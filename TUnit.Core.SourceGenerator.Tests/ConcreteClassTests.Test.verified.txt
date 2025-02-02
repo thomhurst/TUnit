@@ -28,8 +28,44 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2), "SecondTest", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+     Name = "SecondTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ConcreteClassTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ConcreteClass2",
+     Namespace = "TUnit.TestProject.AbstractTests",
+     Attributes = 
+     [
+         new global::TUnit.Core.InheritsTestsAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -48,24 +84,11 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SecondTest()),
 				TestFilePath = @"",
 				TestLineNumber = 11,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-}, new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -78,7 +101,7 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest:0",
 				TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2), "SecondTest", 0, []).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [],
 				TestName = "SecondTest",
 				TestFilePath = @"",
@@ -120,8 +143,44 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2), "AssertClassName", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+     Name = "AssertClassName",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ConcreteClassTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ConcreteClass2",
+     Namespace = "TUnit.TestProject.AbstractTests",
+     Attributes = 
+     [
+         new global::TUnit.Core.InheritsTestsAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -140,24 +199,11 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AssertClassName()),
 				TestFilePath = @"",
 				TestLineNumber = 8,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-}, new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -170,7 +216,7 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 			{
 				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName:0",
 				TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2), "AssertClassName", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "AssertClassName",
 				TestFilePath = @"",
@@ -212,8 +258,44 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1), "AssertClassName", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
+     Name = "AssertClassName",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ConcreteClassTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ConcreteClass1",
+     Namespace = "TUnit.TestProject.AbstractTests",
+     Attributes = 
+     [
+         new global::TUnit.Core.InheritsTestsAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -232,21 +314,11 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AssertClassName()),
 				TestFilePath = @"",
 				TestLineNumber = 8,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -259,7 +331,7 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 			{
 				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0",
 				TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1), "AssertClassName", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "AssertClassName",
 				TestFilePath = @"",

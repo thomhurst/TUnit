@@ -33,8 +33,60 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+     Name = "SomeTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("A")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("B")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("C")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "EnumMemberNamesTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "EnumMemberNamesTests",
+     Namespace = "TUnit.TestProject.Bugs._1432",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -55,27 +107,11 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("A")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("B")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("C")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -88,7 +124,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "SomeTest",
 				TestFilePath = @"",
@@ -105,8 +141,60 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+     Name = "SomeTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("A")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("B")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("C")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "EnumMemberNamesTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "EnumMemberNamesTests",
+     Namespace = "TUnit.TestProject.Bugs._1432",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -127,27 +215,11 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("A")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("B")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("C")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -160,7 +232,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "SomeTest",
 				TestFilePath = @"",
@@ -177,8 +249,60 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+     Name = "SomeTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("A")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("B")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("C")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "EnumMemberNamesTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "EnumMemberNamesTests",
+     Namespace = "TUnit.TestProject.Bugs._1432",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -199,27 +323,11 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("A")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("B")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("C")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -232,7 +340,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "SomeTest",
 				TestFilePath = @"",

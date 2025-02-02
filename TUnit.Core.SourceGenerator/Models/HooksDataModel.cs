@@ -24,6 +24,7 @@ public record HooksDataModel
     public required bool IsVoid { get; init; }
     
     public required IMethodSymbol Method { get; init; }
+    public required INamedTypeSymbol ClassType { get; set; }
 
     public virtual bool Equals(HooksDataModel? other)
     {

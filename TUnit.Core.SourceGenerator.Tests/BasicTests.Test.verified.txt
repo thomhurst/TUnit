@@ -28,8 +28,41 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.BasicTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "SynchronousTest", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.BasicTests),
+     Name = "SynchronousTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.BasicTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "BasicTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "BasicTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -48,18 +81,11 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SynchronousTest()),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -72,7 +98,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 			{
 				TestId = $"TUnit.TestProject.BasicTests.SynchronousTest:0",
 				TestClass = typeof(global::TUnit.TestProject.BasicTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "SynchronousTest", 0, []).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [],
 				TestName = "SynchronousTest",
 				TestFilePath = @"",
@@ -114,8 +140,41 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.BasicTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "AsynchronousTest", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.BasicTests),
+     Name = "AsynchronousTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.BasicTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "BasicTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "BasicTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -134,18 +193,11 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AsynchronousTest()),
 				TestFilePath = @"",
 				TestLineNumber = 11,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -158,7 +210,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 			{
 				TestId = $"TUnit.TestProject.BasicTests.AsynchronousTest:0",
 				TestClass = typeof(global::TUnit.TestProject.BasicTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "AsynchronousTest", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "AsynchronousTest",
 				TestFilePath = @"",
@@ -200,8 +252,41 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.BasicTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "ValueTaskAsynchronousTest", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.BasicTests),
+     Name = "ValueTaskAsynchronousTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.ValueTask),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.BasicTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "BasicTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "BasicTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -220,18 +305,11 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ValueTaskAsynchronousTest()),
 				TestFilePath = @"",
 				TestLineNumber = 17,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -244,7 +322,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 			{
 				TestId = $"TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest:0",
 				TestClass = typeof(global::TUnit.TestProject.BasicTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "ValueTaskAsynchronousTest", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.ValueTask),
 				ParameterTypeFullNames = [],
 				TestName = "ValueTaskAsynchronousTest",
 				TestFilePath = @"",

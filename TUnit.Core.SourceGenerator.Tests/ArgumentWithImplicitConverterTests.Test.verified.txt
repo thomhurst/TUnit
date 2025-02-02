@@ -33,8 +33,60 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Explicit", 0, [typeof(global::TUnit.TestProject.ExplicitInteger)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Name = "Explicit",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(1)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(2)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(3)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
+    {
+        Name = "integer",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ArgumentWithImplicitConverterTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ArgumentWithImplicitConverterTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -55,27 +107,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(1)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(2)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(3)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -88,7 +124,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Explicit", 0, [typeof(global::TUnit.TestProject.ExplicitInteger)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
 				TestName = "Explicit",
 				TestFilePath = @"",
@@ -105,8 +141,60 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Explicit", 0, [typeof(global::TUnit.TestProject.ExplicitInteger)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Name = "Explicit",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(1)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(2)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(3)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
+    {
+        Name = "integer",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ArgumentWithImplicitConverterTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ArgumentWithImplicitConverterTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -127,27 +215,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(1)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(2)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(3)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -160,7 +232,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Explicit", 0, [typeof(global::TUnit.TestProject.ExplicitInteger)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
 				TestName = "Explicit",
 				TestFilePath = @"",
@@ -177,8 +249,60 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Explicit", 0, [typeof(global::TUnit.TestProject.ExplicitInteger)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Name = "Explicit",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(1)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(2)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(3)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
+    {
+        Name = "integer",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ArgumentWithImplicitConverterTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ArgumentWithImplicitConverterTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -199,27 +323,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(1)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(2)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(3)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -232,7 +340,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Explicit", 0, [typeof(global::TUnit.TestProject.ExplicitInteger)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
 				TestName = "Explicit",
 				TestFilePath = @"",
@@ -279,8 +387,60 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Implicit", 0, [typeof(global::TUnit.TestProject.ImplicitInteger)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Name = "Implicit",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(1)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(2)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(3)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
+    {
+        Name = "integer",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ArgumentWithImplicitConverterTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ArgumentWithImplicitConverterTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -301,27 +461,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 14,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(1)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(2)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(3)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -334,7 +478,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Implicit", 0, [typeof(global::TUnit.TestProject.ImplicitInteger)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
 				TestName = "Implicit",
 				TestFilePath = @"",
@@ -351,8 +495,60 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Implicit", 0, [typeof(global::TUnit.TestProject.ImplicitInteger)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Name = "Implicit",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(1)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(2)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(3)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
+    {
+        Name = "integer",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ArgumentWithImplicitConverterTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ArgumentWithImplicitConverterTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -373,27 +569,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 14,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(1)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(2)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(3)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -406,7 +586,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Implicit", 0, [typeof(global::TUnit.TestProject.ImplicitInteger)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
 				TestName = "Implicit",
 				TestFilePath = @"",
@@ -423,8 +603,60 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Implicit", 0, [typeof(global::TUnit.TestProject.ImplicitInteger)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Name = "Implicit",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(1)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(2)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(3)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
+    {
+        Name = "integer",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ArgumentWithImplicitConverterTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ArgumentWithImplicitConverterTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -445,27 +677,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 14,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(1)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(2)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(3)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -478,7 +694,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), "Implicit", 0, [typeof(global::TUnit.TestProject.ImplicitInteger)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
 				TestName = "Implicit",
 				TestFilePath = @"",

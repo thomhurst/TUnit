@@ -28,8 +28,54 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Name = "Test",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.DisplayNameAttribute("A super important test!")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -48,21 +94,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 				TestFilePath = @"",
 				TestLineNumber = 12,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.DisplayNameAttribute("A super important test!")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -75,7 +111,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			{
 				TestId = $"TUnit.TestProject.CustomDisplayNameTests.Test:0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "Test",
 				TestFilePath = @"",
@@ -117,8 +153,54 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test2", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Name = "Test2",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.DisplayNameAttribute("Another super important test!")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -137,21 +219,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2()),
 				TestFilePath = @"",
 				TestLineNumber = 19,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.DisplayNameAttribute("Another super important test!")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -164,7 +236,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			{
 				TestId = $"TUnit.TestProject.CustomDisplayNameTests.Test2:0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test2", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "Test2",
 				TestFilePath = @"",
@@ -210,8 +282,85 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(string), typeof(int), typeof(bool)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Name = "Test3",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("foo", 1, true)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("bar", 2, false)
+{
+    
+}, 
+new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+    {
+        Name = "value3",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -234,27 +383,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg, methodArg1, methodArg2)),
 				TestFilePath = @"",
 				TestLineNumber = 26,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("foo", 1, true)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("bar", 2, false)
-{
-    
-}, new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -267,7 +400,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(string), typeof(int), typeof(bool)]).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
 				TestName = "Test3",
 				TestFilePath = @"",
@@ -284,8 +417,85 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(string), typeof(int), typeof(bool)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Name = "Test3",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("foo", 1, true)
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("bar", 2, false)
+{
+    
+}, 
+new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+    {
+        Name = "value3",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -308,27 +518,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg, methodArg1, methodArg2)),
 				TestFilePath = @"",
 				TestLineNumber = 26,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("foo", 1, true)
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("bar", 2, false)
-{
-    
-}, new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -341,7 +535,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(string), typeof(int), typeof(bool)]).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
 				TestName = "Test3",
 				TestFilePath = @"",
@@ -383,8 +577,65 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "MethodDataSourceTest", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Name = "MethodDataSourceTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("Method")
+{
+    
+}, 
+new global::TUnit.Core.DisplayNameAttribute("Test using MethodDataSource")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "foo",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -404,24 +655,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MethodDataSourceTest(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 36,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("Method")
-{
-    
-}, new global::TUnit.Core.DisplayNameAttribute("Test using MethodDataSource")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -434,7 +672,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest(string):0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "MethodDataSourceTest", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "MethodDataSourceTest",
 				TestFilePath = @"",
@@ -476,32 +714,12 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "PasswordTest", 0, [typeof(string)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
-     Name = "CustomDisplayNameTests",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation<int>
-    {
-        Name = "Order",
-        IsStatic = false,
-        Attributes = 
-        [
-            
-        ]
-    }],
-};
-			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.CustomDisplayNameTests>
-{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "PasswordTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
      Attributes = 
      [
          new global::TUnit.Core.TestAttribute()
@@ -521,12 +739,42 @@ new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
             
         ]
     }],
-     Class = classInformation,
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
 };
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
    Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestClassType = testClassType,
    TestBuilderContext = testBuilderContextAccessor,
    TestInformation = testInformation,
    MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
@@ -565,21 +813,11 @@ new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.PasswordTest(methodArgGeneratedData)),
 					TestFilePath = @"",
 					TestLineNumber = 44,
-					TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
-{
-    
-} ],
-					ClassAttributes = [  ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [ methodDataAttribute ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -593,7 +831,7 @@ new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
 			{
 				TestId = $"global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.CustomDisplayNameTests.PasswordTest(string):0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "PasswordTest", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "PasswordTest",
 				TestFilePath = @"",
@@ -635,8 +873,54 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "SameClassConstantTest", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Name = "SameClassConstantTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -655,21 +939,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SameClassConstantTest()),
 				TestFilePath = @"",
 				TestLineNumber = 51,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -682,7 +956,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			{
 				TestId = $"TUnit.TestProject.CustomDisplayNameTests.SameClassConstantTest:0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "SameClassConstantTest", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "SameClassConstantTest",
 				TestFilePath = @"",
@@ -724,8 +998,54 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "DifferentClassConstantTest", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Name = "DifferentClassConstantTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -744,21 +1064,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DifferentClassConstantTest()),
 				TestFilePath = @"",
 				TestLineNumber = 58,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -771,7 +1081,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			{
 				TestId = $"TUnit.TestProject.CustomDisplayNameTests.DifferentClassConstantTest:0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "DifferentClassConstantTest", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "DifferentClassConstantTest",
 				TestFilePath = @"",
@@ -813,8 +1123,54 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "NestedClassConstantTest", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Name = "NestedClassConstantTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "CustomDisplayNameTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -833,21 +1189,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.NestedClassConstantTest()),
 				TestFilePath = @"",
 				TestLineNumber = 65,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -860,7 +1206,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			{
 				TestId = $"TUnit.TestProject.CustomDisplayNameTests.NestedClassConstantTest:0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "NestedClassConstantTest", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "NestedClassConstantTest",
 				TestFilePath = @"",

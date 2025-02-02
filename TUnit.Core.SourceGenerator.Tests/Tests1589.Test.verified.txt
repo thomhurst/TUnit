@@ -28,14 +28,33 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.Bugs._1589.MyTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1589.MyTests), "Test1", 0, []);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.Bugs._1589.MyTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),
+     Name = "Test1",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "Tests1589",
+     Attributes = 
+     [
+         
+     ],  
+},
      Name = "MyTests",
+     Namespace = "TUnit.TestProject.Bugs._1589",
      Attributes = 
      [
          new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
@@ -52,24 +71,14 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
         ]
     }],
      Properties = [],
+},
 };
-			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.Bugs._1589.MyTests>
-{
-     Name = "Test1",
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Class = classInformation,
-};
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
    Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-   TestClassType = testClassType,
    TestBuilderContext = testBuilderContextAccessor,
    TestInformation = testInformation,
    MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
@@ -108,21 +117,11 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
 					TestFilePath = @"",
 					TestLineNumber = 15,
-					TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-					ClassAttributes = [ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
-{
-    Shared = global::TUnit.Core.SharedType.None
-} ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [ classDataAttribute ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -136,7 +135,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1589.MyTests(TUnit.TestProject.Bugs._1589.MyFixture).Test1:0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1589.MyTests), "Test1", 0, []).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [],
 				TestName = "Test1",
 				TestFilePath = @"",

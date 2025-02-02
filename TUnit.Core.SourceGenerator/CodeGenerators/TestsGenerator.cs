@@ -51,6 +51,11 @@ public class TestsGenerator : IIncrementalGenerator
             return null;
         }
 
+        if (methodSymbol.ContainingType.IsGenericDefinition())
+        {
+            return null;
+        }
+
         return new TestCollectionDataModel(methodSymbol.ParseTestDatas(context, methodSymbol.ContainingType));
     }
     
@@ -72,6 +77,11 @@ public class TestsGenerator : IIncrementalGenerator
         }
 
         if (namedTypeSymbol.DeclaredAccessibility != Accessibility.Public)
+        {
+            return null;
+        }
+
+        if (namedTypeSymbol.IsGenericDefinition())
         {
             return null;
         }

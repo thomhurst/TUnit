@@ -28,8 +28,74 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.AttributeTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AttributeTests), "MyTest", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.AttributeTests),
+     Name = "MyTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.TestProject.AttributeTests.MixedAttribute()
+{
+    
+}, 
+new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo")
+{
+    
+}, 
+new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo", "Bar")
+{
+    
+}, 
+new global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: "Foo")
+{
+    
+}, 
+new global::TUnit.TestProject.AttributeTests.MixedAttribute()
+{
+    Property = "Foo"
+}, 
+new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo")
+{
+    Property = "Bar"
+}, 
+new global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: "Foo")
+{
+    Property = "Bar"
+}, 
+new global::TUnit.TestProject.AttributeTests.MixedAttribute()
+{
+    Property = "Foo",
+Property2 = 1
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.AttributeTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "AttributeTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "AttributeTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -48,43 +114,11 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest()),
 				TestFilePath = @"",
 				TestLineNumber = 7,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.TestProject.AttributeTests.MixedAttribute()
-{
-    
-}, new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo")
-{
-    
-}, new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo", "Bar")
-{
-    
-}, new global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: "Foo")
-{
-    
-}, new global::TUnit.TestProject.AttributeTests.MixedAttribute()
-{
-    Property = "Foo"
-}, new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo")
-{
-    Property = "Bar"
-}, new global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: "Foo")
-{
-    Property = "Bar"
-}, new global::TUnit.TestProject.AttributeTests.MixedAttribute()
-{
-    Property = "Foo",
-Property2 = 1
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -97,7 +131,7 @@ Property2 = 1
 			{
 				TestId = $"TUnit.TestProject.AttributeTests.MyTest:0",
 				TestClass = typeof(global::TUnit.TestProject.AttributeTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AttributeTests), "MyTest", 0, []).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [],
 				TestName = "MyTest",
 				TestFilePath = @"",

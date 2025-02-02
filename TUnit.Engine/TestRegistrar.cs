@@ -17,7 +17,7 @@ internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrches
 			
 			var testRegisteredEventsObjects = testContext.GetTestRegisteredEventsObjects();
 
-			var classType = testContext.TestDetails.ClassType;
+			var classType = testContext.TestDetails.TestClass.Type;
 			
 			RegisterTestContext(classType, testContext);
 

@@ -28,24 +28,12 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.AutoDataTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AutoDataTests), "Test1", 0, [typeof(string), typeof(int), typeof(double), typeof(bool)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.AutoDataTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
-     Name = "AutoDataTests",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-};
-			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.AutoDataTests>
-{
+     Type = typeof(global::TUnit.TestProject.AutoDataTests),
      Name = "Test1",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
      Attributes = 
      [
          new global::TUnit.TestProject.Attributes.AutoDataAttribute()
@@ -89,12 +77,33 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-     Class = classInformation,
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.AutoDataTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "DataSourceGeneratorTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "AutoDataTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
 };
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
    Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestClassType = testClassType,
    TestBuilderContext = testBuilderContextAccessor,
    TestInformation = testInformation,
    MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
@@ -161,21 +170,11 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1(methodArg, methodArg1, methodArg2, methodArg3)),
 					TestFilePath = @"",
 					TestLineNumber = 8,
-					TestAttributes = [ new global::TUnit.TestProject.Attributes.AutoDataAttribute()
-{
-    
-}, new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-					ClassAttributes = [  ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [ methodDataAttribute ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -189,7 +188,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 			{
 				TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.AutoDataTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AutoDataTests), "Test1", 0, [typeof(string), typeof(int), typeof(double), typeof(bool)]).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [typeof(string), typeof(int), typeof(double), typeof(bool)],
 				TestName = "Test1",
 				TestFilePath = @"",

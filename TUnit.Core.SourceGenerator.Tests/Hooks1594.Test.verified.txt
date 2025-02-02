@@ -38,7 +38,51 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.Bugs._1594.MyTests>
 			{
-				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1594.MyTests), "SetupMyTests", 0, []),
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
+     Name = "SetupMyTests",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "Hooks1594",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "MyTests",
+     Namespace = "TUnit.TestProject.Bugs._1594",
+     Attributes = 
+     [
+         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>()
+{
+    Shared = global::TUnit.Core.SharedType.None
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
+    {
+        Name = "myFixture",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Properties = [],
+},
+},
 				Body = (classInstance, context, cancellationToken) => classInstance.SetupMyTests(),
 				HookExecutor = DefaultExecutor.Instance,
 				Order = 0,
@@ -102,7 +146,48 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>>
 			{
-				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>), "SetupParentTests", 0, []),
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+     Name = "SetupParentTests",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "Hooks1594",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ParentTests",
+     Namespace = "TUnit.TestProject.Bugs._1594",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
+    {
+        Name = "fixture",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Properties = [],
+},
+},
 				Body = (classInstance, context, cancellationToken) => classInstance.SetupParentTests(),
 				HookExecutor = DefaultExecutor.Instance,
 				Order = 0,
@@ -163,7 +248,57 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>>
 			{
-				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>), "SetupBase", 0, []),
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+     Name = "SetupBase",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "Hooks1594",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "GrandParentTests",
+     Namespace = "TUnit.TestProject.Bugs._1594",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
+    {
+        Name = "fixture",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
+        Name = "Fixture",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+},
 				Body = (classInstance, context, cancellationToken) => classInstance.SetupBase(),
 				HookExecutor = DefaultExecutor.Instance,
 				Order = 0,

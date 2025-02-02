@@ -11,13 +11,13 @@ public class TestDiscoveryContext : Context
     
     internal TestDiscoveryContext(IEnumerable<DiscoveredTest> discoveredTests)
     {
-        var classContexts = discoveredTests.GroupBy(x => x.TestDetails.ClassType).Select(x => new ClassHookContext()
+        var classContexts = discoveredTests.GroupBy(x => x.TestDetails.TestClass.Type).Select(x => new ClassHookContext
         {
             ClassType = x.Key,
             Tests = [..x.Select(dt => dt.TestContext)]
         });
 
-        var assemblyContexts = classContexts.GroupBy(x => x.ClassType.Assembly).Select(x => new AssemblyHookContext()
+        var assemblyContexts = classContexts.GroupBy(x => x.ClassType.Assembly).Select(x => new AssemblyHookContext
         {
             Assembly = x.Key,
             TestClasses = [..x]

@@ -23,8 +23,8 @@ internal static class TestExtensions
                     End = new LinePosition(testDetails.TestLineNumber, 0)
                 }),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.ClassType.Namespace!,
-                    AssemblyFullName: testDetails.ClassType.Assembly.FullName!,
+                    Namespace: testDetails.TestClass.Type.Namespace!,
+                    AssemblyFullName: testDetails.TestClass.Type.Assembly.FullName!,
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
@@ -35,7 +35,7 @@ internal static class TestExtensions
                 ..testDetails.CustomProperties.Select(x => new TestMetadataProperty(x.Key, x.Value)),
                 
                 // TRX Report Properties
-                new TrxFullyQualifiedTypeNameProperty(testDetails.ClassType.FullName!),
+                new TrxFullyQualifiedTypeNameProperty(testDetails.TestClass.Type.FullName!),
                 new TrxCategoriesProperty([..testDetails.Categories]),
             ])
         };
