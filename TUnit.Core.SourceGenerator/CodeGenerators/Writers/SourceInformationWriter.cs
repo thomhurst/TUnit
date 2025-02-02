@@ -46,7 +46,7 @@ public static class SourceInformationWriter
         return $$"""
                  new global::TUnit.Core.SourceGeneratedMethodInformation
                  {
-                      Type = typeof({{methodSymbol.ContainingType.GloballyQualified()}}{{methodSymbol.ContainingType.GloballyQualified()}}),
+                      Type = typeof({{methodSymbol.ContainingType.GloballyQualified()}}),
                       Name = "{{methodSymbol.Name}}",
                       GenericTypeCount = {{methodSymbol.TypeParameters.Length}},
                       ReturnType = typeof({{methodSymbol.ReturnType.GloballyQualified()}}),
