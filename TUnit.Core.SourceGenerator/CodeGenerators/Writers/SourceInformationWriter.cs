@@ -55,7 +55,7 @@ public static class SourceInformationWriter
                           {{string.Join(", \r\n", AttributeWriter.WriteAttributes(context, methodSymbol.GetAttributes()))}}
                       ],  
                       Parameters = [{{string.Join(", \r\n", methodSymbol.Parameters.Select(p => GenerateParameterInformation(context, p, ArgumentsType.Method, genericSubstitutions)))}}],
-                      Class = {{GenerateClassInformation(context, methodSymbol.ReceiverType as INamedTypeSymbol ?? methodSymbol.ContainingType)}},
+                      Class = {{GenerateClassInformation(context, namedTypeSymbol)}},
                  }
                  """;
     }
