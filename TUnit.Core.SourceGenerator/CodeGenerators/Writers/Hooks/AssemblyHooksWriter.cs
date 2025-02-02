@@ -24,7 +24,7 @@ public static class AssemblyHooksWriter
         }
 
         sourceBuilder.WriteLine("{ ");
-        sourceBuilder.WriteLine($"""MethodInfo = {SourceInformationWriter.GenerateMethodInformation(model.Context, model.Method, null)},""");
+        sourceBuilder.WriteLine($"""MethodInfo = {SourceInformationWriter.GenerateMethodInformation(model.Context, model.ClassType, model.Method, null)},""");
         
         if (model.IsVoid)
         {

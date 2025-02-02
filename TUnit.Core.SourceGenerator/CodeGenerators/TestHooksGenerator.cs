@@ -81,6 +81,7 @@ public class TestHooksGenerator : IIncrementalGenerator
                     HookLocationType = hookLocationType,
                     IsEveryHook = isEveryHook && hookLevel is not "TUnit.Core.HookType.TestDiscovery" and not "TUnit.Core.HookType.TestSession",
                     HookLevel = hookLevel,
+                    ClassType = classType,
                     FullyQualifiedTypeName =
                         classType.GloballyQualified(),
                     MinimalTypeName = classType.Name,

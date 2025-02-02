@@ -40,13 +40,13 @@ public static class SourceInformationWriter
                  """;
     }
 
-    public static string GenerateMethodInformation(GeneratorAttributeSyntaxContext context, IMethodSymbol methodSymbol,
+    public static string GenerateMethodInformation(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol,
         IDictionary<string, string>? genericSubstitutions)
     {
         return $$"""
                  new global::TUnit.Core.SourceGeneratedMethodInformation
                  {
-                      Type = typeof({{methodSymbol.ContainingType.GloballyQualified()}}),
+                      Type = typeof({{namedTypeSymbol.GloballyQualified()}}),
                       Name = "{{methodSymbol.Name}}",
                       GenericTypeCount = {{methodSymbol.TypeParameters.Length}},
                       ReturnType = typeof({{methodSymbol.ReturnType.GloballyQualified()}}),
@@ -55,7 +55,7 @@ public static class SourceInformationWriter
                           {{string.Join(", \r\n", AttributeWriter.WriteAttributes(context, methodSymbol.GetAttributes()))}}
                       ],  
                       Parameters = [{{string.Join(", \r\n", methodSymbol.Parameters.Select(p => GenerateParameterInformation(context, p, ArgumentsType.Method, genericSubstitutions)))}}],
-                      Class = {{GenerateClassInformation(context, methodSymbol.ContainingType)}},
+                      Class = {{GenerateClassInformation(context, methodSymbol.ReceiverType as INamedTypeSymbol ?? methodSymbol.ContainingType)}},
                  }
                  """;
     }

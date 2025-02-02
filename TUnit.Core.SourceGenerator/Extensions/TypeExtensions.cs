@@ -202,6 +202,11 @@ public static class TypeExtensions
             return false;
         }
 
+        if (namedTypeSymbol.IsUnboundGenericType)
+        {
+            return true;
+        }
+
         return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
     }
     
