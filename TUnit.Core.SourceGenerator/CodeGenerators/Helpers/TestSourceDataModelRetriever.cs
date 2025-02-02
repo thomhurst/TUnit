@@ -155,12 +155,6 @@ public static class TestSourceDataModelRetriever
             ..classAttributes,
             ..assemblyAttributes
         ];
-
-        var propertyAttributes = testGenerationContext.PropertyArguments
-            .InnerContainers
-            .Select(x => x.PropertySymbol)
-            .SelectMany(x => x.GetAttributes())
-            .Where(x => x.IsDataSourceAttribute());
         
         return new TestSourceDataModel
         {
@@ -169,25 +163,16 @@ public static class TestSourceDataModelRetriever
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = namedTypeSymbol.GloballyQualified(),
             MinimalTypeName = namedTypeSymbol.Name,
-            AssemblyName = namedTypeSymbol.ContainingAssembly.Name,
             TestClass = namedTypeSymbol,
             TestMethod = methodSymbol,
-            Namespace = namedTypeSymbol.ContainingNamespace.Name,
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            MethodParameterTypes = [ ..methodSymbol.Parameters.Select(x => x.Type.GloballyQualified()) ],
             MethodArgumentTypes = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
-            MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
-            TestAttributes = AttributeWriter.WriteAttributes(testGenerationContext.Context, testAttributes),
-            ClassAttributes = AttributeWriter.WriteAttributes(testGenerationContext.Context, classAttributes),
-            AssemblyAttributes = AttributeWriter.WriteAttributes(testGenerationContext.Context, assemblyAttributes),
-            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
             GenericSubstitutions = GetGenericSubstitutions(methodSymbol, testArguments.GetArgumentTypes())
         };

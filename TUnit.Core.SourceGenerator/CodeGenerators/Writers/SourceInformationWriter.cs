@@ -88,9 +88,15 @@ public static class SourceInformationWriter
     public static string GenerateParameterInformation(GeneratorAttributeSyntaxContext context,
         IParameterSymbol parameter, ArgumentsType argumentsType, IDictionary<string, string>? genericSubstitutions)
     {
-        var type = parameter.Type.IsGenericDefinition()
-            ? genericSubstitutions![parameter.Type.GloballyQualified()]
-            : parameter.Type.GloballyQualified();
+        var type = parameter.Type.GloballyQualified();
+
+        if (parameter.Type.IsGenericDefinition())
+        {
+            type = genericSubstitutions?.TryGetValue(type, out var substitution) == true 
+                ? substitution
+                // We can't find the generic type - Fall back to object
+                : "object";
+        }
         
         return $$"""
                  new global::TUnit.Core.SourceGeneratedParameterInformation<{{type}}>
