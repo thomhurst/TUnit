@@ -2,18 +2,10 @@
 
 namespace TUnit.Core;
 
-public abstract record SourceGeneratedMemberInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : SourceGeneratedMemberInformation
-{
-    [field: AllowNull, MaybeNull]
-    [field: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    public override Type Type => field ??= typeof(T);
-}
-
 public abstract record SourceGeneratedMemberInformation
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    public abstract Type Type { get; }
+    public abstract Type Type { get; init; }
 
     public required string Name { get; init; }
 

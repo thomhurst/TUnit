@@ -19,7 +19,7 @@ public static class ClassHooksWriter
         }
 
         sourceBuilder.WriteLine("{ ");
-        sourceBuilder.WriteLine($"""MethodInfo = {SourceInformationWriter.GenerateMethodInformation(model.Context, model.Method)},""");
+        sourceBuilder.WriteLine($"""MethodInfo = {SourceInformationWriter.GenerateMethodInformation(model.Context, model.Method, null)},""");
 
         if (model.IsVoid)
         {

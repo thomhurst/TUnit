@@ -11,7 +11,7 @@ public static class GlobalTestHooksWriter
     { 
         sourceBuilder.WriteLine($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"""MethodInfo = {SourceInformationWriter.GenerateMethodInformation(model.Context, model.Method)},""");
+        sourceBuilder.WriteLine($"""MethodInfo = {SourceInformationWriter.GenerateMethodInformation(model.Context, model.Method, null)},""");
 
         if (model.IsVoid)
         {

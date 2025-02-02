@@ -77,6 +77,7 @@ public record TestSourceDataModel
 
     public string ClassNameToGenerate => MinimalTypeName;
     public required TestGenerationContext TestGenerationContext { get; init; }
+    public IDictionary<string, string>? GenericSubstitutions { get; set; }
 
     public string MethodVariablesWithCancellationToken()
     {

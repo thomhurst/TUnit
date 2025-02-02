@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -8,7 +9,11 @@ public record SourceGeneratedMethodInformation<[DynamicallyAccessedMembers(Dynam
     [field: AllowNull, MaybeNull]
     [field: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    public override Type Type => field ??= typeof(T);
+    public override Type Type
+    {
+        get => field ??= typeof(T);
+        init;
+    }
 }
 
 public abstract record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
@@ -24,11 +29,7 @@ public abstract record SourceGeneratedMethodInformation : SourceGeneratedMemberI
 
     private MethodInfo GetMethodInfo()
     {
-#if NET
-        return Type.GetMethod(Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray())!;
-#else
-        return Type.GetMethod(Name, Parameters.Select(x => x.Type).ToArray())!;
-#endif
+        return MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
     }
 
     public required Type ReturnType { get; init; }

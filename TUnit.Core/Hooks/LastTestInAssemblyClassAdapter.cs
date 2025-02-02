@@ -24,8 +24,9 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),
-        Class = new SourceGeneratedClassInformation<ILastTestInAssemblyEventReceiver>
+        Class = new SourceGeneratedClassInformation
         {
+            Type = typeof(ILastTestInAssemblyEventReceiver),
             Assembly = new SourceGeneratedAssemblyInformation
             {
                 Name = "TUnit.Core",

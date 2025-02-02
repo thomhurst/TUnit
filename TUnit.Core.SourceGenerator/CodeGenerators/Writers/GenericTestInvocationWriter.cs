@@ -10,10 +10,10 @@ public static class GenericTestInvocationWriter
         TestSourceDataModel testSourceDataModel)
     {
         var testId = testSourceDataModel.TestId;
-
+        
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
         
-        sourceBuilder.WriteLine($"var testInformation = {SourceInformationWriter.GenerateMethodInformation(testSourceDataModel.TestGenerationContext.Context, testSourceDataModel.TestMethod)};");
+        sourceBuilder.WriteLine($"var testInformation = {SourceInformationWriter.GenerateMethodInformation(testSourceDataModel.TestGenerationContext.Context, testSourceDataModel.TestMethod, testSourceDataModel.GenericSubstitutions)};");
         
         sourceBuilder.WriteLine();
         

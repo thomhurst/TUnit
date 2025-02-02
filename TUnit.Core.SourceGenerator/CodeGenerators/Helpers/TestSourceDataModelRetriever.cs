@@ -189,7 +189,30 @@ public static class TestSourceDataModelRetriever
             AssemblyAttributes = AttributeWriter.WriteAttributes(testGenerationContext.Context, assemblyAttributes),
             PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
+            GenericSubstitutions = GetGenericSubstitutions(methodSymbol, testArguments.GetArgumentTypes())
         };
+    }
+
+    private static IDictionary<string, string>? GetGenericSubstitutions(IMethodSymbol methodSymbol, string[] argumentTypes)
+    {
+        if(methodSymbol.Parameters.Length is 0 || methodSymbol.TypeParameters.Length is 0)
+        {
+            return null;
+        }
+
+        var dictionary = new Dictionary<string, string>();
+        
+        for (var index = 0; index < methodSymbol.Parameters.Length; index++)
+        {
+            var parameter = methodSymbol.Parameters[index];
+
+            if (parameter.Type.IsGenericDefinition())
+            {
+                dictionary[parameter.Type.GloballyQualified()] = argumentTypes[index];
+            }
+        }
+
+        return dictionary;
     }
 
     private static IEnumerable<string> GetParameterTypes(IMethodSymbol methodSymbol, string[] argumentTypes)

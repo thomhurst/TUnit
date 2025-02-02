@@ -2,15 +2,7 @@
 
 namespace TUnit.Core;
 
-public record SourceGeneratedClassInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : SourceGeneratedClassInformation
-{
-    [field: AllowNull, MaybeNull]
-    [field: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    public override Type Type => field ??= typeof(T);
-}
-
-public abstract record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
+public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
 {
     public virtual bool Equals(SourceGeneratedClassInformation? other)
     {
@@ -18,7 +10,7 @@ public abstract record SourceGeneratedClassInformation : SourceGeneratedMemberIn
                && Assembly.Equals(other.Assembly)
                && base.Equals(other);
     }
-
+    
     public override int GetHashCode()
     {
         unchecked
@@ -28,6 +20,9 @@ public abstract record SourceGeneratedClassInformation : SourceGeneratedMemberIn
             return hashCode;
         }
     }
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    public override required Type Type { get; init; }
 
     public required string Namespace {get; init;}
     public required SourceGeneratedAssemblyInformation Assembly { get; init; }

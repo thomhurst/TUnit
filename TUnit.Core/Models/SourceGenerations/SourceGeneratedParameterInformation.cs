@@ -7,7 +7,11 @@ public record SourceGeneratedParameterInformation<[DynamicallyAccessedMembers(Dy
     [field: AllowNull, MaybeNull]
     [field: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    public override Type Type => field ??= typeof(T);
+    public override Type Type
+    {
+        get => field ??= typeof(T);
+        init;
+    }
 }
 
 public abstract record SourceGeneratedParameterInformation : SourceGeneratedMemberInformation;
