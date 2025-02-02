@@ -14,8 +14,8 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
         var mutableDisplayName = displayName;
         
         var parameters = testDetails
-            .MethodInfo
-            .GetParameters()
+            .TestMethod
+            .Parameters
             .Zip(testDetails.TestMethodArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument));
         
         foreach (var parameter in parameters)

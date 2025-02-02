@@ -91,7 +91,7 @@ internal class SingleTestExecutor(
                 // Ideally all these 'Set up' hooks would be refactored into inner/classes and/or methods,
                 // But users may want to set AsyncLocal values, and so the method must be a parent/ancestor of the method that starts the test!
                 // So actually refactoring these into other methods would mean they wouldn't be a parent/ancestor and would break async local!
-                var assemblyHooksTaskCompletionSource = assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
+                var assemblyHooksTaskCompletionSource = assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.TestClass.Type.Assembly,
                     _ => new TaskCompletionSource<bool>(), out var assemblyHooksTaskPreviouslyExisted);
                 
                 if (assemblyHooksTaskPreviouslyExisted)
@@ -103,9 +103,9 @@ internal class SingleTestExecutor(
                     try
                     {
                         var beforeAssemblyHooks =
-                            assemblyHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly);
+                            assemblyHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.TestClass.Type.Assembly);
                         var assemblyHookContext =
-                            assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType.Assembly);
+                            assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.TestClass.Type.Assembly);
 
                         AssemblyHookContext.Current = assemblyHookContext;
 
@@ -135,7 +135,7 @@ internal class SingleTestExecutor(
                     }
                 }
 
-                var classHooksTaskCompletionSource = classHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType,
+                var classHooksTaskCompletionSource = classHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.TestClass.Type,
                     _ => new TaskCompletionSource<bool>(), out var classHooksTaskPreviouslyExisted);
                 
                 if (classHooksTaskPreviouslyExisted)
@@ -147,8 +147,8 @@ internal class SingleTestExecutor(
                     try
                     {
                         var beforeClassHooks =
-                            classHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.ClassType);
-                        var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType);
+                            classHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.TestClass.Type);
+                        var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.TestClass.Type);
 
                         ClassHookContext.Current = classHookContext;
 
@@ -290,8 +290,8 @@ internal class SingleTestExecutor(
     private async Task ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
-        var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.ClassType);
-        var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType);
+        var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type);
+        var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.TestClass.Type);
                 
         ClassHookContext.Current = classHookContext;
                 
@@ -313,8 +313,8 @@ internal class SingleTestExecutor(
                 
         ClassHookContext.Current = null;
         
-        var afterAssemblyHooks = assemblyHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.ClassType.Assembly);
-        var assemblyHookContext = assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType.Assembly);
+        var afterAssemblyHooks = assemblyHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type.Assembly);
+        var assemblyHookContext = assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.TestClass.Type.Assembly);
 
         AssemblyHookContext.Current = assemblyHookContext;
                 
@@ -509,7 +509,7 @@ internal class SingleTestExecutor(
 
     private TestContext[] GetDependencies(TestDetails testDetails, DependsOnAttribute dependsOnAttribute)
     {
-        var testsForClass = testFinder.GetTests(dependsOnAttribute.TestClass ?? testDetails.ClassType);
+        var testsForClass = testFinder.GetTests(dependsOnAttribute.TestClass ?? testDetails.TestClass.Type);
 
         if (dependsOnAttribute.TestClass == null)
         {

@@ -11,8 +11,10 @@ public static class SourceInformationWriter
     {
         return $$"""
                  new global::TUnit.Core.SourceGeneratedClassInformation<{{namedTypeSymbol.GloballyQualified()}}>
-                 {
+                 {    
+                      Assembly = {{GenerateAssemblyInformation(context, namedTypeSymbol.ContainingAssembly)}},
                       Name = "{{namedTypeSymbol.Name}}",
+                      Namespace = "{{namedTypeSymbol.ContainingNamespace.ToDisplayString()}}",
                       Attributes = 
                       [
                           {{string.Join(", \r\n", AttributeWriter.WriteAttributes(context, namedTypeSymbol.GetAttributes()))}}
@@ -22,19 +24,35 @@ public static class SourceInformationWriter
                  }
                  """;
     }
-    
-    public static string GenerateTestInformation(GeneratorAttributeSyntaxContext context, IMethodSymbol methodSymbol)
+
+    private static string GenerateAssemblyInformation(GeneratorAttributeSyntaxContext context, IAssemblySymbol assembly)
     {
         return $$"""
-                 new global::TUnit.Core.SourceGeneratedTestInformation<{{methodSymbol.ContainingType.GloballyQualified()}}>
+                 new global::TUnit.Core.SourceGeneratedAssemblyInformation
+                 {
+                      Name = "{{assembly.Name}}",
+                      Attributes = 
+                      [
+                          {{string.Join(", \r\n", AttributeWriter.WriteAttributes(context, assembly.GetAttributes()))}}
+                      ],  
+                 }
+                 """;
+    }
+
+    public static string GenerateMethodInformation(GeneratorAttributeSyntaxContext context, IMethodSymbol methodSymbol)
+    {
+        return $$"""
+                 new global::TUnit.Core.SourceGeneratedMethodInformation<{{methodSymbol.ContainingType.GloballyQualified()}}>
                  {
                       Name = "{{methodSymbol.Name}}",
+                      GenericTypeCount = {{methodSymbol.TypeParameters.Length}},
+                      ReturnType = typeof({{methodSymbol.ReturnType.GloballyQualified()}}),
                       Attributes = 
                       [
                           {{string.Join(", \r\n", AttributeWriter.WriteAttributes(context, methodSymbol.GetAttributes()))}}
                       ],  
                       Parameters = [{{string.Join(", \r\n", methodSymbol.Parameters.Select(p => GenerateParameterInformation(context, p, ArgumentsType.Method)))}}],
-                      Class = classInformation,
+                      Class = {{GenerateClassInformation(context, methodSymbol.ContainingType)}},
                  }
                  """;
     }
@@ -66,8 +84,6 @@ public static class SourceInformationWriter
     
     public static string GenerateParameterInformation(GeneratorAttributeSyntaxContext context, IParameterSymbol parameter, ArgumentsType argumentsType)
     {
-        var parent = argumentsType == ArgumentsType.Method ? "testInformation" : "classInformation";
-        
         return $$"""
                  new global::TUnit.Core.SourceGeneratedParameterInformation<{{parameter.Type.GloballyQualified()}}>
                      {

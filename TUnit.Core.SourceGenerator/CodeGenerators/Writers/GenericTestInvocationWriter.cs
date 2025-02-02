@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
-using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
@@ -14,9 +13,7 @@ public static class GenericTestInvocationWriter
 
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
         
-        sourceBuilder.WriteLine($"var testClassType = typeof({fullyQualifiedClassType});");
-        
-        sourceBuilder.WriteLine($"var methodInfo = {MethodInfoWriter.Write(testSourceDataModel)};");
+        sourceBuilder.WriteLine($"var testInformation = {SourceInformationWriter.GenerateMethodInformation(testSourceDataModel.TestGenerationContext.Context, testSourceDataModel.TestMethod)};");
         
         sourceBuilder.WriteLine();
         
@@ -26,16 +23,6 @@ public static class GenericTestInvocationWriter
         var methodVariablesIndex = 0;
         var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
-
-        if (testSourceDataModel.ClassArguments is GeneratedArgumentsContainer
-            || testSourceDataModel.MethodArguments is GeneratedArgumentsContainer
-            || testSourceDataModel.PropertyArguments.InnerContainers.Any(x =>
-                x.ArgumentsContainer is GeneratedArgumentsContainer))
-        {
-            sourceBuilder.WriteLine($"var classInformation = {SourceInformationWriter.GenerateClassInformation(testSourceDataModel.TestGenerationContext.Context, testSourceDataModel.TestClass)};");
-
-            sourceBuilder.WriteLine($"var testInformation = {SourceInformationWriter.GenerateTestInformation(testSourceDataModel.TestGenerationContext.Context, testSourceDataModel.TestMethod)};");
-        }
 
         testSourceDataModel.ClassArguments.OpenScope(sourceBuilder, ref classVariablesIndex);
         testSourceDataModel.PropertyArguments.OpenScope(sourceBuilder, ref propertiesVariablesIndex);
@@ -55,13 +42,6 @@ public static class GenericTestInvocationWriter
             sourceBuilder.WriteLine($"{fullyQualifiedClassType}.{propertySymbol.Name} = {argumentsContainer.DataVariables.Select(x => x.Name).ElementAt(0)};");
         }
 
-        IEnumerable<BaseContainer> dataContainers =
-            [
-                testSourceDataModel.ClassArguments,
-                testSourceDataModel.MethodArguments,
-                ..testSourceDataModel.PropertyArguments.InnerContainers.Select(x => x.ArgumentsContainer)
-            ];
-        
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
         
         sourceBuilder.WriteLine();
@@ -79,17 +59,13 @@ public static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic).SelectMany(x => x.ArgumentsContainer.DataVariables.Select(variable => variable.Name)).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
-        sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
         sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         
-        sourceBuilder.WriteLine($"TestAttributes = [ {testSourceDataModel.TestAttributes.ToCommaSeparatedString()} ],");
-        sourceBuilder.WriteLine($"ClassAttributes = [ {testSourceDataModel.ClassAttributes.ToCommaSeparatedString()} ],");
-        sourceBuilder.WriteLine($"AssemblyAttributes = [ {testSourceDataModel.AssemblyAttributes.ToCommaSeparatedString()} ],");
-
-        sourceBuilder.WriteLine($"DataAttributes = [ {dataContainers.SelectMany(x => x.DataAttributesVariables).Select(x => x.Name).ToCommaSeparatedString()} ],");
+        sourceBuilder.WriteLine("TestMethod = testInformation,");
+        
         sourceBuilder.WriteLine("TestBuilderContext = testBuilderContext,");
         sourceBuilder.WriteLine("});");
         

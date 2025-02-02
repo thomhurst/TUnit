@@ -2,12 +2,15 @@
 
 namespace TUnit.Core;
 
-public class SourceGeneratedPropertyInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : SourceGeneratedPropertyInformation
+public record SourceGeneratedPropertyInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : SourceGeneratedPropertyInformation
 {
-    public override Type Type { get; } = typeof(T);
+    [field: AllowNull, MaybeNull]
+    [field: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    public override Type Type => field ??= typeof(T);
 }
 
-public abstract class SourceGeneratedPropertyInformation : SourceGeneratedMemberInformation
+public abstract record SourceGeneratedPropertyInformation : SourceGeneratedMemberInformation
 {
     public required bool IsStatic { get; init; }
 }

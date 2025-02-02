@@ -91,7 +91,6 @@ public record GeneratedArgumentsContainer(
                                                                  {{attr.Name}}.GenerateDataSources(new DataGeneratorMetadata
                                                                  {
                                                                     Type = global::TUnit.Core.Enums.DataGeneratorType.{{type}},
-                                                                    TestClassType = testClassType,
                                                                     TestBuilderContext = testBuilderContextAccessor,
                                                                     TestInformation = testInformation,
                                                                     MembersToGenerate = {{SourceInformationWriter.GenerateMembers(Context, ImmutableArray<IParameterSymbol>.Empty, Property, ArgumentsType.Property)}},

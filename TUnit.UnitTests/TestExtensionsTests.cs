@@ -13,13 +13,6 @@ public class TestExtensionsTests
     public void TopLevelClass()
     {
         var testDetails = _fixture.Build<TestDetails<TestExtensionsTests>>()
-            .Without(x => x.ClassType)
-            .Without(x => x.MethodInfo)
-            .Without(x => x.Attributes)
-            .Without(x => x.AssemblyAttributes)
-            .Without(x => x.ClassAttributes)
-            .Without(x => x.DataAttributes)
-            .Without(x => x.TestAttributes)
             .With(x => x.TestClassArguments, [])
             .Create();
 
@@ -34,13 +27,6 @@ public class TestExtensionsTests
     public void NestedClass()
     {
         var testDetails = _fixture.Build<TestDetails<InnerClass>>()
-            .Without(x => x.ClassType)
-            .Without(x => x.MethodInfo)
-            .Without(x => x.Attributes)
-            .Without(x => x.AssemblyAttributes)
-            .Without(x => x.ClassAttributes)
-            .Without(x => x.DataAttributes)
-            .Without(x => x.TestAttributes)
             .With(x => x.TestClassArguments, [])
             .Create();
 
@@ -54,12 +40,7 @@ public class TestExtensionsTests
     private TestMetadata<TestExtensionsTests> CreateDummyMetadata()
     {
         return _fixture.Build<TestMetadata<TestExtensionsTests>>()
-            .Without(x => x.MethodInfo)
             .Without(x => x.ResettableClassFactory)
-            .With(x => x.TestAttributes, [])
-            .With(x => x.ClassAttributes, [])
-            .With(x => x.AssemblyAttributes, [])
-            .With(x => x.DataAttributes, [])
             .Create();
     }
 

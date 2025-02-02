@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Hooks;
@@ -6,7 +7,38 @@ namespace TUnit.Core.Hooks;
 public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClassEventReceiver, TestContext testContext) : IExecutableHook<ClassHookContext>
 {
     public string Name => nameof(lastTestInClassEventReceiver.OnLastTestInClass);
-    public MethodInfo MethodInfo => typeof(ILastTestInClassEventReceiver).GetMethod(Name)!;
+
+    [field: AllowNull, MaybeNull]
+    public SourceGeneratedMethodInformation MethodInfo => field ??= new SourceGeneratedMethodInformation<ILastTestInClassEventReceiver>()
+    {
+        Attributes = [],
+        Name = nameof(lastTestInClassEventReceiver.OnLastTestInClass),
+        Parameters = [new SourceGeneratedParameterInformation<ClassHookContext>
+        {
+            Attributes = [],
+            Name = "context"
+        }, new SourceGeneratedParameterInformation<TestContext>
+        {
+            Attributes = [],
+            Name = "testContext"
+        }],
+        GenericTypeCount = 0,
+        ReturnType = typeof(ValueTask),
+        Class = new SourceGeneratedClassInformation<ILastTestInClassEventReceiver>
+        {
+            Assembly = new SourceGeneratedAssemblyInformation
+            {
+                Name = "TUnit.Core",
+                Attributes = [],
+            },
+            Attributes = [],
+            Namespace = "TUnit.Core.Interfaces",
+            Name = "ILastTestInClassEventReceiver",
+            Parameters = [],
+            Properties = [],
+        }
+    };
+    
     public int Order => 0;
 
     public bool Execute(ClassHookContext context, CancellationToken cancellationToken)

@@ -63,12 +63,12 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 
     private string BuildPath(TestDetails testDetails)
     {
-        var assembly = testDetails.ClassType.Assembly.GetName();
+        var assembly = testDetails.TestClass.Type.Assembly.GetName();
 
-        var classTypeName = testDetails.ClassType.Name;
+        var classTypeName = testDetails.TestClass.Type.Name;
         
         return
-            $"/{assembly.Name ?? assembly.FullName}/{testDetails.ClassType.Namespace}/{classTypeName}/{testDetails.MethodInfo.Name}";
+            $"/{assembly.Name ?? assembly.FullName}/{testDetails.TestClass.Type.Namespace}/{classTypeName}/{testDetails.TestMethod.Name}";
     }
 
     private PropertyBag BuildPropertyBag(TestDetails testDetails)

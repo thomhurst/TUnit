@@ -37,7 +37,7 @@ public static class TestContextExtensions
 
                     try
                     {
-                        await AsyncConvert.Convert(testContext.TestDetails.MethodInfo.Invoke(@class, args));
+                        await AsyncConvert.Convert(testContext.TestDetails.TestMethod.ReflectionInformation.Invoke(@class, args));
                     }
                     catch (TargetInvocationException e)
                     {

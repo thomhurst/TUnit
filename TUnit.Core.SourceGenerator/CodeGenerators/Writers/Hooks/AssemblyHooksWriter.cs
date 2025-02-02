@@ -16,15 +16,15 @@ public static class AssemblyHooksWriter
         
         if (model.HookLocationType == HookLocationType.Before)
         {
-            sourceBuilder.WriteLine("new BeforeAssemblyHookMethod");
+            sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod");
         }
         else
         {
-            sourceBuilder.WriteLine("new AfterAssemblyHookMethod");
+            sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.AfterAssemblyHookMethod");
         }
 
         sourceBuilder.WriteLine("{ ");
-        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
+        sourceBuilder.WriteLine($"""MethodInfo = {SourceInformationWriter.GenerateMethodInformation(model.Context, model.Method)},""");
         
         if (model.IsVoid)
         {
