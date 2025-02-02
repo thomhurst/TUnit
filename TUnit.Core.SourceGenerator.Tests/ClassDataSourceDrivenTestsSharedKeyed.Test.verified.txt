@@ -28,8 +28,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
      Name = "DataSource_Class",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -179,8 +180,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
      Name = "DataSource_Class_Generic",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

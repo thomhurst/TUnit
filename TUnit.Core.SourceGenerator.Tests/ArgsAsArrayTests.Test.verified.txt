@@ -28,8 +28,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgsAsArrayTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
      Name = "Params",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -152,8 +153,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgsAsArrayTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
      Name = "NonParams",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -276,8 +278,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgsAsArrayTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
      Name = "ParamsEnumerable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -400,8 +403,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgsAsArrayTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
      Name = "Enumerable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -524,8 +528,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgsAsArrayTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
      Name = "Following_Non_Params",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

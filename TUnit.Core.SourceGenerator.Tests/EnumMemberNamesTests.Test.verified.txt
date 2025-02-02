@@ -33,8 +33,9 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
      Name = "SomeTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -140,8 +141,9 @@ new global::TUnit.Core.ArgumentsAttribute("C")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
      Name = "SomeTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -247,8 +249,9 @@ new global::TUnit.Core.ArgumentsAttribute("C")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
      Name = "SomeTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

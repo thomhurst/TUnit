@@ -33,8 +33,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "DataSource_Method",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -140,8 +141,9 @@ new global::TUnit.Core.ArgumentsAttribute(3)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "DataSource_Method",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -247,8 +249,9 @@ new global::TUnit.Core.ArgumentsAttribute(3)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "DataSource_Method",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -384,8 +387,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "DataSource_Method",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -500,8 +504,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "DataSource_Method",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -616,8 +621,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "DataSource_Method",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -762,8 +768,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "EnumValue",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -869,8 +876,9 @@ new global::TUnit.Core.ArgumentsAttribute(-1)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "EnumValue",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -976,8 +984,9 @@ new global::TUnit.Core.ArgumentsAttribute(-1)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "EnumValue",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1108,8 +1117,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "NullValue",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1232,8 +1242,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "EmptyString",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1356,8 +1367,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "NonEmptyString",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1485,8 +1497,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "BooleanString",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1592,8 +1605,9 @@ new global::TUnit.Core.ArgumentsAttribute(true)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "BooleanString",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1699,8 +1713,9 @@ new global::TUnit.Core.ArgumentsAttribute(true)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "BooleanString",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1831,8 +1846,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "Type",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1955,8 +1971,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "IntegerArray",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -2079,8 +2096,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataDrivenTests),
      Name = "IntMaxValue",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

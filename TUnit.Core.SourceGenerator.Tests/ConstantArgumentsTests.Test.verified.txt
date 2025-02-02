@@ -28,8 +28,9 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ConstantArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
      Name = "String1",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -152,8 +153,9 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ConstantArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
      Name = "Int",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -276,8 +278,9 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ConstantArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
      Name = "Double",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -400,8 +403,9 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ConstantArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
      Name = "Float",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -524,8 +528,9 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ConstantArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
      Name = "Long",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -648,8 +653,9 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ConstantArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
      Name = "UInt",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -772,8 +778,9 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ConstantArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
      Name = "ULong",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

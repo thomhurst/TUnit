@@ -39,8 +39,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -164,8 +165,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -289,8 +291,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -414,8 +417,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -539,8 +543,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -664,8 +669,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -789,8 +795,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -914,8 +921,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1039,8 +1047,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
      Name = "DataSourceClassCombinedWithDataSourceMethodTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

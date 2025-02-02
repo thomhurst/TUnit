@@ -32,8 +32,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NullableByteArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
      Name = "Test",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -135,8 +136,9 @@ new global::TUnit.Core.ArgumentsAttribute(null)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NullableByteArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
      Name = "Test",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -267,8 +269,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NullableByteArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
      Name = "Test2",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -379,8 +382,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NullableByteArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
      Name = "Test2",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

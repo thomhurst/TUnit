@@ -32,8 +32,9 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
      Name = "Base_Derived1",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -159,8 +160,9 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassD
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
      Name = "Base_Derived1",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -315,8 +317,9 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
      Name = "Base_Derived2",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -442,8 +445,9 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassD
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
      Name = "Base_Derived2",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

@@ -44,8 +44,9 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.AfterAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyBase1>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase1),
      Name = "AfterAll1",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -140,8 +141,9 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.AssemblyBase1>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyBase1>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase1),
      Name = "AfterEach1",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -234,8 +236,9 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.AfterAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyBase2>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase2),
      Name = "AfterAll2",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -330,8 +333,9 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.AssemblyBase2>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyBase2>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase2),
      Name = "AfterEach2",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -424,8 +428,9 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.AfterAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyBase3>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase3),
      Name = "AfterAll3",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -520,8 +525,9 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.AssemblyBase3>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyBase3>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase3),
      Name = "AfterEach3",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -614,8 +620,9 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 		[
 			new global::TUnit.Core.Hooks.AfterAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
      Name = "AfterAllCleanUp",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -710,8 +717,9 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 		[
 			new global::TUnit.Core.Hooks.AfterAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
      Name = "AfterAllCleanUpWithContext",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -813,8 +821,9 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 		[
 			new global::TUnit.Core.Hooks.AfterAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
      Name = "AfterAllCleanUp",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -916,8 +925,9 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 		[
 			new global::TUnit.Core.Hooks.AfterAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
      Name = "AfterAllCleanUpWithContext",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1027,8 +1037,9 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
      Name = "Cleanup",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1121,8 +1132,9 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
      Name = "Cleanup",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1229,8 +1241,9 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
      Name = "CleanupWithContext",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1330,8 +1343,9 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AfterTests.AssemblyCleanupTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
      Name = "CleanupWithContext",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

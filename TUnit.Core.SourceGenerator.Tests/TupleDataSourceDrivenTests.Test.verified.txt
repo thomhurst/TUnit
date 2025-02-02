@@ -28,8 +28,9 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TupleDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
      Name = "DataSource_TupleMethod",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

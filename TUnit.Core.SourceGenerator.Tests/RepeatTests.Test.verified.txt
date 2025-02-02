@@ -32,8 +32,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "One",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -125,8 +126,9 @@ new global::TUnit.Core.RepeatAttribute(1)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "One",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -248,8 +250,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "Two",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -341,8 +344,9 @@ new global::TUnit.Core.RepeatAttribute(2)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "Two",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -434,8 +438,9 @@ new global::TUnit.Core.RepeatAttribute(2)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "Two",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -558,8 +563,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "Three",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -647,8 +653,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "Three",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -736,8 +743,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "Three",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -825,8 +833,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.RepeatTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.RepeatTests),
      Name = "Three",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

@@ -38,8 +38,9 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1589.BaseTests<TFixture>>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<TFixture>),
      Name = "Setup",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

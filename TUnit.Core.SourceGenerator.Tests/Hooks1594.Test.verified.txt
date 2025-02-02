@@ -38,8 +38,9 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.Bugs._1594.MyTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1594.MyTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
      Name = "SetupMyTests",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -145,8 +146,9 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1594.ParentTests<TFixture>>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<TFixture>),
      Name = "SetupParentTests",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -246,8 +248,9 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1594.GrandParentTests<TFixture>>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<TFixture>),
      Name = "SetupBase",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

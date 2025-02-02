@@ -38,8 +38,9 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.STAThreadTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.STAThreadTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.STAThreadTests),
      Name = "BeforeTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -151,8 +152,9 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.STAThreadTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.STAThreadTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.STAThreadTests),
      Name = "AfterTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

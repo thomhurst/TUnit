@@ -28,8 +28,9 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AutoDataTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AutoDataTests),
      Name = "Test1",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

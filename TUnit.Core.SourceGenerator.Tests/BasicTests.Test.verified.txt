@@ -28,8 +28,9 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BasicTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BasicTests),
      Name = "SynchronousTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -139,8 +140,9 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BasicTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BasicTests),
      Name = "AsynchronousTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -250,8 +252,9 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BasicTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BasicTests),
      Name = "ValueTaskAsynchronousTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.ValueTask),

@@ -28,8 +28,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NumberArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
      Name = "Int",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -152,8 +153,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NumberArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
      Name = "Double",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -276,8 +278,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NumberArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
      Name = "Float",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -400,8 +403,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NumberArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
      Name = "Long",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -524,8 +528,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NumberArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
      Name = "ULong",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -648,8 +653,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.NumberArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
      Name = "UInt",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

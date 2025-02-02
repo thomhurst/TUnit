@@ -32,8 +32,9 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.GenericMethodTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.GenericMethodTests),
      Name = "AggregateBy_HasExpectedOutput",
      GenericTypeCount = 3,
      ReturnType = typeof(void),
@@ -185,8 +186,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collec
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.GenericMethodTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.GenericMethodTests),
      Name = "AggregateBy_HasExpectedOutput",
      GenericTypeCount = 3,
      ReturnType = typeof(void),

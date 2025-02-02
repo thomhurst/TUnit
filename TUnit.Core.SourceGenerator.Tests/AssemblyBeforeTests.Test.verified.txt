@@ -38,8 +38,9 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblyBase1>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase1),
      Name = "BeforeAll1",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -134,8 +135,9 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.AssemblyBase1>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblyBase1>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase1),
      Name = "BeforeEach1",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -228,8 +230,9 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblyBase2>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase2),
      Name = "BeforeAll2",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -324,8 +327,9 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.AssemblyBase2>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblyBase2>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase2),
      Name = "BeforeEach2",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -418,8 +422,9 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblyBase3>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase3),
      Name = "BeforeAll3",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -514,8 +519,9 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.AssemblyBase3>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblyBase3>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase3),
      Name = "BeforeEach3",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -608,8 +614,9 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
      Name = "BeforeAllSetUp",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -704,8 +711,9 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
      Name = "BeforeAllSetUpWithContext",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -807,8 +815,9 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
      Name = "BeforeAllSetUp",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -910,8 +919,9 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod
 			{ 
-			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
+			MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
      Name = "BeforeAllSetUpWithContext",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1021,8 +1031,9 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
      Name = "Setup",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1115,8 +1126,9 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
      Name = "Setup",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1223,8 +1235,9 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
      Name = "SetupWithContext",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1324,8 +1337,9 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
 			{
-				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.BeforeTests.AssemblySetupTests>
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
      Name = "SetupWithContext",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

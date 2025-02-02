@@ -32,8 +32,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceGeneratorTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
      Name = "GeneratedData_Method",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -233,8 +234,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceGeneratorTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
      Name = "GeneratedData_Method",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -463,8 +465,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceGeneratorTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
      Name = "GeneratedData_Method2",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -700,8 +703,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceGeneratorTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
      Name = "GeneratedData_Method2",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -966,8 +970,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceGeneratorTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
      Name = "GeneratedData_Method3",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1203,8 +1208,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.DataSourceGeneratorTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
      Name = "GeneratedData_Method3",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

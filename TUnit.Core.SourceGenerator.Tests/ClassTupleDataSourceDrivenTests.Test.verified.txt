@@ -34,8 +34,9 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
      Name = "DataSource_TupleMethod",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -250,8 +251,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
      Name = "DataSource_TupleMethod",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -466,8 +468,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
      Name = "DataSource_TupleMethod",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -682,8 +685,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
      Name = "DataSource_TupleMethod",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

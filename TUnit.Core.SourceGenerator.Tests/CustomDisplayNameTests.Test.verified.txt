@@ -28,8 +28,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "Test",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -152,8 +153,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "Test2",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -280,8 +282,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "Test3",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -414,8 +417,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "Test3",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -573,8 +577,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "MethodDataSourceTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -709,8 +714,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "PasswordTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -867,8 +873,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "SameClassConstantTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -991,8 +998,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "DifferentClassConstantTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1115,8 +1123,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
      Name = "NestedClassConstantTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

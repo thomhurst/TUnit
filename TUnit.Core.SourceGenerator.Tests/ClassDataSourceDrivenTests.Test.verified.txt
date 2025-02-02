@@ -28,8 +28,9 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
      Name = "DataSource_Class",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -177,8 +178,9 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
      Name = "DataSource_Class_Generic",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -326,8 +328,9 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
      Name = "IsInitialized_With_1_ClassDataSource",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -475,8 +478,9 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
      Name = "IsInitialized_With_2_ClassDataSources",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -643,8 +647,9 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
      Name = "IsInitialized_With_3_ClassDataSources",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -828,8 +833,9 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
      Name = "IsInitialized_With_4_ClassDataSources",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1030,8 +1036,9 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
      Name = "IsInitialized_With_5_ClassDataSources",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

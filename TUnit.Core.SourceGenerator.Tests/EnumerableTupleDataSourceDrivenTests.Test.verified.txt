@@ -32,8 +32,9 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
      Name = "DataSource_TupleMethod",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -158,8 +159,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
      Name = "DataSource_TupleMethod",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

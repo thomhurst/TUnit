@@ -28,8 +28,9 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
      Name = "Test",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -142,8 +143,9 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
      Name = "GenericMethodDataSource",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -268,8 +270,9 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
      Name = "NonGenericMethodDataSource",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -394,8 +397,9 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Library.BaseTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Library.BaseTests),
      Name = "BaseTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

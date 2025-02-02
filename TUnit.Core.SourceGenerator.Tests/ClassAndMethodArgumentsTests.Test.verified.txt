@@ -32,8 +32,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "Simple",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -134,8 +135,9 @@ new global::TUnit.Core.ArgumentsAttribute("2")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "Simple",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -267,8 +269,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "WithMethodLevel",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -386,8 +389,9 @@ new global::TUnit.Core.ArgumentsAttribute("2")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "WithMethodLevel",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -505,8 +509,9 @@ new global::TUnit.Core.ArgumentsAttribute("2")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "WithMethodLevel",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -624,8 +629,9 @@ new global::TUnit.Core.ArgumentsAttribute("2")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "WithMethodLevel",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -774,8 +780,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "IgnoreParameters",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -893,8 +900,9 @@ new global::TUnit.Core.ArgumentsAttribute("2")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "IgnoreParameters",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1012,8 +1020,9 @@ new global::TUnit.Core.ArgumentsAttribute("2")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "IgnoreParameters",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -1131,8 +1140,9 @@ new global::TUnit.Core.ArgumentsAttribute("2")
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
      Name = "IgnoreParameters",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

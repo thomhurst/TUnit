@@ -33,8 +33,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
      Name = "Explicit",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -140,8 +141,9 @@ new global::TUnit.Core.ArgumentsAttribute(3)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
      Name = "Explicit",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -247,8 +249,9 @@ new global::TUnit.Core.ArgumentsAttribute(3)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
      Name = "Explicit",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -384,8 +387,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
      Name = "Implicit",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -491,8 +495,9 @@ new global::TUnit.Core.ArgumentsAttribute(3)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
      Name = "Implicit",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -598,8 +603,9 @@ new global::TUnit.Core.ArgumentsAttribute(3)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
      Name = "Implicit",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

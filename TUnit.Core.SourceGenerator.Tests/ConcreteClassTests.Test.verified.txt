@@ -28,8 +28,9 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
      Name = "SecondTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -142,8 +143,9 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AbstractTests.AbstractBaseClass>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AbstractTests.AbstractBaseClass),
      Name = "AssertClassName",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -253,8 +255,9 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AbstractTests.AbstractBaseClass>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AbstractTests.AbstractBaseClass),
      Name = "AssertClassName",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

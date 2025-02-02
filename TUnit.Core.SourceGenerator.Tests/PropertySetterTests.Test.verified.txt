@@ -28,8 +28,9 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.PropertySetterTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.PropertySetterTests),
      Name = "Test",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

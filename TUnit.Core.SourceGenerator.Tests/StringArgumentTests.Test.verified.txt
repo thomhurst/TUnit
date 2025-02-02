@@ -38,8 +38,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Normal",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -169,8 +170,9 @@ new global::TUnit.Core.ArgumentsAttribute(        """
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Normal",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -300,8 +302,9 @@ new global::TUnit.Core.ArgumentsAttribute(        """
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Normal",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -431,8 +434,9 @@ new global::TUnit.Core.ArgumentsAttribute(        """
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Normal",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -562,8 +566,9 @@ new global::TUnit.Core.ArgumentsAttribute(        """
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Normal",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -693,8 +698,9 @@ new global::TUnit.Core.ArgumentsAttribute(        """
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Normal",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -824,8 +830,9 @@ new global::TUnit.Core.ArgumentsAttribute(        """
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Normal",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -955,8 +962,9 @@ new global::TUnit.Core.ArgumentsAttribute(        """
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Normal",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1124,8 +1132,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Nullable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1251,8 +1260,9 @@ new global::TUnit.Core.ArgumentsAttribute(null)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Nullable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1378,8 +1388,9 @@ new global::TUnit.Core.ArgumentsAttribute(null)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Nullable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1505,8 +1516,9 @@ new global::TUnit.Core.ArgumentsAttribute(null)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Nullable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1632,8 +1644,9 @@ new global::TUnit.Core.ArgumentsAttribute(null)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Nullable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1759,8 +1772,9 @@ new global::TUnit.Core.ArgumentsAttribute(null)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Nullable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -1886,8 +1900,9 @@ new global::TUnit.Core.ArgumentsAttribute(null)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Nullable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -2013,8 +2028,9 @@ new global::TUnit.Core.ArgumentsAttribute(null)
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
      Name = "Nullable",
      GenericTypeCount = 0,
      ReturnType = typeof(void),

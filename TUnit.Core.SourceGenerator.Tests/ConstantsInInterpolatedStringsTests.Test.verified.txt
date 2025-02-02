@@ -28,8 +28,9 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests),
      Name = "SomeTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

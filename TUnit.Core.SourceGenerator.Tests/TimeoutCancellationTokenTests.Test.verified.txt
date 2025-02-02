@@ -28,8 +28,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
      Name = "DefaultTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -161,8 +162,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
      Name = "BasicTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -302,8 +304,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
      Name = "InheritedTimeoutAttribute",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -439,8 +442,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
      Name = "DataTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -590,8 +594,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
      Name = "DataSourceTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),
@@ -740,8 +745,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
      Name = "MatrixTest",
      GenericTypeCount = 0,
      ReturnType = typeof(global::System.Threading.Tasks.Task),

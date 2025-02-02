@@ -28,8 +28,9 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.AttributeTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
+     Type = typeof(global::TUnit.TestProject.AttributeTests),
      Name = "MyTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
