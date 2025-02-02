@@ -14,6 +14,29 @@ public class TestExtensionsTests
     {
         var testDetails = _fixture.Build<TestDetails<TestExtensionsTests>>()
             .With(x => x.TestClassArguments, [])
+            .With(x => x.TestMethod, new SourceGeneratedMethodInformation
+            {
+                Attributes = [],
+                Class = new SourceGeneratedClassInformation
+                {
+                    Name = "TestExtensionsTests",
+                    Namespace = "TUnit.UnitTests",
+                    Assembly = new SourceGeneratedAssemblyInformation
+                    {
+                        Attributes = [],
+                        Name = "TUnit.UnitTests",
+                    },
+                    Attributes = [],
+                    Parameters = [],
+                    Properties = [],
+                    Type = typeof(TestExtensionsTests),
+                },
+                Name = "DummyMethod",
+                Parameters = [],
+                Type = typeof(TestExtensionsTests),
+                ReturnType = typeof(void),
+                GenericTypeCount = 0,
+            })
             .Create();
 
         var context = new TestContext(null!, testDetails, CreateDummyMetadata());
@@ -28,7 +51,29 @@ public class TestExtensionsTests
     {
         var testDetails = _fixture.Build<TestDetails<InnerClass>>()
             .With(x => x.TestClassArguments, [])
-            .Create();
+            .With(x => x.TestMethod, new SourceGeneratedMethodInformation
+            {
+                Attributes = [],
+                Class = new SourceGeneratedClassInformation
+                {
+                    Name = "InnerClass",
+                    Namespace = "TUnit.UnitTests",
+                    Assembly = new SourceGeneratedAssemblyInformation
+                    {
+                        Attributes = [],
+                        Name = "TUnit.UnitTests",
+                    },
+                    Attributes = [],
+                    Parameters = [],
+                    Properties = [],
+                    Type = typeof(InnerClass),
+                },
+                Name = "DummyMethod",
+                Parameters = [],
+                Type = typeof(TestExtensionsTests),
+                ReturnType = typeof(void),
+                GenericTypeCount = 0,
+            })            .Create();
 
         var context = new TestContext(null!, testDetails, CreateDummyMetadata());
 
@@ -40,6 +85,29 @@ public class TestExtensionsTests
     private TestMetadata<TestExtensionsTests> CreateDummyMetadata()
     {
         return _fixture.Build<TestMetadata<TestExtensionsTests>>()
+            .With(x => x.TestMethod, new SourceGeneratedMethodInformation
+            {
+                Attributes = [],
+                Class = new SourceGeneratedClassInformation
+                {
+                    Name = "TestExtensionsTests",
+                    Namespace = "TUnit.UnitTests",
+                    Assembly = new SourceGeneratedAssemblyInformation
+                    {
+                        Attributes = [],
+                        Name = "TUnit.UnitTests",
+                    },
+                    Attributes = [],
+                    Parameters = [],
+                    Properties = [],
+                    Type = typeof(TestExtensionsTests),
+                },
+                Name = "DummyMethod",
+                Parameters = [],
+                Type = typeof(TestExtensionsTests),
+                ReturnType = typeof(void),
+                GenericTypeCount = 0,
+            })
             .Without(x => x.ResettableClassFactory)
             .Create();
     }
