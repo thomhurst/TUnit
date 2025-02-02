@@ -148,7 +148,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
-     Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<TFixture>),
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
      Name = "SetupParentTests",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -162,7 +162,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
      Parameters = [],
      Class = new global::TUnit.Core.SourceGeneratedClassInformation
 {    
-     Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<TFixture>),
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
      Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Hooks1594",
@@ -177,7 +177,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
      [
          
      ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
     {
         Name = "fixture",
         Attributes = 
@@ -250,7 +250,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
-     Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<TFixture>),
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
      Name = "SetupBase",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -264,7 +264,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
      Parameters = [],
      Class = new global::TUnit.Core.SourceGeneratedClassInformation
 {    
-     Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<TFixture>),
+     Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
      Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Hooks1594",
@@ -279,7 +279,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
      [
          
      ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
     {
         Name = "fixture",
         Attributes = 
@@ -289,7 +289,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
     }],
      Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
     {
-        Type = typeof(TFixture),
+        Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
         Name = "Fixture",
         IsStatic = false,
         Attributes = 

@@ -399,7 +399,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 {
-     Type = typeof(global::TUnit.TestProject.Library.BaseTests),
+     Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
      Name = "BaseTest",
      GenericTypeCount = 0,
      ReturnType = typeof(void),
@@ -413,7 +413,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
      Parameters = [],
      Class = new global::TUnit.Core.SourceGeneratedClassInformation
 {    
-     Type = typeof(global::TUnit.TestProject.Library.BaseTests),
+     Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
      Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "InheritedTestsFromDifferentProjectTests",
@@ -422,11 +422,14 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
          
      ],  
 },
-     Name = "BaseTests",
-     Namespace = "TUnit.TestProject.Library",
+     Name = "InheritedTestsFromDifferentProjectTests",
+     Namespace = "TUnit.TestProject",
      Attributes = 
      [
-         
+         new global::TUnit.Core.InheritsTestsAttribute()
+{
+    
+}
      ],  
      Parameters = [],
      Properties = [],
