@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Hooks;
@@ -9,8 +8,9 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
     public string Name => nameof(lastTestInClassEventReceiver.OnLastTestInClass);
 
     [field: AllowNull, MaybeNull]
-    public SourceGeneratedMethodInformation MethodInfo => field ??= new SourceGeneratedMethodInformation<ILastTestInClassEventReceiver>()
+    public SourceGeneratedMethodInformation MethodInfo => field ??= new SourceGeneratedMethodInformation
     {
+        Type = typeof(ILastTestInClassEventReceiver),
         Attributes = [],
         Name = nameof(lastTestInClassEventReceiver.OnLastTestInClass),
         Parameters = [new SourceGeneratedParameterInformation<ClassHookContext>
