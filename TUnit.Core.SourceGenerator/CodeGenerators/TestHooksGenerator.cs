@@ -64,7 +64,7 @@ public class TestHooksGenerator : IIncrementalGenerator
         }
         else
         {
-            classTypes = [containingType];
+            classTypes = [];
         }
 
         foreach (var classType in classTypes)
