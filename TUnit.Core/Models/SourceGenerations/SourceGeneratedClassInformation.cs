@@ -1,20 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
 public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
 {
-    private static readonly Dictionary<string, SourceGeneratedClassInformation> Cache = [];
+    private static readonly ConcurrentDictionary<string, SourceGeneratedClassInformation> Cache = [];
     public static SourceGeneratedClassInformation GetOrAdd(string name, Func<SourceGeneratedClassInformation> factory)
     {
-        if (Cache.TryGetValue(name, out var value))
-        {
-            return value;
-        }
-        
-        value = factory();
-        Cache[name] = value;
-        return value;
+        return Cache.GetOrAdd(name, _ => factory());
     }
     
     public virtual bool Equals(SourceGeneratedClassInformation? other)

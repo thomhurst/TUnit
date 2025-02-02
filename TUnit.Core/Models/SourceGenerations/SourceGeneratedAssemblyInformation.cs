@@ -1,18 +1,13 @@
-﻿namespace TUnit.Core;
+﻿using System.Collections.Concurrent;
+
+namespace TUnit.Core;
 
 public record SourceGeneratedAssemblyInformation
 {
-    private static readonly Dictionary<string, SourceGeneratedAssemblyInformation> Cache = [];
+    private static readonly ConcurrentDictionary<string, SourceGeneratedAssemblyInformation> Cache = [];
     public static SourceGeneratedAssemblyInformation GetOrAdd(string name, Func<SourceGeneratedAssemblyInformation> factory)
     {
-        if (Cache.TryGetValue(name, out var value))
-        {
-            return value;
-        }
-        
-        value = factory();
-        Cache[name] = value;
-        return value;
+        return Cache.GetOrAdd(name, _ => factory());
     }
     
     public virtual bool Equals(SourceGeneratedAssemblyInformation? other)
