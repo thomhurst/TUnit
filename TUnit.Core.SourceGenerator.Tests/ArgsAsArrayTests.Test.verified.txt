@@ -53,17 +53,17 @@ new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgsAsArrayTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgsAsArrayTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -72,7 +72,7 @@ new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -178,17 +178,17 @@ new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgsAsArrayTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgsAsArrayTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -197,7 +197,7 @@ new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -303,17 +303,17 @@ new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgsAsArrayTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgsAsArrayTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -322,7 +322,7 @@ new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -428,17 +428,17 @@ new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgsAsArrayTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgsAsArrayTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -447,7 +447,7 @@ new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -561,17 +561,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collec
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgsAsArrayTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgsAsArrayTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -580,7 +580,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collec
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

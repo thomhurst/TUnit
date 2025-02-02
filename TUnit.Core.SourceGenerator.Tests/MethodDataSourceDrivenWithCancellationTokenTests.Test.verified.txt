@@ -89,17 +89,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -111,7 +111,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -219,17 +219,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -241,7 +241,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -349,17 +349,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -371,7 +371,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -483,17 +483,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -505,7 +505,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -617,17 +617,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -639,7 +639,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -751,17 +751,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MethodDataSourceDrivenWithCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -773,7 +773,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

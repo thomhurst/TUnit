@@ -58,17 +58,17 @@ new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1539.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1539", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Tests1539",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "Tests",
      Namespace = "TUnit.TestProject.Bugs._1539",
      Attributes = 
@@ -77,7 +77,7 @@ new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

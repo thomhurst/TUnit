@@ -52,17 +52,17 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.MyTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Hooks1594",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MyTests",
      Namespace = "TUnit.TestProject.Bugs._1594",
      Attributes = 
@@ -81,7 +81,7 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
         ]
     }],
      Properties = [],
-},
+}),
 },
 				Body = (classInstance, context, cancellationToken) => classInstance.SetupMyTests(),
 				HookExecutor = DefaultExecutor.Instance,
@@ -160,17 +160,17 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Hooks1594",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ParentTests",
      Namespace = "TUnit.TestProject.Bugs._1594",
      Attributes = 
@@ -186,7 +186,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
         ]
     }],
      Properties = [],
-},
+}),
 },
 				Body = (classInstance, context, cancellationToken) => classInstance.SetupParentTests(),
 				HookExecutor = DefaultExecutor.Instance,
@@ -262,17 +262,17 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Hooks1594",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "GrandParentTests",
      Namespace = "TUnit.TestProject.Bugs._1594",
      Attributes = 
@@ -297,7 +297,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
             
         ]
     }],
-},
+}),
 },
 				Body = (classInstance, context, cancellationToken) => classInstance.SetupBase(),
 				HookExecutor = DefaultExecutor.Instance,

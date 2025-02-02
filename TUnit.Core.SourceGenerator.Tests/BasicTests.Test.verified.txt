@@ -42,17 +42,17 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BasicTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.BasicTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "BasicTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "BasicTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -61,7 +61,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -154,17 +154,17 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BasicTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.BasicTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "BasicTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "BasicTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -173,7 +173,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -266,17 +266,17 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BasicTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.BasicTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "BasicTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "BasicTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -285,7 +285,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

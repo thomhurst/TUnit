@@ -50,17 +50,17 @@ new global::TUnit.Core.RepeatAttribute(1)
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -72,7 +72,7 @@ new global::TUnit.Core.RepeatAttribute(1)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -144,17 +144,17 @@ new global::TUnit.Core.RepeatAttribute(1)
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -166,7 +166,7 @@ new global::TUnit.Core.RepeatAttribute(1)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -268,17 +268,17 @@ new global::TUnit.Core.RepeatAttribute(2)
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -290,7 +290,7 @@ new global::TUnit.Core.RepeatAttribute(2)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -362,17 +362,17 @@ new global::TUnit.Core.RepeatAttribute(2)
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -384,7 +384,7 @@ new global::TUnit.Core.RepeatAttribute(2)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -456,17 +456,17 @@ new global::TUnit.Core.RepeatAttribute(2)
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -478,7 +478,7 @@ new global::TUnit.Core.RepeatAttribute(2)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -577,17 +577,17 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -599,7 +599,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -667,17 +667,17 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -689,7 +689,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -757,17 +757,17 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -779,7 +779,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -847,17 +847,17 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.RepeatTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "RepeatTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "RepeatTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -869,7 +869,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

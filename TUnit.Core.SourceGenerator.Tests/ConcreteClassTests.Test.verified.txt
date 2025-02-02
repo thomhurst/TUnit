@@ -42,17 +42,17 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConcreteClassTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConcreteClassTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConcreteClass2",
      Namespace = "TUnit.TestProject.AbstractTests",
      Attributes = 
@@ -64,7 +64,7 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -157,17 +157,17 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConcreteClassTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConcreteClassTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConcreteClass2",
      Namespace = "TUnit.TestProject.AbstractTests",
      Attributes = 
@@ -179,7 +179,7 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -272,17 +272,17 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass1", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConcreteClassTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConcreteClassTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConcreteClass1",
      Namespace = "TUnit.TestProject.AbstractTests",
      Attributes = 
@@ -294,7 +294,7 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

@@ -61,17 +61,17 @@ new global::TUnit.Core.ArgumentsAttribute(null)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1692.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.Bugs._1692.Tests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1692", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Tests1692",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "Tests",
      Namespace = "TUnit.TestProject.Bugs._1692",
      Attributes = 
@@ -80,7 +80,7 @@ new global::TUnit.Core.ArgumentsAttribute(null)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -165,17 +165,17 @@ new global::TUnit.Core.ArgumentsAttribute(null)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1692.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.Bugs._1692.Tests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1692", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Tests1692",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "Tests",
      Namespace = "TUnit.TestProject.Bugs._1692",
      Attributes = 
@@ -184,7 +184,7 @@ new global::TUnit.Core.ArgumentsAttribute(null)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

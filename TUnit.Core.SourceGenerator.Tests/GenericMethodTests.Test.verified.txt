@@ -101,17 +101,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collec
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "GenericMethodTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "GenericMethodTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -120,7 +120,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collec
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -255,17 +255,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collec
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "GenericMethodTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "GenericMethodTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -274,7 +274,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collec
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

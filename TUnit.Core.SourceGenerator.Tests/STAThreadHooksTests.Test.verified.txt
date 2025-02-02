@@ -56,17 +56,17 @@ new global::TUnit.Core.Executors.HookExecutorAttribute<global::TUnit.Core.STAThr
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.STAThreadTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.STAThreadTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("STAThreadHooksTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "STAThreadHooksTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "STAThreadTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -78,7 +78,7 @@ new global::TUnit.Core.Executors.HookExecutorAttribute<global::TUnit.Core.STAThr
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 },
 				Body = (classInstance, context, cancellationToken) => classInstance.BeforeTest(),
 				HookExecutor = new global::TUnit.Core.STAThreadExecutor(),
@@ -170,17 +170,17 @@ new global::TUnit.Core.Executors.HookExecutorAttribute<global::TUnit.Core.STAThr
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.STAThreadTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.STAThreadTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("STAThreadHooksTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "STAThreadHooksTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "STAThreadTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -192,7 +192,7 @@ new global::TUnit.Core.Executors.HookExecutorAttribute<global::TUnit.Core.STAThr
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 },
 				Body = (classInstance, context, cancellationToken) => classInstance.AfterTest(),
 				HookExecutor = new global::TUnit.Core.STAThreadExecutor(),

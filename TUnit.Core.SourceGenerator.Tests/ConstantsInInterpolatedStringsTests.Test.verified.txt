@@ -53,17 +53,17 @@ new global::TUnit.Core.ArgumentsAttribute($"{"Value"}1")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantsInInterpolatedStringsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConstantsInInterpolatedStringsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConstantsInInterpolatedStringsTests",
      Namespace = "TUnit.TestProject.Bugs._1432",
      Attributes = 
@@ -72,7 +72,7 @@ new global::TUnit.Core.ArgumentsAttribute($"{"Value"}1")
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

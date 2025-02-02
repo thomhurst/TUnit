@@ -53,17 +53,17 @@ new global::TUnit.Core.ArgumentsAttribute("123")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConstantArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConstantArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -72,7 +72,7 @@ new global::TUnit.Core.ArgumentsAttribute("123")
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -178,17 +178,17 @@ new global::TUnit.Core.ArgumentsAttribute(123)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConstantArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConstantArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -197,7 +197,7 @@ new global::TUnit.Core.ArgumentsAttribute(123)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -303,17 +303,17 @@ new global::TUnit.Core.ArgumentsAttribute(1.23)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConstantArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConstantArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -322,7 +322,7 @@ new global::TUnit.Core.ArgumentsAttribute(1.23)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -428,17 +428,17 @@ new global::TUnit.Core.ArgumentsAttribute(1.23F)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConstantArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConstantArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -447,7 +447,7 @@ new global::TUnit.Core.ArgumentsAttribute(1.23F)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -553,17 +553,17 @@ new global::TUnit.Core.ArgumentsAttribute(123L)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConstantArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConstantArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -572,7 +572,7 @@ new global::TUnit.Core.ArgumentsAttribute(123L)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -678,17 +678,17 @@ new global::TUnit.Core.ArgumentsAttribute(123U)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConstantArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConstantArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -697,7 +697,7 @@ new global::TUnit.Core.ArgumentsAttribute(123U)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -803,17 +803,17 @@ new global::TUnit.Core.ArgumentsAttribute(123UL)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ConstantArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ConstantArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -822,7 +822,7 @@ new global::TUnit.Core.ArgumentsAttribute(123UL)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

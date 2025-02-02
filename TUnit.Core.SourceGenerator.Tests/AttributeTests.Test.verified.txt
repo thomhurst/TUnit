@@ -75,17 +75,17 @@ Property2 = 1
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AttributeTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.AttributeTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AttributeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "AttributeTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "AttributeTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -94,7 +94,7 @@ Property2 = 1
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

@@ -66,17 +66,17 @@ new global::TUnit.Core.ArgumentsAttribute(3)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgumentWithImplicitConverterTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgumentWithImplicitConverterTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -85,7 +85,7 @@ new global::TUnit.Core.ArgumentsAttribute(3)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -174,17 +174,17 @@ new global::TUnit.Core.ArgumentsAttribute(3)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgumentWithImplicitConverterTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgumentWithImplicitConverterTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -193,7 +193,7 @@ new global::TUnit.Core.ArgumentsAttribute(3)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -282,17 +282,17 @@ new global::TUnit.Core.ArgumentsAttribute(3)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgumentWithImplicitConverterTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgumentWithImplicitConverterTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -301,7 +301,7 @@ new global::TUnit.Core.ArgumentsAttribute(3)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -420,17 +420,17 @@ new global::TUnit.Core.ArgumentsAttribute(3)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgumentWithImplicitConverterTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgumentWithImplicitConverterTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -439,7 +439,7 @@ new global::TUnit.Core.ArgumentsAttribute(3)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -528,17 +528,17 @@ new global::TUnit.Core.ArgumentsAttribute(3)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgumentWithImplicitConverterTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgumentWithImplicitConverterTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -547,7 +547,7 @@ new global::TUnit.Core.ArgumentsAttribute(3)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -636,17 +636,17 @@ new global::TUnit.Core.ArgumentsAttribute(3)
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ArgumentWithImplicitConverterTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ArgumentWithImplicitConverterTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -655,7 +655,7 @@ new global::TUnit.Core.ArgumentsAttribute(3)
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

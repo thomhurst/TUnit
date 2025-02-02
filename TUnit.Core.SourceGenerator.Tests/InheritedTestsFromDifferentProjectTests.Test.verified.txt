@@ -42,17 +42,17 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "InheritedTestsFromDifferentProjectTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "InheritedTestsFromDifferentProjectTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -64,7 +64,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -168,17 +168,17 @@ new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestD
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "InheritedTestsFromDifferentProjectTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "InheritedTestsFromDifferentProjectTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -190,7 +190,7 @@ new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestD
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -295,17 +295,17 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "InheritedTestsFromDifferentProjectTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "InheritedTestsFromDifferentProjectTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -317,7 +317,7 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -411,17 +411,17 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "InheritedTestsFromDifferentProjectTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "InheritedTestsFromDifferentProjectTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -433,7 +433,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
