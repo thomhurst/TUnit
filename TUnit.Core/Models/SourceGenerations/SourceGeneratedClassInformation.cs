@@ -4,6 +4,19 @@ namespace TUnit.Core;
 
 public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
 {
+    private static readonly Dictionary<string, SourceGeneratedClassInformation> Cache = [];
+    public static SourceGeneratedClassInformation GetOrAdd(string name, Func<SourceGeneratedClassInformation> factory)
+    {
+        if (Cache.TryGetValue(name, out var value))
+        {
+            return value;
+        }
+        
+        value = factory();
+        Cache[name] = value;
+        return value;
+    }
+    
     public virtual bool Equals(SourceGeneratedClassInformation? other)
     {
         return Namespace == other?.Namespace 
