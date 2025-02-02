@@ -4,19 +4,7 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
-public record SourceGeneratedMethodInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : SourceGeneratedMethodInformation
-{
-    [field: AllowNull, MaybeNull]
-    [field: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    public override Type Type
-    {
-        get => field ??= typeof(T);
-        init;
-    }
-}
-
-public abstract record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
+public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
     public required SourceGeneratedParameterInformation[] Parameters { get; init; }
     
@@ -33,4 +21,7 @@ public abstract record SourceGeneratedMethodInformation : SourceGeneratedMemberI
     }
 
     public required Type ReturnType { get; init; }
+    
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    public override required Type Type { get; init; }
 }

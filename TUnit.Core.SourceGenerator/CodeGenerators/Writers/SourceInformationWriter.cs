@@ -44,8 +44,9 @@ public static class SourceInformationWriter
         IDictionary<string, string>? genericSubstitutions)
     {
         return $$"""
-                 new global::TUnit.Core.SourceGeneratedMethodInformation<{{methodSymbol.ContainingType.GloballyQualified()}}>
+                 new global::TUnit.Core.SourceGeneratedMethodInformation
                  {
+                      Type = typeof({{methodSymbol.ContainingType.GloballyQualified()}}{{methodSymbol.ContainingType.GloballyQualified()}}),
                       Name = "{{methodSymbol.Name}}",
                       GenericTypeCount = {{methodSymbol.TypeParameters.Length}},
                       ReturnType = typeof({{methodSymbol.ReturnType.GloballyQualified()}}),
