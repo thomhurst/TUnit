@@ -42,6 +42,7 @@ public static class SourceInformationWriter
             
             foreach (var parameter in parameters)
             {
+                sourceCodeWriter.WriteTabs();
                 GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
                     null);
             }
@@ -119,6 +120,7 @@ public static class SourceInformationWriter
             
             foreach (var parameter in parameters)
             {
+                sourceCodeWriter.WriteTabs();
                 GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
                     null);
             }

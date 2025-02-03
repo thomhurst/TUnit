@@ -29,193 +29,163 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-     Name = "Test1",
-     GenericTypeCount = 0,
-     ReturnType = typeof(void),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MultipleClassDataSourceDrivenTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MultipleClassDataSourceDrivenTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
-{
-    Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None]
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
-    {
-        Name = "inject1",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
-    {
-        Name = "inject2",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
-    {
-        Name = "inject3",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
-    {
-        Name = "inject4",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
-    {
-        Name = "inject5",
-        Attributes = 
-        [
-            
-        ]
-    }],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
-    {
-        Name = "inject1",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
-    {
-        Name = "inject2",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
-    {
-        Name = "inject3",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
-    {
-        Name = "inject4",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
-    {
-        Name = "inject5",
-        Attributes = 
-        [
-            
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
-{
-    Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None]
-};
-
-			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
-
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
-				classDataIndex++;
-				var classArgGeneratedData = classArgGeneratedDataAccessor();
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = classArgGeneratedData.Item1;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2 classArg1 = classArgGeneratedData.Item2;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3 classArg2 = classArgGeneratedData.Item3;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = classArgGeneratedData.Item4;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = classArgGeneratedData.Item5;
-
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(() => 
-				new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(classArg, classArg1, classArg2, classArg3, classArg4)
-				, sessionId, testBuilderContext);
-
-				var resettableClassFactory = resettableClassFactoryDelegate();
-
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
-				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
-					TestClassArguments = [classArg, classArg1, classArg2, classArg3, classArg4],
-					TestMethodArguments = [],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
-					TestFilePath = @"",
-					TestLineNumber = 14,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
-			}
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
-				TestClass = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+				Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+				Name = "Test1",
+				GenericTypeCount = 0,
 				ReturnType = typeof(void),
-				ParameterTypeFullNames = [],
-				TestName = "Test1",
-				TestFilePath = @"",
-				TestLineNumber = 14,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MultipleClassDataSourceDrivenTests",
+						Attributes = [],
+					}),
+					Name = "MultipleClassDataSourceDrivenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+						{
+							Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
 }
+						],
+						Parameters = 
+						[
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
+							{
+								Name = "inject1",
+								Attributes = [],
+							},
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
+							{
+								Name = "inject2",
+								Attributes = [],
+							},
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
+							{
+								Name = "inject3",
+								Attributes = [],
+							},
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
+							{
+								Name = "inject4",
+								Attributes = [],
+							},
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
+							{
+								Name = "inject5",
+								Attributes = [],
+							},
+						],
+						Properties = [],
+					}),
+};
+
+					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+					{
+						Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+						TestBuilderContext = testBuilderContextAccessor,
+						TestInformation = testInformation,
+						MembersToGenerate = 
+						[
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
+							{
+								Name = "inject1",
+								Attributes = [],
+							},
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
+							{
+								Name = "inject2",
+								Attributes = [],
+							},
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
+							{
+								Name = "inject3",
+								Attributes = [],
+							},
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
+							{
+								Name = "inject4",
+								Attributes = [],
+							},
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
+							{
+								Name = "inject5",
+								Attributes = [],
+							},
+						],
+						TestSessionId = sessionId,
+					};
+					var classDataAttribute = 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+					{
+						Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
+}
+						var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+
+						foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+						{
+							classDataIndex++;
+							var classArgGeneratedData = classArgGeneratedDataAccessor();
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = classArgGeneratedData.Item1;
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2 classArg1 = classArgGeneratedData.Item2;
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3 classArg2 = classArgGeneratedData.Item3;
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = classArgGeneratedData.Item4;
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = classArgGeneratedData.Item5;
+
+
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(() => 
+							new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(classArg, classArg1, classArg2, classArg3, classArg4)
+							, sessionId, testBuilderContext);
+
+							var resettableClassFactory = resettableClassFactoryDelegate();
+
+							nodes.Add(new TestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
+							{
+								TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
+								TestClassArguments = [classArg, classArg1, classArg2, classArg3, classArg4],
+								TestMethodArguments = [],
+								TestClassProperties = [],
+								CurrentRepeatAttempt = 0,
+								RepeatLimit = 0,
+								ResettableClassFactory = resettableClassFactory,
+								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
+								TestFilePath = @"",
+								TestLineNumber = 14,
+								TestMethod = testInformation,
+								TestBuilderContext = testBuilderContext,
+							});
+							resettableClassFactory = resettableClassFactoryDelegate();
+							testBuilderContext = new();
+							testBuilderContextAccessor.Current = testBuilderContext;
+						}
+					}
+					catch (global::System.Exception exception)
+					{
+						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						{
+							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
+							TestClass = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+							ReturnType = typeof(void),
+							ParameterTypeFullNames = [],
+							TestName = "Test1",
+							TestFilePath = @"",
+							TestLineNumber = 14,
+							Exception = exception,
+						});
+					}
+					return nodes;
+				}
+			}
 
   
 // <auto-generated/>
@@ -248,192 +218,162 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-     Name = "Test2",
-     GenericTypeCount = 0,
-     ReturnType = typeof(void),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MultipleClassDataSourceDrivenTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MultipleClassDataSourceDrivenTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
-{
-    Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None]
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
-    {
-        Name = "inject1",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
-    {
-        Name = "inject2",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
-    {
-        Name = "inject3",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
-    {
-        Name = "inject4",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
-    {
-        Name = "inject5",
-        Attributes = 
-        [
-            
-        ]
-    }],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
-    {
-        Name = "inject1",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
-    {
-        Name = "inject2",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
-    {
-        Name = "inject3",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
-    {
-        Name = "inject4",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
-    {
-        Name = "inject5",
-        Attributes = 
-        [
-            
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
-{
-    Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None]
-};
-
-			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
-
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
-				classDataIndex++;
-				var classArgGeneratedData = classArgGeneratedDataAccessor();
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = classArgGeneratedData.Item1;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2 classArg1 = classArgGeneratedData.Item2;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3 classArg2 = classArgGeneratedData.Item3;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = classArgGeneratedData.Item4;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = classArgGeneratedData.Item5;
-
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(() => 
-				new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(classArg, classArg1, classArg2, classArg3, classArg4)
-				, sessionId, testBuilderContext);
-
-				var resettableClassFactory = resettableClassFactoryDelegate();
-
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
-				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
-					TestClassArguments = [classArg, classArg1, classArg2, classArg3, classArg4],
-					TestMethodArguments = [],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2()),
-					TestFilePath = @"",
-					TestLineNumber = 20,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
-			}
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
-				TestClass = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+				Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+				Name = "Test2",
+				GenericTypeCount = 0,
 				ReturnType = typeof(void),
-				ParameterTypeFullNames = [],
-				TestName = "Test2",
-				TestFilePath = @"",
-				TestLineNumber = 20,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MultipleClassDataSourceDrivenTests",
+						Attributes = [],
+					}),
+					Name = "MultipleClassDataSourceDrivenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+						{
+							Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
 }
+						],
+						Parameters = 
+						[
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
+							{
+								Name = "inject1",
+								Attributes = [],
+							},
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
+							{
+								Name = "inject2",
+								Attributes = [],
+							},
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
+							{
+								Name = "inject3",
+								Attributes = [],
+							},
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
+							{
+								Name = "inject4",
+								Attributes = [],
+							},
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
+							{
+								Name = "inject5",
+								Attributes = [],
+							},
+						],
+						Properties = [],
+					}),
+};
+
+					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+					{
+						Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+						TestBuilderContext = testBuilderContextAccessor,
+						TestInformation = testInformation,
+						MembersToGenerate = 
+						[
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
+							{
+								Name = "inject1",
+								Attributes = [],
+							},
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
+							{
+								Name = "inject2",
+								Attributes = [],
+							},
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
+							{
+								Name = "inject3",
+								Attributes = [],
+							},
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
+							{
+								Name = "inject4",
+								Attributes = [],
+							},
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
+							{
+								Name = "inject5",
+								Attributes = [],
+							},
+						],
+						TestSessionId = sessionId,
+					};
+					var classDataAttribute = 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+					{
+						Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
+}
+						var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+
+						foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+						{
+							classDataIndex++;
+							var classArgGeneratedData = classArgGeneratedDataAccessor();
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = classArgGeneratedData.Item1;
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2 classArg1 = classArgGeneratedData.Item2;
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3 classArg2 = classArgGeneratedData.Item3;
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = classArgGeneratedData.Item4;
+							global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = classArgGeneratedData.Item5;
+
+
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(() => 
+							new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(classArg, classArg1, classArg2, classArg3, classArg4)
+							, sessionId, testBuilderContext);
+
+							var resettableClassFactory = resettableClassFactoryDelegate();
+
+							nodes.Add(new TestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
+							{
+								TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
+								TestClassArguments = [classArg, classArg1, classArg2, classArg3, classArg4],
+								TestMethodArguments = [],
+								TestClassProperties = [],
+								CurrentRepeatAttempt = 0,
+								RepeatLimit = 0,
+								ResettableClassFactory = resettableClassFactory,
+								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2()),
+								TestFilePath = @"",
+								TestLineNumber = 20,
+								TestMethod = testInformation,
+								TestBuilderContext = testBuilderContext,
+							});
+							resettableClassFactory = resettableClassFactoryDelegate();
+							testBuilderContext = new();
+							testBuilderContextAccessor.Current = testBuilderContext;
+						}
+					}
+					catch (global::System.Exception exception)
+					{
+						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						{
+							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
+							TestClass = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+							ReturnType = typeof(void),
+							ParameterTypeFullNames = [],
+							TestName = "Test2",
+							TestFilePath = @"",
+							TestLineNumber = 20,
+							Exception = exception,
+						});
+					}
+					return nodes;
+				}
+			}
 
 ]

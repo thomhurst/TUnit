@@ -33,306 +33,246 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-     Name = "AggregateBy_HasExpectedOutput",
-     GenericTypeCount = 3,
-     ReturnType = typeof(void),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData")
-{
-    
-}, 
-new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<int>>
-    {
-        Name = "source",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Func<int, int>>
-    {
-        Name = "keySelector",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Func<int, int>>
-    {
-        Name = "seedSelector",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Func<int, int, int>>
-    {
-        Name = "func",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEqualityComparer<int>>
-    {
-        Name = "comparer",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>>
-    {
-        Name = "expected",
-        Attributes = 
-        [
-            
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "GenericMethodTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "GenericMethodTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
+			{
+				Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+				Name = "AggregateBy_HasExpectedOutput",
+				GenericTypeCount = 3,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData"),
+					new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
+				],
+				Parameters = 
+				[
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					{
+						Name = "source",
+						Attributes = [],
+					},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					{
+						Name = "keySelector",
+						Attributes = [],
+					},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					{
+						Name = "seedSelector",
+						Attributes = [],
+					},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					{
+						Name = "func",
+						Attributes = [],
+					},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					{
+						Name = "comparer",
+						Attributes = [],
+					},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					{
+						Name = "expected",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "GenericMethodTests",
+						Attributes = [],
+					}),
+					Name = "GenericMethodTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
 };
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData())
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData())
+				{
+					testMethodDataIndex++;
+
+					var methodData = methodDataAccessor();
+					var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Collections.Generic.IEnumerable<int>, global::System.Func<int, int>, global::System.Func<int, int>, global::System.Func<int, int, int>, global::System.Collections.Generic.IEqualityComparer<int>, global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>>(methodData);
+					global::System.Collections.Generic.IEnumerable<int> methodArg = methodArgTuples.Item1;
+					global::System.Func<int, int> methodArg1 = methodArgTuples.Item2;
+					global::System.Func<int, int> methodArg2 = methodArgTuples.Item3;
+					global::System.Func<int, int, int> methodArg3 = methodArgTuples.Item4;
+					global::System.Collections.Generic.IEqualityComparer<int> methodArg4 = methodArgTuples.Item5;
+					global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>> methodArg5 = methodArgTuples.Item6;
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
+					new global::TUnit.TestProject.GenericMethodTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.GenericMethodTests>
+					{
+						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AggregateBy_HasExpectedOutput(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5)),
+						TestFilePath = @"",
+						TestLineNumber = 5,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
 			{
-				testMethodDataIndex++;
-
-				var methodData = methodDataAccessor();
-				var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Collections.Generic.IEnumerable<int>, global::System.Func<int, int>, global::System.Func<int, int>, global::System.Func<int, int, int>, global::System.Collections.Generic.IEqualityComparer<int>, global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>>(methodData);
-				global::System.Collections.Generic.IEnumerable<int> methodArg = methodArgTuples.Item1;
-				global::System.Func<int, int> methodArg1 = methodArgTuples.Item2;
-				global::System.Func<int, int> methodArg2 = methodArgTuples.Item3;
-				global::System.Func<int, int, int> methodArg3 = methodArgTuples.Item4;
-				global::System.Collections.Generic.IEqualityComparer<int> methodArg4 = methodArgTuples.Item5;
-				global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>> methodArg5 = methodArgTuples.Item6;
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
-				new global::TUnit.TestProject.GenericMethodTests()
-				, sessionId, testBuilderContext);
-
-				var resettableClassFactory = resettableClassFactoryDelegate();
-
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.GenericMethodTests>
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AggregateBy_HasExpectedOutput(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5)),
+					TestClass = typeof(global::TUnit.TestProject.GenericMethodTests),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<int>), typeof(global::System.Func<int, int>), typeof(global::System.Func<int, int>), typeof(global::System.Func<int, int, int>), typeof(global::System.Collections.Generic.IEqualityComparer<int>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>)],
+					TestName = "AggregateBy_HasExpectedOutput",
 					TestFilePath = @"",
 					TestLineNumber = 5,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
+		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
 		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
+			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			var classDataIndex = 0;
+			var testMethodDataIndex = 0;
+			try
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
-				TestClass = typeof(global::TUnit.TestProject.GenericMethodTests),
-				ReturnType = typeof(void),
-				ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<int>), typeof(global::System.Func<int, int>), typeof(global::System.Func<int, int>), typeof(global::System.Func<int, int, int>), typeof(global::System.Collections.Generic.IEqualityComparer<int>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>)],
-				TestName = "AggregateBy_HasExpectedOutput",
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-     Name = "AggregateBy_HasExpectedOutput",
-     GenericTypeCount = 3,
-     ReturnType = typeof(void),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData")
-{
-    
-}, 
-new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
-    {
-        Name = "source",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Func<string, string>>
-    {
-        Name = "keySelector",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Func<string, string>>
-    {
-        Name = "seedSelector",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Func<string, string, string>>
-    {
-        Name = "func",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEqualityComparer<string>>
-    {
-        Name = "comparer",
-        Attributes = 
-        [
-            
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>>
-    {
-        Name = "expected",
-        Attributes = 
-        [
-            
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "GenericMethodTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "GenericMethodTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
+				var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+				{
+					Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+					Name = "AggregateBy_HasExpectedOutput",
+					GenericTypeCount = 3,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.TestAttribute(),
+						new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData"),
+						new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
+					],
+					Parameters = 
+					[
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						{
+							Name = "source",
+							Attributes = [],
+						},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						{
+							Name = "keySelector",
+							Attributes = [],
+						},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						{
+							Name = "seedSelector",
+							Attributes = [],
+						},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						{
+							Name = "func",
+							Attributes = [],
+						},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						{
+							Name = "comparer",
+							Attributes = [],
+						},
+new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						{
+							Name = "expected",
+							Attributes = [],
+						},
+					],
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+					{
+						Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+						{
+							Name = "GenericMethodTests",
+							Attributes = [],
+						}),
+						Name = "GenericMethodTests",
+						Namespace = "TUnit.TestProject",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
 };
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData())
-			{
-				testMethodDataIndex++;
+					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData())
+					{
+						testMethodDataIndex++;
 
-				var methodData = methodDataAccessor();
-				var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Collections.Generic.IEnumerable<string>, global::System.Func<string, string>, global::System.Func<string, string>, global::System.Func<string, string, string>, global::System.Collections.Generic.IEqualityComparer<string>, global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>>(methodData);
-				global::System.Collections.Generic.IEnumerable<string> methodArg = methodArgTuples.Item1;
-				global::System.Func<string, string> methodArg1 = methodArgTuples.Item2;
-				global::System.Func<string, string> methodArg2 = methodArgTuples.Item3;
-				global::System.Func<string, string, string> methodArg3 = methodArgTuples.Item4;
-				global::System.Collections.Generic.IEqualityComparer<string> methodArg4 = methodArgTuples.Item5;
-				global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>> methodArg5 = methodArgTuples.Item6;
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
-				new global::TUnit.TestProject.GenericMethodTests()
-				, sessionId, testBuilderContext);
+						var methodData = methodDataAccessor();
+						var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Collections.Generic.IEnumerable<string>, global::System.Func<string, string>, global::System.Func<string, string>, global::System.Func<string, string, string>, global::System.Collections.Generic.IEqualityComparer<string>, global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>>(methodData);
+						global::System.Collections.Generic.IEnumerable<string> methodArg = methodArgTuples.Item1;
+						global::System.Func<string, string> methodArg1 = methodArgTuples.Item2;
+						global::System.Func<string, string> methodArg2 = methodArgTuples.Item3;
+						global::System.Func<string, string, string> methodArg3 = methodArgTuples.Item4;
+						global::System.Collections.Generic.IEqualityComparer<string> methodArg4 = methodArgTuples.Item5;
+						global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>> methodArg5 = methodArgTuples.Item6;
+						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
+						new global::TUnit.TestProject.GenericMethodTests()
+						, sessionId, testBuilderContext);
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+						var resettableClassFactory = resettableClassFactoryDelegate();
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.GenericMethodTests>
+						nodes.Add(new TestMetadata<global::TUnit.TestProject.GenericMethodTests>
+						{
+							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
+							TestClassArguments = [],
+							TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5],
+							TestClassProperties = [],
+							CurrentRepeatAttempt = 0,
+							RepeatLimit = 0,
+							ResettableClassFactory = resettableClassFactory,
+							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AggregateBy_HasExpectedOutput(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5)),
+							TestFilePath = @"",
+							TestLineNumber = 5,
+							TestMethod = testInformation,
+							TestBuilderContext = testBuilderContext,
+						});
+						resettableClassFactory = resettableClassFactoryDelegate();
+						testBuilderContext = new();
+						testBuilderContextAccessor.Current = testBuilderContext;
+					}
+				}
+				catch (global::System.Exception exception)
 				{
-					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AggregateBy_HasExpectedOutput(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5)),
-					TestFilePath = @"",
-					TestLineNumber = 5,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
+					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					{
+						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
+						TestClass = typeof(global::TUnit.TestProject.GenericMethodTests),
+						ReturnType = typeof(void),
+						ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<string>), typeof(global::System.Func<string, string>), typeof(global::System.Func<string, string>), typeof(global::System.Func<string, string, string>), typeof(global::System.Collections.Generic.IEqualityComparer<string>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>)],
+						TestName = "AggregateBy_HasExpectedOutput",
+						TestFilePath = @"",
+						TestLineNumber = 5,
+						Exception = exception,
+					});
+				}
+				return nodes;
 			}
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
-				TestClass = typeof(global::TUnit.TestProject.GenericMethodTests),
-				ReturnType = typeof(void),
-				ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<string>), typeof(global::System.Func<string, string>), typeof(global::System.Func<string, string>), typeof(global::System.Func<string, string, string>), typeof(global::System.Collections.Generic.IEqualityComparer<string>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>)],
-				TestName = "AggregateBy_HasExpectedOutput",
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-}
 
 ]
