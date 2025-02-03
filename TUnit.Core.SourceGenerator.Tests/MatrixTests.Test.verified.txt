@@ -29,177 +29,150 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "MatrixTest_One",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "str",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute("A", "B", "C", "D")
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2, 3)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(true, false)
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "str",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute("A", "B", "C", "D")
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2, 3)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(true, false)
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "MatrixTest_One",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "str",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute("A", "B", "C", "D")
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "i",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "boolean",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(true, false)
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
-				int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
-				bool methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[2]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "str",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute("A", "B", "C", "D")
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "i",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(1, 2, 3)
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "boolean",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(true, false)
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
+					int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
+					bool methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[2]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg, methodArg1, methodArg2],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest_One(methodArg, methodArg1, methodArg2)),
+						TestFilePath = @"",
+						TestLineNumber = 7,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1, methodArg2],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest_One(methodArg, methodArg1, methodArg2)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
+					TestName = "MatrixTest_One",
 					TestFilePath = @"",
 					TestLineNumber = 7,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
-				TestName = "MatrixTest_One",
-				TestFilePath = @"",
-				TestLineNumber = 7,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -232,200 +205,167 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "MatrixTest_Two",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i2",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2, 3)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i3",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2, 3, 4)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(true, false)
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i2",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2, 3)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i3",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2, 3, 4)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(true, false)
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "MatrixTest_Two",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "i",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(1, 2)
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "i2",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "i3",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(1, 2, 3, 4)
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "boolean",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(true, false)
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-				int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
-				int methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[2]);
-				bool methodArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[3]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "i",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(1, 2)
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "i2",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(1, 2, 3)
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "i3",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(1, 2, 3, 4)
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "boolean",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(true, false)
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
+					int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
+					int methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[2]);
+					bool methodArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[3]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest_Two(methodArg, methodArg1, methodArg2, methodArg3)),
+						TestFilePath = @"",
+						TestLineNumber = 17,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest_Two(methodArg, methodArg1, methodArg2, methodArg3)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(int), typeof(int), typeof(int), typeof(bool)],
+					TestName = "MatrixTest_Two",
 					TestFilePath = @"",
 					TestLineNumber = 17,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(int), typeof(int), typeof(int), typeof(bool)],
-				TestName = "MatrixTest_Two",
-				TestFilePath = @"",
-				TestLineNumber = 17,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -458,154 +398,133 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "MatrixTest_Enum",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
-    {
-        Name = "testEnum",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(-1, global::TUnit.TestProject.TestEnum.One)
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "i",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(1, 2)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
-    {
-        Name = "testEnum",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(-1, global::TUnit.TestProject.TestEnum.One)
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "MatrixTest_Enum",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "i",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(1, 2)
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
+					{
+						Name = "testEnum",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(-1, global::TUnit.TestProject.TestEnum.One)
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-				global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(methodArgGeneratedData[1]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "i",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(1, 2)
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
+						{
+							Name = "testEnum",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(-1, global::TUnit.TestProject.TestEnum.One)
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
+					global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(methodArgGeneratedData[1]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg, methodArg1],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest_Enum(methodArg, methodArg1)),
+						TestFilePath = @"",
+						TestLineNumber = 28,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest_Enum(methodArg, methodArg1)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(int), typeof(global::TUnit.TestProject.TestEnum)],
+					TestName = "MatrixTest_Enum",
 					TestFilePath = @"",
 					TestLineNumber = 28,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(int), typeof(global::TUnit.TestProject.TestEnum)],
-				TestName = "MatrixTest_Enum",
-				TestFilePath = @"",
-				TestLineNumber = 28,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -638,148 +557,127 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "AutoGenerateBools",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "str",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute("A", "B", "C")
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "str",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute("A", "B", "C")
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "AutoGenerateBools",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "str",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute("A", "B", "C")
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "boolean",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
-				bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "str",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute("A", "B", "C")
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "boolean",
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
+					bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg, methodArg1],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AutoGenerateBools(methodArg, methodArg1)),
+						TestFilePath = @"",
+						TestLineNumber = 37,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AutoGenerateBools(methodArg, methodArg1)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(string), typeof(bool)],
+					TestName = "AutoGenerateBools",
 					TestFilePath = @"",
 					TestLineNumber = 37,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(string), typeof(bool)],
-				TestName = "AutoGenerateBools",
-				TestFilePath = @"",
-				TestLineNumber = 37,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -812,154 +710,133 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "AutoGenerateBools2",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "str",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute("A", "B", "C")
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute()
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "str",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute("A", "B", "C")
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute()
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "AutoGenerateBools2",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "str",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute("A", "B", "C")
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "boolean",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute()
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
-				bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "str",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute("A", "B", "C")
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "boolean",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute()
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
+					bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg, methodArg1],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AutoGenerateBools2(methodArg, methodArg1)),
+						TestFilePath = @"",
+						TestLineNumber = 46,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AutoGenerateBools2(methodArg, methodArg1)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(string), typeof(bool)],
+					TestName = "AutoGenerateBools2",
 					TestFilePath = @"",
 					TestLineNumber = 46,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(string), typeof(bool)],
-				TestName = "AutoGenerateBools2",
-				TestFilePath = @"",
-				TestLineNumber = 46,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -992,154 +869,133 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "ImplicitConversion",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>
-    {
-        Name = "enum",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(global::TUnit.TestProject.TestEnum.One, Two)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute()
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>
-    {
-        Name = "enum",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute(global::TUnit.TestProject.TestEnum.One, Two)
-{
-    
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute()
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "ImplicitConversion",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>
+					{
+						Name = "enum",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute(global::TUnit.TestProject.TestEnum.One, Two)
+						],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "boolean",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute()
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				OneOf<global::TUnit.TestProject.TestEnum, TestEnum2> methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>(methodArgGeneratedData[0]);
-				bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>
+						{
+							Name = "enum",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute(global::TUnit.TestProject.TestEnum.One, Two)
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "boolean",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute()
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					OneOf<global::TUnit.TestProject.TestEnum, TestEnum2> methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>(methodArgGeneratedData[0]);
+					bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg, methodArg1],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ImplicitConversion(methodArg, methodArg1)),
+						TestFilePath = @"",
+						TestLineNumber = 55,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ImplicitConversion(methodArg, methodArg1)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool)],
+					TestName = "ImplicitConversion",
 					TestFilePath = @"",
 					TestLineNumber = 55,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool)],
-				TestName = "ImplicitConversion",
-				TestFilePath = @"",
-				TestLineNumber = 55,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -1172,311 +1028,281 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "ExcludingAutoGeneratedMatrixValues",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MatrixTests.CountToTenEnum>
-    {
-        Name = "enum",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute<global::TUnit.TestProject.MatrixTests.CountToTenEnum>()
-{
-    Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven]
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute()
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MatrixTests.CountToTenEnum>
-    {
-        Name = "enum",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute<global::TUnit.TestProject.MatrixTests.CountToTenEnum>()
-{
-    Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven]
-}
-        ]
-    }, 
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-    {
-        Name = "boolean",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixAttribute()
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "ExcludingAutoGeneratedMatrixValues",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MatrixTests.CountToTenEnum>
+					{
+						Name = "enum",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixAttribute<global::TUnit.TestProject.MatrixTests.CountToTenEnum>()
+							{
+								Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven],
+}
+							],
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "boolean",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixAttribute()
+							],
+						},
+					],
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+					{
+						Type = typeof(global::TUnit.TestProject.MatrixTests),
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+						{
+							Name = "MatrixTests",
+							Attributes = [],
+						}),
+						Name = "MatrixTests",
+						Namespace = "TUnit.TestProject",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				global::TUnit.TestProject.MatrixTests.CountToTenEnum methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MatrixTests.CountToTenEnum>(methodArgGeneratedData[0]);
-				bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+					{
+						Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+						TestBuilderContext = testBuilderContextAccessor,
+						TestInformation = testInformation,
+						MembersToGenerate = 
+						[
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MatrixTests.CountToTenEnum>
+							{
+								Name = "enum",
+								Attributes = 
+								[
+									new global::TUnit.Core.MatrixAttribute<global::TUnit.TestProject.MatrixTests.CountToTenEnum>()
+									{
+										Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven],
+}
+									],
+								},
+								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+								{
+									Name = "boolean",
+									Attributes = 
+									[
+										new global::TUnit.Core.MatrixAttribute()
+									],
+								},
+							],
+							TestSessionId = sessionId,
+						};
+						var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+						{
+							testMethodDataIndex++;
+
+							var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+							global::TUnit.TestProject.MatrixTests.CountToTenEnum methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MatrixTests.CountToTenEnum>(methodArgGeneratedData[0]);
+							bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+							new global::TUnit.TestProject.MatrixTests()
+							, sessionId, testBuilderContext);
+
+							var resettableClassFactory = resettableClassFactoryDelegate();
+
+							nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+							{
+								TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
+								TestClassArguments = [],
+								TestMethodArguments = [methodArg, methodArg1],
+								TestClassProperties = [],
+								CurrentRepeatAttempt = 0,
+								RepeatLimit = 0,
+								ResettableClassFactory = resettableClassFactory,
+								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ExcludingAutoGeneratedMatrixValues(methodArg, methodArg1)),
+								TestFilePath = @"",
+								TestLineNumber = 64,
+								TestMethod = testInformation,
+								TestBuilderContext = testBuilderContext,
+							});
+							resettableClassFactory = resettableClassFactoryDelegate();
+							testBuilderContext = new();
+							testBuilderContextAccessor.Current = testBuilderContext;
+						}
+					}
+					catch (global::System.Exception exception)
+					{
+						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						{
+							TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
+							TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+							ReturnType = typeof(global::System.Threading.Tasks.Task),
+							ParameterTypeFullNames = [typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool)],
+							TestName = "ExcludingAutoGeneratedMatrixValues",
+							TestFilePath = @"",
+							TestLineNumber = 64,
+							Exception = exception,
+						});
+					}
+					return nodes;
+				}
+			}
+
+  
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
+	}
+	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	{
+		return Tests0(sessionId);
+	}
+	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "Method1",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "item",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg, methodArg1],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ExcludingAutoGeneratedMatrixValues(methodArg, methodArg1)),
-					TestFilePath = @"",
-					TestLineNumber = 64,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "item",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method1(int):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method1(methodArg)),
+						TestFilePath = @"",
+						TestLineNumber = 91,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
 			}
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
+			catch (global::System.Exception exception)
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool)],
-				TestName = "ExcludingAutoGeneratedMatrixValues",
-				TestFilePath = @"",
-				TestLineNumber = 64,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-}
-
-  
-// <auto-generated/>
-#pragma warning disable
-using global::System.Linq;
-using global::System.Reflection;
-using global::TUnit.Core;
-using global::TUnit.Core.Extensions;
-
-namespace TUnit.SourceGenerated;
-
-[global::System.Diagnostics.StackTraceHidden]
-[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
-{
-	[global::System.Runtime.CompilerServices.ModuleInitializer]
-	public static void Initialise()
-	{
-		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
-	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
-	{
-		return Tests0(sessionId);
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "Method1",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "item",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "item",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-			{
-				testMethodDataIndex++;
-
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
-
-				var resettableClassFactory = resettableClassFactoryDelegate();
-
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method1(int):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method1(methodArg)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(int)],
+					TestName = "Method1",
 					TestFilePath = @"",
 					TestLineNumber = 91,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method1(int):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(int)],
-				TestName = "Method1",
-				TestFilePath = @"",
-				TestLineNumber = 91,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -1509,131 +1335,116 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "Method2",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "item",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ArrayMethod")
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "item",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ArrayMethod")
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "Method2",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "item",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ArrayMethod")
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "item",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ArrayMethod")
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method2(int):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method2(methodArg)),
+						TestFilePath = @"",
+						TestLineNumber = 99,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method2(int):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method2(methodArg)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(int)],
+					TestName = "Method2",
 					TestFilePath = @"",
 					TestLineNumber = 99,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method2(int):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(int)],
-				TestName = "Method2",
-				TestFilePath = @"",
-				TestLineNumber = 99,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -1666,131 +1477,116 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "Method3",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "item",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("IntMethod")
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "item",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("IntMethod")
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "Method3",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "item",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("IntMethod")
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "item",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("IntMethod")
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method3(int):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method3(methodArg)),
+						TestFilePath = @"",
+						TestLineNumber = 107,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method3(int):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method3(methodArg)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(int)],
+					TestName = "Method3",
 					TestFilePath = @"",
 					TestLineNumber = 107,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method3(int):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(int)],
-				TestName = "Method3",
-				TestFilePath = @"",
-				TestLineNumber = 107,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -1823,130 +1619,115 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Name = "Method4",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "item",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ObjectMethod")
-{
-    
-}
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "MatrixTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "MatrixTests",
-     Namespace = "TUnit.TestProject",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
-};
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-{
-   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestInformation = testInformation,
-   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-    {
-        Name = "item",
-        Attributes = 
-        [
-            new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ObjectMethod")
-{
-    
-}
-        ]
-    }],
-   TestSessionId = sessionId,
-};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
-{
-    
-};
-
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				testMethodDataIndex++;
+				Type = typeof(global::TUnit.TestProject.MatrixTests),
+				Name = "Method4",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MatrixDataSourceAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "item",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ObjectMethod")
+						],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.MatrixTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MatrixTests",
+						Attributes = [],
+					}),
+					Name = "MatrixTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-				new global::TUnit.TestProject.MatrixTests()
-				, sessionId, testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "item",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ObjectMethod")
+							],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
-				var resettableClassFactory = resettableClassFactoryDelegate();
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
+					{
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method4(int):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method4(methodArg)),
+						TestFilePath = @"",
+						TestLineNumber = 115,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method4(int):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method4(methodArg)),
+					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [typeof(int)],
+					TestName = "Method4",
 					TestFilePath = @"",
 					TestLineNumber = 115,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					Exception = exception,
 				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
 			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method4(int):0",
-				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [typeof(int)],
-				TestName = "Method4",
-				TestFilePath = @"",
-				TestLineNumber = 115,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
 ]

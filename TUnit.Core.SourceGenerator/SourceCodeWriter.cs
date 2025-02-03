@@ -13,6 +13,11 @@ public class SourceCodeWriter : IDisposable
         _stringBuilder.AppendLine();
     }
 
+    public void Write([StringSyntax("c#")] string value)
+    {
+        _stringBuilder.Append(value);
+    }
+
     public void WriteTabs()
     {
         for (var i = 0; i < _tabLevel; i++)
@@ -20,7 +25,7 @@ public class SourceCodeWriter : IDisposable
             _stringBuilder.Append('\t');
         }
     }
-    
+
     public void WriteLine([StringSyntax("c#")] string value)
     {
         if (string.IsNullOrEmpty(value))

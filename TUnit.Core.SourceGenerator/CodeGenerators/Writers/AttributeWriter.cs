@@ -8,24 +8,49 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public class AttributeWriter
 {
-    public static string[] WriteAttributes(GeneratorAttributeSyntaxContext context, ImmutableArray<AttributeData> attributeDatas)
+    public static void WriteAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        ImmutableArray<AttributeData> attributeDatas)
     {
-        return attributeDatas
-            .Where(x => x.AttributeClass?.ContainingAssembly?.Name != "System.Runtime")
-            .Select(x => WriteAttribute(context, x))
-            .Where(x => !string.IsNullOrEmpty(x))
-            .ToArray();
-    }
-
-    public static string WriteAttribute(GeneratorAttributeSyntaxContext context, AttributeData attributeData)
-    {
-        if (attributeData.ApplicationSyntaxReference is null
-            || attributeData.AttributeClass?.ContainingAssembly?.Name == "System.Runtime")
+        if(attributeDatas.Length == 0)
         {
-            return string.Empty;
+            sourceCodeWriter.Write("[],");
+            sourceCodeWriter.WriteLine();
+            return;
         }
 
-        var syntax = attributeData.ApplicationSyntaxReference.GetSyntax();
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine("[");
+        for (var index = 0; index < attributeDatas.Length; index++)
+        {
+            sourceCodeWriter.WriteTabs();
+            var attributeData = attributeDatas[index];
+            
+            if(attributeData.ApplicationSyntaxReference is null)
+            {
+                continue;
+            }
+            
+            WriteAttribute(sourceCodeWriter, context, attributeData);
+            
+            if (index != attributeDatas.Length - 1)
+            {
+                sourceCodeWriter.Write(",");
+            }
+            
+            sourceCodeWriter.WriteLine();
+        }
+        sourceCodeWriter.WriteLine("],");
+    }
+
+    public static void WriteAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        AttributeData attributeData)
+    {
+        var syntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
+
+        if (syntax is null)
+        {
+            return;
+        }
 
         var arguments = syntax.ChildNodes()
             .OfType<AttributeArgumentListSyntax>()
@@ -40,14 +65,23 @@ public class AttributeWriter
 
         var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(context, x)));
 
-        var formattedProperties = string.Join(",\r\n", properties.Select(x => FormatProperty(context, x)));
+        var formattedProperties = properties.Select(x => FormatProperty(context, x)).ToArray();
         
-        return $$"""
-                 new {{attributeName}}({{formattedConstructorArgs}})
-                 {
-                     {{formattedProperties}}
-                 }
-                 """;
+        sourceCodeWriter.Write($"new {attributeName}({formattedConstructorArgs})");
+       
+        if (formattedProperties.Length == 0)
+        {
+            return;
+        }
+        
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine("{");
+        foreach (var property in formattedProperties)
+        {
+            sourceCodeWriter.WriteLine($"{property},");
+        }
+        
+        sourceCodeWriter.Write("}");
     }
 
     private static string FormatConstructorArgument(GeneratorAttributeSyntaxContext context, AttributeArgumentSyntax attributeArgumentSyntax)

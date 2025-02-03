@@ -34,322 +34,268 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-     Name = "SomeTest",
-     GenericTypeCount = 0,
-     ReturnType = typeof(void),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("A")
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("B")
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("C")
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "value",
-        Attributes = 
-        [
-            
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "EnumMemberNamesTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "EnumMemberNamesTests",
-     Namespace = "TUnit.TestProject.Bugs._1432",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
+			{
+				Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+				Name = "SomeTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.ArgumentsAttribute("A"),
+					new global::TUnit.Core.ArgumentsAttribute("B"),
+					new global::TUnit.Core.ArgumentsAttribute("C")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "EnumMemberNamesTests",
+						Attributes = [],
+					}),
+					Name = "EnumMemberNamesTests",
+					Namespace = "TUnit.TestProject.Bugs._1432",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
 };
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			string methodArg = "A";
+				string methodArg = "A";
 
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
-			new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
-			, sessionId, testBuilderContext);
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
+				new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
+				, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+				var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
+				{
+					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArg],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
+					TestFilePath = @"",
+					TestLineNumber = 5,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+					TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [typeof(string)],
+					TestName = "SomeTest",
+					TestFilePath = @"",
+					TestLineNumber = 5,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
+		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
 		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
+			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			var classDataIndex = 0;
+			var testMethodDataIndex = 0;
+			try
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = typeof(void),
-				ParameterTypeFullNames = [typeof(string)],
-				TestName = "SomeTest",
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-     Name = "SomeTest",
-     GenericTypeCount = 0,
-     ReturnType = typeof(void),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("A")
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("B")
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("C")
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "value",
-        Attributes = 
-        [
-            
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "EnumMemberNamesTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "EnumMemberNamesTests",
-     Namespace = "TUnit.TestProject.Bugs._1432",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
+				var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+					Name = "SomeTest",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.TestAttribute(),
+						new global::TUnit.Core.ArgumentsAttribute("A"),
+						new global::TUnit.Core.ArgumentsAttribute("B"),
+						new global::TUnit.Core.ArgumentsAttribute("C")
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value",
+							Attributes = [],
+						},
+					],
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+					{
+						Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+						{
+							Name = "EnumMemberNamesTests",
+							Attributes = [],
+						}),
+						Name = "EnumMemberNamesTests",
+						Namespace = "TUnit.TestProject.Bugs._1432",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
 };
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			string methodArg = "B";
+					string methodArg = "B";
 
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
-			new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
-			, sessionId, testBuilderContext);
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
+					new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
+					, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+					var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
+					{
+						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+						TestClassArguments = [],
+						TestMethodArguments = [methodArg],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
+						TestFilePath = @"",
+						TestLineNumber = 5,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+				catch (global::System.Exception exception)
+				{
+					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					{
+						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+						TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+						ReturnType = typeof(void),
+						ParameterTypeFullNames = [typeof(string)],
+						TestName = "SomeTest",
+						TestFilePath = @"",
+						TestLineNumber = 5,
+						Exception = exception,
+					});
+				}
+				return nodes;
+			}
+			private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = typeof(void),
-				ParameterTypeFullNames = [typeof(string)],
-				TestName = "SomeTest",
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-     Name = "SomeTest",
-     GenericTypeCount = 0,
-     ReturnType = typeof(void),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("A")
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("B")
-{
-    
-}, 
-new global::TUnit.Core.ArgumentsAttribute("C")
-{
-    
-}
-     ],  
-     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-    {
-        Name = "value",
-        Attributes = 
-        [
-            
-        ]
-    }],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "EnumMemberNamesTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "EnumMemberNamesTests",
-     Namespace = "TUnit.TestProject.Bugs._1432",
-     Attributes = 
-     [
-         
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
+				global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+				var classDataIndex = 0;
+				var testMethodDataIndex = 0;
+				try
+				{
+					var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+					{
+						Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+						Name = "SomeTest",
+						GenericTypeCount = 0,
+						ReturnType = typeof(void),
+						Attributes = 
+						[
+							new global::TUnit.Core.TestAttribute(),
+							new global::TUnit.Core.ArgumentsAttribute("A"),
+							new global::TUnit.Core.ArgumentsAttribute("B"),
+							new global::TUnit.Core.ArgumentsAttribute("C")
+						],
+						Parameters = 
+						[
+							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+							{
+								Name = "value",
+								Attributes = [],
+							},
+						],
+						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+						{
+							Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+							{
+								Name = "EnumMemberNamesTests",
+								Attributes = [],
+							}),
+							Name = "EnumMemberNamesTests",
+							Namespace = "TUnit.TestProject.Bugs._1432",
+							Attributes = [],
+							Parameters = [],
+							Properties = [],
+						}),
 };
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			string methodArg = "C";
+						string methodArg = "C";
 
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
-			new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
-			, sessionId, testBuilderContext);
+						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
+						new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
+						, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+						var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
-			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = typeof(void),
-				ParameterTypeFullNames = [typeof(string)],
-				TestName = "SomeTest",
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-}
+						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
+						{
+							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+							TestClassArguments = [],
+							TestMethodArguments = [methodArg],
+							TestClassProperties = [],
+							CurrentRepeatAttempt = 0,
+							RepeatLimit = 0,
+							ResettableClassFactory = resettableClassFactory,
+							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
+							TestFilePath = @"",
+							TestLineNumber = 5,
+							TestMethod = testInformation,
+							TestBuilderContext = testBuilderContext,
+						});
+						resettableClassFactory = resettableClassFactoryDelegate();
+						testBuilderContext = new();
+						testBuilderContextAccessor.Current = testBuilderContext;
+					}
+					catch (global::System.Exception exception)
+					{
+						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						{
+							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+							TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
+							ReturnType = typeof(void),
+							ParameterTypeFullNames = [typeof(string)],
+							TestName = "SomeTest",
+							TestFilePath = @"",
+							TestLineNumber = 5,
+							Exception = exception,
+						});
+					}
+					return nodes;
+				}
+			}
 
 ]

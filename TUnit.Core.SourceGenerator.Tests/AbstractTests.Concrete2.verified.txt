@@ -29,89 +29,80 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-     Name = "SecondTest",
-     GenericTypeCount = 0,
-     ReturnType = typeof(void),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "AbstractTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "ConcreteClass2",
-     Namespace = "TUnit.TestProject.AbstractTests",
-     Attributes = 
-     [
-         new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
+			{
+				Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+				Name = "SecondTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "AbstractTests",
+						Attributes = [],
+					}),
+					Name = "ConcreteClass2",
+					Namespace = "TUnit.TestProject.AbstractTests",
+					Attributes = 
+					[
+						new global::TUnit.Core.InheritsTestsAttribute()
+					],
+					Parameters = [],
+					Properties = [],
+				}),
 };
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 
-			new global::TUnit.TestProject.AbstractTests.ConcreteClass2()
-			, sessionId, testBuilderContext);
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 
+				new global::TUnit.TestProject.AbstractTests.ConcreteClass2()
+				, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+				var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
+				{
+					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest:0",
+					TestClassArguments = [],
+					TestMethodArguments = [],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SecondTest()),
+					TestFilePath = @"",
+					TestLineNumber = 11,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest:0",
-				TestClassArguments = [],
-				TestMethodArguments = [],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SecondTest()),
-				TestFilePath = @"",
-				TestLineNumber = 11,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest:0",
+					TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [],
+					TestName = "SecondTest",
+					TestFilePath = @"",
+					TestLineNumber = 11,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest:0",
-				TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-				ReturnType = typeof(void),
-				ParameterTypeFullNames = [],
-				TestName = "SecondTest",
-				TestFilePath = @"",
-				TestLineNumber = 11,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -144,89 +135,80 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-     Name = "AssertClassName",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "AbstractTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "ConcreteClass2",
-     Namespace = "TUnit.TestProject.AbstractTests",
-     Attributes = 
-     [
-         new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
+			{
+				Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+				Name = "AssertClassName",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "AbstractTests",
+						Attributes = [],
+					}),
+					Name = "ConcreteClass2",
+					Namespace = "TUnit.TestProject.AbstractTests",
+					Attributes = 
+					[
+						new global::TUnit.Core.InheritsTestsAttribute()
+					],
+					Parameters = [],
+					Properties = [],
+				}),
 };
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 
-			new global::TUnit.TestProject.AbstractTests.ConcreteClass2()
-			, sessionId, testBuilderContext);
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 
+				new global::TUnit.TestProject.AbstractTests.ConcreteClass2()
+				, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+				var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
+				{
+					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName:0",
+					TestClassArguments = [],
+					TestMethodArguments = [],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AssertClassName()),
+					TestFilePath = @"",
+					TestLineNumber = 8,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName:0",
-				TestClassArguments = [],
-				TestMethodArguments = [],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AssertClassName()),
-				TestFilePath = @"",
-				TestLineNumber = 8,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName:0",
+					TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [],
+					TestName = "AssertClassName",
+					TestFilePath = @"",
+					TestLineNumber = 8,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName:0",
-				TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [],
-				TestName = "AssertClassName",
-				TestFilePath = @"",
-				TestLineNumber = 8,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -259,88 +241,79 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
-     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-     Name = "AssertClassName",
-     GenericTypeCount = 0,
-     ReturnType = typeof(global::System.Threading.Tasks.Task),
-     Attributes = 
-     [
-         new global::TUnit.Core.TestAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass1", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{    
-     Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
-     Name = "AbstractTests",
-     Attributes = 
-     [
-         
-     ],  
-}),
-     Name = "ConcreteClass1",
-     Namespace = "TUnit.TestProject.AbstractTests",
-     Attributes = 
-     [
-         new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-}
-     ],  
-     Parameters = [],
-     Properties = [],
-}),
+			{
+				Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
+				Name = "AssertClassName",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass1", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "AbstractTests",
+						Attributes = [],
+					}),
+					Name = "ConcreteClass1",
+					Namespace = "TUnit.TestProject.AbstractTests",
+					Attributes = 
+					[
+						new global::TUnit.Core.InheritsTestsAttribute()
+					],
+					Parameters = [],
+					Properties = [],
+				}),
 };
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => 
-			new global::TUnit.TestProject.AbstractTests.ConcreteClass1()
-			, sessionId, testBuilderContext);
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => 
+				new global::TUnit.TestProject.AbstractTests.ConcreteClass1()
+				, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+				var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass1>
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass1>
+				{
+					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0",
+					TestClassArguments = [],
+					TestMethodArguments = [],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AssertClassName()),
+					TestFilePath = @"",
+					TestLineNumber = 8,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0",
-				TestClassArguments = [],
-				TestMethodArguments = [],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AssertClassName()),
-				TestFilePath = @"",
-				TestLineNumber = 8,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0",
+					TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					ParameterTypeFullNames = [],
+					TestName = "AssertClassName",
+					TestFilePath = @"",
+					TestLineNumber = 8,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0",
-				TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-				ReturnType = typeof(global::System.Threading.Tasks.Task),
-				ParameterTypeFullNames = [],
-				TestName = "AssertClassName",
-				TestFilePath = @"",
-				TestLineNumber = 8,
-				Exception = exception,
-			});
-		}
-		return nodes;
 	}
-}
 
 ]
