@@ -715,7 +715,6 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 				],
 				ClassAttributes = [],
 				AssemblyAttributes = [],
-
 			},
 		];
 	}
@@ -811,7 +810,6 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 				],
 				ClassAttributes = [],
 				AssemblyAttributes = [],
-
 			},
 		];
 	}
@@ -907,7 +905,6 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 				],
 				ClassAttributes = [],
 				AssemblyAttributes = [],
-
 			},
 		];
 	}
@@ -1003,7 +1000,6 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 				],
 				ClassAttributes = [],
 				AssemblyAttributes = [],
-
 			},
 		];
 	}
@@ -1104,7 +1100,6 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 				],
 				ClassAttributes = [],
 				AssemblyAttributes = [],
-
 			},
 		];
 	}
@@ -1200,7 +1195,6 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 				],
 				ClassAttributes = [],
 				AssemblyAttributes = [],
-
 			},
 		];
 	}
@@ -1301,7 +1295,6 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 				],
 				ClassAttributes = [],
 				AssemblyAttributes = [],
-
 			},
 		];
 	}
