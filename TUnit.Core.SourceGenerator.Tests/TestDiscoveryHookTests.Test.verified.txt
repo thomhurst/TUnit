@@ -68,8 +68,8 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 }
 							],
 							ClassAttributes = [],
-														AssemblyAttributes = 
-[],
+							AssemblyAttributes = [],
+
 						},
 					];
 				}
@@ -151,8 +151,8 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
 					],
 					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
+					AssemblyAttributes = [],
+
 				},
 			];
 		}

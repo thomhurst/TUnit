@@ -11,14 +11,14 @@ public static class ClassHooksWriter
     { 
         if (model.HookLocationType == HookLocationType.Before)
         {
-            sourceBuilder.WriteLine("new BeforeClassHookMethod");
+            sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.BeforeClassHookMethod");
         }
         else
         {
-            sourceBuilder.WriteLine("new AfterClassHookMethod");
+            sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.AfterClassHookMethod");
         }
 
-        sourceBuilder.WriteLine("{ ");
+        sourceBuilder.WriteLine("{");
         sourceBuilder.WriteTabs();
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
@@ -49,7 +49,6 @@ public static class ClassHooksWriter
         sourceBuilder.Write("AssemblyAttributes = ");
         AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
 
-        sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("},");
     }
 

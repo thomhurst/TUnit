@@ -54,7 +54,6 @@ public static class AssemblyHooksWriter
         sourceBuilder.Write("AssemblyAttributes = ");
         AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
         
-        sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("},");
     }
     

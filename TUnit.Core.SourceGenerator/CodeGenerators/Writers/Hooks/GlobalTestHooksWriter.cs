@@ -44,8 +44,6 @@ public static class GlobalTestHooksWriter
         sourceBuilder.Write("AssemblyAttributes = ");
         AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
 
-
-        sourceBuilder.WriteLine();            
         sourceBuilder.WriteLine("},");
     }
 

@@ -80,8 +80,8 @@ file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
 				],
 				ClassAttributes = [],
-								AssemblyAttributes = 
-[],
+				AssemblyAttributes = [],
+
 			},
 		];
 	}
@@ -256,8 +256,8 @@ file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
 				],
 				ClassAttributes = [],
-								AssemblyAttributes = 
-[],
+				AssemblyAttributes = [],
+
 			},
 		];
 	}
@@ -432,8 +432,8 @@ file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
 				],
 				ClassAttributes = [],
-								AssemblyAttributes = 
-[],
+				AssemblyAttributes = [],
+
 			},
 		];
 	}
@@ -608,8 +608,8 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 					new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
 				],
 				ClassAttributes = [],
-								AssemblyAttributes = 
-[],
+				AssemblyAttributes = [],
+
 			},
 		];
 	}
@@ -704,8 +704,8 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 					new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
 				],
 				ClassAttributes = [],
-								AssemblyAttributes = 
-[],
+				AssemblyAttributes = [],
+
 			},
 		];
 	}
@@ -800,8 +800,8 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 					new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
 				],
 				ClassAttributes = [],
-								AssemblyAttributes = 
-[],
+				AssemblyAttributes = [],
+
 			},
 		];
 	}
@@ -901,8 +901,8 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 					new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
 				],
 				ClassAttributes = [],
-								AssemblyAttributes = 
-[],
+				AssemblyAttributes = [],
+
 			},
 		];
 	}
