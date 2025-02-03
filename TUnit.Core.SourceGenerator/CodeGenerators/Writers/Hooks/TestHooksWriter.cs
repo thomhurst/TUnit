@@ -52,6 +52,7 @@ public class TestHooksWriter : BaseHookWriter
             sourceBuilder.Write("AssemblyAttributes = ");
             AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
             
+            sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("},");
 
             return;

@@ -41,22 +41,22 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value1",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value2",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<double>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<double>
 					{
 						Name = "value3",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value4",
 						Attributes = [],

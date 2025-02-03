@@ -58,7 +58,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
 							{
 								Name = "myFixture",
 								Attributes = [],

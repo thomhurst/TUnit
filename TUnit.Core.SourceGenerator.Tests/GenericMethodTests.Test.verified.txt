@@ -46,32 +46,32 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "source",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "keySelector",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "seedSelector",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "func",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "comparer",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "expected",
 						Attributes = [],
@@ -170,32 +170,32 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "source",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "keySelector",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "seedSelector",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "func",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "comparer",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "expected",
 							Attributes = [],

@@ -41,7 +41,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
 					{
 						Name = "value",
 						Attributes = [],
@@ -176,7 +176,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
 					{
 						Name = "value",
 						Attributes = [],
@@ -311,7 +311,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
@@ -446,12 +446,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
@@ -594,17 +594,17 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
@@ -753,22 +753,22 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class4",
 						Attributes = [],
@@ -923,27 +923,27 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class4",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
 					{
 						Name = "class5",
 						Attributes = [],

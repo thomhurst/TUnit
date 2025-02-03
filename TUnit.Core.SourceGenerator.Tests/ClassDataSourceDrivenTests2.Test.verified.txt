@@ -60,7 +60,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
 						{
 							Name = "base",
 							Attributes = [],
@@ -173,7 +173,7 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassD
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
 							{
 								Name = "base",
 								Attributes = [],
@@ -315,7 +315,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
 						{
 							Name = "base",
 							Attributes = [],
@@ -428,7 +428,7 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassD
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
 							{
 								Name = "base",
 								Attributes = [],

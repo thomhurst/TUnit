@@ -46,17 +46,17 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
@@ -152,17 +152,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],

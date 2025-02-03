@@ -48,7 +48,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
 					{
 						Name = "integer",
 						Attributes = [],
@@ -138,7 +138,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestPro
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
 						{
 							Name = "integer",
 							Attributes = [],
@@ -228,7 +228,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestPro
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
 							{
 								Name = "integer",
 								Attributes = [],
@@ -348,7 +348,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
 					{
 						Name = "integer",
 						Attributes = [],
@@ -438,7 +438,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestPro
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
 						{
 							Name = "integer",
 							Attributes = [],
@@ -528,7 +528,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestPro
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
 							{
 								Name = "integer",
 								Attributes = [],

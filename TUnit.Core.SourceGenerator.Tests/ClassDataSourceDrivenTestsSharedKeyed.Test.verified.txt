@@ -45,7 +45,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<SomeAsyncDisposableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<SomeAsyncDisposableClass>
 						{
 							Name = "value",
 							Attributes = [],
@@ -188,7 +188,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<SomeAsyncDisposableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<SomeAsyncDisposableClass>
 						{
 							Name = "value",
 							Attributes = [],

@@ -62,7 +62,7 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 						Attributes = [],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
 							{
 								Name = "fixture",
 								Attributes = [],

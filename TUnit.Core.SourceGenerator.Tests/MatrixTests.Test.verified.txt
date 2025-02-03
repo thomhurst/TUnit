@@ -41,7 +41,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "str",
 						Attributes = 
@@ -49,7 +49,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							new global::TUnit.Core.MatrixAttribute("A", "B", "C", "D")
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "i",
 						Attributes = 
@@ -57,7 +57,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "boolean",
 						Attributes = 
@@ -217,7 +217,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "i",
 						Attributes = 
@@ -225,7 +225,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							new global::TUnit.Core.MatrixAttribute(1, 2)
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "i2",
 						Attributes = 
@@ -233,7 +233,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "i3",
 						Attributes = 
@@ -241,7 +241,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3, 4)
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "boolean",
 						Attributes = 
@@ -410,7 +410,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "i",
 						Attributes = 
@@ -418,7 +418,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							new global::TUnit.Core.MatrixAttribute(1, 2)
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
 					{
 						Name = "testEnum",
 						Attributes = 
@@ -569,7 +569,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "str",
 						Attributes = 
@@ -577,7 +577,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							new global::TUnit.Core.MatrixAttribute("A", "B", "C")
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "boolean",
 						Attributes = [],
@@ -722,7 +722,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "str",
 						Attributes = 
@@ -730,7 +730,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							new global::TUnit.Core.MatrixAttribute("A", "B", "C")
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "boolean",
 						Attributes = 
@@ -881,7 +881,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>
 					{
 						Name = "enum",
 						Attributes = 
@@ -889,7 +889,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.T
 							new global::TUnit.Core.MatrixAttribute(global::TUnit.TestProject.TestEnum.One, Two)
 						],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "boolean",
 						Attributes = 
@@ -1040,7 +1040,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MatrixTests.CountToTenEnum>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MatrixTests.CountToTenEnum>
 					{
 						Name = "enum",
 						Attributes = 
@@ -1051,7 +1051,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestPro
 }
 							],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "boolean",
 							Attributes = 
@@ -1205,7 +1205,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "item",
 						Attributes = 
@@ -1347,7 +1347,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "item",
 						Attributes = 
@@ -1489,7 +1489,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "item",
 						Attributes = 
@@ -1631,7 +1631,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "item",
 						Attributes = 

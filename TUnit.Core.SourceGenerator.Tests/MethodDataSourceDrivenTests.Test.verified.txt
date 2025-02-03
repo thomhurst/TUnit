@@ -41,7 +41,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
@@ -153,7 +153,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
@@ -265,7 +265,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Action>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Action>
 					{
 						Name = "action",
 						Attributes = [],
@@ -388,7 +388,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							{
 								Name = "value",
 								Attributes = [],
@@ -482,7 +482,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 									],
 									Parameters = 
 									[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+										new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 										{
 											Name = "value",
 											Attributes = [],
@@ -615,7 +615,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 								],
 								Parameters = 
 								[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 									{
 										Name = "value",
 										Attributes = [],
@@ -717,7 +717,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 													],
 													Parameters = 
 													[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+														new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 														{
 															Name = "value",
 															Attributes = [],
@@ -819,7 +819,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 																		],
 																		Parameters = 
 																		[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+																			new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 																			{
 																				Name = "value",
 																				Attributes = [],
@@ -921,7 +921,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 																							],
 																							Parameters = 
 																							[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+																								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 																								{
 																									Name = "value",
 																									Attributes = [],
@@ -1033,7 +1033,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue>
 					{
 						Name = "value",
 						Attributes = [],
@@ -1145,7 +1145,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string[]>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string[]>
 					{
 						Name = "strings",
 						Attributes = [],

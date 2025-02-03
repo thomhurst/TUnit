@@ -68,7 +68,7 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 							],
 							Parameters = 
 							[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
+								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
 								{
 									Name = "myFixture",
 									Attributes = [],
@@ -168,7 +168,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 						Attributes = [],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
 							{
 								Name = "fixture",
 								Attributes = [],
@@ -262,7 +262,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 						Attributes = [],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
 							{
 								Name = "fixture",
 								Attributes = [],

@@ -41,7 +41,7 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "name",
 						Attributes = [],

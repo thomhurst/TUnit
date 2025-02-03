@@ -147,7 +147,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value",
 						Attributes = [],
@@ -262,7 +262,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value",
 						Attributes = [],

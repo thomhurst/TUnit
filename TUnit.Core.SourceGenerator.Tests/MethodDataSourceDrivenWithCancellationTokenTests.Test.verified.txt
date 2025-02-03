@@ -54,12 +54,12 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
@@ -154,12 +154,12 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],
@@ -254,12 +254,12 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							{
 								Name = "value",
 								Attributes = [],
 							},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 							{
 								Name = "cancellationToken",
 								Attributes = [],
@@ -358,12 +358,12 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
 							],
 							Parameters = 
 							[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 								{
 									Name = "value",
 									Attributes = [],
 								},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+								new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 								{
 									Name = "cancellationToken",
 									Attributes = [],
@@ -462,12 +462,12 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
 								],
 								Parameters = 
 								[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 									{
 										Name = "value",
 										Attributes = [],
 									},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+									new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 									{
 										Name = "cancellationToken",
 										Attributes = [],
@@ -566,12 +566,12 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
 									],
 									Parameters = 
 									[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+										new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 										{
 											Name = "value",
 											Attributes = [],
 										},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+										new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 										{
 											Name = "cancellationToken",
 											Attributes = [],

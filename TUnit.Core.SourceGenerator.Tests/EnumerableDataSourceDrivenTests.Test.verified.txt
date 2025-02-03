@@ -41,7 +41,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
@@ -157,7 +157,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
@@ -273,7 +273,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue>
 					{
 						Name = "value",
 						Attributes = [],

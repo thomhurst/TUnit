@@ -667,7 +667,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.ClassHookContext>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.ClassHookContext>
 					{
 						Name = "context",
 						Attributes = [],
@@ -763,7 +763,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
@@ -859,12 +859,12 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.ClassHookContext>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.ClassHookContext>
 					{
 						Name = "context",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
@@ -1048,7 +1048,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],
@@ -1143,7 +1143,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
 						{
 							Name = "testContext",
 							Attributes = [],
@@ -1238,12 +1238,12 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
 						{
 							Name = "testContext",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],

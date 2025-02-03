@@ -41,7 +41,7 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value",
 						Attributes = [],

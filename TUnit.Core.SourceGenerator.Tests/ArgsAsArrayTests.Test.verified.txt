@@ -41,7 +41,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string[]>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string[]>
 					{
 						Name = "arguments",
 						Attributes = [],
@@ -154,7 +154,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string[]>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string[]>
 					{
 						Name = "arguments",
 						Attributes = [],
@@ -267,7 +267,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
 					{
 						Name = "arguments",
 						Attributes = [],
@@ -380,7 +380,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
 					{
 						Name = "arguments",
 						Attributes = [],
@@ -493,12 +493,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "i",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
 					{
 						Name = "arguments",
 						Attributes = [],

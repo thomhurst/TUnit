@@ -41,10 +41,11 @@ public static class GlobalTestHooksWriter
         AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes());
         
         sourceBuilder.WriteTabs();
-        sourceBuilder.WriteLine("AssemblyAttributes = ");
+        sourceBuilder.Write("AssemblyAttributes = ");
         AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
 
-        
+
+        sourceBuilder.WriteLine();            
         sourceBuilder.WriteLine("},");
     }
 

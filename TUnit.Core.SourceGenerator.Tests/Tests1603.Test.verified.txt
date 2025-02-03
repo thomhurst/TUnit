@@ -41,7 +41,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<short>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<short>
 					{
 						Name = "value",
 						Attributes = [],
@@ -154,7 +154,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<short>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<short>
 					{
 						Name = "value",
 						Attributes = [],

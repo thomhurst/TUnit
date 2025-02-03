@@ -48,7 +48,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value",
 						Attributes = [],
@@ -138,7 +138,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value",
 							Attributes = [],
@@ -228,7 +228,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value",
 								Attributes = [],

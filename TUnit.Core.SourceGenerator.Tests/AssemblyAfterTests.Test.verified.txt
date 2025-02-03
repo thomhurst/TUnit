@@ -673,7 +673,7 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.AssemblyHookContext>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.AssemblyHookContext>
 					{
 						Name = "context",
 						Attributes = [],
@@ -769,7 +769,7 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
@@ -865,12 +865,12 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.AssemblyHookContext>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.AssemblyHookContext>
 					{
 						Name = "context",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
@@ -1054,7 +1054,7 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],
@@ -1149,7 +1149,7 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
 						{
 							Name = "testContext",
 							Attributes = [],
@@ -1244,12 +1244,12 @@ file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.So
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
 						{
 							Name = "testContext",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],

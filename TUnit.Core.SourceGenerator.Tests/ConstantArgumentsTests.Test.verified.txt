@@ -41,7 +41,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "dummy",
 						Attributes = [],
@@ -154,7 +154,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "dummy",
 						Attributes = [],
@@ -267,7 +267,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<double>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<double>
 					{
 						Name = "dummy",
 						Attributes = [],
@@ -380,7 +380,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<float>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<float>
 					{
 						Name = "dummy",
 						Attributes = [],
@@ -493,7 +493,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<long>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<long>
 					{
 						Name = "dummy",
 						Attributes = [],
@@ -606,7 +606,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<uint>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<uint>
 					{
 						Name = "dummy",
 						Attributes = [],
@@ -719,7 +719,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<ulong>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<ulong>
 					{
 						Name = "dummy",
 						Attributes = [],

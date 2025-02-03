@@ -273,17 +273,17 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value1",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value2",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
@@ -384,17 +384,17 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value1",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value2",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
@@ -519,7 +519,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "foo",
 						Attributes = [],
@@ -640,7 +640,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "password",
 						Attributes = [],

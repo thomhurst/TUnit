@@ -45,7 +45,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
@@ -68,17 +68,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
@@ -214,7 +214,7 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
@@ -237,17 +237,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							{
 								Name = "value",
 								Attributes = [],
 							},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
 							},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
@@ -412,17 +412,17 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
@@ -445,17 +445,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
@@ -605,17 +605,17 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
@@ -638,17 +638,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							{
 								Name = "value",
 								Attributes = [],
 							},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
 							},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
@@ -827,17 +827,17 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
@@ -860,17 +860,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
@@ -1020,17 +1020,17 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
@@ -1053,17 +1053,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						],
 						Parameters = 
 						[
-new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							{
 								Name = "value",
 								Attributes = [],
 							},
-new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
 							},
-new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],

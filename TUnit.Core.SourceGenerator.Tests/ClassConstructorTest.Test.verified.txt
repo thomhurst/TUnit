@@ -55,7 +55,7 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.DummyReferenceTypeClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.DummyReferenceTypeClass>
 						{
 							Name = "dummyReferenceTypeClass",
 							Attributes = [],

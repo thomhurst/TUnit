@@ -46,7 +46,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 					{
 						Name = "someByte",
 						Attributes = [],
@@ -135,7 +135,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 						{
 							Name = "someByte",
 							Attributes = [],
@@ -253,12 +253,12 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				],
 				Parameters = 
 				[
-new global::TUnit.Core.SourceGeneratedParameterInformation<byte>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<byte>
 					{
 						Name = "byte1",
 						Attributes = [],
 					},
-new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 					{
 						Name = "byte2",
 						Attributes = [],
@@ -348,12 +348,12 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 					],
 					Parameters = 
 					[
-new global::TUnit.Core.SourceGeneratedParameterInformation<byte>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<byte>
 						{
 							Name = "byte1",
 							Attributes = [],
 						},
-new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 						{
 							Name = "byte2",
 							Attributes = [],
