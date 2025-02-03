@@ -31,7 +31,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageVersion Include="Microsoft.Playwright" Version="1.49.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.50.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.13.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.4.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.4.3" />
