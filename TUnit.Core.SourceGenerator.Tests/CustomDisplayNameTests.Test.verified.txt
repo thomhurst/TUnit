@@ -688,8 +688,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
+				var methodDataAttribute = new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)

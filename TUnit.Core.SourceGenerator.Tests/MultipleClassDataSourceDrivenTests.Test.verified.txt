@@ -125,11 +125,11 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						],
 						TestSessionId = sessionId,
 					};
-					var classDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+					var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
 					{
 						Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
-}
+};
+
 						var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 						foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -314,11 +314,11 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						],
 						TestSessionId = sessionId,
 					};
-					var classDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+					var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
 					{
 						Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
-}
+};
+
 						var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 						foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)

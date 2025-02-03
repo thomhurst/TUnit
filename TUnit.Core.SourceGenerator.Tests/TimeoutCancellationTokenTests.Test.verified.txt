@@ -734,8 +734,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)

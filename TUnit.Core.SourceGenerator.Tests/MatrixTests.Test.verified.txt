@@ -118,8 +118,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -310,8 +310,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -471,8 +471,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -624,8 +624,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -783,8 +783,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -942,8 +942,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -1107,8 +1107,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							],
 							TestSessionId = sessionId,
 						};
-						var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+						var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -1250,8 +1250,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -1392,8 +1392,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -1534,8 +1534,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -1676,8 +1676,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.MatrixDataSourceAttribute()
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)

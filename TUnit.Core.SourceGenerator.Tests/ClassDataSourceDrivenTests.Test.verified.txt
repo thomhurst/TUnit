@@ -80,8 +80,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>()
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -215,8 +215,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>()
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -350,8 +350,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>()
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -495,8 +495,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -653,8 +653,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -822,8 +822,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -1002,8 +1002,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					],
 					TestSessionId = sessionId,
 				};
-				var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)

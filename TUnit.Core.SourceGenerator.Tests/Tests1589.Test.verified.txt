@@ -85,11 +85,11 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						],
 						TestSessionId = sessionId,
 					};
-					var classDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
+					var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
 					{
 						Shared = global::TUnit.Core.SharedType.None,
-}
+};
+
 						var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 						foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)

@@ -115,8 +115,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					],
 					TestSessionId = sessionId,
 				};
-				var classDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>()
+				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+
 				var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 				foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -137,8 +137,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 						],
 						TestSessionId = sessionId,
 					};
-					var methodDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>()
+					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
+
 					var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 					foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -284,8 +284,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 						],
 						TestSessionId = sessionId,
 					};
-					var classDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+
 					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -306,8 +306,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 							],
 							TestSessionId = sessionId,
 						};
-						var methodDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>()
+						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
+
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -492,8 +492,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					],
 					TestSessionId = sessionId,
 				};
-				var classDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>()
+				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+
 				var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 				foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -524,8 +524,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 						],
 						TestSessionId = sessionId,
 					};
-					var methodDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>()
+					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+
 					var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 					foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -685,8 +685,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 						],
 						TestSessionId = sessionId,
 					};
-					var classDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+
 					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -717,8 +717,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 							],
 							TestSessionId = sessionId,
 						};
-						var methodDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>()
+						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -907,8 +907,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					],
 					TestSessionId = sessionId,
 				};
-				var classDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>()
+				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+
 				var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 				foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -939,8 +939,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 						],
 						TestSessionId = sessionId,
 					};
-					var methodDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+
 					var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 					foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -1100,8 +1100,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 						],
 						TestSessionId = sessionId,
 					};
-					var classDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+
 					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -1132,8 +1132,8 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
 							],
 							TestSessionId = sessionId,
 						};
-						var methodDataAttribute = 
-new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)

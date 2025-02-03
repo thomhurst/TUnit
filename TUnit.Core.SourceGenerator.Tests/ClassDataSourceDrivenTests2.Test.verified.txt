@@ -87,8 +87,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					],
 					TestSessionId = sessionId,
 				};
-				var classDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>()
+				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>();
+
 				var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 				foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -200,8 +200,8 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassD
 						],
 						TestSessionId = sessionId,
 					};
-					var classDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>()
+					var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>();
+
 					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -342,8 +342,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					],
 					TestSessionId = sessionId,
 				};
-				var classDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>()
+				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>();
+
 				var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 				foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -455,8 +455,8 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassD
 						],
 						TestSessionId = sessionId,
 					};
-					var classDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>()
+					var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>();
+
 					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)

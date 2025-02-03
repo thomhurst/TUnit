@@ -84,12 +84,12 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 						],
 						TestSessionId = sessionId,
 					};
-					var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
+					var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
 					{
 						Shared = global::TUnit.Core.SharedType.Keyed,
 						Key = "🔑",
-}
+};
+
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
@@ -227,12 +227,12 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 						],
 						TestSessionId = sessionId,
 					};
-					var methodDataAttribute = 
-new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
+					var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
 					{
 						Shared = global::TUnit.Core.SharedType.Keyed,
 						Key = "🔑",
-}
+};
+
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)

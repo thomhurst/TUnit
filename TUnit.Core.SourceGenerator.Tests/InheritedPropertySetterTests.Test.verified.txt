@@ -158,8 +158,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								string propertyArg = "1";
 
 								string propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
-								var propertyDataAttribute2 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()								;
+								var propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>();
 								var propertyArg2 = propertyDataAttribute2.GenerateDataSources(new DataGeneratorMetadata								{
 									Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 									TestBuilderContext = testBuilderContextAccessor,
@@ -180,11 +179,10 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Proper
 									TestSessionId = sessionId,
 								}).ElementAtOrDefault(0)();
 
-								var propertyDataAttribute3 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+								var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 								{
 									Shared = global::TUnit.Core.SharedType.PerTestSession,
-}									;
+};
 									var propertyArg3 = propertyDataAttribute3.GenerateDataSources(new DataGeneratorMetadata									{
 										Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 										TestBuilderContext = testBuilderContextAccessor,
@@ -208,11 +206,10 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Proper
 											TestSessionId = sessionId,
 										}).ElementAtOrDefault(0)();
 
-										var propertyDataAttribute4 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+										var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 										{
 											Shared = global::TUnit.Core.SharedType.PerClass,
-}											;
+};
 											var propertyArg4 = propertyDataAttribute4.GenerateDataSources(new DataGeneratorMetadata											{
 												Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 												TestBuilderContext = testBuilderContextAccessor,
@@ -236,12 +233,11 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Proper
 													TestSessionId = sessionId,
 												}).ElementAtOrDefault(0)();
 
-												var propertyDataAttribute5 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+												var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 												{
 													Shared = global::TUnit.Core.SharedType.Keyed,
 													Key = "Key",
-}													;
+};
 													var propertyArg5 = propertyDataAttribute5.GenerateDataSources(new DataGeneratorMetadata													{
 														Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 														TestBuilderContext = testBuilderContextAccessor,
@@ -266,11 +262,10 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Proper
 															TestSessionId = sessionId,
 														}).ElementAtOrDefault(0)();
 
-														var propertyDataAttribute6 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+														var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
 														{
 															Shared = global::TUnit.Core.SharedType.PerTestSession,
-}															;
+};
 															var propertyArg6 = propertyDataAttribute6.GenerateDataSources(new DataGeneratorMetadata															{
 																Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 																TestBuilderContext = testBuilderContextAccessor,
@@ -412,8 +407,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 				string propertyArg = "1";
 
 				string propertyArg1 = global::TUnit.TestProject.InheritedPropertySetterTests.MethodData();
-				var propertyDataAttribute2 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()				;
+				var propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>();
 				var propertyArg2 = propertyDataAttribute2.GenerateDataSources(new DataGeneratorMetadata				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 					TestBuilderContext = testBuilderContextAccessor,
@@ -434,11 +428,10 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Proper
 					TestSessionId = sessionId,
 				}).ElementAtOrDefault(0)();
 
-				var propertyDataAttribute3 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+				var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 				{
 					Shared = global::TUnit.Core.SharedType.PerTestSession,
-}					;
+};
 					var propertyArg3 = propertyDataAttribute3.GenerateDataSources(new DataGeneratorMetadata					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 						TestBuilderContext = testBuilderContextAccessor,
@@ -462,11 +455,10 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Proper
 							TestSessionId = sessionId,
 						}).ElementAtOrDefault(0)();
 
-						var propertyDataAttribute4 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+						var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 						{
 							Shared = global::TUnit.Core.SharedType.PerClass,
-}							;
+};
 							var propertyArg4 = propertyDataAttribute4.GenerateDataSources(new DataGeneratorMetadata							{
 								Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 								TestBuilderContext = testBuilderContextAccessor,
@@ -490,12 +482,11 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Proper
 									TestSessionId = sessionId,
 								}).ElementAtOrDefault(0)();
 
-								var propertyDataAttribute5 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+								var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 								{
 									Shared = global::TUnit.Core.SharedType.Keyed,
 									Key = "Key",
-}									;
+};
 									var propertyArg5 = propertyDataAttribute5.GenerateDataSources(new DataGeneratorMetadata									{
 										Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 										TestBuilderContext = testBuilderContextAccessor,
@@ -520,11 +511,10 @@ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Proper
 											TestSessionId = sessionId,
 										}).ElementAtOrDefault(0)();
 
-										var propertyDataAttribute6 = 
-new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+										var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
 										{
 											Shared = global::TUnit.Core.SharedType.PerTestSession,
-}											;
+};
 											var propertyArg6 = propertyDataAttribute6.GenerateDataSources(new DataGeneratorMetadata											{
 												Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 												TestBuilderContext = testBuilderContextAccessor,
