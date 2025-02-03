@@ -51,8 +51,11 @@ public record GeneratedArgumentsContainer(
         var dataAttr = GenerateDataAttributeVariable("var", string.Empty,
             ref variableIndex);
             
-        sourceCodeWriter.WriteLine($"{dataAttr.Type} {dataAttr.Name} = ");
+        sourceCodeWriter.WriteTabs();
+        sourceCodeWriter.Write($"{dataAttr.Type} {dataAttr.Name} = ");
         AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);
+        sourceCodeWriter.Write(";");
+        sourceCodeWriter.WriteLine();
         
         sourceCodeWriter.WriteLine();
         
@@ -87,9 +90,11 @@ public record GeneratedArgumentsContainer(
                 string.Empty,
                 ref variableIndex);
             
-            sourceCodeWriter.WriteLine($"{attr.Type} {attr.Name} = ");
+            sourceCodeWriter.WriteTabs();
+            sourceCodeWriter.Write($"{attr.Type} {attr.Name} = ");
             AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);     
-            sourceCodeWriter.WriteLine(";");
+            sourceCodeWriter.Write(";");
+            sourceCodeWriter.WriteLine();
             
             var dataSourceVariable = GenerateVariable("var", string.Empty, ref variableIndex);
 
