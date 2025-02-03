@@ -29,8 +29,9 @@ public class AttributeWriter
             if (index != attributeDatas.Length - 1)
             {
                 sourceCodeWriter.Write(",");
-                sourceCodeWriter.WriteLine();
             }
+            
+            sourceCodeWriter.WriteLine();
         }
         sourceCodeWriter.WriteLine("],");
     }
