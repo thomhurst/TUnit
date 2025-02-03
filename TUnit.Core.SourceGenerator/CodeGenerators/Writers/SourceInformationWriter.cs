@@ -23,7 +23,7 @@ public static class SourceInformationWriter
         
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
-        AttributeWriter.WriteAttributes(sourceCodeWriter, context, namedTypeSymbol.GetAttributes());
+        AttributeWriter.WriteAttributes(sourceCodeWriter, context, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray());
 
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Parameters = ");
