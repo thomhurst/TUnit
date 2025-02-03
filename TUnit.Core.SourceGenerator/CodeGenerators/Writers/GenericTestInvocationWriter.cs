@@ -13,7 +13,13 @@ public static class GenericTestInvocationWriter
         
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
         
-        sourceBuilder.WriteLine($"var testInformation = {SourceInformationWriter.GenerateMethodInformation(testSourceDataModel.TestGenerationContext.Context, testSourceDataModel.TestClass, testSourceDataModel.TestMethod, testSourceDataModel.GenericSubstitutions)};");
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("var testInformation = ");
+
+        SourceInformationWriter.GenerateMethodInformation(sourceBuilder,
+            testSourceDataModel.TestGenerationContext.Context,
+            testSourceDataModel.TestClass, testSourceDataModel.TestMethod,
+            testSourceDataModel.GenericSubstitutions, ';');
         
         sourceBuilder.WriteLine();
         

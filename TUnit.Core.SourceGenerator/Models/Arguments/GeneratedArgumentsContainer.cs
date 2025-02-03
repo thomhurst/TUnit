@@ -32,24 +32,27 @@ public record GeneratedArgumentsContainer(
 
         var dataGeneratorMetadataVariableName = $"{VariableNamePrefix}DataGeneratorMetadata";
         
-        sourceCodeWriter.WriteLine($$"""
-                                     var {{dataGeneratorMetadataVariableName}} = new DataGeneratorMetadata
-                                     {
-                                        Type = global::TUnit.Core.Enums.DataGeneratorType.{{type}},
-                                        TestBuilderContext = testBuilderContextAccessor,
-                                        TestInformation = testInformation,
-                                        MembersToGenerate = {{SourceInformationWriter.GenerateMembers(Context, Parameters, null, ArgumentsType)}},
-                                        TestSessionId = sessionId,
-                                     };
-                                     """);
+        sourceCodeWriter.WriteLine($"var {dataGeneratorMetadataVariableName} = new DataGeneratorMetadata");
+        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.WriteLine($"Type = global::TUnit.Core.Enums.DataGeneratorType.{type},");
+        sourceCodeWriter.WriteLine("TestBuilderContext = testBuilderContextAccessor,");
+        sourceCodeWriter.WriteLine("TestInformation = testInformation,");
+        
+        sourceCodeWriter.WriteTabs();
+        sourceCodeWriter.Write("MembersToGenerate = ");
+        SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, Parameters, null, ArgumentsType);
+        
+        sourceCodeWriter.WriteLine("TestSessionId = sessionId,");
+        sourceCodeWriter.WriteLine("};");
         
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
 
-        var dataAttr = GenerateDataAttributeVariable("var", AttributeWriter.WriteAttribute(Context, AttributeData),
+        var dataAttr = GenerateDataAttributeVariable("var", string.Empty,
             ref variableIndex);
             
-        sourceCodeWriter.WriteLine(dataAttr.ToString());
+        sourceCodeWriter.WriteLine($"{dataAttr.Type} {dataAttr.Name} = ");
+        AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);
         
         sourceCodeWriter.WriteLine();
         
@@ -81,21 +84,30 @@ public record GeneratedArgumentsContainer(
         if (Property is not null)
         {
             var attr = GenerateDataAttributeVariable("var",
-                AttributeWriter.WriteAttribute(Context, AttributeData),
+                string.Empty,
                 ref variableIndex);
             
-            sourceCodeWriter.WriteLine(attr.ToString());
+            sourceCodeWriter.WriteLine($"{attr.Type} {attr.Name} = ");
+            AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);     
+            sourceCodeWriter.WriteLine(";");
             
-            sourceCodeWriter.WriteLine(GenerateVariable("var", $$"""
-                                                                 {{attr.Name}}.GenerateDataSources(new DataGeneratorMetadata
-                                                                 {
-                                                                    Type = global::TUnit.Core.Enums.DataGeneratorType.{{type}},
-                                                                    TestBuilderContext = testBuilderContextAccessor,
-                                                                    TestInformation = testInformation,
-                                                                    MembersToGenerate = {{SourceInformationWriter.GenerateMembers(Context, ImmutableArray<IParameterSymbol>.Empty, Property, ArgumentsType.Property)}},
-                                                                    TestSessionId = sessionId,
-                                                                 }).ElementAtOrDefault(0)()
-                                                                 """, ref variableIndex).ToString());
+            var dataSourceVariable = GenerateVariable("var", string.Empty, ref variableIndex);
+
+            sourceCodeWriter.WriteTabs();
+            sourceCodeWriter.Write($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
+            
+            sourceCodeWriter.Write($"{attr.Name}.GenerateDataSources(new DataGeneratorMetadata");
+                sourceCodeWriter.WriteLine("{");
+            sourceCodeWriter.WriteLine($"Type = global::TUnit.Core.Enums.DataGeneratorType.{type},");
+                sourceCodeWriter.WriteLine("TestBuilderContext = testBuilderContextAccessor,");
+            sourceCodeWriter.WriteLine("TestInformation = testInformation,");
+            
+            sourceCodeWriter.WriteTabs();
+            sourceCodeWriter.Write("MembersToGenerate = ");
+            SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, ImmutableArray<IParameterSymbol>.Empty, Property, ArgumentsType.Property);
+                
+            sourceCodeWriter.WriteLine("TestSessionId = sessionId,");
+            sourceCodeWriter.WriteLine("}).ElementAtOrDefault(0)();");
             sourceCodeWriter.WriteLine();
             return;
         }
