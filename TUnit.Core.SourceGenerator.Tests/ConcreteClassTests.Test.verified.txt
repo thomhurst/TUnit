@@ -51,6 +51,7 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 					Namespace = "TUnit.TestProject.AbstractTests",
 					Attributes = 
 					[
+						new global::TUnit.Core.InheritsTestsAttribute(),
 						new global::TUnit.Core.InheritsTestsAttribute()
 					],
 					Parameters = [],
@@ -157,6 +158,7 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 					Namespace = "TUnit.TestProject.AbstractTests",
 					Attributes = 
 					[
+						new global::TUnit.Core.InheritsTestsAttribute(),
 						new global::TUnit.Core.InheritsTestsAttribute()
 					],
 					Parameters = [],
