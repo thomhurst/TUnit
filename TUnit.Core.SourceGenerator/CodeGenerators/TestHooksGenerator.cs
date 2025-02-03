@@ -195,17 +195,14 @@ public class TestHooksGenerator : IIncrementalGenerator
         }
         catch (Exception ex)
         {
-            // Log the full stack trace
-            productionContext.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor(
-                    id: "SG001",
-                    title: "Source Generator Exception",
-                    messageFormat: "{0}: {1}",
-                    category: "SourceGenerator",
-                    DiagnosticSeverity.Error,
-                    isEnabledByDefault: true),
-                Location.None,
-                ex.GetType().Name,
-                ex.ToString()));
+            var descriptor = new DiagnosticDescriptor(id: "TUnit0000",
+                title: "Error Generating Source",
+                messageFormat: "{0} {1}",
+                category: "SourceGenerator",
+                DiagnosticSeverity.Error,
+                isEnabledByDefault: true);
+                
+            productionContext.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.Message, ex.StackTrace));
         }
     }
 

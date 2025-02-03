@@ -183,16 +183,14 @@ public class TestsGenerator : IIncrementalGenerator
         }
         catch (Exception ex)
         {
-            context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor(
-                    id: "SG001",
-                    title: "Source Generator Exception",
-                    messageFormat: "{0}: {1}",
-                    category: "SourceGenerator",
-                    DiagnosticSeverity.Error,
-                    isEnabledByDefault: true),
-                Location.None,
-                ex.GetType().Name,
-                ex.ToString()));
+            var descriptor = new DiagnosticDescriptor(id: "TUnit0000",
+                title: "Error Generating Source",
+                messageFormat: "{0} {1}",
+                category: "SourceGenerator",
+                DiagnosticSeverity.Error,
+                isEnabledByDefault: true);
+                
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.Message, ex.StackTrace));
         }
     }
 }

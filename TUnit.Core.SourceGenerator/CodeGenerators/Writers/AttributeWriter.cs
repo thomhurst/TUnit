@@ -24,6 +24,12 @@ public class AttributeWriter
         {
             sourceCodeWriter.WriteTabs();
             var attributeData = attributeDatas[index];
+            
+            if(attributeData.ApplicationSyntaxReference is null)
+            {
+                continue;
+            }
+            
             WriteAttribute(sourceCodeWriter, context, attributeData);
             
             if (index != attributeDatas.Length - 1)
@@ -39,7 +45,12 @@ public class AttributeWriter
     public static void WriteAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData)
     {
-        var syntax = attributeData.ApplicationSyntaxReference!.GetSyntax();
+        var syntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
+
+        if (syntax is null)
+        {
+            return;
+        }
 
         var arguments = syntax.ChildNodes()
             .OfType<AttributeArgumentListSyntax>()
