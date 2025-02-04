@@ -94,7 +94,6 @@ public static class TestContextExtensions
         IEnumerable<object?> rawObjects =
         [
             context.Events,
-            ..context.TestDetails.DataAttributes,
             ..context.TestDetails.Attributes,
             context.TestDetails.ClassInstance,
             context.InternalDiscoveredTest.ClassConstructor,
