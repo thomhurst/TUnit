@@ -8,7 +8,7 @@ If you want simple control over the name of a test, you can use the `[DisplayNam
 
 ```csharp
     [Test]
-    [DisplayName("My first time!")]
+    [DisplayName("My first test!")]
     public async Task Test()
     {
         ...
