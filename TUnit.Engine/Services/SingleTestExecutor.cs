@@ -39,7 +39,7 @@ internal class SingleTestExecutor(
     {
         lock (Lock)
         {
-            return test.TestContext.TestTask ??= ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest);
+            return test.TestContext.TestTask ??= Task.Run(() => ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest));
         }
     }
 
