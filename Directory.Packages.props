@@ -57,7 +57,7 @@
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.1.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="Verify.NUnit" Version="28.10.0" />
+    <PackageVersion Include="Verify.NUnit" Version="28.10.1" />
     <PackageVersion Include="TUnit" Version="0.10.6" />
     <PackageVersion Include="TUnit.Core" Version="0.10.6" />
     <PackageVersion Include="TUnit.Assertions" Version="0.10.6" />
