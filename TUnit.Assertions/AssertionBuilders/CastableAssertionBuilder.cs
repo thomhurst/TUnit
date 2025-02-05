@@ -25,7 +25,7 @@ public class CastableAssertionBuilder<TActual, TExpected> : InvokableValueAssert
     {
         try
         {
-            return (TExpected)Convert.ChangeType(data.Result, typeof(TExpected))!;
+            return (TExpected?)data.Result;
         }
         catch
         {
