@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class CastableAssertionBuilder<TActual, TExpected> : InvokableValueAssertionBuilder<TActual>
+public class CastableAssertionBuilder<TActual, TExpected> : InvokableValueAssertionBuilder<TExpected>
 {
     private readonly Func<AssertionData, TExpected?> _mapper;
 
