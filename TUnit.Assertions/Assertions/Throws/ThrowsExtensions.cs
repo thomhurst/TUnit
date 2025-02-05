@@ -41,6 +41,14 @@ public static class ThrowsExtensions
             assertionData => assertionData.Result);
     }
 
+    public static CastableAssertionBuilder<TActual, TActual> ThrowsNothing<TActual>(this IValueDelegateSource<TActual> delegateSource)
+    {
+        IValueSource<TActual> valueSource = delegateSource;
+        return new CastableAssertionBuilder<TActual, TActual>(
+            valueSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>(), []),
+            assertionData => assertionData.Result is TActual actual ? actual : default);
+    }
+
     public static ThrowsException<TActual, TException> WithParameterName<TActual, TException>(this ThrowsException<TActual, TException> throwsException, string expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
         where TException : ArgumentException
     {

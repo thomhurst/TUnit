@@ -4,9 +4,7 @@ using TUnit.Assertions.Extensions;
 namespace TUnit.Assertions.AssertionBuilders;
 
 public class ValueDelegateAssertionBuilder<TActual> 
-    : AssertionBuilder,
-        IDelegateSource,
-        IValueSource<TActual>
+    : AssertionBuilder, IValueDelegateSource<TActual>
 {
     internal ValueDelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {
