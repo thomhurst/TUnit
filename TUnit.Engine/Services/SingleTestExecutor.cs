@@ -443,7 +443,7 @@ internal class SingleTestExecutor(
     {
         var timeout = discoveredTest.TestDetails.Timeout;
 
-        if (timeout == null || timeout.Value == default)
+        if (timeout == null || timeout.Value == TimeSpan.Zero)
         {
             await RunTest(discoveredTest, cancellationToken, cleanupExceptions);
             return;
