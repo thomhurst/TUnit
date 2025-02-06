@@ -14,6 +14,7 @@ internal record DiscoveredTest<
 
     public override async Task ExecuteTest(CancellationToken cancellationToken)
     {
+        TestContext.CancellationToken = cancellationToken;
         await TestExecutor.ExecuteTest(TestContext, () => TestBody.Invoke(TestClass, cancellationToken));
     }
     
