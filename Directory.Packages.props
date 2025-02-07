@@ -65,6 +65,6 @@
     <PackageVersion Include="Verify.TUnit" Version="28.10.1" />
     <PackageVersion Include="Vogen" Version="6.0.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.2" />
   </ItemGroup>
 </Project>
