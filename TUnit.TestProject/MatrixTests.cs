@@ -119,6 +119,18 @@ public class MatrixTests
     {
         await Task.CompletedTask;
     }
+    
+    [Test]
+    [MatrixDataSource]
+    [MatrixExclusion(1, 1)]
+    [MatrixExclusion(2, 2)]
+    [MatrixExclusion(3, 3)]
+    public async Task Exclusion(
+        [MatrixMethod<MatrixTests>(nameof(EnumerableMethod))] int item,
+        [MatrixMethod<MatrixTests>(nameof(EnumerableMethod))] int item2)
+    {
+        await Task.CompletedTask;
+    }
 
     public enum CountToTenEnum
     {

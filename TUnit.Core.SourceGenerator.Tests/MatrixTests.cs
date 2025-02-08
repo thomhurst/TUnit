@@ -20,6 +20,6 @@ internal class MatrixTests : TestsBase<TestsGenerator>
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(11);
+            await Assert.That(generatedFiles.Length).IsEqualTo(12);
         });
 }
