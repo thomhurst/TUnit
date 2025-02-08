@@ -138,7 +138,11 @@ public abstract class AssertionBuilder : ISource
         
         foreach (var assertion in _assertions.Reverse())
         {
-            var result = await assertion.GetAssertionResult(AwaitedAssertionData.Value.Result, AwaitedAssertionData.Value.Exception, AwaitedAssertionData.Value.ActualExpression);
+            var result = await assertion.GetAssertionResult(AwaitedAssertionData.Value.Result, AwaitedAssertionData.Value.Exception, new AssertionMetadata
+            {
+                StartTime = AwaitedAssertionData.Value.Start,
+                EndTime = AwaitedAssertionData.Value.End
+            }, AwaitedAssertionData.Value.ActualExpression);
             
             Results.Add(result);
             

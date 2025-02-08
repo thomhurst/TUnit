@@ -8,7 +8,8 @@ public class NotAssignableFromExpectedValueAssertCondition<TActual>(Type expecte
     protected override string GetExpectation()
         => $"to not be assignable from type {expectedType.Name}";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata)
         => AssertionResult
             .FailIf(actualValue is null,
                 "actual is null")

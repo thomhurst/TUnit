@@ -30,7 +30,7 @@ public abstract class BaseAssertCondition
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";
 
-    internal abstract Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression);
+    internal abstract Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata, string? actualExpression);
     
     internal void SetSubject(string? subject)
         => Subject = subject;
@@ -41,24 +41,30 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     
     internal Task<AssertionResult> GetAssertionResult(AssertionData assertionData)
     {
-        return GetAssertionResult(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
+        return GetAssertionResult(assertionData.Result, assertionData.Exception, new AssertionMetadata
+        {
+            StartTime = assertionData.Start,
+            EndTime = assertionData.End
+        }, assertionData.ActualExpression);
     }
 
-    internal override Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression)
+    internal override Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata, string? actualExpression)
     {
         if (actualValue is not null && actualValue is not TActual)
         {
             throw new AssertionException($"Expected {typeof(TActual).Name} but received {actualValue.GetType().Name}");
         } 
         
-        return GetAssertionResult((TActual?) actualValue, exception, actualExpression);
+        return GetAssertionResult((TActual?) actualValue, exception, assertionMetadata, actualExpression);
     }
 
     internal TActual? ActualValue { get; private set; }
     internal Exception? Exception { get; private set; }
     public string? ActualExpression { get; private set; }
     
-    public Task<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception, string? actualExpression = null)
+    public Task<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata, string? actualExpression = null)
     {
         ActualValue = actualValue;
         Exception = exception;
@@ -69,8 +75,9 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
             AssertionScope.GetCurrentAssertionScope()?.RemoveException(exception);
         }
 
-        return GetResult(actualValue, exception);
+        return GetResult(actualValue, exception, assertionMetadata);
     }
 
-    protected abstract Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception);
+    protected abstract Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata);
 }
