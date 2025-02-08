@@ -18,11 +18,14 @@ Options are:
 ### Shared = SharedType.None
 The instance is not shared ever. A new one will be created for you.
 
-### Shared = SharedType.Globally
-The instance is shared globally for every test that also uses this setting, meaning it'll always be the same instance.
-
-### Shared = SharedType.ForClass
+### Shared = SharedType.PerClass
 The instance is shared for every test in the same class as itself, that also has this setting.
+
+### Shared = SharedType.PerAssembly
+The instance is shared for every test in the same assembly as itself, that also has this setting.
+
+### Shared = SharedType.PerTestSession
+The instance is shared for every test in the current test session, meaning it'll always be the same instance.
 
 ### Shared = SharedType.Keyed
 When using this, you must also populate the `Key` argument on the attribute.
@@ -38,7 +41,7 @@ If you need to do some initialization or teardown for when this object is create
 public class MyTestClass
 {
     [Test]
-    [ClassDataSource<WebApplicationFactory>(Shared = SharedType.Globally)]
+    [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
     public void MyTest(WebApplicationFactory webApplicationFactory)
     {
     }
@@ -70,7 +73,7 @@ E.g.
 [Test]
     [ClassDataSource<Value1, Value2, Value3, Value4, Value5>
         (
-        Shared = [SharedType.Globally, SharedType.Keyed, SharedType.ForClass, SharedType.Keyed, SharedType.None],
+        Shared = [SharedType.PerTestSession, SharedType.Keyed, SharedType.PerClass, SharedType.Keyed, SharedType.None],
         Keys = [ "Value2Key", "Value4Key" ]
         )]
     public class MyType(Value1 value1, Value2 value2, Value3 value3, Value4 value4, Value5 value5)
