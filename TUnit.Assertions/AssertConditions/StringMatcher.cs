@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -19,6 +20,9 @@ public abstract class StringMatcher
     /// </summary>
     public static implicit operator StringMatcher(string pattern) => AsWildcard(pattern);
 
+    
+    public static implicit operator StringMatcher(Regex pattern) => AsRegex(pattern.ToString());
+
     /// <summary>
     ///     A wildcard match.<br />
     ///     Supports * to match zero or more characters and ? to match exactly one character.
@@ -29,7 +33,7 @@ public abstract class StringMatcher
     /// <summary>
     ///     A <see cref="Regex"> match.
     /// </summary>
-    public static RegexMatch AsRegex(string pattern)
+    public static RegexMatch AsRegex([StringSyntax("regex")] string pattern)
         => new RegexMatch(pattern);
 
     public sealed class WildcardMatch : StringMatcher
