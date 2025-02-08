@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core.Enums;
+
+namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
@@ -16,10 +18,25 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
             throw new Exception("[MatrixDataSource] only supports parameterised tests");
         }
         
+        var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
+        ? dataGeneratorMetadata.TestInformation.Attributes : dataGeneratorMetadata.TestInformation.Class.Attributes);
+        
         foreach (var row in GetMatrixValues(parameterInformation.Select(GetAllArguments)))
         {
+            if (exclusions.Any(e => e.SequenceEqual(row)))
+            {
+                continue;
+            }
+            
             yield return () => row.ToArray();
         }
+    }
+
+    private object?[][] GetExclusions(Attribute[] attributes)
+    {
+        return attributes.OfType<MatrixExclusionAttribute>()
+            .Select(x => x.Objects)
+            .ToArray();
     }
 
     private IReadOnlyList<object?> GetAllArguments(SourceGeneratedParameterInformation sourceGeneratedParameterInformation)

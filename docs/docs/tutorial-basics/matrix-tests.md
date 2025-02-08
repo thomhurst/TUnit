@@ -124,3 +124,54 @@ public class MyTestClass
     }
 }
 ```
+
+## Matrix Exclusions
+
+You can also add a `[MatrixExclusion(...)]` attribute to your tests.
+This works similar to the `[Arguments(...)]` attribute, and if objects match a generated matrix test case, it'll be ignored.
+
+This helps you exclude specific one-off scenarios without having to complicate your tests with `if` conditions.
+
+```csharp
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Is;
+using TUnit.Core;
+
+namespace MyTestProject;
+
+public class MyTestClass
+{
+    [Test]
+    [MatrixDataSource]
+    [MatrixExclusion(1, 1)]
+    [MatrixExclusion(2, 2)]
+    [MatrixExclusion(3, 3)]
+    public async Task MyTest(
+        [MatrixRange<int>(1, 3)] int value1,
+        [MatrixRange<int>(1, 3)] int value2
+        )
+    {
+        ...
+    }
+}
+```
+
+Whereas the above Matrix would usually generate: 
+- 1, 1
+- 1, 2
+- 1, 3
+- 2, 1
+- 2, 2
+- 2, 3
+- 3, 1
+- 3, 2
+- 3, 3
+
+Because of the exclusion attributes, it'll only generate:
+- 1, 2
+- 1, 3
+- 2, 1
+- 2, 3
+- 3, 1
+- 3, 2
