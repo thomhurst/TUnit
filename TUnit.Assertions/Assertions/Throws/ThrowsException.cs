@@ -65,7 +65,12 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     private async ValueTask<AssertionData> AssertionDataTask()
     {
-        var value = await this;
-        return new AssertionData(value, null, ((ISource)_delegateAssertionBuilder).ActualExpression);
+        var assertionData = await _delegateAssertionBuilder.ProcessAssertionsAsync();
+
+        return assertionData with
+        {
+            Result = assertionData.Exception as TException,
+            Exception = null
+        };
     }
 }

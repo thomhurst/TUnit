@@ -22,7 +22,8 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
     protected override string GetExpectation()
         => $"to satisfy {_assertionBuilderExpression}";
 
-    protected override async Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override async Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata)
     {
         if (actualValue is null)
         {
@@ -39,7 +40,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
         
         foreach (var baseAssertCondition in ((ISource)assertion).Assertions)
         {
-            var result = await baseAssertCondition.GetAssertionResult(innerItem, exception, "");
+            var result = await baseAssertCondition.GetAssertionResult(innerItem, exception, assertionMetadata, "");
 
             if (!result.IsPassed)
             {

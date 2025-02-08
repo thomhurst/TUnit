@@ -7,7 +7,8 @@ public class EnumerableNotContainsExpectedFuncAssertCondition<TActual, TInner>(
 {
     protected override string GetExpectation() => $"to contain no entry matching {matcherString ?? "null"}";
     
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata)
     {
         return AssertionResult
             .FailIf(actualValue is null,

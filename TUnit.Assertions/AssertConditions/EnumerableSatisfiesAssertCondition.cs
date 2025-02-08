@@ -23,7 +23,8 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
     protected override string GetExpectation()
         => $"to satisfy {_assertionBuilderExpression}";
 
-    protected override async Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override async Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata)
     {
         if (actualValue is null)
         {
@@ -34,7 +35,7 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
         foreach (var itemValue in actualValue)
         {
             var currentIndex = i++;
-            var assertionResult = await GetResult(itemValue, exception);
+            var assertionResult = await GetResult(itemValue, exception, assertionMetadata);
             if (assertionResult.IsPassed)
             {
                 continue;
@@ -46,7 +47,7 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
         return mergedAsserts;
     }
     
-    private async Task<AssertionResult> GetResult(TInner? itemValue, Exception? exception)
+    private async Task<AssertionResult> GetResult(TInner? itemValue, Exception? exception, AssertionMetadata assertionMetadata)
     {
         var innerItemTask = _mapper(itemValue);
         var innerItem = innerItemTask == null ? default : await innerItemTask;
@@ -54,7 +55,7 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
         var assertion = _assertionBuilder(innerAssertionBuilder);
         foreach (var baseAssertCondition in assertion.Assertions)
         {
-            var result = await baseAssertCondition.GetAssertionResult(innerItem, exception, "");
+            var result = await baseAssertCondition.GetAssertionResult(innerItem, exception, assertionMetadata, "");
             if (!result.IsPassed)
             {
                 return result;
