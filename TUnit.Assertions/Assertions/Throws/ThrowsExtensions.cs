@@ -2,6 +2,7 @@
 using TUnit.Assertions.AssertConditions.Exceptions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Assertions.Throws;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
@@ -24,6 +25,18 @@ public static class ThrowsExtensions
             delegateSource.RegisterAssertion(new ThrowsExactTypeOfDelegateAssertCondition<object?, TException>(), [], $"{nameof(ThrowsExactly)}<{typeof(TException).Name}>"),
             delegateSource,
             e => e);
+    }
+    
+    public static InvokableDelegateAssertionBuilder ThrowsWithin(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null) 
+    {
+        return delegateSource.RegisterAssertion(new ThrowsWithinAssertCondition<object?, Exception>(timeSpan), [doNotPopulateThisValue]);
+    }
+    
+    public static InvokableDelegateAssertionBuilder ThrowsWithin<TException>(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
+        where TException : Exception
+    {
+        return delegateSource.RegisterAssertion(new ThrowsWithinAssertCondition<object?, TException>(timeSpan), [doNotPopulateThisValue],
+            $"{nameof(ThrowsWithin)}<{typeof(TException).Name}>");
     }
 
     public static ThrowsException<object?, Exception> ThrowsException(this IDelegateSource delegateSource)
