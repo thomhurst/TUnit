@@ -1,0 +1,6 @@
+﻿{
+  "MyKey1": "MyValue1",
+  "Nested": {
+    "MyKey2": "MyValue2"
+  }
+}
