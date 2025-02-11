@@ -6,6 +6,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Exceptions;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
@@ -132,7 +133,7 @@ public abstract class AssertionBuilder : ISource
             await OtherTypeAssertionBuilder;
         }
         
-        AwaitedAssertionData ??= await _assertionDataTask;
+        AwaitedAssertionData ??= await GetAssertionData();
 
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
         
@@ -175,7 +176,30 @@ public abstract class AssertionBuilder : ISource
         
         return AwaitedAssertionData.Value;
     }
-    
+
+    private async Task<AssertionData> GetAssertionData()
+    {
+        var minimumWait = _assertions.Select(x => x.WaitFor).Min();
+        
+        if(minimumWait is null)
+        {
+            return await _assertionDataTask;
+        }
+        
+        using var cts = new CancellationTokenSource();
+
+        return await await Task.WhenAny(_assertionDataTask.AsTask(), GetMinimumWaitTask(minimumWait.Value, cts.Token));
+    }
+
+    private async Task<AssertionData> GetMinimumWaitTask(TimeSpan wait, CancellationToken token)
+    {
+        var start = DateTimeOffset.Now;
+
+        await Task.Delay(wait, token);
+        
+        return new AssertionData(null, new CompleteWithinException($"The assertion did not complete within {wait.PrettyPrint()}"), _actualExpression, start, DateTimeOffset.Now);
+    }
+
     [Obsolete("This is a base `object` method that should not be called.", true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     [DebuggerHidden]

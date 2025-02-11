@@ -5,23 +5,23 @@ namespace TUnit.Assertions.Extensions;
 [StackTraceHidden]
 internal static class DelegateExtensions
 {
-    public static ValueTask<AssertionData> AsAssertionData(this Action action, string? actualExpression)
+    public static async ValueTask<AssertionData> AsAssertionData(this Action action, string? actualExpression)
     {
         var start = DateTimeOffset.Now;
 
         try
         {
-            action();
+            await Task.Run(action);
             
             var end = DateTimeOffset.Now;
 
-            return new ValueTask<AssertionData>((null, null, actualExpression, start, end));
+            return (null, null, actualExpression, start, end);
         }
         catch (Exception e)
         {
             var end = DateTimeOffset.Now;
 
-            return new ValueTask<AssertionData>((null, e, actualExpression, start, end));
+            return (null, e, actualExpression, start, end);
         }
     }
     

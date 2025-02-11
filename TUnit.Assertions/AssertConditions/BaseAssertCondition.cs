@@ -24,6 +24,11 @@ public abstract class BaseAssertCondition
     public string? OverriddenMessage { get; internal set; }
     
     public string? Subject { get; private set; }
+    
+    /// <summary>
+    /// Sets a timeout to wait for the assertion to complete.
+    /// </summary>
+    public virtual TimeSpan? WaitFor { get; protected set; }
 
     protected abstract string GetExpectation();
 
