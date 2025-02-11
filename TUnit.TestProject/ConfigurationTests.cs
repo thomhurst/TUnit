@@ -3,6 +3,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 
+[Skip("Issue with AOT - https://github.com/microsoft/testfx/issues/4972")]
 public class ConfigurationTests
 {
     [Test]

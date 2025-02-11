@@ -2,6 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
+[Skip("Issue with AOT - https://github.com/microsoft/testfx/issues/4972")]
 public class ConfigurationTests : InvokableTestBase
 {
     [Test]
