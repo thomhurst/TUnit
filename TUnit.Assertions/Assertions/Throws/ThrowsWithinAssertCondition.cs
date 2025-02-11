@@ -1,4 +1,5 @@
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Helpers;
 
@@ -15,9 +16,13 @@ public class ThrowsWithinAssertCondition<TActual, TExpectedException>(TimeSpan t
         => AssertionResult
         .FailIf(exception is null,
             "none was thrown")
-        .OrFailIf(exception?.GetType().IsAssignableTo(typeof(TExpectedException)) != true,
-            $"{exception?.GetType().Name.PrependAOrAn()} was thrown"
+        .OrFailIf(exception!.GetType().IsAssignableTo(typeof(CompleteWithinException)),
+            "it took too long to throw")
+        .OrFailIf(!exception.GetType().IsAssignableTo(typeof(TExpectedException)),
+            $"{exception.GetType().Name.PrependAOrAn()} was thrown"
         )
         .OrFailIf(assertionMetadata.Duration > timeSpan,
             $"it threw after {assertionMetadata.Duration.PrettyPrint()}");
+    
+    public override TimeSpan? WaitFor => timeSpan;
 }
