@@ -18,7 +18,7 @@ public static class ComparableIsExtensions
             {
                 return value.CompareTo(expected) > 0;
             },
-            (value, _, _) => $"{value} was not greater than {expected}",
+            (value, _, _) => $"it was {value}",
             $"to be greater than {expected}")
             , [doNotPopulateThisValue]); }
     
@@ -29,7 +29,7 @@ public static class ComparableIsExtensions
             {
                 return value.CompareTo(expected) >= 0;
             },
-            (value, _, _) => $"{value} was not greater than or equal to {expected}",
+            (value, _, _) => $"it was {value}",
             $"be greater than or equal to {expected}")
             , [doNotPopulateThisValue]); }
     
@@ -40,7 +40,7 @@ public static class ComparableIsExtensions
             {
                 return value.CompareTo(expected) < 0;
             },
-            (value, _, _) => $"{value} was not less than {expected}",
+            (value, _, _) => $"it was {value}",
             $"be less than {expected}")
             , [doNotPopulateThisValue]); }
     
@@ -51,7 +51,7 @@ public static class ComparableIsExtensions
             {
                 return value.CompareTo(expected) <= 0;
             },
-            (value, _, _) => $"{value} was not less than or equal to {expected}",
+            (value, _, _) => $"it was {value}",
             $"be less than or equal to {expected}")
             , [doNotPopulateThisValue]); }
     
