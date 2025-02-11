@@ -53,7 +53,7 @@
     <PackageVersion Include="Sourcy.Git" Version="0.7.6" />
     <PackageVersion Include="StreamJsonRpc" Version="2.20.20" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
-    <PackageVersion Include="System.Text.Json" Version="9.0.1" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.2" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.2.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.2.0" />
