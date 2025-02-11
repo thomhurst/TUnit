@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -14,6 +15,8 @@ public partial class TestContext
     internal static readonly Dictionary<string, string> InternalParametersDictionary = new();
 
     public static IReadOnlyDictionary<string, string> Parameters => InternalParametersDictionary;
+
+    public static IConfiguration Configuration { get; internal set; } = null!;
     
     public static string? OutputDirectory
         => Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
