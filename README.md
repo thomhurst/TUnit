@@ -140,7 +140,7 @@ This provides you base classes, similarly to Microsoft.Playwright.NUnit or Micro
 # Example test
 
 ```csharp
-private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
+    private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
     private static readonly TimeOnly Noon = TimeOnly.FromTimeSpan(TimeSpan.FromHours(12));
 
     [Test]
@@ -156,7 +156,7 @@ private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero)
 or with more complex test orchestration needs
 
 ```csharp
-[Before(Class)]
+    [Before(Class)]
     public static async Task ClearDatabase(ClassHookContext context) { ... }
 
     [After(Class)]
