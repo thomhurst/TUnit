@@ -6,7 +6,7 @@ sidebar_position: 7
 
 TUnit supports having a `testconfig.json` file within your test project.
 
-Then can be used to store key-value configuration pairs.
+This can be used to store key-value configuration pairs.
 
 To retrieve these within your tests, you can use the static method `TestContext.Configuration.Get(key)`
 
