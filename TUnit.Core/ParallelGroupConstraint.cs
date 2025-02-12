@@ -2,7 +2,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public record ParallelGroupConstraint(string Group) : IParallelConstraint,
+public record ParallelGroupConstraint(string Group, int Order) : IParallelConstraint,
     IComparable<ParallelGroupConstraint>,
     IComparable
 {

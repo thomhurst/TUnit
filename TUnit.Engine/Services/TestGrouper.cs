@@ -11,7 +11,7 @@ internal class TestGrouper
         var notInParallel = new PriorityQueue<DiscoveredTest, int>();
         var keyedNotInParallel = new ConcurrentDictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>();
         var parallel = new List<DiscoveredTest>();
-        var parallelGroups = new ConcurrentDictionary<string, List<DiscoveredTest>>();
+        var parallelGroups = new ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>>();
         
         foreach (var discoveredTest in testCases)
         {
@@ -35,7 +35,7 @@ internal class TestGrouper
             }
             else if (discoveredTest.TestDetails.ParallelConstraint is ParallelGroupConstraint parallelGroupConstraint)
             {
-                parallelGroups.GetOrAdd(parallelGroupConstraint.Group, _ => []).Add(discoveredTest);
+                parallelGroups.GetOrAdd(parallelGroupConstraint, _ => []).Add(discoveredTest);
             }
             else
             {
