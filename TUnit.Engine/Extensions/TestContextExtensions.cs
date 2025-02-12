@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -64,7 +65,7 @@ public static class TestContextExtensions
             Parallel = [newTest],
             NotInParallel = new PriorityQueue<DiscoveredTest, int>(),
             KeyedNotInParallel = new Dictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>(),
-            ParallelGroups = new Dictionary<string, List<DiscoveredTest>>()
+            ParallelGroups = new ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>>()
         }, null, testContext.GetService<ExecuteRequestContext>());
     }
     
