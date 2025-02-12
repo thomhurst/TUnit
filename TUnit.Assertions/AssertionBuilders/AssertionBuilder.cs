@@ -188,7 +188,11 @@ public abstract class AssertionBuilder : ISource
         
         using var cts = new CancellationTokenSource();
 
-        return await await Task.WhenAny(_assertionDataTask.AsTask(), GetMinimumWaitTask(minimumWait.Value, cts.Token));
+        var completedTask = await Task.WhenAny(_assertionDataTask.AsTask(), GetMinimumWaitTask(minimumWait.Value, cts.Token));
+
+        await cts.CancelAsync();
+        
+        return await completedTask;
     }
 
     private async Task<AssertionData> GetMinimumWaitTask(TimeSpan wait, CancellationToken token)
