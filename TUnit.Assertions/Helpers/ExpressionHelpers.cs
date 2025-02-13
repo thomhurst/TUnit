@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.Helpers;
 
-internal static class ExpressionHelpers
+public static class ExpressionHelpers
 {
     public static string GetName<T1, T2>(Expression<Func<T1, T2>> exp)
     {
