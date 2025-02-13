@@ -26,15 +26,15 @@ public partial class TestContext
         get
         {
 #if NET
-            
-            if (RuntimeFeature.IsDynamicCodeSupported)
-#endif
+            if (!RuntimeFeature.IsDynamicCodeSupported)
             {
-                return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
-                       ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                return AppContext.BaseDirectory;
             }
+#endif
 
-            return AppContext.BaseDirectory;
+            return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
+                   ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
         }
     }
 
