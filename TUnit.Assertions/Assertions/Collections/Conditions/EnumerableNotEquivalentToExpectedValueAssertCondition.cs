@@ -8,7 +8,7 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
 {
     protected override string GetExpectation() => $" to be not equivalent to {(expected != null ? string.Join(",", expected) : null)}";
 
-    protected override AssertionResult GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
         if (actualValue is null != expectedValue is null)
         {
@@ -16,12 +16,10 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
         }
 
         return AssertionResult
-            .FailIf(
-                () => actualValue is null && expectedValue is null,
-                () => "it is null")
-            .OrFailIf(
-                () => actualValue!.SequenceEqual(expectedValue!, equalityComparer),
-                () => "the two Enumerables were equivalent"
+            .FailIf(actualValue is null && expectedValue is null,
+                "it is null")
+            .OrFailIf(actualValue!.SequenceEqual(expectedValue!, equalityComparer),
+                "the two Enumerables were equivalent"
             );
     }
 }

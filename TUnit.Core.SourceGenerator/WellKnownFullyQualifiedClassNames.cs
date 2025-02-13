@@ -13,9 +13,9 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName ArgumentsAttribute = "TUnit.Core.ArgumentsAttribute";
     public static readonly FullyQualifiedTypeName MethodDataSourceAttribute = "TUnit.Core.MethodDataSourceAttribute";
     public static readonly FullyQualifiedTypeName ClassDataSourceAttribute = "TUnit.Core.ClassDataSourceAttribute";
-    public static readonly FullyQualifiedTypeName MatrixAttribute = "TUnit.Core.MatrixAttribute";
     public static readonly FullyQualifiedTypeName ClassConstructorAttribute = "TUnit.Core.ClassConstructorAttribute";
     public static readonly FullyQualifiedTypeName DataSourceGeneratorAttribute = "TUnit.Core.DataSourceGeneratorAttribute";
+    public static readonly FullyQualifiedTypeName NonTypedDataSourceGeneratorAttribute = "TUnit.Core.NonTypedDataSourceGeneratorAttribute";
 
     
     // Metadata

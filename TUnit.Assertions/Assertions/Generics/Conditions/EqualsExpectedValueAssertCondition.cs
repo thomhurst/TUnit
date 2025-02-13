@@ -14,19 +14,22 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected, IEqua
     protected override string GetExpectation()
         => $"to be equal to {expected}";
 
-    protected override AssertionResult GetResult(TActual? actualValue, TActual? expectedValue)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, TActual? expectedValue)
     {
+        if (equalityComparer.Equals(actualValue, expectedValue))
+        {
+            return AssertionResult.Passed;
+        }
+        
         if (actualValue is IEquatable<TActual> equatable)
         {
             return AssertionResult
-                .FailIf(
-                    () => !equatable.Equals(expected),
-                    () => $"found {actualValue}");
+                .FailIf(!equatable.Equals(expected),
+                    $"found {actualValue}");
         }
 
         return AssertionResult
-            .FailIf(
-                () => !Equals(actualValue, expectedValue) && !equalityComparer.Equals(actualValue, expectedValue),
-                () => $"found {actualValue}");
+            .FailIf(!Equals(actualValue, expectedValue),
+                $"found {actualValue}");
     }
 }

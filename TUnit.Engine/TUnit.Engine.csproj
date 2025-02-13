@@ -17,10 +17,15 @@
     <PackageReference Include="Microsoft.Testing.Platform" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TUnit.Engine.props">
+    <TfmSpecificPackageFile Include="TUnit.Engine.props">
       <Pack>true</Pack>
-      <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-    </Content>
+      <PackagePath>$(BuildTransitivePath)</PackagePath>
+    </TfmSpecificPackageFile>
+    
+    <TfmSpecificPackageFile Include="TUnit.Engine.props">
+      <Pack>true</Pack>
+      <PackagePath>$(BuildPath)</PackagePath>
+    </TfmSpecificPackageFile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />

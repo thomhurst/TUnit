@@ -84,9 +84,9 @@ public class EquivalentAssertionTests
         
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             """
-            Expected array to be equivalent to 1,2,3,4,5
+            Expected array to be equivalent to [1, 2, 3, 4, 5]
             
-            but it is 1,5,2,3,4
+            but it is [1, 5, 2, 3, 4]
             
             at Assert.That(array).IsEquivalentTo(list)
             """
@@ -103,9 +103,9 @@ public class EquivalentAssertionTests
         
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             """
-            Expected array to be equivalent to 1,2,3,4,5
+            Expected array to be equivalent to [1, 2, 3, 4, 5]
             
-            but it is 1,5,2,3,4
+            but it is [1, 5, 2, 3, 4]
             
             at Assert.That(array).IsEquivalentTo(list)
             """
@@ -128,7 +128,7 @@ public class EquivalentAssertionTests
             """
             Expected result1 to be equivalent to result2
             
-            but Property Value did not match
+            but Property MyClass.Value did not match
             Expected: "Foo1"
             Received: "Foo"
             
@@ -152,7 +152,7 @@ public class EquivalentAssertionTests
             """
             Expected object1 to be equivalent to object2
             
-            but Property Value did not match
+            but Property MyClass.Value did not match
             Expected: "Foo"
             Received: null
             
@@ -192,7 +192,7 @@ public class EquivalentAssertionTests
             """
             Expected object1 to be equivalent to object2
             
-            but Property Inner.Inner.Value did not match
+            but Property MyClass.Inner.Inner.Value did not match
             Expected: "Baz"
             Received: null
             
@@ -300,7 +300,7 @@ public class EquivalentAssertionTests
             """
             Expected object1 to be equivalent to object2
             
-            but EnumerableItem Inner.Inner.Collection.[3] did not match
+            but EnumerableItem MyClass.Inner.Inner.Collection.[3] did not match
             Expected: "4"
             Received: null
             

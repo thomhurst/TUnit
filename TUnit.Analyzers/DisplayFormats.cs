@@ -15,7 +15,7 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType, 
         SymbolDisplayKindOptions.None, 
-        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
+        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
     
     public static readonly SymbolDisplayFormat FullyQualifiedGenericWithGlobalPrefix = new(
@@ -29,7 +29,7 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType, 
         SymbolDisplayKindOptions.None, 
-        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
+        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
     
     public static readonly SymbolDisplayFormat FullyQualifiedNonGeneric = new(
@@ -43,8 +43,8 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType,
         SymbolDisplayKindOptions.None, 
-        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
+        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
     
-    public static readonly SymbolDisplayFormat NameOnly = new();
+    public static readonly SymbolDisplayFormat NameOnly = new(miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 }

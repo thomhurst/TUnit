@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Hooks;
@@ -42,10 +41,10 @@ public abstract record InstanceHookMethod
 {
     public abstract Type ClassType { get; }
     public abstract Assembly Assembly { get; }
-    public required MethodInfo MethodInfo { get; init; }
+    public required SourceGeneratedMethodInformation MethodInfo { get; init; }
     
     [field: AllowNull, MaybeNull]
-    public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
+    public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
 
     public required Attribute[] MethodAttributes { get; init; }
     public required Attribute[] ClassAttributes { get; init; }

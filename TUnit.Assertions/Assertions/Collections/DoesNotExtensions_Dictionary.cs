@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesNotExtensions
 {
-    public static InvokableValueAssertionBuilder<TDictionary> DoesNotContainKey<TDictionary, TKey>(this IValueSource<TDictionary> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TDictionary> DoesNotContainKey<TDictionary, TKey>(this IValueSource<TDictionary> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TDictionary : IDictionary
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TDictionary, TKey>(expected,
@@ -24,7 +24,7 @@ public static partial class DoesNotExtensions
             , [doNotPopulateThisValue]);
     }
     
-    public static InvokableValueAssertionBuilder<TDictionary> DoesNotContainValue<TDictionary, TValue>(this IValueSource<TDictionary> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<TDictionary> DoesNotContainValue<TDictionary, TValue>(this IValueSource<TDictionary> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
         where TDictionary : IDictionary
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TDictionary, TValue>(expected,

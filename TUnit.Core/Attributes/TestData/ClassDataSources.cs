@@ -140,7 +140,7 @@ internal class ClassDataSources
             var innerDictionary = TestClassTypeInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<Type, Task>());
             
-            return innerDictionary.GetOrAdd(testContext.TestDetails.ClassType,
+            return innerDictionary.GetOrAdd(testContext.TestDetails.TestClass.Type,
                 _ => InitializeObject(item));
         }
 
@@ -149,7 +149,7 @@ internal class ClassDataSources
             var innerDictionary = AssemblyInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<Assembly, Task>());
             
-            return innerDictionary.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
+            return innerDictionary.GetOrAdd(testContext.TestDetails.TestClass.Type.Assembly,
                 _ => InitializeObject(item));
         }
 
@@ -175,6 +175,11 @@ internal class ClassDataSources
         {
             await TestDataContainer.ConsumeGlobalCount(typeof(T));
         }
+    }
+    
+    public static bool IsStaticProperty(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        return dataGeneratorMetadata.MembersToGenerate is [SourceGeneratedPropertyInformation { IsStatic: true }];
     }
 
     private static T Create<T>() where T : new()

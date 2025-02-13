@@ -1327,5 +1327,86 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0047Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test methods must not be static..
+        /// </summary>
+        internal static string TUnit0048Description {
+            get {
+                return ResourceManager.GetString("TUnit0048Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test methods must not be static..
+        /// </summary>
+        internal static string TUnit0048MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0048MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test methods must not be static.
+        /// </summary>
+        internal static string TUnit0048Title {
+            get {
+                return ResourceManager.GetString("TUnit0048Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [MatrixDataSourceAttribute] is required if using [Matrix] values on your parameters..
+        /// </summary>
+        internal static string TUnit0049Description {
+            get {
+                return ResourceManager.GetString("TUnit0049Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [MatrixDataSourceAttribute] is required if using [Matrix] values on your parameters..
+        /// </summary>
+        internal static string TUnit0049MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0049MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [MatrixDataSourceAttribute] is required.
+        /// </summary>
+        internal static string TUnit0049Title {
+            get {
+                return ResourceManager.GetString("TUnit0049Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too many arguments provided..
+        /// </summary>
+        internal static string TUnit0050Description {
+            get {
+                return ResourceManager.GetString("TUnit0050Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too many arguments provided..
+        /// </summary>
+        internal static string TUnit0050MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0050MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too many arguments provided.
+        /// </summary>
+        internal static string TUnit0050Title {
+            get {
+                return ResourceManager.GetString("TUnit0050Title", resourceCulture);
+            }
+        }
     }
 }

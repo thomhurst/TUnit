@@ -14,14 +14,14 @@ public class InjectNonSharedInstance(DummyReferenceTypeClass dummyReferenceTypeC
         await Assert.That(Instances).DoesNotContain(dummyReferenceTypeClass);
         Instances.Add(dummyReferenceTypeClass);
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test2()
     {
         await Assert.That(Instances).DoesNotContain(dummyReferenceTypeClass);
         Instances.Add(dummyReferenceTypeClass);
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test3()
     {

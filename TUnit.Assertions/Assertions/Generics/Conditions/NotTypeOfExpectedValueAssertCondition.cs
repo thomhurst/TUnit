@@ -8,9 +8,9 @@ public class NotTypeOfExpectedValueAssertCondition<TActual>(Type expected)
     protected override string GetExpectation()
         => $"to not be of type {expected.Name}";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata)
         => AssertionResult
-            .FailIf(
-                () => actualValue?.GetType() == expected,
-                () => "it was");
+            .FailIf(actualValue?.GetType() == expected,
+                "it was");
 }

@@ -10,11 +10,11 @@ public static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
         
-        sourceBuilder.WriteLine("nodes.Add(new FailedInitializationTest");
+        sourceBuilder.WriteLine("nodes.Add(new global::TUnit.Core.FailedInitializationTest");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestClass = typeof({testSourceDataModel.FullyQualifiedTypeName}),");
-        sourceBuilder.WriteLine($"ReturnType = {MethodInfoWriter.Write(testSourceDataModel)}.ReturnType,");
+        sourceBuilder.WriteLine($"ReturnType = typeof({testSourceDataModel.TestMethod.ReturnType.GloballyQualified()}),");
         sourceBuilder.WriteLine($"ParameterTypeFullNames = [{string.Join(", ", testSourceDataModel.MethodArgumentTypes.Select(x => $"typeof({x})"))}],");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");

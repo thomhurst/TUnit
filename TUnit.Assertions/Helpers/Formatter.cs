@@ -42,6 +42,7 @@ internal abstract class Formatter
         }
 
         var formatter = Formatters.FirstOrDefault(f => f.CanHandle(value));
+        
         if (formatter != null)
         {
             return formatter.FormatValue(value);

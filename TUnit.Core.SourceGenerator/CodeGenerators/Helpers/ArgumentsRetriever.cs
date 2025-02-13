@@ -10,22 +10,19 @@ public static class ArgumentsRetriever
 {
     public static IEnumerable<BaseContainer> GetArguments(GeneratorAttributeSyntaxContext context,
         ImmutableArray<IParameterSymbol> parameters,
+        IPropertySymbol? property,
         ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
         ImmutableArray<AttributeData> dataAttributes,
-        INamedTypeSymbol namedTypeSymbol,
+        INamedTypeSymbol testClass,
+        IMethodSymbol testMethod,
         ArgumentsType argumentsType,
         string? propertyName = null)
     {
-        if (parameterOrPropertyTypes.IsDefaultOrEmpty || !IsDataDriven(dataAttributes, parameters))
+        if (parameterOrPropertyTypes.IsDefaultOrEmpty || !IsDataDriven(dataAttributes))
         {
             yield return new EmptyArgumentsContainer();
             
             yield break;
-        }
-        
-        foreach (var argumentsContainer in MatrixRetriever.Parse(context, parameters, argumentsType))
-        {
-            yield return argumentsContainer;
         }
 
         foreach (var attributeTypeGroup in dataAttributes.GroupBy(x => x.AttributeClass,
@@ -52,7 +49,7 @@ public static class ArgumentsRetriever
                 if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix)
                 {
                     yield return MethodDataSourceRetriever.ParseMethodData(context, parameterOrPropertyTypes,
-                        namedTypeSymbol, dataAttribute, argumentsType, index);
+                        testClass, dataAttribute, argumentsType, index);
                 }
 
                 if (name == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix)
@@ -63,21 +60,45 @@ public static class ArgumentsRetriever
                 if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
                         .DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
-                    yield return DataSourceGeneratorRetriever.Parse(context, namedTypeSymbol, dataAttribute, argumentsType,
-                        index, propertyName);
+                    yield return DataSourceGeneratorRetriever.Parse(context, 
+                        testClass, 
+                        testMethod, 
+                        parameters, 
+                        property, 
+                        parameterOrPropertyTypes, 
+                        dataAttribute, 
+                        argumentsType,
+                        index, 
+                        propertyName, 
+                        true);
+                }
+                
+                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                        .NonTypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                {
+                    yield return DataSourceGeneratorRetriever.Parse(context, 
+                        testClass, 
+                        testMethod, 
+                        parameters, 
+                        property, 
+                        parameterOrPropertyTypes, 
+                        dataAttribute, 
+                        argumentsType,
+                        index, 
+                        propertyName,
+                        false);
                 }
             }
         }
     }
 
-    private static bool IsDataDriven(ImmutableArray<AttributeData> dataAttributes,
-        ImmutableArray<IParameterSymbol> parameters)
+    private static bool IsDataDriven(ImmutableArray<AttributeData> dataAttributes)
     {
-        return dataAttributes.Any(x => x.IsDataSourceAttribute())
-               || parameters.HasMatrixAttribute();
+        return dataAttributes.Any(x => x.IsDataSourceAttribute());
     }
 
-    public static ClassPropertiesContainer GetProperties(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
+    public static ClassPropertiesContainer GetProperties(GeneratorAttributeSyntaxContext context,
+        INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol)
     {
         var settableProperties = namedTypeSymbol
             .GetSelfAndBaseTypes()
@@ -103,8 +124,13 @@ public static class ArgumentsRetriever
             var dataSourceAttributes = propertySymbol.GetAttributes().Where(x => x.IsDataSourceAttribute()).ToImmutableArray();
             if (dataSourceAttributes.Any())
             {
-                var args = GetArguments(context, ImmutableArray<IParameterSymbol>.Empty,
-                    ImmutableArray.Create(propertySymbol.Type), dataSourceAttributes, namedTypeSymbol,
+                var args = GetArguments(context, 
+                    ImmutableArray<IParameterSymbol>.Empty,
+                    propertySymbol,
+                    ImmutableArray.Create(propertySymbol.Type), 
+                    dataSourceAttributes, 
+                    namedTypeSymbol, 
+                    methodSymbol,
                     ArgumentsType.Property, propertySymbol.Name);
                 
                 list.Add((propertySymbol, args.OfType<ArgumentsContainer>().First()));

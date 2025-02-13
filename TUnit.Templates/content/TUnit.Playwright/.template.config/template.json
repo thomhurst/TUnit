@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Tom Longhurst",
+    "description": "A template for testing using Playwright with TUnit",
+    "classifications": [
+      "Test",
+      "TUnit",
+      "Playwright"
+    ],
+    "name": "TUnit Playwright Project",
+    "identity": "TUnit.Test.Playwright",
+    "groupIdentity": "TUnit.Playwright",
+    "shortName": "TUnit.Playwright",
+    "tags": {
+      "language": "C#",
+      "type": "project"
+    },
+    "sourceName": "TestProject",
+    "preferNameDirectory": true
+  }
+  

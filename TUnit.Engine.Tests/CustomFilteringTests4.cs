@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 
 namespace TUnit.Engine.Tests;
 
@@ -10,11 +10,11 @@ public class CustomFilteringTests4 : InvokableTestBase
         await RunTestsWithFilter(
             "/*/*/CustomFilteringTests/*[one=other]",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Failed"),
-                result => result.ResultSummary.Counters.Total.Should().Be(0),
-                result => result.ResultSummary.Counters.Passed.Should().Be(0),
-                result => result.ResultSummary.Counters.Failed.Should().Be(0),
-                result => result.ResultSummary.Counters.NotExecuted.Should().Be(0)
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(0),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(0),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
 }

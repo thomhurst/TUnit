@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace TUnit.Analyzers.Extensions;
 
@@ -9,7 +10,13 @@ public static class CompilationExtensions
     {
         if (parameterType?.IsGenericDefinition() == false)
         {
-            return compilation.HasImplicitConversion(argumentType, parameterType);
+            if (argumentType is null)
+            {
+                return false;
+            }
+            
+            var conversion = compilation.ClassifyConversion(argumentType, parameterType);
+            return conversion.IsImplicit || conversion.IsNumeric;
         }
         
         if (parameterType is INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ TypeKind: TypeKind.TypeParameter }] } namedType)

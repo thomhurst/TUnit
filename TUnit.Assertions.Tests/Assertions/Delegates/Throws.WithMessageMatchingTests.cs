@@ -1,4 +1,6 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Throws;
 
 namespace TUnit.Assertions.Tests.Assertions.Delegates;
 
@@ -55,6 +57,7 @@ public partial class Throws
         }
 
         [Test]
+        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
         public async Task Returns_Exception_When_Awaited()
         {
             var matchingMessage = "foo";
@@ -63,7 +66,7 @@ public partial class Throws
 
             var result = await Assert.That(action).Throws<CustomException>().WithMessageMatching(matchingMessage);
 
-            await Assert.That((object?)result).IsSameReferenceAs(exception);
+            await Assert.That(result).IsSameReferenceAs(exception);
         }
 
         [Test]

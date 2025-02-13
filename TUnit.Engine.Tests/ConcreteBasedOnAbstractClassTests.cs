@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 
 namespace TUnit.Engine.Tests;
 
@@ -10,11 +10,11 @@ public class ConcreteBasedOnAbstractClassTests : InvokableTestBase
         await RunTestsWithFilter(
             "/*/*/(ConcreteClass1|ConcreteClass2)/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Failed"),
-                result => result.ResultSummary.Counters.Total.Should().Be(3),
-                result => result.ResultSummary.Counters.Passed.Should().Be(2),
-                result => result.ResultSummary.Counters.Failed.Should().Be(1),
-                result => result.ResultSummary.Counters.NotExecuted.Should().Be(0)
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
 }

@@ -14,6 +14,7 @@ internal record DiscoveredTest<
 
     public override async Task ExecuteTest(CancellationToken cancellationToken)
     {
+        TestContext.CancellationToken = cancellationToken;
         await TestExecutor.ExecuteTest(TestContext, () => TestBody.Invoke(TestClass, cancellationToken));
     }
     
@@ -40,6 +41,8 @@ internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparab
     public abstract IClassConstructor? ClassConstructor { get; }
     
     public IHookExecutor? HookExecutor { get; internal set; }
+
+    internal Dependency[] Dependencies { get; set; } = [];
     
     public int CompareTo(object? obj)
     {

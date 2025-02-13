@@ -9,6 +9,8 @@ namespace TUnit.Engine.Logging;
 internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger)
     : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
 {
+    private readonly MTPLoggerAdapter _adapter = new(logger);
+    
     public Task<bool> IsEnabledAsync()
     {
         return Task.FromResult(true);
@@ -35,15 +37,8 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
                 ConsoleColor = GetConsoleColor(logLevel)
             }
         });
-
-        if (exception is not null)
-        {
-            await logger.LogErrorAsync(text, exception);
-        }
-        else
-        {
-            await logger.LogErrorAsync(text);
-        }
+        
+        await _adapter.LogAsync(logLevel, state, exception, formatter);
     }
 
     public void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
@@ -62,15 +57,8 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
                 ConsoleColor = GetConsoleColor(logLevel)
             }
         });
-
-        if (exception is not null)
-        {
-            logger.LogError(text, exception);
-        }
-        else
-        {
-            logger.LogError(text);
-        }
+        
+        _adapter.Log(logLevel, state, exception, formatter);
     }
 
     private static ConsoleColor GetConsoleColor(LogLevel logLevel)
@@ -80,7 +68,7 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
             return ConsoleColor.DarkYellow;
         }
         
-        if(logLevel >= LogLevel.Error)
+        if (logLevel >= LogLevel.Error)
         {
             return ConsoleColor.DarkRed;
         }

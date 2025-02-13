@@ -18,7 +18,7 @@ public class MethodDataSourceDrivenWithCancellationTokenTests
     {
         Console.WriteLine(value);
     }
-    
+
     public static int T() => 1;
 
     public static Func<int> FuncT() => () => 1;

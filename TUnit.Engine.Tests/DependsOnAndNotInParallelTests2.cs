@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 
 namespace TUnit.Engine.Tests;
 
@@ -10,11 +10,11 @@ public class NotInParallelWithDependsOnTests : InvokableTestBase
         await RunTestsWithFilter(
             "/*/*/NotInParallelWithDependsOnTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Failed"),
-                result => result.ResultSummary.Counters.Total.Should().Be(3),
-                result => result.ResultSummary.Counters.Passed.Should().Be(0),
-                result => result.ResultSummary.Counters.Failed.Should().Be(3),
-                result => result.ResultSummary.Counters.NotExecuted.Should().Be(0),
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(0),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(3),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0),
 
             ]);
     }

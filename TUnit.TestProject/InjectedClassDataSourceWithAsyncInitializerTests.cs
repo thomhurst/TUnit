@@ -19,14 +19,14 @@ public class InjectedClassDataSourceWithAsyncInitializerTests(InjectedClassDataS
         Console.WriteLine("Test");
         return Task.CompletedTask;
     }
-    
+
     [Test]
     public Task Test2()
     {
         Console.WriteLine("Test");
         return Task.CompletedTask;
     }
-    
+
     [Test]
     public Task Test3()
     {

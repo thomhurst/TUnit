@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -37,7 +38,7 @@ public static class TestContextExtensions
 
                     try
                     {
-                        await AsyncConvert.Convert(testContext.TestDetails.MethodInfo.Invoke(@class, args));
+                        await AsyncConvert.Convert(testContext.TestDetails.TestMethod.ReflectionInformation.Invoke(@class, args));
                     }
                     catch (TargetInvocationException e)
                     {
@@ -64,7 +65,7 @@ public static class TestContextExtensions
             Parallel = [newTest],
             NotInParallel = new PriorityQueue<DiscoveredTest, int>(),
             KeyedNotInParallel = new Dictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>(),
-            ParallelGroups = new Dictionary<string, List<DiscoveredTest>>()
+            ParallelGroups = new ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>>()
         }, null, testContext.GetService<ExecuteRequestContext>());
     }
     
@@ -84,11 +85,22 @@ public static class TestContextExtensions
 
         if (testContext.Result?.Exception is not null && exception is not null)
         {
-            exception = new AggregateException(testContext.Result.Exception, exception);
+            if (exception is AggregateException aggregateException)
+            {
+                exception = new AggregateException([
+                    testContext.Result.Exception, ..aggregateException.InnerExceptions
+                ]);
+            }
+            else
+            {
+                exception = new AggregateException(testContext.Result.Exception, exception);
+            }
         }
 
-        var start = testContext.Timings.MinBy(x => x.Start)?.Start;
-        var end = testContext.Timings.MaxBy(x => x.End)?.End;
+        DateTimeOffset? now = null;
+        
+        var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? (now ??= DateTimeOffset.UtcNow);
+        var end = testContext.Timings.MaxBy(x => x.End)?.End ?? (now ??= DateTimeOffset.UtcNow);
         
         testContext.Result = new TestResult
         {

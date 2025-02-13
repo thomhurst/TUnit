@@ -7,6 +7,7 @@ public static class WellKnown
         public static readonly FullyQualifiedTypeName TimeoutAttribute = GetTypeName("TimeoutAttribute");
         public static readonly FullyQualifiedTypeName Explicit = GetTypeName("ExplicitAttribute");
         public static readonly FullyQualifiedTypeName Matrix = GetTypeName("MatrixAttribute");
+        public static readonly FullyQualifiedTypeName MatrixDataSourceAttribute = GetTypeName("MatrixDataSourceAttribute");
 
         public static readonly FullyQualifiedTypeName BeforeAttribute = GetTypeName("BeforeAttribute");
         public static readonly FullyQualifiedTypeName AfterAttribute = GetTypeName("AfterAttribute");
@@ -24,6 +25,9 @@ public static class WellKnown
         public static readonly FullyQualifiedTypeName TestContext = GetTypeName("TestContext");
         public static readonly FullyQualifiedTypeName ClassHookContext = GetTypeName("ClassHookContext");
         public static readonly FullyQualifiedTypeName AssemblyHookContext = GetTypeName("AssemblyHookContext");
+        public static readonly FullyQualifiedTypeName TestSessionContext = GetTypeName("TestSessionContext");
+        public static readonly FullyQualifiedTypeName BeforeTestDiscoveryContext = GetTypeName("BeforeTestDiscoveryContext");
+        public static readonly FullyQualifiedTypeName TestDiscoveryContext = GetTypeName("TestDiscoveryContext");
 
         public static readonly FullyQualifiedTypeName InheritsTestsAttribute = GetTypeName("InheritsTestsAttribute");
 

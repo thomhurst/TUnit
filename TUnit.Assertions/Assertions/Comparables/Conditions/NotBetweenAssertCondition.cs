@@ -7,7 +7,8 @@ public class NotBetweenAssertCondition<TActual>(TActual minimum, TActual maximum
 
     protected override string GetExpectation() => $"to not be between {minimum} & {minimum} ({GetRange()} Range)";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata)
     {
         bool isInRange;
 
@@ -21,9 +22,8 @@ public class NotBetweenAssertCondition<TActual>(TActual minimum, TActual maximum
         }
 
         return AssertionResult
-            .FailIf(
-                () => !isInRange,
-                () => $"received {actualValue}");
+            .FailIf(!isInRange,
+                $"received {actualValue}");
 
     }
 

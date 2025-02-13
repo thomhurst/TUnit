@@ -1,3 +1,3 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Interfaces;
 
-public interface IValueDelegateSource<TActual> : ISource<TActual>;
+public interface IValueDelegateSource<out TActual> : IValueSource<TActual>, IDelegateSource;

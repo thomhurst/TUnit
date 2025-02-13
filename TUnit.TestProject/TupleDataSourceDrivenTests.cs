@@ -8,6 +8,6 @@ public class TupleDataSourceDrivenTests
     {
         // Dummy method
     }
-    
+
     public static (int, string, bool) TupleMethod() => (1, "String", true);
 }

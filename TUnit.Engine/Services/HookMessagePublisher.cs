@@ -27,7 +27,7 @@ public class HookMessagePublisher(IExtension extension, IMessageBus messageBus) 
                     (
                         hookMethod.Assembly.FullName!, hookMethod.ClassType.Namespace!,
                         hookMethod.ClassType.Name, hookMethod.Name,
-                        hookMethod.MethodInfo.GetParameters().Select(x => x.ParameterType.FullName!).ToArray(),
+                        hookMethod.MethodInfo.Parameters.Select(x => x.Type.FullName!).ToArray(),
                         hookMethod.MethodInfo.ReturnType.FullName!
                     )
                 ),
@@ -73,7 +73,7 @@ public class HookMessagePublisher(IExtension extension, IMessageBus messageBus) 
                     (
                         hookMethod.Assembly.FullName!, hookMethod.ClassType.Namespace!,
                         hookMethod.ClassType.Name, hookMethod.Name,
-                        hookMethod.MethodInfo.GetParameters().Select(x => x.ParameterType.FullName!).ToArray(),
+                        hookMethod.MethodInfo.Parameters.Select(x => x.Type.FullName!).ToArray(),
                         hookMethod.MethodInfo.ReturnType.FullName!
                     ),
                     stateProperty

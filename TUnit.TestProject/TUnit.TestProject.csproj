@@ -26,15 +26,16 @@
     <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
-    <NoWarn>IL2118</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AutoFixture" />
     <PackageReference Include="coverlet.collector" />
-    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="OneOf" />
+    <PackageReference Include="Shouldly" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
@@ -56,5 +57,11 @@
     <None Update="Data\Zip.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="testconfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Test.cs" />
   </ItemGroup>
 </Project>

@@ -1,8 +1,9 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Helpers;
+using Microsoft.CodeAnalysis.Operations;
+using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Analyzers;
 
@@ -14,81 +15,90 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
+        context.RegisterOperationAction(AnalyzeOperation, OperationKind.SimpleAssignment);
     }
-    
-    private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
-        if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
+
+    private void AnalyzeOperation(OperationAnalysisContext context)
+    {
+        if (context.Operation is not IAssignmentOperation assignmentOperation)
         {
             return;
         }
-
-        var classMembers = namedTypeSymbol.GetMembers();
         
-        var tests = classMembers
-            .OfType<IMethodSymbol>()
-            .Where(x => x.GetAttributes()
-                .Any(a => WellKnown.AttributeFullyQualifiedClasses.Test.WithGlobalPrefix == a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
-            )
-            .ToList();
-
-        if (!tests.Any())
+        if (!TryGetParentMethodBody(assignmentOperation, out var methodBodyOperation))
         {
             return;
         }
 
-        var fieldsAndProperties = classMembers
+        if (context.Operation.SemanticModel?.GetDeclaredSymbol(methodBodyOperation.Syntax) is not IMethodSymbol
+            methodSymbol)
+        {
+            return;
+        }
+
+        if (!methodSymbol.IsTestMethod(context.Compilation))
+        {
+            return;
+        }
+        
+        var testClass = methodSymbol.ContainingType;
+
+        var typeMembers = testClass.GetMembers();
+        
+        var fieldsAndProperties = typeMembers
             .OfType<IFieldSymbol>()
-            .Concat<ISymbol>(classMembers.OfType<IPropertySymbol>())
+            .Concat<ISymbol>(typeMembers.OfType<IPropertySymbol>())
             .Where(x => !x.IsStatic);
         
         foreach (var fieldOrProperty in fieldsAndProperties)
         {
-            var fieldOrPropertySyntax = fieldOrProperty.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+            var targetSymbol = GetTarget(assignmentOperation);
 
-            var methodDeclarationSyntaxes = tests
-                .Select(x => x.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax())
-                .OfType<MethodDeclarationSyntax>();
-            
-            foreach (var methodDeclarationSyntax in methodDeclarationSyntaxes)
+            if (!SymbolEqualityComparer.Default.Equals(targetSymbol?.ContainingType, testClass))
             {
-                CheckMethod(context, methodDeclarationSyntax, fieldOrPropertySyntax);
+                return;
             }
-        }
-    }
-
-    private void CheckMethod(SymbolAnalysisContext context, MethodDeclarationSyntax methodDeclarationSyntax,
-        SyntaxNode? fieldOrPropertySyntax)
-    {
-        var descendantNodes = methodDeclarationSyntax.DescendantNodes();
-        
-        foreach (var descendantNode in descendantNodes)
-        {
-            if (IsAssignment(descendantNode, fieldOrPropertySyntax))
+            
+            if (SymbolEqualityComparer.Default.Equals(targetSymbol, fieldOrProperty))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.InstanceAssignmentInTestClass,
-                        descendantNode.GetLocation())
-                );
+                        assignmentOperation.Syntax.GetLocation()));
             }
         }
     }
 
-    private bool IsAssignment(SyntaxNode syntaxNode, SyntaxNode? fieldOrPropertySyntax)
+    private static ISymbol? GetTarget(IAssignmentOperation assignmentOperation)
     {
-        if (syntaxNode is not AssignmentExpressionSyntax assignmentExpressionSyntax)
+        if (assignmentOperation.Target is IPropertyReferenceOperation propertyReferenceOperation)
         {
-            return false;
+            return propertyReferenceOperation.Property;
+        }
+        
+        if (assignmentOperation.Target is IFieldReferenceOperation fieldReferenceOperation)
+        {
+            return fieldReferenceOperation.Field;
+        }
+        
+        return null;
+    }
+
+    private static bool TryGetParentMethodBody(IAssignmentOperation assignmentOperation, [NotNullWhen(true)] out IMethodBodyOperation? methodBodyOperation)
+    {
+        var parent = assignmentOperation.Parent;
+
+        while (parent is not null)
+        {
+            if (parent is IMethodBodyOperation methodBody)
+            {
+                methodBodyOperation = methodBody;
+                return true;
+            }
+
+            parent = parent.Parent;
         }
 
-        var assignmentSyntaxChild = assignmentExpressionSyntax.ChildNodes().FirstOrDefault();
-
-        if (assignmentSyntaxChild is not IdentifierNameSyntax identifierNameSyntax)
-        {
-            return false;
-        }
-
-        return identifierNameSyntax.Identifier.ValueText == fieldOrPropertySyntax?.ToString();
+        methodBodyOperation  = null;
+        return false;
     }
 }

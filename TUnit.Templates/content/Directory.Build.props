@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <ItemGroup Condition="$(MSBuildProjectName.Contains('TestProject'))">
+        <Using Include="TUnit.Core.HookType" Static="True" />
+        <Using Include="TUnit.Core" />
+    </ItemGroup>
+</Project>

@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataSourceClassCombinedWithDataSourceMethod());
+		global::TUnit.Core.SourceRegistrar.Register(new DataSourceClassCombinedWithDataSourceMethod());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -39,728 +39,917 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();
-
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
+				Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+				Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "i",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+						Attributes = [],
+					}),
+					Name = "DataSourceClassCombinedWithDataSourceMethod",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "i",
+							Attributes = [],
+						},
+					],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				int classArg = global::TUnit.TestProject.CommonTestData.One();
+
+				int methodArg = global::TUnit.TestProject.CommonTestData.One();
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+				new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+					TestClassArguments = [classArg],
+					TestMethodArguments = [methodArg],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+					TestFilePath = @"",
+					TestLineNumber = 10,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
+			{
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+					TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [typeof(int)],
+					TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+					TestFilePath = @"",
+					TestLineNumber = 10,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		catch (global::System.Exception exception)
+		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
 		{
-			nodes.Add(new FailedInitializationTest
+			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			var classDataIndex = 0;
+			var testMethodDataIndex = 0;
+			try
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
+				var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+				{
+					Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+					Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.TestAttribute(),
+						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "i",
+							Attributes = [],
+						},
+					],
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+					{
+						Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+						{
+							Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+							Attributes = [],
+						}),
+						Name = "DataSourceClassCombinedWithDataSourceMethod",
+						Namespace = "TUnit.TestProject",
+						Attributes = 
+						[
+							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+						],
+						Parameters = 
+						[
+							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+							{
+								Name = "i",
+								Attributes = [],
+							},
+						],
+						Properties = [],
+					}),
+};
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();
+					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
+					int methodArg = global::TUnit.TestProject.CommonTestData.One();
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+					new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+					, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+					var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+					{
+						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+						TestClassArguments = [classArg],
+						TestMethodArguments = [methodArg],
+						TestClassProperties = [],
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+						TestFilePath = @"",
+						TestLineNumber = 10,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+				catch (global::System.Exception exception)
+				{
+					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					{
+						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+						TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+						ReturnType = typeof(void),
+						ParameterTypeFullNames = [typeof(int)],
+						TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+						TestFilePath = @"",
+						TestLineNumber = 10,
+						Exception = exception,
+					});
+				}
+				return nodes;
+			}
+			private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
+				global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+				var classDataIndex = 0;
+				var testMethodDataIndex = 0;
+				try
+				{
+					var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+					{
+						Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+						Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+						GenericTypeCount = 0,
+						ReturnType = typeof(void),
+						Attributes = 
+						[
+							new global::TUnit.Core.TestAttribute(),
+							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+						],
+						Parameters = 
+						[
+							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+							{
+								Name = "i",
+								Attributes = [],
+							},
+						],
+						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+						{
+							Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+							{
+								Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+								Attributes = [],
+							}),
+							Name = "DataSourceClassCombinedWithDataSourceMethod",
+							Namespace = "TUnit.TestProject",
+							Attributes = 
+							[
+								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+							],
+							Parameters = 
+							[
+								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+								{
+									Name = "i",
+									Attributes = [],
+								},
+							],
+							Properties = [],
+						}),
+};
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();
+						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
+						int methodArg = global::TUnit.TestProject.CommonTestData.One();
+						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+						new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+						, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+						var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests3(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
+						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+						{
+							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+							TestClassArguments = [classArg],
+							TestMethodArguments = [methodArg],
+							TestClassProperties = [],
+							CurrentRepeatAttempt = 0,
+							RepeatLimit = 0,
+							ResettableClassFactory = resettableClassFactory,
+							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+							TestFilePath = @"",
+							TestLineNumber = 10,
+							TestMethod = testInformation,
+							TestBuilderContext = testBuilderContext,
+						});
+						resettableClassFactory = resettableClassFactoryDelegate();
+						testBuilderContext = new();
+						testBuilderContextAccessor.Current = testBuilderContext;
+					}
+					catch (global::System.Exception exception)
+					{
+						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						{
+							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+							TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+							ReturnType = typeof(void),
+							ParameterTypeFullNames = [typeof(int)],
+							TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+							TestFilePath = @"",
+							TestLineNumber = 10,
+							Exception = exception,
+						});
+					}
+					return nodes;
+				}
+				private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests3(string sessionId)
+				{
+					global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+					var classDataIndex = 0;
+					var testMethodDataIndex = 0;
+					try
+					{
+						var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+						{
+							Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+							Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+							GenericTypeCount = 0,
+							ReturnType = typeof(void),
+							Attributes = 
+							[
+								new global::TUnit.Core.TestAttribute(),
+								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+							],
+							Parameters = 
+							[
+								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+								{
+									Name = "i",
+									Attributes = [],
+								},
+							],
+							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+							{
+								Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+								{
+									Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+									Attributes = [],
+								}),
+								Name = "DataSourceClassCombinedWithDataSourceMethod",
+								Namespace = "TUnit.TestProject",
+								Attributes = 
+								[
+									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+								],
+								Parameters = 
+								[
+									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+									{
+										Name = "i",
+										Attributes = [],
+									},
+								],
+								Properties = [],
+							}),
+};
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();
+							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+							int classArg = global::TUnit.TestProject.CommonTestData.One();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
+							int methodArg = global::TUnit.TestProject.CommonTestData.Two();
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+							new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+							, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+							var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests4(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
+							nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+							{
+								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+								TestClassArguments = [classArg],
+								TestMethodArguments = [methodArg],
+								TestClassProperties = [],
+								CurrentRepeatAttempt = 0,
+								RepeatLimit = 0,
+								ResettableClassFactory = resettableClassFactory,
+								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+								TestFilePath = @"",
+								TestLineNumber = 10,
+								TestMethod = testInformation,
+								TestBuilderContext = testBuilderContext,
+							});
+							resettableClassFactory = resettableClassFactoryDelegate();
+							testBuilderContext = new();
+							testBuilderContextAccessor.Current = testBuilderContext;
+						}
+						catch (global::System.Exception exception)
+						{
+							nodes.Add(new global::TUnit.Core.FailedInitializationTest
+							{
+								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+								TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+								ReturnType = typeof(void),
+								ParameterTypeFullNames = [typeof(int)],
+								TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+								TestFilePath = @"",
+								TestLineNumber = 10,
+								Exception = exception,
+							});
+						}
+						return nodes;
+					}
+					private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests4(string sessionId)
+					{
+						global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+						var classDataIndex = 0;
+						var testMethodDataIndex = 0;
+						try
+						{
+							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+							{
+								Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+								Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+								GenericTypeCount = 0,
+								ReturnType = typeof(void),
+								Attributes = 
+								[
+									new global::TUnit.Core.TestAttribute(),
+									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+								],
+								Parameters = 
+								[
+									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+									{
+										Name = "i",
+										Attributes = [],
+									},
+								],
+								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+								{
+									Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+									{
+										Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+										Attributes = [],
+									}),
+									Name = "DataSourceClassCombinedWithDataSourceMethod",
+									Namespace = "TUnit.TestProject",
+									Attributes = 
+									[
+										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+									],
+									Parameters = 
+									[
+										new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+										{
+											Name = "i",
+											Attributes = [],
+										},
+									],
+									Properties = [],
+								}),
+};
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();
+								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+								int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
+								int methodArg = global::TUnit.TestProject.CommonTestData.Two();
+								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+								new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+								, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+								var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests5(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
+								nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+								{
+									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+									TestClassArguments = [classArg],
+									TestMethodArguments = [methodArg],
+									TestClassProperties = [],
+									CurrentRepeatAttempt = 0,
+									RepeatLimit = 0,
+									ResettableClassFactory = resettableClassFactory,
+									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+									TestFilePath = @"",
+									TestLineNumber = 10,
+									TestMethod = testInformation,
+									TestBuilderContext = testBuilderContext,
+								});
+								resettableClassFactory = resettableClassFactoryDelegate();
+								testBuilderContext = new();
+								testBuilderContextAccessor.Current = testBuilderContext;
+							}
+							catch (global::System.Exception exception)
+							{
+								nodes.Add(new global::TUnit.Core.FailedInitializationTest
+								{
+									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+									TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+									ReturnType = typeof(void),
+									ParameterTypeFullNames = [typeof(int)],
+									TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+									TestFilePath = @"",
+									TestLineNumber = 10,
+									Exception = exception,
+								});
+							}
+							return nodes;
+						}
+						private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests5(string sessionId)
+						{
+							global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+							var classDataIndex = 0;
+							var testMethodDataIndex = 0;
+							try
+							{
+								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+								{
+									Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+									Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+									GenericTypeCount = 0,
+									ReturnType = typeof(void),
+									Attributes = 
+									[
+										new global::TUnit.Core.TestAttribute(),
+										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+									],
+									Parameters = 
+									[
+										new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+										{
+											Name = "i",
+											Attributes = [],
+										},
+									],
+									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+									{
+										Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+										{
+											Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+											Attributes = [],
+										}),
+										Name = "DataSourceClassCombinedWithDataSourceMethod",
+										Namespace = "TUnit.TestProject",
+										Attributes = 
+										[
+											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+										],
+										Parameters = 
+										[
+											new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+											{
+												Name = "i",
+												Attributes = [],
+											},
+										],
+										Properties = [],
+									}),
+};
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();
+									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+									int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
+									int methodArg = global::TUnit.TestProject.CommonTestData.Two();
+									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+									new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+									, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+									var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests6(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
+									nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+									{
+										TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+										TestClassArguments = [classArg],
+										TestMethodArguments = [methodArg],
+										TestClassProperties = [],
+										CurrentRepeatAttempt = 0,
+										RepeatLimit = 0,
+										ResettableClassFactory = resettableClassFactory,
+										TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+										TestFilePath = @"",
+										TestLineNumber = 10,
+										TestMethod = testInformation,
+										TestBuilderContext = testBuilderContext,
+									});
+									resettableClassFactory = resettableClassFactoryDelegate();
+									testBuilderContext = new();
+									testBuilderContextAccessor.Current = testBuilderContext;
+								}
+								catch (global::System.Exception exception)
+								{
+									nodes.Add(new global::TUnit.Core.FailedInitializationTest
+									{
+										TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+										TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+										ReturnType = typeof(void),
+										ParameterTypeFullNames = [typeof(int)],
+										TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+										TestFilePath = @"",
+										TestLineNumber = 10,
+										Exception = exception,
+									});
+								}
+								return nodes;
+							}
+							private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests6(string sessionId)
+							{
+								global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+								var classDataIndex = 0;
+								var testMethodDataIndex = 0;
+								try
+								{
+									var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+									{
+										Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+										Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+										GenericTypeCount = 0,
+										ReturnType = typeof(void),
+										Attributes = 
+										[
+											new global::TUnit.Core.TestAttribute(),
+											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+										],
+										Parameters = 
+										[
+											new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+											{
+												Name = "i",
+												Attributes = [],
+											},
+										],
+										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+										{
+											Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+											{
+												Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+												Attributes = [],
+											}),
+											Name = "DataSourceClassCombinedWithDataSourceMethod",
+											Namespace = "TUnit.TestProject",
+											Attributes = 
+											[
+												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+											],
+											Parameters = 
+											[
+												new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+												{
+													Name = "i",
+													Attributes = [],
+												},
+											],
+											Properties = [],
+										}),
+};
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();
+										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+										var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+										int classArg = global::TUnit.TestProject.CommonTestData.One();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
+										int methodArg = global::TUnit.TestProject.CommonTestData.Three();
+										var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+										new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+										, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+										var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests7(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
+										nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+										{
+											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+											TestClassArguments = [classArg],
+											TestMethodArguments = [methodArg],
+											TestClassProperties = [],
+											CurrentRepeatAttempt = 0,
+											RepeatLimit = 0,
+											ResettableClassFactory = resettableClassFactory,
+											TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+											TestFilePath = @"",
+											TestLineNumber = 10,
+											TestMethod = testInformation,
+											TestBuilderContext = testBuilderContext,
+										});
+										resettableClassFactory = resettableClassFactoryDelegate();
+										testBuilderContext = new();
+										testBuilderContextAccessor.Current = testBuilderContext;
+									}
+									catch (global::System.Exception exception)
+									{
+										nodes.Add(new global::TUnit.Core.FailedInitializationTest
+										{
+											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+											TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+											ReturnType = typeof(void),
+											ParameterTypeFullNames = [typeof(int)],
+											TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+											TestFilePath = @"",
+											TestLineNumber = 10,
+											Exception = exception,
+										});
+									}
+									return nodes;
+								}
+								private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests7(string sessionId)
+								{
+									global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+									var classDataIndex = 0;
+									var testMethodDataIndex = 0;
+									try
+									{
+										var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+										{
+											Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+											Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+											GenericTypeCount = 0,
+											ReturnType = typeof(void),
+											Attributes = 
+											[
+												new global::TUnit.Core.TestAttribute(),
+												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+											],
+											Parameters = 
+											[
+												new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+												{
+													Name = "i",
+													Attributes = [],
+												},
+											],
+											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+											{
+												Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+												{
+													Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+													Attributes = [],
+												}),
+												Name = "DataSourceClassCombinedWithDataSourceMethod",
+												Namespace = "TUnit.TestProject",
+												Attributes = 
+												[
+													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+												],
+												Parameters = 
+												[
+													new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+													{
+														Name = "i",
+														Attributes = [],
+													},
+												],
+												Properties = [],
+											}),
+};
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();
+											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+											int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
+											int methodArg = global::TUnit.TestProject.CommonTestData.Three();
+											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+											new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+											, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+											var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests8(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]);
+											nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+											{
+												TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+												TestClassArguments = [classArg],
+												TestMethodArguments = [methodArg],
+												TestClassProperties = [],
+												CurrentRepeatAttempt = 0,
+												RepeatLimit = 0,
+												ResettableClassFactory = resettableClassFactory,
+												TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+												TestFilePath = @"",
+												TestLineNumber = 10,
+												TestMethod = testInformation,
+												TestBuilderContext = testBuilderContext,
+											});
+											resettableClassFactory = resettableClassFactoryDelegate();
+											testBuilderContext = new();
+											testBuilderContextAccessor.Current = testBuilderContext;
+										}
+										catch (global::System.Exception exception)
+										{
+											nodes.Add(new global::TUnit.Core.FailedInitializationTest
+											{
+												TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+												TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+												ReturnType = typeof(void),
+												ParameterTypeFullNames = [typeof(int)],
+												TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+												TestFilePath = @"",
+												TestLineNumber = 10,
+												Exception = exception,
+											});
+										}
+										return nodes;
+									}
+									private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests8(string sessionId)
+									{
+										global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+										var classDataIndex = 0;
+										var testMethodDataIndex = 0;
+										try
+										{
+											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+											{
+												Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+												Name = "DataSourceClassCombinedWithDataSourceMethodTest",
+												GenericTypeCount = 0,
+												ReturnType = typeof(void),
+												Attributes = 
+												[
+													new global::TUnit.Core.TestAttribute(),
+													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+												],
+												Parameters = 
+												[
+													new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+													{
+														Name = "i",
+														Attributes = [],
+													},
+												],
+												Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+												{
+													Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+													Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+													{
+														Name = "DataSourceClassCombinedWithDataSourceMethodTests",
+														Attributes = [],
+													}),
+													Name = "DataSourceClassCombinedWithDataSourceMethod",
+													Namespace = "TUnit.TestProject",
+													Attributes = 
+													[
+														new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+														new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+														new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+													],
+													Parameters = 
+													[
+														new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+														{
+															Name = "i",
+															Attributes = [],
+														},
+													],
+													Properties = [],
+												}),
+};
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();
+												var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+												var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+												int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
-			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
-			, sessionId, testBuilderContext);
+												int methodArg = global::TUnit.TestProject.CommonTestData.Three();
+												var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
+												new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
+												, sessionId, testBuilderContext);
 
-			var resettableClassFactory = resettableClassFactoryDelegate();
+												var resettableClassFactory = resettableClassFactoryDelegate();
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
-				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod), "DataSourceClassCombinedWithDataSourceMethodTest", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
-				TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
-				TestFilePath = @"",
-				TestLineNumber = 10,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-}
+												nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
+												{
+													TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+													TestClassArguments = [classArg],
+													TestMethodArguments = [methodArg],
+													TestClassProperties = [],
+													CurrentRepeatAttempt = 0,
+													RepeatLimit = 0,
+													ResettableClassFactory = resettableClassFactory,
+													TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
+													TestFilePath = @"",
+													TestLineNumber = 10,
+													TestMethod = testInformation,
+													TestBuilderContext = testBuilderContext,
+												});
+												resettableClassFactory = resettableClassFactoryDelegate();
+												testBuilderContext = new();
+												testBuilderContextAccessor.Current = testBuilderContext;
+											}
+											catch (global::System.Exception exception)
+											{
+												nodes.Add(new global::TUnit.Core.FailedInitializationTest
+												{
+													TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+													TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+													ReturnType = typeof(void),
+													ParameterTypeFullNames = [typeof(int)],
+													TestName = "DataSourceClassCombinedWithDataSourceMethodTest",
+													TestFilePath = @"",
+													TestLineNumber = 10,
+													Exception = exception,
+												});
+											}
+											return nodes;
+										}
+									}
 
 ]

@@ -12,7 +12,7 @@ public static class TestInformationRetriever
     public static int GetRepeatCount(AttributeData[] methodAndClassAttributes)
     {
         return methodAndClassAttributes
-            .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+            .SafeFirstOrDefault(x => x.AttributeClass?.GloballyQualifiedNonGeneric()
                                      == "global::TUnit.Core.RepeatAttribute")
             ?.ConstructorArguments.SafeFirstOrDefault().Value as int? ?? 0;
     }

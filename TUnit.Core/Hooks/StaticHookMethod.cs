@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Hooks;
@@ -23,11 +22,11 @@ public abstract record StaticHookMethod<T> : StaticHookMethod, IExecutableHook<T
 #endif
 public abstract record StaticHookMethod
 {
-    public required MethodInfo MethodInfo { get; init; }
+    public required SourceGeneratedMethodInformation MethodInfo { get; init; }
 
     [field: AllowNull, MaybeNull]
-    public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
-    public Type ClassType => MethodInfo.ReflectedType!;
+    public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
+    public Type ClassType => MethodInfo.Class.Type;
     public Assembly Assembly => ClassType.Assembly;
     
     public required Attribute[] MethodAttributes { get; init; }

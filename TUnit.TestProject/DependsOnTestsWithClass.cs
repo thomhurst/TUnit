@@ -18,7 +18,7 @@ public class DependsOnTestsOtherClass
 public class DependsOnTestsWithClass
 {
     private static DateTime _test2Start;
-    
+
     [Test, DependsOn(typeof(DependsOnTestsOtherClass), nameof(DependsOnTestsOtherClass.Test1))]
     public async Task Test2()
     {

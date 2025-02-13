@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -7,12 +8,27 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanticModel) : CSharpSyntaxRewriter
 {
-    public override SyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+    public override SyntaxNode VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+    {
+        return SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(node.ToFullString()));
+    }
+
+    public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
+        if (node.Name is IdentifierNameSyntax identifierName)
+        {
+            return VisitIdentifierName(identifierName);
+        }
+
+        if (symbol is null)
+        {
+            return base.VisitMemberAccessExpression(node);
+        }
+        
         return SyntaxFactory
-            .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+            .IdentifierName(symbol!.GloballyQualified())
             .WithoutTrivia();
     }
 
@@ -21,36 +37,67 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         var symbol = node.GetSymbolInfo(semanticModel);
         
         return SyntaxFactory
-            .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+            .IdentifierName(symbol!.GloballyQualified())
             .WithoutTrivia();
     }
 
-    public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
+    public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
-        if (symbol is not IFieldSymbol
-                {
-                    Type: INamedTypeSymbol
-                    {
-                        TypeKind: TypeKind.Enum
-                    }
-                }
-            && symbol.IsConst(out var constantValue))
+        if (TryParseConstant(symbol, out var constantValue))
         {
-            return Literal(constantValue);
+            return constantValue;
         }
-        
+
+        if (symbol is IMethodSymbol methodSymbol)
+        {
+            var type = methodSymbol.ReceiverType
+                ?? methodSymbol.ContainingType;
+            
+            return SyntaxFactory
+                .IdentifierName(type.GloballyQualified())
+                .WithoutTrivia();
+        }
+
+        if (symbol is null)
+        {
+            return base.VisitIdentifierName(node);
+        }
+
         return SyntaxFactory
-            .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+            .IdentifierName(symbol.GloballyQualified())
             .WithoutTrivia();
     }
+    
+    
+
+    private static bool TryParseConstant(ISymbol? symbol, [NotNullWhen(true)] out SyntaxNode? literalSyntax)
+    {
+        if (symbol is not IFieldSymbol
+            {
+                Type: INamedTypeSymbol
+                {
+                    TypeKind: TypeKind.Enum
+                }
+            }
+            && symbol.IsConst(out var constantValue))
+        {
+            literalSyntax = Literal(constantValue);
+            
+            return true;
+        }
+
+        literalSyntax = null;
+        return false;
+    }
+
 
     private static SyntaxNode Literal(object? constantValue)
     {
         return constantValue switch
         {
-            null => SyntaxFactory.LiteralExpression(SyntaxKind.NullKeyword),
+            null => SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression),
             string strValue => SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(strValue)),
             char charValue => SyntaxFactory.LiteralExpression(SyntaxKind.CharacterLiteralExpression, SyntaxFactory.Literal(charValue)),
             bool boolValue => boolValue ? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression) 
@@ -74,7 +121,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         return SyntaxFactory
             .TypeOfExpression(
                 SyntaxFactory.ParseTypeName(
-                    symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+                    symbol!.GloballyQualified())
             )
             .WithoutTrivia();
     }

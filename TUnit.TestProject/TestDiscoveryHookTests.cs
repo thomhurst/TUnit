@@ -6,7 +6,7 @@ public class TestDiscoveryHookTests
     public static void BeforeDiscovery()
     {
     }
-    
+
     [AfterEvery(TestDiscovery)]
     public static void AfterDiscovery()
     {

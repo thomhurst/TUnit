@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new PropertySetterTests());
+		global::TUnit.Core.SourceRegistrar.Register(new PropertySetterTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -28,150 +28,318 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.PropertySetterTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PropertySetterTests), "Test", 0, []);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String propertyArg = "1";
-
-			global::System.String propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
-			var propertyInfo2 = testClassType.GetProperty("Property3", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
-{
-    
-};
-			var propertyArg2 = propertyDataAttribute2.GenerateDataSources(new DataGeneratorMetadata
-{
-   Type = TUnit.Core.Enums.DataGeneratorType.Property,
-   TestClassType = testClassType,
-   ParameterInfos = null,
-   PropertyInfo = propertyInfo2,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestSessionId = sessionId,
-}).ElementAtOrDefault(0)();
-
-			var propertyInfo3 = testClassType.GetProperty("Property4", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
-{
-    Shared = global::TUnit.Core.SharedType.PerTestSession,
-};
-			var propertyArg3 = propertyDataAttribute3.GenerateDataSources(new DataGeneratorMetadata
-{
-   Type = TUnit.Core.Enums.DataGeneratorType.Property,
-   TestClassType = testClassType,
-   ParameterInfos = null,
-   PropertyInfo = propertyInfo3,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestSessionId = sessionId,
-}).ElementAtOrDefault(0)();
-
-			var propertyInfo4 = testClassType.GetProperty("Property5", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
-{
-    Shared = global::TUnit.Core.SharedType.PerClass,
-};
-			var propertyArg4 = propertyDataAttribute4.GenerateDataSources(new DataGeneratorMetadata
-{
-   Type = TUnit.Core.Enums.DataGeneratorType.Property,
-   TestClassType = testClassType,
-   ParameterInfos = null,
-   PropertyInfo = propertyInfo4,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestSessionId = sessionId,
-}).ElementAtOrDefault(0)();
-
-			var propertyInfo5 = testClassType.GetProperty("Property6", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
-{
-    Shared = global::TUnit.Core.SharedType.Keyed, Key = "Key",
-};
-			var propertyArg5 = propertyDataAttribute5.GenerateDataSources(new DataGeneratorMetadata
-{
-   Type = TUnit.Core.Enums.DataGeneratorType.Property,
-   TestClassType = testClassType,
-   ParameterInfos = null,
-   PropertyInfo = propertyInfo5,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestSessionId = sessionId,
-}).ElementAtOrDefault(0)();
-
-			var propertyInfo6 = testClassType.GetProperty("StaticProperty", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
-{
-    Shared = global::TUnit.Core.SharedType.PerTestSession,
-};
-			var propertyArg6 = propertyDataAttribute6.GenerateDataSources(new DataGeneratorMetadata
-{
-   Type = TUnit.Core.Enums.DataGeneratorType.Property,
-   TestClassType = testClassType,
-   ParameterInfos = null,
-   PropertyInfo = propertyInfo6,
-   TestBuilderContext = testBuilderContextAccessor,
-   TestSessionId = sessionId,
-}).ElementAtOrDefault(0)();
-
-
-			global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PropertySetterTests>(() => 
-			new global::TUnit.TestProject.PropertySetterTests()
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				Property1 = propertyArg,
-				Property2 = propertyArg1,
-				Property3 = propertyArg2,
-				Property4 = propertyArg3,
-				Property5 = propertyArg4,
-				Property6 = propertyArg5,
-			}
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.PropertySetterTests>
-			{
-				TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
-				TestClassArguments = [],
-				TestMethodArguments = [],
-				TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3, propertyArg4, propertyArg5],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
-				TestFilePath = @"",
-				TestLineNumber = 70,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [ propertyDataAttribute2, propertyDataAttribute3, propertyDataAttribute4, propertyDataAttribute5, propertyDataAttribute6 ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
-			{
-				TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
-				TestClass = typeof(global::TUnit.TestProject.PropertySetterTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PropertySetterTests), "Test", 0, []).ReturnType,
-				ParameterTypeFullNames = [],
-				TestName = "Test",
-				TestFilePath = @"",
-				TestLineNumber = 70,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
+				Type = typeof(global::TUnit.TestProject.PropertySetterTests),
+				Name = "Test",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PropertySetterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.PropertySetterTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "PropertySetterTests",
+						Attributes = [],
+					}),
+					Name = "PropertySetterTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
+					],
+					Parameters = [],
+					Properties = 
+					[
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+						{
+							Type = typeof(string),
+							Name = "Property1",
+							IsStatic = false,
+							Attributes = 
+							[
+								new global::TUnit.Core.ArgumentsAttribute("1")
+							],
+						},
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+						{
+							Type = typeof(string),
+							Name = "Property2",
+							IsStatic = false,
+							Attributes = 
+							[
+								new global::TUnit.Core.MethodDataSourceAttribute("MethodData")
+							],
+						},
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+						{
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property3",
+							IsStatic = false,
+							Attributes = 
+							[
+								new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+							],
+						},
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+						{
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property4",
+							IsStatic = false,
+							Attributes = 
+							[
+								new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+								{
+									Shared = global::TUnit.Core.SharedType.PerTestSession,
 }
+								],
+							},
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+							{
+								Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+								Name = "Property5",
+								IsStatic = false,
+								Attributes = 
+								[
+									new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+									{
+										Shared = global::TUnit.Core.SharedType.PerClass,
+}
+									],
+								},
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+								{
+									Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+									Name = "Property6",
+									IsStatic = false,
+									Attributes = 
+									[
+										new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+										{
+											Shared = global::TUnit.Core.SharedType.Keyed,
+											Key = "Key",
+}
+										],
+									},
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+									{
+										Type = typeof(string),
+										Name = "Property7",
+										IsStatic = false,
+										Attributes = 
+										[
+											new DataSourceGeneratorTests.AutoFixtureGenerator<string>()
+										],
+									},
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+									{
+										Type = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),
+										Name = "StaticProperty",
+										IsStatic = true,
+										Attributes = 
+										[
+											new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+											{
+												Shared = global::TUnit.Core.SharedType.PerTestSession,
+}
+											],
+										},
+									],
+								}),
+};
+
+								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+								string propertyArg = "1";
+
+								string propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
+								var propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>();
+								var propertyArg2 = propertyDataAttribute2.GenerateDataSources(new DataGeneratorMetadata								{
+									Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+									TestBuilderContext = testBuilderContextAccessor,
+									TestInformation = testInformation,
+									MembersToGenerate = 
+									[
+										new global::TUnit.Core.SourceGeneratedPropertyInformation
+										{
+											Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+											Name = "Property3",
+											IsStatic = false,
+											Attributes = 
+											[
+												new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+											],
+										},
+									],
+									TestSessionId = sessionId,
+								}).ElementAtOrDefault(0)();
+
+								var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+								{
+									Shared = global::TUnit.Core.SharedType.PerTestSession,
+};
+									var propertyArg3 = propertyDataAttribute3.GenerateDataSources(new DataGeneratorMetadata									{
+										Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+										TestBuilderContext = testBuilderContextAccessor,
+										TestInformation = testInformation,
+										MembersToGenerate = 
+										[
+											new global::TUnit.Core.SourceGeneratedPropertyInformation
+											{
+												Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+												Name = "Property4",
+												IsStatic = false,
+												Attributes = 
+												[
+													new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+													{
+														Shared = global::TUnit.Core.SharedType.PerTestSession,
+}
+													],
+												},
+											],
+											TestSessionId = sessionId,
+										}).ElementAtOrDefault(0)();
+
+										var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+										{
+											Shared = global::TUnit.Core.SharedType.PerClass,
+};
+											var propertyArg4 = propertyDataAttribute4.GenerateDataSources(new DataGeneratorMetadata											{
+												Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+												TestBuilderContext = testBuilderContextAccessor,
+												TestInformation = testInformation,
+												MembersToGenerate = 
+												[
+													new global::TUnit.Core.SourceGeneratedPropertyInformation
+													{
+														Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+														Name = "Property5",
+														IsStatic = false,
+														Attributes = 
+														[
+															new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+															{
+																Shared = global::TUnit.Core.SharedType.PerClass,
+}
+															],
+														},
+													],
+													TestSessionId = sessionId,
+												}).ElementAtOrDefault(0)();
+
+												var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+												{
+													Shared = global::TUnit.Core.SharedType.Keyed,
+													Key = "Key",
+};
+													var propertyArg5 = propertyDataAttribute5.GenerateDataSources(new DataGeneratorMetadata													{
+														Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+														TestBuilderContext = testBuilderContextAccessor,
+														TestInformation = testInformation,
+														MembersToGenerate = 
+														[
+															new global::TUnit.Core.SourceGeneratedPropertyInformation
+															{
+																Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+																Name = "Property6",
+																IsStatic = false,
+																Attributes = 
+																[
+																	new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+																	{
+																		Shared = global::TUnit.Core.SharedType.Keyed,
+																		Key = "Key",
+}
+																	],
+																},
+															],
+															TestSessionId = sessionId,
+														}).ElementAtOrDefault(0)();
+
+														var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+														{
+															Shared = global::TUnit.Core.SharedType.PerTestSession,
+};
+															var propertyArg6 = propertyDataAttribute6.GenerateDataSources(new DataGeneratorMetadata															{
+																Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+																TestBuilderContext = testBuilderContextAccessor,
+																TestInformation = testInformation,
+																MembersToGenerate = 
+																[
+																	new global::TUnit.Core.SourceGeneratedPropertyInformation
+																	{
+																		Type = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),
+																		Name = "StaticProperty",
+																		IsStatic = true,
+																		Attributes = 
+																		[
+																			new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+																			{
+																				Shared = global::TUnit.Core.SharedType.PerTestSession,
+}
+																			],
+																		},
+																	],
+																	TestSessionId = sessionId,
+																}).ElementAtOrDefault(0)();
+
+
+																global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;
+																var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PropertySetterTests>(() => 
+																new global::TUnit.TestProject.PropertySetterTests()
+																{
+																	Property1 = propertyArg,
+																	Property2 = propertyArg1,
+																	Property3 = propertyArg2,
+																	Property4 = propertyArg3,
+																	Property5 = propertyArg4,
+																	Property6 = propertyArg5,
+																}
+																, sessionId, testBuilderContext);
+
+																var resettableClassFactory = resettableClassFactoryDelegate();
+
+																nodes.Add(new TestMetadata<global::TUnit.TestProject.PropertySetterTests>
+																{
+																	TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
+																	TestClassArguments = [],
+																	TestMethodArguments = [],
+																	TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3, propertyArg4, propertyArg5],
+																	CurrentRepeatAttempt = 0,
+																	RepeatLimit = 0,
+																	ResettableClassFactory = resettableClassFactory,
+																	TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
+																	TestFilePath = @"",
+																	TestLineNumber = 70,
+																	TestMethod = testInformation,
+																	TestBuilderContext = testBuilderContext,
+																});
+																resettableClassFactory = resettableClassFactoryDelegate();
+																testBuilderContext = new();
+																testBuilderContextAccessor.Current = testBuilderContext;
+															}
+															catch (global::System.Exception exception)
+															{
+																nodes.Add(new global::TUnit.Core.FailedInitializationTest
+																{
+																	TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
+																	TestClass = typeof(global::TUnit.TestProject.PropertySetterTests),
+																	ReturnType = typeof(global::System.Threading.Tasks.Task),
+																	ParameterTypeFullNames = [],
+																	TestName = "Test",
+																	TestFilePath = @"",
+																	TestLineNumber = 70,
+																	Exception = exception,
+																});
+															}
+															return nodes;
+														}
+													}
 
 ]

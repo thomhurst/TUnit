@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions;
 
@@ -16,23 +17,22 @@ public static class Compare
         | BindingFlags.NonPublic
         | BindingFlags.FlattenHierarchy;
 
-    //[RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
     public static IEnumerable<ComparisonFailure> CheckEquivalent<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-        TExpected>(
-        TActual actual,
-        TExpected expected, CompareOptions options)
+        TExpected>(TActual actual,
+        TExpected expected, CompareOptions options, 
+        int? index)
     {
-        return CheckEquivalent(actual, expected, options, [], MemberType.Value);
+        return CheckEquivalent(actual, expected, options, [InitialMemberName<TActual>(actual, index)], MemberType.Value);
     }
-
-    //[RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
+    
     private static IEnumerable<ComparisonFailure> CheckEquivalent<
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TExpected>(
-        TActual actual,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+        TActual,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+        TExpected>(TActual actual,
         TExpected expected, CompareOptions options,
         string[] memberNames, MemberType memberType)
     {
@@ -59,9 +59,7 @@ public static class Compare
             yield break;
         }
 
-        if (actual.GetType().IsPrimitive
-            || actual.GetType().IsEnum
-            || actual is string)
+        if (actual.GetType().IsSimpleType())
         {
             yield return new ComparisonFailure
             {
@@ -81,7 +79,7 @@ public static class Compare
 
             for (var i = 0; i < Math.Max(actualObjects.Length, expectedObjects.Length); i++)
             {
-                string?[] readOnlySpan = [..memberNames, $"[{i}]"];
+                string?[] readOnlySpan = [..memberNames.Skip(1), $"[{i}]"];
 
                 if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
                 {
@@ -97,6 +95,8 @@ public static class Compare
                     yield return comparisonFailure;
                 }
             }
+            
+            yield break;
         }
 
         foreach (var fieldName in actual.GetType().GetFields().Concat(expected.GetType().GetFields())
@@ -104,7 +104,7 @@ public static class Compare
                      .Select(x => x.Name)
                      .Distinct())
         {
-            string?[] readOnlySpan = [..memberNames, fieldName];
+            string?[] readOnlySpan = [..memberNames.Skip(1), fieldName];
 
             if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
             {
@@ -145,7 +145,7 @@ public static class Compare
                      .Select(x => x.Name)
                      .Distinct())
         {
-            string?[] readOnlySpan = [..memberNames, propertyName];
+            string?[] readOnlySpan = [..memberNames.Skip(1), propertyName];
 
             if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
             {
@@ -180,5 +180,17 @@ public static class Compare
                 yield return comparisonFailure;
             }
         }
+    }
+
+    private static string InitialMemberName<TActual>(object? actual, int? index)
+    {
+        var type = actual?.GetType().Name ?? typeof(TActual).Name;
+        
+        if (index is null)
+        {
+            return type;
+        }
+        
+        return $"{type}[{index}]";
     }
 }

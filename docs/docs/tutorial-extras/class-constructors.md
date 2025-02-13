@@ -22,7 +22,7 @@ using TUnit.Core;
 
 namespace MyTestProject;
 
-public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEvent
+public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEventReceiver
 {
     private static readonly IServiceProvider _serviceProvider = CreateServiceProvider();
 

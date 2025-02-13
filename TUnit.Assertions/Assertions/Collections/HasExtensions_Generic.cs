@@ -9,7 +9,7 @@ public static partial class HasExtensions
 {
     public static Member<TRootObject, TPropertyType> HasMember<TRootObject, TPropertyType>(this IValueSource<TRootObject> valueSource, Expression<Func<TRootObject, TPropertyType>> selector, [CallerArgumentExpression(nameof(selector))] string expression = "")
     {
-        valueSource.AssertionBuilder.AppendCallerMethod([expression]);
+        valueSource.AppendExpression($"HasMember({expression})");
         return new(valueSource, selector);
     }
 }

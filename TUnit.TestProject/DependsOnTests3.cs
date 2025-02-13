@@ -14,22 +14,22 @@ public class DependsOnTests3
     public async Task Test1()
     {
         _test1Start = TestContext.Current!.TestStart!.Value.DateTime;
-        
+
         await Task.Delay(TimeSpan.FromSeconds(1));
-        
+
         TestContext.Current!.ObjectBag.Add("Test1", "1");
     }
-    
+
     [Test]
     public async Task Test2()
     {
         _test2Start = TestContext.Current!.TestStart!.Value.DateTime;
-        
+
         await Task.Delay(TimeSpan.FromSeconds(1));
-        
+
         TestContext.Current!.ObjectBag.Add("Test2", "2");
     }
-    
+
     [Test]
     [DependsOn(nameof(Test1))]
     [DependsOn(nameof(Test2))]

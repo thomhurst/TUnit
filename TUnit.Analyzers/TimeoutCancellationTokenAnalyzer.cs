@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Analyzers;
 
@@ -25,7 +26,7 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes()
             .Concat(methodSymbol.ContainingType.GetAttributes());
 
-        var timeoutAttribute = attributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+        var timeoutAttribute = attributes.FirstOrDefault(x => x.AttributeClass?.GloballyQualifiedNonGeneric()
                                                              == "global::TUnit.Core.TimeoutAttribute");
 
         if (timeoutAttribute is null)

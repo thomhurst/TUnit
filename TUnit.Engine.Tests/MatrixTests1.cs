@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 
 namespace TUnit.Engine.Tests;
 
@@ -10,11 +10,11 @@ public class MatrixTests1 : InvokableTestBase
         await RunTestsWithFilter(
             "/*/*/MatrixTests/MatrixTest_One",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Completed"),
-                result => result.ResultSummary.Counters.Total.Should().Be(24, "Total"),
-                result => result.ResultSummary.Counters.Passed.Should().Be(24, "Passed"),
-                result => result.ResultSummary.Counters.Failed.Should().Be(0, "Failed"),
-                result => result.ResultSummary.Counters.NotExecuted.Should().Be(0, "Skipped")
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(24, "Total"),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(24, "Passed"),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0, "Failed"),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0, "Skipped")
             ]);
     }
 }

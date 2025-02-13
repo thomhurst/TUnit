@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions;
+using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Extensions;
 
@@ -16,7 +17,7 @@ public class DependsOnTests2
         _test1Start = TestContext.Current!.TestStart!.Value.DateTime;
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
-    
+
     [Test, DependsOn(nameof(Test1), parameterTypes: [typeof(string), typeof(int), typeof(bool)])]
     public async Task Test2()
     {

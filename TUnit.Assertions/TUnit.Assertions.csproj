@@ -25,15 +25,25 @@
 </ItemGroup>
 
 <ItemGroup>
-    <Content Include="TUnit.Assertions.props">
+    <TfmSpecificPackageFile Include="TUnit.Assertions.props">
         <Pack>true</Pack>
-        <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-    </Content>
+        <PackagePath>$(BuildTransitivePath)</PackagePath>
+    </TfmSpecificPackageFile>
 
-    <Content Include="TUnit.Assertions.targets">
+    <TfmSpecificPackageFile Include="TUnit.Assertions.props">
         <Pack>true</Pack>
-        <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-    </Content>
+        <PackagePath>$(BuildPath)</PackagePath>
+    </TfmSpecificPackageFile>
+
+    <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
+        <Pack>true</Pack>
+        <PackagePath>$(BuildTransitivePath)</PackagePath>
+    </TfmSpecificPackageFile>
+
+    <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
+        <Pack>true</Pack>
+        <PackagePath>$(BuildPath)</PackagePath>
+    </TfmSpecificPackageFile>
 </ItemGroup>
 
 <ItemGroup>

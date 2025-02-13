@@ -6,14 +6,25 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="TUnit.Core.props">
+        <TfmSpecificPackageFile Include="TUnit.Core.props">
             <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-        </Content>
-        <Content Include="TUnit.Core.targets">
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <TfmSpecificPackageFile Include="TUnit.Core.props">
             <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-        </Content>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <TfmSpecificPackageFile Include="TUnit.Core.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <TfmSpecificPackageFile Include="TUnit.Core.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </TfmSpecificPackageFile>
     </ItemGroup>
     <ItemGroup>
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />

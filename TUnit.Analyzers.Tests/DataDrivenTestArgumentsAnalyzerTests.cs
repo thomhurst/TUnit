@@ -185,7 +185,6 @@ public class DataDrivenTestArgumentsAnalyzerTests
 
                 public class MyClass
                 {
-                            
                     [Test]
                     [Arguments(ProjectReferenceEnum.Value1)]
                     public void MyTest(ProjectReferenceEnum value)
@@ -194,6 +193,49 @@ public class DataDrivenTestArgumentsAnalyzerTests
 
                 }
                 """
+            );
+    }
+    
+    [Test]
+    public async Task Convertible_Type_Does_Not_Flag()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(-123)]
+                    public void Int_To_Short(short value)
+                    {
+                    }
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Error_When_Too_Many_Arguments()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [{|#0:Arguments(null, "")|}]
+                    public void Create_Unit_Test(string? something)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.TooManyArguments)
+                    .WithLocation(0)
             );
     }
 }

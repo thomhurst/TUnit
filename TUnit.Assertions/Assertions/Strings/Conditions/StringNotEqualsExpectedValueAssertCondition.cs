@@ -9,20 +9,17 @@ public class StringNotEqualsExpectedValueAssertCondition(string expected, String
     protected override string GetExpectation()
         => $"to not be equal to {Formatter.Format(expected).TruncateWithEllipsis(100)}";
 
-    protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
+    protected override Task<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {
-
         if (actualValue is null)
         {
             return AssertionResult
-                .FailIf(
-                    () => expectedValue is null,
-                    () => "it was null");
+                .FailIf(expectedValue is null,
+                    "it was null");
         }
 
         return AssertionResult
-            .FailIf(
-                () => string.Equals(actualValue, expectedValue, stringComparison),
-                () => "it was");
+            .FailIf(string.Equals(actualValue, expectedValue, stringComparison),
+                "it was");
     }
 }

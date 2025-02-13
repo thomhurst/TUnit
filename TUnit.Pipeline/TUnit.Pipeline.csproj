@@ -11,7 +11,7 @@
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Shouldly" />
     <PackageReference Include="ModularPipelines.DotNet" />
     <PackageReference Include="ModularPipelines.Git" />
     <PackageReference Include="ModularPipelines.GitHub" />

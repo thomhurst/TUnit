@@ -3,9 +3,9 @@
     <PropertyGroup>
         <TargetFrameworks>net472; net8.0; net9.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
-        <OutputType>Exe</OutputType>
         <IsLibraryTestProject>true</IsLibraryTestProject>
         <ImplicitUsings>enable</ImplicitUsings>
+        <OutputType>exe</OutputType>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 

@@ -11,7 +11,10 @@ public static class GlobalTestHooksWriter
     { 
         sourceBuilder.WriteLine($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
+        
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("MethodInfo = ");
+        SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
 
         if (model.IsVoid)
         {
@@ -28,12 +31,19 @@ public static class GlobalTestHooksWriter
         sourceBuilder.WriteLine($"Order = {model.Order},");
         sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
         sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
-        sourceBuilder.WriteLine(
-            $"MethodAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.GetAttributes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
-        sourceBuilder.WriteLine(
-            $"ClassAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
-        sourceBuilder.WriteLine(
-            $"AssemblyAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
+        
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("MethodAttributes = ");
+        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.GetAttributes().ExcludingSystemAttributes());
+        
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("ClassAttributes = ");
+        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes());
+        
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("AssemblyAttributes = ");
+        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
+
         sourceBuilder.WriteLine("},");
     }
 

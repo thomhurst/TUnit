@@ -99,14 +99,12 @@ internal class HooksCollector(string sessionId)
         {
             foreach (var beforeHook in hookSource.CollectBeforeAssemblyHooks(sessionId))
             {
-                var beforeList = BeforeAssemblyHooks.GetOrAdd(beforeHook.Assembly, _ => []);
-                beforeList.Add(beforeHook);
+                BeforeAssemblyHooks.GetOrAdd(beforeHook.Assembly, _ => []).Add(beforeHook);
             }
 
             foreach (var afterHook in hookSource.CollectAfterAssemblyHooks(sessionId))
             {
-                var afterList = AfterAssemblyHooks.GetOrAdd(afterHook.Assembly, _ => []);
-                afterList.Add(afterHook);
+                AfterAssemblyHooks.GetOrAdd(afterHook.Assembly, _ => []).Add(afterHook);
             }
             
             foreach (var beforeHook in hookSource.CollectBeforeEveryAssemblyHooks(sessionId))

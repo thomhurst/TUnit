@@ -12,12 +12,12 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesExtensions
 {
-    public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return Contains(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "", [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = "")
+    public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         var assertionBuilder = valueSource.RegisterAssertion(new StringContainsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
@@ -25,12 +25,12 @@ public static partial class DoesExtensions
         return new StringContainsAssertionBuilderWrapper(assertionBuilder);
     }
     
-    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return StartsWith(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "", [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = "")
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, self) =>
@@ -49,12 +49,12 @@ public static partial class DoesExtensions
     }
     
         
-    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return EndsWith(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "", [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = "")
+    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, _) =>

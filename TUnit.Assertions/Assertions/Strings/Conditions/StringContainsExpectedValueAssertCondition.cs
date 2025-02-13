@@ -12,20 +12,18 @@ public class StringContainsExpectedValueAssertCondition(string expected, StringC
     protected override string GetExpectation()
         => $"to contain {Formatter.Format(expected).TruncateWithEllipsis(100)}";
 
-    protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
+    protected override Task<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {
         if (actualValue is null)
         {
             return AssertionResult
-                .FailIf(
-                    () => expectedValue is not null,
-                    () => "it was null");
+                .FailIf(expectedValue is not null,
+                    "it was null");
         }
 
         return AssertionResult
-            .FailIf(
-                () => !actualValue.Contains(expectedValue!, stringComparison),
-                () => $"it was not found. {MessageSuffix()}");
+            .FailIf(!actualValue.Contains(expectedValue!, stringComparison),
+                $"it was not found. {MessageSuffix()}");
     }
 
     private string MessageSuffix()

@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -14,11 +17,27 @@ public partial class TestContext
     internal static readonly Dictionary<string, string> InternalParametersDictionary = new();
 
     public static IReadOnlyDictionary<string, string> Parameters => InternalParametersDictionary;
+
+    public static IConfiguration Configuration { get; internal set; } = null!;
     
     public static string? OutputDirectory
-        => Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
-           ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-    
+    {
+        [UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Dynamic code check implemented")]
+        get
+        {
+#if NET
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                return AppContext.BaseDirectory;
+            }
+#endif
+
+            return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
+                   ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        }
+    }
+
     public static string WorkingDirectory
     {
         get => Environment.CurrentDirectory;

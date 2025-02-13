@@ -36,9 +36,9 @@ internal class TUnitTestDiscoverer(
 
         var executionRequest = context.Request as TestExecutionRequest;
         
-        var filteredTests = testFilterService.FilterTests(executionRequest?.Filter, allDiscoveredTests).ToArray();
+        var filteredTests = testFilterService.FilterTests(executionRequest, allDiscoveredTests);
         
-        await logger.LogTraceAsync($"Found {filteredTests.Length} tests after filtering.");
+        await logger.LogTraceAsync($"Found {filteredTests.Count} tests after filtering.");
         
         var organisedTests = testGrouper.OrganiseTests(filteredTests);
         
@@ -69,7 +69,7 @@ internal class TUnitTestDiscoverer(
         
         foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
         {
-            if(beforeDiscoveryHook.IsSynchronous)
+            if (beforeDiscoveryHook.IsSynchronous)
             {
                 await logger.LogDebugAsync("Executing synchronous [Before(TestDiscovery)] hook");
 
@@ -83,14 +83,14 @@ internal class TUnitTestDiscoverer(
             }
         }
         
-        var allDiscoveredTests = testsConstructor.GetTests().ToArray();
+        var allDiscoveredTests = testsConstructor.GetTests();
 
         var afterDiscoveryHooks = testDiscoveryHookOrchestrator.CollectAfterHooks();
         var afterContext = testDiscoveryHookOrchestrator.GetAfterContext(allDiscoveredTests);
         
         foreach (var afterDiscoveryHook in afterDiscoveryHooks)
         {
-            if(afterDiscoveryHook.IsSynchronous)
+            if (afterDiscoveryHook.IsSynchronous)
             {
                 await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
 

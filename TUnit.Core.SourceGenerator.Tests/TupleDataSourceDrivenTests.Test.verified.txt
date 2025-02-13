@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class TupleDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new TupleDataSourceDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new TupleDataSourceDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -28,67 +28,99 @@ file partial class TupleDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-			var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod());
-			global::System.Int32 methodArg = methodArgTuples.Item1;
-			global::System.String methodArg1 = methodArgTuples.Item2;
-			global::System.Boolean methodArg2 = methodArgTuples.Item3;
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TupleDataSourceDrivenTests>(() => 
-			new global::TUnit.TestProject.TupleDataSourceDrivenTests()
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.TupleDataSourceDrivenTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TupleDataSourceDrivenTests.DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg, methodArg1, methodArg2],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
+				Type = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
+				Name = "DataSource_TupleMethod",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "TupleDataSourceDrivenTests",
+						Attributes = [],
+					}),
+					Name = "TupleDataSourceDrivenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+
+				var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod());
+				int methodArg = methodArgTuples.Item1;
+				string methodArg1 = methodArgTuples.Item2;
+				bool methodArg2 = methodArgTuples.Item3;
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TupleDataSourceDrivenTests>(() => 
+				new global::TUnit.TestProject.TupleDataSourceDrivenTests()
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.TupleDataSourceDrivenTests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArg, methodArg1, methodArg2],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
+					TestFilePath = @"",
+					TestLineNumber = 5,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TupleDataSourceDrivenTests.DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
-				TestClass = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
-				TestName = "DataSource_TupleMethod",
-				TestFilePath = @"",
-				TestLineNumber = 5,
-				Exception = exception,
-			});
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
+					TestClass = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
+					TestName = "DataSource_TupleMethod",
+					TestFilePath = @"",
+					TestLineNumber = 5,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		return nodes;
 	}
-}
 
 ]

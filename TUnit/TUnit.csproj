@@ -1,14 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    
-    <PropertyGroup>
-        <IsLibraryPackage>true</IsLibraryPackage>
-        <IsTestProject>false</IsTestProject>
-        <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
-    </PropertyGroup>
-    
-    <ItemGroup>
-      <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
-      <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
-    </ItemGroup>
+
+  <PropertyGroup>
+    <IsLibraryPackage>true</IsLibraryPackage>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+    <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
+  </ItemGroup>
+
+  <!-- <ItemGroup>
+    <None Include="TUnit.props">
+      <Pack>true</Pack>
+      <PackagePath>$(BuildPath)</PackagePath>
+    </None>
+
+    <None Include="TUnit.targets">
+      <Pack>true</Pack>
+      <PackagePath>$(BuildPath)</PackagePath>
+    </None>
+  </ItemGroup> -->
 
 </Project>

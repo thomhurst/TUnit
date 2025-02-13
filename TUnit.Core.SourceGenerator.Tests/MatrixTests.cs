@@ -1,4 +1,3 @@
-using TUnit.Assertions.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
@@ -21,6 +20,6 @@ internal class MatrixTests : TestsBase<TestsGenerator>
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(3);
+            await Assert.That(generatedFiles.Length).IsEqualTo(12);
         });
 }

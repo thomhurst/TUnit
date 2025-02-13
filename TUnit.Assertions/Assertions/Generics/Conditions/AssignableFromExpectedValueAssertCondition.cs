@@ -8,11 +8,11 @@ public class AssignableFromExpectedValueAssertCondition<TActual>(Type expectedTy
     protected override string GetExpectation()
         => $"to be assignable from type {expectedType.Name}";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata)
         => AssertionResult
-            .FailIf(() => actualValue is null,
-                () => "actual is null")
-            .OrFailIf(
-                () => !actualValue!.GetType().IsAssignableFrom(expectedType),
-                () => $"it is {ActualValue?.GetType().Name ?? "null"}");
+            .FailIf(actualValue is null,
+                "actual is null")
+            .OrFailIf(!actualValue!.GetType().IsAssignableFrom(expectedType),
+                $"it is {ActualValue?.GetType().Name ?? "null"}");
 }

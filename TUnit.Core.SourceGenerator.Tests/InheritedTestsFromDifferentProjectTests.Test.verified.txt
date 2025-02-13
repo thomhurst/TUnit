@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
+		global::TUnit.Core.SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -28,64 +28,81 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "Test", 0, []);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
-			new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test:0",
-				TestClassArguments = [],
-				TestMethodArguments = [],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
-				TestFilePath = @"",
-				TestLineNumber = 6,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
+				Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+				Name = "Test",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "InheritedTestsFromDifferentProjectTests",
+						Attributes = [],
+					}),
+					Name = "InheritedTestsFromDifferentProjectTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.InheritsTestsAttribute()
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
+				new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+				{
+					TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test:0",
+					TestClassArguments = [],
+					TestMethodArguments = [],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
+					TestFilePath = @"",
+					TestLineNumber = 6,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test:0",
-				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "Test", 0, []).ReturnType,
-				ParameterTypeFullNames = [],
-				TestName = "Test",
-				TestFilePath = @"",
-				TestLineNumber = 6,
-				Exception = exception,
-			});
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test:0",
+					TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [],
+					TestName = "Test",
+					TestFilePath = @"",
+					TestLineNumber = 6,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -99,12 +116,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
+		global::TUnit.Core.SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -117,68 +134,90 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", 0, [typeof(global::System.String)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-			global::System.String methodArg = global::TUnit.TestProject.TestData.Foo();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
-			new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(System.String):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GenericMethodDataSource(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 11,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
+				Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+				Name = "GenericMethodDataSource",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "InheritedTestsFromDifferentProjectTests",
+						Attributes = [],
+					}),
+					Name = "InheritedTestsFromDifferentProjectTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.InheritsTestsAttribute()
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+
+				string methodArg = global::TUnit.TestProject.TestData.Foo();
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
+				new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(string):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArg],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GenericMethodDataSource(methodArg)),
+					TestFilePath = @"",
+					TestLineNumber = 11,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(System.String):0",
-				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
-				TestName = "GenericMethodDataSource",
-				TestFilePath = @"",
-				TestLineNumber = 11,
-				Exception = exception,
-			});
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(string):0",
+					TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [typeof(string)],
+					TestName = "GenericMethodDataSource",
+					TestFilePath = @"",
+					TestLineNumber = 11,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -192,12 +231,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
+		global::TUnit.Core.SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -210,68 +249,90 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", 0, [typeof(global::System.String)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-			global::System.String methodArg = global::TUnit.TestProject.TestData.Foo();
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
-			new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(System.String):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.NonGenericMethodDataSource(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 17,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
+				Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+				Name = "NonGenericMethodDataSource",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "InheritedTestsFromDifferentProjectTests",
+						Attributes = [],
+					}),
+					Name = "InheritedTestsFromDifferentProjectTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.InheritsTestsAttribute()
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+
+				string methodArg = global::TUnit.TestProject.TestData.Foo();
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
+				new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(string):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArg],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.NonGenericMethodDataSource(methodArg)),
+					TestFilePath = @"",
+					TestLineNumber = 17,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(System.String):0",
-				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
-				TestName = "NonGenericMethodDataSource",
-				TestFilePath = @"",
-				TestLineNumber = 17,
-				Exception = exception,
-			});
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(string):0",
+					TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [typeof(string)],
+					TestName = "NonGenericMethodDataSource",
+					TestFilePath = @"",
+					TestLineNumber = 17,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -285,12 +346,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class Inherited_InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new Inherited_InheritedTestsFromDifferentProjectTests());
+		global::TUnit.Core.SourceRegistrar.Register(new Inherited_InheritedTestsFromDifferentProjectTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -303,63 +364,80 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : TUnit.Cor
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "BaseTest", 0, []);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
-			new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest:0",
-				TestClassArguments = [],
-				TestMethodArguments = [],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.BaseTest()),
-				TestFilePath = @"",
-				TestLineNumber = 7,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.InheritsTestsAttribute()
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedInitializationTest
+				Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+				Name = "BaseTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "InheritedTestsFromDifferentProjectTests",
+						Attributes = [],
+					}),
+					Name = "InheritedTestsFromDifferentProjectTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.InheritsTestsAttribute()
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
+				new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
+				{
+					TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest:0",
+					TestClassArguments = [],
+					TestMethodArguments = [],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.BaseTest()),
+					TestFilePath = @"",
+					TestLineNumber = 7,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest:0",
-				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "BaseTest", 0, []).ReturnType,
-				ParameterTypeFullNames = [],
-				TestName = "BaseTest",
-				TestFilePath = @"",
-				TestLineNumber = 7,
-				Exception = exception,
-			});
+				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				{
+					TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest:0",
+					TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+					ReturnType = typeof(void),
+					ParameterTypeFullNames = [],
+					TestName = "BaseTest",
+					TestFilePath = @"",
+					TestLineNumber = 7,
+					Exception = exception,
+				});
+			}
+			return nodes;
 		}
-		return nodes;
 	}
-}
 
 ]

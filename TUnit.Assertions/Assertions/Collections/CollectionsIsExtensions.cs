@@ -1,6 +1,5 @@
 ﻿#nullable disable
 
-using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Collections;
@@ -11,37 +10,105 @@ using TUnit.Assertions.Equality;
 
 namespace TUnit.Assertions.Extensions;
 
+[SuppressMessage("Usage", "TUnitAssertions0003:Compiler argument populated")]
 public static class CollectionsIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
     {
-        return IsEquivalentTo(valueSource, expected, new EquivalentToEqualityComparer<TInner>(), doNotPopulateThisValue);
+        return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), doNotPopulateThisValue);
     }
-    
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
-            where TActual : IEnumerable<TInner>
-        {
-            return IsEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue);
-        }
-    
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource,
+        IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer,
+        [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
     {
-        return IsEquivalentTo(valueSource, expected, new EquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue);
+        return IsEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue);
+    }
+
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+        where TActual : IEnumerable<TInner>
+    {
+        return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
     {
         return valueSource.RegisterAssertion(
             new EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(expected,
-                new EquivalentToEqualityComparer<TInner>(), collectionOrdering), [doNotPopulateThisValue]);
+                comparer, collectionOrdering), [doNotPopulateThisValue]);
+    }
+
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsInOrder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(
+            this IValueSource<IEnumerable<TInner>> valueSource)
+    {
+        return IsOrderedBy(valueSource, x => x, Comparer<TInner>.Default, null);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> IsEmpty<TActual>(this IValueSource<TActual> valueSource)
-        where TActual : IEnumerable
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsInDescendingOrder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(
+        this IValueSource<IEnumerable<TInner>> valueSource)
     {
-        return valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<TActual>(0), []);
+        return IsOrderedByDescending(valueSource, x => x, Comparer<TInner>.Default, null);
+    }
+    
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsInOrder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(
+        this IValueSource<IEnumerable<TInner>> valueSource,
+        IComparer<TInner> comparer)
+    {
+        return IsOrderedBy(valueSource, x => x, comparer, null);
+    }
+    
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsInDescendingOrder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(
+        this IValueSource<IEnumerable<TInner>> valueSource,
+        IComparer<TInner> comparer)
+    {
+        return IsOrderedByDescending(valueSource, x => x, comparer, null);
+    }
+    
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedBy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner, TComparisonItem>(
+        this IValueSource<IEnumerable<TInner>> valueSource,
+        Func<TInner, TComparisonItem> comparisonItemSelector,
+        [CallerArgumentExpression(nameof(comparisonItemSelector))] string doNotPopulateThisValue = null)
+    {
+        return IsOrderedBy(valueSource, comparisonItemSelector, Comparer<TComparisonItem>.Default, doNotPopulateThisValue);
+    }
+    
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedByDescending<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner, TComparisonItem>(
+        this IValueSource<IEnumerable<TInner>> valueSource,
+        Func<TInner, TComparisonItem> comparisonItemSelector,
+        [CallerArgumentExpression(nameof(comparisonItemSelector))] string doNotPopulateThisValue = null)
+    {
+        return IsOrderedByDescending(valueSource, comparisonItemSelector, Comparer<TComparisonItem>.Default, doNotPopulateThisValue);
+    }
+    
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedBy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner, TComparisonItem>(
+        this IValueSource<IEnumerable<TInner>> valueSource,
+        Func<TInner, TComparisonItem> comparisonItemSelector,
+        IComparer<TComparisonItem> comparer,
+        [CallerArgumentExpression(nameof(comparisonItemSelector))] string doNotPopulateThisValue = null,
+        [CallerArgumentExpression(nameof(comparer))] string doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new EnumerableOrderedByAssertCondition<TInner, TComparisonItem>(comparer, comparisonItemSelector, Order.Ascending), [doNotPopulateThisValue, doNotPopulateThisValue2]);
+    }
+    
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedByDescending<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner, TComparisonItem>(
+        this IValueSource<IEnumerable<TInner>> valueSource,
+        Func<TInner, TComparisonItem> comparisonItemSelector,
+        IComparer<TComparisonItem> comparer,
+        [CallerArgumentExpression(nameof(comparisonItemSelector))] string doNotPopulateThisValue = null,
+        [CallerArgumentExpression(nameof(comparer))] string doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new EnumerableOrderedByAssertCondition<TInner, TComparisonItem>(comparer, comparisonItemSelector, Order.Descending), [doNotPopulateThisValue, doNotPopulateThisValue2]);
+    }
+
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsEmpty<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
+    {
+        return valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<TInner>(0), []);
     }
 }

@@ -13,17 +13,16 @@ public class ThrowsWithMessageAssertCondition<TActual, TException>(
     protected override string GetExpectation()
         => $"to throw {typeof(TException).Name.PrependAOrAn()} which message equals \"{expectedMessage.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata)
     {
         var actualException = exceptionSelector(exception);
 
         return AssertionResult
-            .FailIf(
-                () => actualException is null,
-                () => "the exception is null")
-            .OrFailIf(
-                () => !string.Equals(actualException!.Message, expectedMessage, stringComparison),
-                () => new StringDifference(actualException!.Message, expectedMessage)
-                    .ToString("it differs at index"));
+            .FailIf(actualException is null,
+                "the exception is null")
+            .OrFailIf(!string.Equals(actualException!.Message, expectedMessage, stringComparison),
+                $"{new StringDifference(actualException!.Message, expectedMessage)
+                    .ToString("it differs at index")}");
     }
 }

@@ -20,7 +20,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
     private static int _count;
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    
+
     public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => new Random().Next();
@@ -32,7 +32,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
         {
             beforeTestContext.AddLinkedCancellationToken(_cancellationTokenSource.Token);
         }
-        
+
         return default;
     }
 
@@ -46,7 +46,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
         if (testContext.Result?.Status == Status.Failed)
         {
             await _cancellationTokenSource.CancelAsync();
-            
+
             // We need a condition to end execution at some point otherwise we could go forever recursively
             if (Interlocked.Increment(ref _count) > 5)
             {
@@ -71,6 +71,6 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
     {
         return testContext.ObjectBag.ContainsKey("DynamicDataGeneratorRetry");
     }
-    
+
     public int Order => 0;
 }

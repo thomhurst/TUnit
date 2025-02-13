@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Enums;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -15,7 +16,7 @@ public class ClassConstructorRetriever
         {
             AttributeIndex = index,
             Attribute = dataAttribute,
-            ClassConstructorType = type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            ClassConstructorType = type.GloballyQualified(),
             ArgumentsType = ArgumentsType.ClassConstructor,
             DisposeAfterTest = dataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
         };

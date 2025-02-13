@@ -69,7 +69,7 @@ public static class MethodExtensions
 
         }
         return attributes.FirstOrDefault(x =>
-                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                x.AttributeClass?.GloballyQualifiedNonGeneric()
                 == fullyQualifiedNameWithGlobalPrefix);
     }
 }

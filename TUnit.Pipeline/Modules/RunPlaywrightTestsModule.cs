@@ -2,8 +2,6 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
@@ -14,13 +12,16 @@ public class RunPlaywrightTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Playwright.Tests.csproj").AssertExists();
+        var project = Sourcy.DotNet.Projects.TUnit_Templates__content__TUnit_Playwright__TestProject;
         
-        return await context.DotNet().Test(new DotNetTestOptions(project)
+        return await context.DotNet().Test(new DotNetTestOptions(project.FullName)
         {
             NoBuild = true,
             Configuration = Configuration.Release,
-            Framework = Environment.GetEnvironmentVariable("NET_VERSION"),
+            EnvironmentVariables = new Dictionary<string, string?>
+            {
+                ["DISABLE_GITHUB_REPORTER"] = "true",
+            }
         }, cancellationToken);
     }
 }

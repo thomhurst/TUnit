@@ -95,7 +95,7 @@ public class TestMethodParametersAnalyzerTests
                     {
                         public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                         {
-                            return [() => default];
+                            return [() => default!];
                         }
                     }
                                 
@@ -103,7 +103,7 @@ public class TestMethodParametersAnalyzerTests
                     {
                         public override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                         {
-                            return [() => default];
+                            return [() => default!];
                         }
                     }
                 }

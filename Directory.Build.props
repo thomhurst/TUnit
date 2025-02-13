@@ -11,6 +11,8 @@
     <LangVersion>latest</LangVersion>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <NoWarn>NU1507;NU1903;CS9107</NoWarn>
+    <BuildTransitivePath>buildTransitive/$(TargetFramework)/</BuildTransitivePath>
+    <BuildPath>build/netstandard2.0</BuildPath>
 
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)strongname.snk</AssemblyOriginatorKeyFile>
@@ -33,12 +35,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Engine, PublicKey=$(PublicKey)</_Parameter1>
-    </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.UnitTests, PublicKey=$(PublicKey)</_Parameter1>
-    </AssemblyAttribute>
+    <InternalsVisibleTo Include="TUnit.Engine" />
+    <InternalsVisibleTo Include="TUnit.UnitTests" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -66,10 +64,6 @@
   <PropertyGroup>
     <IsTestingPlatformApplication Condition="'$(IsTestingPlatformApplication)' == ''">false</IsTestingPlatformApplication>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
-  </ItemGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>

@@ -69,12 +69,39 @@ public record MethodDataSourceAttributeContainer(
             
         for (var index = 0; index < TypesToInject.Length; index++)
         {
-            var tupleType = TypesToInject[index];
-
-            var refIndex = index;
-                
-            sourceCodeWriter.WriteLine(GenerateVariable(tupleType.GloballyQualified(), $"{tupleVariableName}.Item{index+1}", ref refIndex).ToString());
+            WriteTuples(sourceCodeWriter, ref index, tupleVariableName);
         }
+    }
+
+    private void WriteTuples(SourceCodeWriter sourceCodeWriter, ref int index, string tupleVariableName)
+    {
+        var tupleType = TypesToInject[index];
+            
+        var accessorIndex = index + 1;
+
+        string accessor;
+        if (accessorIndex < 8)
+        {
+            accessor = $"{tupleVariableName}.Item{accessorIndex}";
+        }
+        else
+        {
+            var newIndex = (accessorIndex + 1) % 8;
+            var repeatCount = (accessorIndex + 1) / 8;
+
+            if (accessorIndex >= 15)
+            {
+                newIndex++;
+            }
+            
+            var restAccessor = string.Join(".", Enumerable.Repeat("Rest", repeatCount));
+            
+            accessor = $"{tupleVariableName}.{restAccessor}.Item{newIndex}";
+        }
+
+        var refIndex = index;
+        
+        sourceCodeWriter.WriteLine(GenerateVariable(tupleType.GloballyQualified(), accessor, ref refIndex).ToString());
     }
 
     private void WriteEnumerable(SourceCodeWriter sourceCodeWriter)
@@ -102,11 +129,7 @@ public record MethodDataSourceAttributeContainer(
 
             for (var index = 0; index < TypesToInject.Length; index++)
             {
-                var tupleType = TypesToInject[index];
-
-                var refIndex = index;
-                    
-                sourceCodeWriter.WriteLine(GenerateVariable(tupleType.GloballyQualified(), $"{tupleVariableName}.Item{index+1}", ref refIndex).ToString());
+                WriteTuples(sourceCodeWriter, ref index, tupleVariableName);
             }
         }
         else

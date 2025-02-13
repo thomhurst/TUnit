@@ -14,7 +14,7 @@ public class DateTimeOffsetEqualsExpectedValueAssertCondition(DateTimeOffset exp
         return $"to be equal to {expected} +-{_tolerance}";
     }
 
-    protected override AssertionResult GetResult(DateTimeOffset actualValue, DateTimeOffset expectedValue)
+    protected override Task<AssertionResult> GetResult(DateTimeOffset actualValue, DateTimeOffset expectedValue)
     {
         if (_tolerance is not null)
         {
@@ -22,15 +22,13 @@ public class DateTimeOffsetEqualsExpectedValueAssertCondition(DateTimeOffset exp
             var max = expectedValue + _tolerance;
 
             return AssertionResult
-                .FailIf(
-                    () => actualValue < min || actualValue > max,
-                    () => $"the received value {actualValue} is outside the tolerances");
+                .FailIf(actualValue < min || actualValue > max,
+                    $"the received value {actualValue} is outside the tolerances");
         }
 
         return AssertionResult
-            .FailIf(
-                () => actualValue != expected,
-                () => $"the received value {actualValue} is different");
+            .FailIf(actualValue != expected,
+                $"the received value {actualValue} is different");
     }
 
     public void SetTolerance(TimeSpan tolerance)

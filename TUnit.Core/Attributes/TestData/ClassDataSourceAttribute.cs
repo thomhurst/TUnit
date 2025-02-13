@@ -18,7 +18,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
             {
                 await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
                     context.TestContext,
-                    dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+                    ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
                     Shared,
                     Key,
                     item);
@@ -28,18 +28,18 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
             {
                 await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestStart(
                     context,
-                    dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+                    ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
                     Shared,
                     Key,
                     item);
             };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, _) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, item);
             };
             
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, _) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, item);
             };

@@ -1,23 +1,21 @@
-﻿using System.Net.Http;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 public class DisposablePropertyTests
 {
 #pragma warning disable TUnit0023
-    public HttpClient? HttpClient { get; private set; }
+    public Stream? Stream { get; private set; }
 #pragma warning restore TUnit0023
 
     [Before(Test)]
     public void Setup()
     {
-        HttpClient = new HttpClient();
+        Stream = new MemoryStream();
     }
 
     [After(Test)]
     public void Blah()
     {
-        HttpClient?.Dispose();
+        Stream?.Dispose();
     }
 
     [Test]

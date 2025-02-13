@@ -22,10 +22,32 @@ public static class TestSourceDataModelRetriever
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
 
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
-        var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, constructorParameters, constructorParameters.Select(x => x.Type).ToImmutableArray(), GetClassAttributes(namedTypeSymbol).Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(
+                context,
+                constructorParameters,
+                null,
+                constructorParameters.Select(x => x.Type).ToImmutableArray(),
+                GetClassAttributes(namedTypeSymbol)
+                    .Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute()))
+                    .ToImmutableArray(),
+                namedTypeSymbol,
+                methodSymbol,
+                ArgumentsType.ClassConstructor)
+            .ToArray();
+        
         var methodParametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
-        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
-        var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol);
+
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(
+            context,
+            methodParametersWithoutCancellationToken,
+            null,
+            methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(),
+            methodSymbol.GetAttributes(),
+            namedTypeSymbol,
+            methodSymbol,
+            ArgumentsType.Method);
+        
+        var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol, methodSymbol);
         
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
@@ -133,38 +155,49 @@ public static class TestSourceDataModelRetriever
             ..classAttributes,
             ..assemblyAttributes
         ];
-
-        var propertyAttributes = testGenerationContext.PropertyArguments
-            .InnerContainers
-            .Select(x => x.PropertySymbol)
-            .SelectMany(x => x.GetAttributes())
-            .Where(x => x.IsDataSourceAttribute());
         
         return new TestSourceDataModel
         {
+            TestGenerationContext = testGenerationContext,
             TestId = TestInformationRetriever.GetTestId(testGenerationContext),
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = namedTypeSymbol.GloballyQualified(),
             MinimalTypeName = namedTypeSymbol.Name,
-            AssemblyName = namedTypeSymbol.ContainingAssembly.Name,
-            Namespace = namedTypeSymbol.ContainingNamespace.Name,
+            TestClass = namedTypeSymbol,
+            TestMethod = methodSymbol,
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            MethodParameterTypes = [ ..methodSymbol.Parameters.Select(x => x.Type.GloballyQualified()) ],
             MethodArgumentTypes = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
-            MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
-            TestAttributes = AttributeWriter.WriteAttributes(testGenerationContext.Context, testAttributes),
-            ClassAttributes = AttributeWriter.WriteAttributes(testGenerationContext.Context, classAttributes),
-            AssemblyAttributes = AttributeWriter.WriteAttributes(testGenerationContext.Context, assemblyAttributes),
-            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
+            GenericSubstitutions = GetGenericSubstitutions(methodSymbol, testArguments.GetArgumentTypes())
         };
+    }
+
+    private static IDictionary<string, string>? GetGenericSubstitutions(IMethodSymbol methodSymbol, string[] argumentTypes)
+    {
+        if(methodSymbol.Parameters.Length is 0 || methodSymbol.TypeParameters.Length is 0)
+        {
+            return null;
+        }
+
+        var dictionary = new Dictionary<string, string>();
+        
+        for (var index = 0; index < methodSymbol.Parameters.Length; index++)
+        {
+            var parameter = methodSymbol.Parameters[index];
+
+            if (parameter.Type.IsGenericDefinition())
+            {
+                dictionary[parameter.Type.GloballyQualified()] = argumentTypes[index];
+            }
+        }
+
+        return dictionary;
     }
 
     private static IEnumerable<string> GetParameterTypes(IMethodSymbol methodSymbol, string[] argumentTypes)

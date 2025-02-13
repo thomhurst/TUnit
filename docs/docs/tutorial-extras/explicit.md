@@ -8,14 +8,11 @@ If you want a test to only be run explicitly (and not part of all general tests)
 
 This can be added to a test method or a test class.
 
-If added to a test method, then all tests generated from that test method (different test cases generated from different test data) will only be run if that method has been explicitly run.
-If added to a test class, then all tests generated within that class will only be run if only tests within that class have been explicitly run.
+A test is considered 'explicitly' run when all filtered tests have an explicit attribute on them. 
 
-A test is considered 'explicitly' run when:
-- A test filter was used and matches your test
-    e.g.  `dotnet run --treenode-filter "/*/*/*/*"`
-- You ran your test from within the test explorer in your IDE specifically
+That means that you could run all tests in a class with an `[Explicit]` attribute. Or you could run a single method with an `[Explicit]` attribute. But if you try to run a mix of explicit and non-explicit tests, then the ones with an `[Explicit]` attribute will be excluded from the run.
 
+This can be useful for 'Tests' that make sense in a local environment, and maybe not part of your CI builds. Or they could be helpers that ping things to warm them up, and by making them explicit tests, they are easily runnable, but don't affect your overall test suite.
 
 ```csharp
 using TUnit.Core;

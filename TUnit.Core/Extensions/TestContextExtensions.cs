@@ -17,8 +17,9 @@ public static class TestContextExtensions
         var tests = context.GetService<ITestFinder>().GetTestsByNameAndParameters(
             testName: testName, 
             methodParameterTypes: parameterTypes, 
-            classType: context.TestDetails.ClassType, 
-            classParameterTypes: context.TestDetails.TestClassParameterTypes);
+            classType: context.TestDetails.TestClass.Type, 
+            classParameterTypes: context.TestDetails.TestClassParameterTypes,
+            classArguments: context.TestDetails.TestClassArguments);
 
         if (tests.Any(x => x.TestTask?.IsCompleted is not true))
         {
@@ -32,10 +33,10 @@ public static class TestContextExtensions
     {
         var testDetails = testContext.TestDetails;
         
-        var classTypeName = testDetails.ClassType.FullName?
+        var classTypeName = testDetails.TestClass.Type.FullName?
                                 .Split(ClassTypeNameSplitter, StringSplitOptions.RemoveEmptyEntries)
                                 .LastOrDefault()
-                            ?? testDetails.ClassType.Name;
+                            ?? testDetails.TestClass.Type.Name;
         
         if (testDetails.TestClassArguments.Length == 0)
         {
@@ -93,7 +94,6 @@ public static class TestContextExtensions
         IEnumerable<object?> rawObjects =
         [
             context.Events,
-            ..context.TestDetails.DataAttributes,
             ..context.TestDetails.Attributes,
             context.TestDetails.ClassInstance,
             context.InternalDiscoveredTest.ClassConstructor,

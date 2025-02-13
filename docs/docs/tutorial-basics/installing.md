@@ -4,6 +4,17 @@ sidebar_position: 1
 
 # Installing TUnit
 
+## Easily
+
+Assuming you have the .NET SDK installed, simply run:
+
+`dotnet new install TUnit.Templates`
+`dotnet new TUnit -n "YourProjectName"`
+
+A new test project will be created for you with some samples of different test types and tips. When you're ready to get going, delete them and create your own!
+
+## Manually
+
 First create an empty .NET console application:
 
 ```powershell
@@ -34,7 +45,7 @@ Your `.csproj` should be as simple as something like:
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="TUnit" VersionOverride="$(TUnitVersion)" />
+      <PackageReference Include="TUnit" Version="$(TUnitVersion)" />
     </ItemGroup>
 
 </Project>
@@ -46,5 +57,6 @@ If you're used to other testing frameworks, you're probably used to the package 
 This should NOT be used with TUnit. It'll stop test discovery from working properly.
 
 ## .NET Framework
-If you are still targeting .NET Framework, you may have compilation errors around missing types, such as the `ModuleInitialiserAttribute`.
-These are looked at by the compiler, not the runtime, so you can define them yourselves or use a polyfill library. Using a Polyfill library is the easiest, for example, just reference the NuGet package `Polyfill`.
+If you are still targeting .NET Framework, TUnit will try to Polyfill some missing types that are used by the compiler, such as the `ModuleInitialiserAttribute`.
+
+If you have issues with other Polyfill libraries also defining them, in your project files, you can define the property `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>` to stop TUnit generating them for you.

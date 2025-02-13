@@ -11,16 +11,14 @@ public class PropertyEqualsExpectedValueAssertCondition<TRootObjectType, TProper
         return $"{typeof(TRootObjectType).Name}.{ExpressionHelpers.GetName(propertySelector)} to be equal to {expected}";
     }
 
-    protected override AssertionResult GetResult(TRootObjectType? actualValue, TPropertyType? expectedValue)
+    protected override Task<AssertionResult> GetResult(TRootObjectType? actualValue, TPropertyType? expectedValue)
     {
         var propertyValue = GetPropertyValue(actualValue);
         return AssertionResult
-            .FailIf(
-                () => actualValue is null,
-                () => $"Object `{typeof(TRootObjectType).Name}` was null")
-            .OrFailIf(
-                () => Equals(propertyValue, expectedValue) != isEqual,
-                () => $"received {GetPropertyValue(actualValue)?.ToString()}"
+            .FailIf(actualValue is null,
+                $"Object `{typeof(TRootObjectType).Name}` was null")
+            .OrFailIf(Equals(propertyValue, expectedValue) != isEqual,
+                $"received {GetPropertyValue(actualValue)?.ToString()}"
             );
     }
 

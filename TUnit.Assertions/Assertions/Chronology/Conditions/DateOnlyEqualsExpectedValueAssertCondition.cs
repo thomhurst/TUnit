@@ -16,7 +16,7 @@ public class DateOnlyEqualsExpectedValueAssertCondition(DateOnly expected) : Exp
         return $"to be equal to {expected} +-{_tolerance}";
     }
 
-    protected override AssertionResult GetResult(DateOnly actualValue, DateOnly expectedValue)
+    protected override Task<AssertionResult> GetResult(DateOnly actualValue, DateOnly expectedValue)
     {
         if (_tolerance is not null)
         {
@@ -24,15 +24,13 @@ public class DateOnlyEqualsExpectedValueAssertCondition(DateOnly expected) : Exp
             var max = expected.AddDays(_tolerance.Value);
 
             return AssertionResult
-                .FailIf(
-                    () => actualValue < min || actualValue > max,
-                    () => $"the received value {actualValue} is outside the tolerances");
+                .FailIf(actualValue < min || actualValue > max,
+                    $"the received value {actualValue} is outside the tolerances");
         }
 
         return AssertionResult
-            .FailIf(
-                () => actualValue != expected,
-                () => $"the received value {actualValue} is different");
+            .FailIf(actualValue != expected,
+                $"the received value {actualValue} is different");
     }
 
     public void SetTolerance(int toleranceDays)

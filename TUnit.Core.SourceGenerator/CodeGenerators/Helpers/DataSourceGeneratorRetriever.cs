@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
@@ -7,23 +8,29 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class DataSourceGeneratorRetriever
 {
-    public static ArgumentsContainer Parse(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol,
+    public static ArgumentsContainer Parse(GeneratorAttributeSyntaxContext context,
+        INamedTypeSymbol testClass,
+        IMethodSymbol testMethod,
+        ImmutableArray<IParameterSymbol> parameters,
+        IPropertySymbol? property,
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
         AttributeData attributeData,
         ArgumentsType argumentsType,
         int index,
-        string? propertyName)
+        string? propertyName, 
+        bool isStronglyTyped)
     {
         return new GeneratedArgumentsContainer
         (
-            context,
-            attributeData: attributeData,
+            Context: context,
+            AttributeData: attributeData,
             ArgumentsType: argumentsType,
-            TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            AttributeDataGeneratorType: attributeData.AttributeClass!.ToDisplayString(DisplayFormats
-                .FullyQualifiedGenericWithGlobalPrefix),
-            GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass).TypeArguments
-                .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray(),
-            AttributeIndex: index
+            ParameterOrPropertyTypes: parameterOrPropertyTypes,
+            TestClass: testClass,
+            TestMethod: testMethod,
+            Property: property,
+            Parameters: parameters,
+            GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass)?.TypeArguments.Select(x => x.GloballyQualified()).ToArray() ?? []
         )
         {
             DisposeAfterTest =
@@ -32,19 +39,25 @@ public static class DataSourceGeneratorRetriever
                 true,
             PropertyName = propertyName,
             Attribute = attributeData,
-            AttributeIndex = index
+            AttributeIndex = index,
+            IsStronglyTyped = isStronglyTyped,
         };
     }
 
-    private static INamedTypeSymbol GetDataGeneratorAttributeBaseClass(ITypeSymbol attributeClass)
+    private static INamedTypeSymbol? GetDataGeneratorAttributeBaseClass(ITypeSymbol? attributeClass)
     {
-        var selfAndBaseTypes = attributeClass.GetSelfAndBaseTypes();
+        var selfAndBaseTypes = attributeClass?.GetSelfAndBaseTypes();
 
-        return (INamedTypeSymbol) selfAndBaseTypes.First(HasGeneratorInterface);
+        if (selfAndBaseTypes?.FirstOrDefault(HasGeneratorInterface) is INamedTypeSymbol generatorInterface)
+        {
+            return generatorInterface;
+        }
+
+        return null;
     }
 
     private static bool HasGeneratorInterface(ITypeSymbol t)
     {
-        return t.Interfaces.Select(i => i.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).Contains(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute.WithGlobalPrefix);
+        return t.Interfaces.Select(i => i.GloballyQualified()).Contains(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute.WithGlobalPrefix);
     }
 }

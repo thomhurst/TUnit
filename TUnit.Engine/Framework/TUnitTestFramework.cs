@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Logging;
 
@@ -14,15 +15,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly IExtension _extension;
     private readonly IServiceProvider _frameworkServiceProvider;
     private readonly ITestFrameworkCapabilities _capabilities;
+    private readonly IEnumerable<IFilterReceiver> _filterReceivers;
     private static readonly ConcurrentDictionary<string, TUnitServiceProvider> ServiceProvidersPerSession = [];
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
-        ITestFrameworkCapabilities capabilities)
+        ITestFrameworkCapabilities capabilities,
+        IEnumerable<IFilterReceiver> filterReceivers)
     {
         _extension = extension;
         _frameworkServiceProvider = frameworkServiceProvider;
         _capabilities = capabilities;
+        _filterReceivers = filterReceivers;
+
+        TestContext.Configuration = new ConfigurationAdapter(frameworkServiceProvider.GetConfiguration());
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -51,6 +57,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         );
 
         var stringFilter = serviceProvider.FilterParser.GetTestFilter(context);
+        
+        foreach (var filterReceiver in _filterReceivers)
+        {
+            filterReceiver.Filter = stringFilter;
+        }
 
         var logger = serviceProvider.Logger;
         
@@ -94,7 +105,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     foreach (var beforeSessionHook in beforeSessionHooks)
                     {
-                        if(beforeSessionHook.IsSynchronous)
+                        if (beforeSessionHook.IsSynchronous)
                         {
                             await logger.LogDebugAsync("Executing synchronous [Before(TestSession)] hook");
 
@@ -118,7 +129,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     foreach (var afterSessionHook in afterSessionHooks)
                     {
-                        if(afterSessionHook.IsSynchronous)
+                        if (afterSessionHook.IsSynchronous)
                         {
                             await logger.LogDebugAsync("Executing synchronous [After(TestSession)] hook");
 

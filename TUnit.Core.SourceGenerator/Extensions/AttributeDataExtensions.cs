@@ -16,7 +16,7 @@ public static class AttributeDataExtensions
     
     public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)
     {
-        return attributeData?.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+        return attributeData?.AttributeClass?.GloballyQualifiedNonGeneric();
     }
 
     public static bool IsTest(this AttributeData? attributeData)
@@ -36,13 +36,6 @@ public static class AttributeDataExtensions
         return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
                    x.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataAttribute.WithGlobalPrefix)
                == true;
-    }
-    
-    public static bool IsMatrixAttribute(this AttributeData? attributeData)
-    {
-        var displayString = attributeData?.GetFullyQualifiedAttributeTypeName();
-
-        return WellKnownFullyQualifiedClassNames.MatrixAttribute.WithGlobalPrefix == displayString;
     }
     
     public static bool IsNonGlobalHook(this AttributeData attributeData, Compilation compilation)

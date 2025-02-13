@@ -43,8 +43,21 @@ public class PolyfillGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterSourceOutput(context.CompilationProvider
-            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer()), (productionContext, compilation) =>
+            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer())
+            .Combine(context.AnalyzerConfigOptionsProvider.Select((x, _) => x.GlobalOptions)), (productionContext, tuple) =>
         {
+            var options = tuple.Right;
+
+            if (options.TryGetValue("build_property.EnableTUnitPolyfills",
+                    out var enableTUnitPolyfillsString)
+                && bool.TryParse(enableTUnitPolyfillsString, out var enableTUnitPolyfills)
+                && !enableTUnitPolyfills)
+            {
+                return;
+            }
+            
+            var compilation = tuple.Left;
+            
             if (compilation.GetTypeByMetadataName("System.Runtime.CompilerServices.ModuleInitializerAttribute") == null)
             {
                 productionContext.AddSource("ModuleInitializerAttribute.g.cs",

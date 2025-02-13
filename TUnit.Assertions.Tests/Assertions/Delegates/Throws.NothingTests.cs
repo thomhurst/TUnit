@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.Tests.Assertions.Delegates;
+﻿using TUnit.Assertions.AssertConditions.Throws;
+
+namespace TUnit.Assertions.Tests.Assertions.Delegates;
 
 public partial class Throws
 {

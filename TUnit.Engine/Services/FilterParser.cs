@@ -21,7 +21,7 @@ public class FilterParser
     }
 
 #pragma warning disable TPEXP
-    private static string? StringifyFilter(ITestExecutionFilter filter)
+    public static string? StringifyFilter(ITestExecutionFilter filter)
     {
         return filter switch
         {

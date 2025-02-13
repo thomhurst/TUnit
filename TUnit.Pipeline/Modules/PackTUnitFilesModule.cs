@@ -37,7 +37,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                             new KeyValue("AssemblyFileVersion", version.SemVer!),
                             new KeyValue("IsPackTarget", "true")
                         ],
-                        IncludeSource = true,
+                        IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
                         Configuration = Configuration.Release,
                     }, cancellationToken);
                 

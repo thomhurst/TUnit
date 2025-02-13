@@ -8,12 +8,12 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsException<TActual, TException> where TException : Exception
 {
-    private readonly InvokableDelegateAssertionBuilder<TActual> _delegateAssertionBuilder;
-    private readonly IDelegateSource<TActual> _source;
+    private readonly InvokableDelegateAssertionBuilder _delegateAssertionBuilder;
+    private readonly IDelegateSource _source;
     private readonly Func<Exception?, Exception?> _selector;
 
-    public ThrowsException(InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,
-        IDelegateSource<TActual> source,
+    public ThrowsException(InvokableDelegateAssertionBuilder delegateAssertionBuilder,
+        IDelegateSource source,
         Func<Exception?, Exception?> selector)
     {
         _delegateAssertionBuilder = delegateAssertionBuilder;
@@ -21,14 +21,14 @@ public class ThrowsException<TActual, TException> where TException : Exception
         _selector = selector;
     }
 
-    public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression(nameof(match))] string doNotPopulateThisValue = "")
+    public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression(nameof(match))] string? doNotPopulateThisValue = null)
     {
         _source.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(match, _selector)
             , [doNotPopulateThisValue]);
         return this;
     }
 
-    public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         _source.RegisterAssertion(new ThrowsWithMessageAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _selector)
             , [doNotPopulateThisValue]);
@@ -37,7 +37,7 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public ThrowsException<TActual, Exception> WithInnerException()
     {
-        _source.AssertionBuilder.AppendExpression($"{nameof(WithInnerException)}()");
+        _source.AppendExpression($"{nameof(WithInnerException)}()");
         return new(_delegateAssertionBuilder, _source, e => _selector(e)?.InnerException);
     }
 
@@ -47,13 +47,30 @@ public class ThrowsException<TActual, TException> where TException : Exception
             d => d.Exception as TException);
         return task.GetAwaiter();
     }
-    
-    public AndConvertedTypeAssertionBuilder<TActual, TException> And => new(_delegateAssertionBuilder, async () =>
-    {
-        var value = await this;
-        return new AssertionData<TException>(value, null, _delegateAssertionBuilder.ActualExpression);
 
-    }, _delegateAssertionBuilder.ActualExpression!, _delegateAssertionBuilder.ExpressionBuilder!.Append(".And"));
-    
-    public DelegateOr<TActual> Or => _delegateAssertionBuilder.Or;
+    public AndConvertedTypeAssertionBuilder<TException> And
+    {
+        get
+        {
+            _source.ExpressionBuilder.Append(".And");
+            return new AndConvertedTypeAssertionBuilder<TException>(_source, AssertionDataTask());
+        }
+    }
+
+    public DelegateOr<object?> Or => _delegateAssertionBuilder.Or;
+
+    internal void RegisterAssertion(BaseAssertCondition<TActual> condition, string?[] argumentExpressions, [CallerMemberName] string? caller = null) => _source.RegisterAssertion(condition, argumentExpressions, caller);
+
+    internal void RegisterAssertion(Func<Func<Exception?, Exception?>, BaseAssertCondition<TActual>> conditionFunc, string?[] argumentExpressions, [CallerMemberName] string? caller = null) => _source.RegisterAssertion(conditionFunc(_selector), argumentExpressions, caller);
+
+    private async ValueTask<AssertionData> AssertionDataTask()
+    {
+        var assertionData = await _delegateAssertionBuilder.ProcessAssertionsAsync();
+
+        return assertionData with
+        {
+            Result = assertionData.Exception as TException,
+            Exception = null
+        };
+    }
 }
