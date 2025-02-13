@@ -41,6 +41,8 @@ internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparab
     public abstract IClassConstructor? ClassConstructor { get; }
     
     public IHookExecutor? HookExecutor { get; internal set; }
+
+    internal Dependency[] Dependencies { get; set; } = [];
     
     public int CompareTo(object? obj)
     {

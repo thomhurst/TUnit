@@ -71,9 +71,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var instanceTracker = Register(new InstanceTracker());
         
         var hooksCollector = Register(new HooksCollector(context.Request.Session.SessionUid.Value));
+
+        var dependencyCollector = new DependencyCollector();
         
         var testMetadataCollector = Register(new TestMetadataCollector(context.Request.Session.SessionUid.Value, TUnitMessageBus, LoggerFactory));
-        var testsLoader = Register(new TestsConstructor(extension, testMetadataCollector, this));
+        var testsConstructor = Register(new TestsConstructor(extension, testMetadataCollector, dependencyCollector, this));
         var testFilterService = Register(new TestFilterService(LoggerFactory));
         
         TestGrouper = Register(new TestGrouper());
@@ -88,7 +90,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testHookOrchestrator = Register(new TestHookOrchestrator(hooksCollector));
 
         var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
-        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, Logger, extension));
+        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsConstructor, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, Logger, extension));
         
         TestFinder = Register(new TestsFinder(TestDiscoverer));
         Register<ITestFinder>(TestFinder);
@@ -101,7 +103,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // TODO
         Register(new HookMessagePublisher(extension, messageBus));
         
-        var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TestFinder, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar));
+        var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar));
         
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken));
         

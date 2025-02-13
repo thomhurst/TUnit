@@ -7,7 +7,6 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
@@ -25,7 +24,6 @@ internal class SingleTestExecutor(
     ParallelLimitLockProvider parallelLimitLockProvider,
     AssemblyHookOrchestrator assemblyHookOrchestrator,
     ClassHookOrchestrator classHookOrchestrator,
-    ITestFinder testFinder,
     ITUnitMessageBus messageBus,
     TUnitFrameworkLogger logger,
     EngineCancellationToken engineCancellationToken,
@@ -72,7 +70,12 @@ internal class SingleTestExecutor(
 
             try
             {
-                await WaitForDependsOnTests(test, filter, context);
+                if (testContext.Result?.Exception is {} exception)
+                {
+                    throw exception;
+                }
+                
+                await WaitForDependencies(test, filter, context);
 
                 start = DateTimeOffset.Now;
 
@@ -457,85 +460,28 @@ internal class SingleTestExecutor(
         return Task.Run(() => testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions), cancellationToken);
     }
 
-    private async ValueTask WaitForDependsOnTests(DiscoveredTest test, ITestExecutionFilter? filter,
+    private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
-        foreach (var dependency in GetDependencies(test.TestDetails))
+        // Reverse so most nested dependencies resolve first
+        for (var index = test.Dependencies.Length - 1; index >= 0; index--)
         {
+            var dependency = test.Dependencies[index];
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, context, true);
             }
             catch (Exception e) when (dependency.ProceedOnFailure)
             {
-                test.TestContext.OutputWriter.WriteLine($"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
+                test.TestContext.OutputWriter.WriteLine(
+                    $"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
             }
             catch (Exception e)
             {
-                throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
+                throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}",
+                    e);
             }
         }
-    }
-
-    private (DiscoveredTest Test, bool ProceedOnFailure)[] GetDependencies(TestDetails testDetails)
-    {
-        return GetDependencies(testDetails, testDetails, [testDetails]).ToArray();
-    }
-
-    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails, List<TestDetails> currentChain)
-    {
-        foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
-        {
-            var dependencies = GetDependencies(testDetails, dependsOnAttribute);
-
-            foreach (var dependency in dependencies)
-            {
-                currentChain.Add(dependency.TestDetails);
-
-                if (dependency.TestDetails.IsSameTest(original))
-                {
-                    throw new DependencyConflictException(currentChain);
-                }
-
-                yield return (dependency.InternalDiscoveredTest, dependsOnAttribute.ProceedOnFailure);
-
-                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails, currentChain))
-                {
-                    yield return nestedDependency;
-                }
-            }
-        }
-    }
-
-    private TestContext[] GetDependencies(TestDetails testDetails, DependsOnAttribute dependsOnAttribute)
-    {
-        var testsForClass = testFinder.GetTests(dependsOnAttribute.TestClass ?? testDetails.TestClass.Type);
-
-        if (dependsOnAttribute.TestClass == null)
-        {
-            testsForClass = testsForClass
-                .Where(x => x.TestDetails.TestClassArguments.SequenceEqual(testDetails.TestClassArguments));
-        }
-
-        if (dependsOnAttribute.TestName != null)
-        {
-            testsForClass = testsForClass.Where(x => x.TestDetails.TestName == dependsOnAttribute.TestName);
-        }
-
-        if (dependsOnAttribute.ParameterTypes != null)
-        {
-            testsForClass = testsForClass.Where(x =>
-                x.TestDetails.TestMethodParameterTypes.SequenceEqual(dependsOnAttribute.ParameterTypes));
-        }
-        
-        var foundTests = testsForClass.ToArray();
-
-        if (!foundTests.Any())
-        {
-            throw new TUnitException($"No tests found for DependsOn({dependsOnAttribute}) - If using Inheritance remember to use an [InheritsTest] attribute");
-        }
-
-        return foundTests;
     }
 
     public Task<bool> IsEnabledAsync()

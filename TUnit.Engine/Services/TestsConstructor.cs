@@ -5,15 +5,22 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Services;
 
-internal class TestsConstructor(IExtension extension, TestMetadataCollector testMetadataCollector, IServiceProvider serviceProvider) : IDataProducer
+internal class TestsConstructor(IExtension extension, 
+    TestMetadataCollector testMetadataCollector,
+    DependencyCollector dependencyCollector, 
+    IServiceProvider serviceProvider) : IDataProducer
 {
-    public IEnumerable<DiscoveredTest> GetTests()
+    public DiscoveredTest[] GetTests()
     {
         var testMetadatas = testMetadataCollector.GetTests();
 
-        return testMetadatas.Select(ConstructTest);
+        var discoveredTests = testMetadatas.Select(ConstructTest).ToArray();
+
+        dependencyCollector.ResolveDependencies(discoveredTests);
+        
+        return discoveredTests;
     }
-    
+
     public DiscoveredTest ConstructTest(TestMetadata testMetadata)
     {
         var testDetails = testMetadata.BuildTestDetails();
