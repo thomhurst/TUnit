@@ -13,8 +13,8 @@ public record TestContextEvents :
     ILastTestInTestSessionEventReceiver,
     ITestRetryEventReceiver
 {
-    public int Order => 0;
-
+    public int Order => int.MaxValue / 2;
+    
     public EventHandler? OnDispose { get; set; }
     public AsyncEvent<TestRegisteredContext>? OnTestRegistered { get; set; }
     public AsyncEvent<BeforeTestContext>? OnTestStart { get; set; }

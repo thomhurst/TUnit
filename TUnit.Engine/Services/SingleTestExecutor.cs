@@ -251,17 +251,7 @@ internal class SingleTestExecutor(
     {
         try
         {
-            if (testContext.Result?.Status != Status.Skipped)
-            {
-                foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
-                {
-                    await logger.LogDebugAsync("Executing ITestEndEventReceivers");
-
-                    await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
-                        cleanUpExceptions);
-                }
-            }
-            else
+            if (testContext.Result?.Status == Status.Skipped)
             {
                 foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
                 {
