@@ -459,19 +459,22 @@ internal class SingleTestExecutor(
         ExecuteRequestContext context)
     {
         // Reverse so most nested dependencies resolve first
-        foreach (var dependency in test.Dependencies.Reverse())
+        for (var index = test.Dependencies.Length - 1; index >= 0; index--)
         {
+            var dependency = test.Dependencies[index];
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, context, true);
-            }   
+            }
             catch (Exception e) when (dependency.ProceedOnFailure)
             {
-                test.TestContext.OutputWriter.WriteLine($"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
+                test.TestContext.OutputWriter.WriteLine(
+                    $"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
             }
             catch (Exception e)
             {
-                throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
+                throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}",
+                    e);
             }
         }
     }
