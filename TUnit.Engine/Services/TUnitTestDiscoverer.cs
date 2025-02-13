@@ -83,7 +83,7 @@ internal class TUnitTestDiscoverer(
             }
         }
         
-        var allDiscoveredTests = testsConstructor.GetTests().ToArray();
+        var allDiscoveredTests = testsConstructor.GetTests();
 
         var afterDiscoveryHooks = testDiscoveryHookOrchestrator.CollectAfterHooks();
         var afterContext = testDiscoveryHookOrchestrator.GetAfterContext(allDiscoveredTests);
