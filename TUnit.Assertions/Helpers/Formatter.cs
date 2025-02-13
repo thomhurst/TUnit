@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace TUnit.Assertions.Helpers;
 
-internal abstract class Formatter
+public abstract class Formatter
 {
     private class SimpleFormatter<T>(Func<T, string> formatValue) : Formatter
     {

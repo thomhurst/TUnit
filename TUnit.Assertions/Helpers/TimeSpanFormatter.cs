@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.Helpers;
 
-internal static class TimeSpanFormatter
+public static class TimeSpanFormatter
 {
     public static string PrettyPrint(this TimeSpan timeSpan)
     {
