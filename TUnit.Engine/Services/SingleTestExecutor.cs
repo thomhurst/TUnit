@@ -70,6 +70,11 @@ internal class SingleTestExecutor(
 
             try
             {
+                if (testContext.Result?.Exception is {} exception)
+                {
+                    throw exception;
+                }
+                
                 await WaitForDependencies(test, filter, context);
 
                 start = DateTimeOffset.Now;

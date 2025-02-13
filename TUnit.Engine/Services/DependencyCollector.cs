@@ -1,5 +1,6 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
@@ -21,16 +22,6 @@ internal class DependencyCollector
     private IEnumerable<Dependency> GetDependencies(DiscoveredTest original, DiscoveredTest test,
         List<DiscoveredTest> currentChain, DiscoveredTest[] allTests)
     {
-        if (test.Dependencies is { Length: > 0 })
-        {
-            foreach (var testDependency in test.Dependencies)
-            {
-                yield return testDependency;
-            }
-            
-            yield break;
-        }
-        
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
             var dependencies = GetDependencies(test, dependsOnAttribute, allTests);
@@ -41,7 +32,12 @@ internal class DependencyCollector
 
                 if (dependency.TestDetails.IsSameTest(original.TestDetails))
                 {
-                    throw new DependencyConflictException(currentChain.Select(x => x.TestDetails));
+                    var dependencyConflictException = new DependencyConflictException(currentChain.Select(x => x.TestDetails));
+
+                    original.TestContext.SetResult(dependencyConflictException);
+                    dependency.TestContext.SetResult(dependencyConflictException);
+                    
+                    continue;
                 }
 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
@@ -79,7 +75,7 @@ internal class DependencyCollector
 
         if (!foundTests.Any())
         {
-            throw new TUnitException($"No tests found for DependsOn({dependsOnAttribute}) - If using Inheritance remember to use an [InheritsTest] attribute");
+            test.TestContext.SetResult(new TUnitException($"No tests found for DependsOn({dependsOnAttribute}) - If using Inheritance remember to use an [InheritsTest] attribute"));
         }
 
         return foundTests;
