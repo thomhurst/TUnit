@@ -464,7 +464,7 @@ internal class SingleTestExecutor(
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, context, true);
-            }
+            }   
             catch (Exception e) when (dependency.ProceedOnFailure)
             {
                 test.TestContext.OutputWriter.WriteLine($"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
