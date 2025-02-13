@@ -70,7 +70,7 @@ internal class SingleTestExecutor(
 
             try
             {
-                await WaitForDepencies(test, filter, context);
+                await WaitForDependencies(test, filter, context);
 
                 start = DateTimeOffset.Now;
 
@@ -455,7 +455,7 @@ internal class SingleTestExecutor(
         return Task.Run(() => testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions), cancellationToken);
     }
 
-    private async ValueTask WaitForDepencies(DiscoveredTest test, ITestExecutionFilter? filter,
+    private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
         // Reverse so most nested dependencies resolve first
