@@ -25,7 +25,10 @@ public partial class TestContext
         [UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Dynamic code check implemented")]
         get
         {
+#if NET
+            
             if (RuntimeFeature.IsDynamicCodeSupported)
+#endif
             {
                 return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
                        ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
