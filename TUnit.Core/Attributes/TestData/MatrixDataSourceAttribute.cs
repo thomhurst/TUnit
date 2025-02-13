@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Enums;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Core.Enums;
 
 namespace TUnit.Core;
 
@@ -54,7 +55,11 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 
             if (type.IsEnum)
             {
+#if NET
+                return Enum.GetValuesAsUnderlyingType(type).Cast<object>().Except(matrixAttribute?.Excluding ?? []).ToArray();
+#else
                 return Enum.GetValues(type).Cast<object>().Except(matrixAttribute?.Excluding ?? []).ToArray();
+#endif
             }
             
             throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");

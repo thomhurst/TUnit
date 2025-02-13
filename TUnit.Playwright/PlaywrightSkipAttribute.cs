@@ -36,7 +36,11 @@ public class PlaywrightSkipAttribute : SkipAttribute
 
         return Task.FromResult(_combinations.Any(combination =>
         {
-            var targets = Enum.GetValues(typeof(Targets)).OfType<Targets>();
+#if NET
+            var targets = Enum.GetValues<Targets>();
+#else
+            var targets = Enum.GetValues(typeof(Targets)).Cast<Targets>();
+#endif
             var requirements = targets.Where(x => combination.HasFlag(x));
             return requirements.All(flag =>
                 flag switch
