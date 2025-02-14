@@ -17,13 +17,13 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConcreteClass2());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -89,16 +89,13 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
 				{
 					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest:0",
-					TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [],
-					TestName = "SecondTest",
+					MethodName = $"SecondTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConcreteClass2.SecondTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 11,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -124,13 +121,13 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new Inherited_ConcreteClass2());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -196,16 +193,13 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
 				{
 					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName:0",
-					TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "AssertClassName",
+					MethodName = $"AssertClassName",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConcreteClass2.AssertClassName failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 8,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -231,13 +225,13 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new Inherited_ConcreteClass1());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -302,16 +296,13 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass1>
 				{
 					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0",
-					TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "AssertClassName",
+					MethodName = $"AssertClassName",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConcreteClass1.AssertClassName failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 8,
-					Exception = exception,
 				});
 			}
 			return nodes;

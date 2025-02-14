@@ -2,6 +2,7 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
@@ -26,6 +27,11 @@ internal class TestsConstructor(IExtension extension,
         var testDetails = testMetadata.BuildTestDetails();
 
         var testContext = new TestContext(serviceProvider, testDetails, testMetadata);
+
+        if (testMetadata.DiscoveryException is not null)
+        {
+            testContext.SetResult(testMetadata.DiscoveryException);
+        }
 
         RunOnTestDiscoveryAttributeHooks([..testDetails.DataAttributes, ..testDetails.Attributes], testContext);
 

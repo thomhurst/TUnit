@@ -17,13 +17,13 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PropertySetterTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -326,16 +326,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 															}
 															catch (global::System.Exception exception)
 															{
-																nodes.Add(new global::TUnit.Core.FailedInitializationTest
+																nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PropertySetterTests>
 																{
 																	TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
-																	TestClass = typeof(global::TUnit.TestProject.PropertySetterTests),
-																	ReturnType = typeof(global::System.Threading.Tasks.Task),
-																	ParameterTypeFullNames = [],
-																	TestName = "Test",
+																	MethodName = $"Test",
+																	Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PropertySetterTests.Test failed to initialize", exception),
 																	TestFilePath = @"",
 																	TestLineNumber = 70,
-																	Exception = exception,
 																});
 															}
 															return nodes;

@@ -68,6 +68,8 @@ public abstract record TestMetadata
     
     public required TestBuilderContext TestBuilderContext { get; init; }
     
+    public Exception? DiscoveryException { get; init; }
+    
     public abstract TestDetails BuildTestDetails();
     internal abstract DiscoveredTest BuildDiscoveredTest(TestContext testContext);
 

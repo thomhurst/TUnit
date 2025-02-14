@@ -132,7 +132,7 @@ public class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("}");
 
                 sourceBuilder.WriteLine(
-                    "public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)");
+                    "public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)");
                 sourceBuilder.WriteLine("{");
                 if (count == 1)
                 {
@@ -156,10 +156,10 @@ public class TestsGenerator : IIncrementalGenerator
                 foreach (var model in classGrouping)
                 {
                     sourceBuilder.WriteLine(
-                        $"private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests{index++}(string sessionId)");
+                        $"private global::System.Collections.Generic.List<TestMetadata> Tests{index++}(string sessionId)");
                     sourceBuilder.WriteLine("{");
                     sourceBuilder.WriteLine(
-                        "global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];");
+                        "global::System.Collections.Generic.List<TestMetadata> nodes = [];");
                     sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
                     sourceBuilder.WriteLine($"var {VariableNames.TestMethodDataIndex} = 0;");
 
