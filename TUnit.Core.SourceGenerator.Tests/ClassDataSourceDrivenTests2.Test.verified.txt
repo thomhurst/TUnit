@@ -17,7 +17,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests2());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -25,9 +25,9 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -124,23 +124,19 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
 				{
 					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived1:0",
-					TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [],
-					TestName = "Base_Derived1",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 9,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -237,16 +233,12 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
 					{
 						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived1:0",
-						TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [],
-						TestName = "Base_Derived1",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived1 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 9,
-						Exception = exception,
 					});
 				}
 				return nodes;
@@ -272,7 +264,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests2());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -280,9 +272,9 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -379,23 +371,19 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
 				{
 					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived2:0",
-					TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [],
-					TestName = "Base_Derived2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 15,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -492,16 +480,12 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
 					{
 						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived2:0",
-						TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [],
-						TestName = "Base_Derived2",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived2 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 15,
-						Exception = exception,
 					});
 				}
 				return nodes;

@@ -17,7 +17,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgumentWithImplicitConverterTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -26,9 +26,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			..Tests2(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -102,23 +102,19 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-					TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
-					TestName = "Explicit",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -192,23 +188,19 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-						TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
-						TestName = "Explicit",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,
-						Exception = exception,
 					});
 				}
 				return nodes;
 			}
-			private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
+			private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 			{
-				global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+				global::System.Collections.Generic.List<TestMetadata> nodes = [];
 				var classDataIndex = 0;
 				var testMethodDataIndex = 0;
 				try
@@ -282,16 +274,12 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-							TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-							ReturnType = typeof(void),
-							ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
-							TestName = "Explicit",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 5,
-							Exception = exception,
 						});
 					}
 					return nodes;
@@ -317,7 +305,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgumentWithImplicitConverterTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -326,9 +314,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			..Tests2(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -402,23 +390,19 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-					TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
-					TestName = "Implicit",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 14,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -492,23 +476,19 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-						TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
-						TestName = "Implicit",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 14,
-						Exception = exception,
 					});
 				}
 				return nodes;
 			}
-			private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
+			private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 			{
-				global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+				global::System.Collections.Generic.List<TestMetadata> nodes = [];
 				var classDataIndex = 0;
 				var testMethodDataIndex = 0;
 				try
@@ -582,16 +562,12 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-							TestClass = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-							ReturnType = typeof(void),
-							ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
-							TestName = "Implicit",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 14,
-							Exception = exception,
 						});
 					}
 					return nodes;

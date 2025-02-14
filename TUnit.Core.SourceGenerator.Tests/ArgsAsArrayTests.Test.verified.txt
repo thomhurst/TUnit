@@ -17,13 +17,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -95,16 +95,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Params(string[]):0",
-					TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(string[])],
-					TestName = "Params",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.Params failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -130,13 +126,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -208,16 +204,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.NonParams(string[]):0",
-					TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(string[])],
-					TestName = "NonParams",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.NonParams failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 15,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -243,13 +235,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -321,16 +313,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable(System.Collections.Generic.IEnumerable<string>):0",
-					TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<string>)],
-					TestName = "ParamsEnumerable",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.ParamsEnumerable failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 25,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -356,13 +344,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -434,16 +422,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Enumerable(System.Collections.Generic.IEnumerable<string>):0",
-					TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<string>)],
-					TestName = "Enumerable",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.Enumerable failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 35,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -469,13 +453,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -553,16 +537,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params(int,System.Collections.Generic.IEnumerable<string>):0",
-					TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>)],
-					TestName = "Following_Non_Params",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.Following_Non_Params failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 45,
-					Exception = exception,
 				});
 			}
 			return nodes;

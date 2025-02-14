@@ -17,7 +17,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new GenericMethodTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -25,9 +25,9 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -135,23 +135,19 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.GenericMethodTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
-					TestClass = typeof(global::TUnit.TestProject.GenericMethodTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<int>), typeof(global::System.Func<int, int>), typeof(global::System.Func<int, int>), typeof(global::System.Func<int, int, int>), typeof(global::System.Collections.Generic.IEqualityComparer<int>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>)],
-					TestName = "AggregateBy_HasExpectedOutput",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("GenericMethodTests.AggregateBy_HasExpectedOutput failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -259,16 +255,12 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.GenericMethodTests>
 					{
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
-						TestClass = typeof(global::TUnit.TestProject.GenericMethodTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<string>), typeof(global::System.Func<string, string>), typeof(global::System.Func<string, string>), typeof(global::System.Func<string, string, string>), typeof(global::System.Collections.Generic.IEqualityComparer<string>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>)],
-						TestName = "AggregateBy_HasExpectedOutput",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("GenericMethodTests.AggregateBy_HasExpectedOutput failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,
-						Exception = exception,
 					});
 				}
 				return nodes;

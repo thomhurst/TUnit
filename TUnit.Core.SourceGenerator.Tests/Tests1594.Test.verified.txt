@@ -17,13 +17,13 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MyTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -125,16 +125,12 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1594.MyTests>
 						{
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1594.MyTests(TUnit.TestProject.Bugs._1594.MyFixture).Test1:0",
-							TestClass = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
-							ReturnType = typeof(void),
-							ParameterTypeFullNames = [],
-							TestName = "Test1",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MyTests.Test1 failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 12,
-							Exception = exception,
 						});
 					}
 					return nodes;

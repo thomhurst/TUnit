@@ -17,7 +17,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassTupleDataSourceDrivenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -27,9 +27,9 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 			..Tests3(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -191,23 +191,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
-					TestName = "DataSource_TupleMethod",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 24,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -369,23 +365,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 					{
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
-						TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
-						TestName = "DataSource_TupleMethod",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 24,
-						Exception = exception,
 					});
 				}
 				return nodes;
 			}
-			private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
+			private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 			{
-				global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+				global::System.Collections.Generic.List<TestMetadata> nodes = [];
 				var classDataIndex = 0;
 				var testMethodDataIndex = 0;
 				try
@@ -547,23 +539,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 						{
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
-							TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-							ReturnType = typeof(void),
-							ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
-							TestName = "DataSource_TupleMethod",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 24,
-							Exception = exception,
 						});
 					}
 					return nodes;
 				}
-				private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests3(string sessionId)
+				private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 				{
-					global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 					var classDataIndex = 0;
 					var testMethodDataIndex = 0;
 					try
@@ -725,16 +713,12 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						}
 						catch (global::System.Exception exception)
 						{
-							nodes.Add(new global::TUnit.Core.FailedInitializationTest
+							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 							{
 								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
-								TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-								ReturnType = typeof(void),
-								ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
-								TestName = "DataSource_TupleMethod",
+								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 24,
-								Exception = exception,
 							});
 						}
 						return nodes;

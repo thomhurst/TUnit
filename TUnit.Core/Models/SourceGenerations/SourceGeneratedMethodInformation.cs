@@ -6,6 +6,31 @@ namespace TUnit.Core;
 
 public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
+    internal static SourceGeneratedMethodInformation Unknown { get; } =
+        new()
+        {
+            Attributes = [],
+            Name = "Unknown",
+            ReturnType = typeof(void),
+            Type = typeof(object),
+            Parameters = [],
+            GenericTypeCount = 0,
+            Class = new SourceGeneratedClassInformation
+            {
+                Assembly = new SourceGeneratedAssemblyInformation()
+                {
+                    Attributes = [],
+                    Name = "Unknown",
+                },
+                Attributes = [],
+                Name = "Unknown",
+                Namespace = "Unknown",
+                Parameters = [],
+                Properties = [],
+                Type = typeof(object)
+            }
+        };
+    
     public required SourceGeneratedParameterInformation[] Parameters { get; init; }
     
     public required int GenericTypeCount { get; init; }

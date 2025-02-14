@@ -17,13 +17,13 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConstantArgumentsTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -95,16 +95,12 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.String1(string):0",
-					TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string)],
-					TestName = "String1",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.String1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 16,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -130,13 +126,13 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConstantArgumentsTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -208,16 +204,12 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Int(int):0",
-					TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int)],
-					TestName = "Int",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Int failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 23,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -243,13 +235,13 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConstantArgumentsTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -321,16 +313,12 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Double(double):0",
-					TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(double)],
-					TestName = "Double",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Double failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 30,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -356,13 +344,13 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConstantArgumentsTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -434,16 +422,12 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Float(float):0",
-					TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(float)],
-					TestName = "Float",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Float failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 37,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -469,13 +453,13 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConstantArgumentsTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -547,16 +531,12 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Long(long):0",
-					TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(long)],
-					TestName = "Long",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Long failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 44,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -582,13 +562,13 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConstantArgumentsTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -660,16 +640,12 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.UInt(uint):0",
-					TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(uint)],
-					TestName = "UInt",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.UInt failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 51,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -695,13 +671,13 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConstantArgumentsTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -773,16 +749,12 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.ULong(ulong):0",
-					TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(ulong)],
-					TestName = "ULong",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.ULong failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 58,
-					Exception = exception,
 				});
 			}
 			return nodes;

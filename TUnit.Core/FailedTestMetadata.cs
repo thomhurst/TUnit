@@ -1,0 +1,33 @@
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Core;
+
+public record FailedTestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>
+    where TClassType : class
+{
+    public required string TestId { get; init; }
+    public required Exception Exception { get; init; }
+    public required string TestFilePath { get; init; }
+    public required int TestLineNumber { get; init; }
+
+
+    public static implicit operator TestMetadata<TClassType>(FailedTestMetadata<TClassType> failedTestMetadata)
+    {
+        return new TestMetadata<TClassType>
+        {
+            TestId = failedTestMetadata.TestId,
+            RepeatLimit = 0,
+            TestMethod = SourceGeneratedMethodInformation.Unknown,
+            CurrentRepeatAttempt = 0,
+            ResettableClassFactory = new ResettableLazy<TClassType>(() => null!, "Unknown", new TestBuilderContext()),
+            TestMethodFactory = (_, _) => Task.CompletedTask,
+            TestBuilderContext = new TestBuilderContext(),
+            TestClassArguments = [],
+            TestClassProperties = [],
+            TestFilePath = failedTestMetadata.TestFilePath,
+            TestLineNumber = failedTestMetadata.TestLineNumber,
+            TestMethodArguments = [],
+            DiscoveryException = failedTestMetadata.Exception
+        };
+    }
+}

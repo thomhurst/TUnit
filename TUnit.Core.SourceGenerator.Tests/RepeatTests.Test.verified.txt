@@ -17,7 +17,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -25,9 +25,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -93,23 +93,19 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 				{
 					TestId = $"TUnit.TestProject.RepeatTests.One:0",
-					TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [],
-					TestName = "One",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.One failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 6,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -175,16 +171,12 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 					{
 						TestId = $"TUnit.TestProject.RepeatTests.One:1",
-						TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [],
-						TestName = "One",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.One failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 6,
-						Exception = exception,
 					});
 				}
 				return nodes;
@@ -210,7 +202,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -219,9 +211,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			..Tests2(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -287,23 +279,19 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 				{
 					TestId = $"TUnit.TestProject.RepeatTests.Two:0",
-					TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [],
-					TestName = "Two",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 13,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -369,23 +357,19 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 					{
 						TestId = $"TUnit.TestProject.RepeatTests.Two:1",
-						TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [],
-						TestName = "Two",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 13,
-						Exception = exception,
 					});
 				}
 				return nodes;
 			}
-			private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
+			private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 			{
-				global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+				global::System.Collections.Generic.List<TestMetadata> nodes = [];
 				var classDataIndex = 0;
 				var testMethodDataIndex = 0;
 				try
@@ -451,16 +435,12 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 						{
 							TestId = $"TUnit.TestProject.RepeatTests.Two:2",
-							TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-							ReturnType = typeof(void),
-							ParameterTypeFullNames = [],
-							TestName = "Two",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 13,
-							Exception = exception,
 						});
 					}
 					return nodes;
@@ -486,7 +466,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -496,9 +476,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			..Tests3(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -563,23 +543,19 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 				{
 					TestId = $"TUnit.TestProject.RepeatTests.Three:0",
-					TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [],
-					TestName = "Three",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 20,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -644,23 +620,19 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 					{
 						TestId = $"TUnit.TestProject.RepeatTests.Three:1",
-						TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [],
-						TestName = "Three",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 20,
-						Exception = exception,
 					});
 				}
 				return nodes;
 			}
-			private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
+			private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 			{
-				global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+				global::System.Collections.Generic.List<TestMetadata> nodes = [];
 				var classDataIndex = 0;
 				var testMethodDataIndex = 0;
 				try
@@ -725,23 +697,19 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 						{
 							TestId = $"TUnit.TestProject.RepeatTests.Three:2",
-							TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-							ReturnType = typeof(void),
-							ParameterTypeFullNames = [],
-							TestName = "Three",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 20,
-							Exception = exception,
 						});
 					}
 					return nodes;
 				}
-				private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests3(string sessionId)
+				private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 				{
-					global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 					var classDataIndex = 0;
 					var testMethodDataIndex = 0;
 					try
@@ -806,16 +774,12 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						}
 						catch (global::System.Exception exception)
 						{
-							nodes.Add(new global::TUnit.Core.FailedInitializationTest
+							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
 							{
 								TestId = $"TUnit.TestProject.RepeatTests.Three:3",
-								TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-								ReturnType = typeof(void),
-								ParameterTypeFullNames = [],
-								TestName = "Three",
+								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 20,
-								Exception = exception,
 							});
 						}
 						return nodes;

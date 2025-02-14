@@ -17,13 +17,13 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConstantInBaseClassTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -95,16 +95,12 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests.SomeTest(string):0",
-					TestClass = typeof(global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string)],
-					TestName = "SomeTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantInBaseClassTests.SomeTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 13,
-					Exception = exception,
 				});
 			}
 			return nodes;
