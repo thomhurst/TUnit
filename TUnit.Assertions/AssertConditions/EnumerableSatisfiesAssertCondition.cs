@@ -23,8 +23,10 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
     protected override string GetExpectation()
         => $"to satisfy {_assertionBuilderExpression}";
 
-    protected override async Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
-        AssertionMetadata assertionMetadata)
+    protected override async ValueTask<AssertionResult> GetResult(
+        TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
     {
         if (actualValue is null)
         {

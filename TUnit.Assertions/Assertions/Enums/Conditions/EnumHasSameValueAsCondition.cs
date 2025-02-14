@@ -11,8 +11,10 @@ public class EnumHasSameValueAsCondition<TEnum, TExpected>(TExpected expected) :
         return $"to have the same value as {Enum.GetName(typeof(TExpected), expected)}";
     }
 
-    protected override Task<AssertionResult> GetResult(TEnum? actualValue, Exception? exception,
-        AssertionMetadata assertionMetadata)
+    protected override ValueTask<AssertionResult> GetResult(
+        TEnum? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
     {
         return AssertionResult.FailIf(actualValue is null, "the source enum is null")
             .OrFailIf(Convert.ToInt32(actualValue!) != Convert.ToInt32(expected), $"the value was {Convert.ToInt32(actualValue!)}");
