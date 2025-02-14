@@ -98,6 +98,7 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NameOfArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NameOfArgumentTests.TestName(string):0",
+					MethodName = $"TestName",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NameOfArgumentTests.TestName failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,

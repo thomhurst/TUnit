@@ -88,6 +88,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
 				{
 					TestId = $"TUnit.TestProject.BasicTests.SynchronousTest:0",
+					MethodName = $"SynchronousTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.SynchronousTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -187,6 +188,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
 				{
 					TestId = $"TUnit.TestProject.BasicTests.AsynchronousTest:0",
+					MethodName = $"AsynchronousTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.AsynchronousTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 11,
@@ -286,6 +288,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
 				{
 					TestId = $"TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest:0",
+					MethodName = $"ValueTaskAsynchronousTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.ValueTaskAsynchronousTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 17,

@@ -154,6 +154,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AutoDataTests>
 				{
 					TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
+					MethodName = $"Test1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("AutoDataTests.Test1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 8,

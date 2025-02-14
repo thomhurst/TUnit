@@ -329,6 +329,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 																nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PropertySetterTests>
 																{
 																	TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
+																	MethodName = $"Test",
 																	Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PropertySetterTests.Test failed to initialize", exception),
 																	TestFilePath = @"",
 																	TestLineNumber = 70,

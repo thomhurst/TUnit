@@ -6,25 +6,25 @@ namespace TUnit.Core;
 
 public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
-    internal static SourceGeneratedMethodInformation Unknown { get; } =
+    internal static SourceGeneratedMethodInformation Failure<TClassType>(string methodName) =>
         new()
         {
             Attributes = [],
-            Name = "Unknown",
+            Name = methodName,
             ReturnType = typeof(void),
             Type = typeof(object),
             Parameters = [],
             GenericTypeCount = 0,
             Class = new SourceGeneratedClassInformation
             {
-                Assembly = new SourceGeneratedAssemblyInformation()
+                Assembly = new SourceGeneratedAssemblyInformation
                 {
                     Attributes = [],
-                    Name = "Unknown",
+                    Name = typeof(TClassType).Assembly.GetName().Name!,
                 },
                 Attributes = [],
-                Name = "Unknown",
-                Namespace = "Unknown",
+                Name = typeof(TClassType).Name,
+                Namespace = typeof(TClassType).Namespace,
                 Parameters = [],
                 Properties = [],
                 Type = typeof(object)

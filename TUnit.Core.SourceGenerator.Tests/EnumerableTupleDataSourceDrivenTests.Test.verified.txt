@@ -120,6 +120,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
+					MethodName = $"DataSource_TupleMethod",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -222,6 +223,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
 					{
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
+						MethodName = $"DataSource_TupleMethod",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,

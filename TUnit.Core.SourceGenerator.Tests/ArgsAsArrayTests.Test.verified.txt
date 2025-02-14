@@ -98,6 +98,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Params(string[]):0",
+					MethodName = $"Params",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.Params failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -207,6 +208,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.NonParams(string[]):0",
+					MethodName = $"NonParams",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.NonParams failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 15,
@@ -316,6 +318,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable(System.Collections.Generic.IEnumerable<string>):0",
+					MethodName = $"ParamsEnumerable",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.ParamsEnumerable failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 25,
@@ -425,6 +428,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Enumerable(System.Collections.Generic.IEnumerable<string>):0",
+					MethodName = $"Enumerable",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.Enumerable failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 35,
@@ -540,6 +544,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params(int,System.Collections.Generic.IEnumerable<string>):0",
+					MethodName = $"Following_Non_Params",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgsAsArrayTests.Following_Non_Params failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 45,

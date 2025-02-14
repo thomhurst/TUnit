@@ -127,6 +127,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
 				{
 					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived1:0",
+					MethodName = $"Base_Derived1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 9,
@@ -236,6 +237,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
 					{
 						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived1:0",
+						MethodName = $"Base_Derived1",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived1 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 9,
@@ -374,6 +376,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
 				{
 					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived2:0",
+					MethodName = $"Base_Derived2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 15,
@@ -483,6 +486,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
 					{
 						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived2:0",
+						MethodName = $"Base_Derived2",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived2 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 15,

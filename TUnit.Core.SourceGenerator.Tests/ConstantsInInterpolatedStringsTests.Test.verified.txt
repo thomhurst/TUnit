@@ -98,6 +98,7 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests.SomeTest(string):0",
+					MethodName = $"SomeTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantsInInterpolatedStringsTests.SomeTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 13,

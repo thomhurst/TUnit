@@ -110,6 +110,7 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TupleDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
+					MethodName = $"DataSource_TupleMethod",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,

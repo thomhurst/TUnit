@@ -103,6 +103,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
+					MethodName = $"Test",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -188,6 +189,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
+						MethodName = $"Test",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,
@@ -308,6 +310,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
+					MethodName = $"Test2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 12,
@@ -399,6 +402,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
+						MethodName = $"Test2",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 12,

@@ -98,6 +98,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.Test:0",
+					MethodName = $"Test",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 12,
@@ -207,6 +208,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.Test2:0",
+					MethodName = $"Test2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 19,
@@ -343,6 +345,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
+					MethodName = $"Test3",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test3 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 26,
@@ -450,6 +453,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
+						MethodName = $"Test3",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test3 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 26,
@@ -568,6 +572,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest(string):0",
+					MethodName = $"MethodDataSourceTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.MethodDataSourceTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 36,
@@ -708,6 +713,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.CustomDisplayNameTests.PasswordTest(string):0",
+					MethodName = $"PasswordTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.PasswordTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 44,
@@ -817,6 +823,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.SameClassConstantTest:0",
+					MethodName = $"SameClassConstantTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.SameClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 51,
@@ -926,6 +933,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.DifferentClassConstantTest:0",
+					MethodName = $"DifferentClassConstantTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.DifferentClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 58,
@@ -1035,6 +1043,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.NestedClassConstantTest:0",
+					MethodName = $"NestedClassConstantTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.NestedClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 65,

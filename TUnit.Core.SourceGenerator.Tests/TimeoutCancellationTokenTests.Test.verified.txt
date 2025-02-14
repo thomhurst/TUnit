@@ -107,6 +107,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DefaultTest(System.Threading.CancellationToken):0",
+					MethodName = $"DefaultTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DefaultTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 15,
@@ -227,6 +228,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).BasicTest(System.Threading.CancellationToken):0",
+					MethodName = $"BasicTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.BasicTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 21,
@@ -346,6 +348,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).InheritedTimeoutAttribute(System.Threading.CancellationToken):0",
+					MethodName = $"InheritedTimeoutAttribute",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.InheritedTimeoutAttribute failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 29,
@@ -473,6 +476,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataTest(int,System.Threading.CancellationToken):0",
+					MethodName = $"DataTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DataTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 36,
@@ -599,6 +603,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataSourceTest(int,System.Threading.CancellationToken):0",
+					MethodName = $"DataSourceTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DataSourceTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 47,
@@ -756,6 +761,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
+					MethodName = $"MatrixTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.MatrixTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 54,

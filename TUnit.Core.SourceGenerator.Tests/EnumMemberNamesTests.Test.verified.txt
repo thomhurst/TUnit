@@ -105,6 +105,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+					MethodName = $"SomeTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -191,6 +192,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+						MethodName = $"SomeTest",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,
@@ -277,6 +279,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
+							MethodName = $"SomeTest",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 5,

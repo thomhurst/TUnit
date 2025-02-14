@@ -6,6 +6,7 @@ public record FailedTestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessed
     where TClassType : class
 {
     public required string TestId { get; init; }
+    public required string MethodName { get; init; }
     public required Exception Exception { get; init; }
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
@@ -17,7 +18,7 @@ public record FailedTestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessed
         {
             TestId = failedTestMetadata.TestId,
             RepeatLimit = 0,
-            TestMethod = SourceGeneratedMethodInformation.Unknown,
+            TestMethod = SourceGeneratedMethodInformation.Failure<TClassType>(failedTestMetadata.MethodName),
             CurrentRepeatAttempt = 0,
             ResettableClassFactory = new ResettableLazy<TClassType>(() => null!, "Unknown", new TestBuilderContext()),
             TestMethodFactory = (_, _) => Task.CompletedTask,
@@ -30,4 +31,5 @@ public record FailedTestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessed
             DiscoveryException = failedTestMetadata.Exception
         };
     }
+
 }

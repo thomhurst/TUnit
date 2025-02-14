@@ -123,6 +123,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+					MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 10,
@@ -221,6 +222,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 					{
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+						MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 10,
@@ -319,6 +321,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 						{
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+							MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 10,
@@ -417,6 +420,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 							{
 								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+								MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 10,
@@ -515,6 +519,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 								{
 									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+									MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 									TestFilePath = @"",
 									TestLineNumber = 10,
@@ -613,6 +618,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 									{
 										TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+										MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 										Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 										TestFilePath = @"",
 										TestLineNumber = 10,
@@ -711,6 +717,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 										{
 											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+											MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 											Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 											TestFilePath = @"",
 											TestLineNumber = 10,
@@ -809,6 +816,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 											{
 												TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+												MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 												Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 												TestFilePath = @"",
 												TestLineNumber = 10,
@@ -907,6 +915,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 												{
 													TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
+													MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 													Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 													TestFilePath = @"",
 													TestLineNumber = 10,

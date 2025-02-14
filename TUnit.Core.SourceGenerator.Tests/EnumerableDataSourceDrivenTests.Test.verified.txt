@@ -101,6 +101,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method(int):0",
+					MethodName = $"DataSource_Method",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumerableDataSourceDrivenTests.DataSource_Method failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 8,
@@ -213,6 +214,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method2(int):0",
+					MethodName = $"DataSource_Method2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumerableDataSourceDrivenTests.DataSource_Method2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 15,
@@ -325,6 +327,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_WithBaseReturn(TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue):0",
+					MethodName = $"DataSource_WithBaseReturn",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumerableDataSourceDrivenTests.DataSource_WithBaseReturn failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 22,

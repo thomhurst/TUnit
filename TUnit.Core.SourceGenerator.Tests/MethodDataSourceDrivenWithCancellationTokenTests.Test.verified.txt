@@ -118,6 +118,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+					MethodName = $"MyTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 10,
@@ -214,6 +215,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 					{
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+						MethodName = $"MyTest",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 10,
@@ -314,6 +316,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 						{
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+							MethodName = $"MyTest",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 10,
@@ -414,6 +417,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 							{
 								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+								MethodName = $"MyTest",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 10,
@@ -514,6 +518,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 								{
 									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+									MethodName = $"MyTest",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 									TestFilePath = @"",
 									TestLineNumber = 10,
@@ -614,6 +619,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 									{
 										TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+										MethodName = $"MyTest",
 										Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 										TestFilePath = @"",
 										TestLineNumber = 10,

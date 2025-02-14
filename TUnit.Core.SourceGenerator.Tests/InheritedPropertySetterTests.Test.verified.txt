@@ -329,6 +329,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 																nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PropertySetterTests>
 																{
 																	TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
+																	MethodName = $"Test",
 																	Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PropertySetterTests.Test failed to initialize", exception),
 																	TestFilePath = @"",
 																	TestLineNumber = 70,
@@ -575,6 +576,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 												nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.InheritedPropertySetterTests>
 												{
 													TestId = $"TUnit.TestProject.InheritedPropertySetterTests.Test:0",
+													MethodName = $"Test",
 													Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedPropertySetterTests.Test failed to initialize", exception),
 													TestFilePath = @"",
 													TestLineNumber = 70,

@@ -98,6 +98,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.String1(string):0",
+					MethodName = $"String1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.String1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 16,
@@ -207,6 +208,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Int(int):0",
+					MethodName = $"Int",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Int failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 23,
@@ -316,6 +318,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Double(double):0",
+					MethodName = $"Double",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Double failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 30,
@@ -425,6 +428,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Float(float):0",
+					MethodName = $"Float",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Float failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 37,
@@ -534,6 +538,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Long(long):0",
+					MethodName = $"Long",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Long failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 44,
@@ -643,6 +648,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.UInt(uint):0",
+					MethodName = $"UInt",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.UInt failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 51,
@@ -752,6 +758,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.ULong(ulong):0",
+					MethodName = $"ULong",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.ULong failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 58,

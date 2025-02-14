@@ -174,6 +174,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
 						{
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
+							MethodName = $"Test1",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MultipleClassDataSourceDrivenTests.Test1 failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 14,
@@ -359,6 +360,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
 						{
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
+							MethodName = $"Test2",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MultipleClassDataSourceDrivenTests.Test2 failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 20,

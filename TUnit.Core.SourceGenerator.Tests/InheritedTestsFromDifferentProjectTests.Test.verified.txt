@@ -91,6 +91,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
 				{
 					TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test:0",
+					MethodName = $"Test",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedTestsFromDifferentProjectTests.Test failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 6,
@@ -202,6 +203,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(string):0",
+					MethodName = $"GenericMethodDataSource",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedTestsFromDifferentProjectTests.GenericMethodDataSource failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 11,
@@ -313,6 +315,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(string):0",
+					MethodName = $"NonGenericMethodDataSource",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 17,
@@ -415,6 +418,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
 				{
 					TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest:0",
+					MethodName = $"BaseTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedTestsFromDifferentProjectTests.BaseTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 7,

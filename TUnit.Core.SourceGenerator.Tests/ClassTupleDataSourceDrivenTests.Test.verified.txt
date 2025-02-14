@@ -194,6 +194,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
+					MethodName = $"DataSource_TupleMethod",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 24,
@@ -368,6 +369,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 					{
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
+						MethodName = $"DataSource_TupleMethod",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 24,
@@ -542,6 +544,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 						{
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
+							MethodName = $"DataSource_TupleMethod",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 24,
@@ -716,6 +719,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 							{
 								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
+								MethodName = $"DataSource_TupleMethod",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 24,

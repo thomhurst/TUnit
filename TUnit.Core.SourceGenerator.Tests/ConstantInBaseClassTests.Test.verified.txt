@@ -98,6 +98,7 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests.SomeTest(string):0",
+					MethodName = $"SomeTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantInBaseClassTests.SomeTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 13,

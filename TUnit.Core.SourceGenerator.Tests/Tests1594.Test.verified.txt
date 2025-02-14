@@ -128,6 +128,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1594.MyTests>
 						{
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1594.MyTests(TUnit.TestProject.Bugs._1594.MyFixture).Test1:0",
+							MethodName = $"Test1",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MyTests.Test1 failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 12,

@@ -105,6 +105,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+					MethodName = $"Explicit",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -191,6 +192,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+						MethodName = $"Explicit",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,
@@ -277,6 +279,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+							MethodName = $"Explicit",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 5,
@@ -393,6 +396,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+					MethodName = $"Implicit",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 14,
@@ -479,6 +483,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+						MethodName = $"Implicit",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 14,
@@ -565,6 +570,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+							MethodName = $"Implicit",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 14,

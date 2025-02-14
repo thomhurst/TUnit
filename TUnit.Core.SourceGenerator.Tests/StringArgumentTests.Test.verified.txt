@@ -119,6 +119,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.StringArgumentTests.Normal(string):0",
+					MethodName = $"Normal",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Normal failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -214,6 +215,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.StringArgumentTests.Normal(string):0",
+						MethodName = $"Normal",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Normal failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,
@@ -309,6 +311,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.StringArgumentTests.Normal(string):0",
+							MethodName = $"Normal",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Normal failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 5,
@@ -404,6 +407,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 							{
 								TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS3:TUnit.TestProject.StringArgumentTests.Normal(string):0",
+								MethodName = $"Normal",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Normal failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 5,
@@ -499,6 +503,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 								{
 									TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS4:TUnit.TestProject.StringArgumentTests.Normal(string):0",
+									MethodName = $"Normal",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Normal failed to initialize", exception),
 									TestFilePath = @"",
 									TestLineNumber = 5,
@@ -594,6 +599,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 									{
 										TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS5:TUnit.TestProject.StringArgumentTests.Normal(string):0",
+										MethodName = $"Normal",
 										Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Normal failed to initialize", exception),
 										TestFilePath = @"",
 										TestLineNumber = 5,
@@ -689,6 +695,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 										{
 											TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS6:TUnit.TestProject.StringArgumentTests.Normal(string):0",
+											MethodName = $"Normal",
 											Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Normal failed to initialize", exception),
 											TestFilePath = @"",
 											TestLineNumber = 5,
@@ -787,6 +794,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 											{
 												TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS7:TUnit.TestProject.StringArgumentTests.Normal(string):0",
+												MethodName = $"Normal",
 												Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Normal failed to initialize", exception),
 												TestFilePath = @"",
 												TestLineNumber = 5,
@@ -913,6 +921,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
+					MethodName = $"Nullable",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Nullable failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 24,
@@ -1004,6 +1013,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
+						MethodName = $"Nullable",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Nullable failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 24,
@@ -1095,6 +1105,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
+							MethodName = $"Nullable",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Nullable failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 24,
@@ -1186,6 +1197,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 							{
 								TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS3:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
+								MethodName = $"Nullable",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Nullable failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 24,
@@ -1277,6 +1289,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 								{
 									TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS4:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
+									MethodName = $"Nullable",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Nullable failed to initialize", exception),
 									TestFilePath = @"",
 									TestLineNumber = 24,
@@ -1368,6 +1381,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 									{
 										TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS5:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
+										MethodName = $"Nullable",
 										Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Nullable failed to initialize", exception),
 										TestFilePath = @"",
 										TestLineNumber = 24,
@@ -1459,6 +1473,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 										{
 											TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS6:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
+											MethodName = $"Nullable",
 											Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Nullable failed to initialize", exception),
 											TestFilePath = @"",
 											TestLineNumber = 24,
@@ -1550,6 +1565,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.StringArgumentTests>
 											{
 												TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS7:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
+												MethodName = $"Nullable",
 												Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("StringArgumentTests.Nullable failed to initialize", exception),
 												TestFilePath = @"",
 												TestLineNumber = 24,

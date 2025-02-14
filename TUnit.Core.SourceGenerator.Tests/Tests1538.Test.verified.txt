@@ -145,6 +145,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(bool,string,string,string,string,string,string,string):0",
+					MethodName = $"Eight_Args",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Eight_Args failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -349,6 +350,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(bool,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string):0",
+					MethodName = $"SixteenArgs",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.SixteenArgs failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 13,

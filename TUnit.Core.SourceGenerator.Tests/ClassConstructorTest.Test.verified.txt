@@ -105,6 +105,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassConstructorTest>
 				{
 					TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
+					MethodName = $"Test",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassConstructorTest.Test failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 8,

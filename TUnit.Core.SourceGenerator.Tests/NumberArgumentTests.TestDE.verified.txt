@@ -98,6 +98,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NumberArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NumberArgumentTests.Int(int):0",
+					MethodName = $"Int",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.Int failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
@@ -207,6 +208,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NumberArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NumberArgumentTests.Double(double):0",
+					MethodName = $"Double",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.Double failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 12,
@@ -316,6 +318,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NumberArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NumberArgumentTests.Float(float):0",
+					MethodName = $"Float",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.Float failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 19,
@@ -425,6 +428,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NumberArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NumberArgumentTests.Long(long):0",
+					MethodName = $"Long",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.Long failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 26,
@@ -534,6 +538,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NumberArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NumberArgumentTests.ULong(ulong):0",
+					MethodName = $"ULong",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.ULong failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 33,
@@ -643,6 +648,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NumberArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NumberArgumentTests.UInt(uint):0",
+					MethodName = $"UInt",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.UInt failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 40,

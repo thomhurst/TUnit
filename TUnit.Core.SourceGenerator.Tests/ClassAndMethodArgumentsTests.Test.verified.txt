@@ -105,6 +105,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).Simple:0",
+					MethodName = $"Simple",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.Simple failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 8,
@@ -192,6 +193,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).Simple:0",
+						MethodName = $"Simple",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.Simple failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 8,
@@ -321,6 +323,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
+					MethodName = $"WithMethodLevel",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.WithMethodLevel failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 11,
@@ -419,6 +422,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
+						MethodName = $"WithMethodLevel",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.WithMethodLevel failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 11,
@@ -517,6 +521,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
+							MethodName = $"WithMethodLevel",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.WithMethodLevel failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 11,
@@ -615,6 +620,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 							{
 								TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
+								MethodName = $"WithMethodLevel",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.WithMethodLevel failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 11,
@@ -744,6 +750,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
+					MethodName = $"IgnoreParameters",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.IgnoreParameters failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 16,
@@ -842,6 +849,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
+						MethodName = $"IgnoreParameters",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.IgnoreParameters failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 16,
@@ -940,6 +948,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
+							MethodName = $"IgnoreParameters",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.IgnoreParameters failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 16,
@@ -1038,6 +1047,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 							{
 								TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
+								MethodName = $"IgnoreParameters",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassAndMethodArgumentsTests.IgnoreParameters failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 16,

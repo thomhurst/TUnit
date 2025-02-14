@@ -109,6 +109,7 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AttributeTests>
 								{
 									TestId = $"TUnit.TestProject.AttributeTests.MyTest:0",
+									MethodName = $"MyTest",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("AttributeTests.MyTest failed to initialize", exception),
 									TestFilePath = @"",
 									TestLineNumber = 7,

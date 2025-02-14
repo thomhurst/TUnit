@@ -13,6 +13,7 @@ public static class FailedTestInitializationWriter
         sourceBuilder.WriteLine($"nodes.Add(new FailedTestMetadata<{testSourceDataModel.TestClass.GloballyQualified()}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
+        sourceBuilder.WriteLine($"MethodName = $\"{testSourceDataModel.MethodName}\",");
         sourceBuilder.WriteLine($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");

@@ -89,6 +89,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_1:0",
+					MethodName = $"High_1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 12,
@@ -189,6 +190,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_2:0",
+					MethodName = $"High_2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 18,
@@ -289,6 +291,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_3:0",
+					MethodName = $"High_3",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_3 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 24,
@@ -389,6 +392,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_1:0",
+					MethodName = $"Medium_1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Medium_1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 30,
@@ -489,6 +493,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_2:0",
+					MethodName = $"Medium_2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Medium_2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 36,
@@ -589,6 +594,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Low_1:0",
+					MethodName = $"Low_1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Low_1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 42,

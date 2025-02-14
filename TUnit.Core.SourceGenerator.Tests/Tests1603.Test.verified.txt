@@ -98,6 +98,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Casted_Integer_To_Short_Converts(short):0",
+					MethodName = $"Casted_Integer_To_Short_Converts",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Casted_Integer_To_Short_Converts failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 8,
@@ -207,6 +208,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Integer_To_Short_Converts(short):0",
+					MethodName = $"Integer_To_Short_Converts",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Integer_To_Short_Converts failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 15,

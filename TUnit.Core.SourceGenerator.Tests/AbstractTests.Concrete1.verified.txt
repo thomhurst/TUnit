@@ -91,6 +91,7 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass1>
 				{
 					TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0",
+					MethodName = $"AssertClassName",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConcreteClass1.AssertClassName failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 8,
