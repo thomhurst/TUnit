@@ -6,13 +6,13 @@ namespace TUnit.Core;
 
 public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
-    internal static SourceGeneratedMethodInformation Failure<TClassType>(string methodName) =>
+    internal static SourceGeneratedMethodInformation Failure<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>(string methodName) =>
         new()
         {
             Attributes = [],
             Name = methodName,
             ReturnType = typeof(void),
-            Type = typeof(object),
+            Type = typeof(TClassType),
             Parameters = [],
             GenericTypeCount = 0,
             Class = new SourceGeneratedClassInformation
@@ -27,7 +27,7 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
                 Namespace = typeof(TClassType).Namespace,
                 Parameters = [],
                 Properties = [],
-                Type = typeof(object)
+                Type = typeof(TClassType)
             }
         };
     
