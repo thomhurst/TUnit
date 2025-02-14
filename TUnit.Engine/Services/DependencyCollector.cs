@@ -28,6 +28,11 @@ internal class DependencyCollector
 
             foreach (var dependency in dependencies)
             {
+                if (currentChain.Contains(dependency))
+                {
+                    yield break;
+                }
+                
                 currentChain.Add(dependency);
 
                 if (dependency.TestDetails.IsSameTest(original.TestDetails))
@@ -37,7 +42,7 @@ internal class DependencyCollector
                     original.TestContext.SetResult(dependencyConflictException);
                     dependency.TestContext.SetResult(dependencyConflictException);
                     
-                    continue;
+                    yield break;
                 }
 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
@@ -73,7 +78,7 @@ internal class DependencyCollector
         
         var foundTests = testsForClass.ToArray();
 
-        if (!foundTests.Any())
+        if (foundTests.Length == 0)
         {
             test.TestContext.SetResult(new TUnitException($"No tests found for DependsOn({dependsOnAttribute}) - If using Inheritance remember to use an [InheritsTest] attribute"));
         }
