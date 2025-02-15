@@ -6,11 +6,11 @@ internal record Dependency(DiscoveredTest Test, bool ProceedOnFailure)
     
     public virtual bool Equals(Dependency? other)
     {
-        return other?.TestDetails.TestId == TestDetails.TestId;
+        return other?.TestDetails.IsSameTest(TestDetails) is true;
     }
 
     public override int GetHashCode()
     {
-        return TestDetails.TestId.GetHashCode();
+        return TestDetails.TestName.GetHashCode();
     }
 }

@@ -37,27 +37,21 @@ internal class DependencyCollector
 
             foreach (var dependency in dependencies)
             {
-                if (currentChain.Contains(dependency))
+                if (currentChain.Any(x => x.TestDetails.IsSameTest(dependency.TestDetails)))
                 {
-                    IEnumerable<TestDetails> chain =
-                    [
-                        ..currentChain.SkipWhile(x => !x.Equals(dependency)).Select(x => x.TestDetails),
-                        dependency.TestDetails
-                    ];
-                    
-                    throw new DependencyConflictException(chain);
+                    yield break;
                 }
                 
                 currentChain.Add(dependency);
 
-                if (dependency.Equals(original))
+                if (dependency.TestDetails.IsSameTest(original.TestDetails))
                 {
                     throw new DependencyConflictException(currentChain.Select(x => x.TestDetails));
                 }
 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(original, dependency, currentChain, allTests))
+                foreach (var nestedDependency in GetDependencies(original, dependency, currentChain.ToList(), allTests))
                 {
                     yield return nestedDependency;
                 }
