@@ -94,13 +94,7 @@ public class AssertionResult
     public static AssertionResult Passed { get; } = new(true, string.Empty);
     
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
-    public static implicit operator ValueTask<AssertionResult>(AssertionResult result) {
-        #if NET5_0_OR_GREATER
-        return ValueTask.FromResult(result);
-        #else
-        return new ValueTask<AssertionResult>(result);
-        #endif
-    }
+    public static implicit operator ValueTask<AssertionResult>(AssertionResult result) => new(result);
 
     [InterpolatedStringHandler]
     public readonly struct InterpolatedStringHandler
