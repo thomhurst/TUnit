@@ -8,6 +8,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit.Analyzers">
       <PrivateAssets>all</PrivateAssets>
@@ -17,5 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Exclude snapshot files from compilation -->
+    <Compile Remove="Snapshots\**" />
+    <None Include="Snapshots\**" />
   </ItemGroup>
 </Project>
