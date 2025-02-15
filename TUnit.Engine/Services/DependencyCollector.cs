@@ -16,12 +16,20 @@ internal class DependencyCollector
 
     private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests)
     {
-        var shouldAbort = new BooleanReferenceWrapper();
-        return GetDependencies(test, test, [test], allTests, shouldAbort).ToArray();
+        try
+        {
+            return GetDependencies(test, test, [test], allTests).ToArray();
+        }
+        catch (Exception e)
+        {
+            test.TestContext.SetResult(e);
+        }
+
+        return [];
     }
 
     private IEnumerable<Dependency> GetDependencies(DiscoveredTest original, DiscoveredTest test,
-        List<DiscoveredTest> currentChain, DiscoveredTest[] allTests, BooleanReferenceWrapper shouldAbort)
+        List<DiscoveredTest> currentChain, DiscoveredTest[] allTests)
     {
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
@@ -29,39 +37,28 @@ internal class DependencyCollector
 
             foreach (var dependency in dependencies)
             {
-                if(shouldAbort.Value)
-                {
-                    yield break;
-                }
-                
                 if (currentChain.Contains(dependency))
                 {
-                    shouldAbort.Value = true;
-                    yield break;
+                    IEnumerable<TestDetails> chain =
+                    [
+                        ..currentChain.SkipWhile(x => !x.Equals(dependency)).Select(x => x.TestDetails),
+                        dependency.TestDetails
+                    ];
+                    
+                    throw new DependencyConflictException(chain);
                 }
                 
                 currentChain.Add(dependency);
 
                 if (dependency.Equals(original))
                 {
-                    var dependencyConflictException = new DependencyConflictException(currentChain.Select(x => x.TestDetails));
-
-                    original.TestContext.SetResult(dependencyConflictException);
-                    dependency.TestContext.SetResult(dependencyConflictException);
-                    
-                    shouldAbort.Value = true;
-                    yield break;
+                    throw new DependencyConflictException(currentChain.Select(x => x.TestDetails));
                 }
 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(original, dependency, currentChain, allTests, shouldAbort))
+                foreach (var nestedDependency in GetDependencies(original, dependency, currentChain, allTests))
                 {
-                    if (shouldAbort.Value)
-                    {
-                        yield break;
-                    }
-                    
                     yield return nestedDependency;
                 }
             }
@@ -97,10 +94,5 @@ internal class DependencyCollector
         }
 
         return foundTests;
-    }
-
-    private class BooleanReferenceWrapper
-    {
-        public bool Value { get; set; }
     }
 }
