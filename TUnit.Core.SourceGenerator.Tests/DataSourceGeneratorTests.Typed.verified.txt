@@ -17,7 +17,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -25,9 +25,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -180,23 +180,20 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 				{
 					TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
-					TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(int)],
-					TestName = "GeneratedData_Method",
+					MethodName = $"GeneratedData_Method",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 9,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -349,16 +346,13 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
 						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
-						TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(int)],
-						TestName = "GeneratedData_Method",
+						MethodName = $"GeneratedData_Method",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 9,
-						Exception = exception,
 					});
 				}
 				return nodes;
@@ -384,7 +378,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -392,9 +386,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -571,23 +565,20 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 				{
 					TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
-					TestName = "GeneratedData_Method2",
+					MethodName = $"GeneratedData_Method2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 17,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -764,16 +755,13 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
 						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
-						TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
-						TestName = "GeneratedData_Method2",
+						MethodName = $"GeneratedData_Method2",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 17,
-						Exception = exception,
 					});
 				}
 				return nodes;
@@ -799,7 +787,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -807,9 +795,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -986,23 +974,20 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 				{
 					TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
-					TestName = "GeneratedData_Method3",
+					MethodName = $"GeneratedData_Method3",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 25,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -1179,16 +1164,13 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
 						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
-						TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
-						TestName = "GeneratedData_Method3",
+						MethodName = $"GeneratedData_Method3",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 25,
-						Exception = exception,
 					});
 				}
 				return nodes;

@@ -17,13 +17,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -86,16 +86,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_1:0",
-					TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "High_1",
+					MethodName = $"High_1",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 12,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -121,13 +118,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -190,16 +187,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_2:0",
-					TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "High_2",
+					MethodName = $"High_2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 18,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -225,13 +219,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -294,16 +288,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_3:0",
-					TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "High_3",
+					MethodName = $"High_3",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_3 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 24,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -329,13 +320,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -398,16 +389,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_1:0",
-					TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "Medium_1",
+					MethodName = $"Medium_1",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Medium_1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 30,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -433,13 +421,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -502,16 +490,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_2:0",
-					TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "Medium_2",
+					MethodName = $"Medium_2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Medium_2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 36,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -537,13 +522,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -606,16 +591,13 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Low_1:0",
-					TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "Low_1",
+					MethodName = $"Low_1",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Low_1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 42,
-					Exception = exception,
 				});
 			}
 			return nodes;

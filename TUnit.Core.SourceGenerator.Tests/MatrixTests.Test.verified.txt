@@ -17,13 +17,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -158,16 +158,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
-					TestName = "MatrixTest_One",
+					MethodName = $"MatrixTest_One",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.MatrixTest_One failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 7,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -193,13 +190,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -351,16 +348,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int), typeof(int), typeof(int), typeof(bool)],
-					TestName = "MatrixTest_Two",
+					MethodName = $"MatrixTest_Two",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.MatrixTest_Two failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 17,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -386,13 +380,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -510,16 +504,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int), typeof(global::TUnit.TestProject.TestEnum)],
-					TestName = "MatrixTest_Enum",
+					MethodName = $"MatrixTest_Enum",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.MatrixTest_Enum failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 28,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -545,13 +536,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -663,16 +654,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string), typeof(bool)],
-					TestName = "AutoGenerateBools",
+					MethodName = $"AutoGenerateBools",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.AutoGenerateBools failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 37,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -698,13 +686,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -822,16 +810,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string), typeof(bool)],
-					TestName = "AutoGenerateBools2",
+					MethodName = $"AutoGenerateBools2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.AutoGenerateBools2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 46,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -857,13 +842,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -981,16 +966,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool)],
-					TestName = "ImplicitConversion",
+					MethodName = $"ImplicitConversion",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.ImplicitConversion failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 55,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -1016,13 +998,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1146,16 +1128,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 						{
 							TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
-							TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-							ReturnType = typeof(global::System.Threading.Tasks.Task),
-							ParameterTypeFullNames = [typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool)],
-							TestName = "ExcludingAutoGeneratedMatrixValues",
+							MethodName = $"ExcludingAutoGeneratedMatrixValues",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.ExcludingAutoGeneratedMatrixValues failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 64,
-							Exception = exception,
 						});
 					}
 					return nodes;
@@ -1181,13 +1160,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1288,16 +1267,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method1(int):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int)],
-					TestName = "Method1",
+					MethodName = $"Method1",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method1 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 91,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -1323,13 +1299,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1430,16 +1406,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method2(int):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int)],
-					TestName = "Method2",
+					MethodName = $"Method2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 99,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -1465,13 +1438,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1572,16 +1545,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method3(int):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int)],
-					TestName = "Method3",
+					MethodName = $"Method3",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method3 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 107,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -1607,13 +1577,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1714,16 +1684,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method4(int):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int)],
-					TestName = "Method4",
+					MethodName = $"Method4",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method4 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 115,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -1749,13 +1716,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1876,16 +1843,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Exclusion(int,int):0",
-					TestClass = typeof(global::TUnit.TestProject.MatrixTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int), typeof(int)],
-					TestName = "Exclusion",
+					MethodName = $"Exclusion",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Exclusion failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 123,
-					Exception = exception,
 				});
 			}
 			return nodes;

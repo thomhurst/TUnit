@@ -17,13 +17,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -104,16 +104,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DefaultTest(System.Threading.CancellationToken):0",
-					TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(global::System.Threading.CancellationToken)],
-					TestName = "DefaultTest",
+					MethodName = $"DefaultTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DefaultTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 15,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -139,13 +136,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -228,16 +225,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).BasicTest(System.Threading.CancellationToken):0",
-					TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(global::System.Threading.CancellationToken)],
-					TestName = "BasicTest",
+					MethodName = $"BasicTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.BasicTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 21,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -263,13 +257,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -351,16 +345,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).InheritedTimeoutAttribute(System.Threading.CancellationToken):0",
-					TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(global::System.Threading.CancellationToken)],
-					TestName = "InheritedTimeoutAttribute",
+					MethodName = $"InheritedTimeoutAttribute",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.InheritedTimeoutAttribute failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 29,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -386,13 +377,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -482,16 +473,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataTest(int,System.Threading.CancellationToken):0",
-					TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
-					TestName = "DataTest",
+					MethodName = $"DataTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DataTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 36,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -517,13 +505,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -612,16 +600,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataSourceTest(int,System.Threading.CancellationToken):0",
-					TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
-					TestName = "DataSourceTest",
+					MethodName = $"DataSourceTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DataSourceTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 47,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -647,13 +632,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -773,16 +758,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
-					TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
-					TestName = "MatrixTest",
+					MethodName = $"MatrixTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.MatrixTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 54,
-					Exception = exception,
 				});
 			}
 			return nodes;
