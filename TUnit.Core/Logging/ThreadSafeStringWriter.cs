@@ -63,23 +63,7 @@ internal class ThreadSafeStringWriter : StringWriter
         }
     }
 
-    public override void Write(ReadOnlySpan<char> buffer)
-    {
-        lock (_lock)
-        {
-            base.Write(buffer);
-        }
-    }
-
     public override void Write(string? value)
-    {
-        lock (_lock)
-        {
-            base.Write(value);
-        }
-    }
-
-    public override void Write(StringBuilder? value)
     {
         lock (_lock)
         {
@@ -103,43 +87,11 @@ internal class ThreadSafeStringWriter : StringWriter
         }
     }
 
-    public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new CancellationToken())
-    {
-        lock (_lock)
-        {
-            return base.WriteAsync(buffer, cancellationToken);
-        }
-    }
-
     public override Task WriteAsync(string? value)
     {
         lock (_lock)
         {
             return base.WriteAsync(value);
-        }
-    }
-
-    public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new CancellationToken())
-    {
-        lock (_lock)
-        {
-            return base.WriteAsync(value, cancellationToken);
-        }
-    }
-
-    public override void WriteLine(ReadOnlySpan<char> buffer)
-    {
-        lock (_lock)
-        {
-            base.WriteLine(buffer);
-        }
-    }
-
-    public override void WriteLine(StringBuilder? value)
-    {
-        lock (_lock)
-        {
-            base.WriteLine(value);
         }
     }
 
@@ -159,27 +111,11 @@ internal class ThreadSafeStringWriter : StringWriter
         }
     }
 
-    public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new CancellationToken())
-    {
-        lock (_lock)
-        {
-            return base.WriteLineAsync(buffer, cancellationToken);
-        }
-    }
-
     public override Task WriteLineAsync(string? value)
     {
         lock (_lock)
         {
             return base.WriteLineAsync(value);
-        }
-    }
-
-    public override Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new CancellationToken())
-    {
-        lock (_lock)
-        {
-            return base.WriteLineAsync(value, cancellationToken);
         }
     }
 
@@ -194,27 +130,11 @@ internal class ThreadSafeStringWriter : StringWriter
         }
     }
 
-    public override ValueTask DisposeAsync()
-    {
-        lock (_lock)
-        {
-            return base.DisposeAsync();
-        }
-    }
-
     public override void Flush()
     {
         lock (_lock)
         {
             base.Flush();
-        }
-    }
-
-    public override Task FlushAsync(CancellationToken cancellationToken)
-    {
-        lock (_lock)
-        {
-            return base.FlushAsync(cancellationToken);
         }
     }
 
@@ -307,14 +227,6 @@ internal class ThreadSafeStringWriter : StringWriter
     }
 
     public override void Write(string format, params object?[] arg)
-    {
-        lock (_lock)
-        {
-            base.Write(format, arg);
-        }
-    }
-
-    public override void Write(string format, params ReadOnlySpan<object?> arg)
     {
         lock (_lock)
         {
@@ -466,14 +378,6 @@ internal class ThreadSafeStringWriter : StringWriter
         }
     }
 
-    public override void WriteLine(string format, params ReadOnlySpan<object?> arg)
-    {
-        lock (_lock)
-        {
-            base.WriteLine(format, arg);
-        }
-    }
-
     public override void WriteLine(uint value)
     {
         lock (_lock)
@@ -515,4 +419,102 @@ internal class ThreadSafeStringWriter : StringWriter
             }
         }
     }
+
+#if NET
+    public override void Write(ReadOnlySpan<char> buffer)
+    {
+        lock (_lock)
+        {
+            base.Write(buffer);
+        }
+    }
+    
+    public override void WriteLine(string format, params ReadOnlySpan<object?> arg)
+    {
+        lock (_lock)
+        {
+            base.WriteLine(format, arg);
+        }
+    }
+
+    public override void Write(string format, params ReadOnlySpan<object?> arg)
+    {
+        lock (_lock)
+        {
+            base.Write(format, arg);
+        }
+    }
+
+    public override Task FlushAsync(CancellationToken cancellationToken)
+    {
+        lock (_lock)
+        {
+            return base.FlushAsync(cancellationToken);
+        }
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        lock (_lock)
+        {
+            return base.DisposeAsync();
+        }
+    }
+
+    public override Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new CancellationToken())
+    {
+        lock (_lock)
+        {
+            return base.WriteLineAsync(value, cancellationToken);
+        }
+    }
+
+    public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new CancellationToken())
+    {
+        lock (_lock)
+        {
+            return base.WriteLineAsync(buffer, cancellationToken);
+        }
+    }
+
+    public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new CancellationToken())
+    {
+        lock (_lock)
+        {
+            return base.WriteAsync(value, cancellationToken);
+        }
+    }
+
+    public override void WriteLine(ReadOnlySpan<char> buffer)
+    {
+        lock (_lock)
+        {
+            base.WriteLine(buffer);
+        }
+    }
+
+    public override void WriteLine(StringBuilder? value)
+    {
+        lock (_lock)
+        {
+            base.WriteLine(value);
+        }
+    }
+
+    public override void Write(StringBuilder? value)
+    {
+        lock (_lock)
+        {
+            base.Write(value);
+        }
+    }
+
+    public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new CancellationToken())
+    {
+        lock (_lock)
+        {
+            return base.WriteAsync(buffer, cancellationToken);
+        }
+    }
+#endif
 }
