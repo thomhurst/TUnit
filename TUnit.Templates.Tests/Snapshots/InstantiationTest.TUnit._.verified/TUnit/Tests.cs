@@ -1,6 +1,6 @@
-﻿using TestProject.Data;
+﻿using TUnit.Data;
 
-namespace TestProject;
+namespace TUnit;
 
 public class Tests
 {
