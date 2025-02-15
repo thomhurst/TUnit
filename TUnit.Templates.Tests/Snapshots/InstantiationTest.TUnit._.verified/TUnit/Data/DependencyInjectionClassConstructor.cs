@@ -1,6 +1,6 @@
 ﻿using TUnit.Core.Interfaces;
 
-namespace TestProject;
+namespace TUnit;
 
 public class DependencyInjectionClassConstructor : IClassConstructor
 {

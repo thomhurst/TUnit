@@ -1,4 +1,4 @@
-﻿namespace TestProject;
+﻿namespace TUnit;
 
 [Arguments("Hello")]
 [Arguments("World")]

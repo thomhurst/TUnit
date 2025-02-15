@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**;content\Directory.Build.props;content\Directory.Build.targets;content\Directory.Packages.props" />
+    <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**;content\Directory.Build.props;content\Directory.Build.targets;content\Directory.Packages.props" CopyToOutputDirectory="PreserveNewest" />
     <Compile Remove="**\*" />
   </ItemGroup>
 
