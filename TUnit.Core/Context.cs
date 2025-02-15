@@ -14,8 +14,8 @@ public abstract class Context : IContext
         ?? BeforeTestDiscoveryContext.Current as Context
         ?? GlobalContext.Current;
     
-    public StringWriter OutputWriter { get; } = new();
-    public StringWriter ErrorOutputWriter { get; } = new();
+    public StringWriter OutputWriter { get; } = new ThreadSafeStringWriter();
+    public StringWriter ErrorOutputWriter { get; } = new ThreadSafeStringWriter();
  
     internal Context()
     {
@@ -23,12 +23,12 @@ public abstract class Context : IContext
     
     public string GetStandardOutput()
     {
-        return OutputWriter.GetStringBuilder().ToString().Trim();
+        return OutputWriter.ToString().Trim();
     }
     
     public string GetErrorOutput()
     {
-        return ErrorOutputWriter.GetStringBuilder().ToString().Trim();
+        return ErrorOutputWriter.ToString().Trim();
     }
     
     public TUnitLogger GetDefaultLogger()
