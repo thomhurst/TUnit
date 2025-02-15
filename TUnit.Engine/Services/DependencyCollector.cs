@@ -18,7 +18,7 @@ internal class DependencyCollector
     {
         try
         {
-            return GetDependencies(test, test, [test], allTests).ToArray();
+            return GetDependencies(test, test, [], allTests).ToArray();
         }
         catch (Exception e)
         {
@@ -39,9 +39,14 @@ internal class DependencyCollector
             {
                 if (currentChain.Any(x => x.TestDetails.IsSameTest(dependency.TestDetails)))
                 {
-                    yield break;
+                    var chain = currentChain
+                        .SkipWhile(x => !x.TestDetails.IsSameTest(dependency.TestDetails))
+                        .Select(x => x.TestDetails)
+                        .Append(dependency.TestDetails);
+
+                    throw new DependencyConflictException(chain);
                 }
-                
+
                 currentChain.Add(dependency);
 
                 if (dependency.TestDetails.IsSameTest(original.TestDetails))
@@ -51,10 +56,12 @@ internal class DependencyCollector
 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(original, dependency, currentChain.ToList(), allTests))
+                foreach (var nestedDependency in GetDependencies(original, dependency, [..currentChain], allTests))
                 {
                     yield return nestedDependency;
                 }
+
+                currentChain.Remove(dependency);
             }
         }
     }
