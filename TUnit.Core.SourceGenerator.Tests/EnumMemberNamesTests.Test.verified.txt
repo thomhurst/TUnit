@@ -17,7 +17,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new EnumMemberNamesTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -26,9 +26,9 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 			..Tests2(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -102,23 +102,20 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-					TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(string)],
-					TestName = "SomeTest",
+					MethodName = $"SomeTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -192,23 +189,20 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-						TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(string)],
-						TestName = "SomeTest",
+						MethodName = $"SomeTest",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,
-						Exception = exception,
 					});
 				}
 				return nodes;
 			}
-			private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
+			private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 			{
-				global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+				global::System.Collections.Generic.List<TestMetadata> nodes = [];
 				var classDataIndex = 0;
 				var testMethodDataIndex = 0;
 				try
@@ -282,16 +276,13 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 						{
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
-							TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-							ReturnType = typeof(void),
-							ParameterTypeFullNames = [typeof(string)],
-							TestName = "SomeTest",
+							MethodName = $"SomeTest",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 5,
-							Exception = exception,
 						});
 					}
 					return nodes;

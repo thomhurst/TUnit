@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
@@ -92,6 +93,14 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
                     executableHook.ExecuteAsync(testContext, CancellationToken.None)
                 );
             }
+        }
+        
+        foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
+        {
+            await logger.LogDebugAsync("Executing ITestEndEventReceivers");
+
+            await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
+                cleanUpExceptions);
         }
         
         await logger.LogDebugAsync("Disposing test class");

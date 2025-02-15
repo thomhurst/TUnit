@@ -71,39 +71,7 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
                 .WithProperty(new TrxExceptionProperty(exception.Message, exception.StackTrace))
         ));
     }
-
-    public async ValueTask FailedInitialization(FailedInitializationTest failedInitializationTest)
-    {
-        var testClass = failedInitializationTest.TestClass;
-        
-        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: new TestNode
-                {
-                    Uid = failedInitializationTest.TestId,
-                    DisplayName = $"{failedInitializationTest.TestName} (Failed Initialization)",
-                    Properties = new PropertyBag
-                        (
-                            new TestFileLocationProperty(failedInitializationTest.TestFilePath,
-                                new LinePositionSpan(new LinePosition(failedInitializationTest.TestLineNumber, 0),
-                                    new LinePosition(failedInitializationTest.TestLineNumber, 0))
-                            ),
-                            new TestMethodIdentifierProperty(
-                                AssemblyFullName: testClass.Assembly.FullName!,
-                                Namespace: testClass.Namespace!,
-                                TypeName: testClass.Name,
-                                MethodName: failedInitializationTest.TestName,
-                                ParameterTypeFullNames: failedInitializationTest.ParameterTypeFullNames.Select(x => x.FullName!).ToArray(),
-                                ReturnTypeFullName: failedInitializationTest.ReturnType.FullName!
-                            ),
-                            // TRX Reports
-                            new TrxExceptionProperty(failedInitializationTest.Exception.Message, failedInitializationTest.Exception.StackTrace)
-                            )
-                }
-                .WithProperty(new ErrorTestNodeStateProperty(failedInitializationTest.Exception))
-        ));
-    }
-
+    
     public async ValueTask Skipped(TestContext testContext, string reason)
     {
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(

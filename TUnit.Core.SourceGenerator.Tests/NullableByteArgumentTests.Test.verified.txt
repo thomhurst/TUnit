@@ -17,7 +17,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new NullableByteArgumentTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -25,9 +25,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -100,23 +100,20 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
-					TestClass = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(byte?)],
-					TestName = "Test",
+					MethodName = $"Test",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 5,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -189,16 +186,13 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
-						TestClass = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(byte?)],
-						TestName = "Test",
+						MethodName = $"Test",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 5,
-						Exception = exception,
 					});
 				}
 				return nodes;
@@ -224,7 +218,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new NullableByteArgumentTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -232,9 +226,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -313,23 +307,20 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
-					TestClass = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(byte), typeof(byte?)],
-					TestName = "Test2",
+					MethodName = $"Test2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 12,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -408,16 +399,13 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
-						TestClass = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-						ReturnType = typeof(void),
-						ParameterTypeFullNames = [typeof(byte), typeof(byte?)],
-						TestName = "Test2",
+						MethodName = $"Test2",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 12,
-						Exception = exception,
 					});
 				}
 				return nodes;

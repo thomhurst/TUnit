@@ -43,7 +43,17 @@ internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparab
     public IHookExecutor? HookExecutor { get; internal set; }
 
     internal Dependency[] Dependencies { get; set; } = [];
-    
+
+    public virtual bool Equals(DiscoveredTest? other)
+    {
+        return other?.TestDetails.TestId == TestDetails.TestId;
+    }
+
+    public override int GetHashCode()
+    {
+        return TestDetails.TestId.GetHashCode();
+    }
+
     public int CompareTo(object? obj)
     {
         return CompareTo(obj as DiscoveredTest);

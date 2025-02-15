@@ -9,6 +9,7 @@
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
         <LangVersion>latest</LangVersion>
         <OutputType>Exe</OutputType>
+        <GenerateProgramFile>false</GenerateProgramFile>
     </PropertyGroup>
 
     <ItemGroup>
