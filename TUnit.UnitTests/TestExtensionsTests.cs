@@ -1,3 +1,4 @@
+using System.Reflection;
 using AutoFixture;
 using TUnit.Core;
 using TUnit.Core.Extensions;
@@ -39,7 +40,7 @@ public class TestExtensionsTests
             })
             .Create();
 
-        var context = new TestContext(null!, testDetails, CreateDummyMetadata());
+        var context = CreateTestContext(testDetails);
 
         var name = context.GetClassTypeName();
         
@@ -75,11 +76,22 @@ public class TestExtensionsTests
                 GenericTypeCount = 0,
             })            .Create();
 
-        var context = new TestContext(null!, testDetails, CreateDummyMetadata());
+        var context = CreateTestContext(testDetails);
 
         var name = context.GetClassTypeName();
         
         Assert.That(name, Is.EqualTo("TestExtensionsTests+InnerClass"));
+    }
+
+    private TestContext CreateTestContext<T>(TestDetails<T> testDetails) where T : class
+    {
+        var constructor = typeof(TestContext).GetConstructor(
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            null,
+            [typeof(IServiceProvider), typeof(TestDetails), typeof(TestMetadata)],
+            [])!;
+
+        return (TestContext)constructor.Invoke([null, testDetails, CreateDummyMetadata()]);
     }
 
     private TestMetadata<TestExtensionsTests> CreateDummyMetadata()

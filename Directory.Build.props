@@ -30,11 +30,6 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
-  <ItemGroup>
-    <InternalsVisibleTo Include="TUnit.Engine" />
-    <InternalsVisibleTo Include="TUnit.UnitTests" />
-  </ItemGroup>
-
   <PropertyGroup>
     <CurrentYear>$([System.DateTime]::Now.ToString("yyyy"))</CurrentYear>
   </PropertyGroup>
