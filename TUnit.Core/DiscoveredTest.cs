@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Diagnostics;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -26,6 +27,7 @@ internal record DiscoveredTest<
     public override IClassConstructor? ClassConstructor => resettableLazyTestClassFactory.ClassConstructor;
 }
 
+[DebuggerDisplay("{TestDetails.TestId}")]
 internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparable
 {
     public required TestContext TestContext { get; init; }

@@ -49,4 +49,33 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
     
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     public override required Type Type { get; init; }
+
+    public virtual bool Equals(SourceGeneratedMethodInformation? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return base.Equals(other) && Parameters.SequenceEqual(other.Parameters) && GenericTypeCount == other.GenericTypeCount && Class.Equals(other.Class) && ReturnType.Equals(other.ReturnType) && Type.Equals(other.Type);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = base.GetHashCode();
+            hashCode = (hashCode * 397) ^ Parameters.GetHashCode();
+            hashCode = (hashCode * 397) ^ GenericTypeCount;
+            hashCode = (hashCode * 397) ^ Class.GetHashCode();
+            hashCode = (hashCode * 397) ^ ReturnType.GetHashCode();
+            hashCode = (hashCode * 397) ^ Type.GetHashCode();
+            return hashCode;
+        }
+    }
 }
