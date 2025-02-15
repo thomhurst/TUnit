@@ -35,7 +35,7 @@ public abstract class BaseAssertCondition
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";
 
-    internal abstract Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata, string? actualExpression);
+    internal abstract ValueTask<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata, string? actualExpression);
     
     internal void SetSubject(string? subject)
         => Subject = subject;
@@ -44,7 +44,7 @@ public abstract class BaseAssertCondition
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
     
-    internal Task<AssertionResult> GetAssertionResult(AssertionData assertionData)
+    internal ValueTask<AssertionResult> GetAssertionResult(AssertionData assertionData)
     {
         return GetAssertionResult(assertionData.Result, assertionData.Exception, new AssertionMetadata
         {
@@ -53,7 +53,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         }, assertionData.ActualExpression);
     }
 
-    internal override Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception,
+    internal override ValueTask<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata, string? actualExpression)
     {
         if (actualValue is not null && actualValue is not TActual)
@@ -68,7 +68,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     internal Exception? Exception { get; private set; }
     public string? ActualExpression { get; private set; }
     
-    public Task<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception,
+    public ValueTask<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata, string? actualExpression = null)
     {
         ActualValue = actualValue;
@@ -83,6 +83,6 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return GetResult(actualValue, exception, assertionMetadata);
     }
 
-    protected abstract Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+    protected abstract ValueTask<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata);
 }

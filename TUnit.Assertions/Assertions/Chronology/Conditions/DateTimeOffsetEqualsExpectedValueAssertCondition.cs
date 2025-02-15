@@ -14,7 +14,7 @@ public class DateTimeOffsetEqualsExpectedValueAssertCondition(DateTimeOffset exp
         return $"to be equal to {expected} +-{_tolerance}";
     }
 
-    protected override Task<AssertionResult> GetResult(DateTimeOffset actualValue, DateTimeOffset expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(DateTimeOffset actualValue, DateTimeOffset expectedValue)
     {
         if (_tolerance is not null)
         {
