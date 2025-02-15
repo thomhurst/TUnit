@@ -420,28 +420,12 @@ internal class ThreadSafeStringWriter : StringWriter
         }
     }
 
-#if NET
+#if NET8_0_OR_GREATER
     public override void Write(ReadOnlySpan<char> buffer)
     {
         lock (_lock)
         {
             base.Write(buffer);
-        }
-    }
-    
-    public override void WriteLine(string format, params ReadOnlySpan<object?> arg)
-    {
-        lock (_lock)
-        {
-            base.WriteLine(format, arg);
-        }
-    }
-
-    public override void Write(string format, params ReadOnlySpan<object?> arg)
-    {
-        lock (_lock)
-        {
-            base.Write(format, arg);
         }
     }
 
@@ -514,6 +498,24 @@ internal class ThreadSafeStringWriter : StringWriter
         lock (_lock)
         {
             return base.WriteAsync(buffer, cancellationToken);
+        }
+    }
+#endif
+
+#if NET9_0_OR_GREATER
+        public override void WriteLine(string format, params ReadOnlySpan<object?> arg)
+    {
+        lock (_lock)
+        {
+            base.WriteLine(format, arg);
+        }
+    }
+
+    public override void Write(string format, params ReadOnlySpan<object?> arg)
+    {
+        lock (_lock)
+        {
+            base.Write(format, arg);
         }
     }
 #endif
