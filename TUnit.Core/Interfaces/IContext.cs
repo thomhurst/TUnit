@@ -4,7 +4,7 @@ namespace TUnit.Core.Interfaces;
 
 public interface IContext
 {
-    StringWriter OutputWriter { get; }
-    StringWriter ErrorOutputWriter { get; }
+    TextWriter OutputWriter { get; }
+    TextWriter ErrorOutputWriter { get; }
     TUnitLogger GetDefaultLogger();
 }
