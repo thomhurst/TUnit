@@ -5,8 +5,10 @@ public class EnumerableDistinctItemsExpectedValueAssertCondition<TInner>(IEquali
 {
     protected override string GetExpectation() => "items to be distinct";
 
-    protected override Task<AssertionResult> GetResult(IEnumerable<TInner>? actualValue, Exception? exception,
-        AssertionMetadata assertionMetadata)
+    protected override ValueTask<AssertionResult> GetResult(
+        IEnumerable<TInner>? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
     {
         if (actualValue is null)
         {
