@@ -498,17 +498,6 @@ internal class ThreadSafeStringWriter : StringWriter
         }
     }
 
-    public override IFormatProvider FormatProvider
-    {
-        get
-        {
-            lock (_lock)
-            {
-                return base.FormatProvider;
-            }
-        }
-    }
-
     [AllowNull] public override string NewLine
     {
         get
@@ -524,30 +513,6 @@ internal class ThreadSafeStringWriter : StringWriter
             {
                 base.NewLine = value;
             }
-        }
-    }
-
-    public override object InitializeLifetimeService()
-    {
-        lock (_lock)
-        {
-            return base.InitializeLifetimeService();
-        }
-    }
-
-    public override bool Equals(object? obj)
-    {
-        lock (_lock)
-        {
-            return base.Equals(obj);
-        }
-    }
-
-    public override int GetHashCode()
-    {
-        lock (_lock)
-        {
-            return base.GetHashCode();
         }
     }
 }
