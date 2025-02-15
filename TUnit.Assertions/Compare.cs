@@ -25,7 +25,7 @@ public static class Compare
         TExpected expected, CompareOptions options, 
         int? index)
     {
-        return CheckEquivalent(actual, expected, options, [InitialMemberName<TActual>(actual, index)], MemberType.Value);
+        return CheckEquivalent(actual, expected, options, [InitialMemberName<TActual>(actual, index)], MemberType.Value, []);
     }
     
     private static IEnumerable<ComparisonFailure> CheckEquivalent<
@@ -34,7 +34,7 @@ public static class Compare
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         TExpected>(TActual actual,
         TExpected expected, CompareOptions options,
-        string[] memberNames, MemberType memberType)
+        string[] memberNames, MemberType memberType, HashSet<object> visited)
     {
         if (actual is null && expected is null)
         {
@@ -72,6 +72,11 @@ public static class Compare
             yield break;
         }
 
+        if (!visited.Add(actual))
+        {
+            yield break;
+        }
+
         if (actual is IEnumerable actualEnumerable && expected is IEnumerable expectedEnumerable)
         {
             var actualObjects = actualEnumerable.Cast<object>().ToArray();
@@ -90,7 +95,7 @@ public static class Compare
                 var expectedObject = expectedObjects.ElementAtOrDefault(i);
 
                 foreach (var comparisonFailure in CheckEquivalent(actualObject, expectedObject, options,
-                             [..memberNames, $"[{i}]"], MemberType.EnumerableItem))
+                             [..memberNames, $"[{i}]"], MemberType.EnumerableItem, visited))
                 {
                     yield return comparisonFailure;
                 }
@@ -134,7 +139,7 @@ public static class Compare
             }
 
             foreach (var comparisonFailure in CheckEquivalent(actualFieldValue, expectedFieldValue, options,
-                         [..memberNames, fieldName], MemberType.Field))
+                         [..memberNames, fieldName], MemberType.Field, visited))
             {
                 yield return comparisonFailure;
             }
@@ -175,7 +180,7 @@ public static class Compare
             }
 
             foreach (var comparisonFailure in CheckEquivalent(actualPropertyValue, expectedPropertyValue, options,
-                         [..memberNames, propertyName], MemberType.Property))
+                         [..memberNames, propertyName], MemberType.Property, visited))
             {
                 yield return comparisonFailure;
             }

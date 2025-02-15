@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace TestProject;
+namespace TUnit.Playwright;
 
 public class Hooks
 {
