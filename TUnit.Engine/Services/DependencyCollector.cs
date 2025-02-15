@@ -18,7 +18,7 @@ internal class DependencyCollector
     {
         try
         {
-            return GetDependencies(test, test, [], allTests).ToArray();
+            return GetDependencies(test, [test], allTests).ToArray();
         }
         catch (Exception e)
         {
@@ -28,7 +28,7 @@ internal class DependencyCollector
         return [];
     }
 
-    private IEnumerable<Dependency> GetDependencies(DiscoveredTest original, DiscoveredTest test,
+    private IEnumerable<Dependency> GetDependencies(DiscoveredTest test,
         List<DiscoveredTest> currentChain, DiscoveredTest[] allTests)
     {
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
@@ -49,14 +49,9 @@ internal class DependencyCollector
 
                 currentChain.Add(dependency);
 
-                if (dependency.TestDetails.IsSameTest(original.TestDetails))
-                {
-                    throw new DependencyConflictException(currentChain.Select(x => x.TestDetails));
-                }
-
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(original, dependency, [..currentChain], allTests))
+                foreach (var nestedDependency in GetDependencies(dependency, [..currentChain], allTests))
                 {
                     yield return nestedDependency;
                 }
