@@ -16,11 +16,12 @@ internal class DependencyCollector
 
     private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests)
     {
-        return GetDependencies(test, test, [test], allTests).ToArray();
+        var shouldAbort = new BooleanReferenceWrapper();
+        return GetDependencies(test, test, [test], allTests, shouldAbort).ToArray();
     }
 
     private IEnumerable<Dependency> GetDependencies(DiscoveredTest original, DiscoveredTest test,
-        List<DiscoveredTest> currentChain, DiscoveredTest[] allTests)
+        List<DiscoveredTest> currentChain, DiscoveredTest[] allTests, BooleanReferenceWrapper shouldAbort)
     {
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
@@ -28,8 +29,14 @@ internal class DependencyCollector
 
             foreach (var dependency in dependencies)
             {
+                if(shouldAbort.Value)
+                {
+                    yield break;
+                }
+                
                 if (currentChain.Contains(dependency))
                 {
+                    shouldAbort.Value = true;
                     yield break;
                 }
                 
@@ -42,13 +49,19 @@ internal class DependencyCollector
                     original.TestContext.SetResult(dependencyConflictException);
                     dependency.TestContext.SetResult(dependencyConflictException);
                     
+                    shouldAbort.Value = true;
                     yield break;
                 }
 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(original, dependency, currentChain, allTests))
+                foreach (var nestedDependency in GetDependencies(original, dependency, currentChain, allTests, shouldAbort))
                 {
+                    if (shouldAbort.Value)
+                    {
+                        yield break;
+                    }
+                    
                     yield return nestedDependency;
                 }
             }
@@ -84,5 +97,10 @@ internal class DependencyCollector
         }
 
         return foundTests;
+    }
+
+    private class BooleanReferenceWrapper
+    {
+        public bool Value { get; set; }
     }
 }
