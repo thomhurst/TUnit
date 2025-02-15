@@ -1,7 +1,5 @@
 ﻿namespace TestProject;
 
-[assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-
 public class Tests
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
