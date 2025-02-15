@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace TUnit.Templates.Tests;
 
@@ -12,19 +13,31 @@ namespace TUnit.Templates.Tests;
 /// See https://github.com/dotnet/templating/blob/main/docs/authoring-tools/Templates-Testing-Tooling.md
 /// for usage information.
 /// </remarks>
-public abstract class TemplateTestBase : IDisposable
+public abstract partial class TemplateTestBase : IDisposable
 {
     private bool _disposed;
-    private ILoggerFactory _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+    private readonly ILoggerFactory _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
     protected abstract string TemplateShortName { get; }
 
     protected VerificationEngine Engine => new(_loggerFactory);
 
-    protected TemplateVerifierOptions Options => new(TemplateShortName)
-    {
-        TemplatePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "content", TemplateShortName),
-    };
+    protected TemplateVerifierOptions Options =>
+        new TemplateVerifierOptions(TemplateShortName)
+        {
+            TemplatePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "content", TemplateShortName),
+        }.WithCustomScrubbers(ScrubbersDefinition.Empty.AddScrubber(sb =>
+        {
+            var original = sb.ToString();
+            var match = TUnitPackageRegex().Match(original);
+
+            if (match.Success)
+            {
+                var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "{VERSION}");
+                sb.Replace(match.Value, line);
+            }
+
+        }, "csproj"));
 
     protected virtual void Dispose(bool disposing)
     {
@@ -45,4 +58,7 @@ public abstract class TemplateTestBase : IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+
+    [GeneratedRegex("""<PackageReference Include="TUnit[^"]*" Version="([^"]*)" />""")]
+    private static partial Regex TUnitPackageRegex();
 }
