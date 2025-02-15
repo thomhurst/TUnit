@@ -1,4 +1,4 @@
-﻿namespace TestProject;
+﻿namespace TUnit.AspNet;
 
 public class Tests
 {
