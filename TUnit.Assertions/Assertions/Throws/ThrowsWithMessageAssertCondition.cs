@@ -13,8 +13,10 @@ public class ThrowsWithMessageAssertCondition<TActual, TException>(
     protected override string GetExpectation()
         => $"to throw {typeof(TException).Name.PrependAOrAn()} which message equals \"{expectedMessage.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
-        AssertionMetadata assertionMetadata)
+    protected override ValueTask<AssertionResult> GetResult(
+        TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
     {
         var actualException = exceptionSelector(exception);
 

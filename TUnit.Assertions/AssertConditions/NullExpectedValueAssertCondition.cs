@@ -5,8 +5,10 @@ public class NullExpectedValueAssertCondition<TActual> : BaseAssertCondition<TAc
     protected override string GetExpectation()
         => "to be null";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
-        AssertionMetadata assertionMetadata)
+    protected override ValueTask<AssertionResult> GetResult(
+        TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
         => AssertionResult
             .FailIf(actualValue is not null,
                 $"found {actualValue}");

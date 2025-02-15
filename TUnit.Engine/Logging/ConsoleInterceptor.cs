@@ -10,7 +10,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 {
     public override Encoding Encoding => RedirectedOut?.Encoding ?? Encoding.UTF8;
 
-    protected abstract StringWriter? RedirectedOut { get; }
+    protected abstract TextWriter? RedirectedOut { get; }
     
     private protected abstract TextWriter GetOriginalOut();
     

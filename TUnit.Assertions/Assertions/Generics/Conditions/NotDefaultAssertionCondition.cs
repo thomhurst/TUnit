@@ -9,7 +9,7 @@ public class NotDefaultExpectedValueAssertCondition<TActual>() : ExpectedValueAs
         protected override string GetExpectation()
             => $"to not be {(_defaultValue is null ? "null" : _defaultValue)}";
 
-        protected override Task<AssertionResult> GetResult(TActual? actualValue, TActual? expectedValue)
+        protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TActual? expectedValue)
             => AssertionResult
                 .FailIf(actualValue is null || actualValue.Equals(_defaultValue),
                     "it was");
