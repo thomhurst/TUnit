@@ -375,4 +375,179 @@ public class DependsOnConflictAnalyzerTests
                     .WithLocation(4)
             );
     }
+    
+    [Test]
+    public async Task Deep_Nested_With_Direct_Conflict()
+    {
+        await Verifier
+			.VerifyAnalyzerAsync(
+				"""
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [DependsOn(nameof(Test2))]
+                    public void Test1()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test3))]
+                    public void Test2()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test4))]
+                    public void Test3()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test5))]
+                    public void Test4()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test6))]
+                    public void Test5()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test7))]
+                    public void Test6()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test8))]
+                    public void Test7()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test9))]
+                    public void Test8()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test10))]
+                    public void {|#0:Test9|}()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test9))]
+                    public void {|#1:Test10|}()
+                    {
+                    }
+                }
+                """,
+
+                Verifier
+                    .Diagnostic(Rules.DependsOnConflicts)
+                    .WithMessage("DependsOn Conflicts: MyClass.Test9 > MyClass.Test10 > MyClass.Test9")
+                    .WithLocation(0),
+                
+                Verifier
+                    .Diagnostic(Rules.DependsOnConflicts)
+                    .WithMessage("DependsOn Conflicts: MyClass.Test10 > MyClass.Test9 > MyClass.Test10")
+                    .WithLocation(1)
+            );
+    }
+    
+    [Test]
+    public async Task Deep_Nested_With_Indirect_Conflict()
+    {
+        await Verifier
+			.VerifyAnalyzerAsync(
+				"""
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [DependsOn(nameof(Test2))]
+                    public void Test1()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test3))]
+                    public void Test2()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test4))]
+                    public void Test3()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test5))]
+                    public void Test4()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test6))]
+                    public void Test5()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test7))]
+                    public void Test6()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test8))]
+                    public void Test7()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test9))]
+                    public void {|#0:Test8|}()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test10))]
+                    public void {|#1:Test9|}()
+                    {
+                    }
+                    
+                    [Test]
+                    [DependsOn(nameof(Test8))]
+                    public void {|#2:Test10|}()
+                    {
+                    }
+                }
+                """,
+
+                Verifier
+                    .Diagnostic(Rules.DependsOnConflicts)
+                    .WithMessage("DependsOn Conflicts: MyClass.Test8 > MyClass.Test9 > MyClass.Test10 > MyClass.Test8")
+                    .WithLocation(0),
+                
+                Verifier
+                    .Diagnostic(Rules.DependsOnConflicts)
+                    .WithMessage("DependsOn Conflicts: MyClass.Test9 > MyClass.Test10 > MyClass.Test8 > MyClass.Test9")
+                    .WithLocation(1),
+                
+                Verifier
+                    .Diagnostic(Rules.DependsOnConflicts)
+                    .WithMessage("DependsOn Conflicts: MyClass.Test10 > MyClass.Test8 > MyClass.Test9 > MyClass.Test10")
+                    .WithLocation(2)
+            );
+    }
 }
