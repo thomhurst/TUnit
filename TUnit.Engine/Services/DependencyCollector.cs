@@ -35,7 +35,7 @@ internal class DependencyCollector
                 
                 currentChain.Add(dependency);
 
-                if (dependency.TestDetails.IsSameTest(original.TestDetails))
+                if (dependency.Equals(original))
                 {
                     var dependencyConflictException = new DependencyConflictException(currentChain.Select(x => x.TestDetails));
 
