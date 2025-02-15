@@ -14,7 +14,7 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
     public virtual bool Equals(SourceGeneratedClassInformation? other)
     {
         return Namespace == other?.Namespace 
-               && Assembly.Equals(other.Assembly)
+               && Assembly.Equals(other?.Assembly)
                && base.Equals(other);
     }
     
@@ -22,7 +22,7 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
     {
         unchecked
         {
-            var hashCode = Namespace.GetHashCode();
+            var hashCode = Namespace?.GetHashCode() ?? 1;
             hashCode = (hashCode * 397) ^ Assembly.GetHashCode();
             return hashCode;
         }
@@ -31,7 +31,7 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     public override required Type Type { get; init; }
 
-    public required string Namespace {get; init;}
+    public required string? Namespace {get; init;}
     public required SourceGeneratedAssemblyInformation Assembly { get; init; }
     public required SourceGeneratedParameterInformation[] Parameters { get; init; }
     

@@ -17,7 +17,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new Tests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -25,9 +25,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -100,23 +100,20 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1692.Tests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1692.Tests.NullTest(string):0",
-					TestClass = typeof(global::TUnit.TestProject.Bugs._1692.Tests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string)],
-					TestName = "NullTest",
+					MethodName = $"NullTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.NullTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 10,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -189,16 +186,13 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1692.Tests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1692.Tests.NullTest(string):0",
-						TestClass = typeof(global::TUnit.TestProject.Bugs._1692.Tests),
-						ReturnType = typeof(global::System.Threading.Tasks.Task),
-						ParameterTypeFullNames = [typeof(string)],
-						TestName = "NullTest",
+						MethodName = $"NullTest",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.NullTest failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 10,
-						Exception = exception,
 					});
 				}
 				return nodes;

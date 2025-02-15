@@ -17,13 +17,13 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new CustomDisplayNameTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -95,16 +95,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.Test:0",
-					TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "Test",
+					MethodName = $"Test",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 12,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -130,13 +127,13 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new CustomDisplayNameTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -208,16 +205,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.Test2:0",
-					TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "Test2",
+					MethodName = $"Test2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 19,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -243,7 +237,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new CustomDisplayNameTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -251,9 +245,9 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -348,23 +342,20 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
-					TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
-					TestName = "Test3",
+					MethodName = $"Test3",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test3 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 26,
-					Exception = exception,
 				});
 			}
 			return nodes;
 		}
-		private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 		{
-			global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+			global::System.Collections.Generic.List<TestMetadata> nodes = [];
 			var classDataIndex = 0;
 			var testMethodDataIndex = 0;
 			try
@@ -459,16 +450,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				}
 				catch (global::System.Exception exception)
 				{
-					nodes.Add(new global::TUnit.Core.FailedInitializationTest
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 					{
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
-						TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-						ReturnType = typeof(global::System.Threading.Tasks.Task),
-						ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
-						TestName = "Test3",
+						MethodName = $"Test3",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test3 failed to initialize", exception),
 						TestFilePath = @"",
 						TestLineNumber = 26,
-						Exception = exception,
 					});
 				}
 				return nodes;
@@ -494,13 +482,13 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new CustomDisplayNameTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -581,16 +569,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest(string):0",
-					TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string)],
-					TestName = "MethodDataSourceTest",
+					MethodName = $"MethodDataSourceTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.MethodDataSourceTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 36,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -616,13 +601,13 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new CustomDisplayNameTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -725,16 +710,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.CustomDisplayNameTests.PasswordTest(string):0",
-					TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string)],
-					TestName = "PasswordTest",
+					MethodName = $"PasswordTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.PasswordTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 44,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -760,13 +742,13 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new CustomDisplayNameTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -838,16 +820,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.SameClassConstantTest:0",
-					TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "SameClassConstantTest",
+					MethodName = $"SameClassConstantTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.SameClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 51,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -873,13 +852,13 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new CustomDisplayNameTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -951,16 +930,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.DifferentClassConstantTest:0",
-					TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "DifferentClassConstantTest",
+					MethodName = $"DifferentClassConstantTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.DifferentClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 58,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -986,13 +962,13 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new CustomDisplayNameTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1064,16 +1040,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
 					TestId = $"TUnit.TestProject.CustomDisplayNameTests.NestedClassConstantTest:0",
-					TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [],
-					TestName = "NestedClassConstantTest",
+					MethodName = $"NestedClassConstantTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.NestedClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 65,
-					Exception = exception,
 				});
 			}
 			return nodes;

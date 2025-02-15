@@ -17,13 +17,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -94,16 +94,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method(int):0",
-					TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(int)],
-					TestName = "DataSource_Method",
+					MethodName = $"DataSource_Method",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 12,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -129,13 +126,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -206,16 +203,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method2(int):0",
-					TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(int)],
-					TestName = "DataSource_Method2",
+					MethodName = $"DataSource_Method2",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method2 failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 19,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -241,13 +235,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -318,16 +312,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method_WithAction(void System.Action()):0",
-					TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(global::System.Action)],
-					TestName = "DataSource_Method_WithAction",
+					MethodName = $"DataSource_Method_WithAction",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method_WithAction failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 26,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -353,7 +344,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -361,9 +352,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 			..Tests1(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -441,23 +432,20 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					}
 					catch (global::System.Exception exception)
 					{
-						nodes.Add(new global::TUnit.Core.FailedInitializationTest
+						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 						{
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method3(int):0",
-							TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-							ReturnType = typeof(void),
-							ParameterTypeFullNames = [typeof(int)],
-							TestName = "DataSource_Method3",
+							MethodName = $"DataSource_Method3",
+							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method3 failed to initialize", exception),
 							TestFilePath = @"",
 							TestLineNumber = 33,
-							Exception = exception,
 						});
 					}
 					return nodes;
 				}
-				private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+				private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 				{
-					global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 					var classDataIndex = 0;
 					var testMethodDataIndex = 0;
 					try
@@ -535,16 +523,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 								}
 								catch (global::System.Exception exception)
 								{
-									nodes.Add(new global::TUnit.Core.FailedInitializationTest
+									nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 									{
 										TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method3(int):0",
-										TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-										ReturnType = typeof(void),
-										ParameterTypeFullNames = [typeof(int)],
-										TestName = "DataSource_Method3",
+										MethodName = $"DataSource_Method3",
+										Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method3 failed to initialize", exception),
 										TestFilePath = @"",
 										TestLineNumber = 33,
-										Exception = exception,
 									});
 								}
 								return nodes;
@@ -570,7 +555,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
 		[
@@ -580,9 +565,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 			..Tests3(sessionId),
 		];
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -668,23 +653,20 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 							}
 							catch (global::System.Exception exception)
 							{
-								nodes.Add(new global::TUnit.Core.FailedInitializationTest
+								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 								{
 									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(int):0",
-									TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-									ReturnType = typeof(void),
-									ParameterTypeFullNames = [typeof(int)],
-									TestName = "DataSource_Method4",
+									MethodName = $"DataSource_Method4",
+									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method4 failed to initialize", exception),
 									TestFilePath = @"",
 									TestLineNumber = 42,
-									Exception = exception,
 								});
 							}
 							return nodes;
 						}
-						private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
+						private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 						{
-							global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+							global::System.Collections.Generic.List<TestMetadata> nodes = [];
 							var classDataIndex = 0;
 							var testMethodDataIndex = 0;
 							try
@@ -770,23 +752,20 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 												}
 												catch (global::System.Exception exception)
 												{
-													nodes.Add(new global::TUnit.Core.FailedInitializationTest
+													nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 													{
 														TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(int):0",
-														TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-														ReturnType = typeof(void),
-														ParameterTypeFullNames = [typeof(int)],
-														TestName = "DataSource_Method4",
+														MethodName = $"DataSource_Method4",
+														Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method4 failed to initialize", exception),
 														TestFilePath = @"",
 														TestLineNumber = 42,
-														Exception = exception,
 													});
 												}
 												return nodes;
 											}
-											private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
+											private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 											{
-												global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+												global::System.Collections.Generic.List<TestMetadata> nodes = [];
 												var classDataIndex = 0;
 												var testMethodDataIndex = 0;
 												try
@@ -872,23 +851,20 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																	}
 																	catch (global::System.Exception exception)
 																	{
-																		nodes.Add(new global::TUnit.Core.FailedInitializationTest
+																		nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 																		{
 																			TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(int):0",
-																			TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-																			ReturnType = typeof(void),
-																			ParameterTypeFullNames = [typeof(int)],
-																			TestName = "DataSource_Method4",
+																			MethodName = $"DataSource_Method4",
+																			Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method4 failed to initialize", exception),
 																			TestFilePath = @"",
 																			TestLineNumber = 42,
-																			Exception = exception,
 																		});
 																	}
 																	return nodes;
 																}
-																private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests3(string sessionId)
+																private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 																{
-																	global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+																	global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																	var classDataIndex = 0;
 																	var testMethodDataIndex = 0;
 																	try
@@ -974,16 +950,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																						}
 																						catch (global::System.Exception exception)
 																						{
-																							nodes.Add(new global::TUnit.Core.FailedInitializationTest
+																							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 																							{
 																								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS3:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(int):0",
-																								TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-																								ReturnType = typeof(void),
-																								ParameterTypeFullNames = [typeof(int)],
-																								TestName = "DataSource_Method4",
+																								MethodName = $"DataSource_Method4",
+																								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method4 failed to initialize", exception),
 																								TestFilePath = @"",
 																								TestLineNumber = 42,
-																								Exception = exception,
 																							});
 																						}
 																						return nodes;
@@ -1009,13 +982,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1086,16 +1059,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_WithBaseReturn(TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue):0",
-					TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-					ReturnType = typeof(void),
-					ParameterTypeFullNames = [typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue)],
-					TestName = "DataSource_WithBaseReturn",
+					MethodName = $"DataSource_WithBaseReturn",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_WithBaseReturn failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 53,
-					Exception = exception,
 				});
 			}
 			return nodes;
@@ -1121,13 +1091,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
@@ -1202,16 +1172,13 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 			}
 			catch (global::System.Exception exception)
 			{
-				nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>
 				{
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTest(string[]):0",
-					TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-					ReturnType = typeof(global::System.Threading.Tasks.Task),
-					ParameterTypeFullNames = [typeof(string[])],
-					TestName = "EnumerableFuncArrayTest",
+					MethodName = $"EnumerableFuncArrayTest",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.EnumerableFuncArrayTest failed to initialize", exception),
 					TestFilePath = @"",
 					TestLineNumber = 59,
-					Exception = exception,
 				});
 			}
 			return nodes;

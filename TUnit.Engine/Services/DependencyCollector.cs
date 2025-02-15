@@ -16,7 +16,16 @@ internal class DependencyCollector
 
     private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests)
     {
-        return GetDependencies(test, test, [test], allTests).ToArray();
+        try
+        {
+            return GetDependencies(test, test, [test], allTests).ToArray();
+        }
+        catch (Exception e)
+        {
+            test.TestContext.SetResult(e);
+        }
+
+        return [];
     }
 
     private IEnumerable<Dependency> GetDependencies(DiscoveredTest original, DiscoveredTest test,
@@ -28,16 +37,22 @@ internal class DependencyCollector
 
             foreach (var dependency in dependencies)
             {
+                if (currentChain.Contains(dependency))
+                {
+                    IEnumerable<TestDetails> chain =
+                    [
+                        ..currentChain.SkipWhile(x => !x.Equals(dependency)).Select(x => x.TestDetails),
+                        dependency.TestDetails
+                    ];
+                    
+                    throw new DependencyConflictException(chain);
+                }
+                
                 currentChain.Add(dependency);
 
-                if (dependency.TestDetails.IsSameTest(original.TestDetails))
+                if (dependency.Equals(original))
                 {
-                    var dependencyConflictException = new DependencyConflictException(currentChain.Select(x => x.TestDetails));
-
-                    original.TestContext.SetResult(dependencyConflictException);
-                    dependency.TestContext.SetResult(dependencyConflictException);
-                    
-                    continue;
+                    throw new DependencyConflictException(currentChain.Select(x => x.TestDetails));
                 }
 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
@@ -73,7 +88,7 @@ internal class DependencyCollector
         
         var foundTests = testsForClass.ToArray();
 
-        if (!foundTests.Any())
+        if (foundTests.Length == 0)
         {
             test.TestContext.SetResult(new TUnitException($"No tests found for DependsOn({dependsOnAttribute}) - If using Inheritance remember to use an [InheritsTest] attribute"));
         }
