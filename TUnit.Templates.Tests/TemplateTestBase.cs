@@ -33,13 +33,13 @@ public abstract partial class TemplateTestBase : IDisposable
 
             if (match.Success)
             {
-                var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "{VERSION}");
+                var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "0.12.23");
                 sb.Replace(match.Value, line);
             }
 
         }, "csproj"));
 
-    protected virtual void Dispose(bool disposing)
+    protected void Dispose(bool disposing)
     {
         if (!_disposed)
         {
