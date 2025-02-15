@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AutoFixture;
 using TUnit.Core;
@@ -83,7 +84,12 @@ public class TestExtensionsTests
         Assert.That(name, Is.EqualTo("TestExtensionsTests+InnerClass"));
     }
 
-    private TestContext CreateTestContext<T>(TestDetails<T> testDetails) where T : class
+    private TestContext CreateTestContext<
+#if NET
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+        T
+    >(TestDetails<T> testDetails) where T : class
     {
         var constructor = typeof(TestContext).GetConstructor(
             BindingFlags.Instance | BindingFlags.NonPublic,
