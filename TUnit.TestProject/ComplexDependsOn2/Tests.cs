@@ -6,14 +6,14 @@ public abstract class BaseClass
     [Test]
     public async Task Test1()
     {
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(TimeSpan.FromMilliseconds(50));
     }
 
     [Test]
     [DependsOn(nameof(Test1))]
     public async Task Test2()
     {
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(TimeSpan.FromMilliseconds(50));
     }
 }
 public class TestsDataSource
