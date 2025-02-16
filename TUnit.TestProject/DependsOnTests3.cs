@@ -15,7 +15,7 @@ public class DependsOnTests3
     {
         _test1Start = TestContext.Current!.TestStart!.Value.DateTime;
 
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(TimeSpan.FromMilliseconds(50));
 
         TestContext.Current!.ObjectBag.Add("Test1", "1");
     }
@@ -25,7 +25,7 @@ public class DependsOnTests3
     {
         _test2Start = TestContext.Current!.TestStart!.Value.DateTime;
 
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(TimeSpan.FromMilliseconds(50));
 
         TestContext.Current!.ObjectBag.Add("Test2", "2");
     }
@@ -36,7 +36,7 @@ public class DependsOnTests3
     public async Task Test3()
     {
         _test3Start = TestContext.Current!.TestStart!.Value.DateTime;
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(TimeSpan.FromMilliseconds(50));
 
         var test1 = TestContext.Current!.GetTests(nameof(Test1));
         var test2 = TestContext.Current!.GetTests(nameof(Test2));
