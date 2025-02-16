@@ -1,9 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "packageRules": [
-    {
-      "matchPackageNames": ["/ModularPipelines/"],
-      "groupName": "ModularPipelines"
-    }
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/Snapshots/**"
   ]
 }
