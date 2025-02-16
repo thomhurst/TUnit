@@ -6,19 +6,20 @@ namespace TUnit.Engine.Services;
 
 internal class DependencyCollector
 {
-    public void ResolveDependencies(DiscoveredTest[] discoveredTests)
+    public void ResolveDependencies(DiscoveredTest[] discoveredTests, CancellationToken cancellationToken)
     {
         foreach (var discoveredTest in discoveredTests)
         {
-            discoveredTest.Dependencies = GetDependencies(discoveredTest, discoveredTests);
+            discoveredTest.Dependencies = GetDependencies(discoveredTest, discoveredTests, cancellationToken);
         }
     }
 
-    private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests)
+    private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests,
+        CancellationToken cancellationToken)
     {
         try
         {
-            return GetDependencies(test, [test], allTests).ToArray();
+            return GetDependencies(test, [], [], allTests, cancellationToken).ToArray();
         }
         catch (Exception e)
         {
@@ -29,14 +30,23 @@ internal class DependencyCollector
     }
 
     private IEnumerable<Dependency> GetDependencies(DiscoveredTest test,
-        List<DiscoveredTest> currentChain, DiscoveredTest[] allTests)
+        List<DiscoveredTest> currentChain, HashSet<DiscoveredTest> visited, DiscoveredTest[] allTests, CancellationToken cancellationToken)
     {
+        if (!visited.Add(test))
+        {
+            yield break;
+        }
+        
+        currentChain.Add(test);
+        
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
             var dependencies = GetDependencies(test, dependsOnAttribute, allTests);
 
             foreach (var dependency in dependencies)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 if (currentChain.Any(x => x.TestDetails.IsSameTest(dependency.TestDetails)))
                 {
                     var chain = currentChain
@@ -51,7 +61,7 @@ internal class DependencyCollector
 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(dependency, [..currentChain], allTests))
+                foreach (var nestedDependency in GetDependencies(dependency, [..currentChain], visited, allTests, cancellationToken))
                 {
                     yield return nestedDependency;
                 }
@@ -59,6 +69,8 @@ internal class DependencyCollector
                 currentChain.Remove(dependency);
             }
         }
+        
+        currentChain.Remove(test);
     }
 
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
