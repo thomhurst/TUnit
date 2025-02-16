@@ -1,4 +1,5 @@
-﻿namespace TUnit.TestProject.ComplexDependsOn2;
+﻿#pragma warning disable
+namespace TUnit.TestProject.ComplexDependsOn2;
 
 public abstract class BaseClass
 {
