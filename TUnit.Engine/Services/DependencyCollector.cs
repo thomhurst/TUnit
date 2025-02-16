@@ -32,11 +32,23 @@ internal class DependencyCollector
     private IEnumerable<Dependency> GetDependencies(DiscoveredTest test,
         List<DiscoveredTest> currentChain, HashSet<DiscoveredTest> visited, DiscoveredTest[] allTests, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (currentChain.Any(x => x.TestDetails.IsSameTest(test.TestDetails)))
+        {
+            var chain = currentChain
+                .SkipWhile(x => !x.TestDetails.IsSameTest(test.TestDetails))
+                .Select(x => x.TestDetails)
+                .Append(test.TestDetails);
+
+            throw new DependencyConflictException(chain);
+        }
+
         if (!visited.Add(test))
         {
             yield break;
         }
-        
+
         currentChain.Add(test);
         
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
@@ -45,28 +57,12 @@ internal class DependencyCollector
 
             foreach (var dependency in dependencies)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                
-                if (currentChain.Any(x => x.TestDetails.IsSameTest(dependency.TestDetails)))
-                {
-                    var chain = currentChain
-                        .SkipWhile(x => !x.TestDetails.IsSameTest(dependency.TestDetails))
-                        .Select(x => x.TestDetails)
-                        .Append(dependency.TestDetails);
-
-                    throw new DependencyConflictException(chain);
-                }
-
-                currentChain.Add(dependency);
-
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
                 foreach (var nestedDependency in GetDependencies(dependency, [..currentChain], visited, allTests, cancellationToken))
                 {
                     yield return nestedDependency;
                 }
-
-                currentChain.Remove(dependency);
             }
         }
         
