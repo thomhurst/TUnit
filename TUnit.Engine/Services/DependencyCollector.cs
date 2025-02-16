@@ -6,19 +6,20 @@ namespace TUnit.Engine.Services;
 
 internal class DependencyCollector
 {
-    public void ResolveDependencies(DiscoveredTest[] discoveredTests)
+    public void ResolveDependencies(DiscoveredTest[] discoveredTests, CancellationToken cancellationToken)
     {
         foreach (var discoveredTest in discoveredTests)
         {
-            discoveredTest.Dependencies = GetDependencies(discoveredTest, discoveredTests);
+            discoveredTest.Dependencies = GetDependencies(discoveredTest, discoveredTests, cancellationToken);
         }
     }
 
-    private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests)
+    private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests,
+        CancellationToken cancellationToken)
     {
         try
         {
-            return GetDependencies(test, [test], allTests).ToArray();
+            return GetDependencies(test, [], [], allTests, cancellationToken).ToArray();
         }
         catch (Exception e)
         {
@@ -29,36 +30,43 @@ internal class DependencyCollector
     }
 
     private IEnumerable<Dependency> GetDependencies(DiscoveredTest test,
-        List<DiscoveredTest> currentChain, DiscoveredTest[] allTests)
+        List<DiscoveredTest> currentChain, HashSet<DiscoveredTest> visited, DiscoveredTest[] allTests, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (currentChain.Any(x => x.TestDetails.IsSameTest(test.TestDetails)))
+        {
+            var chain = currentChain
+                .SkipWhile(x => !x.TestDetails.IsSameTest(test.TestDetails))
+                .Select(x => x.TestDetails)
+                .Append(test.TestDetails);
+
+            throw new DependencyConflictException(chain);
+        }
+
+        if (!visited.Add(test))
+        {
+            yield break;
+        }
+
+        currentChain.Add(test);
+        
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
             var dependencies = GetDependencies(test, dependsOnAttribute, allTests);
 
             foreach (var dependency in dependencies)
             {
-                if (currentChain.Any(x => x.TestDetails.IsSameTest(dependency.TestDetails)))
-                {
-                    var chain = currentChain
-                        .SkipWhile(x => !x.TestDetails.IsSameTest(dependency.TestDetails))
-                        .Select(x => x.TestDetails)
-                        .Append(dependency.TestDetails);
-
-                    throw new DependencyConflictException(chain);
-                }
-
-                currentChain.Add(dependency);
-
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(dependency, [..currentChain], allTests))
+                foreach (var nestedDependency in GetDependencies(dependency, [..currentChain], visited, allTests, cancellationToken))
                 {
                     yield return nestedDependency;
                 }
-
-                currentChain.Remove(dependency);
             }
         }
+        
+        currentChain.Remove(test);
     }
 
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
