@@ -11,13 +11,13 @@ internal class TestsConstructor(IExtension extension,
     DependencyCollector dependencyCollector, 
     IServiceProvider serviceProvider) : IDataProducer
 {
-    public DiscoveredTest[] GetTests()
+    public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
     {
         var testMetadatas = testMetadataCollector.GetTests();
 
         var discoveredTests = testMetadatas.Select(ConstructTest).ToArray();
 
-        dependencyCollector.ResolveDependencies(discoveredTests);
+        dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
         
         return discoveredTests;
     }

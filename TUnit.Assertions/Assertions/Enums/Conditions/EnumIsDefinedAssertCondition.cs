@@ -9,8 +9,10 @@ public class EnumIsDefinedAssertCondition<TEnum> : BaseAssertCondition<TEnum> wh
         return "to be defined";
     }
 
-    protected override Task<AssertionResult> GetResult(TEnum? actualValue, Exception? exception,
-        AssertionMetadata assertionMetadata)
+    protected override ValueTask<AssertionResult> GetResult(
+        TEnum? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
     {
         return AssertionResult.FailIf(actualValue is null, "the source enum is null")
             .OrFailIf(!Enum.IsDefined(typeof(TEnum), actualValue!), "it was not");

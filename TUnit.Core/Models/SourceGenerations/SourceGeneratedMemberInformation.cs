@@ -1,10 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public abstract record SourceGeneratedMemberInformation
 {
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     public abstract Type Type { get; init; }
 
     public required string Name { get; init; }

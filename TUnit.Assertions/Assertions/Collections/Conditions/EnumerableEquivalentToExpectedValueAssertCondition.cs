@@ -23,31 +23,28 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         return $"to be equivalent to {(expected != null ? Formatter.Format(expected) : null)}";
     }
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
         if (actualValue is null && expectedValue is null)
         {
             return AssertionResult.Passed;
         }
 
-        TInner[]? orderedActual;
-        if (collectionOrdering == CollectionOrdering.Any)
-        {
-            orderedActual = actualValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer)).ToArray();
-            expectedValue = expectedValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer));
-        }
-        else
-        {
-            orderedActual = actualValue?.ToArray();
-        }
-
+        var enumeratedActual = actualValue?.ToArray();
+        var enumeratedExpected = expectedValue?.ToArray();
+        
         return AssertionResult
-            .FailIf(orderedActual is null,
+            .FailIf(enumeratedActual is null,
                 "it is null")
-            .OrFailIf(expectedValue is null,
+            .OrFailIf(enumeratedExpected is null,
                 "it is not null")
-            .OrFailIf(!orderedActual!.SequenceEqual(expectedValue!, equalityComparer), FailureMessage(orderedActual)
-            );
+            .OrFailIf(collectionOrdering == CollectionOrdering.Matching && !enumeratedActual!.SequenceEqual(enumeratedExpected!, equalityComparer), FailureMessage(enumeratedActual))
+            .OrFailIf(!EqualsAnyOrder(enumeratedActual!, enumeratedExpected!), FailureMessage(enumeratedActual));
+    }
+
+    private static bool EqualsAnyOrder(TInner[] actualValue, TInner[] expectedValue)
+    {
+        return actualValue.Length == expectedValue.Length && !actualValue.Except(expectedValue).Any(); 
     }
 
     private string FailureMessage(IEnumerable<TInner>? orderedActual)
@@ -59,33 +56,5 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         }
         
         return $"it is {string.Join(",", Formatter.Format(orderedActual!))}";
-    }
-    
-    internal class ComparerWrapper<T>(IEqualityComparer<T> equalityComparer) : IComparer<T>
-    {
-        public int Compare(T? x, T? y)
-        {
-            if (equalityComparer is IComparer<T> comparer)
-            {
-                return comparer.Compare(x!, y!);
-            }
-            
-            if (x is null && y is null)
-            {
-                return 0;
-            }
-
-            if (x is null || y is null)
-            {
-                return -1;
-            }
-
-            if (equalityComparer.Equals(x, y))
-            {
-                return 0;
-            }
-            
-            return Comparer<T>.Default.Compare(x, y);
-        }
     }
 }

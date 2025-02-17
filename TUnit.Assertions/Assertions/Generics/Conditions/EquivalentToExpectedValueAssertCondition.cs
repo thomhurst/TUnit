@@ -14,7 +14,7 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
     protected override string GetExpectation()
         => $"to be equivalent to {expectedExpression}";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
     {
         if (actualValue is null && ExpectedValue is null)
         {

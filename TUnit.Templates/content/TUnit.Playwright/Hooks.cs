@@ -11,7 +11,7 @@ public class Hooks
         {
             Environment.SetEnvironmentVariable("PWDEBUG", "1");
         }
-        
+
         Microsoft.Playwright.Program.Main(["install"]);
     }
 }

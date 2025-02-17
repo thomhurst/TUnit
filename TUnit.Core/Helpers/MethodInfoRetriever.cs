@@ -5,7 +5,7 @@ namespace TUnit.Core.Helpers;
 
 public class MethodInfoRetriever
 {
-    public static MethodInfo GetMethodInfo([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type type, 
+    public static MethodInfo GetMethodInfo([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, 
         string methodName, 
         int genericParameterCount, 
         Type[] parameterTypes)

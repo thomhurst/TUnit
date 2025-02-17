@@ -32,6 +32,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.50.0" />
+    <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="8.0.406" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.13.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.4.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.4.3" />
@@ -59,9 +60,9 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.2.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="Verify.NUnit" Version="28.11.0" />
-    <PackageVersion Include="TUnit" Version="0.12.25" />
-    <PackageVersion Include="TUnit.Core" Version="0.12.25" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.12.25" />
+    <PackageVersion Include="TUnit" Version="0.13.9" />
+    <PackageVersion Include="TUnit.Core" Version="0.13.9" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.13.9" />
     <PackageVersion Include="Verify.TUnit" Version="28.11.0" />
     <PackageVersion Include="Vogen" Version="7.0.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />

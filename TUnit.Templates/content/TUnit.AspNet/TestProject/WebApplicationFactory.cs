@@ -8,7 +8,7 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
     public Task InitializeAsync()
     {
         _ = Server;
-        
+
         return Task.CompletedTask;
     }
 }

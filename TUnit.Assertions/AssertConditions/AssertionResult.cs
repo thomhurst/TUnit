@@ -94,6 +94,7 @@ public class AssertionResult
     public static AssertionResult Passed { get; } = new(true, string.Empty);
     
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
+    public static implicit operator ValueTask<AssertionResult>(AssertionResult result) => new(result);
 
     [InterpolatedStringHandler]
     public readonly struct InterpolatedStringHandler

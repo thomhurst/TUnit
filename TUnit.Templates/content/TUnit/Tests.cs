@@ -9,7 +9,7 @@ public class Tests
     {
         Console.WriteLine("This is a basic test");
     }
-    
+
     [Test]
     [Arguments(1, 2, 3)]
     [Arguments(2, 3, 5)]
@@ -21,7 +21,7 @@ public class Tests
 
         await Assert.That(result).IsEqualTo(c);
     }
-    
+
     [Test]
     [MethodDataSource(nameof(DataSource))]
     public async Task MethodDataSource(int a, int b, int c)
@@ -32,7 +32,7 @@ public class Tests
 
         await Assert.That(result).IsEqualTo(c);
     }
-    
+
     [Test]
     [ClassDataSource<DataClass>]
     [ClassDataSource<DataClass>(Shared = SharedType.PerClass)]
@@ -55,7 +55,7 @@ public class Tests
 
         await Assert.That(result).IsEqualTo(c);
     }
-    
+
     public static IEnumerable<(int a, int b, int c)> DataSource()
     {
         yield return (1, 1, 2);

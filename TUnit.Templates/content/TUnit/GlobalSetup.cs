@@ -2,6 +2,7 @@
 
 // You can use attributes at the assembly level to apply to all tests in the assembly
 [assembly: Retry(3)]
+[assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 
 namespace TestProject;
 
@@ -12,7 +13,7 @@ public class GlobalHooks
     {
         Console.WriteLine("Or you can define methods that do stuff before...");
     }
-    
+
     [After(TestSession)]
     public static void CleanUp()
     {

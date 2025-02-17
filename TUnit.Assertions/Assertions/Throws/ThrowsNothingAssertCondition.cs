@@ -7,8 +7,10 @@ public class ThrowsNothingAssertCondition<TActual> : DelegateAssertCondition<TAc
     protected override string GetExpectation()
         => "to throw nothing";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
-        AssertionMetadata assertionMetadata)
+    protected override ValueTask<AssertionResult> GetResult(
+        TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
         => AssertionResult
         .FailIf(exception is not null,
             $"{exception?.GetType().Name.PrependAOrAn()} was thrown:{Environment.NewLine}{exception?.Message}");
