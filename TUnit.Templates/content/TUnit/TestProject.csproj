@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,5 +9,4 @@
   <ItemGroup>
     <PackageReference Include="TUnit" Version="0.13.3" />
   </ItemGroup>
-
 </Project>

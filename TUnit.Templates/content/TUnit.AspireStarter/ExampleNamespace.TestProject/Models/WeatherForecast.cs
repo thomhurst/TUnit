@@ -1,4 +1,4 @@
-﻿namespace TestProject.Models
+﻿namespace ExampleNamespace.TestProject.Models
 {
     record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
     {

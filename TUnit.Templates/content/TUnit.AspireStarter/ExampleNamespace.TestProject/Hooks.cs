@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace TestProject;
+namespace ExampleNamespace.TestProject;
 
 public class Hooks
 {

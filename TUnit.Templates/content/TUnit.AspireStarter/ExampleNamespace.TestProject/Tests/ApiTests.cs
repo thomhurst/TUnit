@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using TestProject.Models;
+using ExampleNamespace.TestProject.Models;
 
-namespace TestProject.Tests;
+namespace ExampleNamespace.TestProject.Tests;
 
 public class ApiTests
 {

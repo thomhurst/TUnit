@@ -1,5 +1,5 @@
-using ApiService;
-using ServiceDefaults;
+using ExampleNamespace.ApiService;
+using ExampleNamespace.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +34,7 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-namespace ApiService
+namespace ExampleNamespace.ApiService
 {
     record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
     {

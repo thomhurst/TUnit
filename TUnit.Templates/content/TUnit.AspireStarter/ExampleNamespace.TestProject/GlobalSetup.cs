@@ -7,7 +7,7 @@ using Aspire.Hosting;
 [assembly: Retry(3)]
 [assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 
-namespace TestProject;
+namespace ExampleNamespace.TestProject;
 
 public class GlobalHooks
 {
@@ -18,7 +18,7 @@ public class GlobalHooks
     public static async Task SetUp()
     {
         // Arrange
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>();
+        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ExampleNamespace_AppHost>();
         appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
             clientBuilder.AddStandardResilienceHandler();

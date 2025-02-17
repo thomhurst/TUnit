@@ -12,13 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ApiService\ApiService.csproj" />
-    <ProjectReference Include="..\WebApp\WebApp.csproj" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="9.0.0" />
+    <ProjectReference Include="..\ExampleNamespace.ApiService\ExampleNamespace.ApiService.csproj" />
+    <ProjectReference Include="..\ExampleNamespace.WebApp\ExampleNamespace.WebApp.csproj" />
   </ItemGroup>
 
 </Project>

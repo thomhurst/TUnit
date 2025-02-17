@@ -1,6 +1,6 @@
-using ServiceDefaults;
-using WebApp;
-using WebApp.Components;
+using ExampleNamespace.ServiceDefaults;
+using ExampleNamespace.WebApp;
+using ExampleNamespace.WebApp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

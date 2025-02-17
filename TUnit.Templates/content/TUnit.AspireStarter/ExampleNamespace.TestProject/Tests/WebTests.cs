@@ -1,7 +1,7 @@
 using Microsoft.Playwright;
 using TUnit.Playwright;
 
-namespace TestProject.Tests;
+namespace ExampleNamespace.TestProject.Tests;
 
 public class WebTests: PageTest
 {

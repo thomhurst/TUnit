@@ -16,7 +16,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\AppHost\AppHost.csproj" />
+    <ProjectReference Include="..\ExampleNamespace.AppHost\ExampleNamespace.AppHost.csproj" />
   </ItemGroup>
 
   <ItemGroup>
