@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TUnit.Aspire.ServiceDefaults\ServiceDefaults.csproj" />
+    <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0" />
+    <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

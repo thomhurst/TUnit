@@ -1,4 +1,5 @@
-using TUnit.Aspire.ApiService;
+using ApiService;
+using ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,7 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-namespace TUnit.Aspire.ApiService
+namespace ApiService
 {
     record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
     {

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TUnit.Aspire.ServiceDefaults\ServiceDefaults.csproj" />
+    <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>
