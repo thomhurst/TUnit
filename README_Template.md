@@ -18,7 +18,9 @@ TUnit is designed to aid with all testing types:
 
 Assuming you have the .NET SDK installed, simply run:
 
-`dotnet new install TUnit.Templates` `dotnet new TUnit -n "YourProjectName"`
+`dotnet new install TUnit.Templates` 
+
+`dotnet new TUnit -n "YourProjectName"`
 
 A new test project will be created for you with some samples of different test types and tips. When you're ready to get going, delete them and create your own!
 
