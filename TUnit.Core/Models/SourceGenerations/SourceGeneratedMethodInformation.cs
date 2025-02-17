@@ -40,6 +40,7 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
     [field: AllowNull, MaybeNull]
     public MethodInfo ReflectionInformation => field ??= GetMethodInfo();
 
+    [RequiresDynamicCode("Uses reflection")]
     private MethodInfo GetMethodInfo()
     {
         return MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
@@ -47,7 +48,6 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
 
     public required Type ReturnType { get; init; }
     
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     public override required Type Type { get; init; }
 
     public virtual bool Equals(SourceGeneratedMethodInformation? other)
