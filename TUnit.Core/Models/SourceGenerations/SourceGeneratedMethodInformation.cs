@@ -38,20 +38,11 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
     public required SourceGeneratedClassInformation Class { get; init; }
 
     [field: AllowNull, MaybeNull]
-    public MethodInfo ReflectionInformation
-    {
-        [RequiresDynamicCode("Reflection")]
-        get => field ??= GetMethodInfo();
-    }
-
-    [RequiresDynamicCode("Reflection")]
-    private MethodInfo GetMethodInfo()
-    {
-        return MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
-    }
+    public MethodInfo ReflectionInformation => field ??= MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
 
     public required Type ReturnType { get; init; }
     
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
     public override required Type Type { get; init; }
 
     public virtual bool Equals(SourceGeneratedMethodInformation? other)
