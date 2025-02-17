@@ -38,9 +38,13 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
     public required SourceGeneratedClassInformation Class { get; init; }
 
     [field: AllowNull, MaybeNull]
-    public MethodInfo ReflectionInformation => field ??= GetMethodInfo();
+    public MethodInfo ReflectionInformation
+    {
+        [RequiresDynamicCode("Reflection")]
+        get => field ??= GetMethodInfo();
+    }
 
-    [RequiresDynamicCode("Uses reflection")]
+    [RequiresDynamicCode("Reflection")]
     private MethodInfo GetMethodInfo()
     {
         return MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
