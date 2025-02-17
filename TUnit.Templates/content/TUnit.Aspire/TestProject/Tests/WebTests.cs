@@ -1,6 +1,9 @@
+using Microsoft.Playwright;
+using TUnit.Playwright;
+
 namespace TestProject.Tests;
 
-public class WebTests
+public class WebTests: PageTest
 {
     [Test]
     public async Task GetWebResourceRootReturnsOkStatusCode()
@@ -20,10 +23,13 @@ public class WebTests
     public async Task IncreaseCounterTest()
     {
         // Act
-        var httpClient = (GlobalHooks.App ?? throw new NullReferenceException()).CreateHttpClient("webfrontend");
+        var url = (GlobalHooks.App ?? throw new NullReferenceException()).GetEndpoint("webfrontend");
         if (GlobalHooks.ResourceNotificationService != null)
             await GlobalHooks.ResourceNotificationService
                 .WaitForResourceAsync("webfrontend", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
-        var response = await httpClient.GetAsync("/");
+        await Page.GotoAsync(url.AbsoluteUri);
+        await Page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = "Counter" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Click me" }).ClickAsync();
+        await Expect(Page.GetByText("Current count:")).ToContainTextAsync("1");
     }
 }
