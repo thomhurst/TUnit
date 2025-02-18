@@ -2,7 +2,7 @@
 {
     public class AspireStarterTemplateTests : TemplateTestBase
     {
-        protected override string TemplateShortName => "TUnit.AspireStarter";
+        protected override string TemplateShortName => "TUnit.Aspire.Starter";
 
         [Test]
         public async Task InstantiationTest()

@@ -1,4 +1,4 @@
-namespace TUnit.Aspire
+namespace TUnit.Aspire.Test
 {
     public class IntegrationTest1
     {

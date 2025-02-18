@@ -13,9 +13,9 @@
     "Playwright"
   ],
   "name": "TUnit Aspire Starter Project",
-  "identity": "TUnit.Test.AspireStarter",
-  "groupIdentity": "TUnit.AspireStarter",
-  "shortName": "TUnit.AspireStarter",
+  "identity": "TUnit.Test.Aspire.Starter",
+  "groupIdentity": "TUnit.Aspire.Starter",
+  "shortName": "TUnit.Aspire.Starter",
   "tags": {
     "language": "C#",
     "type": "project"

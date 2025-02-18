@@ -11,8 +11,8 @@
   ],
   "name": "TUnit Aspire Test Project",
   "identity": "TUnit.Test.Aspire",
-  "groupIdentity": "TUnit.Aspire",
-  "shortName": "TUnit.Aspire",
+  "groupIdentity": "TUnit.Aspire.Test",
+  "shortName": "TUnit.Aspire.Test",
   "tags": {
     "language": "C#",
     "type": "project"
