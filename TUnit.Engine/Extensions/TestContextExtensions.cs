@@ -17,6 +17,7 @@ namespace TUnit.Engine.Extensions;
 
 public static class TestContextExtensions
 {
+    [RequiresUnreferencedCode("Reflection")]
     [Experimental("WIP")]
     public static async Task ReregisterTestWithArguments(
         this TestContext testContext, 
@@ -40,8 +41,7 @@ public static class TestContextExtensions
 
                     try
                     {
-                        var methodInfo = @class.GetType().GetMethod(testMetadata.TestMethod.Name)!;
-                        await AsyncConvert.Convert(methodInfo.Invoke(@class, args));
+                        await AsyncConvert.Convert(testMetadata.TestMethod.ReflectionInformation.Invoke(@class, args));
                     }
                     catch (TargetInvocationException e)
                     {
