@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,9 +8,15 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
+
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" Version="9.0.0" />
-    <PackageReference Include="TUnit" Version="0.13.3" />
+    <PackageReference Include="TUnit.Playwright" Version="0.13.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.AspireStarter.AppHost\TUnit.AspireStarter.AppHost.csproj" />
   </ItemGroup>
 
   <ItemGroup>
