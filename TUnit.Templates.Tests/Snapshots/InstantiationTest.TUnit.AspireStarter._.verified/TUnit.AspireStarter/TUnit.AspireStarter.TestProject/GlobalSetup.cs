@@ -11,8 +11,8 @@ namespace TUnit.AspireStarter.TestProject;
 
 public class GlobalHooks
 {
-    public static DistributedApplication? App{ get; private set; }
-    public static ResourceNotificationService? NotificationService { get; private set; }
+    public static DistributedApplication App { get; private set; } = null!;
+    public static ResourceNotificationService NotificationService { get; private set; } = null!;
 
     [Before(TestSession)]
     public static async Task SetUp()
@@ -27,11 +27,5 @@ public class GlobalHooks
         App = await appHost.BuildAsync();
         NotificationService = App.Services.GetRequiredService<ResourceNotificationService>();
         await App.StartAsync();
-    }
-
-    [After(TestSession)]
-    public static void CleanUp()
-    {
-        Console.WriteLine("...and after!");
     }
 }
