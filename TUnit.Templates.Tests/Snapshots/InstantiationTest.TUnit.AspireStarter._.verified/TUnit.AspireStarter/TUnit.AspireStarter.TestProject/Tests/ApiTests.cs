@@ -10,9 +10,10 @@ public class ApiTests
     {
         // Act
         var httpClient = (GlobalHooks.App ?? throw new NullReferenceException()).CreateHttpClient("apiservice");
-        if (GlobalHooks.ResourceNotificationService != null)
-            await GlobalHooks.ResourceNotificationService
-                .WaitForResourceAsync("apiservice", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
+        if (GlobalHooks.NotificationService != null)
+        {
+            await GlobalHooks.NotificationService.WaitForResourceAsync("apiservice", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
+        }
         var response = await httpClient.GetAsync("/weatherforecast");
         // Assert
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
@@ -26,9 +27,11 @@ public class ApiTests
     {
         // Act
         var httpClient = (GlobalHooks.App ?? throw new NullReferenceException()).CreateHttpClient("apiservice");
-        if (GlobalHooks.ResourceNotificationService != null)
-            await GlobalHooks.ResourceNotificationService
-                .WaitForResourceAsync("apiservice", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
+        if (GlobalHooks.NotificationService != null)
+        {
+            await GlobalHooks.NotificationService.WaitForResourceAsync("apiservice", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
+        }
+
         var response = await httpClient.GetAsync("/weatherforecast");
         var content = await response.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<IEnumerable<WeatherForecast>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
