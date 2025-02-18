@@ -1,4 +1,8 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using TUnit.Core.Helpers;
+
+namespace TUnit.Core;
 
 public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
@@ -33,6 +37,13 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
     
     public required SourceGeneratedClassInformation Class { get; init; }
     
+    [field: AllowNull, MaybeNull]
+    public MethodInfo ReflectionInformation
+    {
+        [RequiresUnreferencedCode("Reflection API")]
+        get => field ??= MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
+    }
+
     public required Type ReturnType { get; init; }
     
     public override required Type Type { get; init; }

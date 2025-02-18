@@ -5,6 +5,7 @@ using TUnit.Engine.Extensions;
 
 namespace TUnit.TestProject;
 
+[DynamicCodeOnly]
 public class DynamicallyRegisteredTests
 {
     [Test]
@@ -41,6 +42,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
     }
 
     [Experimental("WIP")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Dynamic Code Only attribute on test")]
     public async ValueTask OnTestEnd(TestContext testContext)
     {
         if (testContext.Result?.Status == Status.Failed)
