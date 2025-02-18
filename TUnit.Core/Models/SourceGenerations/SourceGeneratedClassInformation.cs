@@ -28,7 +28,6 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
         }
     }
 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     public override required Type Type { get; init; }
 
     public required string? Namespace {get; init;}

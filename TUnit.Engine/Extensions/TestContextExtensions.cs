@@ -11,6 +11,8 @@ using TUnit.Engine.Models;
 using TUnit.Engine.Services;
 using AggregateException = System.AggregateException;
 
+#pragma warning disable
+
 namespace TUnit.Engine.Extensions;
 
 public static class TestContextExtensions
@@ -38,7 +40,8 @@ public static class TestContextExtensions
 
                     try
                     {
-                        await AsyncConvert.Convert(testContext.TestDetails.TestMethod.ReflectionInformation.Invoke(@class, args));
+                        var methodInfo = @class.GetType().GetMethod(testMetadata.TestMethod.Name)!;
+                        await AsyncConvert.Convert(methodInfo.Invoke(@class, args));
                     }
                     catch (TargetInvocationException e)
                     {
