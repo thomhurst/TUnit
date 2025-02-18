@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using System.Text;
+
+namespace TUnit.Core;
 
 public abstract record SourceGeneratedMemberInformation
 {
@@ -7,6 +9,14 @@ public abstract record SourceGeneratedMemberInformation
     public required string Name { get; init; }
 
     public required Attribute[] Attributes { get; init; }
+    
+    protected virtual bool PrintMembers(StringBuilder stringBuilder)
+    {
+        stringBuilder.Append($"Type = {Type.Name}, ");
+        stringBuilder.Append($"Name = {Name}");
+
+        return true;
+    }
 
     public virtual bool Equals(SourceGeneratedMemberInformation? other)
     {
