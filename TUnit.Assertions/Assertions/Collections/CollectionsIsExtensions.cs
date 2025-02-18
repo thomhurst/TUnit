@@ -13,7 +13,9 @@ namespace TUnit.Assertions.Extensions;
 [SuppressMessage("Usage", "TUnitAssertions0003:Compiler argument populated")]
 public static class CollectionsIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual,  
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
     {
         return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), doNotPopulateThisValue);
@@ -29,7 +31,9 @@ public static class CollectionsIsExtensions
         return IsEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual,  
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
     {
         return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue);
