@@ -7,12 +7,12 @@ using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
-public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TExpected>(TExpected expected, string expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
+public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
     private readonly List<string> _ignoredMembers = [];
 
     protected override string GetExpectation()
-        => $"to be equivalent to {expectedExpression}";
+        => $"to be equivalent to {expectedExpression ?? "null"}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
     {

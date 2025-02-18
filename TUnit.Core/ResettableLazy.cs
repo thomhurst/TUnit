@@ -4,9 +4,9 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 public class ResettableLazy<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     TClassConstructor,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     T> : ResettableLazy<T>
     where TClassConstructor : IClassConstructor, new()
     where T : class
@@ -28,7 +28,7 @@ public class ResettableLazy<
     }
 }
 
-public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : IAsyncDisposable where T : class
+public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> : IAsyncDisposable where T : class
 {
     public IClassConstructor? ClassConstructor { get; protected set; }
     public TestBuilderContext TestBuilderContext { get; }

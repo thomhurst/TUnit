@@ -108,7 +108,7 @@ public static class GenericIsExtensions
         return new EquivalentToAssertionBuilderWrapper<TActual, TExpected>(assertionBuilder);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> IsSameReferenceAs<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
+    public static InvokableValueAssertionBuilder<TActual> IsSameReferenceAs<TActual, TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
         return valueSource.RegisterAssertion(new SameReferenceExpectedValueAssertCondition<TActual, TExpected>(expected)
             , [doNotPopulateThisValue1]);

@@ -4,9 +4,8 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public record TestDetails<
-[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
-    TClassType
+public record TestDetails<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+TClassType
 > : TestDetails where TClassType : class
 {
     [JsonIgnore]

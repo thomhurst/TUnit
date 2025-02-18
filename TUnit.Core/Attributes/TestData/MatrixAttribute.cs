@@ -11,4 +11,4 @@ public class MatrixAttribute(params object?[]? objects) : TestDataAttribute
 }
 
 [AttributeUsage(AttributeTargets.Parameter)]
-public class MatrixAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(params T?[]? objects) : MatrixAttribute(objects?.Cast<object>().ToArray());
+public class MatrixAttribute<T>(params T?[]? objects) : MatrixAttribute(objects?.Cast<object>().ToArray());
