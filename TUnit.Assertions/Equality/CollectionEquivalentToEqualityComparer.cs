@@ -3,7 +3,7 @@
 namespace TUnit.Assertions.Equality;
 
 #pragma warning disable CS8767
-public class CollectionEquivalentToEqualityComparer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(
+public class CollectionEquivalentToEqualityComparer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] T>(
     CompareOptions compareOptions) : EquivalentToEqualityComparer<T>(compareOptions)
 {
     public CollectionEquivalentToEqualityComparer() : this(new CompareOptions())
