@@ -14,13 +14,13 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<CopyToLocalNuGetModule>]
 public class TestNugetPackageModule : Module<CommandResult[]>
 {
-    private readonly List<string> _frameworks = ["net8.0", "net9.0"];
+    private readonly List<string> _frameworks = ["net6.0", "net7.0", "net8.0", "net9.0"];
 
     public TestNugetPackageModule()
     {
         if (EnvironmentVariables.IsNet472)
         {
-            _frameworks.Add("net472");
+            _frameworks.AddRange(["net462", "net472", "net481"]);
         }
     }
     
