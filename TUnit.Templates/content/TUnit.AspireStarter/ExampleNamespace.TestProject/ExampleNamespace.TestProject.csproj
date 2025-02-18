@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" Version="9.0.0" />
-    <PackageReference Include="TUnit.Playwright" Version="0.13.9" />
+    <PackageReference Include="TUnit" Version="0.13.9" />
   </ItemGroup>
 
 
@@ -24,7 +24,6 @@
     <Using Include="Microsoft.Extensions.DependencyInjection" />
     <Using Include="Aspire.Hosting.ApplicationModel" />
     <Using Include="Aspire.Hosting.Testing" />
-    <Using Include="TUnit" />
   </ItemGroup>
 
 </Project>
