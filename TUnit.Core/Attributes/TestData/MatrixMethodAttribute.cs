@@ -5,7 +5,7 @@ using System.Reflection;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Parameter)]
-public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClass>(string methodName)
+public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] TClass>(string methodName)
     : MatrixAttribute(GetMethodValue(methodName))
 {
     private static object?[] GetMethodValue(string methodName)

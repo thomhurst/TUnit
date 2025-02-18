@@ -8,7 +8,9 @@ using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Equality;
 
-public class EquivalentToEqualityComparer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(CompareOptions compareOptions) : IEqualityComparer<T>
+public class EquivalentToEqualityComparer<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+    T>(CompareOptions compareOptions) : IEqualityComparer<T>
 {
     public virtual int? EnumerableIndex { get; protected set; }
 

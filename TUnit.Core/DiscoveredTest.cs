@@ -5,11 +5,11 @@ namespace TUnit.Core;
 
 internal record DiscoveredTest<
     [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis
-        .DynamicallyAccessedMemberTypes.All)]
+        .DynamicallyAccessedMemberTypes.PublicConstructors)]
     TTestClass
->(ResettableLazy<TTestClass> resettableLazyTestClassFactory) : DiscoveredTest where TTestClass : class
+>(ResettableLazy<TTestClass> ResettableLazyTestClassFactory) : DiscoveredTest where TTestClass : class
 {
-    public TTestClass TestClass => resettableLazyTestClassFactory.Value;
+    public TTestClass TestClass => ResettableLazyTestClassFactory.Value;
     
     public required Func<TTestClass, CancellationToken, Task> TestBody { get; init; }
 
@@ -21,10 +21,10 @@ internal record DiscoveredTest<
     
     public override async Task ResetTestInstance()
     {
-        await resettableLazyTestClassFactory.ResetLazy();
+        await ResettableLazyTestClassFactory.ResetLazy();
     }
 
-    public override IClassConstructor? ClassConstructor => resettableLazyTestClassFactory.ClassConstructor;
+    public override IClassConstructor? ClassConstructor => ResettableLazyTestClassFactory.ClassConstructor;
 }
 
 [DebuggerDisplay("{TestDetails.TestId}")]

@@ -86,9 +86,9 @@ public class TestExtensionsTests
 
     private TestContext CreateTestContext<
 #if NET
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 #endif
-        T
+    T
     >(TestDetails<T> testDetails) where T : class
     {
         var constructor = typeof(TestContext).GetConstructor(
