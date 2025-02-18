@@ -4,8 +4,8 @@ namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T1, 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T2>
+    T1, 
+    T2>
     : DataSourceGeneratorAttribute<T1, T2> 
     where T1 : new()
     where T2 : new()

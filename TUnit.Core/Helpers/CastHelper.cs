@@ -6,7 +6,7 @@ namespace TUnit.Core.Helpers;
 public static class CastHelper
 {
     [UnconditionalSuppressMessage("", "IL2072")]
-    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(object? value)
+    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
     {
         if (value is null)
         {
@@ -26,7 +26,7 @@ public static class CastHelper
         return (T?) GetImplicitConversion(value.GetType(), typeof(T)).Invoke(null, [value]);
     }
 
-    private static MethodInfo GetImplicitConversion([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type targetType)
+    private static MethodInfo GetImplicitConversion([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType)
     {
         return baseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
             .Concat(targetType.GetMethods(BindingFlags.Public | BindingFlags.Static))

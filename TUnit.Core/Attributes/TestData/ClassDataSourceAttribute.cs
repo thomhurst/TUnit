@@ -3,7 +3,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : DataSourceGeneratorAttribute<T> where T : new()
+public sealed class ClassDataSourceAttribute<T> : DataSourceGeneratorAttribute<T> where T : new()
 {
     public SharedType Shared { get; set; } = SharedType.None;
     public string Key { get; set; } = string.Empty;
