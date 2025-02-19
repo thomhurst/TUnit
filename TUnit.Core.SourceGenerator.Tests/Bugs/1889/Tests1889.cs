@@ -9,7 +9,7 @@ internal class Tests1889 : TestsBase<TestsGenerator>
             "TUnit.TestProject",
             "Bugs",
             "1889",
-            "Tests.cs"),
+            "DerivedTest.cs"),
         async generatedFiles =>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(1);
