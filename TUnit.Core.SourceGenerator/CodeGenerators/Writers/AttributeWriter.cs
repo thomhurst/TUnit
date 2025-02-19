@@ -11,6 +11,12 @@ public class AttributeWriter
     public static void WriteAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         ImmutableArray<AttributeData> attributeDatas)
     {
+        var dataAttributeInterface =
+            context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute
+                .WithoutGlobalPrefix);
+        
+        attributeDatas = attributeDatas.RemoveAll(x => x.AttributeClass?.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataAttributeInterface)) == true);
+        
         if (attributeDatas.Length == 0)
         {
             sourceCodeWriter.Write("[],");

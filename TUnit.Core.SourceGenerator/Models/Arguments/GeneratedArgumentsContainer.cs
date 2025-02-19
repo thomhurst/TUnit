@@ -57,9 +57,9 @@ public record GeneratedArgumentsContainer(
         sourceCodeWriter.Write(";");
         sourceCodeWriter.WriteLine();
         
-        sourceCodeWriter.WriteLine($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
         sourceCodeWriter.WriteLine();
 
+        sourceCodeWriter.WriteLine($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
         sourceCodeWriter.WriteLine();
         
         sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName});");

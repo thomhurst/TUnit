@@ -57,7 +57,7 @@ public abstract record TestDetails
 
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
-    public Attribute[] Attributes => field ??= [..TestAttributes, ..ClassAttributes, ..AssemblyAttributes];
+    public Attribute[] Attributes => field ??= [..TestAttributes, ..ClassAttributes, ..AssemblyAttributes, ..DataAttributes];
 
     [JsonIgnore]
     internal Func<TestContext, Exception, int, Task<bool>>? RetryLogic { get; set; }
