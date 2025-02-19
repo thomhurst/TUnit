@@ -53,8 +53,7 @@ public abstract record TestDetails
     [JsonIgnore] public Attribute[] TestAttributes => TestMethod.Attributes;
 
     [JsonIgnore]
-    [field: AllowNull, MaybeNull]
-    public Attribute[] DataAttributes => field ??= Attributes.OfType<IDataAttribute>().OfType<Attribute>().ToArray();
+    public required Attribute[] DataAttributes { get; init; }
 
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
