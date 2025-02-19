@@ -58,6 +58,9 @@ public record GeneratedArgumentsContainer(
         sourceCodeWriter.WriteLine();
         
         sourceCodeWriter.WriteLine();
+
+        sourceCodeWriter.WriteLine($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
+        sourceCodeWriter.WriteLine();
         
         sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName});");
         sourceCodeWriter.WriteLine();
@@ -94,6 +97,9 @@ public record GeneratedArgumentsContainer(
             sourceCodeWriter.Write($"{attr.Type} {attr.Name} = ");
             AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);     
             sourceCodeWriter.Write(";");
+            sourceCodeWriter.WriteLine();
+            
+            sourceCodeWriter.WriteLine($"testBuilderContext.DataAttributes.Add({attr.Name});");
             sourceCodeWriter.WriteLine();
             
             var dataSourceVariable = GenerateVariable("var", string.Empty, ref variableIndex);

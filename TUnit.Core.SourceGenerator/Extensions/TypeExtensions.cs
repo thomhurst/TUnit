@@ -89,8 +89,13 @@ public static class TypeExtensions
             .Any(x => x.GloballyQualifiedNonGeneric() == typeName);
     }
     
-    public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, ITypeSymbol inheritedType)
+    public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, [NotNullWhen(true)] ITypeSymbol? inheritedType)
     {
+        if (inheritedType is null)
+        {
+            return false;
+        }
+        
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
             .Any(x => SymbolEqualityComparer.Default.Equals(x, inheritedType));

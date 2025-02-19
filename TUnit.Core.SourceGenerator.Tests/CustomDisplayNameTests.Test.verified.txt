@@ -620,8 +620,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -674,6 +673,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					TestSessionId = sessionId,
 				};
 				var methodDataAttribute = new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator();
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 

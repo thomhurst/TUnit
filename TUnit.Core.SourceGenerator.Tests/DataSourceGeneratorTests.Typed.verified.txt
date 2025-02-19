@@ -40,8 +40,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				ReturnType = typeof(void),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -61,11 +60,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					}),
 					Name = "DataSourceGeneratorTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = 
-					[
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>(),
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
-					],
+					Attributes = [],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
@@ -117,6 +112,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				};
 				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
+				testBuilderContext.DataAttributes.Add(classDataAttribute);
+
 				var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 				foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -138,6 +135,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						TestSessionId = sessionId,
 					};
 					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
+
+					testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 					var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -206,8 +205,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					ReturnType = typeof(void),
 					Attributes = 
 					[
-						new global::TUnit.Core.TestAttribute(),
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>()
+						new global::TUnit.Core.TestAttribute()
 					],
 					Parameters = 
 					[
@@ -227,11 +225,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						}),
 						Name = "DataSourceGeneratorTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = 
-						[
-							new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>(),
-							new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
-						],
+						Attributes = [],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
@@ -283,6 +277,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					};
 					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
+					testBuilderContext.DataAttributes.Add(classDataAttribute);
+
 					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -304,6 +300,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							TestSessionId = sessionId,
 						};
 						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
+
+						testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -401,8 +399,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				ReturnType = typeof(void),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -432,11 +429,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					}),
 					Name = "DataSourceGeneratorTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = 
-					[
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>(),
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
-					],
+					Attributes = [],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
@@ -488,6 +481,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				};
 				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
+				testBuilderContext.DataAttributes.Add(classDataAttribute);
+
 				var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 				foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -519,6 +514,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						TestSessionId = sessionId,
 					};
 					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+
+					testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 					var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -591,8 +588,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					ReturnType = typeof(void),
 					Attributes = 
 					[
-						new global::TUnit.Core.TestAttribute(),
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>()
+						new global::TUnit.Core.TestAttribute()
 					],
 					Parameters = 
 					[
@@ -622,11 +618,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						}),
 						Name = "DataSourceGeneratorTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = 
-						[
-							new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>(),
-							new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
-						],
+						Attributes = [],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
@@ -678,6 +670,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					};
 					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
+					testBuilderContext.DataAttributes.Add(classDataAttribute);
+
 					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -709,6 +703,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							TestSessionId = sessionId,
 						};
 						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+
+						testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -810,8 +806,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				ReturnType = typeof(void),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -841,11 +836,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					}),
 					Name = "DataSourceGeneratorTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = 
-					[
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>(),
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
-					],
+					Attributes = [],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
@@ -897,6 +888,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 				};
 				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
+				testBuilderContext.DataAttributes.Add(classDataAttribute);
+
 				var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 				foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -928,6 +921,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						TestSessionId = sessionId,
 					};
 					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+
+					testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 					var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -1000,8 +995,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					ReturnType = typeof(void),
 					Attributes = 
 					[
-						new global::TUnit.Core.TestAttribute(),
-						new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+						new global::TUnit.Core.TestAttribute()
 					],
 					Parameters = 
 					[
@@ -1031,11 +1025,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						}),
 						Name = "DataSourceGeneratorTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = 
-						[
-							new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>(),
-							new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
-						],
+						Attributes = [],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
@@ -1087,6 +1077,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					};
 					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
+					testBuilderContext.DataAttributes.Add(classDataAttribute);
+
 					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
 					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
@@ -1118,6 +1110,8 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							TestSessionId = sessionId,
 						};
 						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+
+						testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 						var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
