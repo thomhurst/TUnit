@@ -15,13 +15,13 @@
   </PropertyGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Assertions.Analyzers.Tests, PublicKey=$(PublicKey)</_Parameter1>
+      <_Parameter1>TUnit.Assertions.Analyzers.Tests</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Assertions.Analyzers.CodeFixers, PublicKey=$(PublicKey)</_Parameter1>
+      <_Parameter1>TUnit.Assertions.Analyzers.CodeFixers</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Assertions.Analyzers.CodeFixers.Tests, PublicKey=$(PublicKey)</_Parameter1>
+      <_Parameter1>TUnit.Assertions.Analyzers.CodeFixers.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>

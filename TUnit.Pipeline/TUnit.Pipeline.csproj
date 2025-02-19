@@ -3,9 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
-    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>

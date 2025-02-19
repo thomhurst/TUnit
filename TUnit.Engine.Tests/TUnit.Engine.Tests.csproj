@@ -7,7 +7,6 @@
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-        <SignAssembly>false</SignAssembly>
     </PropertyGroup>
 
     <ItemGroup>

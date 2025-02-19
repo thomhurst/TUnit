@@ -3,7 +3,6 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <TargetFrameworks>net8.0;net9.0;net472</TargetFrameworks>
-    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
