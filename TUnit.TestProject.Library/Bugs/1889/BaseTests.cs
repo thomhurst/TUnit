@@ -1,0 +1,16 @@
+﻿using TUnit.Core;
+
+namespace TUnit.TestProject.Library.Bugs._1889;
+
+public abstract class BaseTest<T> {
+    [Test]
+    public void Test1()
+    {
+    }
+
+    [Test]
+    [MatrixDataSource]
+    public void Test2(bool condition)
+    {
+    }
+}

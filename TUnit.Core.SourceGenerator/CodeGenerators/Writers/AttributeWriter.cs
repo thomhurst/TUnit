@@ -11,7 +11,7 @@ public class AttributeWriter
     public static void WriteAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         ImmutableArray<AttributeData> attributeDatas)
     {
-        if(attributeDatas.Length == 0)
+        if (attributeDatas.Length == 0)
         {
             sourceCodeWriter.Write("[],");
             sourceCodeWriter.WriteLine();
@@ -24,19 +24,19 @@ public class AttributeWriter
         {
             sourceCodeWriter.WriteTabs();
             var attributeData = attributeDatas[index];
-            
-            if(attributeData.ApplicationSyntaxReference is null)
+
+            if (attributeData.ApplicationSyntaxReference is null)
             {
                 continue;
             }
-            
+
             WriteAttribute(sourceCodeWriter, context, attributeData);
-            
+
             if (index != attributeDatas.Length - 1)
             {
                 sourceCodeWriter.Write(",");
             }
-            
+
             sourceCodeWriter.WriteLine();
         }
         sourceCodeWriter.WriteLine("],");
@@ -49,6 +49,7 @@ public class AttributeWriter
 
         if (syntax is null)
         {
+            WriteAttributeWithoutSyntax(sourceCodeWriter, context, attributeData);
             return;
         }
 
@@ -58,7 +59,7 @@ public class AttributeWriter
             ?.Arguments ?? [];
 
         var properties = arguments.Where(x => x.NameEquals != null);
-        
+
         var constructorArgs = arguments.Where(x => x.NameEquals == null);
 
         var attributeName = attributeData.AttributeClass!.GloballyQualified();
@@ -66,21 +67,21 @@ public class AttributeWriter
         var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(context, x)));
 
         var formattedProperties = properties.Select(x => FormatProperty(context, x)).ToArray();
-        
+
         sourceCodeWriter.Write($"new {attributeName}({formattedConstructorArgs})");
-       
+
         if (formattedProperties.Length == 0)
         {
             return;
         }
-        
+
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine("{");
         foreach (var property in formattedProperties)
         {
             sourceCodeWriter.WriteLine($"{property},");
         }
-        
+
         sourceCodeWriter.Write("}");
     }
 
@@ -90,12 +91,36 @@ public class AttributeWriter
         {
             return $"{attributeArgumentSyntax.NameColon!.Name}: {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString()}";
         }
-        
+
         return attributeArgumentSyntax.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString();
     }
 
     private static string FormatProperty(GeneratorAttributeSyntaxContext context, AttributeArgumentSyntax attributeArgumentSyntax)
     {
         return $"{attributeArgumentSyntax.NameEquals!.Name} = {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString()}";
+    }
+
+    public static void WriteAttributeWithoutSyntax(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    AttributeData attributeData)
+    {
+        var attributeName = attributeData.AttributeClass!.GloballyQualified();
+
+        var constructorArgs = attributeData.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
+        var formattedConstructorArgs = string.Join(", ", constructorArgs);
+
+        var namedArgs = attributeData.NamedArguments.Select(arg => $"{arg.Key} = {TypedConstantParser.GetRawTypedConstantValue(arg.Value)}");
+        var formattedNamedArgs = string.Join(", ", namedArgs);
+
+        sourceCodeWriter.Write($"new {attributeName}({formattedConstructorArgs})");
+
+        if (string.IsNullOrEmpty(formattedNamedArgs))
+        {
+            return;
+        }
+
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.WriteLine($"{formattedNamedArgs}");
+        sourceCodeWriter.Write("}");
     }
 }
