@@ -112,6 +112,8 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				};
 				var methodDataAttribute = new global::TUnit.TestProject.Attributes.AutoDataAttribute();
 
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
