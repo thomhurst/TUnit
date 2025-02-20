@@ -9,6 +9,7 @@ namespace TUnit.Core.Hooks;
 #endif
 public record InstanceHookMethod : IExecutableHook<TestContext>
 {
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type ClassType { get; init; }
     public Assembly Assembly => ClassType.Assembly;
     public required SourceGeneratedMethodInformation MethodInfo { get; init; }
