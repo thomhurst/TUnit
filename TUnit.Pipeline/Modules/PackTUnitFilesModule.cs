@@ -33,7 +33,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         Properties =
                         [
                             new KeyValue("Version", version.SemVer!),
-                            new KeyValue("PackageVersion", packageVersion!),
+                            new KeyValue("PackageVersion", packageVersion),
                             new KeyValue("AssemblyFileVersion", version.SemVer!),
                             new KeyValue("IsPackTarget", "true")
                         ],

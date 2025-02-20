@@ -36,8 +36,9 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 	{
 		return
 		[
-			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.GlobalBase1>
+			new global::TUnit.Core.Hooks.InstanceHookMethod
 			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),
@@ -64,7 +65,7 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 						Properties = [],
 					}),
 },
-					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach1()),
+					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalBase1)classInstance).BeforeEach1()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -123,8 +124,9 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 	{
 		return
 		[
-			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.GlobalBase2>
+			new global::TUnit.Core.Hooks.InstanceHookMethod
 			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),
@@ -151,7 +153,7 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 						Properties = [],
 					}),
 },
-					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach2()),
+					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalBase2)classInstance).BeforeEach2()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -210,8 +212,9 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 	{
 		return
 		[
-			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.GlobalBase3>
+			new global::TUnit.Core.Hooks.InstanceHookMethod
 			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),
@@ -238,7 +241,7 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 						Properties = [],
 					}),
 },
-					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach3()),
+					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalBase3)classInstance).BeforeEach3()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -297,8 +300,9 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 	{
 		return
 		[
-			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.GlobalSetUpTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod
 			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
@@ -325,7 +329,7 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Properties = [],
 					}),
 },
-					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetUp()),
+					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUp()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -384,8 +388,9 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 	{
 		return
 		[
-			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.GlobalSetUpTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod
 			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
@@ -420,7 +425,7 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Properties = [],
 					}),
 },
-					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetUp(cancellationToken)),
+					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUp(cancellationToken)),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -480,8 +485,9 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 	{
 		return
 		[
-			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.GlobalSetUpTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod
 			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
@@ -515,7 +521,7 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Properties = [],
 					}),
 },
-					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetUpWithContext(context)),
+					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUpWithContext(context)),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -574,8 +580,9 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 	{
 		return
 		[
-			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.BeforeTests.GlobalSetUpTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod
 			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
 				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
@@ -615,7 +622,7 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Properties = [],
 					}),
 },
-					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetUpWithContext(context, cancellationToken)),
+					AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUpWithContext(context, cancellationToken)),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 

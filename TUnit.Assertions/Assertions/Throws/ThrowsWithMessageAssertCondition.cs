@@ -24,7 +24,7 @@ public class ThrowsWithMessageAssertCondition<TActual, TException>(
             .FailIf(actualException is null,
                 "the exception is null")
             .OrFailIf(!string.Equals(actualException!.Message, expectedMessage, stringComparison),
-                $"{new StringDifference(actualException!.Message, expectedMessage)
+                $"{new StringDifference(actualException.Message, expectedMessage)
                     .ToString("it differs at index")}");
     }
 }

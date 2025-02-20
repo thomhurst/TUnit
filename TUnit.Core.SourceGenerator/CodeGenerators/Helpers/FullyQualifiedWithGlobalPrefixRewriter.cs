@@ -28,7 +28,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         }
         
         return SyntaxFactory
-            .IdentifierName(symbol!.GloballyQualified())
+            .IdentifierName(symbol.GloballyQualified())
             .WithoutTrivia();
     }
 
@@ -143,7 +143,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             {
                 return SyntaxFactory.LiteralExpression(
                     SyntaxKind.StringLiteralExpression,
-                    SyntaxFactory.Literal(identifierNameSyntax!.Identifier.ValueText)
+                    SyntaxFactory.Literal(identifierNameSyntax.Identifier.ValueText)
                 );
             }
 
@@ -157,7 +157,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
 
             return SyntaxFactory.LiteralExpression(
                 SyntaxKind.StringLiteralExpression,
-                SyntaxFactory.Literal(argumentExpression!.ToString())
+                SyntaxFactory.Literal(argumentExpression.ToString())
             );
         }
         

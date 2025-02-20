@@ -35,7 +35,7 @@ public abstract record TestDetails
     internal readonly List<string> MutableCategories = [];
     public IReadOnlyList<string> Categories => MutableCategories;
     public required SourceGeneratedMethodInformation TestMethod { get; init; }
-    public abstract object? ClassInstance { get; }
+    public abstract object ClassInstance { get; }
     public required int CurrentRepeatAttempt { get; init; }
     public required int RepeatLimit { get; init; }
     public int RetryLimit { get; internal set; }

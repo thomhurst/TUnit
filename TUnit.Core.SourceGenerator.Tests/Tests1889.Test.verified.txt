@@ -82,7 +82,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
-					TestFilePath = @"/_/TUnit.TestProject.Library/Bugs/1889/BaseTests.cs",
 					TestLineNumber = 7,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
@@ -98,7 +97,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					TestId = $"TUnit.TestProject.Bugs._1889.DerivedTest.Test1:0",
 					MethodName = $"Test1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test1 failed to initialize", exception),
-					TestFilePath = @"/_/TUnit.TestProject.Library/Bugs/1889/BaseTests.cs",
 					TestLineNumber = 7,
 				});
 			}
@@ -192,7 +190,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg)),
-							TestFilePath = @"/_/TUnit.TestProject.Library/Bugs/1889/BaseTests.cs",
 							TestLineNumber = 12,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
@@ -209,7 +206,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1889.DerivedTest.Test2(bool):0",
 						MethodName = $"Test2",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test2 failed to initialize", exception),
-						TestFilePath = @"/_/TUnit.TestProject.Library/Bugs/1889/BaseTests.cs",
 						TestLineNumber = 12,
 					});
 				}
@@ -279,7 +275,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg)),
-							TestFilePath = @"/_/TUnit.TestProject.Library/Bugs/1889/BaseTests.cs",
 							TestLineNumber = 18,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
@@ -295,7 +290,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1889.DerivedTest.Test3(bool):0",
 							MethodName = $"Test3",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test3 failed to initialize", exception),
-							TestFilePath = @"/_/TUnit.TestProject.Library/Bugs/1889/BaseTests.cs",
 							TestLineNumber = 18,
 						});
 					}
@@ -365,7 +359,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 								RepeatLimit = 0,
 								ResettableClassFactory = resettableClassFactory,
 								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg)),
-								TestFilePath = @"/_/TUnit.TestProject.Library/Bugs/1889/BaseTests.cs",
 								TestLineNumber = 18,
 								TestMethod = testInformation,
 								TestBuilderContext = testBuilderContext,
@@ -381,7 +374,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 								TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1889.DerivedTest.Test3(bool):0",
 								MethodName = $"Test3",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test3 failed to initialize", exception),
-								TestFilePath = @"/_/TUnit.TestProject.Library/Bugs/1889/BaseTests.cs",
 								TestLineNumber = 18,
 							});
 						}

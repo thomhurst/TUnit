@@ -24,7 +24,7 @@ public class ThrowsWithParamNameAssertCondition<TActual, TException>(
             .FailIf(actualException is null,
                 "the exception is null")
             .OrFailIf(!string.Equals(actualException!.ParamName, expectedParamName, stringComparison),
-                $"{new StringDifference(actualException!.ParamName, expectedParamName)
+                $"{new StringDifference(actualException.ParamName, expectedParamName)
                     .ToString("it differs at index")}");
     }
 }

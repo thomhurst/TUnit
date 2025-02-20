@@ -13,7 +13,7 @@ public static class SourceExtensions
     {
         if (!string.IsNullOrEmpty(caller))
         {
-            source.AppendExpression(BuildExpression(caller!, argumentExpressions));
+            source.AppendExpression(BuildExpression(caller, argumentExpressions));
         }
         
         var invokeableAssertionBuilder = source.WithAssertion(assertCondition);
@@ -36,7 +36,7 @@ public static class SourceExtensions
     {
         if (!string.IsNullOrEmpty(caller))
         {
-            delegateSource.AppendExpression(BuildExpression(caller!, argumentExpressions));
+            delegateSource.AppendExpression(BuildExpression(caller, argumentExpressions));
         }
         
         var source = delegateSource.WithAssertion(assertCondition);
@@ -72,7 +72,7 @@ public static class SourceExtensions
                 continue;
             }
             
-            assertionBuilder.Append(argumentExpression!);
+            assertionBuilder.Append(argumentExpression);
 
             if (index < argumentExpressions.Length - 1)
             {

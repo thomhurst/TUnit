@@ -48,4 +48,7 @@
     <ItemGroup>
         <PackageReference Remove="Backport.System.Threading.Lock" />
     </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="Microsoft.CSharp" />
+    </ItemGroup>
 </Project>

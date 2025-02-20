@@ -18,7 +18,7 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
 
         foreach (var type in typesIncludingBase)
         {
-            foreach (var instanceHookMethod in hooksCollector.BeforeTestHooks.GetOrAdd(type, _ => [])
+            foreach (var instanceHookMethod in GetBeforeHooks(type)
                          .OrderBy(x => x.Order)
                          .OfType<IExecutableHook<TestContext>>())
             {
@@ -33,7 +33,37 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
             yield return beforeEvery;
         }
     }
+
+    private IReadOnlyCollection<InstanceHookMethod> GetBeforeHooks(Type type)
+    {
+        if (hooksCollector.BeforeTestHooks.TryGetValue(type, out var hooks))
+        {
+            return hooks;
+        }
+        
+        if (type.IsGenericType && hooksCollector.BeforeTestHooks.TryGetValue(type.GetGenericTypeDefinition(), out hooks))
+        {
+            return hooks;
+        }
+
+        return [];
+    }
     
+    private IReadOnlyCollection<InstanceHookMethod> GetAfterHooks(Type type)
+    {
+        if (hooksCollector.AfterTestHooks.TryGetValue(type, out var hooks))
+        {
+            return hooks;
+        }
+        
+        if (type.IsGenericType && hooksCollector.AfterTestHooks.TryGetValue(type.GetGenericTypeDefinition(), out hooks))
+        {
+            return hooks;
+        }
+
+        return [];
+    }
+
     internal IEnumerable<IExecutableHook<TestContext>> CollectAfterHooks(object classInstance, DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
     {
         var testClassType = classInstance.GetType();
@@ -42,7 +72,7 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
 
         foreach (var type in typesIncludingBase)
         {
-            foreach (var instanceHookMethod in hooksCollector.AfterTestHooks.GetOrAdd(type, _ => [])
+            foreach (var instanceHookMethod in GetAfterHooks(type)
                          .OrderBy(x => x.Order)
                          .OfType<IExecutableHook<TestContext>>())
             {
