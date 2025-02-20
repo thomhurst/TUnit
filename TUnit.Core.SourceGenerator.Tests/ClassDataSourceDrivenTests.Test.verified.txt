@@ -36,8 +36,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				ReturnType = typeof(void),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -81,6 +80,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestSessionId = sessionId,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>();
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -168,8 +169,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				ReturnType = typeof(void),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -213,6 +213,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestSessionId = sessionId,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>();
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -300,8 +302,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -345,6 +346,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestSessionId = sessionId,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>();
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -432,8 +435,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -487,6 +489,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestSessionId = sessionId,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -577,8 +581,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -642,6 +645,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestSessionId = sessionId,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -733,8 +738,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -808,6 +812,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestSessionId = sessionId,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -900,8 +906,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -985,6 +990,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestSessionId = sessionId,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 

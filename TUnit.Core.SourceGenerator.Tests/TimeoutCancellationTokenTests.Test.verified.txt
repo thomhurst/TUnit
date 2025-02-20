@@ -721,6 +721,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
+
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)

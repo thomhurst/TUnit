@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-public record SourceGeneratedParameterInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : SourceGeneratedParameterInformation
+public record SourceGeneratedParameterInformation<T> : SourceGeneratedParameterInformation
 {
     [field: AllowNull, MaybeNull]
     public override Type Type

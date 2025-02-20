@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace TUnit.Core;
 
-public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType> : TestMetadata where TClassType : class
+public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TClassType> : TestMetadata where TClassType : class
 {
     public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
     public required Func<TClassType, CancellationToken, Task> TestMethodFactory { get; init; }
@@ -26,6 +26,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 			ReturnType = TestMethod.ReturnType,
 			TestFilePath = TestFilePath,
 			TestLineNumber = TestLineNumber,
+			DataAttributes = TestBuilderContext.DataAttributes.OfType<Attribute>().ToArray()
 		};
 
 		return testDetails;

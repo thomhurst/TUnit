@@ -76,12 +76,12 @@ public class CommitFilesModule : Module<CommandResult>
 
         var pr = await context.GitHub().Client.PullRequest.Create(repositoryId,
             new NewPullRequest("Update ReadMe", newBranchName, "main"));
+
+        var issueUpdate = new IssueUpdate();
+        issueUpdate.AddLabel("ignore-for-release");
         
         await context.GitHub().Client.Issue.Update(repositoryId, pr.Id,
-            new IssueUpdate
-            {
-                Labels = { "ignore-for-release" }
-            });
+            issueUpdate);
 
         return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("gh", "pr", "merge", "--admin", "--squash", pr.Number.ToString())
         {

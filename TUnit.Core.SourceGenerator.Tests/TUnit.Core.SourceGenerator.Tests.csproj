@@ -21,6 +21,7 @@
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="Sourcy.Git" />
     <PackageReference Include="TUnit.Assertions" />
+    <PackageReference Include="TUnit.Core" />
     <PackageReference Include="Verify.NUnit" />
   </ItemGroup>
 

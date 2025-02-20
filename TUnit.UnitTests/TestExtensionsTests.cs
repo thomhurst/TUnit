@@ -16,6 +16,7 @@ public class TestExtensionsTests
     {
         var testDetails = _fixture.Build<TestDetails<TestExtensionsTests>>()
             .With(x => x.TestClassArguments, [])
+            .With(x => x.DataAttributes, [])
             .With(x => x.TestMethod, new SourceGeneratedMethodInformation
             {
                 Attributes = [],
@@ -53,6 +54,7 @@ public class TestExtensionsTests
     {
         var testDetails = _fixture.Build<TestDetails<InnerClass>>()
             .With(x => x.TestClassArguments, [])
+            .With(x => x.DataAttributes, [])
             .With(x => x.TestMethod, new SourceGeneratedMethodInformation
             {
                 Attributes = [],
@@ -86,9 +88,9 @@ public class TestExtensionsTests
 
     private TestContext CreateTestContext<
 #if NET
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 #endif
-        T
+    T
     >(TestDetails<T> testDetails) where T : class
     {
         var constructor = typeof(TestContext).GetConstructor(

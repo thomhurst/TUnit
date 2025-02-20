@@ -1,4 +1,10 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Text;
+using System.Text.Json.Serialization;
+using TUnit.Core.Helpers;
+
+namespace TUnit.Core;
 
 public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
@@ -26,16 +32,33 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
                 Type = typeof(TClassType)
             }
         };
-    
+
     public required SourceGeneratedParameterInformation[] Parameters { get; init; }
-    
+
     public required int GenericTypeCount { get; init; }
-    
+
     public required SourceGeneratedClassInformation Class { get; init; }
-    
+
+    [field: AllowNull, MaybeNull]
+    [JsonIgnore]
+    public MethodInfo ReflectionInformation
+    {
+        [RequiresUnreferencedCode("Reflection API")]
+        get => field ??= MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
+    }
+
     public required Type ReturnType { get; init; }
-    
+
     public override required Type Type { get; init; }
+    
+    protected override bool PrintMembers(StringBuilder stringBuilder)
+    {
+        stringBuilder.Append($"ReturnType = {ReturnType.Name}, ");
+        stringBuilder.Append($"GenericTypeCount = {GenericTypeCount}, ");
+        stringBuilder.Append($"Type = {Type.Name}, ");
+        stringBuilder.Append($"Name = {Name}");
+        return true;
+    }
 
     public virtual bool Equals(SourceGeneratedMethodInformation? other)
     {

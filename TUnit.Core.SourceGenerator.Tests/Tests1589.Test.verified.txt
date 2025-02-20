@@ -49,93 +49,89 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 					}),
 					Name = "MyTests",
 					Namespace = "TUnit.TestProject.Bugs._1589",
-					Attributes = 
+					Attributes = [],
+					Parameters = 
 					[
-						new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
 						{
-							Shared = global::TUnit.Core.SharedType.None,
-}
-						],
-						Parameters = 
-						[
-							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
-							{
-								Name = "myFixture",
-								Attributes = [],
-							},
-						],
-						Properties = [],
-					}),
+							Name = "myFixture",
+							Attributes = [],
+						},
+					],
+					Properties = [],
+				}),
 };
 
-					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-					var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-					{
-						Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-						TestBuilderContext = testBuilderContextAccessor,
-						TestInformation = testInformation,
-						MembersToGenerate = 
-						[
-							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
-							{
-								Name = "myFixture",
-								Attributes = [],
-							},
-						],
-						TestSessionId = sessionId,
-					};
-					var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
-					{
-						Shared = global::TUnit.Core.SharedType.None,
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
+						{
+							Name = "myFixture",
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+				};
+				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
+				{
+					Shared = global::TUnit.Core.SharedType.None,
 };
 
-						var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+					testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-						foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
-						{
-							classDataIndex++;
-							var classArgGeneratedData = classArgGeneratedDataAccessor();
+					var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1589.MyTests>(() => 
-							new global::TUnit.TestProject.Bugs._1589.MyTests(classArgGeneratedData)
-							, sessionId, testBuilderContext);
-
-							var resettableClassFactory = resettableClassFactoryDelegate();
-
-							nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1589.MyTests>
-							{
-								TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1589.MyTests(TUnit.TestProject.Bugs._1589.MyFixture).Test1:0",
-								TestClassArguments = [classArgGeneratedData],
-								TestMethodArguments = [],
-								TestClassProperties = [],
-								CurrentRepeatAttempt = 0,
-								RepeatLimit = 0,
-								ResettableClassFactory = resettableClassFactory,
-								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
-								TestFilePath = @"",
-								TestLineNumber = 15,
-								TestMethod = testInformation,
-								TestBuilderContext = testBuilderContext,
-							});
-							resettableClassFactory = resettableClassFactoryDelegate();
-							testBuilderContext = new();
-							testBuilderContextAccessor.Current = testBuilderContext;
-						}
-					}
-					catch (global::System.Exception exception)
+					foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 					{
-						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1589.MyTests>
+						classDataIndex++;
+						var classArgGeneratedData = classArgGeneratedDataAccessor();
+
+						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1589.MyTests>(() => 
+						new global::TUnit.TestProject.Bugs._1589.MyTests(classArgGeneratedData)
+						, sessionId, testBuilderContext);
+
+						var resettableClassFactory = resettableClassFactoryDelegate();
+
+						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1589.MyTests>
 						{
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1589.MyTests(TUnit.TestProject.Bugs._1589.MyFixture).Test1:0",
-							MethodName = $"Test1",
-							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MyTests.Test1 failed to initialize", exception),
+							TestClassArguments = [classArgGeneratedData],
+							TestMethodArguments = [],
+							TestClassProperties = [],
+							CurrentRepeatAttempt = 0,
+							RepeatLimit = 0,
+							ResettableClassFactory = resettableClassFactory,
+							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
 							TestFilePath = @"",
 							TestLineNumber = 15,
+							TestMethod = testInformation,
+							TestBuilderContext = testBuilderContext,
 						});
+						resettableClassFactory = resettableClassFactoryDelegate();
+						testBuilderContext = new();
+						testBuilderContextAccessor.Current = testBuilderContext;
 					}
-					return nodes;
 				}
+				catch (global::System.Exception exception)
+				{
+					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1589.MyTests>
+					{
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1589.MyTests(TUnit.TestProject.Bugs._1589.MyFixture).Test1:0",
+						MethodName = $"Test1",
+						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MyTests.Test1 failed to initialize", exception),
+						TestFilePath = @"",
+						TestLineNumber = 15,
+					});
+				}
+				return nodes;
 			}
+		}
 
 ]
