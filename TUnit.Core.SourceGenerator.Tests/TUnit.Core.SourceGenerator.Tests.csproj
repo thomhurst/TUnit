@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  
+
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <TargetFrameworks>net8.0;net9.0;net472</TargetFrameworks>
@@ -24,7 +24,7 @@
     <PackageReference Include="TUnit.Core" />
     <PackageReference Include="Verify.NUnit" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
