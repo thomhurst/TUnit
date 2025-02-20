@@ -57,19 +57,20 @@ public class TestHooksWriter : BaseHookWriter
             return;
         }
 
-        sourceBuilder.WriteLine($"new global::TUnit.Core.Hooks.InstanceHookMethod<{model.FullyQualifiedTypeName}>");
+        sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.InstanceHookMethod");
         sourceBuilder.WriteLine("{");
+        sourceBuilder.WriteLine($"ClassType = typeof({model.FullyQualifiedTypeName}),");
         sourceBuilder.WriteTabs();
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
         
         if (model.IsVoid)
         {
-            sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => classInstance.{model.MethodName}({GetArgs(model)}),");
+            sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => (({GetCastType(model.ClassType.IsGenericDefinition(), model.FullyQualifiedTypeName)})classInstance).{model.MethodName}({GetArgs(model)}),");
         }
         else
         {
-            sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.{model.MethodName}({GetArgs(model)})),");
+            sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => (({GetCastType(model.ClassType.IsGenericDefinition(), model.FullyQualifiedTypeName)})classInstance).{model.MethodName}({GetArgs(model)})),");
         }
 
         sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
@@ -88,5 +89,10 @@ public class TestHooksWriter : BaseHookWriter
         AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
         
         sourceBuilder.WriteLine("},");
+    }
+
+    private static string GetCastType(bool isGenericDefinition, string fullyQualifiedTypeName)
+    {
+        return isGenericDefinition ? "dynamic" : fullyQualifiedTypeName;
     }
 }

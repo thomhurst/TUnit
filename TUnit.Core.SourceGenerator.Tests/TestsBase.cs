@@ -104,9 +104,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
 
         await assertions(generatedFiles);
 
-        await Verify(generatedFiles)
-            .IgnoreMembers<TestMetadata>(x => x.TestFilePath)
-            .IgnoreMembers(typeof(FailedTestMetadata<>), "TestFilePath");
+        await Verify(generatedFiles).IgnoreMember("TestFilePath");
     }
 
     private static bool IsError(Diagnostic x)
