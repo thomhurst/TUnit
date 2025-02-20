@@ -65,7 +65,7 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 						Properties = [],
 					}),
 },
-					Body = (classInstance, context, cancellationToken) => ((dynamic)classInstance).Setup(),
+					Body = (classInstance, context, cancellationToken) => typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<>).GetMethod("Setup", []).Invoke(classInstance, []),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 

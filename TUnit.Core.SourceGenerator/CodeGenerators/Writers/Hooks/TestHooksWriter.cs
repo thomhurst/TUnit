@@ -72,18 +72,18 @@ public class TestHooksWriter : BaseHookWriter
             }
             else
             {
-                sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => ((typeof({model.FullyQualifiedTypeName}))classInstance).{model.MethodName}({GetArgs(model)}),");
+                sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => (({model.FullyQualifiedTypeName})classInstance).{model.MethodName}({GetArgs(model)}),");
             }
         }
         else
         {
             if (model.ClassType.IsGenericDefinition())
             {
-                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => await ((global::System.Threading.Tasks.Task) typeof({model.FullyQualifiedTypeName}).GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
+                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => typeof({model.FullyQualifiedTypeName}).GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
             }
             else
             {
-                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((typeof({model.FullyQualifiedTypeName}))classInstance).{model.MethodName}({GetArgs(model)})),");
+                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => (({model.FullyQualifiedTypeName})classInstance).{model.MethodName}({GetArgs(model)})),");
             }
         }
 
