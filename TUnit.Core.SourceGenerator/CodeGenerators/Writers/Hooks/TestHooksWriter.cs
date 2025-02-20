@@ -68,7 +68,7 @@ public class TestHooksWriter : BaseHookWriter
         {
             if (model.ClassType.IsGenericDefinition())
             {
-                sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => typeof({model.FullyQualifiedTypeName}).GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)}),");
+                sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => classInstance.GetType().GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)}),");
             }
             else
             {
@@ -79,7 +79,7 @@ public class TestHooksWriter : BaseHookWriter
         {
             if (model.ClassType.IsGenericDefinition())
             {
-                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => typeof({model.FullyQualifiedTypeName}).GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
+                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.GetType().GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
             }
             else
             {
