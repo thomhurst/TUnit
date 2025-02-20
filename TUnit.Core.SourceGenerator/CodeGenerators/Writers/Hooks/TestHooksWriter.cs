@@ -66,11 +66,25 @@ public class TestHooksWriter : BaseHookWriter
         
         if (model.IsVoid)
         {
-            sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => (({GetCastType(model.ClassType.IsGenericDefinition(), model.FullyQualifiedTypeName)})classInstance).{model.MethodName}({GetArgs(model)}),");
+            if (model.ClassType.IsGenericDefinition())
+            {
+                sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => typeof({model.FullyQualifiedTypeName}).GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)}),");
+            }
+            else
+            {
+                sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => ((typeof({model.FullyQualifiedTypeName}))classInstance).{model.MethodName}({GetArgs(model)}),");
+            }
         }
         else
         {
-            sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => (({GetCastType(model.ClassType.IsGenericDefinition(), model.FullyQualifiedTypeName)})classInstance).{model.MethodName}({GetArgs(model)})),");
+            if (model.ClassType.IsGenericDefinition())
+            {
+                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => await ((global::System.Threading.Tasks.Task) typeof({model.FullyQualifiedTypeName}).GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
+            }
+            else
+            {
+                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((typeof({model.FullyQualifiedTypeName}))classInstance).{model.MethodName}({GetArgs(model)})),");
+            }
         }
 
         sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
@@ -91,8 +105,13 @@ public class TestHooksWriter : BaseHookWriter
         sourceBuilder.WriteLine("},");
     }
 
-    private static string GetCastType(bool isGenericDefinition, string fullyQualifiedTypeName)
+    private static string GetArgsOrEmptyArray(HooksDataModel model)
     {
-        return isGenericDefinition ? "dynamic" : fullyQualifiedTypeName;
+        if (!model.ParameterTypes.Any())
+        {
+            return "[]";
+        }
+        
+        return GetArgs(model);
     }
 }

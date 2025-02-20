@@ -11,12 +11,12 @@ public sealed class ClassDataSourceAttribute<T> : DataSourceGeneratorAttribute<T
     {
         yield return () =>
         {
-            var item = ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId)
+            var item = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
                 .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (_, context) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestRegistered(
                     context.TestContext,
                     ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
                     Shared,
@@ -26,7 +26,7 @@ public sealed class ClassDataSourceAttribute<T> : DataSourceGeneratorAttribute<T
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestStart(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(
                     context,
                     ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
                     Shared,
@@ -36,12 +36,12 @@ public sealed class ClassDataSourceAttribute<T> : DataSourceGeneratorAttribute<T
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, _) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, item);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(Shared, Key, item);
             };
             
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, _) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, item);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(Shared, Key, item);
             };
             
             return item;

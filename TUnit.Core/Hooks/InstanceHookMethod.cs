@@ -43,7 +43,7 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
         if (Body != null)
         {
             HookExecutor.ExecuteSynchronousBeforeTestHook(MethodInfo, context,
-                () => Body.Invoke(context.TestDetails.ClassInstance!, context, cancellationToken)
+                () => Body.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
             );
             return true;
         }
@@ -54,7 +54,7 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     public Task ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteAsynchronousBeforeTestHook(MethodInfo, context,
-            () => AsyncBody!.Invoke(context.TestDetails.ClassInstance!, context, cancellationToken)
+            () => AsyncBody!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
         );
     }
 }
