@@ -57,19 +57,34 @@ public class TestHooksWriter : BaseHookWriter
             return;
         }
 
-        sourceBuilder.WriteLine($"new global::TUnit.Core.Hooks.InstanceHookMethod<{model.FullyQualifiedTypeName}>");
+        sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.InstanceHookMethod");
         sourceBuilder.WriteLine("{");
+        sourceBuilder.WriteLine($"ClassType = typeof({model.FullyQualifiedTypeName}),");
         sourceBuilder.WriteTabs();
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
         
         if (model.IsVoid)
         {
-            sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => classInstance.{model.MethodName}({GetArgs(model)}),");
+            if (model.ClassType.IsGenericDefinition())
+            {
+                sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => classInstance.GetType().GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)}),");
+            }
+            else
+            {
+                sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => (({model.FullyQualifiedTypeName})classInstance).{model.MethodName}({GetArgs(model)}),");
+            }
         }
         else
         {
-            sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.{model.MethodName}({GetArgs(model)})),");
+            if (model.ClassType.IsGenericDefinition())
+            {
+                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.GetType().GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
+            }
+            else
+            {
+                sourceBuilder.WriteLine($"AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => (({model.FullyQualifiedTypeName})classInstance).{model.MethodName}({GetArgs(model)})),");
+            }
         }
 
         sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
@@ -88,5 +103,15 @@ public class TestHooksWriter : BaseHookWriter
         AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
         
         sourceBuilder.WriteLine("},");
+    }
+
+    private static string GetArgsOrEmptyArray(HooksDataModel model)
+    {
+        if (!model.ParameterTypes.Any())
+        {
+            return "[]";
+        }
+        
+        return GetArgs(model);
     }
 }

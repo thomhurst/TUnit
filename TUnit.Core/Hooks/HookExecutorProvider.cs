@@ -4,7 +4,7 @@ namespace TUnit.Core.Hooks;
 
 internal static class HookExecutorProvider
 {
-    public static IHookExecutor GetHookExecutor<TClassType>(InstanceHookMethod<TClassType> instanceMethod, DiscoveredTest discoveredTest)
+    public static IHookExecutor GetHookExecutor(InstanceHookMethod instanceMethod, DiscoveredTest discoveredTest)
     {
         return discoveredTest.HookExecutor ?? instanceMethod.HookExecutor;
     }

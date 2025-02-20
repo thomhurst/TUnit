@@ -1,11 +1,12 @@
 using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
+internal partial class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
 {
     protected TestsBase()
     {
@@ -104,9 +105,14 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
 
         await assertions(generatedFiles);
 
-        await Verify(generatedFiles)
-            .IgnoreMembers<TestMetadata>(x => x.TestFilePath)
-            .IgnoreMembers(typeof(FailedTestMetadata<>), "TestFilePath");
+        var verifyTask = Verify(generatedFiles);
+
+        if (runTestOptions.VerifyConfigurator != null)
+        {
+            verifyTask = runTestOptions.VerifyConfigurator(verifyTask);
+        }
+
+        await verifyTask;
     }
 
     private static bool IsError(Diagnostic x)

@@ -22,10 +22,10 @@ public class AssertMultipleTests
         });
         
         var exception1 = (TUnitAssertionException)assertionException!.InnerExceptions[0];
-        var exception2 = (TUnitAssertionException)assertionException!.InnerExceptions[1];
-        var exception3 = (TUnitAssertionException)assertionException!.InnerExceptions[2];
-        var exception4 = (TUnitAssertionException)assertionException!.InnerExceptions[3];
-        var exception5 = (TUnitAssertionException)assertionException!.InnerExceptions[4];
+        var exception2 = (TUnitAssertionException)assertionException.InnerExceptions[1];
+        var exception3 = (TUnitAssertionException)assertionException.InnerExceptions[2];
+        var exception4 = (TUnitAssertionException)assertionException.InnerExceptions[3];
+        var exception5 = (TUnitAssertionException)assertionException.InnerExceptions[4];
 
         NUnitAssert.That(exception1.Message, Is.EqualTo("""
                                                         Expected 1 to be equal to 2
@@ -84,10 +84,10 @@ public class AssertMultipleTests
         });
 
         var exception1 = (TUnitAssertionException)assertionException!.InnerExceptions[0];
-        var exception2 = (TUnitAssertionException)assertionException!.InnerExceptions[1];
-        var exception3 = (TUnitAssertionException)assertionException!.InnerExceptions[2];
-        var exception4 = (TUnitAssertionException)assertionException!.InnerExceptions[3];
-        var exception5 = (TUnitAssertionException)assertionException!.InnerExceptions[4];
+        var exception2 = (TUnitAssertionException)assertionException.InnerExceptions[1];
+        var exception3 = (TUnitAssertionException)assertionException.InnerExceptions[2];
+        var exception4 = (TUnitAssertionException)assertionException.InnerExceptions[3];
+        var exception5 = (TUnitAssertionException)assertionException.InnerExceptions[4];
 
         NUnitAssert.That(exception1.Message, Is.EqualTo("""
                                                         Expected 1 to be equal to 2
@@ -163,10 +163,10 @@ public class AssertMultipleTests
         NUnitAssert.That(aggregateException!.InnerExceptions[0], Is.TypeOf<TUnitAssertionException>());
         NUnitAssert.That(aggregateException.InnerExceptions[1], Is.TypeOf<TUnitAssertionException>());
         NUnitAssert.That(aggregateException.InnerExceptions[2], Is.TypeOf<TUnitAssertionException>());
-        NUnitAssert.That(aggregateException!.InnerExceptions[3], Is.TypeOf<TUnitAssertionException>());
-        NUnitAssert.That(aggregateException!.InnerExceptions[4], Is.TypeOf<TUnitAssertionException>());
-        NUnitAssert.That(aggregateException!.InnerExceptions[5], Is.TypeOf<TUnitAssertionException>());
-        NUnitAssert.That(aggregateException!.InnerExceptions[6], Is.TypeOf<TUnitAssertionException>());
+        NUnitAssert.That(aggregateException.InnerExceptions[3], Is.TypeOf<TUnitAssertionException>());
+        NUnitAssert.That(aggregateException.InnerExceptions[4], Is.TypeOf<TUnitAssertionException>());
+        NUnitAssert.That(aggregateException.InnerExceptions[5], Is.TypeOf<TUnitAssertionException>());
+        NUnitAssert.That(aggregateException.InnerExceptions[6], Is.TypeOf<TUnitAssertionException>());
 
         var assertionException1 = (TUnitAssertionException)aggregateException.InnerExceptions[0];
         var assertionException2 = (TUnitAssertionException)aggregateException.InnerExceptions[1];
