@@ -27,7 +27,7 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
     {
         lock (Lock)
         {
-            return InnerDictionary.TryGetValue(key, out value);
+            return InnerDictionary.TryGetValue(key, out value!);
         }
     }
     
