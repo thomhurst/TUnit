@@ -72,7 +72,7 @@ public static class SourceExtensions
                 continue;
             }
             
-            assertionBuilder.Append(argumentExpression!);
+            assertionBuilder.Append(argumentExpression);
 
             if (index < argumentExpressions.Length - 1)
             {

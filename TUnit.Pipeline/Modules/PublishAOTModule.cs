@@ -20,7 +20,7 @@ public class PublishAOTModule : Module<CommandResult>
 
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        var testProject = context.Git().RootDirectory!.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
+        var testProject = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
 
         return await context.DotNet().Publish(new DotNetPublishOptions(testProject)
         {

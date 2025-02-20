@@ -57,10 +57,10 @@ public class TestHooksGenerator : IIncrementalGenerator
         
         var containingType = methodSymbol.ContainingType;
         IEnumerable<INamedTypeSymbol> classTypes;
-
+        
         if (containingType.IsGenericDefinition())
         {
-            classTypes = GenericTypeHelper.GetConstructedTypes(context.SemanticModel.Compilation, containingType);
+            classTypes = [containingType.ConstructUnboundGenericType(), ..GenericTypeHelper.GetConstructedTypes(context.SemanticModel.Compilation, containingType)];
         }
         else
         {
