@@ -143,16 +143,14 @@ This provides you base classes, similarly to Microsoft.Playwright.NUnit or Micro
 # Example test
 
 ```csharp
-    private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
-    private static readonly TimeOnly Noon = TimeOnly.FromTimeSpan(TimeSpan.FromHours(12));
-
     [Test]
-    public async Task IsMorning()
+    public async Task Create_User_Has_Expected_Creation_Time()
     {
-        var time = GetTime();
-
-        await Assert.That(time).IsAfterOrEqualTo(Midnight)
-            .And.IsBefore(Noon);
+        var user = await CreateUser();
+        
+        await Assert.That(user.CreatedAt)
+            .IsEqualTo(DateTime.Now)
+            .Within(TimeSpan.FromMinutes(1));
     }
 ```
 
