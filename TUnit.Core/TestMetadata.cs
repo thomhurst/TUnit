@@ -26,6 +26,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 			ReturnType = TestMethod.ReturnType,
 			TestFilePath = TestFilePath,
 			TestLineNumber = TestLineNumber,
+			DataAttributes = TestBuilderContext.DataAttributes.OfType<Attribute>().ToArray()
 		};
 
 		return testDetails;

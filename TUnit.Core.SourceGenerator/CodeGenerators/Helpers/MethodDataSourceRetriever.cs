@@ -67,7 +67,7 @@ public static class MethodDataSourceRetriever
     {
         if (methodDataAttribute.AttributeClass?.IsGenericType is true)
         {
-            return methodDataAttribute.AttributeClass.TypeArguments[0]!;
+            return methodDataAttribute.AttributeClass.TypeArguments[0];
         }
 
         if (methodDataAttribute.ConstructorArguments.Length is 2)

@@ -7,40 +7,11 @@ namespace TUnit.Core.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public record InstanceHookMethod<TClassType> : InstanceHookMethod, IExecutableHook<TestContext>
+public record InstanceHookMethod : IExecutableHook<TestContext>
 {
-    public override Type ClassType { get; } = typeof(TClassType);
-    public override Assembly Assembly { get; } = typeof(TClassType).Assembly;
-    
-    public Func<TClassType, TestContext, CancellationToken, Task>? AsyncBody { get; init; }
-    public Action<TClassType, TestContext, CancellationToken>? Body { get; init; }
-    
-    public override bool IsSynchronous => Body != null;
-    public bool Execute(TestContext context, CancellationToken cancellationToken)
-    {
-        if (Body != null)
-        {
-            HookExecutor.ExecuteSynchronousBeforeTestHook(MethodInfo, context,
-                () => Body.Invoke((TClassType)context.TestDetails.ClassInstance!, context, cancellationToken)
-            );
-            return true;
-        }
-
-        return false;
-    }
-
-    public Task ExecuteAsync(TestContext context, CancellationToken cancellationToken)
-    {
-        return HookExecutor.ExecuteAsynchronousBeforeTestHook(MethodInfo, context,
-            () => AsyncBody!.Invoke((TClassType)context.TestDetails.ClassInstance!, context, cancellationToken)
-        );
-    }
-}
-
-public abstract record InstanceHookMethod
-{
-    public abstract Type ClassType { get; }
-    public abstract Assembly Assembly { get; }
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
+    public required Type ClassType { get; init; }
+    public Assembly Assembly => ClassType.Assembly;
     public required SourceGeneratedMethodInformation MethodInfo { get; init; }
     
     [field: AllowNull, MaybeNull]
@@ -62,5 +33,28 @@ public abstract record InstanceHookMethod
     
     public required int Order { get; init; }
     
-    public abstract bool IsSynchronous { get; }
+    public Func<object, TestContext, CancellationToken, Task>? AsyncBody { get; init; }
+    public Action<object, TestContext, CancellationToken>? Body { get; init; }
+    
+    public bool IsSynchronous => Body != null;
+    
+    public bool Execute(TestContext context, CancellationToken cancellationToken)
+    {
+        if (Body != null)
+        {
+            HookExecutor.ExecuteSynchronousBeforeTestHook(MethodInfo, context,
+                () => Body.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
+            );
+            return true;
+        }
+
+        return false;
+    }
+
+    public Task ExecuteAsync(TestContext context, CancellationToken cancellationToken)
+    {
+        return HookExecutor.ExecuteAsynchronousBeforeTestHook(MethodInfo, context,
+            () => AsyncBody!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
+        );
+    }
 }

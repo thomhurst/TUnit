@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  
+
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <TargetFrameworks>net8.0;net9.0;net472</TargetFrameworks>
@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
@@ -20,36 +21,15 @@
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="Sourcy.Git" />
-    <PackageReference Include="TUnit.Assertions" />
     <PackageReference Include="Verify.NUnit" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\$(TargetFramework)\TUnit.TestProject.Library.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="CustomDisplayNameTests.*.txt">
-      <ParentFile>CustomDisplayNameTests</ParentFile>
-      <DependentUpon>CustomDisplayNameTests.cs</DependentUpon>
-    </None>
-    <None Update="Bugs\1539\BasicTests.Test.verified.txt">
-      <ParentFile>BasicTests</ParentFile>
-      <DependentUpon>BasicTests.cs</DependentUpon>
-    </None>
-    <None Update="ArgsAsArrayTests.Test.verified.txt">
-      <ParentFile>BasicTests</ParentFile>
-      <DependentUpon>ArgsAsArrayTests.cs</DependentUpon>
-    </None>
-    <None Update="ArgumentWithImplicitConverterTests.Test.verified.txt">
-      <ParentFile>BasicTests</ParentFile>
-      <DependentUpon>ArgumentWithImplicitConverterTests.cs</DependentUpon>
-    </None>
-    <None Update="AttributeTests.Test.verified.txt">
-      <ParentFile>BasicTests</ParentFile>
-      <DependentUpon>AttributeTests.cs</DependentUpon>
     </None>
   </ItemGroup>
 </Project>

@@ -22,6 +22,6 @@ public class ThrowsWithMessageMatchingAssertCondition<TActual, TException>(
             .FailIf(actualException is null,
                 "the exception is null")
             .OrFailIf(!match.Matches(actualException!.Message),
-                $"found \"{actualException!.Message.ShowNewLines().TruncateWithEllipsis(100)}\"");
+                $"found \"{actualException.Message.ShowNewLines().TruncateWithEllipsis(100)}\"");
     }
 }

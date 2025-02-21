@@ -35,7 +35,7 @@ public abstract record TestDetails
     internal readonly List<string> MutableCategories = [];
     public IReadOnlyList<string> Categories => MutableCategories;
     public required SourceGeneratedMethodInformation TestMethod { get; init; }
-    public abstract object? ClassInstance { get; }
+    public abstract object ClassInstance { get; }
     public required int CurrentRepeatAttempt { get; init; }
     public required int RepeatLimit { get; init; }
     public int RetryLimit { get; internal set; }
@@ -53,12 +53,11 @@ public abstract record TestDetails
     [JsonIgnore] public Attribute[] TestAttributes => TestMethod.Attributes;
 
     [JsonIgnore]
-    [field: AllowNull, MaybeNull]
-    public Attribute[] DataAttributes => field ??= Attributes.OfType<IDataAttribute>().OfType<Attribute>().ToArray();
+    public required Attribute[] DataAttributes { get; init; }
 
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
-    public Attribute[] Attributes => field ??= [..TestAttributes, ..ClassAttributes, ..AssemblyAttributes];
+    public Attribute[] Attributes => field ??= [..TestAttributes, ..ClassAttributes, ..AssemblyAttributes, ..DataAttributes];
 
     [JsonIgnore]
     internal Func<TestContext, Exception, int, Task<bool>>? RetryLogic { get; set; }

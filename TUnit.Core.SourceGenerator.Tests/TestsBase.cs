@@ -1,11 +1,12 @@
 using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
+internal partial class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
 {
     protected TestsBase()
     {
@@ -15,7 +16,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
     {
         return RunTest(inputFile, new RunTestOptions(), assertions);
     }
-    
+
     public async Task RunTest(string inputFile, RunTestOptions runTestOptions, Func<string[], Task> assertions)
     {
 #if NET
@@ -44,7 +45,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             ..runTestOptions.AdditionalFiles.Select(x => File.ReadAllText(x))
 #endif
         ];
-        
+
         // Create an instance of the source generator.
         var generator = new TGenerator();
 
@@ -58,9 +59,9 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
                 )
             );
         }
-        
+
         // To run generators, we can use an empty compilation.
-        
+
         var compilation = CSharpCompilation.Create(
                 GetType().Name,
                 [
@@ -70,10 +71,10 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             )
             .WithReferences(ReferencesHelper.References)
             .AddSyntaxTrees(additionalSources.Select(x => CSharpSyntaxTree.ParseText(x)));
-        
+
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
-        
+
         foreach (var error in diagnostics.Where(IsError))
         {
             throw new Exception
@@ -88,7 +89,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
                  """
             );
         }
-        
+
         // Retrieve all files in the compilation.
         var generatedFiles = newCompilation.SyntaxTrees
             .Select(t => t.GetText().ToString())
@@ -103,8 +104,15 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         }
 
         await assertions(generatedFiles);
-        
-        await Verify(generatedFiles);
+
+        var verifyTask = Verify(generatedFiles);
+
+        if (runTestOptions.VerifyConfigurator != null)
+        {
+            verifyTask = runTestOptions.VerifyConfigurator(verifyTask);
+        }
+
+        await verifyTask;
     }
 
     private static bool IsError(Diagnostic x)
@@ -114,11 +122,11 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             return true;
         }
 
-        if (x.Severity == DiagnosticSeverity.Warning &&  x.GetMessage().Contains("failed to generate source"))
+        if (x.Severity == DiagnosticSeverity.Warning && x.GetMessage().Contains("failed to generate source"))
         {
             return true;
         }
-        
+
         return false;
     }
 }
