@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TUnit.AspireStarter.ServiceDefaults\TUnit.AspireStarter.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\TUnit.Aspire.Starter.ServiceDefaults\TUnit.Aspire.Starter.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace TUnit.AspireStarter.TestProject.Models
+﻿namespace TUnit.Aspire.Starter.TestProject.Models
 {
     record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
     {

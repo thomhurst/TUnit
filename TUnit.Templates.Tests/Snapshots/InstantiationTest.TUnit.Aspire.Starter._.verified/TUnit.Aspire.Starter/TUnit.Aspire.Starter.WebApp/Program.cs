@@ -1,6 +1,6 @@
-using TUnit.AspireStarter.ServiceDefaults;
-using TUnit.AspireStarter.WebApp;
-using TUnit.AspireStarter.WebApp.Components;
+using TUnit.Aspire.Starter.ServiceDefaults;
+using TUnit.Aspire.Starter.WebApp;
+using TUnit.Aspire.Starter.WebApp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

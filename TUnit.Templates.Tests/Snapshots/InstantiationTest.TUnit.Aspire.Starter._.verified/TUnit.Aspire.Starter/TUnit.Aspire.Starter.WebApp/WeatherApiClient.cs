@@ -1,4 +1,4 @@
-namespace TUnit.AspireStarter.WebApp;
+namespace TUnit.Aspire.Starter.WebApp;
 
 public class WeatherApiClient(HttpClient httpClient)
 {

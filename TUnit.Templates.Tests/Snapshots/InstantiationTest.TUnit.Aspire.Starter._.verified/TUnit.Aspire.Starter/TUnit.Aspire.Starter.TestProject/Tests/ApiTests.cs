@@ -1,19 +1,18 @@
 ﻿using System.Text.Json;
-using TUnit.AspireStarter.TestProject.Models;
+using TUnit.Aspire.Starter.TestProject.Data;
+using TUnit.Aspire.Starter.TestProject.Models;
 
-namespace TUnit.AspireStarter.TestProject.Tests;
+namespace TUnit.Aspire.Starter.TestProject.Tests;
 
-public class ApiTests
+[ClassDataSource<HttpClientDataClass>]
+public class ApiTests(HttpClientDataClass httpClientData)
 {
     [Test]
     public async Task GetWeatherForecastReturnsOkStatusCode()
     {
+        // Arrange
+        var httpClient = httpClientData.HttpClient;
         // Act
-        var httpClient = (GlobalHooks.App ?? throw new NullReferenceException()).CreateHttpClient("apiservice");
-        if (GlobalHooks.NotificationService != null)
-        {
-            await GlobalHooks.NotificationService.WaitForResourceAsync("apiservice", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
-        }
         var response = await httpClient.GetAsync("/weatherforecast");
         // Assert
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
@@ -25,13 +24,9 @@ public class ApiTests
         [Matrix("Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching")] string summary
     )
     {
+        // Arrange
+        var httpClient = httpClientData.HttpClient;
         // Act
-        var httpClient = (GlobalHooks.App ?? throw new NullReferenceException()).CreateHttpClient("apiservice");
-        if (GlobalHooks.NotificationService != null)
-        {
-            await GlobalHooks.NotificationService.WaitForResourceAsync("apiservice", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
-        }
-
         var response = await httpClient.GetAsync("/weatherforecast");
         var content = await response.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<IEnumerable<WeatherForecast>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
