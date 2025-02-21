@@ -7,12 +7,14 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class TypedConstantParser
 {
-    public static string? GetTypedConstantValue(SemanticModel semanticModel,
-        ExpressionSyntax argumentExpression, ITypeSymbol? parameterType)
+    public static string GetTypedConstantValue(SemanticModel semanticModel,
+        (TypedConstant typedConstant, AttributeArgumentSyntax a) element, ITypeSymbol? parameterType)
     {
+        var argumentExpression = element.a.Expression;
+
         var newExpression = argumentExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
 
-        if (parameterType?.TypeKind == TypeKind.Enum && 
+        if (parameterType?.TypeKind == TypeKind.Enum &&
             (newExpression.IsKind(SyntaxKind.UnaryMinusExpression) || newExpression.IsKind(SyntaxKind.UnaryPlusExpression)))
         {
             return $"({parameterType.GloballyQualified()})({newExpression})";
@@ -21,6 +23,14 @@ public static class TypedConstantParser
         if (parameterType?.SpecialType == SpecialType.System_Decimal)
         {
             return $"{newExpression.ToString().TrimEnd('d')}m";
+        }
+
+        if (parameterType is not null
+            && element.typedConstant.Type is not null
+            && semanticModel.Compilation.ClassifyConversion(element.typedConstant.Type, parameterType) is
+            { IsExplicit: true, IsImplicit: false })
+        {
+            return $"({parameterType.GloballyQualified()})({newExpression})";
         }
 
         return newExpression.ToString();
@@ -45,5 +55,42 @@ public static class TypedConstantParser
         }
 
         return typedConstant.Type!.GloballyQualified();
+    }
+
+    public static string GetRawTypedConstantValue(TypedConstant typedConstant)
+    {
+        if (typedConstant.IsNull)
+        {
+            return "null";
+        }
+
+        switch (typedConstant.Kind)
+        {
+            case TypedConstantKind.Primitive:
+                return FormatPrimitive(typedConstant);
+            case TypedConstantKind.Enum:
+                return $"({typedConstant.Type!.GloballyQualified()})({typedConstant.Value})";
+            case TypedConstantKind.Type:
+                return $"typeof({((ITypeSymbol)typedConstant.Value!).GloballyQualified()})";
+            case TypedConstantKind.Array:
+                var elements = typedConstant.Values.Select(GetRawTypedConstantValue);
+                return $"new[] {{ {string.Join(", ", elements)} }}";
+            case TypedConstantKind.Error:
+                return "default";
+            default:
+                throw new NotSupportedException($"Unsupported TypedConstantKind: {typedConstant.Kind}");
+        }
+    }
+
+    private static string FormatPrimitive(TypedConstant typedConstant)
+    {
+        var value = typedConstant.Value;
+        return value switch
+        {
+            string s => $"\"{s}\"",
+            char c => $"'{c}'",
+            bool b => b ? "true" : "false",
+            _ => value?.ToString() ?? "null"
+        };
     }
 }

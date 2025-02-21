@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.Helpers;
 
-internal class StringDifference(string? actualValue, string? expectedValue, IEqualityComparer<string>? comparer = null)
+public class StringDifference(string? actualValue, string? expectedValue, IEqualityComparer<string>? comparer = null)
 {
     private const char ArrowDown = '\u2193';
     private const char ArrowUp = '\u2191';

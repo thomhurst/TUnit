@@ -1,13 +1,16 @@
 using TUnit.Assertions.AssertConditions.Connectors;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AndAssertionBuilder<TActual> : AssertionBuilder<TActual>, IAndAssertionBuilder
+public class AndAssertionBuilder : AssertionBuilder, IAndAssertionBuilder
 {
-    internal AndAssertionBuilder(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder.AssertionDataTask, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
+    internal AndAssertionBuilder(AssertionBuilder assertionBuilder) : base(((ISource)assertionBuilder).AssertionDataTask, (
+        (ISource)assertionBuilder).ActualExpression!, (
+        (ISource)assertionBuilder).ExpressionBuilder, ((ISource)assertionBuilder).Assertions)
     {
-        if (assertionBuilder.Assertions.Any(a => a is OrAssertCondition<TActual>))
+        if (((ISource)assertionBuilder).Assertions.Any(a => a is OrAssertCondition))
         {
             throw new MixedAndOrAssertionsException();
         }

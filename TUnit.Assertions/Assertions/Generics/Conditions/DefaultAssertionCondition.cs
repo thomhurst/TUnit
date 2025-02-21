@@ -9,7 +9,10 @@ public class DefaultExpectedValueAssertCondition<TActual> : BaseAssertCondition<
     protected override string GetExpectation()
         => $"to be {(_defaultValue is null ? "null" : _defaultValue)}";
 
-    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    protected override ValueTask<AssertionResult> GetResult(
+        TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
         => AssertionResult
             .FailIf(actualValue is not null && !actualValue.Equals(_defaultValue),
                 $"found {actualValue}");

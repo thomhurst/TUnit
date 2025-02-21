@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoFixture" />
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="OneOf" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="Humanizer" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+        <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+        <PackageReference Include="Polly" />
+        <PackageReference Include="Testcontainers.PostgreSql" />
+        <PackageReference Include="Testcontainers.Redis" />
+        <PackageReference Include="Vogen" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    </ItemGroup>
+    
+</Project>

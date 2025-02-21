@@ -8,7 +8,7 @@ public class EnumerableContainsExpectedValueAssertCondition<TActual, TInner>(
 {
     protected override string GetExpectation() => $"to contain {expected}";
 
-    protected override AssertionResult GetResult(TActual? actualValue, TInner? inner)
+    protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TInner? inner)
         => AssertionResult
             .FailIf(actualValue is null,
                 $"{ActualExpression ?? typeof(TActual).Name} is null")

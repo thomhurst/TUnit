@@ -1,4 +1,6 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 
 namespace TUnit.Core;
@@ -13,9 +15,15 @@ public abstract class Context : IContext
         ?? TestDiscoveryContext.Current as Context
         ?? BeforeTestDiscoveryContext.Current as Context
         ?? GlobalContext.Current;
+
+    private StringBuilder? _outputStringBuilder;
+    private StringBuilder? _errorOutputStringBuilder;
     
-    public StringWriter OutputWriter { get; } = new();
-    public StringWriter ErrorOutputWriter { get; } = new();
+    [field: AllowNull, MaybeNull]
+    public TextWriter OutputWriter => field ??= TextWriter.Synchronized(new StringWriter(_outputStringBuilder ??= new StringBuilder()));
+    
+    [field: AllowNull, MaybeNull]
+    public TextWriter ErrorOutputWriter => field ??= TextWriter.Synchronized(new StringWriter(_errorOutputStringBuilder ??= new StringBuilder()));
  
     internal Context()
     {
@@ -23,12 +31,12 @@ public abstract class Context : IContext
     
     public string GetStandardOutput()
     {
-        return OutputWriter.GetStringBuilder().ToString().Trim();
+        return _outputStringBuilder?.ToString().Trim() ?? string.Empty;
     }
     
     public string GetErrorOutput()
     {
-        return ErrorOutputWriter.GetStringBuilder().ToString().Trim();
+        return _errorOutputStringBuilder?.ToString().Trim() ?? string.Empty;
     }
     
     public TUnitLogger GetDefaultLogger()

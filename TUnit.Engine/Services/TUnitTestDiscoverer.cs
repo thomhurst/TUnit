@@ -32,13 +32,13 @@ internal class TUnitTestDiscoverer(
     {
         cancellationToken.ThrowIfCancellationRequested();
                 
-        var allDiscoveredTests = _cachedTests ??= await DiscoverTests();
+        var allDiscoveredTests = _cachedTests ??= await DiscoverTests(cancellationToken);
 
         var executionRequest = context.Request as TestExecutionRequest;
         
-        var filteredTests = testFilterService.FilterTests(executionRequest?.Filter, allDiscoveredTests).ToArray();
+        var filteredTests = testFilterService.FilterTests(executionRequest, allDiscoveredTests);
         
-        await logger.LogTraceAsync($"Found {filteredTests.Length} tests after filtering.");
+        await logger.LogTraceAsync($"Found {filteredTests.Count} tests after filtering.");
         
         var organisedTests = testGrouper.OrganiseTests(filteredTests);
         
@@ -60,7 +60,7 @@ internal class TUnitTestDiscoverer(
         }
     }
 
-    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests()
+    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(CancellationToken cancellationToken)
     {
         hooksCollector.CollectDiscoveryHooks();
         
@@ -83,7 +83,7 @@ internal class TUnitTestDiscoverer(
             }
         }
         
-        var allDiscoveredTests = testsConstructor.GetTests().ToArray();
+        var allDiscoveredTests = testsConstructor.GetTests(cancellationToken);
 
         var afterDiscoveryHooks = testDiscoveryHookOrchestrator.CollectAfterHooks();
         var afterContext = testDiscoveryHookOrchestrator.GetAfterContext(allDiscoveredTests);

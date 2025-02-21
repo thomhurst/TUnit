@@ -15,13 +15,13 @@ public class CustomPropertyTests
     {
         await Assert.That(GetDictionary()).ContainsKey("ClassProperty");
         await Assert.That(GetDictionary()).ContainsValue("ClassPropertyValue");
-        
+
         await Assert.That(GetDictionary()).ContainsKey("ClassProperty2");
         await Assert.That(GetDictionary()).ContainsValue("ClassPropertyValue2");
-        
+
         await Assert.That(GetDictionary()).ContainsKey("MethodProperty");
         await Assert.That(GetDictionary()).ContainsValue("MethodPropertyValue");
-        
+
         await Assert.That(GetDictionary()).ContainsKey("MethodProperty2");
         await Assert.That(GetDictionary()).ContainsValue("MethodPropertyValue2");
     }
@@ -33,6 +33,6 @@ public class CustomPropertyTests
     }
 
     public class ClassPropertyAttribute() : PropertyAttribute("ClassProperty2", "ClassPropertyValue2");
-    
+
     public class MethodPropertyAttribute() : PropertyAttribute("MethodProperty2", "MethodPropertyValue2");
 }

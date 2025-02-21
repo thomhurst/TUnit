@@ -10,29 +10,29 @@ public class GlobalTestHooks
     {
         testContext.ObjectBag.TryAdd("SetUpCustomTestNameProperty", testContext.TestDetails.TestName);
     }
-    
+
     [AfterEvery(Test)]
     public static async Task CleanUp(TestContext testContext)
     {
         testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.TestDetails.TestName);
         await Assert.That(testContext.Result).IsNotNull();
     }
-    
+
     [BeforeEvery(Class)]
     public static void ClassSetUp(ClassHookContext context)
     {
     }
-    
+
     [AfterEvery(Class)]
     public static void ClassCleanUp(ClassHookContext context)
     {
     }
-    
+
     [BeforeEvery(Assembly)]
     public static void AssemblySetUp(AssemblyHookContext context)
     {
     }
-    
+
     [AfterEvery(Assembly)]
     public static void AssemblyCleanUp(AssemblyHookContext context)
     {

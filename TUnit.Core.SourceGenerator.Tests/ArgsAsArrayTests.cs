@@ -10,6 +10,6 @@ internal class ArgsAsArrayTests : TestsBase<TestsGenerator>
             "ArgsAsArrayTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(4);
+            await Assert.That(generatedFiles.Length).IsEqualTo(5);
         });
 }

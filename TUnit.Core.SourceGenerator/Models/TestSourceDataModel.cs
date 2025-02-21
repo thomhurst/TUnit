@@ -1,4 +1,5 @@
-﻿using TUnit.Core.SourceGenerator.Extensions;
+﻿using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.Models;
@@ -22,35 +23,19 @@ public record TestSourceDataModel
 
     public override int GetHashCode()
     {
-        unchecked
-        {
-            var hashCode = FullyQualifiedTypeName.GetHashCode();
-            hashCode = (hashCode * 397) ^ MinimalTypeName.GetHashCode();
-            hashCode = (hashCode * 397) ^ MethodName.GetHashCode();
-            hashCode = (hashCode * 397) ^ ClassArguments.GetHashCode();
-            hashCode = (hashCode * 397) ^ MethodArguments.GetHashCode();
-            hashCode = (hashCode * 397) ^ MethodArgumentTypes.GetHashCode();
-            hashCode = (hashCode * 397) ^ MethodParameterNames.GetHashCode();
-            hashCode = (hashCode * 397) ^ MethodGenericTypeCount;
-            hashCode = (hashCode * 397) ^ TestId.GetHashCode();
-            hashCode = (hashCode * 397) ^ CurrentRepeatAttempt;
-            hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
-            hashCode = (hashCode * 397) ^ LineNumber;
-            hashCode = (hashCode * 397) ^ RepeatLimit;
-            return hashCode;
-        }
+        return TestId.GetHashCode();
     }
 
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
+    public required INamedTypeSymbol TestClass { get; init; }
+    public required IMethodSymbol TestMethod { get; init; }
     public required BaseContainer ClassArguments { get; init; }
     
     public required BaseContainer MethodArguments { get; init; }
     
-    public required string[] MethodParameterTypes { get; init; }
     public required string[] MethodArgumentTypes { get; init; }
-    public required string[] MethodParameterNames { get; init; }
     
     public required int MethodGenericTypeCount { get; init; }
     
@@ -61,18 +46,11 @@ public record TestSourceDataModel
     public required int LineNumber { get; init; }
 
     public required int RepeatLimit { get; init; }
-    public required string? TestExecutor { get; init; }
     
-    public required string[] TestAttributes { get; init; }
-    public required string[] ClassAttributes { get; init; }
-    public required string[] AssemblyAttributes { get; init; }
-    
-    public required string[] PropertyAttributeTypes { get; init; }
     public required ClassPropertiesContainer PropertyArguments { get; init; }
-    public required string AssemblyName { get; init; }
-    public required string Namespace { get; init; }
-
     public string ClassNameToGenerate => MinimalTypeName;
+    public required TestGenerationContext TestGenerationContext { get; init; }
+    public IDictionary<string, string>? GenericSubstitutions { get; set; }
 
     public string MethodVariablesWithCancellationToken()
     {

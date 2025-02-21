@@ -1,34 +1,35 @@
 ﻿// ReSharper disable UseCollectionExpression
 
 using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 
 public class MethodDataSourceDrivenTests
 {
     public const string MyString = "Hello World!";
-    
+
     [Test]
     [MethodDataSource(nameof(SomeMethod))]
     public void DataSource_Method(int value)
     {
         // Dummy method
     }
-    
+
     [Test]
     [MethodDataSource(nameof(SomeMethod))]
     public void DataSource_Method2(int value)
     {
         // Dummy method
     }
-    
+
     [Test]
     [MethodDataSource(nameof(SomeAction))]
     public void DataSource_Method_WithAction(Action action)
     {
         // Dummy method
     }
-    
+
     [Test]
     [MethodDataSource(nameof(SomeMethod), Arguments = [5])]
     [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { 5 })]
@@ -37,7 +38,7 @@ public class MethodDataSourceDrivenTests
         Console.WriteLine(value);
         // Dummy method
     }
-    
+
     [Test]
     [MethodDataSource(nameof(SomeMethod), Arguments = ["Hello World!", 5, true])]
     [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { "Hello World!", 6, true })]
@@ -48,13 +49,13 @@ public class MethodDataSourceDrivenTests
         Console.WriteLine(value);
         // Dummy method
     }
-    
+
     [Test]
     [MethodDataSource(nameof(MethodWithBaseReturn))]
     public void DataSource_WithBaseReturn(BaseValue value)
     {
     }
-    
+
     [Test]
     [MethodDataSource(nameof(EnumerableFuncArrayTestData))]
     public async Task EnumerableFuncArrayTest(string[] strings)
@@ -74,12 +75,12 @@ public class MethodDataSourceDrivenTests
     public static int SomeMethod() => 1;
 
     public static Func<Action> SomeAction() => () => () => { };
-    
+
     public static int SomeMethod(int input) => input * 2;
     public static int SomeMethod(string input1, int input2, bool input3) => input2 * 2;
 
     public static Func<BaseValue> MethodWithBaseReturn() => () => new ConcreteValue();
-    
+
     public abstract class BaseValue;
 
     public class ConcreteValue : BaseValue;

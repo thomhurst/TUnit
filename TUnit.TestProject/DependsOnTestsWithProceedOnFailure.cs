@@ -7,7 +7,7 @@ public class DependsOnTestsWithProceedOnFailure
     {
         throw new Exception();
     }
-    
+
     [Test, DependsOn(nameof(Test1), ProceedOnFailure = true)]
     public void Test2()
     {

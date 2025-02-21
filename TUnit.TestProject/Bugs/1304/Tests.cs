@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions;
+using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Extensions;
 using Vogen;
 
@@ -33,7 +34,7 @@ public class Tests
         await Assert.That(() => AccountId.Parse(input!)).ThrowsException();
     }
 
-// This test works fine
+    // This test works fine
     [Test]
     [Arguments("2c48c152-7cb7-4f51-8f01-704454f36e60")]
     [Arguments("00000000-0000-0000-0000-000000000000")]

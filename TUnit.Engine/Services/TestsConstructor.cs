@@ -2,23 +2,36 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
-internal class TestsConstructor(IExtension extension, TestMetadataCollector testMetadataCollector, IServiceProvider serviceProvider) : IDataProducer
+internal class TestsConstructor(IExtension extension, 
+    TestMetadataCollector testMetadataCollector,
+    DependencyCollector dependencyCollector, 
+    IServiceProvider serviceProvider) : IDataProducer
 {
-    public IEnumerable<DiscoveredTest> GetTests()
+    public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
     {
         var testMetadatas = testMetadataCollector.GetTests();
 
-        return testMetadatas.Select(ConstructTest);
+        var discoveredTests = testMetadatas.Select(ConstructTest).ToArray();
+
+        dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
+        
+        return discoveredTests;
     }
-    
+
     public DiscoveredTest ConstructTest(TestMetadata testMetadata)
     {
         var testDetails = testMetadata.BuildTestDetails();
 
         var testContext = new TestContext(serviceProvider, testDetails, testMetadata);
+
+        if (testMetadata.DiscoveryException is not null)
+        {
+            testContext.SetResult(testMetadata.DiscoveryException);
+        }
 
         RunOnTestDiscoveryAttributeHooks([..testDetails.DataAttributes, ..testDetails.Attributes], testContext);
 

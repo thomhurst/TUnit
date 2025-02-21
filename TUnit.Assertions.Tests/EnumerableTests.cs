@@ -1,4 +1,7 @@
-﻿namespace TUnit.Assertions.Tests;
+﻿using System.Collections;
+using TUnit.Assertions.AssertConditions.Throws;
+
+namespace TUnit.Assertions.Tests;
 
 public class EnumerableTests
 {
@@ -25,7 +28,7 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        await Assert.That(array).Contains((int x) => x == 1);
+        await Assert.That(array).Contains(x => x == 1);
     }
     
     [Test]
@@ -34,7 +37,7 @@ public class EnumerableTests
         int[] array = [1, 2, 3];
 
         await Assert.That(
-            async () => await Assert.That(array).Contains((int x) => x == 4)
+            async () => await Assert.That(array).Contains(x => x == 4)
         ).Throws<AssertionException>();
     }
     
@@ -43,7 +46,7 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        await Assert.That(array).ContainsOnly((int x) => x < 10);
+        await Assert.That(array).ContainsOnly(x => x < 10);
     }
     
     [Test]
@@ -52,7 +55,7 @@ public class EnumerableTests
         int[] array = [1, 2, 3];
 
         await Assert.That(
-            async () => await Assert.That(array).ContainsOnly((int x) => x < 3)
+            async () => await Assert.That(array).ContainsOnly(x => x < 3)
         ).Throws<AssertionException>();
     }
     
@@ -79,7 +82,7 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        await Assert.That(array).DoesNotContain((int x) => x > 10);
+        await Assert.That(array).DoesNotContain(x => x > 10);
     }
     
     [Test]
@@ -88,7 +91,73 @@ public class EnumerableTests
         int[] array = [1, 2, 3];
 
         await Assert.That(
-            async () => await Assert.That(array).DoesNotContain((int x) => x < 3)
+            async () => await Assert.That(array).DoesNotContain(x => x < 3)
         ).Throws<AssertionException>();
+    }
+    
+    [Test]
+    public async Task Enumerable_Ordered_Good()
+    {
+        int[] array = [1, 2, 3];
+
+        await Assert.That(array).IsInOrder();
+    }
+    
+    [Test]
+    public async Task Enumerable_Ordered_Bad()
+    {
+        int[] array = [1, 3, 2];
+
+        await Assert.That(
+            async () => await Assert.That(array).IsInOrder()
+        ).Throws<AssertionException>();
+    }
+    
+    [Test]
+    public async Task Enumerable_Ordered_Descending_Good()
+    {
+        int[] array = [3, 2, 1];
+
+        await Assert.That(array).IsInDescendingOrder();
+    }
+    
+    [Test]
+    public async Task Enumerable_Ordered_Descending_Bad()
+    {
+        int[] array = [3, 1, 2];
+
+        await Assert.That(
+            async () => await Assert.That(array).IsInDescendingOrder()
+        ).Throws<AssertionException>();
+    }
+    
+    [Test]
+    public async Task Untyped_Enumerable()
+    {
+        int[] array = [1, 2, 3];
+        
+        IEnumerable enumerable = array;
+
+        await Assert.That(enumerable).IsInOrder();
+    }
+    
+    [Test]
+    public async Task Untyped_Enumerable_EqualTo()
+    {
+        int[] array = [1, 2, 3];
+        
+        IEnumerable enumerable = array;
+
+        await Assert.That(enumerable).IsEqualTo(enumerable);
+    }
+    
+    [Test]
+    public async Task Untyped_Enumerable_ReferenceEqualTo()
+    {
+        int[] array = [1, 2, 3];
+        
+        IEnumerable enumerable = array;
+
+        await Assert.That(enumerable).IsSameReferenceAs(enumerable);
     }
 }

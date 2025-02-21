@@ -11,7 +11,7 @@ public class PropertyEqualsExpectedValueAssertCondition<TRootObjectType, TProper
         return $"{typeof(TRootObjectType).Name}.{ExpressionHelpers.GetName(propertySelector)} to be equal to {expected}";
     }
 
-    protected override AssertionResult GetResult(TRootObjectType? actualValue, TPropertyType? expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(TRootObjectType? actualValue, TPropertyType? expectedValue)
     {
         var propertyValue = GetPropertyValue(actualValue);
         return AssertionResult

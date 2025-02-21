@@ -35,7 +35,7 @@ public class GenericMethodTests
             expected: Enumerable.Range(0, 10).ToDictionary(x => x, x => x)
         );
     }
-    
+
     public static IEnumerable<Func<(IEnumerable<string> source,
         Func<string, string> keySelector,
         Func<string, string> seedSelector,

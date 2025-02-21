@@ -11,23 +11,23 @@ public class KeyedNotInParallelTests
     [After(Test)]
     public async Task TestOverlaps()
     {
-        TestDateTimeRanges.Add(new ConstraintDateTimeRange(TestContext.Current!.TestDetails.TestName, TestContext.Current!.TestStart!.Value.DateTime, TestContext.Current.Result!.End!.Value.DateTime));
+        TestDateTimeRanges.Add(new ConstraintDateTimeRange(TestContext.Current!.TestDetails.TestName, TestContext.Current.TestStart!.Value.DateTime, TestContext.Current.Result!.End!.Value.DateTime));
 
         await AssertNoOverlaps();
     }
-    
+
     [Test, NotInParallel("1"), Repeat(3)]
     public async Task NotInParallel_Test1()
     {
         await Task.Delay(500);
     }
-    
+
     [Test, NotInParallel("1"), Repeat(3)]
     public async Task NotInParallel_Test2()
     {
         await Task.Delay(500);
     }
-    
+
     [Test, NotInParallel("3"), Repeat(3)]
     public async Task NotInParallel_Test3()
     {

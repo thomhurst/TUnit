@@ -1,5 +1,4 @@
-using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -25,11 +24,18 @@ public abstract class BaseAssertCondition
     public string? OverriddenMessage { get; internal set; }
     
     public string? Subject { get; private set; }
+    
+    /// <summary>
+    /// Sets a timeout to wait for the assertion to complete.
+    /// </summary>
+    public virtual TimeSpan? WaitFor { get; protected set; }
 
     protected abstract string GetExpectation();
 
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";
+
+    internal abstract ValueTask<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata, string? actualExpression);
     
     internal void SetSubject(string? subject)
         => Subject = subject;
@@ -37,55 +43,33 @@ public abstract class BaseAssertCondition
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
-    internal InvokableAssertionBuilder<TActual> ChainedToWithoutExpression(AssertionBuilder<TActual> assertionBuilder)
-    {
-        return assertionBuilder.WithAssertion(this);
-    }
     
-    internal InvokableAssertionBuilder<TActual> ChainedTo(AssertionBuilder<TActual> assertionBuilder, string?[] argumentExpressions, [CallerMemberName] string caller = "")
+    internal ValueTask<AssertionResult> GetAssertionResult(AssertionData assertionData)
     {
-        if (string.IsNullOrEmpty(caller))
+        return GetAssertionResult(assertionData.Result, assertionData.Exception, new AssertionMetadata
         {
-            return assertionBuilder.WithAssertion(this);
-        }
+            StartTime = assertionData.Start,
+            EndTime = assertionData.End
+        }, assertionData.ActualExpression);
+    }
 
-        assertionBuilder.AppendExpression(caller)
-            .AppendRaw('(');
-
-        argumentExpressions = argumentExpressions.OfType<string>().ToArray();
+    internal override ValueTask<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata, string? actualExpression)
+    {
+        if (actualValue is not null && actualValue is not TActual)
+        {
+            throw new AssertionException($"Expected {typeof(TActual).Name} but received {actualValue.GetType().Name}");
+        } 
         
-        for (var index = 0; index < argumentExpressions.Length; index++)
-        {
-            var argumentExpression = argumentExpressions[index];
-
-            if (string.IsNullOrEmpty(argumentExpression))
-            {
-                continue;
-            }
-            
-            assertionBuilder.AppendRaw(argumentExpression!);
-
-            if (index < argumentExpressions.Length - 1)
-            {
-                assertionBuilder.AppendRaw(',');
-                assertionBuilder.AppendRaw(' ');
-            }
-        }
-
-        return assertionBuilder.AppendRaw(')')
-            .WithAssertion(this);
-    }
-    
-    internal Task<AssertionResult> Assert(AssertionData<TActual> assertionData)
-    {
-        return Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
+        return GetAssertionResult((TActual?) actualValue, exception, assertionMetadata, actualExpression);
     }
 
     internal TActual? ActualValue { get; private set; }
     internal Exception? Exception { get; private set; }
     public string? ActualExpression { get; private set; }
     
-    internal Task<AssertionResult> Assert(TActual? actualValue, Exception? exception, string? actualExpression)
+    public ValueTask<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata, string? actualExpression = null)
     {
         ActualValue = actualValue;
         Exception = exception;
@@ -96,8 +80,9 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
             AssertionScope.GetCurrentAssertionScope()?.RemoveException(exception);
         }
 
-        return GetResult(actualValue, exception);
+        return GetResult(actualValue, exception, assertionMetadata);
     }
 
-    protected abstract Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception);
+    protected abstract ValueTask<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata);
 }

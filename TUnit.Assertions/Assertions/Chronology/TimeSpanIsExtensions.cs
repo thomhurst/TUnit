@@ -11,7 +11,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static class TimeSpanIsExtensions
 {
-    public static TimeSpanEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "")
+    public static TimeSpanEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
         return new TimeSpanEqualToAssertionBuilderWrapper(
             valueSource.RegisterAssertion(new TimeSpanEqualsExpectedValueAssertCondition(expected),

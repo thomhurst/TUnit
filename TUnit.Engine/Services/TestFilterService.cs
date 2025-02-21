@@ -1,4 +1,6 @@
-﻿using Microsoft.Testing.Platform.Extensions.Messages;
+﻿#pragma warning disable TPEXP
+
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -9,20 +11,38 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 {
     private readonly ILogger<TestFilterService> _logger = loggerFactory.CreateLogger<TestFilterService>();
 
-    public IEnumerable<DiscoveredTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IEnumerable<DiscoveredTest> testNodes)
+    public IReadOnlyCollection<DiscoveredTest> FilterTests(TestExecutionRequest? testExecutionRequest, IReadOnlyCollection<DiscoveredTest> testNodes)
     {
-#pragma warning disable TPEXP
+        var testExecutionFilter = testExecutionRequest?.Filter;
+        
         if (testExecutionFilter is null or NopFilter)
-#pragma warning restore TPEXP
         {
             _logger.LogTrace("No test filter found.");
-            
+
+            if (testExecutionRequest is RunTestExecutionRequest)
+            {
+                return testNodes
+                    .Where(x => !x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
+                    .ToArray();
+            }
+
             return testNodes;
         }
         
         _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
-        return testNodes.Where(x => MatchesTest(testExecutionFilter, x));
+        var filteredTests = testNodes.Where(x => MatchesTest(testExecutionFilter, x)).ToArray();
+        
+        var testsWithExplicitAttributeCount = filteredTests.Count(x => x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any());
+        
+        if (testsWithExplicitAttributeCount > 0 && testsWithExplicitAttributeCount < filteredTests.Length)
+        {
+            return testNodes
+                .Where(x => !x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
+                .ToArray();
+        }
+
+        return filteredTests;
     }
 
     public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, DiscoveredTest discoveredTest)
@@ -43,12 +63,12 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 
     private string BuildPath(TestDetails testDetails)
     {
-        var assembly = testDetails.ClassType.Assembly.GetName();
+        var assembly = testDetails.TestClass.Type.Assembly.GetName();
 
-        var classTypeName = testDetails.ClassType.Name;
+        var classTypeName = testDetails.TestClass.Type.Name;
         
         return
-            $"/{assembly.Name ?? assembly.FullName}/{testDetails.ClassType.Namespace}/{classTypeName}/{testDetails.MethodInfo.Name}";
+            $"/{assembly.Name ?? assembly.FullName}/{testDetails.TestClass.Type.Namespace}/{classTypeName}/{testDetails.TestMethod.Name}";
     }
 
     private PropertyBag BuildPropertyBag(TestDetails testDetails)

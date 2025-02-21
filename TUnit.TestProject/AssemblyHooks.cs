@@ -6,14 +6,14 @@ namespace TUnit.TestProject;
 public abstract class AssemblyHooks
 {
     private static int _beforeHook1Calls;
-    
+
     [Before(Assembly)]
     public static void BeforeHook1()
     {
         _beforeHook1Calls++;
     }
-    
-    
+
+
 #if NET
     [Before(Assembly)]
     public static async Task BeforeHook2(AssemblyHookContext context)
@@ -21,7 +21,7 @@ public abstract class AssemblyHooks
         await Assert.That(context.TestCount).IsPositive();
     }
 #endif
-    
+
     [Before(Assembly), Timeout(30_000)]
     public static void BeforeHook3(CancellationToken cancellationToken)
     {
@@ -35,7 +35,7 @@ public abstract class AssemblyHooks
         await Assert.That(context.TestCount).IsPositive();
     }
 #endif
-    
+
     [After(Assembly)]
     public static async Task AfterHook1()
     {
@@ -49,7 +49,7 @@ public abstract class AssemblyHooks
         await Assert.That(context.TestCount).IsPositive();
     }
 #endif
-    
+
     [After(Assembly), Timeout(30_000)]
     public static void AfterHook3(CancellationToken cancellationToken)
     {

@@ -10,12 +10,12 @@ namespace TUnit.Assertions.Extensions;
 
 public static class StringIsNotExtensions
 {
-    public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return IsNotEqualTo(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "", [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = "")
+    public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new StringNotEqualsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);

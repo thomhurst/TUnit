@@ -1,13 +1,14 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
+using TUnit.Assertions.AssertConditions.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
 public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActual, TAssertionBuilder>
-    where TAssertionBuilder : AssertionBuilder<TActual>
+    where TAssertionBuilder : AssertionBuilder
 {
-    private readonly Stack<BaseAssertCondition<TActual>> _assertConditions = [];
+    private readonly Stack<BaseAssertCondition> _assertConditions = [];
     private InvokableAssertionBuilder<TActual>? _invokableAssertionBuilder;
 
     internal OrAssertionGroup(Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> initialAssert, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert, TAssertionBuilder assertionBuilder) : base(assertionBuilder)
@@ -29,28 +30,28 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
 
     private async Task<TActual?> GetResult()
     {
-        AssertionBuilder.Assertions.Clear();
+        ((ISource)AssertionBuilder).Assertions.Clear();
         
         foreach (var condition in _assertConditions)
         {
-            AssertionBuilder.Assertions.Push(condition);
+            ((ISource)AssertionBuilder).Assertions.Push(condition);
         }
         
-        return await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => x.Result);
+        return (TActual?) await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => x.Result);
     }
 
     private void Push(TAssertionBuilder assertionBuilder, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
     {
         if (_assertConditions.Count > 0)
         {
-            _assertConditions.Push(new OrAssertCondition<TActual>(_assertConditions.Pop(), assert(assertionBuilder).Assertions.Pop()));
+            _assertConditions.Push(new OrAssertCondition(_assertConditions.Pop(), ((ISource)assert(assertionBuilder)).Assertions.Pop()));
         }
         else
         {
             var invokableAssertionBuilder = assert(assertionBuilder);
             assertionBuilder.AppendConnector(ChainType.Or);
             _invokableAssertionBuilder = invokableAssertionBuilder;
-            _assertConditions.Push(_invokableAssertionBuilder.Assertions.Pop());
+            _assertConditions.Push(((ISource)_invokableAssertionBuilder).Assertions.Pop());
         }
     }
 }

@@ -7,7 +7,7 @@ public static class GlobalSetUpCleanUp
     {
         // Dummy method
     }
-    
+
     [Before(Assembly)]
     public static void BlahSetUp2()
     {

@@ -1,11 +1,11 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Connectors;
 
-internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
+internal class OrAssertCondition : BaseAssertCondition
 {
-    private readonly BaseAssertCondition<TActual> _condition1;
-    private readonly BaseAssertCondition<TActual> _condition2;
+    private readonly BaseAssertCondition _condition1;
+    private readonly BaseAssertCondition _condition2;
 
-    public OrAssertCondition(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2)
+    public OrAssertCondition(BaseAssertCondition condition1, BaseAssertCondition condition2)
     {
         Verify.ArgNotNull(condition1);
         Verify.ArgNotNull(condition2);
@@ -21,10 +21,10 @@ internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
     internal override string GetExpectationWithReason()
         => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} or {_condition2.GetExpectationWithReason()}";
 
-    protected override async Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    internal sealed override async ValueTask<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata, string? actualExpression)
     {
-        return (await _condition1.Assert(actualValue, exception, ActualExpression))
-            .Or(await _condition2.Assert(actualValue, exception, ActualExpression));
+        return (await _condition1.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression))
+            .Or(await _condition2.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression));
     }
 
     internal override void SetBecauseReason(BecauseReason becauseReason)

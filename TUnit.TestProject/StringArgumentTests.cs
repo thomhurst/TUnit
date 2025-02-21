@@ -20,7 +20,7 @@ public class StringArgumentTests
     {
         // Dummy method
     }
-    
+
     [Test]
     [Arguments("")]
     [Arguments(@"\")]

@@ -8,7 +8,7 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
 {
     protected override string GetExpectation() => $" to be not equivalent to {(expected != null ? string.Join(",", expected) : null)}";
 
-    protected override AssertionResult GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
         if (actualValue is null != expectedValue is null)
         {

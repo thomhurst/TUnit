@@ -10,13 +10,13 @@ public class Tests
     public void Test()
     {
     }
-    
+
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
     public class AttributeWithPositionalArgs : Attribute
     {
         public AttributeWithPositionalArgs(int one = 1, string two = "2", bool three = true)
         {
-            
+
         }
     }
 }

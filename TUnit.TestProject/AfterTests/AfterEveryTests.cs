@@ -7,7 +7,7 @@ public class GlobalBase1
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task AfterEach1()
     {
@@ -22,7 +22,7 @@ public class GlobalBase2 : GlobalBase1
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task AfterEach2()
     {
@@ -37,7 +37,7 @@ public class GlobalBase3 : GlobalBase2
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task AfterEach3()
     {
@@ -52,43 +52,43 @@ public class GlobalCleanUpTests : GlobalBase3
     {
         await Task.CompletedTask;
     }
-    
+
     [AfterEvery(Test)]
     public static async Task AfterAllCleanUp(TestContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
-        
+
     [AfterEvery(Test)]
     public static async Task AfterAllCleanUpWithContext(TestContext context)
     {
         await Task.CompletedTask;
     }
-    
+
     [AfterEvery(Test)]
     public static async Task AfterAllCleanUpWithContext(TestContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task CleanUp()
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test), Timeout(30_000)]
     public async Task CleanUp(CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task CleanUpWithContext(TestContext testContext)
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test), Timeout(30_000)]
     public async Task CleanUpWithContext(TestContext testContext, CancellationToken cancellationToken)
     {

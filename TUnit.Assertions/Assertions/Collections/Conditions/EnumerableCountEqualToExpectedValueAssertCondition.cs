@@ -2,24 +2,23 @@
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableCountEqualToExpectedValueAssertCondition<TActual>(int expected)
-    : ExpectedValueAssertCondition<TActual, int>(expected)
-    where TActual : IEnumerable
+public class EnumerableCountEqualToExpectedValueAssertCondition<TInner>(int expected)
+    : ExpectedValueAssertCondition<IEnumerable<TInner>, int>(expected)
 {
     protected override string GetExpectation() => $"to have a count of {expected}";
 
-    protected override AssertionResult GetResult(TActual? actualValue, int count)
+    protected override ValueTask<AssertionResult> GetResult(IEnumerable<TInner>? actualValue, int count)
     {
         var actualCount = GetCount(actualValue);
 
         return AssertionResult
             .FailIf(actualValue is null,
-                $"{ActualExpression ?? typeof(TActual).Name} is null")
+                $"{ActualExpression ?? typeof(IEnumerable<TInner>).Name} is null")
             .OrFailIf(actualCount != count,
                 $"it was {actualCount} instead");
     }
 
-    private int GetCount(TActual? actualValue)
+    private int GetCount(IEnumerable<TInner>? actualValue)
     {
         if (actualValue is ICollection collection)
         {

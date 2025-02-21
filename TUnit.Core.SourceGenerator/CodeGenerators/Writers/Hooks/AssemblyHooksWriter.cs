@@ -16,16 +16,18 @@ public static class AssemblyHooksWriter
         
         if (model.HookLocationType == HookLocationType.Before)
         {
-            sourceBuilder.WriteLine("new BeforeAssemblyHookMethod");
+            sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod");
         }
         else
         {
-            sourceBuilder.WriteLine("new AfterAssemblyHookMethod");
+            sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.AfterAssemblyHookMethod");
         }
 
         sourceBuilder.WriteLine("{ ");
-        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
-        
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("MethodInfo = ");
+        SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
+
         if (model.IsVoid)
         {
             sourceBuilder.WriteLine($"Body = (context, cancellationToken) => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)}),");
@@ -39,12 +41,19 @@ public static class AssemblyHooksWriter
         sourceBuilder.WriteLine($"Order = {model.Order},");
         sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
         sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
-        sourceBuilder.WriteLine(
-            $"MethodAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.GetAttributes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
-        sourceBuilder.WriteLine(
-            $"ClassAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
-        sourceBuilder.WriteLine(
-            $"AssemblyAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
+        
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("MethodAttributes = ");
+        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.GetAttributes().ExcludingSystemAttributes());
+        
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("ClassAttributes = ");
+        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes());
+        
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("AssemblyAttributes = ");
+        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
+        
         sourceBuilder.WriteLine("},");
     }
     

@@ -8,57 +8,125 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public class AttributeWriter
 {
-    public static string[] WriteAttributes(GeneratorAttributeSyntaxContext context, ImmutableArray<AttributeData> attributeDatas)
+    public static void WriteAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        ImmutableArray<AttributeData> attributeDatas)
     {
-        return attributeDatas
-            .Where(x => x.AttributeClass?.ContainingAssembly?.Name != "System.Runtime")
-            .Select(x => WriteAttribute(context, x))
-            .Where(x => !string.IsNullOrEmpty(x))
-            .ToArray();
-    }
-
-    public static string WriteAttribute(GeneratorAttributeSyntaxContext context, AttributeData attributeData)
-    {
-        if (attributeData.ApplicationSyntaxReference is null
-            || attributeData.AttributeClass?.ContainingAssembly?.Name == "System.Runtime")
+        var dataAttributeInterface =
+            context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute
+                .WithoutGlobalPrefix);
+        
+        attributeDatas = attributeDatas.RemoveAll(x => x.AttributeClass?.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataAttributeInterface)) == true);
+        
+        if (attributeDatas.Length == 0)
         {
-            return string.Empty;
+            sourceCodeWriter.Write("[],");
+            sourceCodeWriter.WriteLine();
+            return;
         }
 
-        var attributeSyntax = attributeData.ApplicationSyntaxReference.GetSyntax();
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine("[");
+        for (var index = 0; index < attributeDatas.Length; index++)
+        {
+            sourceCodeWriter.WriteTabs();
+            var attributeData = attributeDatas[index];
 
-        var constructorArgumentSyntaxes = attributeSyntax.DescendantNodes()
-            .OfType<AttributeArgumentSyntax>()
-            .Where(x => x.NameEquals is null);
-        
-        var constructorArguments = attributeData.ConstructorArguments
-            .Select((constant, index) =>
+            if (attributeData.ApplicationSyntaxReference is null)
             {
-                var elementAtOrDefault = constructorArgumentSyntaxes.ElementAtOrDefault(index);
-                return new
-                {
-                    Syntax = elementAtOrDefault,
-                    Constant = constant,
-                    Name = elementAtOrDefault?.NameColon?.ToString()
-                };
-            })
-            .Where(x => x.Syntax != null)
-            .Select(x =>
-                $"{x.Name}{TypedConstantParser.GetTypedConstantValue(context.SemanticModel, x.Syntax!.Expression, x.Constant.Type)}");
+                continue;
+            }
 
-        var namedArgSyntaxes = attributeSyntax.DescendantNodes()
-            .OfType<AttributeArgumentSyntax>()
-            .Where(x => x.NameEquals is not null)
-            .ToArray();
+            WriteAttribute(sourceCodeWriter, context, attributeData);
 
-        var namedArguments = attributeData.NamedArguments.Select(x =>
-            $"{x.Key} = {TypedConstantParser.GetTypedConstantValue(context.SemanticModel, namedArgSyntaxes.First(stx => stx.NameEquals?.Name.Identifier.ValueText == x.Key).Expression, x.Value.Type)},");
+            if (index != attributeDatas.Length - 1)
+            {
+                sourceCodeWriter.Write(",");
+            }
 
-        return $$"""
-                 new {{attributeData.AttributeClass!.GloballyQualified()}}({{string.Join(", ", constructorArguments)}})
-                 {
-                     {{string.Join(" ", namedArguments)}}
-                 }
-                 """;
+            sourceCodeWriter.WriteLine();
+        }
+        sourceCodeWriter.WriteLine("],");
+    }
+
+    public static void WriteAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        AttributeData attributeData)
+    {
+        var syntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
+
+        if (syntax is null)
+        {
+            WriteAttributeWithoutSyntax(sourceCodeWriter, context, attributeData);
+            return;
+        }
+
+        var arguments = syntax.ChildNodes()
+            .OfType<AttributeArgumentListSyntax>()
+            .FirstOrDefault()
+            ?.Arguments ?? [];
+
+        var properties = arguments.Where(x => x.NameEquals != null);
+
+        var constructorArgs = arguments.Where(x => x.NameEquals == null);
+
+        var attributeName = attributeData.AttributeClass!.GloballyQualified();
+
+        var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(context, x)));
+
+        var formattedProperties = properties.Select(x => FormatProperty(context, x)).ToArray();
+
+        sourceCodeWriter.Write($"new {attributeName}({formattedConstructorArgs})");
+
+        if (formattedProperties.Length == 0)
+        {
+            return;
+        }
+
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine("{");
+        foreach (var property in formattedProperties)
+        {
+            sourceCodeWriter.WriteLine($"{property},");
+        }
+
+        sourceCodeWriter.Write("}");
+    }
+
+    private static string FormatConstructorArgument(GeneratorAttributeSyntaxContext context, AttributeArgumentSyntax attributeArgumentSyntax)
+    {
+        if (attributeArgumentSyntax.NameColon is not null)
+        {
+            return $"{attributeArgumentSyntax.NameColon!.Name}: {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString()}";
+        }
+
+        return attributeArgumentSyntax.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString();
+    }
+
+    private static string FormatProperty(GeneratorAttributeSyntaxContext context, AttributeArgumentSyntax attributeArgumentSyntax)
+    {
+        return $"{attributeArgumentSyntax.NameEquals!.Name} = {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString()}";
+    }
+
+    public static void WriteAttributeWithoutSyntax(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    AttributeData attributeData)
+    {
+        var attributeName = attributeData.AttributeClass!.GloballyQualified();
+
+        var constructorArgs = attributeData.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
+        var formattedConstructorArgs = string.Join(", ", constructorArgs);
+
+        var namedArgs = attributeData.NamedArguments.Select(arg => $"{arg.Key} = {TypedConstantParser.GetRawTypedConstantValue(arg.Value)}");
+        var formattedNamedArgs = string.Join(", ", namedArgs);
+
+        sourceCodeWriter.Write($"new {attributeName}({formattedConstructorArgs})");
+
+        if (string.IsNullOrEmpty(formattedNamedArgs))
+        {
+            return;
+        }
+
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.WriteLine($"{formattedNamedArgs}");
+        sourceCodeWriter.Write("}");
     }
 }

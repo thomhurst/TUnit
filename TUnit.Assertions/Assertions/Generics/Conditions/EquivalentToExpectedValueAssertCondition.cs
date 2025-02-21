@@ -7,14 +7,18 @@ using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
-public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TExpected>(TExpected expected, string expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
+public class EquivalentToExpectedValueAssertCondition<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+    TActual,  
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+    TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
     private readonly List<string> _ignoredMembers = [];
 
     protected override string GetExpectation()
-        => $"to be equivalent to {expectedExpression}";
+        => $"to be equivalent to {expectedExpression ?? "null"}";
 
-    protected override AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
     {
         if (actualValue is null && ExpectedValue is null)
         {
@@ -58,7 +62,10 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         }
         else if (actualValue is IEnumerable enumerable && ExpectedValue is IEnumerable enumerable2)
         {
-            isEqual = enumerable.Cast<object>().SequenceEqual(enumerable2.Cast<object>());
+            IEnumerable<object> castedEnumerable = [..enumerable];
+            IEnumerable<object> castedEnumerable2 = [..enumerable2];
+            
+            isEqual = castedEnumerable.SequenceEqual(castedEnumerable2);
         }
         if (isEqual != null)
         {

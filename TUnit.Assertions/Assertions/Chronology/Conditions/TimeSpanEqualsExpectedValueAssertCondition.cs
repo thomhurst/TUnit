@@ -14,7 +14,7 @@ public class TimeSpanEqualsExpectedValueAssertCondition(TimeSpan expected) : Exp
         return $"to be equal to {expected} +-{_tolerance}";
     }
 
-    protected override AssertionResult GetResult(TimeSpan actualValue, TimeSpan expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(TimeSpan actualValue, TimeSpan expectedValue)
     {
         if (_tolerance is not null)
         {

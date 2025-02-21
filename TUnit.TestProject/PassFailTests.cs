@@ -8,7 +8,7 @@ public class PassFailTests
     {
         // Dummy method
     }
-    
+
     [Test]
     [Arguments(1)]
     [Arguments(2)]
@@ -35,8 +35,9 @@ public class PassFailTests
     {
         // Dummy method
     }
-    
+
     [Test]
+    [MatrixDataSource]
     [Category("Pass")]
     public void Pass4(
         [Matrix(1, 2, 3, 4, 5)] int value,
@@ -45,14 +46,14 @@ public class PassFailTests
     {
         // Dummy method
     }
-    
+
     [Test]
     [Category("Fail")]
     public void Fail1()
     {
         throw new Exception();
     }
-    
+
     [Test]
     [Arguments(1)]
     [Arguments(2)]
@@ -79,8 +80,9 @@ public class PassFailTests
     {
         throw new Exception();
     }
-    
+
     [Test]
+    [MatrixDataSource]
     [Category("Fail")]
     public void Fail4(
         [Matrix(1, 2, 3, 4, 5)] int value,
@@ -89,37 +91,37 @@ public class PassFailTests
     {
         throw new Exception();
     }
-    
+
     public static int Data1() => 1;
     public static int Data2() => 1;
     public static int Data3() => 1;
     public static int Data4() => 1;
     public static int Data5() => 1;
-    
+
     public static IEnumerable<int> EnumerableData1()
     {
         yield return 1;
         yield return 2;
         yield return 3;
         yield return 4;
-        yield return 5; 
+        yield return 5;
     }
-    
+
     public static IEnumerable<int> EnumerableData2()
     {
         yield return 6;
         yield return 7;
         yield return 8;
         yield return 9;
-        yield return 10; 
+        yield return 10;
     }
-    
+
     public static IEnumerable<int> EnumerableData3()
     {
         yield return 11;
         yield return 12;
         yield return 13;
         yield return 14;
-        yield return 15; 
+        yield return 15;
     }
 }

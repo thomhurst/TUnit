@@ -1,11 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <IsLibraryPackage>true</IsLibraryPackage>
-      <LangVersion>preview</LangVersion>
+        <IsLibraryPackage>true</IsLibraryPackage>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="TUnit.Engine" />
+    </ItemGroup>
+
+    <ItemGroup>
         <TfmSpecificPackageFile Include="TUnit.Core.props">
             <Pack>true</Pack>
             <PackagePath>$(BuildTransitivePath)</PackagePath>
@@ -27,13 +31,24 @@
         </TfmSpecificPackageFile>
     </ItemGroup>
     <ItemGroup>
-        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
-        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
 
-        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
-        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Remove="Backport.System.Threading.Lock" />
+        <PackageReference Remove="Backport.System.Threading.Lock" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="Microsoft.CSharp" />
     </ItemGroup>
 </Project>

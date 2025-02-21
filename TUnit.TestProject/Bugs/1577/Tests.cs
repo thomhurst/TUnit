@@ -12,7 +12,7 @@ public partial class Tests
     public partial record MyRecordType2(IReadOnlyCollection<string> SomeCollection);
     public partial record MyRecordType3(IReadOnlyList<string> SomeList);
     public partial record MyRecordType4(IReadOnlyDictionary<string, int> SomeDictionary);
-    
+
     [Test]
     public async Task MyRecordType_SerializesProperly()
     {
@@ -48,10 +48,10 @@ public partial class Tests
 
     private T RoundTripSerialize<T>(T original)
     {
-        var jsonTypeInfo = (JsonTypeInfo<T>) SourceGenerationContext.Default.GetTypeInfo(original!.GetType())!;
+        var jsonTypeInfo = (JsonTypeInfo<T>)SourceGenerationContext.Default.GetTypeInfo(original!.GetType())!;
         return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(original, jsonTypeInfo), jsonTypeInfo)!;
     }
-    
+
     [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(MyRecordType))]
     [JsonSerializable(typeof(MyRecordType2))]

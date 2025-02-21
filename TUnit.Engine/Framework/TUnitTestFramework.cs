@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Logging;
 
@@ -26,6 +27,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _frameworkServiceProvider = frameworkServiceProvider;
         _capabilities = capabilities;
         _filterReceivers = filterReceivers;
+
+        TestContext.Configuration = new ConfigurationAdapter(frameworkServiceProvider.GetConfiguration());
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();

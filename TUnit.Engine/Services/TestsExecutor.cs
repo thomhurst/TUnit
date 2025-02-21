@@ -1,4 +1,5 @@
-﻿using EnumerableAsyncProcessor.Extensions;
+﻿using System.Collections.Concurrent;
+using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
@@ -83,10 +84,10 @@ internal class TestsExecutor
             .ProcessInParallel(_maximumParallelTests);
     }
 
-    private async Task ProcessParallelGroups(IDictionary<string, List<DiscoveredTest>> groups,
+    private async Task ProcessParallelGroups(ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>> groups,
         ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
-        foreach (var (_, value) in groups)
+        foreach (var (_, value) in groups.OrderBy(x => x.Key.Order))
         {
             await ProcessParallelTests(value, filter, context);
         }

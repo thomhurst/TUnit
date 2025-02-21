@@ -17,77 +17,96 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new Tests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.Bugs._1603.Tests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1603.Tests), "Casted_Integer_To_Short_Converts", 0, [typeof(short)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-			short methodArg = (short)-123;
-
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1603.Tests>(() => 
-			new global::TUnit.TestProject.Bugs._1603.Tests()
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Casted_Integer_To_Short_Converts(short):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Casted_Integer_To_Short_Converts(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 8,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute((short)-123)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
+				Name = "Casted_Integer_To_Short_Converts",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.ArgumentsAttribute((short)-123)
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<short>
+					{
+						Name = "value",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1603.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1603", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "Tests1603",
+						Attributes = [],
+					}),
+					Name = "Tests",
+					Namespace = "TUnit.TestProject.Bugs._1603",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+
+				short methodArg = (short)-123;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1603.Tests>(() => 
+				new global::TUnit.TestProject.Bugs._1603.Tests()
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
+				{
+					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Casted_Integer_To_Short_Converts(short):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArg],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Casted_Integer_To_Short_Converts(methodArg)),
+					TestFilePath = @"",
+					TestLineNumber = 8,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Casted_Integer_To_Short_Converts(short):0",
-				TestClass = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1603.Tests), "Casted_Integer_To_Short_Converts", 0, [typeof(short)]).ReturnType,
-				ParameterTypeFullNames = [typeof(short)],
-				TestName = "Casted_Integer_To_Short_Converts",
-				TestFilePath = @"",
-				TestLineNumber = 8,
-				Exception = exception,
-			});
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
+				{
+					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Casted_Integer_To_Short_Converts(short):0",
+					MethodName = $"Casted_Integer_To_Short_Converts",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Casted_Integer_To_Short_Converts failed to initialize", exception),
+					TestFilePath = @"",
+					TestLineNumber = 8,
+				});
+			}
+			return nodes;
 		}
-		return nodes;
 	}
-}
 
   
 // <auto-generated/>
@@ -108,76 +127,95 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new Tests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
+	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.Bugs._1603.Tests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1603.Tests), "Integer_To_Short_Converts", 0, [typeof(short)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-			short methodArg = -123;
-
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1603.Tests>(() => 
-			new global::TUnit.TestProject.Bugs._1603.Tests()
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Integer_To_Short_Converts(short):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Integer_To_Short_Converts(methodArg)),
-				TestFilePath = @"",
-				TestLineNumber = 15,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(-123)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
+				Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
+				Name = "Integer_To_Short_Converts",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+					new global::TUnit.Core.ArgumentsAttribute(-123)
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<short>
+					{
+						Name = "value",
+						Attributes = [],
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1603.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1603", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "Tests1603",
+						Attributes = [],
+					}),
+					Name = "Tests",
+					Namespace = "TUnit.TestProject.Bugs._1603",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+};
+
+				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+
+				short methodArg = (short)(-123);
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1603.Tests>(() => 
+				new global::TUnit.TestProject.Bugs._1603.Tests()
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
+				{
+					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Integer_To_Short_Converts(short):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArg],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Integer_To_Short_Converts(methodArg)),
+					TestFilePath = @"",
+					TestLineNumber = 15,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+			catch (global::System.Exception exception)
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Integer_To_Short_Converts(short):0",
-				TestClass = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1603.Tests), "Integer_To_Short_Converts", 0, [typeof(short)]).ReturnType,
-				ParameterTypeFullNames = [typeof(short)],
-				TestName = "Integer_To_Short_Converts",
-				TestFilePath = @"",
-				TestLineNumber = 15,
-				Exception = exception,
-			});
+				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
+				{
+					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1603.Tests.Integer_To_Short_Converts(short):0",
+					MethodName = $"Integer_To_Short_Converts",
+					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Integer_To_Short_Converts failed to initialize", exception),
+					TestFilePath = @"",
+					TestLineNumber = 15,
+				});
+			}
+			return nodes;
 		}
-		return nodes;
 	}
-}
 
 ]

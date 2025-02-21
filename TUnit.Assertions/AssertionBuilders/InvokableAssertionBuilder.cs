@@ -1,20 +1,26 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 public class InvokableAssertionBuilder<TActual> : 
-    AssertionBuilder<TActual>, IInvokableAssertionBuilder 
+    AssertionBuilder, IInvokableAssertionBuilder 
 {
-    internal InvokableAssertionBuilder(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder.AssertionDataTask, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
+    private readonly ISource _source;
+
+    internal InvokableAssertionBuilder(ISource source) : base(source.AssertionDataTask, source.ActualExpression!,
+        source.ExpressionBuilder, source.Assertions)
     {
-        if (assertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
+        _source = source;
+        
+        if (source is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
         {
             AwaitedAssertionData = invokableAssertionBuilder.AwaitedAssertionData;
         }
     }
 
-    internal async Task<T> ProcessAssertionsAsync<T>(Func<AssertionData<TActual>, T> mapper)
+    internal async Task<T> ProcessAssertionsAsync<T>(Func<AssertionData, T> mapper)
     {
         var assertionData = await ProcessAssertionsAsync();
         return mapper(assertionData);
@@ -28,15 +34,17 @@ public class InvokableAssertionBuilder<TActual> :
         return Results;
     }
 
-    string? IInvokableAssertionBuilder.GetExpression()
+    string IInvokableAssertionBuilder.GetExpression()
     {
-        var expression = ExpressionBuilder?.ToString();
+        var expression = _source.ExpressionBuilder.ToString();
 
-        if (expression?.Length < 100)
+        if (expression.Length < 100)
         {
             return expression;
         }
         
-        return $"{expression?[..100]}...";
+        return $"{expression[..100]}...";
     }
+
+    protected internal Stack<BaseAssertCondition> Assertions => _source.Assertions;
 }

@@ -4,22 +4,23 @@ using System.Runtime.CompilerServices;
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
 [SuppressMessage("Usage", "TUnitAssertions0002:Assert statements must be awaited")]
+[SuppressMessage("Usage", "TUnitAssertions0008:ValueTasks should be awaited when used within Assert.That(...)")]
 public static class AssertionGroup
 {
     public static OrAssertionGroupInvoker<TActual, TAssertionBuilder> Or<TActual, TAssertionBuilder>(AssertionGroup<TActual, TAssertionBuilder> group1, AssertionGroup<TActual, TAssertionBuilder> group2) 
-        where TAssertionBuilder : AssertionBuilder<TActual>
+        where TAssertionBuilder : AssertionBuilder
     {
         return new OrAssertionGroupInvoker<TActual, TAssertionBuilder>(group1, group2);
     }
     
     public static AndAssertionGroupInvoker<TActual, TAssertionBuilder> And<TActual, TAssertionBuilder>(AssertionGroup<TActual, TAssertionBuilder> group1, AssertionGroup<TActual, TAssertionBuilder> group2) 
-        where TAssertionBuilder : AssertionBuilder<TActual>
+        where TAssertionBuilder : AssertionBuilder
     {
         return new AndAssertionGroupInvoker<TActual, TAssertionBuilder>(group1, group2);
     }
     
     public static UnknownAssertionGroupInvoker<TActual, TAssertionBuilder> Assert<TActual, TAssertionBuilder>(AssertionGroup<TActual, TAssertionBuilder> group)
-        where TAssertionBuilder : AssertionBuilder<TActual>
+        where TAssertionBuilder : AssertionBuilder
     {
         return new UnknownAssertionGroupInvoker<TActual, TAssertionBuilder>(group);
     }
@@ -95,7 +96,7 @@ public static class AssertionGroup
     }
 }
 
-public abstract class AssertionGroup<TActual, TAssertionBuilder> where TAssertionBuilder : AssertionBuilder<TActual>
+public abstract class AssertionGroup<TActual, TAssertionBuilder> where TAssertionBuilder : AssertionBuilder
 {
     internal readonly TAssertionBuilder AssertionBuilder;
     

@@ -7,7 +7,7 @@ public class CustomFilteringTests
     {
         await Task.CompletedTask;
     }
-    
+
     [Test, Property("one", "no")]
     public async Task Custom_Filter_Two()
     {

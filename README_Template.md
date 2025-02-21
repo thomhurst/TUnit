@@ -11,13 +11,16 @@ TUnit is designed to aid with all testing types:
 
 [![thomhurst%2FTUnit | Trendshift](https://trendshift.io/api/badge/repositories/11781)](https://trendshift.io/repositories/11781)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8231644d844435eb9fd15110ea771d8)](https://app.codacy.com/gh/thomhurst/TUnit?utm_source=github.com&utm_medium=referral&utm_content=thomhurst/TUnit&utm_campaign=Badge_Grade) ![GitHub Repo stars](https://img.shields.io/github/stars/thomhurst/TUnit) [![GitHub Sponsors](https://img.shields.io/github/sponsors/thomhurst)](https://github.com/sponsors/thomhurst) [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) [![NuGet Downloads](https://img.shields.io/nuget/dt/TUnit)](https://www.nuget.org/packages/TUnit/) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8231644d844435eb9fd15110ea771d8)](https://app.codacy.com/gh/thomhurst/TUnit?utm_source=github.com&utm_medium=referral&utm_content=thomhurst/TUnit&utm_campaign=Badge_Grade) ![GitHub Repo stars](https://img.shields.io/github/stars/thomhurst/TUnit) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed-raw/thomhurst/TUnit)
+ [![GitHub Sponsors](https://img.shields.io/github/sponsors/thomhurst)](https://github.com/sponsors/thomhurst) [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) [![NuGet Downloads](https://img.shields.io/nuget/dt/TUnit)](https://www.nuget.org/packages/TUnit/) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit)
 
 # Quick Start
 
 Assuming you have the .NET SDK installed, simply run:
 
-`dotnet new install TUnit.Templates` `dotnet new TUnit -n "YourProjectName"`
+`dotnet new install TUnit.Templates` 
+
+`dotnet new TUnit -n "YourProjectName"`
 
 A new test project will be created for you with some samples of different test types and tips. When you're ready to get going, delete them and create your own!
 
@@ -38,6 +41,17 @@ One of the most powerful parts of TUnit is the information you have available to
 You can then register to be notified about various events such as test registered (scheduled to run in this test session at some point in the future), test started, test finished, etc.
 
 Say we injected an external object into our tests: By knowing how many tests are registered, we could count them up, and then on a test end event, we could decrease the count. When hitting 0, we know our object isn't going to be used by any other tests, so we can dispose of it. We know when we can handle the lifecycle, and this prevents it from living till the end of the test session where it could be hanging on to precious resources.
+
+# Flexible Data Inputs
+
+One popular feature of TUnit is the `[ClassDataSource<T>]` attribute - Allowing you to inject in classes to your tests with specific lifetimes, such as Per Test Session, or Per Test Class.
+Or if you want to run a combination of lots of different inputs, you can use a `[MatrixDataSource]` and annotate your parameters with `[Matrix(...)`] values.
+
+But guess what? Those features are built on top of a `DataSourceGenerator<T>` class - Which is exposed directly to you.
+That means that that functionality can be extended greatly. If they didn't exist already, you could implement them yourself!
+
+So if you've got creative or complex ways to generate new data, this gives you the flexibility to do it. 
+You create a class which will end up being an attribute you place on your test - So your test classes remain simple and readable! 
 
 # Built in Analyzers
 
@@ -129,7 +143,7 @@ This provides you base classes, similarly to Microsoft.Playwright.NUnit or Micro
 # Example test
 
 ```csharp
-private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
+    private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
     private static readonly TimeOnly Noon = TimeOnly.FromTimeSpan(TimeSpan.FromHours(12));
 
     [Test]
@@ -145,7 +159,7 @@ private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero)
 or with more complex test orchestration needs
 
 ```csharp
-[Before(Class)]
+    [Before(Class)]
     public static async Task ClearDatabase(ClassHookContext context) { ... }
 
     [After(Class)]

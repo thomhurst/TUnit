@@ -1,13 +1,12 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
-[SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1024:Symbols should be compared for equality")]
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 {
@@ -24,7 +23,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.TooManyArgumentsInTestMethod,
             Rules.PropertyRequiredNotSet,
             Rules.MustHavePropertySetter,
-            Rules.ReturnFunc);
+            Rules.ReturnFunc,
+            Rules.MatrixDataSourceAttributeRequired,
+            Rules.TooManyArguments);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -126,7 +127,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Arguments.WithoutGlobalPrefix)))
             {
-                CheckArguments(context, attribute, parameters);
+                CheckArguments(context, attribute, parameters, propertySymbol);
             }
             
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
@@ -147,8 +148,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 CheckDataGenerator(context, attribute, types);
             }
         }
-
-        CheckMatrix(context, parameters);
     }
 
     private void CheckPropertyAccessor(SymbolAnalysisContext context, IPropertySymbol? propertySymbol)
@@ -175,34 +174,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         return types.OfType<ITypeSymbol>().ToImmutableArray().WithoutCancellationTokenParameter();
     }
-
-    private void CheckMatrix(SymbolAnalysisContext context, ImmutableArray<IParameterSymbol> parameters)
-    {
-        if (!parameters.Any(x => x.HasMatrixAttribute(context.Compilation)))
-        {
-            return;
-        }
-        
-        foreach (var parameterSymbol in parameters)
-        {
-            if (SymbolEqualityComparer.Default.Equals(parameters.LastOrDefault()?.Type,
-                    context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!)))
-            {
-                continue;
-            }
-            
-            if (!parameterSymbol.HasMatrixAttribute(context.Compilation))
-            {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.NoTestDataProvided,
-                        context.Symbol.Locations.FirstOrDefault())
-                );
-            }
-        }
-    }
     
     private void CheckArguments(SymbolAnalysisContext context, AttributeData argumentsAttribute,
-        ImmutableArray<IParameterSymbol> parameters)
+        ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? propertySymbol)
     {
         if (argumentsAttribute.ConstructorArguments.IsDefaultOrEmpty)
         {
@@ -219,27 +193,36 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
 
-        if (parameters is { Length: 1 }
-            && parameters[0].Type.IsCollectionType(context.Compilation, out var innerType)
-            && arguments.All(x => SymbolEqualityComparer.Default.Equals(x.Type, innerType)))
+        for (var i = 0; i < Math.Max(parameters.Length, arguments.Length); i++)
         {
-            // All arguments can be used in the single array
-            return;
-        }
+            var parameter = parameters.ElementAtOrDefault(i);
 
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            var methodParameter = parameters[i];
+            if (parameter is null && propertySymbol is null)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rules.TooManyArguments, argumentsAttribute.GetLocation())
+                );
+                break;
+            }
+            
             var argumentExists = i + 1 <= arguments.Length;
-            var methodParameterType = methodParameter.Type;
+            
+            var typeSymbol = parameter?.Type ?? propertySymbol!.Type;
+
             var argument = arguments.ElementAtOrDefault(i);
             
-            if (SymbolEqualityComparer.Default.Equals(methodParameterType, cancellationTokenType))
+            if (typeSymbol.IsCollectionType(context.Compilation, out var innerType)
+                && arguments.Skip(i).Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
+            {
+                break;
+            }
+            
+            if (SymbolEqualityComparer.Default.Equals(typeSymbol, cancellationTokenType))
             {
                 continue;
             }
 
-            if (!argumentExists && methodParameter.IsOptional)
+            if (!argumentExists && parameter?.IsOptional is true)
             {
                 continue;
             }
@@ -250,32 +233,32 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         argumentsAttribute.GetLocation(),
                         "null",
-                        methodParameterType.ToDisplayString())
+                        typeSymbol.ToDisplayString())
                 );
                 return;
             }
             
-            if (argument.IsNull && methodParameterType.NullableAnnotation == NullableAnnotation.NotAnnotated)
+            if (argument.IsNull && typeSymbol.NullableAnnotation == NullableAnnotation.NotAnnotated)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.MethodParameterBadNullability,
-                        parameters[i].Locations.FirstOrDefault(),
-                        parameters[i].Name)
+                        parameter?.Locations.FirstOrDefault() ?? propertySymbol!.Locations.FirstOrDefault(),
+                        parameter?.Name ?? propertySymbol!.Name)
                 );
             }
             
-            if (IsEnumAndInteger(methodParameterType, argument.Type))
+            if (IsEnumAndInteger(typeSymbol, argument.Type))
             {
                 continue;
             }
             
-            if (!argument.IsNull && !CanConvert(context, argument, methodParameterType))
+            if (!argument.IsNull && !CanConvert(context, argument, typeSymbol))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         argumentsAttribute.GetLocation(),
                         argument.Type?.ToDisplayString(),
-                        methodParameterType.ToDisplayString())
+                        typeSymbol.ToDisplayString())
                 );
                 return;
             }
@@ -365,7 +348,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             var unwrappedTypes = UnwrapTypes(context,
                 dataSourceMethod,
                 testParameterTypes,
-                out var isEnumerable,
                 out var isFunc,
                 out var isTuples);
 
@@ -490,11 +472,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context,
         IMethodSymbol methodContainingTestData,
         ImmutableArray<ITypeSymbol> testParameterTypes,
-        out bool isEnumerable,
         out bool isFunc,
         out bool isTuples)
     {
-        isEnumerable = false;
         isFunc = false;
         isTuples = false;
 
@@ -527,7 +507,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         
         if (methodContainingTestData.ReturnType.IsIEnumerable(context.Compilation, out var enumerableInnerType))
         {
-            isEnumerable = true;
             type = enumerableInnerType;
         }
         
@@ -603,7 +582,17 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             // e.g. [Arguments(1.55)]
             return true;
         }
-        
+
+        if (argument.Type is not null
+            && methodParameterType is not null
+            && context.Compilation.ClassifyConversion(argument.Type, methodParameterType)
+                is { IsImplicit: true }
+                or { IsExplicit: true }
+                or { IsNumeric: true })
+        {
+            return true;
+        }
+
         return context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, methodParameterType);
     }
 

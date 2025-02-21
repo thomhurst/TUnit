@@ -9,7 +9,10 @@ public class EnumHasFlagAssertCondition<TEnum>(TEnum expected) : BaseAssertCondi
         return $"to have the flag {expected.ToString()}";
     }
 
-    protected override Task<AssertionResult> GetResult(TEnum? actualValue, Exception? exception)
+    protected override ValueTask<AssertionResult> GetResult(
+        TEnum? actualValue, Exception? exception,
+        AssertionMetadata assertionMetadata
+    )
     {
         return AssertionResult.FailIf(actualValue is null, "the source enum is null")
             .OrFailIf(!actualValue!.HasFlag(expected), "the flag was not present");

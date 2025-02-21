@@ -45,6 +45,9 @@ public partial class TestContext : Context, IDisposable
     public Dictionary<string, object?> ObjectBag { get; }
     
     public TestResult? Result { get; internal set; }
+    
+    public CancellationToken CancellationToken { get; internal set; }
+    
     internal DiscoveredTest InternalDiscoveredTest { get; set; } = null!;
 
     public void SuppressReportingResult()

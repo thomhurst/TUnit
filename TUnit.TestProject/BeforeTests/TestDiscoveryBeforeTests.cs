@@ -1,4 +1,4 @@
-﻿using TUnit.TestProject.Polyfills;
+﻿using Polyfills;
 
 namespace TUnit.TestProject.BeforeTests;
 

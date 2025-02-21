@@ -11,7 +11,7 @@ public class ArgsAsArrayTests
             Console.WriteLine(argument);
         }
     }
-    
+
     [Test]
     [Arguments("arg1", "arg2", "arg3")]
     public void NonParams(string[] arguments)
@@ -21,7 +21,7 @@ public class ArgsAsArrayTests
             Console.WriteLine(argument);
         }
     }
-    
+
     [Test]
     [Arguments("arg1", "arg2", "arg3")]
     public void ParamsEnumerable(params IEnumerable<string> arguments)
@@ -31,10 +31,20 @@ public class ArgsAsArrayTests
             Console.WriteLine(argument);
         }
     }
-    
+
     [Test]
     [Arguments("arg1", "arg2", "arg3")]
     public void Enumerable(IEnumerable<string> arguments)
+    {
+        foreach (var argument in arguments)
+        {
+            Console.WriteLine(argument);
+        }
+    }
+
+    [Test]
+    [Arguments(1, "arg1", "arg2", "arg3")]
+    public void Following_Non_Params(int i, IEnumerable<string> arguments)
     {
         foreach (var argument in arguments)
         {

@@ -1,14 +1,14 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
-using TUnit.TestProject.Polyfills;
+using Polyfills;
 
 namespace TUnit.TestProject;
 
 public class AfterTestAttributeTests
 {
     private static readonly string Filename = $"{Guid.NewGuid():N}-AfterTestAttributeTests.txt";
-    
+
     [Test]
     [WriteFileAfterTest]
     public async Task Test()
@@ -21,7 +21,7 @@ public class AfterTestAttributeTests
         public async ValueTask OnTestEnd(TestContext testContext)
         {
             Console.WriteLine(@"Writing file inside WriteFileAfterTestAttribute!");
-            
+
             await FilePolyfill.WriteAllTextAsync(Filename, "Foo!");
         }
 

@@ -92,6 +92,13 @@ public static class AttributeExtensions
                        .WithoutGlobalPrefix));
     }
     
+    public static bool IsMatrixDataSourceAttribute(this AttributeData attributeData, Compilation compilation)
+    {
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+            compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MatrixDataSourceAttribute
+                .WithoutGlobalPrefix));
+    }
+    
     public static bool IsDataSourceAttribute(this AttributeData? attributeData, Compilation compilation)
     {
         if (attributeData?.AttributeClass is null)

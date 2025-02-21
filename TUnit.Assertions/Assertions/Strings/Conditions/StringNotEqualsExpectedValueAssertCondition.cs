@@ -9,9 +9,8 @@ public class StringNotEqualsExpectedValueAssertCondition(string expected, String
     protected override string GetExpectation()
         => $"to not be equal to {Formatter.Format(expected).TruncateWithEllipsis(100)}";
 
-    protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {
-
         if (actualValue is null)
         {
             return AssertionResult

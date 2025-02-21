@@ -7,6 +7,7 @@ public static class WellKnown
         public static readonly FullyQualifiedTypeName TimeoutAttribute = GetTypeName("TimeoutAttribute");
         public static readonly FullyQualifiedTypeName Explicit = GetTypeName("ExplicitAttribute");
         public static readonly FullyQualifiedTypeName Matrix = GetTypeName("MatrixAttribute");
+        public static readonly FullyQualifiedTypeName MatrixDataSourceAttribute = GetTypeName("MatrixDataSourceAttribute");
 
         public static readonly FullyQualifiedTypeName BeforeAttribute = GetTypeName("BeforeAttribute");
         public static readonly FullyQualifiedTypeName AfterAttribute = GetTypeName("AfterAttribute");

@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Assertions.Enums;
 using TUnit.Assertions.Equality;
 using TUnit.Assertions.Extensions;
@@ -8,7 +7,7 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(
     IEnumerable<TInner> expected,
-    IEqualityComparer<TInner?>? equalityComparer,
+    IEqualityComparer<TInner?> equalityComparer,
     CollectionOrdering collectionOrdering)
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
@@ -24,31 +23,28 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         return $"to be equivalent to {(expected != null ? Formatter.Format(expected) : null)}";
     }
 
-    protected override AssertionResult GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
+    protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
         if (actualValue is null && expectedValue is null)
         {
             return AssertionResult.Passed;
         }
 
-        IEnumerable<TInner>? orderedActual;
-        if (collectionOrdering == CollectionOrdering.Any)
-        {
-            orderedActual = actualValue?.OrderBy(x => x);
-            expectedValue = expectedValue?.OrderBy(x => x);
-        }
-        else
-        {
-            orderedActual = actualValue;
-        }
-
+        var enumeratedActual = actualValue?.ToArray();
+        var enumeratedExpected = expectedValue?.ToArray();
+        
         return AssertionResult
-            .FailIf(orderedActual is null,
+            .FailIf(enumeratedActual is null,
                 "it is null")
-            .OrFailIf(expectedValue is null,
+            .OrFailIf(enumeratedExpected is null,
                 "it is not null")
-            .OrFailIf(!orderedActual!.SequenceEqual(expectedValue!, equalityComparer), FailureMessage(orderedActual)
-            );
+            .OrFailIf(collectionOrdering == CollectionOrdering.Matching && !enumeratedActual!.SequenceEqual(enumeratedExpected!, equalityComparer), FailureMessage(enumeratedActual))
+            .OrFailIf(!EqualsAnyOrder(enumeratedActual!, enumeratedExpected!), FailureMessage(enumeratedActual));
+    }
+
+    private static bool EqualsAnyOrder(TInner[] actualValue, TInner[] expectedValue)
+    {
+        return actualValue.Length == expectedValue.Length && !actualValue.Except(expectedValue).Any(); 
     }
 
     private string FailureMessage(IEnumerable<TInner>? orderedActual)

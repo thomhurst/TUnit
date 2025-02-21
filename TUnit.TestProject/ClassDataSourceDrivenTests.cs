@@ -27,7 +27,7 @@ public class ClassDataSourceDrivenTests
     {
         await Assert.That(class1.IsInitialized).IsTrue();
     }
-    
+
     [Test]
     [ClassDataSource<InitializableClass, InitializableClass>]
     public async Task IsInitialized_With_2_ClassDataSources(InitializableClass class1, InitializableClass class2)
@@ -35,7 +35,7 @@ public class ClassDataSourceDrivenTests
         await Assert.That(class1.IsInitialized).IsTrue();
         await Assert.That(class2.IsInitialized).IsTrue();
     }
-    
+
     [Test]
     [ClassDataSource<InitializableClass, InitializableClass, InitializableClass>]
     public async Task IsInitialized_With_3_ClassDataSources(InitializableClass class1, InitializableClass class2, InitializableClass class3)
@@ -44,7 +44,7 @@ public class ClassDataSourceDrivenTests
         await Assert.That(class2.IsInitialized).IsTrue();
         await Assert.That(class3.IsInitialized).IsTrue();
     }
-    
+
     [Test]
     [ClassDataSource<InitializableClass, InitializableClass, InitializableClass, InitializableClass>]
     public async Task IsInitialized_With_4_ClassDataSources(InitializableClass class1, InitializableClass class2, InitializableClass class3, InitializableClass class4)
@@ -54,7 +54,7 @@ public class ClassDataSourceDrivenTests
         await Assert.That(class3.IsInitialized).IsTrue();
         await Assert.That(class4.IsInitialized).IsTrue();
     }
-    
+
     [Test]
     [ClassDataSource<InitializableClass, InitializableClass, InitializableClass, InitializableClass, InitializableClass>]
     public async Task IsInitialized_With_5_ClassDataSources(InitializableClass class1, InitializableClass class2, InitializableClass class3, InitializableClass class4, InitializableClass class5)

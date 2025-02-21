@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using TUnit.Core;
+﻿using TUnit.Core;
+using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
@@ -30,7 +30,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
             // - Calling it here (and not in a child/sibling method to the actual test body) as this method calls the test body so is considered a parent
             // - Running synchronous hooks synchronously, so they don't generate a new child execution context which happens in async methods
             var beforeHooks = testHookOrchestrator.CollectBeforeHooks(
-                discoveredTest.TestContext.TestDetails.ClassInstance!,
+                discoveredTest.TestContext.TestDetails.ClassInstance,
                 discoveredTest);
 
             foreach (var executableHook in beforeHooks)
@@ -73,7 +73,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
     
     private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
     {
-        var afterHooks = testHookOrchestrator.CollectAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
+        var afterHooks = testHookOrchestrator.CollectAfterHooks(testContext.TestDetails.ClassInstance, testContext.InternalDiscoveredTest, cleanUpExceptions);
             
         foreach (var executableHook in afterHooks)
         {
@@ -93,6 +93,14 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
                     executableHook.ExecuteAsync(testContext, CancellationToken.None)
                 );
             }
+        }
+        
+        foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
+        {
+            await logger.LogDebugAsync("Executing ITestEndEventReceivers");
+
+            await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
+                cleanUpExceptions);
         }
         
         await logger.LogDebugAsync("Disposing test class");

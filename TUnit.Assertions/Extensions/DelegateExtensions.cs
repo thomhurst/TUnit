@@ -5,65 +5,97 @@ namespace TUnit.Assertions.Extensions;
 [StackTraceHidden]
 internal static class DelegateExtensions
 {
-    public static ValueTask<AssertionData<object?>> AsAssertionData(this Action action, string? actualExpression)
+    public static async ValueTask<AssertionData> AsAssertionData(this Action action, string? actualExpression)
     {
+        var start = DateTimeOffset.Now;
+
         try
         {
-            action();
-            return new ValueTask<AssertionData<object?>>((null, null, actualExpression));
+            await Task.Run(action);
+            
+            var end = DateTimeOffset.Now;
+
+            return (null, null, actualExpression, start, end);
         }
         catch (Exception e)
         {
-            return new ValueTask<AssertionData<object?>>((null, e, actualExpression));
+            var end = DateTimeOffset.Now;
+
+            return (null, e, actualExpression, start, end);
         }
     }
     
-    public static async ValueTask<AssertionData<object?>> AsAssertionData(this Func<Task> action, string? actualExpression)
+    public static async ValueTask<AssertionData> AsAssertionData(this Func<Task> action, string? actualExpression)
     {
+        var start = DateTimeOffset.Now;
+
         try
         {
             await action();
-            return (null, null, actualExpression);
+            
+            var end = DateTimeOffset.Now;
+
+            return (null, null, actualExpression, start, end);
         }
         catch (Exception e)
         {
-            return (null, e, actualExpression);
+            var end = DateTimeOffset.Now;
+
+            return (null, e, actualExpression, start, end);
         }
     }
     
-    public static async ValueTask<AssertionData<T>> AsAssertionData<T>(this Func<Task<T>> action, string? actualExpression)
+    public static async ValueTask<AssertionData> AsAssertionData<T>(this Func<Task<T>> action, string? actualExpression)
     {
+        var start = DateTimeOffset.Now;
+
         try
         {
-            return (await action(), null, actualExpression);
+            var result = await action();
+            
+            var end = DateTimeOffset.Now;
+            
+            return (result, null, actualExpression, start, end);
         }
         catch (Exception e)
         {
-            return (default, e, actualExpression);
+            var end = DateTimeOffset.Now;
+
+            return (null, e, actualExpression, start, end);
         }
     }
     
-    public static ValueTask<AssertionData<T>> AsAssertionData<T>(this Func<T> action, string? actualExpression)
+    public static async ValueTask<AssertionData> AsAssertionData<T>(this Func<T> action, string? actualExpression)
     {
+        var start = DateTimeOffset.Now;
+
         try
         {
-            return new ValueTask<AssertionData<T>>((action(), null, actualExpression));
+            var result = await Task.Run(action);
+            
+            var end = DateTimeOffset.Now;
+
+            return (result, null, actualExpression, start, end);
         }
         catch (Exception e)
         {
-            return new ValueTask<AssertionData<T>>((default, e, actualExpression));
+            var end = DateTimeOffset.Now;
+
+            return (null, e, actualExpression, start, end);
         }
     }
     
-    public static ValueTask<AssertionData<T>> AsAssertionData<T>(this T t, string? actualExpression)
+    public static ValueTask<AssertionData> AsAssertionData<T>(this T t, string? actualExpression)
     {
+        var start = DateTimeOffset.Now;
+
         try
         {
-            return new ValueTask<AssertionData<T>>((t, null, actualExpression));
+            return new ValueTask<AssertionData>((t, null, actualExpression, start, start));
         }
         catch (Exception e)
         {
-            return new ValueTask<AssertionData<T>>((default, e, actualExpression));
+            return new ValueTask<AssertionData>((null, e, actualExpression, start, start));
         }
     }
 }

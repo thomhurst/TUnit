@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.String;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
@@ -10,9 +11,9 @@ public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertionBuild
 
     public StringEqualToAssertionBuilderWrapper WithTrimming()
     {
-        var assertion = (ExpectedValueAssertCondition<string, string>) Assertions.Peek();
+        var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
-        assertion.WithTransform(s => s?.Trim(), s => s?.Trim());
+        assertion.WithTrimming();
         
         AppendCallerMethod([]);
         
@@ -21,22 +22,9 @@ public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertionBuild
     
     public StringEqualToAssertionBuilderWrapper WithNullAndEmptyEquality()
     {
-        var assertion = (ExpectedValueAssertCondition<string, string>) Assertions.Peek();
+        var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
-        assertion.WithComparer((actual, expected) =>
-        {
-            if (actual == null && expected == string.Empty)
-            {
-                return AssertionDecision.Pass;
-            }
-
-            if (expected == null && actual == string.Empty)
-            {
-                return AssertionDecision.Pass;
-            }
-
-            return AssertionDecision.Continue;
-        });
+        assertion.WithNullAndEmptyEquality();
         
         AppendCallerMethod([]);
         
@@ -45,9 +33,9 @@ public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertionBuild
     
     public StringEqualToAssertionBuilderWrapper IgnoringWhitespace()
     {
-        var assertion = (ExpectedValueAssertCondition<string, string>) Assertions.Peek();
+        var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
-        assertion.WithTransform(StringUtils.StripWhitespace, StringUtils.StripWhitespace);
+        assertion.IgnoringWhitespace();
         
         AppendCallerMethod([]);
         

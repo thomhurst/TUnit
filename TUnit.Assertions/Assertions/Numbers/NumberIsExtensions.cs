@@ -44,14 +44,14 @@ public static class NumberIsExtensions
     }
     
     public static InvokableValueAssertionBuilder<TActual> IsDivisibleBy<TActual>(
-        this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+        this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                        self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
 
@@ -70,7 +70,7 @@ public static class NumberIsExtensions
                 {
                     if (value is null)
                     {
-                        self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                        self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
 
@@ -88,7 +88,7 @@ public static class NumberIsExtensions
                 {
                     if (value is null)
                     {
-                        self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                        self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
 
@@ -107,7 +107,7 @@ public static class NumberIsExtensions
                 {
                     if (value is null)
                     {
-                        self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                        self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
 
@@ -126,7 +126,7 @@ public static class NumberIsExtensions
                 {
                     if (value is null)
                     {
-                        self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                        self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
 

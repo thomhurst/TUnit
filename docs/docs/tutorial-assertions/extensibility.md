@@ -26,7 +26,7 @@ So to create a custom assertion:
    `TExpected` will be the data (if any) that you receive from your extension method, so you'll be responsible for passing this in. You must pass it to the base class via the base constructor: `base(expectedValue)`
 
 3. Override the method: 
-   `protected override AssertionResult GetResult(...)`
+   `protected override Task<AssertionResult> GetResult(...)`
 
    `AssertionResult` has static methods to represent a pass or a fail.
 
@@ -48,7 +48,7 @@ In your assertion class, that'd be set up like:
     protected override string GetExpectation()
         => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
 
-   protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
+   protected override Task<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {
         if (actualValue is null)
         {
@@ -89,22 +89,22 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
     : ExpectedValueAssertCondition<string, string>(expected)
 {
     protected override string GetExpectation()
-        => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
+        => $"to be equal to \"{expected}\"";
 
-    protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
+    protected override async ValueTask<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {
         if (actualValue is null)
         {
             return AssertionResult
                 .FailIf(
-                    () => expectedValue is not null,
+                    expectedValue is not null,
                     "it was null");
         }
 
         return AssertionResult
             .FailIf(
-                () => !string.Equals(actualValue, expectedValue, stringComparison),
-                $"found {Format(actualValue).TruncateWithEllipsis(100)}");
+                !string.Equals(actualValue, expectedValue, stringComparison),
+                $"found \"{actualValue}\"");
     }
 }
 ```

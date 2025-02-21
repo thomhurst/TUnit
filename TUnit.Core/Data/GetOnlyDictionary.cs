@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core.Data;
 
@@ -19,6 +20,14 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
         lock (Lock)
         {
             return InnerDictionary.GetOrAdd(key, func);
+        }
+    }
+    
+    public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
+    {
+        lock (Lock)
+        {
+            return InnerDictionary.TryGetValue(key, out value!);
         }
     }
     

@@ -1,4 +1,4 @@
-![](assets/banner.png)
+![](assets/banner.png) 
 
 A modern, flexible and fast testing framework for C#. With Native AOT and Trimmed Single File application support included!
 
@@ -11,13 +11,16 @@ TUnit is designed to aid with all testing types:
 
 [![thomhurst%2FTUnit | Trendshift](https://trendshift.io/api/badge/repositories/11781)](https://trendshift.io/repositories/11781)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8231644d844435eb9fd15110ea771d8)](https://app.codacy.com/gh/thomhurst/TUnit?utm_source=github.com&utm_medium=referral&utm_content=thomhurst/TUnit&utm_campaign=Badge_Grade) ![GitHub Repo stars](https://img.shields.io/github/stars/thomhurst/TUnit) [![GitHub Sponsors](https://img.shields.io/github/sponsors/thomhurst)](https://github.com/sponsors/thomhurst) [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) [![NuGet Downloads](https://img.shields.io/nuget/dt/TUnit)](https://www.nuget.org/packages/TUnit/) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8231644d844435eb9fd15110ea771d8)](https://app.codacy.com/gh/thomhurst/TUnit?utm_source=github.com&utm_medium=referral&utm_content=thomhurst/TUnit&utm_campaign=Badge_Grade) ![GitHub Repo stars](https://img.shields.io/github/stars/thomhurst/TUnit) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed-raw/thomhurst/TUnit)
+ [![GitHub Sponsors](https://img.shields.io/github/sponsors/thomhurst)](https://github.com/sponsors/thomhurst) [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) [![NuGet Downloads](https://img.shields.io/nuget/dt/TUnit)](https://www.nuget.org/packages/TUnit/) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit)
 
 # Quick Start
 
 Assuming you have the .NET SDK installed, simply run:
 
-`dotnet new install TUnit.Templates` `dotnet new TUnit -n "YourProjectName"`
+`dotnet new install TUnit.Templates` 
+
+`dotnet new TUnit -n "YourProjectName"`
 
 A new test project will be created for you with some samples of different test types and tips. When you're ready to get going, delete them and create your own!
 
@@ -38,6 +41,17 @@ One of the most powerful parts of TUnit is the information you have available to
 You can then register to be notified about various events such as test registered (scheduled to run in this test session at some point in the future), test started, test finished, etc.
 
 Say we injected an external object into our tests: By knowing how many tests are registered, we could count them up, and then on a test end event, we could decrease the count. When hitting 0, we know our object isn't going to be used by any other tests, so we can dispose of it. We know when we can handle the lifecycle, and this prevents it from living till the end of the test session where it could be hanging on to precious resources.
+
+# Flexible Data Inputs
+
+One popular feature of TUnit is the `[ClassDataSource<T>]` attribute - Allowing you to inject in classes to your tests with specific lifetimes, such as Per Test Session, or Per Test Class.
+Or if you want to run a combination of lots of different inputs, you can use a `[MatrixDataSource]` and annotate your parameters with `[Matrix(...)`] values.
+
+But guess what? Those features are built on top of a `DataSourceGenerator<T>` class - Which is exposed directly to you.
+That means that that functionality can be extended greatly. If they didn't exist already, you could implement them yourself!
+
+So if you've got creative or complex ways to generate new data, this gives you the flexibility to do it. 
+You create a class which will end up being an attribute you place on your test - So your test classes remain simple and readable! 
 
 # Built in Analyzers
 
@@ -129,7 +143,7 @@ This provides you base classes, similarly to Microsoft.Playwright.NUnit or Micro
 # Example test
 
 ```csharp
-private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
+    private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
     private static readonly TimeOnly Noon = TimeOnly.FromTimeSpan(TimeSpan.FromHours(12));
 
     [Test]
@@ -145,7 +159,7 @@ private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero)
 or with more complex test orchestration needs
 
 ```csharp
-[Before(Class)]
+    [Before(Class)]
     public static async Task ClearDatabase(ClassHookContext context) { ... }
 
     [After(Class)]
@@ -260,185 +274,211 @@ As such, the API may change. I'll try to limit this but it's a possibility.
 
 # Benchmark
 
-## Scenario: Building the test project
+### Scenario: Building the test project
 
-### macos-latest
+#### macos-latest
 
 ```
+
 BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 9.0  Runtime=.NET 9.0
-```
-
-Method       |       Mean |    Error |   StdDev
------------- | ---------: | -------: | -------:
-Build_TUnit  | 1,003.6 ms | 19.74 ms | 24.25 ms
-Build_NUnit  |   845.4 ms | 14.13 ms | 13.22 ms
-Build_xUnit  |   865.6 ms | 16.82 ms | 18.70 ms
-Build_MSTest |   900.7 ms | 17.45 ms | 22.68 ms
-
-### ubuntu-latest
+Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
-BenchmarkDotNet v0.14.0, Ubuntu 22.04.5 LTS (Jammy Jellyfish)
+| Method       | Mean       | Error    | StdDev    |
+|------------- |-----------:|---------:|----------:|
+| Build_TUnit  | 1,031.7 ms | 26.57 ms |  72.28 ms |
+| Build_NUnit  |   809.7 ms | 15.21 ms |  20.30 ms |
+| Build_xUnit  |   994.4 ms | 40.06 ms | 118.12 ms |
+| Build_MSTest | 1,032.4 ms | 31.77 ms |  92.68 ms |
+
+
+
+#### ubuntu-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Ubuntu 24.04.1 LTS (Noble Numbat)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0
-```
-
-Method       |    Mean |    Error |   StdDev
------------- | ------: | -------: | -------:
-Build_TUnit  | 1.829 s | 0.0359 s | 0.0384 s
-Build_NUnit  | 1.497 s | 0.0241 s | 0.0226 s
-Build_xUnit  | 1.502 s | 0.0283 s | 0.0291 s
-Build_MSTest | 1.567 s | 0.0126 s | 0.0105 s
-
-### windows-latest
+Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
-BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2966) (Hyper-V)
+| Method       | Mean    | Error    | StdDev   |
+|------------- |--------:|---------:|---------:|
+| Build_TUnit  | 1.764 s | 0.0307 s | 0.0272 s |
+| Build_NUnit  | 1.433 s | 0.0116 s | 0.0108 s |
+| Build_xUnit  | 1.439 s | 0.0071 s | 0.0055 s |
+| Build_MSTest | 1.457 s | 0.0142 s | 0.0126 s |
+
+
+
+#### windows-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.3091) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0
-```
-
-Method       |    Mean |    Error |   StdDev
------------- | ------: | -------: | -------:
-Build_TUnit  | 1.838 s | 0.0351 s | 0.0431 s
-Build_NUnit  | 1.507 s | 0.0288 s | 0.0320 s
-Build_xUnit  | 1.528 s | 0.0221 s | 0.0206 s
-Build_MSTest | 1.570 s | 0.0218 s | 0.0204 s
-
-## Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
-
-### macos-latest
+Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
+| Method       | Mean    | Error    | StdDev   |
+|------------- |--------:|---------:|---------:|
+| Build_TUnit  | 1.794 s | 0.0357 s | 0.0334 s |
+| Build_NUnit  | 1.460 s | 0.0282 s | 0.0289 s |
+| Build_xUnit  | 1.461 s | 0.0170 s | 0.0142 s |
+| Build_MSTest | 1.492 s | 0.0170 s | 0.0150 s |
+
+
+### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
+
+#### macos-latest
+
+```
+
 BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 9.0  Runtime=.NET 9.0
-```
-
-Method    |      Mean |     Error |    StdDev
---------- | --------: | --------: | --------:
-TUnit_AOT |  81.74 ms |  1.372 ms |  1.832 ms
-TUnit     | 519.70 ms | 10.231 ms | 15.929 ms
-NUnit     | 751.01 ms | 10.674 ms |  9.463 ms
-xUnit     | 769.82 ms | 12.237 ms | 10.848 ms
-MSTest    | 673.89 ms |  8.399 ms |  7.857 ms
-
-### ubuntu-latest
+Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
-BenchmarkDotNet v0.14.0, Ubuntu 22.04.5 LTS (Jammy Jellyfish)
+| Method    | Mean      | Error     | StdDev    | Median    |
+|---------- |----------:|----------:|----------:|----------:|
+| TUnit_AOT |  83.70 ms |  1.699 ms |  4.623 ms |  83.18 ms |
+| TUnit     | 557.02 ms | 29.439 ms | 85.408 ms | 521.49 ms |
+| NUnit     | 809.94 ms | 29.159 ms | 80.314 ms | 780.56 ms |
+| xUnit     | 756.58 ms | 14.625 ms | 14.364 ms | 757.68 ms |
+| MSTest    | 686.17 ms | 13.545 ms | 32.712 ms | 681.87 ms |
+
+
+
+#### ubuntu-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Ubuntu 24.04.1 LTS (Noble Numbat)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0
-```
-
-Method    |        Mean |     Error |    StdDev
---------- | ----------: | --------: | --------:
-TUnit_AOT |    46.60 ms |  0.921 ms |  1.661 ms
-TUnit     |   852.07 ms | 16.497 ms | 26.165 ms
-NUnit     | 1,307.76 ms | 11.020 ms |  9.769 ms
-xUnit     | 1,366.43 ms | 14.481 ms | 13.545 ms
-MSTest    | 1,156.89 ms | 12.453 ms | 10.399 ms
-
-### windows-latest
+Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
-BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2966) (Hyper-V)
+| Method    | Mean        | Error     | StdDev    | Median      |
+|---------- |------------:|----------:|----------:|------------:|
+| TUnit_AOT |    45.54 ms |  0.893 ms |  1.587 ms |    46.39 ms |
+| TUnit     |   790.37 ms | 15.533 ms | 19.076 ms |   794.03 ms |
+| NUnit     | 1,258.80 ms |  7.045 ms |  6.590 ms | 1,259.45 ms |
+| xUnit     | 1,311.61 ms | 11.707 ms | 10.378 ms | 1,307.83 ms |
+| MSTest    | 1,110.10 ms | 10.279 ms |  8.583 ms | 1,108.22 ms |
+
+
+
+#### windows-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.3091) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0
-```
-
-Method    |        Mean |     Error |    StdDev
---------- | ----------: | --------: | --------:
-TUnit_AOT |    56.10 ms |  1.876 ms |  5.531 ms
-TUnit     |   847.54 ms | 16.821 ms | 27.638 ms
-NUnit     | 1,283.10 ms |  6.313 ms |  5.905 ms
-xUnit     | 1,337.54 ms | 14.829 ms | 13.871 ms
-MSTest    | 1,141.95 ms | 11.965 ms | 11.192 ms
-
-## Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
-
-### macos-latest
+Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
+| Method    | Mean        | Error     | StdDev    |
+|---------- |------------:|----------:|----------:|
+| TUnit_AOT |    63.10 ms |  1.965 ms |  5.794 ms |
+| TUnit     |   841.83 ms | 14.818 ms | 23.928 ms |
+| NUnit     | 1,283.37 ms | 13.451 ms | 12.582 ms |
+| xUnit     | 1,325.10 ms |  6.867 ms |  6.424 ms |
+| MSTest    | 1,142.81 ms |  9.353 ms |  8.749 ms |
+
+
+### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
+
+#### macos-latest
+
+```
+
 BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 9.0  Runtime=.NET 9.0
-```
-
-Method    |        Mean |     Error |    StdDev
---------- | ----------: | --------: | --------:
-TUnit_AOT |    246.9 ms |  15.42 ms |  45.48 ms
-TUnit     |    640.4 ms |  20.15 ms |  58.79 ms
-NUnit     | 13,847.6 ms | 273.09 ms | 526.16 ms
-xUnit     | 14,083.6 ms | 257.74 ms | 215.22 ms
-MSTest    | 14,385.8 ms | 281.76 ms | 542.85 ms
-
-### ubuntu-latest
+Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
-BenchmarkDotNet v0.14.0, Ubuntu 22.04.5 LTS (Jammy Jellyfish)
+| Method    | Mean        | Error     | StdDev    |
+|---------- |------------:|----------:|----------:|
+| TUnit_AOT |    318.5 ms |  16.82 ms |  49.59 ms |
+| TUnit     |  1,046.1 ms |  74.68 ms | 220.19 ms |
+| NUnit     | 14,148.6 ms | 281.34 ms | 485.29 ms |
+| xUnit     | 14,601.7 ms | 287.26 ms | 532.46 ms |
+| MSTest    | 14,204.0 ms | 281.05 ms | 506.79 ms |
+
+
+
+#### ubuntu-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Ubuntu 24.04.1 LTS (Noble Numbat)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0
-```
-
-Method    |        Mean |     Error |    StdDev
---------- | ----------: | --------: | --------:
-TUnit_AOT |    77.52 ms |  0.491 ms |  0.383 ms
-TUnit     |   929.63 ms | 18.527 ms | 28.844 ms
-NUnit     | 6,538.95 ms | 28.311 ms | 23.641 ms
-xUnit     | 6,579.27 ms | 26.933 ms | 23.876 ms
-MSTest    | 6,451.82 ms | 25.273 ms | 23.640 ms
-
-### windows-latest
+Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
-BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2966) (Hyper-V)
+| Method    | Mean        | Error     | StdDev    |
+|---------- |------------:|----------:|----------:|
+| TUnit_AOT |    78.25 ms |  1.538 ms |  2.439 ms |
+| TUnit     |   878.11 ms | 17.543 ms | 24.013 ms |
+| NUnit     | 6,284.88 ms | 18.256 ms | 17.077 ms |
+| xUnit     | 6,425.68 ms | 17.944 ms | 16.785 ms |
+| MSTest    | 6,231.23 ms |  7.431 ms |  6.587 ms |
+
+
+
+#### windows-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.3091) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 9.0.101
-  [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
-  .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+.NET SDK 9.0.102
+  [Host]   : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0
+Job=.NET 9.0  Runtime=.NET 9.0  
+
 ```
+| Method    | Mean       | Error     | StdDev    | Median     |
+|---------- |-----------:|----------:|----------:|-----------:|
+| TUnit_AOT |   133.8 ms |   2.67 ms |   6.69 ms |   133.0 ms |
+| TUnit     |   911.1 ms |  18.00 ms |  22.76 ms |   915.0 ms |
+| NUnit     | 8,688.0 ms | 171.21 ms | 329.86 ms | 8,801.1 ms |
+| xUnit     | 8,765.1 ms | 172.90 ms | 288.87 ms | 8,850.6 ms |
+| MSTest    | 8,603.3 ms | 169.80 ms | 354.43 ms | 8,734.3 ms |
 
-Method    |       Mean |    Error |   StdDev |     Median
---------- | ---------: | -------: | -------: | ---------:
-TUnit_AOT |   137.3 ms |  2.73 ms |  6.37 ms |   140.2 ms
-TUnit     |   907.3 ms | 17.53 ms | 24.57 ms |   903.2 ms
-NUnit     | 7,491.5 ms | 21.77 ms | 20.36 ms | 7,498.4 ms
-xUnit     | 7,531.1 ms | 19.66 ms | 17.43 ms | 7,536.9 ms
-MSTest    | 7,428.2 ms | 25.21 ms | 22.35 ms | 7,423.7 ms
+
+

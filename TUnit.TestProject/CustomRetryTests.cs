@@ -10,7 +10,7 @@ public class CustomRetryTests
     public static int RetryCount2 { get; private set; }
     public static int RetryCount3 { get; private set; }
     public static int RetryCount4 { get; private set; }
-    
+
     [Test]
     [RetryOperationCancelledException(1)]
     public void One()
@@ -18,7 +18,7 @@ public class CustomRetryTests
         RetryCount1++;
         throw new OperationCanceledException();
     }
-    
+
     [Test]
     [RetryNullReferenceException(2)]
     public void Two()
@@ -26,14 +26,14 @@ public class CustomRetryTests
         RetryCount2++;
         throw new OperationCanceledException();
     }
-    
+
     [Test]
     public void Three()
     {
         RetryCount3++;
         throw new OperationCanceledException();
     }
-    
+
     [Test]
     public void Four()
     {
@@ -57,7 +57,7 @@ public class CustomRetryTests
             return Task.FromResult(exception is OperationCanceledException);
         }
     }
-    
+
     public class RetryNullReferenceExceptionAttribute(int times) : RetryAttribute(times)
     {
         public override Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)

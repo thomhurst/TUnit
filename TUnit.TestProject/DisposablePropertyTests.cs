@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 public class DisposablePropertyTests
 {

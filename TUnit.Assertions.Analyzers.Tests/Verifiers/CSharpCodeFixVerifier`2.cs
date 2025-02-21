@@ -40,7 +40,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                 AdditionalReferences =
                 {
                     typeof(TUnitAttribute).Assembly.Location,
-                    typeof(AssertionBuilder<>).Assembly.Location,
+                    typeof(AssertionBuilder).Assembly.Location,
                 },
             },
         };
@@ -74,7 +74,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                 AdditionalReferences =
                 {
                     typeof(TUnitAttribute).Assembly.Location,
-                    typeof(AssertionBuilder<>).Assembly.Location,
+                    typeof(AssertionBuilder).Assembly.Location,
                 },
             },
         };

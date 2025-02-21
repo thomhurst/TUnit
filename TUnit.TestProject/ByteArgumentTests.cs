@@ -8,7 +8,7 @@ public class ByteArgumentTests
     {
         // Dummy method
     }
-    
+
     [Test]
     [Arguments((byte)1)]
     [Arguments(null)]
