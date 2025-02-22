@@ -15,12 +15,16 @@ public class EnumerableAllExpectedFuncAssertCondition<TActual, TInner>(
         var unmatchedEntries = GetUnmatchedEntries(actualValue);
         return AssertionResult
             .FailIf(actualValue is null, $"{ActualExpression ?? typeof(TActual).Name} is null")
+            .OrFailIf(!unmatchedEntries.IsPassed, unmatchedEntries.Message)
             .And(unmatchedEntries);
     }
 
     private AssertionResult GetUnmatchedEntries(TActual? actualValue)
     {
-        if(actualValue == null) return AssertionResult.Passed;
+        if (actualValue == null)
+        {
+            return AssertionResult.Passed;
+        }
         long i = 0;
         foreach (var item in actualValue)
         {
