@@ -33,20 +33,12 @@ public class ClassAccessibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var compilation = context.Compilation;
-
-        var testsOrHooks = namedTypeSymbol.GetMembers()
-            .OfType<IMethodSymbol>()
-            .Where(x => x.IsTestMethod(compilation) || x.IsHookMethod(compilation, out _, out _, out _))
-            .ToArray();
         
-        if (!testsOrHooks.Any())
+        if (!namedTypeSymbol.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Any(x => x.IsTestMethod(compilation) || x.IsHookMethod(compilation, out _, out _, out _)))
         {
             return;
-        }
-        
-        foreach (var methodSymbol in testsOrHooks.Where(x => x.DeclaredAccessibility != Accessibility.Public))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic, methodSymbol.Locations.FirstOrDefault()));
         }
 
         if (namedTypeSymbol.ContainingType != null)
