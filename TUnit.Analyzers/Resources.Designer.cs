@@ -1408,5 +1408,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0050Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public..
+        /// </summary>
+        internal static string TUnit0051Description {
+            get {
+                return ResourceManager.GetString("TUnit0051Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public.
+        /// </summary>
+        internal static string TUnit0051MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0051MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public.
+        /// </summary>
+        internal static string TUnit0051Title {
+            get {
+                return ResourceManager.GetString("TUnit0051Title", resourceCulture);
+            }
+        }
     }
 }
