@@ -12,11 +12,29 @@ public class EnumerableAllExpectedFuncAssertCondition<TActual, TInner>(
         AssertionMetadata assertionMetadata
     )
     {
+        var unmatchedEntries = GetUnmatchedEntries(actualValue);
         return AssertionResult
-            .FailIf(actualValue is null,
-                $"{ActualExpression ?? typeof(TActual).Name} is null")
-            .OrFailIf(!actualValue!.All(matcher),
-                //TODO: Add entry that failed to match
-                $"not all entries in the collection matched");
+            .FailIf(actualValue is null, $"{ActualExpression ?? typeof(TActual).Name} is null")
+            .OrFailIf(!unmatchedEntries.IsPassed, unmatchedEntries.Message)
+            .And(unmatchedEntries);
     }
+
+    private AssertionResult GetUnmatchedEntries(TActual? actualValue)
+    {
+        if (actualValue == null)
+        {
+            return AssertionResult.Passed;
+        }
+        long i = 0;
+        foreach (var item in actualValue)
+        {
+            if (!matcher(item))
+            {
+                return AssertionResult.Fail($"not all entries in the collection matched, first unmatched entry found at index {i}: \"{item}\"");
+            }
+            i++;
+        }
+        return AssertionResult.Passed; 
+    }
+    
 }
