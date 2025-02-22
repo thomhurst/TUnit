@@ -18,15 +18,16 @@ public class GlobalHooks
     public static async Task SetUp()
     {
         // Arrange
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ExampleNamespace_AppHost>();
-        appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        {
-            clientBuilder.AddStandardResilienceHandler();
-        });
+        // Uncomment out and replace Projects reference with your app host
+        //var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>();
+        //appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
+        //{
+        //    clientBuilder.AddStandardResilienceHandler();
+        //});
 
-        App = await appHost.BuildAsync();
-        NotificationService = App.Services.GetRequiredService<ResourceNotificationService>();
-        await App.StartAsync();
+        //App = await appHost.BuildAsync();
+        //NotificationService = App.Services.GetRequiredService<ResourceNotificationService>();
+        //await App.StartAsync();
     }
 
     [After(TestSession)]
