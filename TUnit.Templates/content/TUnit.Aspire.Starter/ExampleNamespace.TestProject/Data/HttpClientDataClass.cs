@@ -7,10 +7,10 @@ namespace ExampleNamespace.TestProject.Data
         public HttpClient HttpClient { get; private set; } = new();
         public async Task InitializeAsync()
         {
-            HttpClient = (GlobalHooks.App ?? throw new NullReferenceException()).CreateHttpClient("apiservice");
-            if (GlobalHooks.NotificationService != null)
+            HttpClient = (GlobalSetup.App ?? throw new NullReferenceException()).CreateHttpClient("apiservice");
+            if (GlobalSetup.NotificationService != null)
             {
-                await GlobalHooks.NotificationService.WaitForResourceAsync("apiservice", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
+                await GlobalSetup.NotificationService.WaitForResourceAsync("apiservice", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
             }
         }
 

@@ -91,7 +91,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AspireStarter", "AspireStar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AspireTest", "AspireTest", "{8FFE6DFD-F542-4536-9F07-0F510B662763}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TUnit.Templates\content\TUnit.Aspire.Test\TestProject.csproj", "{C371C694-EC08-F339-C155-E3AE2136129D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleNamespace", "TUnit.Templates\content\TUnit.Aspire.Test\ExampleNamespace.csproj", "{C371C694-EC08-F339-C155-E3AE2136129D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleNamespace.ServiceDefaults", "TUnit.Templates\content\TUnit.Aspire.Starter\ExampleNamespace.ServiceDefaults\ExampleNamespace.ServiceDefaults.csproj", "{6A2CB0A8-A7C8-C018-FD9A-CCA015E398EE}"
 EndProject

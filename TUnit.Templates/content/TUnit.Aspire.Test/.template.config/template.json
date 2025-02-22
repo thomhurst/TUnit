@@ -10,13 +10,13 @@
     "Cloud"
   ],
   "name": "TUnit Aspire Test Project",
-  "identity": "TUnit.Test.Aspire",
+  "identity": "TUnit.Test.Aspire.Test",
   "groupIdentity": "TUnit.Aspire.Test",
   "shortName": "TUnit.Aspire.Test",
   "tags": {
     "language": "C#",
     "type": "project"
   },
-  "sourceName": "TestProject",
+  "sourceName": "ExampleNamespace",
   "preferNameDirectory": true
 }

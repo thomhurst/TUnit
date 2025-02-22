@@ -1,3 +1,5 @@
+using TUnit.Aspire.Test.Data;
+
 namespace TUnit.Aspire.Test
 {
     public class IntegrationTest1
@@ -9,28 +11,18 @@ namespace TUnit.Aspire.Test
         //        <ProjectReference Include="../MyAspireApp.AppHost/MyAspireApp.AppHost.csproj" />
         //    </ItemGroup>
         //
-        // 2. Uncomment the following example test and update 'Projects.MyAspireApp_AppHost' to match your AppHost project:
+        // 2. Uncomment the following example test and update 'Projects.MyAspireApp_AppHost' in GlobalSetup.cs to match your AppHost project:
         //
-        // [Test]
-        // public async Task GetWebResourceRootReturnsOkStatusCode()
-        // {
-        //     // Arrange
-        //     var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.MyAspireApp_AppHost>();
-        //     appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        //     {
-        //         clientBuilder.AddStandardResilienceHandler();
-        //     });
-        //     await using var app = await appHost.BuildAsync();
-        //     var resourceNotificationService = app.Services.GetRequiredService<ResourceNotificationService>();
-        //     await app.StartAsync();
-
-        //     // Act
-        //     var httpClient = app.CreateHttpClient("webfrontend");
-        //     await resourceNotificationService.WaitForResourceAsync("webfrontend", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
-        //     var response = await httpClient.GetAsync("/");
-
-        //     // Assert
-        //     await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-        // }
+        //[ClassDataSource<HttpClientDataClass>]
+        //[Test]
+        //public async Task GetWebResourceRootReturnsOkStatusCode(HttpClientDataClass httpClientData)
+        //{
+        //    // Arrange
+        //    var httpClient = httpClientData.HttpClient;
+        //    // Act
+        //    var response = await httpClient.GetAsync("/");
+        //    // Assert
+        //    await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        //}
     }
 }

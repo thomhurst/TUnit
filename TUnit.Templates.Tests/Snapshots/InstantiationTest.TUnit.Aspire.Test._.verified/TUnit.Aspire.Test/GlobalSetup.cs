@@ -7,9 +7,9 @@ using Aspire.Hosting;
 [assembly: Retry(3)]
 [assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 
-namespace TUnit.Aspire.Starter.TestProject;
+namespace TUnit.Aspire.Test;
 
-public class GlobalSetup
+public class GlobalHooks
 {
     public static DistributedApplication? App{ get; private set; }
     public static ResourceNotificationService? NotificationService { get; private set; }
@@ -18,7 +18,7 @@ public class GlobalSetup
     public static async Task SetUp()
     {
         // Arrange
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.TUnit.Aspire.Starter_AppHost>();
+        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.TUnit.Aspire.Test_AppHost>();
         appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
             clientBuilder.AddStandardResilienceHandler();

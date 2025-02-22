@@ -9,7 +9,7 @@ using Aspire.Hosting;
 
 namespace ExampleNamespace.TestProject;
 
-public class GlobalHooks
+public class GlobalSetup
 {
     public static DistributedApplication? App{ get; private set; }
     public static ResourceNotificationService? NotificationService { get; private set; }
