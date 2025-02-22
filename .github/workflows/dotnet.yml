@@ -47,14 +47,14 @@ jobs:
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
       
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4.6.0
+        uses: actions/upload-artifact@v4.6.1
         if: always()
         with:
           name: TestingPlatformDiagnosticLogs${{matrix.os}}
           path: '**/log_*.diag'
           
       - name: NuGet Packages Artifacts
-        uses: actions/upload-artifact@v4.6.0
+        uses: actions/upload-artifact@v4.6.1
         if: always()
         with:
           name: 'NuGetPackages-${{matrix.os}}'
