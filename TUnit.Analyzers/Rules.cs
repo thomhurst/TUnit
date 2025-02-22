@@ -120,6 +120,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor TooManyArguments =
         CreateDescriptor("TUnit0050", UsageCategory, DiagnosticSeverity.Error);
     
+    public static readonly DiagnosticDescriptor TypeMustBePublic =
+        CreateDescriptor("TUnit0051", UsageCategory, DiagnosticSeverity.Error);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(
