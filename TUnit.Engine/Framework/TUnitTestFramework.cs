@@ -81,8 +81,48 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             serviceProvider.EngineCancellationToken.Initialise(context.CancellationToken);
             
+            var beforeDiscoveryHooks = serviceProvider.TestDiscoveryHookOrchestrator.CollectBeforeHooks();
+            var beforeContext = serviceProvider.TestDiscoveryHookOrchestrator.GetBeforeContext();
+        
+            foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
+            {
+                if (beforeDiscoveryHook.IsSynchronous)
+                {
+                    await logger.LogDebugAsync("Executing synchronous [Before(TestDiscovery)] hook");
+
+                    beforeDiscoveryHook.Execute(beforeContext, CancellationToken.None);
+                }
+                else
+                {
+                    await logger.LogDebugAsync("Executing asynchronous [Before(TestDiscovery)] hook");
+
+                    await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
+                }
+            }
+
+            var allDiscoveredTests = serviceProvider.TestDiscoverer.GetTests(serviceProvider.EngineCancellationToken.Token);
+            
+            var afterDiscoveryHooks = serviceProvider.TestDiscoveryHookOrchestrator.CollectAfterHooks();
+            var afterContext = serviceProvider.TestDiscoveryHookOrchestrator.GetAfterContext(allDiscoveredTests);
+        
+            foreach (var afterDiscoveryHook in afterDiscoveryHooks)
+            {
+                if (afterDiscoveryHook.IsSynchronous)
+                {
+                    await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
+
+                    afterDiscoveryHook.Execute(afterContext, CancellationToken.None);
+                }
+                else
+                {
+                    await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
+
+                    await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
+                }
+            }
+            
             var filteredTests = await serviceProvider.TestDiscoverer
-                .FilterTests(context, stringFilter, serviceProvider.EngineCancellationToken.Token);
+                .FilterTests(context, serviceProvider.EngineCancellationToken.Token);
 
             switch (context.Request)
             {
