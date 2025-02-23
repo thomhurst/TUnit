@@ -47,7 +47,7 @@ public class Tests
 
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery");
         await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession");
-        // await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly");
+        await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly");
         // await Assert.That(_3BeforeClassLocal.Value).IsEqualTo("BeforeClass");
         await Assert.That(_4BeforeTestLocal.Value).IsEqualTo("BeforeTest");
     }
