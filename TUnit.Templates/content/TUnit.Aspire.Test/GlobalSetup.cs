@@ -14,21 +14,21 @@ public class GlobalHooks
     public static DistributedApplication? App{ get; private set; }
     public static ResourceNotificationService? NotificationService { get; private set; }
 
-    [Before(TestSession)]
-    public static async Task SetUp()
-    {
-        // Arrange
-        // Uncomment out and replace Projects reference with your app host
-        //var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>();
-        //appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        //{
-        //    clientBuilder.AddStandardResilienceHandler();
-        //});
+    // Uncomment out and replace Projects reference with your app host
+    //[Before(TestSession)]
+    //public static async Task SetUp()
+    //{
+    //    // Arrange
+    //    var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>();
+    //    appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
+    //    {
+    //        clientBuilder.AddStandardResilienceHandler();
+    //    });
 
-        //App = await appHost.BuildAsync();
-        //NotificationService = App.Services.GetRequiredService<ResourceNotificationService>();
-        //await App.StartAsync();
-    }
+    //    App = await appHost.BuildAsync();
+    //    NotificationService = App.Services.GetRequiredService<ResourceNotificationService>();
+    //    await App.StartAsync();
+    //}
 
     [After(TestSession)]
     public static void CleanUp()
