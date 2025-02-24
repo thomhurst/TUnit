@@ -63,7 +63,7 @@ TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the
 
 ## Visual Studio
 
-Visual Studio is fully supported from 2022 17.13 onwards.  For prior versions, the "Use testing platform server mode" option must be selected in Tools > Manage Preview Features.
+Visual Studio is fully supported from 2022 17.13 onwards. For prior versions, the "Use testing platform server mode" option must be selected in Tools > Manage Preview Features.
 
 ![](/docs/static/img/visual-studio.png)
 
@@ -143,14 +143,16 @@ This provides you base classes, similarly to Microsoft.Playwright.NUnit or Micro
 # Example test
 
 ```csharp
+    private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
+    private static readonly TimeOnly Noon = TimeOnly.FromTimeSpan(TimeSpan.FromHours(12));
+
     [Test]
-    public async Task Create_User_Has_Expected_Creation_Time()
+    public async Task IsMorning()
     {
-        var user = await CreateUser();
-        
-        await Assert.That(user.CreatedAt)
-            .IsEqualTo(DateTime.Now)
-            .Within(TimeSpan.FromMinutes(1));
+        var time = GetTime();
+
+        await Assert.That(time).IsAfterOrEqualTo(Midnight)
+            .And.IsBefore(Noon);
     }
 ```
 
