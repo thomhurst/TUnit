@@ -18,11 +18,11 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
     {
         try
         {
-            if (discoveredTest.TestDetails.ClassInstance is IAsyncInitializer asyncInitializer)
+            foreach (var onInitializeObject in discoveredTest.TestContext.GetOnInitializeObjects())
             {
-                await logger.LogDebugAsync("Initializing IAsyncInitializer test class...");
+                await logger.LogDebugAsync($"Initializing IAsyncInitializer: {onInitializeObject.GetType().Name}...");
 
-                await asyncInitializer.InitializeAsync();
+                await onInitializeObject.InitializeAsync();
             }
 
             // In order to set async-local values properly in a before hook, the method doing so needs to have the parents execution context.
@@ -51,6 +51,14 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
                         executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken)
                     );
                 }
+            }
+            
+            foreach (var testStartEventsObject in discoveredTest.TestContext.GetTestStartEventObjects())
+            {
+                await logger.LogDebugAsync($"Executing ITestStartEventReceiver: {testStartEventsObject.GetType().Name}");
+
+                await testStartEventsObject.OnTestStart(new BeforeTestContext(discoveredTest));
+                testStartEventsObject.OnTestStartSynchronous(new BeforeTestContext(discoveredTest));
             }
 
             await logger.LogDebugAsync("Executing test body");

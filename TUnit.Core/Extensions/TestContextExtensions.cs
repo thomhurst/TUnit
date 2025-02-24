@@ -71,6 +71,9 @@ public static class TestContextExtensions
     internal static IEnumerable<ITestStartEventReceiver> GetTestStartEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestStartEventReceiver>();
     
+    internal static IEnumerable<IAsyncInitializer> GetOnInitializeObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<IAsyncInitializer>();
+    
     internal static IEnumerable<ITestRetryEventReceiver> GetTestRetryEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestRetryEventReceiver>();
     
@@ -93,9 +96,9 @@ public static class TestContextExtensions
     {
         IEnumerable<object?> rawObjects =
         [
+            context.TestDetails.ClassInstance,
             context.Events,
             ..context.TestDetails.Attributes,
-            context.TestDetails.ClassInstance,
             context.InternalDiscoveredTest.ClassConstructor,
             ..context.TestDetails.TestClassArguments,
             ..context.TestDetails.TestMethodArguments,
