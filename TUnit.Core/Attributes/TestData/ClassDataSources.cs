@@ -112,7 +112,7 @@ internal class ClassDataSources
         }
     }
 
-    public async ValueTask OnTestStart<T>(BeforeTestContext beforeTestContext, bool isStatic, SharedType shared, string key, T? item)
+    public async ValueTask OnInitialize<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
     {
         if (isStatic)
         {
@@ -120,7 +120,7 @@ internal class ClassDataSources
             return;
         }
         
-        await Initialize(beforeTestContext.TestContext, shared, key, item);
+        await Initialize(testContext, shared, key, item);
     }
 
     public Task Initialize<T>(TestContext testContext, SharedType shared, string key, T? item)

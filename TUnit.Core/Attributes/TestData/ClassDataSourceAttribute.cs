@@ -24,9 +24,9 @@ public sealed class ClassDataSourceAttribute<T> : DataSourceGeneratorAttribute<T
                     item);
             };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, context) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                     context,
                     ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
                     Shared,

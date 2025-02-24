@@ -82,37 +82,37 @@ public sealed class ClassDataSourceAttribute<
                     itemsWithMetadata.Item5.T);
             };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, context) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                     context,
                     false,
                     itemsWithMetadata.Item1.SharedType,
                     itemsWithMetadata.Item1.Key,
                     itemsWithMetadata.Item1.T);
 
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                     context,
                     false,
                     itemsWithMetadata.Item2.SharedType,
                     itemsWithMetadata.Item2.Key,
                     itemsWithMetadata.Item2.T);
 
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                     context,
                     false,
                     itemsWithMetadata.Item3.SharedType,
                     itemsWithMetadata.Item3.Key,
                     itemsWithMetadata.Item3.T);
 
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                     context,
                     false,
                     itemsWithMetadata.Item4.SharedType,
                     itemsWithMetadata.Item4.Key,
                     itemsWithMetadata.Item4.T);
 
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                     context,
                     false,
                     itemsWithMetadata.Item5.SharedType,

@@ -3,6 +3,7 @@
 namespace TUnit.Core;
 
 public record TestContextEvents : 
+    IAsyncInitializer,
     IDisposable,
     ITestRegisteredEventReceiver,
     ITestStartEventReceiver,
@@ -17,6 +18,7 @@ public record TestContextEvents :
     
     public EventHandler? OnDispose { get; set; }
     public AsyncEvent<TestRegisteredContext>? OnTestRegistered { get; set; }
+    public AsyncEvent<TestContext>? OnInitialize { get; set; }
     public AsyncEvent<BeforeTestContext>? OnTestStart { get; set; }
     public AsyncEvent<TestContext>? OnTestEnd { get; set; }
     public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
@@ -72,5 +74,13 @@ public record TestContextEvents :
 
     public void OnTestStartSynchronous(BeforeTestContext beforeTestContext)
     {
+    }
+
+    public async Task InitializeAsync()
+    {
+        if (OnInitialize != null)
+        {
+            await OnInitialize.InvokeAsync(this, TestContext.Current!);
+        }
     }
 }
