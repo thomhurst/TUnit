@@ -37,10 +37,6 @@ public class GenerateReadMeModule : Module<File>
         var runs = await context.GitHub().Client.Actions.Workflows.Runs.List(context.GitHub().RepositoryInfo.Owner,
             context.GitHub().RepositoryInfo.RepositoryName, new WorkflowRunsRequest
             {
-                Status = CheckRunStatusFilter.Success,
-                ExcludePullRequests = true,
-                Branch = "main",
-                Event = "schedule",
                 HeadSha = context.GitHub().EnvironmentVariables.Sha
             });
 
