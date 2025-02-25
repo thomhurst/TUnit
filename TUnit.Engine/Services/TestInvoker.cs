@@ -105,14 +105,19 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
         
         foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
         {
-            await logger.LogDebugAsync("Executing ITestEndEventReceivers");
+            await logger.LogDebugAsync($"Executing ITestEndEventReceiver: {testEndEventsObject.GetType().Name}");
 
             await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
                 cleanUpExceptions);
         }
         
-        await logger.LogDebugAsync("Disposing test class");
-        await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
+        foreach (var disposableObject in testContext.GetOnDisposeObjects())
+        {
+            await logger.LogDebugAsync($"Disposing: {disposableObject.GetType().Name}");
+
+            await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(disposableObject),
+                cleanUpExceptions);
+        }
         
         await _consoleStandardOutLock.WaitAsync();
 
