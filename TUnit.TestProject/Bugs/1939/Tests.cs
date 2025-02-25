@@ -23,7 +23,9 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
     }
     
     [After(TestSession)]
+#pragma warning disable TUnit0042
     public static async Task AssertAllDataClassesDisposed(TestSessionContext context)
+#pragma warning restore TUnit0042
     {
         var tests = context.TestClasses
             .FirstOrDefault(x => x.ClassType == typeof(Tests))

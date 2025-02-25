@@ -81,7 +81,7 @@ public static class TestContextExtensions
         GetPossibleEventObjects(context).OfType<ITestEndEventReceiver>();
     
     internal static IEnumerable<object> GetOnDisposeObjects(this TestContext context) =>
-        GetEventObjects(context).Reverse().Where(x => x is IDisposable or IAsyncDisposable).OfType<object>();
+        Enumerable.Reverse(GetEventObjects(context)).Where(x => x is IDisposable or IAsyncDisposable).OfType<object>();
     
     internal static IEnumerable<ITestSkippedEventReceiver> GetTestSkippedEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestSkippedEventReceiver>();
