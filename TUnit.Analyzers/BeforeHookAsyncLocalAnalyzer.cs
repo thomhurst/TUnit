@@ -11,7 +11,7 @@ namespace TUnit.Analyzers;
 public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.AsyncLocalVoidMethod);
+        ImmutableArray.Create(Rules.AsyncLocalCallFlowValues);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -39,16 +39,31 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var parent = assignmentOperation.Parent;
-        while (parent != null)
+        var methodBodyOperation = GetParentMethod(assignmentOperation.Parent);
+
+        if (methodBodyOperation is null)
+        {
+            return;
+        }
+        
+        CheckMethod(context, methodBodyOperation);
+    }
+
+    private IMethodBodyOperation? GetParentMethod(IOperation? assignmentOperationParent)
+    {
+        var parent = assignmentOperationParent;
+
+        while (parent is not null)
         {
             if (parent is IMethodBodyOperation methodBodyOperation)
             {
-                CheckMethod(context, methodBodyOperation);
+                return methodBodyOperation;
             }
 
             parent = parent.Parent;
         }
+
+        return null;
     }
 
     private void CheckMethod(OperationAnalysisContext context, IMethodBodyOperation methodBodyOperation)
@@ -59,19 +74,20 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (methodSymbol.IsHookMethod(context.Compilation, out _, out _, out var type)
-            && type is HookType.Before 
-            && !methodSymbol.ReturnsVoid)
+        if (!methodSymbol.IsHookMethod(context.Compilation, out _, out _, out var type)
+            || type is not HookType.Before)
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.AsyncLocalVoidMethod,
-                context.Operation.Syntax.GetLocation(),
-                [methodBodyOperation.Syntax.GetLocation()]));
             return;
         }
 
-        var invocations = methodBodyOperation.SemanticModel
-            .SyntaxTree
-            .GetRoot()
+        var syntax = methodSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+
+        if (syntax is null)
+        {
+            return;
+        }
+
+        var invocations = syntax
             .DescendantNodes()
             .OfType<InvocationExpressionSyntax>();
         
@@ -84,36 +100,13 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
                 continue;
             }
             
-            if (!SymbolEqualityComparer.Default.Equals(invocationOperation.TargetMethod, methodSymbol))
+            if (invocationOperation.TargetMethod.Name == "FlowAsyncLocalValues")
             {
-                continue;
+                return;
             }
-
-            var parentMethodBody = GetParentMethodBody(invocationOperation);
-
-            if (parentMethodBody == null)
-            {
-                continue;
-            }
-            
-            CheckMethod(context, parentMethodBody);
-        }
-    }
-
-    private IMethodBodyOperation? GetParentMethodBody(IInvocationOperation invocationOperation)
-    {
-        var parent = invocationOperation.Parent;
-
-        while (parent != null)
-        {
-            if (parent is IMethodBodyOperation methodBodyOperation)
-            {
-                return methodBodyOperation;
-            }
-            
-            parent = parent.Parent;
         }
 
-        return null;
+        context.ReportDiagnostic(Diagnostic.Create(Rules.AsyncLocalCallFlowValues,
+            methodBodyOperation.Syntax.GetLocation()));
     }
 }

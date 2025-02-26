@@ -20,18 +20,21 @@ public class BeforeHookAsyncLocalAnalyzerTests
                 {
                     private static readonly AsyncLocal<int> _asyncLocal = new();
                     
-                    [Before(Test)]
-                    public void {|#0:MyTest|}()
+                    {|#0:[Before(Class)]
+                    public void MyTest()
                     {
                         _asyncLocal.Value = 1;
-                    }
+                    }|}
                 }
-                """
+                """,
+                Verifier
+                    .Diagnostic(Rules.AsyncLocalCallFlowValues)
+                    .WithLocation(0)
             );
     }
     
     [Test]
-    public async Task Async_Raises_Error_Setting_AsyncLocal()
+    public async Task FlowAsyncLocalValues_No_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -45,55 +48,13 @@ public class BeforeHookAsyncLocalAnalyzerTests
                 {
                     private static readonly AsyncLocal<int> _asyncLocal = new();
                     
-                    {|#1:[Before(Test)]
-                    public async Task MyTest()
+                    {|#0:[Before(Class)]
+                    public void MyTest(ClassHookContext context)
                     {
-                        {|#0:_asyncLocal.Value = 1|};
-                        await Task.Yield();
+                        _asyncLocal.Value = 1;
+                        context.FlowAsyncLocalValues();
                     }|}
                 }
-                """,
-
-                Verifier
-                    .Diagnostic(Rules.AsyncLocalVoidMethod)
-                    .WithLocation(0)
-                    .WithLocation(1)
-            );
-    }
-    
-    [Test]
-    public async Task Async_Raises_Error_Setting_AsyncLocal_Nested_Method()
-    {
-        await Verifier
-            .VerifyAnalyzerAsync(
-                """
-                using System.Threading;
-                using System.Threading.Tasks;
-                using TUnit.Core;
-                using static TUnit.Core.HookType;
-                            
-                public class MyClass
-                {
-                    private static readonly AsyncLocal<int> _asyncLocal = new();
-                    
-                    {|#1:[Before(Test)]
-                    public async Task MyTest()
-                    {
-                        SetAsyncLocal();
-                        await Task.Yield();
-                    }|}
-                    
-                    private void SetAsyncLocal()
-                    {
-                        {|#0:_asyncLocal.Value = 1|};
-                    }
-                }
-                """,
-
-                Verifier
-                    .Diagnostic(Rules.AsyncLocalVoidMethod)
-                    .WithLocation(0)
-                    .WithLocation(1)
-            );
+                """);
     }
 }
