@@ -4,6 +4,7 @@ using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
@@ -68,6 +69,8 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
                     await logger.LogDebugAsync("Executing [Before(Class)] hook");
 
                     await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
+                    
+                    ExecutionContextHelper.RestoreContext(classHookContext.ExecutionContext);
                 }
             }
 

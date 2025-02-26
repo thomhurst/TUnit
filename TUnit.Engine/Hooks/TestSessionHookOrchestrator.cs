@@ -1,6 +1,7 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
@@ -20,6 +21,8 @@ internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, Assemb
             await logger.LogDebugAsync("Executing [Before(TestSession)] hook");
 
             await beforeSessionHook.ExecuteAsync(testSessionContext, cancellationToken);
+            
+            ExecutionContextHelper.RestoreContext(testSessionContext.ExecutionContext);
         }
 
         return testSessionContext.ExecutionContext;
