@@ -111,7 +111,9 @@ internal class TestsExecutor
             {
                 if (test.TestContext.SkipReason == null)
                 {
-                    await OnBeforeStart(test.TestContext);
+                    RestoreContexts(await ExecuteBeforeAssemblyHooks(test.TestContext));
+
+                    RestoreContexts(await ExecuteBeforeClassHooks(test.TestContext));
                 }
 
                 await ProcessTest(test, filter, context, context.CancellationToken);
@@ -139,13 +141,9 @@ internal class TestsExecutor
         {
             if (test.TestContext.SkipReason == null)
             {
-                await OnBeforeStart(test.TestContext);
-            }
+                RestoreContexts(await ExecuteBeforeAssemblyHooks(test.TestContext));
 
-            var assemblyHookContext = _assemblyHookOrchestrator.GetContext(test.TestDetails.TestClass.Type.Assembly);
-            if (assemblyHookContext.ExecutionContext != null)
-            {
-                ExecutionContext.Restore(assemblyHookContext.ExecutionContext);
+                RestoreContexts(await ExecuteBeforeClassHooks(test.TestContext));
             }
 
             await ProcessTest(test, filter, context, token);
@@ -156,12 +154,24 @@ internal class TestsExecutor
             {
                 if (test.TestContext.SkipReason != null)
                 {
-                    await OnBeforeStart(test.TestContext!);
+                    RestoreContexts(await ExecuteBeforeAssemblyHooks(test.TestContext));
+
+                    RestoreContexts(await ExecuteBeforeClassHooks(test.TestContext));
                 }
 
                 await ProcessTest(test, filter, context, context.CancellationToken);
             })
             .ProcessInParallel(_maximumParallelTests);
+#endif
+    }
+
+    private void RestoreContexts(List<ExecutionContext> executionContexts)
+    {
+#if NET
+        foreach (var executionContext in executionContexts)
+        {
+            ExecutionContext.Restore(executionContext);
+        }
 #endif
     }
 
@@ -199,53 +209,9 @@ internal class TestsExecutor
     }
 #endif
 
-    private async Task OnBeforeStart(TestContext testContext)
+    private async Task<List<ExecutionContext>> ExecuteBeforeClassHooks(TestContext testContext)
     {
-        // Ideally all these 'Set up' hooks would be refactored into inner/classes and/or methods,
-        // But users may want to set AsyncLocal values, and so the method must be a parent/ancestor of the method that starts the test!
-        // So actually refactoring these into other methods would mean they wouldn't be a parent/ancestor and would break async local!
-        var assemblyHooksTaskCompletionSource = _assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(
-            testContext.TestDetails.TestClass.Type.Assembly, _ => new TaskCompletionSource<bool>(),
-            out var assemblyHooksTaskPreviouslyExisted);
-
-        if (assemblyHooksTaskPreviouslyExisted)
-        {
-            await assemblyHooksTaskCompletionSource.Task;
-        }
-        else
-        {
-            try
-            {
-                var beforeAssemblyHooks = _assemblyHookOrchestrator.CollectBeforeHooks(testContext.TestDetails.TestClass.Type.Assembly);
-                var assemblyHookContext =_assemblyHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type.Assembly);
-
-                AssemblyHookContext.Current = assemblyHookContext;
-
-                foreach (var beforeHook in beforeAssemblyHooks)
-                {
-                    if (beforeHook.IsSynchronous)
-                    {
-                        await _logger.LogDebugAsync("Executing synchronous [Before(Assembly)] hook");
-
-                        beforeHook.Execute(assemblyHookContext, CancellationToken.None);
-                    }
-                    else
-                    {
-                        await _logger.LogDebugAsync("Executing asynchronous [Before(Assembly)] hook");
-
-                        await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
-                    }
-                }
-
-                AssemblyHookContext.Current = null;
-                assemblyHooksTaskCompletionSource.SetResult(false);
-            }
-            catch (Exception e)
-            {
-                assemblyHooksTaskCompletionSource.SetException(e);
-                throw;
-            }
-        }
+        var classHookContext = _classHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type);
 
         var classHooksTaskCompletionSource = _classHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(
             testContext.TestDetails.TestClass.Type, _ => new TaskCompletionSource<bool>(),
@@ -254,42 +220,90 @@ internal class TestsExecutor
         if (classHooksTaskPreviouslyExisted)
         {
             await classHooksTaskCompletionSource.Task;
+            return classHookContext.ExecutionContexts;
         }
-        else
+
+        try
         {
-            try
+            var beforeClassHooks =
+                _classHookOrchestrator.CollectBeforeHooks(testContext.TestDetails.TestClass.Type);
+
+            ClassHookContext.Current = classHookContext;
+
+            foreach (var beforeHook in beforeClassHooks)
             {
-                var beforeClassHooks =
-                    _classHookOrchestrator.CollectBeforeHooks(testContext.TestDetails.TestClass.Type);
-                var classHookContext = _classHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type);
-
-                ClassHookContext.Current = classHookContext;
-
-                foreach (var beforeHook in beforeClassHooks)
+                if (beforeHook.IsSynchronous)
                 {
-                    if (beforeHook.IsSynchronous)
-                    {
-                        await _logger.LogDebugAsync("Executing synchronous [Before(Class)] hook");
+                    await _logger.LogDebugAsync("Executing synchronous [Before(Class)] hook");
 
-                        beforeHook.Execute(classHookContext, CancellationToken.None);
-                    }
-                    else
-                    {
-                        await _logger.LogDebugAsync("Executing asynchronous [Before(Class)] hook");
-
-                        await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
-                    }
+                    beforeHook.Execute(classHookContext, CancellationToken.None);
                 }
+                else
+                {
+                    await _logger.LogDebugAsync("Executing asynchronous [Before(Class)] hook");
 
-                ClassHookContext.Current = null;
-                classHooksTaskCompletionSource.SetResult(false);
+                    await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
+                }
             }
-            catch (Exception e)
-            {
-                classHooksTaskCompletionSource.SetException(e);
-                throw;
-            }
+
+            ClassHookContext.Current = null;
+            classHooksTaskCompletionSource.SetResult(false);
         }
+        catch (Exception e)
+        {
+            classHooksTaskCompletionSource.SetException(e);
+            throw;
+        }
+
+        return classHookContext.ExecutionContexts;
+    }
+
+    private async Task<List<ExecutionContext>> ExecuteBeforeAssemblyHooks(TestContext testContext)
+    {
+        var assemblyHookContext =_assemblyHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type.Assembly);
+
+        var assemblyHooksTaskCompletionSource = _assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(
+            testContext.TestDetails.TestClass.Type.Assembly, _ => new TaskCompletionSource<bool>(),
+            out var assemblyHooksTaskPreviouslyExisted);
+
+        if (assemblyHooksTaskPreviouslyExisted)
+        {
+            await assemblyHooksTaskCompletionSource.Task;
+            return assemblyHookContext.ExecutionContexts;
+        }
+
+        try
+        {
+            var beforeAssemblyHooks = _assemblyHookOrchestrator.CollectBeforeHooks(testContext.TestDetails.TestClass.Type.Assembly);
+
+            AssemblyHookContext.Current = assemblyHookContext;
+
+            foreach (var beforeHook in beforeAssemblyHooks)
+            {
+                if (beforeHook.IsSynchronous)
+                {
+                    await _logger.LogDebugAsync("Executing synchronous [Before(Assembly)] hook");
+
+                    beforeHook.Execute(assemblyHookContext, CancellationToken.None);
+                }
+                else
+                {
+                    await _logger.LogDebugAsync("Executing asynchronous [Before(Assembly)] hook");
+
+                    await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                }
+            }
+
+            AssemblyHookContext.Current = null;
+            assemblyHooksTaskCompletionSource.SetResult(false);
+        }
+        catch (Exception e)
+        {
+            assemblyHooksTaskCompletionSource.SetException(e);
+            throw;
+        }
+
+        return assemblyHookContext.ExecutionContexts;
     }
 
     private int GetParallelTestsLimit()

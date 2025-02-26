@@ -6,7 +6,7 @@ using TUnit.Core.Logging;
 
 namespace TUnit.Core;
 
-public abstract class Context : IContext
+public abstract class Context : IContext, IDisposable
 {
     public static Context Current =>
         TestContext.Current as Context
@@ -29,9 +29,18 @@ public abstract class Context : IContext
     internal Context()
     {
     }
-    
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public ExecutionContext? ExecutionContext { get; set; }
+
+    internal List<ExecutionContext> ExecutionContexts { get; } = [];
+
+    public void FlowAsyncLocalValues()
+    {
+        var executionContext = ExecutionContext.Capture();
+        
+        if (executionContext != null)
+        {
+            ExecutionContexts.Add(executionContext);
+        }
+    }
     
     public string GetStandardOutput()
     {
@@ -46,5 +55,13 @@ public abstract class Context : IContext
     public TUnitLogger GetDefaultLogger()
     {
         return new DefaultLogger();
+    }
+
+    public void Dispose()
+    {
+        foreach (var executionContext in ExecutionContexts)
+        {
+            executionContext.Dispose();
+        }
     }
 }
