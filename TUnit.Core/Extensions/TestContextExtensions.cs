@@ -72,13 +72,16 @@ public static class TestContextExtensions
         GetPossibleEventObjects(context).OfType<ITestStartEventReceiver>();
     
     internal static IEnumerable<IAsyncInitializer> GetOnInitializeObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<IAsyncInitializer>();
+        GetEventObjects(context).OfType<IAsyncInitializer>();
     
     internal static IEnumerable<ITestRetryEventReceiver> GetTestRetryEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestRetryEventReceiver>();
     
     internal static IEnumerable<ITestEndEventReceiver> GetTestEndEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestEndEventReceiver>();
+    
+    internal static IEnumerable<object> GetOnDisposeObjects(this TestContext context) =>
+        Enumerable.Reverse(GetEventObjects(context)).Where(x => x is IDisposable or IAsyncDisposable).OfType<object>();
     
     internal static IEnumerable<ITestSkippedEventReceiver> GetTestSkippedEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestSkippedEventReceiver>();
@@ -94,17 +97,17 @@ public static class TestContextExtensions
 
     private static IEnumerable<object?> GetPossibleEventObjects(this TestContext context)
     {
-        IEnumerable<object?> rawObjects =
-        [
-            context.TestDetails.ClassInstance,
-            context.Events,
-            ..context.TestDetails.Attributes,
-            context.InternalDiscoveredTest.ClassConstructor,
-            ..context.TestDetails.TestClassArguments,
-            ..context.TestDetails.TestMethodArguments,
-            ..context.TestDetails.TestClassInjectedPropertyArguments
-        ];
+        return GetEventObjects(context).OfType<IEventReceiver>().OrderBy(x => x.Order);
+    }
 
-        return rawObjects.OfType<IEventReceiver>().OrderBy(x => x.Order);
+    private static object?[] GetEventObjects(TestContext context)
+    {
+        return context.EventObjects ??= 
+        [
+            context.InternalDiscoveredTest.ClassConstructor,
+            ..context.TestDetails.Attributes,
+            context.Events,
+            context.TestDetails.ClassInstance,
+        ];
     }
 }
