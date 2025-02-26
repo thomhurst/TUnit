@@ -217,9 +217,14 @@ public class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLi
             
             [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_remoteStackTraceString")]
             static extern ref string? RemoteStackTraceString(Exception e);
-            
+
+#if NET8_0
             [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_stackTrace")]
-            static extern ref byte[]? StackTrace(Exception e);
+            static extern ref byte[]? StackTrace(Exception e);    
+#else
+            [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_stackTrace")]
+            static extern ref object? StackTrace(Exception e);   
+#endif
         }
         catch
         {
