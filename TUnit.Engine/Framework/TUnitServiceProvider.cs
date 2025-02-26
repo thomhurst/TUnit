@@ -81,12 +81,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         TestGrouper = Register(new TestGrouper());
         
-        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector));
+        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector, Logger));
 
         TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector, stringFilter));
         TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector, AssemblyHookOrchestrator, stringFilter));
         
-        var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, HooksCollector));
+        var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, HooksCollector, Logger));
         
         var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector));
 

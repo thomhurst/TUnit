@@ -201,18 +201,9 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterClassHooks)
         {
-            if (afterHook.IsSynchronous)
-            {
-                await logger.LogDebugAsync("Executing synchronous [After(Class)] hook");
+            await logger.LogDebugAsync("Executing [After(Class)] hook");
 
-                RunHelpers.RunSafely(() => afterHook.Execute(classHookContext, CancellationToken.None), cleanUpExceptions);
-            }
-            else
-            {
-                await logger.LogDebugAsync("Executing asynchronous [After(Class)] hook");
-
-                await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
-            }
+            await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
         }
                 
         ClassHookContext.Current = null;
@@ -224,18 +215,9 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterAssemblyHooks)
         {
-            if (afterHook.IsSynchronous)
-            {
-                await logger.LogDebugAsync("Executing synchronous [After(Assembly)] hook");
+            await logger.LogDebugAsync("Executing [After(Assembly)] hook");
 
-                RunHelpers.RunSafely(() => afterHook.Execute(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
-            }
-            else
-            {
-                await logger.LogDebugAsync("Executing asynchronous [After(Assembly)] hook");
-
-                await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
-            }
+            await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
         }
                 
         AssemblyHookContext.Current = null;

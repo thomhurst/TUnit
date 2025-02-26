@@ -18,7 +18,7 @@ public record BeforeAssemblyHookMethod : StaticHookMethod<AssemblyHookContext>
     public override Task ExecuteAsync(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteAsynchronousBeforeAssemblyHook(MethodInfo, context,
-            () => AsyncBody!.Invoke(context, cancellationToken)
+            () => Body!.Invoke(context, cancellationToken)
         );
     }
 }

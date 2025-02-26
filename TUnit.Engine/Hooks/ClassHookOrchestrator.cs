@@ -3,11 +3,13 @@ using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Core.Hooks;
+using TUnit.Core.Logging;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector)
+internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector, TUnitFrameworkLogger logger)
 {
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classHookContexts = new();
     
@@ -38,6 +40,47 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
                 yield return staticHookMethod;
             }
         }
+    }
+    
+    public async Task<List<ExecutionContext>> ExecuteBeforeClassHooks(TestContext testContext)
+    {
+        var classHookContext = GetContext(testContext.TestDetails.TestClass.Type);
+
+        var classHooksTaskCompletionSource = PreviouslyRunBeforeHooks.GetOrAdd(
+            testContext.TestDetails.TestClass.Type, _ => new TaskCompletionSource<bool>(),
+            out var classHooksTaskPreviouslyExisted);
+
+        if (classHooksTaskPreviouslyExisted)
+        {
+            await classHooksTaskCompletionSource.Task;
+            return classHookContext.ExecutionContexts;
+        }
+
+        try
+        {
+            var beforeClassHooks = CollectBeforeHooks(testContext.TestDetails.TestClass.Type);
+
+            ClassHookContext.Current = classHookContext;
+
+            foreach (var beforeHook in beforeClassHooks)
+            {
+                {
+                    await logger.LogDebugAsync("Executing [Before(Class)] hook");
+
+                    await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
+                }
+            }
+
+            ClassHookContext.Current = null;
+            classHooksTaskCompletionSource.SetResult(false);
+        }
+        catch (Exception e)
+        {
+            classHooksTaskCompletionSource.SetException(e);
+            throw;
+        }
+
+        return classHookContext.ExecutionContexts;
     }
 
     public IEnumerable<IExecutableHook<ClassHookContext>> CollectAfterHooks(

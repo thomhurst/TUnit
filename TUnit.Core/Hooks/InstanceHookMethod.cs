@@ -33,28 +33,12 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     
     public required int Order { get; init; }
     
-    public Func<object, TestContext, CancellationToken, Task>? AsyncBody { get; init; }
-    public Action<object, TestContext, CancellationToken>? Body { get; init; }
-    
-    public bool IsSynchronous => Body != null;
-    
-    public bool Execute(TestContext context, CancellationToken cancellationToken)
-    {
-        if (Body != null)
-        {
-            HookExecutor.ExecuteSynchronousBeforeTestHook(MethodInfo, context,
-                () => Body.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
-            );
-            return true;
-        }
-
-        return false;
-    }
+    public Func<object, TestContext, CancellationToken, Task>? Body { get; init; }
 
     public Task ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteAsynchronousBeforeTestHook(MethodInfo, context,
-            () => AsyncBody!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
+            () => Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
         );
     }
 }

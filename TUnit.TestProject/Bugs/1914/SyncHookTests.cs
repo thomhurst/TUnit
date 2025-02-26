@@ -3,7 +3,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject.Bugs._1914;
 
-public class Tests
+public class SyncHookTests
 {
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal = new();
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal2 = new();

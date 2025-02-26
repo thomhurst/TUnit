@@ -86,18 +86,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
             foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
             {
-                if (beforeDiscoveryHook.IsSynchronous)
-                {
-                    await logger.LogDebugAsync("Executing synchronous [Before(TestDiscovery)] hook");
+                await logger.LogDebugAsync("Executing [Before(TestDiscovery)] hook");
 
-                    beforeDiscoveryHook.Execute(beforeContext, CancellationToken.None);
-                }
-                else
-                {
-                    await logger.LogDebugAsync("Executing asynchronous [Before(TestDiscovery)] hook");
-
-                    await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
-                }
+                await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
             }
 
             var allDiscoveredTests = serviceProvider.TestDiscoverer.GetTests(serviceProvider.EngineCancellationToken.Token);
@@ -107,18 +98,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
             foreach (var afterDiscoveryHook in afterDiscoveryHooks)
             {
-                if (afterDiscoveryHook.IsSynchronous)
-                {
-                    await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
+                await logger.LogDebugAsync("Executing [After(TestDiscovery)] hook");
 
-                    afterDiscoveryHook.Execute(afterContext, CancellationToken.None);
-                }
-                else
-                {
-                    await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
-
-                    await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
-                }
+                await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
             }
             
             var filteredTests = await serviceProvider.TestDiscoverer
@@ -145,18 +127,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     foreach (var beforeSessionHook in beforeSessionHooks)
                     {
-                        if (beforeSessionHook.IsSynchronous)
-                        {
-                            await logger.LogDebugAsync("Executing synchronous [Before(TestSession)] hook");
+                        await logger.LogDebugAsync("Executing [Before(TestSession)] hook");
 
-                            beforeSessionHook.Execute(testSessionContext, context.CancellationToken);
-                        }
-                        else
-                        {
-                            await logger.LogDebugAsync("Executing asynchronous [Before(TestSession)] hook");
-
-                            await beforeSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
-                        }
+                        await beforeSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
                     }
                     
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
@@ -169,18 +142,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     foreach (var afterSessionHook in afterSessionHooks)
                     {
-                        if (afterSessionHook.IsSynchronous)
-                        {
-                            await logger.LogDebugAsync("Executing synchronous [After(TestSession)] hook");
+                        await logger.LogDebugAsync("Executing [After(TestSession)] hook");
 
-                            afterSessionHook.Execute(testSessionContext, context.CancellationToken);
-                        }
-                        else
-                        {
-                            await logger.LogDebugAsync("Executing asynchronous [After(TestSession)] hook");
-
-                            await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
-                        }
+                        await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
                     }
                     
                     foreach (var artifact in testSessionContext.Artifacts)

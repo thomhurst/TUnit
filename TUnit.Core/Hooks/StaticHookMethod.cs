@@ -9,12 +9,9 @@ namespace TUnit.Core.Hooks;
 #endif
 public abstract record StaticHookMethod<T> : StaticHookMethod, IExecutableHook<T>
 {
-    public Func<T, CancellationToken, Task>? AsyncBody { get; init; }
-    public Action<T, CancellationToken>? Body { get; init; }
-
+    public Func<T, CancellationToken, Task>? Body { get; init; }
     public abstract bool Execute(T context, CancellationToken cancellationToken);
     public abstract Task ExecuteAsync(T context, CancellationToken cancellationToken);
-    public bool IsSynchronous => Body != null;
 }
 
 #if !DEBUG
