@@ -42,7 +42,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
         }
     }
     
-    public async Task<List<ExecutionContext>> ExecuteBeforeClassHooks(TestContext testContext)
+    public async Task<ExecutionContext?> ExecuteBeforeClassHooks(TestContext testContext)
     {
         var classHookContext = GetContext(testContext.TestDetails.TestClass.Type);
 
@@ -53,7 +53,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
         if (classHooksTaskPreviouslyExisted)
         {
             await classHooksTaskCompletionSource.Task;
-            return classHookContext.ExecutionContexts;
+            return classHookContext.ExecutionContext;
         }
 
         try
@@ -80,7 +80,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
             throw;
         }
 
-        return classHookContext.ExecutionContexts;
+        return classHookContext.ExecutionContext;
     }
 
     public IEnumerable<IExecutableHook<ClassHookContext>> CollectAfterHooks(

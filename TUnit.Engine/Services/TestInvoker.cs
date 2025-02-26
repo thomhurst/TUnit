@@ -25,7 +25,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
                 await onInitializeObject.InitializeAsync();
             }
 
-            ExecutionContextHelper.RestoreContexts(await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken));
+            ExecutionContextHelper.RestoreContext(await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken));
             
             foreach (var testStartEventsObject in discoveredTest.TestContext.GetTestStartEventObjects())
             {

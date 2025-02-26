@@ -109,9 +109,9 @@ internal class TestsExecutor
             {
                 if (test.TestContext.SkipReason == null)
                 {
-                    ExecutionContextHelper.RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                    ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
 
-                    ExecutionContextHelper.RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                    ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
                 }
 
                 await ProcessTest(test, filter, context, context.CancellationToken);
@@ -139,9 +139,9 @@ internal class TestsExecutor
         {
             if (test.TestContext.SkipReason == null)
             {
-                ExecutionContextHelper.RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
 
-                ExecutionContextHelper.RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
             }
 
             await ProcessTest(test, filter, context, token);
@@ -152,9 +152,9 @@ internal class TestsExecutor
             {
                 if (test.TestContext.SkipReason != null)
                 {
-                    ExecutionContextHelper.RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                    ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
 
-                    ExecutionContextHelper.RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                    ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
                 }
 
                 await ProcessTest(test, filter, context, context.CancellationToken);

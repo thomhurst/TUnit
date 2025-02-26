@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Logging;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Framework;
 
@@ -81,15 +82,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             serviceProvider.EngineCancellationToken.Initialise(context.CancellationToken);
             
-            var beforeDiscoveryHooks = serviceProvider.TestDiscoveryHookOrchestrator.CollectBeforeHooks();
-            var beforeContext = serviceProvider.TestDiscoveryHookOrchestrator.GetBeforeContext();
-        
-            foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
-            {
-                await logger.LogDebugAsync("Executing [Before(TestDiscovery)] hook");
-
-                await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
-            }
+            ExecutionContextHelper.RestoreContext(await serviceProvider.TestDiscoveryHookOrchestrator.RunBeforeTestDiscovery());
 
             var allDiscoveredTests = serviceProvider.TestDiscoverer.GetTests(serviceProvider.EngineCancellationToken.Token);
             
@@ -123,15 +116,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                             TestFilter = stringFilter
                         };
 
-                    var beforeSessionHooks = serviceProvider.TestSessionHookOrchestrator.CollectBeforeHooks();
+                    ExecutionContextHelper.RestoreContext(await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(context.CancellationToken));
 
-                    foreach (var beforeSessionHook in beforeSessionHooks)
-                    {
-                        await logger.LogDebugAsync("Executing [Before(TestSession)] hook");
-
-                        await beforeSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
-                    }
-                    
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context);
 

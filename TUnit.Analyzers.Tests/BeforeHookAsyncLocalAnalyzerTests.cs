@@ -34,7 +34,7 @@ public class BeforeHookAsyncLocalAnalyzerTests
     }
     
     [Test]
-    public async Task FlowAsyncLocalValues_No_Error()
+    public async Task AddAsyncLocalValues_No_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -52,7 +52,7 @@ public class BeforeHookAsyncLocalAnalyzerTests
                     public void MyTest(ClassHookContext context)
                     {
                         _asyncLocal.Value = 1;
-                        context.FlowAsyncLocalValues();
+                        context.AddAsyncLocalValues();
                     }|}
                 }
                 """);

@@ -22,74 +22,74 @@ public class SyncHookTests
     private static readonly AsyncLocal<string> _4BeforeTestLocal = new();
     private static readonly AsyncLocal<string> _4BeforeTestLocal2 = new();
 
-    [BeforeEvery(TestDiscovery)]
+    [Before(TestDiscovery)]
     public static void BeforeTestDiscovery(BeforeTestDiscoveryContext context)
     {
         _0BeforeTestDiscoveryLocal.Value = "BeforeTestDiscovery";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
     
-    [BeforeEvery(TestDiscovery)]
+    [Before(TestDiscovery)]
     public static void BeforeTestDiscovery2(BeforeTestDiscoveryContext context)
     {
         _0BeforeTestDiscoveryLocal2.Value = "BeforeTestDiscovery2";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
 
-    [BeforeEvery(TestSession)]
+    [Before(TestSession)]
     public static void BeforeTestSession(TestSessionContext context)
     {
         _1BeforeTestSessionLocal.Value = "BeforeTestSession";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
     
-    [BeforeEvery(TestSession)]
+    [Before(TestSession)]
     public static void BeforeTestSession2(TestSessionContext context)
     {
         _1BeforeTestSessionLocal2.Value = "BeforeTestSession2";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
 
-    [BeforeEvery(Assembly)]
+    [Before(Assembly)]
     public static void BeforeAssembly(AssemblyHookContext context)
     {
         _2BeforeAssemblyLocal.Value = "BeforeAssembly";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
     
-    [BeforeEvery(Assembly)]
+    [Before(Assembly)]
     public static void BeforeAssembly2(AssemblyHookContext context)
     {
         _2BeforeAssemblyLocal2.Value = "BeforeAssembly2";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
 
-    [BeforeEvery(Class)]
+    [Before(Class)]
     public static void BeforeClass(ClassHookContext context)
     {
         _3BeforeClassLocal.Value = "BeforeClass";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
     
-    [BeforeEvery(Class)]
+    [Before(Class)]
     public static void BeforeClass2(ClassHookContext context)
     {
         _3BeforeClassLocal2.Value = "BeforeClass2";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
 
-    [BeforeEvery(Test)]
-    public static void BeforeTest(TestContext context)
+    [Before(Test)]
+    public void BeforeTest(TestContext context)
     {
         _4BeforeTestLocal.Value = "BeforeTest";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
     
-    [BeforeEvery(Test)]
-    public static void BeforeTest2(TestContext context)
+    [Before(Test)]
+    public void BeforeTest2(TestContext context)
     {
         _4BeforeTestLocal2.Value = "BeforeTest2";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
 
 
@@ -104,8 +104,6 @@ public class SyncHookTests
     [Arguments(8)]
     public async Task TestAsyncLocal(int i)
     {
-        using var _ = Assert.Multiple();
-
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery");
         await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession");
         await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly");

@@ -1,15 +1,18 @@
-﻿using TUnit.Core;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Core;
 
 namespace TUnit.Engine.Helpers;
 
 internal static class ExecutionContextHelper
 {
-    public static void RestoreContexts(Context context) => RestoreContexts(context.ExecutionContexts);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RestoreContext(Context context) => RestoreContext(context.ExecutionContext);
     
-    public static void RestoreContexts(List<ExecutionContext> executionContexts)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RestoreContext(ExecutionContext? executionContext)
     {
 #if NET
-        foreach (var executionContext in executionContexts)
+        if (executionContext != null)
         {
             ExecutionContext.Restore(executionContext);
         }

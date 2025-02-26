@@ -12,7 +12,7 @@ namespace TUnit.Engine.Hooks;
 #endif
 internal class TestHookOrchestrator(HooksCollector hooksCollector, TUnitFrameworkLogger logger)
 {
-    public async Task<List<ExecutionContext>> ExecuteBeforeHooks(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
+    public async Task<ExecutionContext?> ExecuteBeforeHooks(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
         var beforeHooks = CollectBeforeHooks(
             discoveredTest.TestContext.TestDetails.ClassInstance,
@@ -25,9 +25,11 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector, TUnitFramewor
             await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
                 executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken)
             );
+            
+            ExecutionContextHelper.RestoreContext(discoveredTest.TestContext.ExecutionContext);
         }
 
-        return discoveredTest.TestContext.ExecutionContexts;
+        return discoveredTest.TestContext.ExecutionContext;
     }
     
     internal IEnumerable<IExecutableHook<TestContext>> CollectBeforeHooks(object classInstance, DiscoveredTest discoveredTest)

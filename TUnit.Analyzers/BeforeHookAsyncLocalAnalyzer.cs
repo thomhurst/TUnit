@@ -100,7 +100,7 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
                 continue;
             }
             
-            if (invocationOperation.TargetMethod.Name == "FlowAsyncLocalValues")
+            if (invocationOperation.TargetMethod.Name == "AddAsyncLocalValues")
             {
                 return;
             }

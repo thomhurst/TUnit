@@ -204,8 +204,8 @@ public class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLi
             var newStackTrace = FilterStackTrace(originalStacktrace);
             
             StackTrace(exception) = null;
-            RemoteStackTraceString(exception) = null;
-            StackTraceString(exception) = newStackTrace;
+            StackTraceString(exception) = null;
+            RemoteStackTraceString(exception) = newStackTrace;
 
             if (exception.InnerException != null)
             {

@@ -18,7 +18,7 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
     
     internal GetOnlyDictionary<Assembly, TaskCompletionSource<bool>> PreviouslyRunBeforeHooks { get; } = new();
 
-    public async Task<List<ExecutionContext>> ExecuteBeforeAssemblyHooks(TestContext testContext)
+    public async Task<ExecutionContext?> ExecuteBeforeAssemblyHooks(TestContext testContext)
     {
         var assemblyHookContext = GetContext(testContext.TestDetails.TestClass.Type.Assembly);
 
@@ -29,7 +29,7 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
         if (assemblyHooksTaskPreviouslyExisted)
         {
             await assemblyHooksTaskCompletionSource.Task;
-            return assemblyHookContext.ExecutionContexts;
+            return assemblyHookContext.ExecutionContext;
         }
 
         try
@@ -54,7 +54,7 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
             throw;
         }
 
-        return assemblyHookContext.ExecutionContexts;
+        return assemblyHookContext.ExecutionContext;
     }
     
     public IEnumerable<StaticHookMethod<AssemblyHookContext>> CollectBeforeHooks(Assembly assembly)

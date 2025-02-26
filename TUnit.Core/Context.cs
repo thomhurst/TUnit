@@ -30,16 +30,11 @@ public abstract class Context : IContext, IDisposable
     {
     }
 
-    internal List<ExecutionContext> ExecutionContexts { get; } = [];
+    internal ExecutionContext? ExecutionContext { get; set; }
 
-    public void FlowAsyncLocalValues()
+    public void AddAsyncLocalValues()
     {
-        var executionContext = ExecutionContext.Capture();
-        
-        if (executionContext != null)
-        {
-            ExecutionContexts.Add(executionContext);
-        }
+        ExecutionContext = ExecutionContext.Capture();
     }
     
     public string GetStandardOutput()
@@ -59,9 +54,6 @@ public abstract class Context : IContext, IDisposable
 
     public void Dispose()
     {
-        foreach (var executionContext in ExecutionContexts)
-        {
-            executionContext.Dispose();
-        }
+        ExecutionContext?.Dispose();
     }
 }
