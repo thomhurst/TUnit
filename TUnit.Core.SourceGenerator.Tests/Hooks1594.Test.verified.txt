@@ -72,7 +72,7 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 						Properties = [],
 					}),
 },
-					Body = (classInstance, context, cancellationToken) => ((global::TUnit.TestProject.Bugs._1594.MyTests)classInstance).SetupMyTests(),
+					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1594.MyTests)classInstance).SetupMyTests()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -160,7 +160,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 						Properties = [],
 					}),
 },
-					Body = (classInstance, context, cancellationToken) => classInstance.GetType().GetMethod("SetupParentTests", []).Invoke(classInstance, []),
+					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.GetType().GetMethod("SetupParentTests", []).Invoke(classInstance, [])),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -207,7 +207,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 							Properties = [],
 						}),
 },
-						Body = (classInstance, context, cancellationToken) => ((global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>)classInstance).SetupParentTests(),
+						Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>)classInstance).SetupParentTests()),
 						HookExecutor = DefaultExecutor.Instance,
 						Order = 0,
 						MethodAttributes = 
@@ -295,7 +295,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 						Properties = [],
 					}),
 },
-					Body = (classInstance, context, cancellationToken) => classInstance.GetType().GetMethod("SetupBase", []).Invoke(classInstance, []),
+					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.GetType().GetMethod("SetupBase", []).Invoke(classInstance, [])),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
 					MethodAttributes = 
@@ -351,7 +351,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							],
 						}),
 },
-						Body = (classInstance, context, cancellationToken) => ((global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>)classInstance).SetupBase(),
+						Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>)classInstance).SetupBase()),
 						HookExecutor = DefaultExecutor.Instance,
 						Order = 0,
 						MethodAttributes = 
