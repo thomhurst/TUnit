@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
@@ -28,6 +29,9 @@ public abstract class Context : IContext
     internal Context()
     {
     }
+    
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ExecutionContext? ExecutionContext { get; set; }
     
     public string GetStandardOutput()
     {

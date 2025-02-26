@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using Polyfills;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Hooks;
@@ -104,18 +105,16 @@ internal class TestsExecutor
     private async Task ProcessQueue(ITestExecutionFilter? filter, ExecuteRequestContext context,
         PriorityQueue<DiscoveredTest, int> tests)
     {
-        using var executionContext = ExecutionContext.Capture();
-
         await Task.Run(async delegate
         {
             while (tests.TryDequeue(out var test, out _))
             {
-                if (test.TestContext.SkipReason != null)
+                if (test.TestContext.SkipReason == null)
                 {
-                    await OnBeforeStart(test.TestContext, executionContext!);
+                    await OnBeforeStart(test.TestContext);
                 }
 
-                await ProcessTest(test, filter, context, context.CancellationToken, executionContext!);
+                await ProcessTest(test, filter, context, context.CancellationToken);
             }
         });
     }
@@ -132,33 +131,35 @@ internal class TestsExecutor
         ExecuteRequestContext context)
     {
 #if NET
-        using var executionContext = ExecutionContext.Capture();
-
         await Parallel.ForEachAsync(queue, new ParallelOptions
         {
             MaxDegreeOfParallelism = _maximumParallelTests,
             CancellationToken = context.CancellationToken
         }, async (test, token) =>
         {
-            if (test.TestContext.SkipReason != null)
+            if (test.TestContext.SkipReason == null)
             {
-                await OnBeforeStart(test.TestContext, executionContext!);
+                await OnBeforeStart(test.TestContext);
             }
 
-            await ProcessTest(test, filter, context, token, executionContext!);
+            var assemblyHookContext = _assemblyHookOrchestrator.GetContext(test.TestDetails.TestClass.Type.Assembly);
+            if (assemblyHookContext.ExecutionContext != null)
+            {
+                ExecutionContext.Restore(assemblyHookContext.ExecutionContext);
+            }
+
+            await ProcessTest(test, filter, context, token);
         });
 #else
-        using var executionContext = ExecutionContext.Capture();
-
         await queue
             .ForEachAsync(async test =>
             {
                 if (test.TestContext.SkipReason != null)
                 {
-                    await OnBeforeStart(test.TestContext, executionContext!);
+                    await OnBeforeStart(test.TestContext!);
                 }
 
-                await ProcessTest(test, filter, context, context.CancellationToken, executionContext!);
+                await ProcessTest(test, filter, context, context.CancellationToken);
             })
             .ProcessInParallel(_maximumParallelTests);
 #endif
@@ -166,13 +167,10 @@ internal class TestsExecutor
 
 #if NET
     private async ValueTask ProcessTest(DiscoveredTest test,
-        ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken,
-        ExecutionContext executionContext)
+        ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
     {
         try
         {
-            ExecutionContext.Restore(executionContext);
-            
             await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context, false), cancellationToken);
         }
         catch
@@ -185,8 +183,7 @@ internal class TestsExecutor
     }
 #else
     private async Task ProcessTest(DiscoveredTest test,
-        ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken,
-        ExecutionContext executionContext)
+        ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
     {
         try
         {
@@ -202,12 +199,8 @@ internal class TestsExecutor
     }
 #endif
 
-    private async Task OnBeforeStart(TestContext testContext, ExecutionContext executionContext)
+    private async Task OnBeforeStart(TestContext testContext)
     {
-#if NET
-        ExecutionContext.Restore(executionContext);
- #endif
- 
         // Ideally all these 'Set up' hooks would be refactored into inner/classes and/or methods,
         // But users may want to set AsyncLocal values, and so the method must be a parent/ancestor of the method that starts the test!
         // So actually refactoring these into other methods would mean they wouldn't be a parent/ancestor and would break async local!
@@ -223,10 +216,8 @@ internal class TestsExecutor
         {
             try
             {
-                var beforeAssemblyHooks =
-                    _assemblyHookOrchestrator.CollectBeforeHooks(testContext.TestDetails.TestClass.Type.Assembly);
-                var assemblyHookContext =
-                    _assemblyHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type.Assembly);
+                var beforeAssemblyHooks = _assemblyHookOrchestrator.CollectBeforeHooks(testContext.TestDetails.TestClass.Type.Assembly);
+                var assemblyHookContext =_assemblyHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type.Assembly);
 
                 AssemblyHookContext.Current = assemblyHookContext;
 

@@ -20,8 +20,13 @@ public class Tests
         => _1BeforeTestSessionLocal.Value = "BeforeTestSession";
 
     [BeforeEvery(Assembly)]
-    public static void BeforeAssembly(AssemblyHookContext context)
-        => _2BeforeAssemblyLocal.Value = "BeforeAssembly";
+    public static async Task BeforeAssembly(AssemblyHookContext context)
+    {
+        await Task.CompletedTask;
+        _2BeforeAssemblyLocal.Value = "BeforeAssembly";
+        context.ExecutionContext = ExecutionContext.Capture();
+        Console.WriteLine("");
+    }
 
     [BeforeEvery(Class)]
     public static void BeforeClass(ClassHookContext context)
