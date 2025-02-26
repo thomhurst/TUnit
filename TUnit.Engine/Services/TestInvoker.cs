@@ -25,22 +25,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
                 await onInitializeObject.InitializeAsync();
             }
 
-            // In order to set async-local values properly in a before hook, the method doing so needs to have the parents execution context.
-            // This is achievable by:
-            // - Calling it here (and not in a child/sibling method to the actual test body) as this method calls the test body so is considered a parent
-            // - Running synchronous hooks synchronously, so they don't generate a new child execution context which happens in async methods
-            var beforeHooks = testHookOrchestrator.CollectBeforeHooks(
-                discoveredTest.TestContext.TestDetails.ClassInstance,
-                discoveredTest);
-
-            foreach (var executableHook in beforeHooks)
-            {
-                await logger.LogDebugAsync("Executing [Before(Test)] hook");
-
-                await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
-                    executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken)
-                );
-            }
+            ExecutionContextHelper.RestoreContexts(await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken));
             
             foreach (var testStartEventsObject in discoveredTest.TestContext.GetTestStartEventObjects())
             {

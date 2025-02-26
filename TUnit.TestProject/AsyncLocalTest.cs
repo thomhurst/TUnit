@@ -11,6 +11,7 @@ public class AsyncLocalTest
     [Before(Test)]
     public void Before(TestContext context)
     {
+        context.FlowAsyncLocalValues();
         _asyncLocalValue.Value = "123";
     }
 

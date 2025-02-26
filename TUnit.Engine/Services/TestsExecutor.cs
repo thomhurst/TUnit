@@ -8,6 +8,7 @@ using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
@@ -108,9 +109,9 @@ internal class TestsExecutor
             {
                 if (test.TestContext.SkipReason == null)
                 {
-                    RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                    ExecutionContextHelper.RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
 
-                    RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                    ExecutionContextHelper.RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
                 }
 
                 await ProcessTest(test, filter, context, context.CancellationToken);
@@ -138,9 +139,9 @@ internal class TestsExecutor
         {
             if (test.TestContext.SkipReason == null)
             {
-                RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                ExecutionContextHelper.RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
 
-                RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                ExecutionContextHelper.RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
             }
 
             await ProcessTest(test, filter, context, token);
@@ -151,24 +152,14 @@ internal class TestsExecutor
             {
                 if (test.TestContext.SkipReason != null)
                 {
-                    RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                    ExecutionContextHelper.RestoreContexts(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
 
-                    RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                    ExecutionContextHelper.RestoreContexts(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
                 }
 
                 await ProcessTest(test, filter, context, context.CancellationToken);
             })
             .ProcessInParallel(_maximumParallelTests);
-#endif
-    }
-
-    private void RestoreContexts(List<ExecutionContext> executionContexts)
-    {
-#if NET
-        foreach (var executionContext in executionContexts)
-        {
-            ExecutionContext.Restore(executionContext);
-        }
 #endif
     }
 

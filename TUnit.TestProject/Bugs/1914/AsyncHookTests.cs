@@ -1,8 +1,10 @@
-﻿using TUnit.Assertions;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject.Bugs._1914;
 
+[SuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 public class AsyncHookTests
 {
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal = new();
