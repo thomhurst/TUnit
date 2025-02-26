@@ -1,6 +1,4 @@
-﻿using Microsoft.DiaSymReader;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 public class NestedExceptionTests
 {
