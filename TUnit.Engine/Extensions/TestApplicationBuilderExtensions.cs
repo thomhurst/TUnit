@@ -30,6 +30,7 @@ internal static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
         
         testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
         testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(_ => githubReporter);
