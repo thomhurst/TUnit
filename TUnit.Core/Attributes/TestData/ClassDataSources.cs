@@ -46,11 +46,7 @@ internal class ClassDataSources
     {
         if (sharedType == SharedType.None)
         {
-            var t = Create<T>();
-            
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, _) => await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(t);
-            
-            return t;
+            return Create<T>();
         }
 
         if (sharedType == SharedType.PerTestSession)
@@ -91,16 +87,14 @@ internal class ClassDataSources
         switch (shared)
         {
             case SharedType.None:
-                break;
             case SharedType.PerClass:
+            case SharedType.PerAssembly:
                 break;
             case SharedType.PerTestSession:
                 TestDataContainer.IncrementGlobalUsage(typeof(T));
                 break;
             case SharedType.Keyed:
                 TestDataContainer.IncrementKeyUsage(key, typeof(T));
-                break;
-            case SharedType.PerAssembly:
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -112,7 +106,7 @@ internal class ClassDataSources
         }
     }
 
-    public async ValueTask OnTestStart<T>(BeforeTestContext beforeTestContext, bool isStatic, SharedType shared, string key, T? item)
+    public async ValueTask OnInitialize<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
     {
         if (isStatic)
         {
@@ -120,7 +114,7 @@ internal class ClassDataSources
             return;
         }
         
-        await Initialize(beforeTestContext.TestContext, shared, key, item);
+        await Initialize(testContext, shared, key, item);
     }
 
     public Task Initialize<T>(TestContext testContext, SharedType shared, string key, T? item)
@@ -164,8 +158,13 @@ internal class ClassDataSources
         throw new ArgumentOutOfRangeException(nameof(shared));
     }
 
-    public async ValueTask OnTestEnd<T>(SharedType shared, string key, T? item)
+    public async ValueTask OnDispose<T>(SharedType shared, string key, T? item)
     {
+        if (shared is SharedType.None)
+        {
+            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(item);
+        }
+        
         if (shared == SharedType.Keyed)
         {
             await TestDataContainer.ConsumeKey(key, typeof(T));

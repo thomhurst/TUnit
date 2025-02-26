@@ -3,7 +3,8 @@
 namespace TUnit.Core;
 
 public record TestContextEvents : 
-    IDisposable,
+    IAsyncInitializer,
+    IAsyncDisposable,
     ITestRegisteredEventReceiver,
     ITestStartEventReceiver,
     ITestEndEventReceiver,
@@ -15,8 +16,9 @@ public record TestContextEvents :
 {
     public int Order => int.MaxValue / 2;
     
-    public EventHandler? OnDispose { get; set; }
+    public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestRegisteredContext>? OnTestRegistered { get; set; }
+    public AsyncEvent<TestContext>? OnInitialize { get; set; }
     public AsyncEvent<BeforeTestContext>? OnTestStart { get; set; }
     public AsyncEvent<TestContext>? OnTestEnd { get; set; }
     public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
@@ -64,13 +66,24 @@ public record TestContextEvents :
     {
         return OnTestRetry?.InvokeAsync(this, (testContext, retryAttempt)) ?? default;
     }
-    
-    public void Dispose()
-    {
-        OnDispose?.Invoke(this, EventArgs.Empty);
-    }
 
     public void OnTestStartSynchronous(BeforeTestContext beforeTestContext)
     {
+    }
+
+    public async Task InitializeAsync()
+    {
+        if (OnInitialize != null)
+        {
+            await OnInitialize.InvokeAsync(this, TestContext.Current!);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (OnDispose != null)
+        {
+            await OnDispose.InvokeAsync(this, TestContext.Current!);
+        }
     }
 }

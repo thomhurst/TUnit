@@ -67,7 +67,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var stringFilter = FilterParser.GetTestFilter(context);
 
-        TUnitMessageBus = Register(new TUnitMessageBus(extension, context));
+        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, context));
 
         var instanceTracker = Register(new InstanceTracker());
         

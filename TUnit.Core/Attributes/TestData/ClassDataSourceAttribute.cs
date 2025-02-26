@@ -24,9 +24,9 @@ public sealed class ClassDataSourceAttribute<T> : DataSourceGeneratorAttribute<T
                     item);
             };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, context) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                     context,
                     ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
                     Shared,
@@ -36,12 +36,12 @@ public sealed class ClassDataSourceAttribute<T> : DataSourceGeneratorAttribute<T
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, _) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(Shared, Key, item);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(Shared, Key, item);
             };
             
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, _) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, _) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(Shared, Key, item);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(Shared, Key, item);
             };
             
             return item;

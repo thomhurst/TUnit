@@ -35,7 +35,10 @@ public class GenerateReadMeModule : Module<File>
             .AssertExists();
 
         var runs = await context.GitHub().Client.Actions.Workflows.Runs.List(context.GitHub().RepositoryInfo.Owner,
-            context.GitHub().RepositoryInfo.RepositoryName);
+            context.GitHub().RepositoryInfo.RepositoryName, new WorkflowRunsRequest
+            {
+                HeadSha = context.GitHub().EnvironmentVariables.Sha
+            });
 
         var latestBenchmark = runs.WorkflowRuns.FirstOrDefault(x =>
             x.Name == "Speed Comparison" && x.Status.Value == WorkflowRunStatus.Completed && x.Conclusion?.Value == WorkflowRunConclusion.Success);

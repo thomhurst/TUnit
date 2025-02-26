@@ -2,7 +2,7 @@
 
 public class SharedFixture : IDisposable
 {
-    public bool IsDisposed { get; private set; } = false;
+    public bool IsDisposed { get; private set; }
 
     public void Dispose()
     {
