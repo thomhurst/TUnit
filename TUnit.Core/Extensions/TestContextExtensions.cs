@@ -105,9 +105,6 @@ public static class TestContextExtensions
         return context.EventObjects ??= 
         [
             context.InternalDiscoveredTest.ClassConstructor,
-            ..context.TestDetails.TestClassArguments,
-            ..context.TestDetails.TestMethodArguments,
-            ..context.TestDetails.TestClassInjectedPropertyArguments,
             ..context.TestDetails.Attributes,
             context.Events,
             context.TestDetails.ClassInstance,

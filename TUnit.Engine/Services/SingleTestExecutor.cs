@@ -223,19 +223,18 @@ internal class SingleTestExecutor(
         }
     }
 
-    private Task RegisterIfNotAlready(TestContext testContext)
+    private ValueTask RegisterIfNotAlready(TestContext testContext)
     {
         lock (Lock)
         {
             // Could not be registered if it's triggered from a [DependsOn]
             if (!testContext.IsRegistered)
             {
-                return testRegistrar.RegisterInstance(testContext.InternalDiscoveredTest,
-                    _ => default);
+                return testRegistrar.RegisterInstance(testContext.InternalDiscoveredTest, _ => default);
             }
-            
-            return Task.CompletedTask;
         }
+
+        return default;
     }
 
     private async Task RunCleanUps(DiscoveredTest test, TestContext testContext,
