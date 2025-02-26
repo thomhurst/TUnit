@@ -42,7 +42,7 @@
     <Description>A .NET Testing Framework</Description>
     <Authors>Tom Longhurst</Authors>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageIcon>logo.png</PackageIcon>
+    <PackageIcon>logo.jpg</PackageIcon>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageTags>testing;unit;integration;component;test;assert;tester;framework</PackageTags>
@@ -62,7 +62,7 @@
 
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
-    <None Include="$(MSBuildThisFileDirectory)assets/logo.png" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)assets/logo.jpg" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
