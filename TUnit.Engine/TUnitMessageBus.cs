@@ -203,11 +203,10 @@ public class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLi
             
             var newStackTrace = FilterStackTrace(originalStacktrace);
             
-            // Clear fields so we can set via ExceptionDispatchInfo
             StackTrace(exception) = null;
-            StackTraceString(exception) = newStackTrace;
             RemoteStackTraceString(exception) = null;
-            
+            StackTraceString(exception) = newStackTrace;
+
             if (exception.InnerException != null)
             {
                 TidyStacktrace(exception.InnerException);
