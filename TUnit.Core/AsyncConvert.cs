@@ -21,7 +21,7 @@ public static class AsyncConvert
         await action();
     }
 
-    public static async ValueTask Convert(object? invoke)
+    public static async Task ConvertObject(object? invoke)
     {
         if (invoke is Task task)
         {
