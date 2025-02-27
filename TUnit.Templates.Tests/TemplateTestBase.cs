@@ -29,11 +29,11 @@ public abstract partial class TemplateTestBase : IDisposable
         }.WithCustomScrubbers(ScrubbersDefinition.Empty.AddScrubber(sb =>
         {
             var original = sb.ToString();
-            var match = TUnitPackageRegex().Match(original);
+            var match = PackageVersionRegex().Match(original);
 
             if (match.Success)
             {
-                var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "0.13.0");
+                var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "1.0.0");
                 sb.Replace(match.Value, line);
             };
         }, "csproj"));
@@ -58,6 +58,6 @@ public abstract partial class TemplateTestBase : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    [GeneratedRegex("""<PackageReference Include="TUnit[^"]*" Version="([^"]*)" />""")]
-    private static partial Regex TUnitPackageRegex();
+    [GeneratedRegex("""<PackageReference Include="[^"]*" Version="([^"]*)" />""")]
+    private static partial Regex PackageVersionRegex();
 }
