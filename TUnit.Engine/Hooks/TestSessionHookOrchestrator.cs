@@ -13,6 +13,8 @@ internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, Assemb
     
     public async Task<ExecutionContext?> RunBeforeTestSession(CancellationToken cancellationToken)
     {
+        hooksCollector.CollectionTestSessionHooks();
+        
         var testSessionContext = GetContext();
         var beforeSessionHooks = CollectBeforeHooks();
 
@@ -24,6 +26,10 @@ internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, Assemb
             
             ExecutionContextHelper.RestoreContext(testSessionContext.ExecutionContext);
         }
+        
+        // After Discovery and Before test session hooks are run, more chance of references assemblies
+        // being loaded into the AppDomain, so now we collect the test hooks which should pick up loaded libraries too
+        hooksCollector.CollectHooks();
 
         return testSessionContext.ExecutionContext;
     }

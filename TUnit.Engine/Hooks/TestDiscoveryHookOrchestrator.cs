@@ -11,9 +11,13 @@ internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, TUni
 {
     private BeforeTestDiscoveryContext? _beforeContext;
     private TestDiscoveryContext? _afterContext;
+    
+    
 
     public async Task<ExecutionContext?> RunBeforeTestDiscovery()
     {
+        hooksCollector.CollectDiscoveryHooks();
+        
         var beforeDiscoveryHooks = CollectBeforeHooks();
         var beforeContext = GetBeforeContext();
         
