@@ -33,8 +33,12 @@ public abstract partial class TemplateTestBase : IDisposable
 
             if (match.Success)
             {
-                var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "1.0.0");
-                sb.Replace(match.Value, line);
+                var groupsCount = match.Groups.Count;
+                for (var i = 1; i < groupsCount; i++)
+                {
+                    var line = match.Groups[0].Value.Replace(match.Groups[i].Value, "1.0.0");
+                    sb.Replace(match.Value, line);
+                }
             };
         }, "csproj"));
 
