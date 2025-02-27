@@ -58,6 +58,8 @@ public abstract partial class TemplateTestBase : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    [GeneratedRegex("""<PackageReference Include="[^"]*" Version="([^"]*)" />""")]
+    [GeneratedRegex("""
+                    <PackageReference Include="[^"]*" Version="([^"]*)"
+                    """)]
     private static partial Regex PackageVersionRegex();
 }
