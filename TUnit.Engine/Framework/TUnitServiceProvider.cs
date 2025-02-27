@@ -25,6 +25,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitFrameworkLogger Logger { get; }
     public TUnitMessageBus TUnitMessageBus { get; }
 
+    public HooksCollector HooksCollector { get; set; }
     public TUnitInitializer Initializer { get; }
     public StandardOutConsoleInterceptor StandardOutConsoleInterceptor { get; }
     public StandardErrorConsoleInterceptor StandardErrorConsoleInterceptor { get; }
@@ -66,11 +67,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var stringFilter = FilterParser.GetTestFilter(context);
 
-        TUnitMessageBus = Register(new TUnitMessageBus(extension, context));
+        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, context));
 
         var instanceTracker = Register(new InstanceTracker());
         
-        var hooksCollector = Register(new HooksCollector(context.Request.Session.SessionUid.Value));
+        HooksCollector = Register(new HooksCollector(context.Request.Session.SessionUid.Value));
 
         var dependencyCollector = new DependencyCollector();
         
@@ -80,17 +81,17 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         TestGrouper = Register(new TestGrouper());
         
-        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, hooksCollector));
+        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector, Logger));
 
-        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(hooksCollector, stringFilter));
-        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(hooksCollector, AssemblyHookOrchestrator, stringFilter));
+        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector, Logger, stringFilter));
+        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector, AssemblyHookOrchestrator, Logger, stringFilter));
         
-        var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, hooksCollector));
+        var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, HooksCollector, Logger));
         
-        var testHookOrchestrator = Register(new TestHookOrchestrator(hooksCollector));
+        var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector, Logger));
 
         var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
-        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsConstructor, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, Logger, extension));
+        TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, extension));
         
         TestFinder = Register(new TestsFinder(TestDiscoverer));
         Register<ITestFinder>(TestFinder);
@@ -105,11 +106,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar));
         
-        TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken));
+        TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken, AssemblyHookOrchestrator, classHookOrchestrator));
         
         OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }
-
+    
     public Disposer Disposer { get; }
 
     public async ValueTask DisposeAsync()

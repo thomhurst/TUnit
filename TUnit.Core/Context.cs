@@ -1,11 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Versioning;
 using System.Text;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 
 namespace TUnit.Core;
 
-public abstract class Context : IContext
+public abstract class Context : IContext, IDisposable
 {
     public static Context Current =>
         TestContext.Current as Context
@@ -28,6 +30,17 @@ public abstract class Context : IContext
     internal Context()
     {
     }
+
+    internal ExecutionContext? ExecutionContext { get; set; }
+    
+    public void AddAsyncLocalValues()
+    {
+#if NETSTANDARD
+        throw new PlatformNotSupportedException("This method is not supported in .NET Standard - Please upgrade to .NET 8+.");
+#else
+        ExecutionContext = ExecutionContext.Capture();
+#endif
+    }
     
     public string GetStandardOutput()
     {
@@ -42,5 +55,10 @@ public abstract class Context : IContext
     public TUnitLogger GetDefaultLogger()
     {
         return new DefaultLogger();
+    }
+
+    public void Dispose()
+    {
+        ExecutionContext?.Dispose();
     }
 }

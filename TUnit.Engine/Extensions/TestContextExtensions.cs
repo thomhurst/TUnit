@@ -41,7 +41,7 @@ public static class TestContextExtensions
 
                     try
                     {
-                        await AsyncConvert.Convert(testMetadata.TestMethod.ReflectionInformation.Invoke(@class, args));
+                        await AsyncConvert.ConvertObject(testMetadata.TestMethod.ReflectionInformation.Invoke(@class, args));
                     }
                     catch (TargetInvocationException e)
                     {

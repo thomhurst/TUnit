@@ -1,7 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Attributes;
 
 namespace TUnit.Engine.Tests;
 
+[SkipNetFramework("ExecutionContext.Restore is not supported on .NET Framework")]
 public class AsyncLocalTest : InvokableTestBase
 {
     [Test]

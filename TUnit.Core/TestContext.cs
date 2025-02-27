@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-public partial class TestContext : Context, IDisposable
+public partial class TestContext : Context
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -61,9 +61,6 @@ public partial class TestContext : Context, IDisposable
     }
     
     internal string? SkipReason { get; set; }
-
-    public void Dispose()
-    {
-        Events.Dispose();
-    }
+    
+    internal object?[]? EventObjects { get; set; }
 }

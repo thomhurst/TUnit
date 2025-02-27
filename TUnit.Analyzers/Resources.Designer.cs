@@ -1302,7 +1302,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods..
+        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests..
         /// </summary>
         internal static string TUnit0047Description {
             get {
@@ -1311,7 +1311,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods..
+        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests..
         /// </summary>
         internal static string TUnit0047MessageFormat {
             get {
@@ -1320,7 +1320,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods.
+        ///   Looks up a localized string similar to Call `context.AddAsyncLocalValues`.
         /// </summary>
         internal static string TUnit0047Title {
             get {
@@ -1406,6 +1406,33 @@ namespace TUnit.Analyzers {
         internal static string TUnit0050Title {
             get {
                 return ResourceManager.GetString("TUnit0050Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public..
+        /// </summary>
+        internal static string TUnit0051Description {
+            get {
+                return ResourceManager.GetString("TUnit0051Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public.
+        /// </summary>
+        internal static string TUnit0051MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0051MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public.
+        /// </summary>
+        internal static string TUnit0051Title {
+            get {
+                return ResourceManager.GetString("TUnit0051Title", resourceCulture);
             }
         }
     }

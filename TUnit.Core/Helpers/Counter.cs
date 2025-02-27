@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace TUnit.Engine.Services;
+namespace TUnit.Core.Helpers;
 
 [DebuggerDisplay("Count = {CurrentCount}")]
 public class Counter

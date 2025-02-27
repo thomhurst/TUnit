@@ -433,13 +433,13 @@
         <value>Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`</value>
     </data>
     <data name="TUnit0047Description" xml:space="preserve">
-        <value>Before hooks setting AsyncLocal values should be non-async void returning methods.</value>
+        <value>For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests.</value>
     </data>
     <data name="TUnit0047MessageFormat" xml:space="preserve">
-        <value>Before hooks setting AsyncLocal values should be non-async void returning methods.</value>
+        <value>For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests.</value>
     </data>
     <data name="TUnit0047Title" xml:space="preserve">
-        <value>Before hooks setting AsyncLocal values should be non-async void returning methods</value>
+        <value>Call `context.FlowAsyncLocalValues`</value>
     </data>
     <data name="TUnit0048Description" xml:space="preserve">
         <value>Test methods must not be static.</value>
@@ -467,5 +467,14 @@
     </data>
     <data name="TUnit0050Title" xml:space="preserve">
         <value>Too many arguments provided</value>
+    </data>
+    <data name="TUnit0051Description" xml:space="preserve">
+        <value>Type must be public.</value>
+    </data>
+    <data name="TUnit0051MessageFormat" xml:space="preserve">
+        <value>Type must be public</value>
+    </data>
+    <data name="TUnit0051Title" xml:space="preserve">
+        <value>Type must be public</value>
     </data>
 </root>

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Tom Longhurst",
+  "description": "A project that contains TUnit integration tests of a .NET Aspire app host project.",
+  "classifications": [
+    "Common",
+    "Test",
+    "TUnit",
+    ".NET Aspire",
+    "Cloud"
+  ],
+  "name": "TUnit Aspire Test Project",
+  "identity": "TUnit.Test.Aspire.Test",
+  "groupIdentity": "TUnit.Aspire.Test",
+  "shortName": "TUnit.Aspire.Test",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "ExampleNamespace",
+  "preferNameDirectory": true
+}

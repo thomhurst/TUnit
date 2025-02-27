@@ -108,7 +108,7 @@ public static class Rules
     public static readonly DiagnosticDescriptor ReturnFunc =
         CreateDescriptor("TUnit0046", UsageCategory, DiagnosticSeverity.Warning);
     
-    public static readonly DiagnosticDescriptor AsyncLocalVoidMethod =
+    public static readonly DiagnosticDescriptor AsyncLocalCallFlowValues =
         CreateDescriptor("TUnit0047", UsageCategory, DiagnosticSeverity.Warning);
 
     public static DiagnosticDescriptor InstanceTestMethod =
@@ -119,6 +119,9 @@ public static class Rules
     
     public static readonly DiagnosticDescriptor TooManyArguments =
         CreateDescriptor("TUnit0050", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor TypeMustBePublic =
+        CreateDescriptor("TUnit0051", UsageCategory, DiagnosticSeverity.Error);
     
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

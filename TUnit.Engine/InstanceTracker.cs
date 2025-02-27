@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-using TUnit.Engine.Services;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine;
 

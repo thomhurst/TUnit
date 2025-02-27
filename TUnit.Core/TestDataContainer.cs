@@ -16,8 +16,8 @@ public static class TestDataContainer
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
 
     private static readonly Lock Lock = new();
-    private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
-    private static readonly ConcurrentDictionary<Type, int> CountsPerGlobalType = new();
+    private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, Counter>> CountsPerKey = new();
+    private static readonly ConcurrentDictionary<Type, Counter> CountsPerGlobalType = new();
 
     private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);
     
@@ -39,6 +39,7 @@ public static class TestDataContainer
         DataGeneratorMetadata dataGeneratorMetadata)
     {
         var objectsForClass = InjectedSharedPerAssembly.GetOrAdd(assembly, _ => new GetOnlyDictionary<Type, object>());
+        
         return  (T)objectsForClass.GetOrAdd(typeof(T), _ =>
         {
             var t = func()!;
@@ -52,9 +53,7 @@ public static class TestDataContainer
     
     public static void IncrementGlobalUsage(Type type)
     {
-        var count = CountsPerGlobalType.GetOrAdd(type, _ => 0);
-
-        CountsPerGlobalType[type] = count + 1;
+        CountsPerGlobalType.GetOrAdd(type, _ => new Counter()).Increment();
     }
     
     public static T GetGlobalInstance<T>(Func<T> func, DataGeneratorMetadata dataGeneratorMetadata)
@@ -64,11 +63,9 @@ public static class TestDataContainer
 
     public static void IncrementKeyUsage(string key, Type type)
     {
-        var keysForType = CountsPerKey.GetOrAdd(type, _ => new ConcurrentDictionary<string, int>());
+        var keysForType = CountsPerKey.GetOrAdd(type, _ => []);
 
-        var count = keysForType.GetOrAdd(key, _ => 0);
-
-        keysForType[key] = count + 1;
+        keysForType.GetOrAdd(key, _ => new Counter()).Increment();
     }
 
     public static T GetInstanceForKey<T>(string key, Func<T> func)
@@ -80,20 +77,11 @@ public static class TestDataContainer
     
     internal static async ValueTask ConsumeKey(string key, Type type)
     {
-        lock (Lock)
+        var keysForType = CountsPerKey[type];
+            
+        if (keysForType[key].Decrement() > 0)
         {
-            var keysForType = CountsPerKey.GetOrAdd(type, _ => new ConcurrentDictionary<string, int>());
-
-            var count = keysForType.GetOrAdd(key, _ => 0);
-
-            var newCount = count - 1;
-
-            keysForType[key] = newCount;
-
-            if (newCount > 0)
-            {
-                return;
-            }
+            return;
         }
         
         var instancesForType = InjectedSharedPerKey.GetOrAdd(type, _ => new GetOnlyDictionary<string, object>());
@@ -103,18 +91,9 @@ public static class TestDataContainer
 
     internal static async ValueTask ConsumeGlobalCount(Type type)
     {
-        lock (Lock)
+        if (CountsPerGlobalType[type].Decrement() > 0)
         {
-            var count = CountsPerGlobalType.GetOrAdd(type, _ => 0);
-
-            var newCount = count - 1;
-            
-            CountsPerGlobalType[type] = newCount;
-            
-            if (newCount > 0)
-            {
-                return;
-            }
+            return;
         }
         
         await Disposer.DisposeAsync(InjectedSharedGlobally.Remove(type));

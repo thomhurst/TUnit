@@ -4,35 +4,32 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Logging;
-using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
 
 internal class TUnitTestDiscoverer(
-    HooksCollector hooksCollector,
     TestsConstructor testsConstructor,
     TestFilterService testFilterService,
     TestGrouper testGrouper,
     TestRegistrar testRegistrar,
-    TestDiscoveryHookOrchestrator testDiscoveryHookOrchestrator,
     ITUnitMessageBus tUnitMessageBus,
     TUnitFrameworkLogger logger,
     IExtension extension) : IDataProducer
 {
     private IReadOnlyCollection<DiscoveredTest>? _cachedTests;
 
-    public IReadOnlyCollection<DiscoveredTest> GetCachedTests()
+    public IReadOnlyCollection<DiscoveredTest> GetTests(CancellationToken cancellationToken = default)
     {
-        return _cachedTests!;
+        return _cachedTests ??= testsConstructor.GetTests(cancellationToken);
     }
     
-    public async Task<GroupedTests> FilterTests(ExecuteRequestContext context, string? stringTestFilter, CancellationToken cancellationToken)
+    public async Task<GroupedTests> FilterTests(ExecuteRequestContext context, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
                 
-        var allDiscoveredTests = _cachedTests ??= await DiscoverTests(cancellationToken);
+        var allDiscoveredTests = _cachedTests ??= GetTests(cancellationToken);
 
         var executionRequest = context.Request as TestExecutionRequest;
         
@@ -58,54 +55,6 @@ internal class TUnitTestDiscoverer(
                 onFailureToInitialize: exception => tUnitMessageBus.Failed(test.TestContext, exception, default)
             );
         }
-    }
-
-    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(CancellationToken cancellationToken)
-    {
-        hooksCollector.CollectDiscoveryHooks();
-        
-        var beforeDiscoveryHooks = testDiscoveryHookOrchestrator.CollectBeforeHooks();
-        var beforeContext = testDiscoveryHookOrchestrator.GetBeforeContext();
-        
-        foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
-        {
-            if (beforeDiscoveryHook.IsSynchronous)
-            {
-                await logger.LogDebugAsync("Executing synchronous [Before(TestDiscovery)] hook");
-
-                beforeDiscoveryHook.Execute(beforeContext, CancellationToken.None);
-            }
-            else
-            {
-                await logger.LogDebugAsync("Executing asynchronous [Before(TestDiscovery)] hook");
-
-                await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
-            }
-        }
-        
-        var allDiscoveredTests = testsConstructor.GetTests(cancellationToken);
-
-        var afterDiscoveryHooks = testDiscoveryHookOrchestrator.CollectAfterHooks();
-        var afterContext = testDiscoveryHookOrchestrator.GetAfterContext(allDiscoveredTests);
-        
-        foreach (var afterDiscoveryHook in afterDiscoveryHooks)
-        {
-            if (afterDiscoveryHook.IsSynchronous)
-            {
-                await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
-
-                afterDiscoveryHook.Execute(afterContext, CancellationToken.None);
-            }
-            else
-            {
-                await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
-
-                await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
-            }
-        }        
-        hooksCollector.CollectHooks();
-
-        return allDiscoveredTests;
     }
 
     public Task<bool> IsEnabledAsync()
