@@ -63,7 +63,9 @@ TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the
 
 ## Visual Studio
 
-Visual Studio is fully supported from 2022 17.13 onwards. For prior versions, the "Use testing platform server mode" option must be selected in Tools > Manage Preview Features.
+Visual Studio is fully supported from 2022 17.13 onwards. The "Use testing platform server mode" option is not present from 2022 17.13 onwards.
+
+For prior versions, the "Use testing platform server mode" option must be selected in Tools > Manage Preview Features.
 
 ![](/docs/static/img/visual-studio.png)
 
