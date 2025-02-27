@@ -29,17 +29,13 @@ public abstract partial class TemplateTestBase : IDisposable
         }.WithCustomScrubbers(ScrubbersDefinition.Empty.AddScrubber(sb =>
         {
             var original = sb.ToString();
-            var match = PackageVersionRegex().Match(original);
-
-            if (match.Success)
+            var matches = PackageVersionRegex().Matches(original);
+            
+            foreach (Match match in matches.Where(m => m.Success))
             {
-                var groupsCount = match.Groups.Count;
-                for (var i = 1; i < groupsCount; i++)
-                {
-                    var line = match.Groups[0].Value.Replace(match.Groups[i].Value, "1.0.0");
-                    sb.Replace(match.Value, line);
-                }
-            };
+                var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "1.0.0");
+                sb.Replace(match.Value, line);
+            }
         }, "csproj"));
 
     protected void Dispose(bool disposing)
