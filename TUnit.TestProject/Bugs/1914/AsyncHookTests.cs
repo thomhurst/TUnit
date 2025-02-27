@@ -7,6 +7,7 @@ namespace TUnit.TestProject.Bugs._1914;
 
 [SkipNetFramework("ExecutionContext.Restore is not supported on .NET Framework")]
 [SuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
+[SuppressMessage("Usage", "TUnit0047:Call `context.FlowAsyncLocalValues`")]
 public class AsyncHookTests
 {
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal = new();
@@ -29,7 +30,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _0BeforeTestDiscoveryLocal.Value = "BeforeTestDiscovery";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(TestDiscovery)]
@@ -37,7 +40,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _0BeforeTestDiscoveryLocal2.Value = "BeforeTestDiscovery2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
     [Before(TestSession)]
@@ -45,7 +50,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _1BeforeTestSessionLocal.Value = "BeforeTestSession";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(TestSession)]
@@ -53,7 +60,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _1BeforeTestSessionLocal2.Value = "BeforeTestSession2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
     [Before(Assembly)]
@@ -61,7 +70,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _2BeforeAssemblyLocal.Value = "BeforeAssembly";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(Assembly)]
@@ -69,7 +80,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _2BeforeAssemblyLocal2.Value = "BeforeAssembly2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
     [Before(Class)]
@@ -77,7 +90,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _3BeforeClassLocal.Value = "BeforeClass";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(Class)]
@@ -85,7 +100,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _3BeforeClassLocal2.Value = "BeforeClass2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
     [Before(Test)]
@@ -93,7 +110,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _4BeforeTestLocal.Value = "BeforeTest";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(Test)]
@@ -101,7 +120,9 @@ public class AsyncHookTests
     {
         await Task.CompletedTask;
         _4BeforeTestLocal2.Value = "BeforeTest2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
 

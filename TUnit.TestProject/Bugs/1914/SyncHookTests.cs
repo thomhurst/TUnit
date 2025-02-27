@@ -7,6 +7,7 @@ namespace TUnit.TestProject.Bugs._1914;
 
 [SkipNetFramework("ExecutionContext.Restore is not supported on .NET Framework")]
 [SuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
+[SuppressMessage("Usage", "TUnit0047:Call `context.FlowAsyncLocalValues`")]
 public class SyncHookTests
 {
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal = new();
@@ -28,70 +29,90 @@ public class SyncHookTests
     public static void BeforeTestDiscovery(BeforeTestDiscoveryContext context)
     {
         _0BeforeTestDiscoveryLocal.Value = "BeforeTestDiscovery";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(TestDiscovery)]
     public static void BeforeTestDiscovery2(BeforeTestDiscoveryContext context)
     {
         _0BeforeTestDiscoveryLocal2.Value = "BeforeTestDiscovery2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
     [Before(TestSession)]
     public static void BeforeTestSession(TestSessionContext context)
     {
         _1BeforeTestSessionLocal.Value = "BeforeTestSession";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(TestSession)]
     public static void BeforeTestSession2(TestSessionContext context)
     {
         _1BeforeTestSessionLocal2.Value = "BeforeTestSession2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
     [Before(Assembly)]
     public static void BeforeAssembly(AssemblyHookContext context)
     {
         _2BeforeAssemblyLocal.Value = "BeforeAssembly";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(Assembly)]
     public static void BeforeAssembly2(AssemblyHookContext context)
     {
         _2BeforeAssemblyLocal2.Value = "BeforeAssembly2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
     [Before(Class)]
     public static void BeforeClass(ClassHookContext context)
     {
         _3BeforeClassLocal.Value = "BeforeClass";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(Class)]
     public static void BeforeClass2(ClassHookContext context)
     {
         _3BeforeClassLocal2.Value = "BeforeClass2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
     [Before(Test)]
     public void BeforeTest(TestContext context)
     {
         _4BeforeTestLocal.Value = "BeforeTest";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
     
     [Before(Test)]
     public void BeforeTest2(TestContext context)
     {
         _4BeforeTestLocal2.Value = "BeforeTest2";
+#if NET
         context.AddAsyncLocalValues();
+#endif
     }
 
 
