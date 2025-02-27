@@ -80,7 +80,7 @@ public class CommitFilesModule : Module<CommandResult>
         var issueUpdate = new IssueUpdate();
         issueUpdate.AddLabel("ignore-for-release");
         
-        await context.GitHub().Client.Issue.Update(repositoryId, pr.Id,
+        await context.GitHub().Client.Issue.Update(repositoryId, pr.Number,
             issueUpdate);
 
         return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("gh", "pr", "merge", "--admin", "--squash", pr.Number.ToString())
