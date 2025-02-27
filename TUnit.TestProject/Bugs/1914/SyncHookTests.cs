@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1914;
 
+[SkipNetFramework("ExecutionContext.Restore is not supported on .NET Framework")]
 [SuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 public class SyncHookTests
 {
