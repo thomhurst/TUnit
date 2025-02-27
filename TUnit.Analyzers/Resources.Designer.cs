@@ -1302,7 +1302,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods..
+        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests..
         /// </summary>
         internal static string TUnit0047Description {
             get {
@@ -1311,7 +1311,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods..
+        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests..
         /// </summary>
         internal static string TUnit0047MessageFormat {
             get {
@@ -1320,7 +1320,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods.
+        ///   Looks up a localized string similar to Call `context.AddAsyncLocalValues`.
         /// </summary>
         internal static string TUnit0047Title {
             get {

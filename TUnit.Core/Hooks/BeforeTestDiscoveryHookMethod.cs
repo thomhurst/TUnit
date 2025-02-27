@@ -18,7 +18,7 @@ public record BeforeTestDiscoveryHookMethod : StaticHookMethod<BeforeTestDiscove
     public override Task ExecuteAsync(BeforeTestDiscoveryContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteAsynchronousBeforeTestDiscoveryHook(MethodInfo, context,
-            () => AsyncBody!.Invoke(context, cancellationToken)
+            () => Body!.Invoke(context, cancellationToken)
         );
     }
 }

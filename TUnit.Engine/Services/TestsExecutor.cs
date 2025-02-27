@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -7,6 +8,8 @@ using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 
@@ -15,10 +18,12 @@ namespace TUnit.Engine.Services;
 internal class TestsExecutor
 {
     private readonly SingleTestExecutor _singleTestExecutor;
-    private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly EngineCancellationToken _engineCancellationToken;
 
+    private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
+    private readonly ClassHookOrchestrator _classHookOrchestrator;
+    
     private readonly Counter _executionCounter = new();
     private readonly TaskCompletionSource<bool> _onFinished = new();
 
@@ -27,12 +32,13 @@ internal class TestsExecutor
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
         TUnitFrameworkLogger logger,
         ICommandLineOptions commandLineOptions,
-        EngineCancellationToken engineCancellationToken)
+        EngineCancellationToken engineCancellationToken, AssemblyHookOrchestrator assemblyHookOrchestrator, ClassHookOrchestrator classHookOrchestrator)
     {
         _singleTestExecutor = singleTestExecutor;
-        _logger = logger;
         _commandLineOptions = commandLineOptions;
         _engineCancellationToken = engineCancellationToken;
+        _assemblyHookOrchestrator = assemblyHookOrchestrator;
+        _classHookOrchestrator = classHookOrchestrator;
 
         _maximumParallelTests = GetParallelTestsLimit();
 
@@ -99,9 +105,16 @@ internal class TestsExecutor
     {
         await Task.Run(async delegate
         {
-            while (tests.TryDequeue(out var testInformation, out _))
+            while (tests.TryDequeue(out var test, out _))
             {
-                await ProcessTest(testInformation, filter, context, context.CancellationToken);
+                if (test.TestContext.SkipReason == null)
+                {
+                    ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+
+                    ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                }
+
+                await ProcessTest(test, filter, context, context.CancellationToken);
             }
         });
     }
@@ -112,6 +125,7 @@ internal class TestsExecutor
         await ProcessCollection(queue, filter, context);
     }
 
+    [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
     private async Task ProcessCollection(IEnumerable<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
         ExecuteRequestContext context)
@@ -121,10 +135,30 @@ internal class TestsExecutor
         {
             MaxDegreeOfParallelism = _maximumParallelTests,
             CancellationToken = context.CancellationToken
-        }, (test, token) => ProcessTest(test, filter, context, token));
+        }, async (test, token) =>
+        {
+            if (test.TestContext.SkipReason == null)
+            {
+                ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+
+                ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+            }
+
+            await ProcessTest(test, filter, context, token);
+        });
 #else
         await queue
-            .ForEachAsync(test => ProcessTest(test, filter, context, context.CancellationToken))
+            .ForEachAsync(async test =>
+            {
+                if (test.TestContext.SkipReason != null)
+                {
+                    ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+
+                    ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                }
+
+                await ProcessTest(test, filter, context, context.CancellationToken);
+            })
             .ProcessInParallel(_maximumParallelTests);
 #endif
     }

@@ -21,8 +21,23 @@ public static class AsyncConvert
         await action();
     }
 
-    public static async ValueTask Convert(object? invoke)
+    public static async Task ConvertObject(object? invoke)
     {
+        if (invoke is Func<object> syncFunc)
+        {
+            syncFunc();
+        }
+        
+        if (invoke is Func<Task> asyncFunc)
+        {
+            await asyncFunc();
+        }
+        
+        if (invoke is Func<ValueTask> asyncValueFunc)
+        {
+            await asyncValueFunc();
+        }
+        
         if (invoke is Task task)
         {
             await task;

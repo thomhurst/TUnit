@@ -4,11 +4,14 @@ using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Core.Hooks;
+using TUnit.Core.Logging;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector)
+internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector, TUnitFrameworkLogger logger)
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyHookContexts = new();
 
@@ -16,6 +19,47 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
     
     internal GetOnlyDictionary<Assembly, TaskCompletionSource<bool>> PreviouslyRunBeforeHooks { get; } = new();
 
+    public async Task<ExecutionContext?> ExecuteBeforeAssemblyHooks(TestContext testContext)
+    {
+        var assemblyHookContext = GetContext(testContext.TestDetails.TestClass.Type.Assembly);
+
+        var assemblyHooksTaskCompletionSource = PreviouslyRunBeforeHooks.GetOrAdd(
+            testContext.TestDetails.TestClass.Type.Assembly, _ => new TaskCompletionSource<bool>(),
+            out var assemblyHooksTaskPreviouslyExisted);
+
+        if (assemblyHooksTaskPreviouslyExisted)
+        {
+            await assemblyHooksTaskCompletionSource.Task;
+            return assemblyHookContext.ExecutionContext;
+        }
+
+        try
+        {
+            var beforeAssemblyHooks = CollectBeforeHooks(testContext.TestDetails.TestClass.Type.Assembly);
+
+            AssemblyHookContext.Current = assemblyHookContext;
+
+            foreach (var beforeHook in beforeAssemblyHooks)
+            {
+                await logger.LogDebugAsync("Executing [Before(Assembly)] hook");
+
+                await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                
+                ExecutionContextHelper.RestoreContext(assemblyHookContext.ExecutionContext);
+            }
+
+            AssemblyHookContext.Current = null;
+            assemblyHooksTaskCompletionSource.SetResult(false);
+        }
+        catch (Exception e)
+        {
+            assemblyHooksTaskCompletionSource.SetException(e);
+            throw;
+        }
+
+        return assemblyHookContext.ExecutionContext;
+    }
+    
     public IEnumerable<StaticHookMethod<AssemblyHookContext>> CollectBeforeHooks(Assembly assembly)
     {
         _beforeHooksReached.GetOrAdd(assembly, true);

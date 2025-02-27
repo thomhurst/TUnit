@@ -1,11 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 
 namespace TUnit.Core;
 
-public abstract class Context : IContext
+public abstract class Context : IContext, IDisposable
 {
     public static Context Current =>
         TestContext.Current as Context
@@ -28,6 +29,13 @@ public abstract class Context : IContext
     internal Context()
     {
     }
+
+    internal ExecutionContext? ExecutionContext { get; set; }
+
+    public void AddAsyncLocalValues()
+    {
+        ExecutionContext = ExecutionContext.Capture();
+    }
     
     public string GetStandardOutput()
     {
@@ -42,5 +50,10 @@ public abstract class Context : IContext
     public TUnitLogger GetDefaultLogger()
     {
         return new DefaultLogger();
+    }
+
+    public void Dispose()
+    {
+        ExecutionContext?.Dispose();
     }
 }

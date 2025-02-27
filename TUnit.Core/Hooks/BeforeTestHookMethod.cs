@@ -18,7 +18,7 @@ public record BeforeTestHookMethod : StaticHookMethod<TestContext>
     public override Task ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteAsynchronousBeforeTestHook(MethodInfo, context,
-            () => AsyncBody!.Invoke(context, cancellationToken)
+            () => Body!.Invoke(context, cancellationToken)
         );
     }
 }

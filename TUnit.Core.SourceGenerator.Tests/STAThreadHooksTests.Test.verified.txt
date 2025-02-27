@@ -69,7 +69,7 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 						Properties = [],
 					}),
 },
-					Body = (classInstance, context, cancellationToken) => ((global::TUnit.TestProject.STAThreadTests)classInstance).BeforeTest(),
+					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.STAThreadTests)classInstance).BeforeTest()),
 					HookExecutor = new global::TUnit.Core.STAThreadExecutor(),
 					Order = 0,
 					MethodAttributes = 
@@ -171,7 +171,7 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 						Properties = [],
 					}),
 },
-					Body = (classInstance, context, cancellationToken) => ((global::TUnit.TestProject.STAThreadTests)classInstance).AfterTest(),
+					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.STAThreadTests)classInstance).AfterTest()),
 					HookExecutor = new global::TUnit.Core.STAThreadExecutor(),
 					Order = 0,
 					MethodAttributes = 

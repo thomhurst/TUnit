@@ -12,6 +12,7 @@ public class AsyncLocalTest
     public void Before(TestContext context)
     {
         _asyncLocalValue.Value = "123";
+        context.AddAsyncLocalValues();
     }
 
     [After(Test)]

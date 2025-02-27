@@ -43,6 +43,22 @@ internal class HooksCollector(string sessionId)
         }
     }
 
+    public void CollectionTestSessionHooks()
+    {
+        foreach (var hookSource in Sources.TestSessionHookSources)
+        {
+            foreach (var beforeHook in hookSource.CollectBeforeTestSessionHooks(sessionId))
+            {
+                BeforeTestSessionHooks.Add(beforeHook);
+            }
+
+            foreach (var afterHook in hookSource.CollectAfterTestSessionHooks(sessionId))
+            {
+                AfterTestSessionHooks.Add(afterHook);
+            }
+        }
+    }
+
     public void CollectHooks()
     {
         foreach (var hookSource in Sources.TestHookSources)
@@ -115,19 +131,6 @@ internal class HooksCollector(string sessionId)
             foreach (var afterHook in hookSource.CollectAfterEveryAssemblyHooks(sessionId))
             {
                 AfterEveryAssemblyHooks.Add(afterHook);
-            }
-        }
-
-        foreach (var hookSource in Sources.TestSessionHookSources)
-        {
-            foreach (var beforeHook in hookSource.CollectBeforeTestSessionHooks(sessionId))
-            {
-                BeforeTestSessionHooks.Add(beforeHook);
-            }
-
-            foreach (var afterHook in hookSource.CollectAfterTestSessionHooks(sessionId))
-            {
-                AfterTestSessionHooks.Add(afterHook);
             }
         }
     }

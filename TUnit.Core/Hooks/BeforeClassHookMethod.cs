@@ -18,7 +18,7 @@ public record BeforeClassHookMethod : StaticHookMethod<ClassHookContext>
     public override Task ExecuteAsync(ClassHookContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteAsynchronousBeforeClassHook(MethodInfo, context,
-            () => AsyncBody!.Invoke(context, cancellationToken)
+            () => Body!.Invoke(context, cancellationToken)
         );
     }
 }

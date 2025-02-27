@@ -41,7 +41,8 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
+    private async Task ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter,
+        ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
     {
         var semaphore = WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
 
@@ -91,97 +92,15 @@ internal class SingleTestExecutor(
                     throw new SkipTestException("The test session has been cancelled...");
                 }
                 
-                // Ideally all these 'Set up' hooks would be refactored into inner/classes and/or methods,
-                // But users may want to set AsyncLocal values, and so the method must be a parent/ancestor of the method that starts the test!
-                // So actually refactoring these into other methods would mean they wouldn't be a parent/ancestor and would break async local!
-                var assemblyHooksTaskCompletionSource = assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.TestClass.Type.Assembly,
-                    _ => new TaskCompletionSource<bool>(), out var assemblyHooksTaskPreviouslyExisted);
-                
-                if (assemblyHooksTaskPreviouslyExisted)
-                {
-                    await assemblyHooksTaskCompletionSource.Task;
-                }
-                else
-                {
-                    try
-                    {
-                        var beforeAssemblyHooks =
-                            assemblyHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.TestClass.Type.Assembly);
-                        var assemblyHookContext =
-                            assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.TestClass.Type.Assembly);
-
-                        AssemblyHookContext.Current = assemblyHookContext;
-
-                        foreach (var beforeHook in beforeAssemblyHooks)
-                        {
-                            if (beforeHook.IsSynchronous)
-                            {
-                                await logger.LogDebugAsync("Executing synchronous [Before(Assembly)] hook");
-
-                                beforeHook.Execute(assemblyHookContext, CancellationToken.None);
-                            }
-                            else
-                            {
-                                await logger.LogDebugAsync("Executing asynchronous [Before(Assembly)] hook");
-
-                                await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
-                            }
-                        }
-
-                        AssemblyHookContext.Current = null;
-                        assemblyHooksTaskCompletionSource.SetResult(false);
-                    }
-                    catch (Exception e)
-                    {
-                        assemblyHooksTaskCompletionSource.SetException(e);
-                        throw;
-                    }
-                }
-
-                var classHooksTaskCompletionSource = classHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.TestClass.Type,
-                    _ => new TaskCompletionSource<bool>(), out var classHooksTaskPreviouslyExisted);
-                
-                if (classHooksTaskPreviouslyExisted)
-                {
-                    await classHooksTaskCompletionSource.Task;
-                }
-                else
-                {
-                    try
-                    {
-                        var beforeClassHooks =
-                            classHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.TestClass.Type);
-                        var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.TestClass.Type);
-
-                        ClassHookContext.Current = classHookContext;
-
-                        foreach (var beforeHook in beforeClassHooks)
-                        {
-                            if (beforeHook.IsSynchronous)
-                            {
-                                await logger.LogDebugAsync("Executing synchronous [Before(Class)] hook");
-
-                                beforeHook.Execute(classHookContext, CancellationToken.None);
-                            }
-                            else
-                            {
-                                await logger.LogDebugAsync("Executing asynchronous [Before(Class)] hook");
-
-                                await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
-                            }
-                        }
-
-                        ClassHookContext.Current = null;
-                        classHooksTaskCompletionSource.SetResult(false);
-                    }
-                    catch (Exception e)
-                    {
-                        classHooksTaskCompletionSource.SetException(e);
-                        throw;
-                    }
-                }
-
                 TestContext.Current = testContext;
+
+                foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
+                {
+                    await logger.LogDebugAsync("Executing ITestStartEventReceivers");
+
+                    await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
+                    testStartEventsObject.OnTestStartSynchronous(new BeforeTestContext(testContext.InternalDiscoveredTest));
+                }
                 
                 await ExecuteWithRetries(test, cleanUpExceptions);
 
@@ -227,14 +146,15 @@ internal class SingleTestExecutor(
     {
         lock (Lock)
         {
-            // Could not be registered if it's triggered from a [DependsOn]
+            // Could not be registered if wasn't in the original filter and it's triggered from a [DependsOn]
             if (!testContext.IsRegistered)
             {
-                return testRegistrar.RegisterInstance(testContext.InternalDiscoveredTest, _ => default);
+                return testRegistrar.RegisterInstance(testContext.InternalDiscoveredTest,
+                    _ => default);
             }
+            
+            return default;
         }
-
-        return default;
     }
 
     private async Task RunCleanUps(DiscoveredTest test, TestContext testContext,
@@ -281,18 +201,9 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterClassHooks)
         {
-            if (afterHook.IsSynchronous)
-            {
-                await logger.LogDebugAsync("Executing synchronous [After(Class)] hook");
+            await logger.LogDebugAsync("Executing [After(Class)] hook");
 
-                RunHelpers.RunSafely(() => afterHook.Execute(classHookContext, CancellationToken.None), cleanUpExceptions);
-            }
-            else
-            {
-                await logger.LogDebugAsync("Executing asynchronous [After(Class)] hook");
-
-                await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
-            }
+            await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
         }
                 
         ClassHookContext.Current = null;
@@ -304,18 +215,9 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterAssemblyHooks)
         {
-            if (afterHook.IsSynchronous)
-            {
-                await logger.LogDebugAsync("Executing synchronous [After(Assembly)] hook");
+            await logger.LogDebugAsync("Executing [After(Assembly)] hook");
 
-                RunHelpers.RunSafely(() => afterHook.Execute(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
-            }
-            else
-            {
-                await logger.LogDebugAsync("Executing asynchronous [After(Assembly)] hook");
-
-                await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
-            }
+            await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
         }
                 
         AssemblyHookContext.Current = null;
