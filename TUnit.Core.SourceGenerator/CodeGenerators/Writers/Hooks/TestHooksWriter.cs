@@ -61,7 +61,7 @@ public class TestHooksWriter : BaseHookWriter
         if (model.ClassType.IsGenericDefinition())
         {
             sourceBuilder.WriteLine(
-                $"Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod(nameof({model.FullyQualifiedTypeName}.{model.MethodName}), [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
+                $"Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
         }
         else
         {
