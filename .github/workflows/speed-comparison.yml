@@ -108,24 +108,3 @@ jobs:
           name: ${{ matrix.os }}_markdown_build_time
           path: |
             **/BenchmarkDotNet.Artifacts/**
-
-  generate-readme:
-    runs-on: ubuntu-latest
-    needs: [run-time-benchmarks, build-time-benchmarks]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.x
-
-      - name: Generate ReadMe
-        uses: ./.github/actions/execute-pipeline
-        with:
-          categories: ReadMe
-          admin-token: ${{ secrets.ADMIN_TOKEN }}
-          environment: Development

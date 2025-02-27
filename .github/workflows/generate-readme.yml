@@ -1,0 +1,27 @@
+name: Speed Comparison
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Generate ReadMe
+        uses: ./.github/actions/execute-pipeline
+        with:
+          categories: ReadMe
+          admin-token: ${{ secrets.ADMIN_TOKEN }}
+          environment: Development
