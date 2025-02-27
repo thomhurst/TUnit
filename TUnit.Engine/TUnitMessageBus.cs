@@ -8,6 +8,7 @@ using Microsoft.Testing.Platform.TestHost;
 using Polyfills;
 using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 #pragma warning disable TPEXP
 
@@ -61,8 +62,11 @@ public class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLi
 
         var timingProperty = GetTimingProperty(testContext, start);
 
-        TidyStacktrace(exception);
-
+        if (!commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace))
+        {
+            exception = new TestFailedException(exception);
+        }
+        
         var updateType = GetFailureStateProperty(testContext, exception,
             timingProperty.GlobalTiming.Duration);
 
@@ -174,62 +178,4 @@ public class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLi
     public string Description => extension.Description;
 
     public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage), typeof(SessionFileArtifact), typeof(TestNodeFileArtifact)];
-
-    private string FilterStackTrace(string? stackTrace)
-    {
-        if (string.IsNullOrEmpty(stackTrace))
-        {
-            return string.Empty;
-        }
-        
-        var lines = stackTrace!.Split([Environment.NewLine], StringSplitOptions.None);
-
-        return string.Join(Environment.NewLine,
-            lines.TakeWhile(x => !x.Trim().StartsWith("at TUnit")));
-    }
-
-    private void TidyStacktrace(Exception exception)
-    {
-        if (commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace))
-        {
-            return;
-        }
-
-#if NET8_0_OR_GREATER
-        try
-        {
-            // Remove TUnit from the stack trace so that it shows just the user code and is more readable
-            var originalStacktrace = exception.StackTrace;
-            
-            var newStackTrace = FilterStackTrace(originalStacktrace);
-            
-            StackTrace(exception) = null;
-            StackTraceString(exception) = null;
-            RemoteStackTraceString(exception) = newStackTrace;
-
-            if (exception.InnerException != null)
-            {
-                TidyStacktrace(exception.InnerException);
-            }
-
-            [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_stackTraceString")]
-            static extern ref string? StackTraceString(Exception e);
-            
-            [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_remoteStackTraceString")]
-            static extern ref string? RemoteStackTraceString(Exception e);
-
-#if NET8_0
-            [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_stackTrace")]
-            static extern ref byte[]? StackTrace(Exception e);    
-#else
-            [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_stackTrace")]
-            static extern ref object? StackTrace(Exception e);   
-#endif
-        }
-        catch
-        {
-            // Ignore and use original stack trace
-        }
-#endif
-    }
 }
