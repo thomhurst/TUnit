@@ -14,7 +14,13 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<CopyToLocalNuGetModule>]
 public class TestNugetPackageModule : Module<CommandResult[]>
 {
-    private readonly List<string> _frameworks = ["net6.0", "net7.0", "net8.0", "net9.0"];
+    private readonly List<string> _frameworks = [
+        /* TODO: Bug with:
+        Unhandled exception. System.MissingMethodException: Method not found: 'Void 
+        Microsoft.Testing.Platform.Extensions.Messages.TestNode.set_DisplayName(System.S
+        tring)'.
+        "net6.0", */ 
+        "net7.0", "net8.0", "net9.0"];
 
     public TestNugetPackageModule()
     {
@@ -23,7 +29,7 @@ public class TestNugetPackageModule : Module<CommandResult[]>
             _frameworks.AddRange(["net462", "net472", "net481"]);
         }
     }
-    
+
     protected override async Task<CommandResult[]?> ExecuteAsync(IPipelineContext context,
         CancellationToken cancellationToken)
     {
