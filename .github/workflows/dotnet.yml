@@ -61,13 +61,27 @@ jobs:
           nuget-apikey: ${{ secrets.NUGET__APIKEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
       
-      - name: Upload a Build Artifact
+      - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v4.6.1
         if: always()
         with:
           name: TestingPlatformDiagnosticLogs${{matrix.os}}
           path: '**/log_*.diag'
+
+      - name: Upload Crash Dumps
+        uses: actions/upload-artifact@v4.6.1
+        if: always()
+        with:
+          name: CrashDump${{matrix.os}}
+          path: '**/crashdump*'
           
+      - name: Upload Hang Dumps
+        uses: actions/upload-artifact@v4.6.1
+        if: always()
+        with:
+          name: HangDump${{matrix.os}}
+          path: '**/hangdump*'
+
       - name: NuGet Packages Artifacts
         uses: actions/upload-artifact@v4.6.1
         if: always()
