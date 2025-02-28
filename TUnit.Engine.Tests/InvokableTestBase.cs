@@ -36,7 +36,8 @@ public abstract class InvokableTestBase
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
-        var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
+        var guid = Guid.NewGuid().ToString("N");
+        var trxFilename = guid + ".trx";
         var result = await Cli.Wrap("dotnet")
             .WithArguments(
                 [
@@ -48,6 +49,9 @@ public abstract class InvokableTestBase
                     "--report-trx", "--report-trx-filename", trxFilename,
                     // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
                     "--timeout", "5m",
+                    "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.txt", 
+                    "--crashdump", "--crashdump-filename", $"crashdump.tests-{guid}.txt",
+
                     ..runOptions.AdditionalArguments
                 ]
             )
@@ -73,8 +77,9 @@ public abstract class InvokableTestBase
 
         var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
                      ?? files.First(x => x.Name == "TUnit.TestProject.exe");
-        
-        var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
+
+        var guid = Guid.NewGuid().ToString("N");
+        var trxFilename = guid + ".trx";
         
         var result = await Cli.Wrap(aotApp.FullName)
             .WithArguments(
@@ -106,8 +111,9 @@ public abstract class InvokableTestBase
         
         var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
                      ?? files.First(x => x.Name == "TUnit.TestProject.exe");
-        
-        var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
+
+        var guid = Guid.NewGuid().ToString("N");
+        var trxFilename = guid + ".trx";
         
         var result = await Cli.Wrap(aotApp.FullName)
             .WithArguments(

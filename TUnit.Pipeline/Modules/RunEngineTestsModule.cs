@@ -25,6 +25,10 @@ public class RunEngineTestsModule : Module<CommandResult>
             Configuration = Configuration.Release,
             Framework = "net9.0",
             WorkingDirectory = project.Folder!,
+            Arguments = [
+                "--hangdump", "--hangdump-filename", "hangdump.engine-tests.txt", "--hangdump-timeout", "20m",
+                "--crashdump", "--crashdump-filename", "crashdump.engine-tests.txt"
+            ],
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
