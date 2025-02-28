@@ -67,13 +67,6 @@ jobs:
         with:
           name: TestingPlatformDiagnosticLogs${{matrix.os}}
           path: '**/log_*.diag'
-
-      - name: Upload Crash Dumps
-        uses: actions/upload-artifact@v4.6.1
-        if: always()
-        with:
-          name: CrashDump${{matrix.os}}
-          path: '**/crashdump*'
           
       - name: Upload Hang Dumps
         uses: actions/upload-artifact@v4.6.1

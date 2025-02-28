@@ -27,7 +27,6 @@ public class RunEngineTestsModule : Module<CommandResult>
             WorkingDirectory = project.Folder!,
             Arguments = [
                 "--hangdump", "--hangdump-filename", "hangdump.engine-tests.txt", "--hangdump-timeout", "20m",
-                "--crashdump", "--crashdump-filename", "crashdump.engine-tests.txt"
             ],
             EnvironmentVariables = new Dictionary<string, string?>
             {

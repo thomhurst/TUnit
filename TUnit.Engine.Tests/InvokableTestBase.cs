@@ -50,7 +50,6 @@ public abstract class InvokableTestBase
                     // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
                     "--timeout", "5m",
                     "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.txt", 
-                    "--crashdump", "--crashdump-filename", $"crashdump.tests-{guid}.txt",
 
                     ..runOptions.AdditionalArguments
                 ]
