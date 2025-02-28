@@ -34,7 +34,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.50.0" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="8.0.406" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.13.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="1.4.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="1.4.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.4.3" />
