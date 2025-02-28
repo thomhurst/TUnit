@@ -20,7 +20,7 @@ public class TestNugetPackageModule : Module<CommandResult[]>
         Microsoft.Testing.Platform.Extensions.Messages.TestNode.set_DisplayName(System.S
         tring)'.
         "net6.0", */ 
-        "net7.0", "net8.0", "net9.0"];
+        "net8.0", "net9.0"];
 
     public TestNugetPackageModule()
     {
