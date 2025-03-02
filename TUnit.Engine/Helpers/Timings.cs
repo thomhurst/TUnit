@@ -22,9 +22,14 @@ internal static class Timings
                 context.Timings.Add(new Timing(name, start, end));
             }
         }
-    }  
+    }
+
+    public static Task Record(string name, TestContext context, Func<Task> action)
+    {
+        return Record(name, context, () => new ValueTask(action()));
+    }
     
-    public static async Task Record(string name, TestContext context, Func<Task> action)
+    public static async Task Record(string name, TestContext context, Func<ValueTask> action)
     {
         var start = DateTimeOffset.Now;
 

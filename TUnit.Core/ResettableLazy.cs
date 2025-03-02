@@ -15,7 +15,7 @@ public class ResettableLazy<
     {
     }
     
-    public override async Task ResetLazy()
+    public override async ValueTask ResetLazy()
     {
         await DisposeAsync(ClassConstructor);
         ClassConstructor = new TClassConstructor();
@@ -62,7 +62,7 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
 
     public T Value => _lazy.Value;
 
-    public virtual async Task ResetLazy()
+    public virtual async ValueTask ResetLazy()
     {
         await DisposeAsync();
         

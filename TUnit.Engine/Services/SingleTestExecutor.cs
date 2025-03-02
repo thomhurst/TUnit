@@ -37,11 +37,11 @@ internal class SingleTestExecutor(
     {
         lock (Lock)
         {
-            return test.TestContext.TestTask ??= Task.Run(() => ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest));
+            return test.TestContext.TestTask ??= Task.Run(async () => await ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest));
         }
     }
 
-    private async Task ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter,
+    private async ValueTask ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
     {
         var semaphore = WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
@@ -99,7 +99,6 @@ internal class SingleTestExecutor(
                     await logger.LogDebugAsync("Executing ITestStartEventReceivers");
 
                     await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
-                    testStartEventsObject.OnTestStartSynchronous(new BeforeTestContext(testContext.InternalDiscoveredTest));
                 }
                 
                 await ExecuteWithRetries(test, cleanUpExceptions);
@@ -191,7 +190,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
+    private async ValueTask ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
         var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type);
@@ -203,7 +202,7 @@ internal class SingleTestExecutor(
         {
             await logger.LogDebugAsync("Executing [After(Class)] hook");
 
-            await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
+            await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
         }
                 
         ClassHookContext.Current = null;
@@ -217,7 +216,7 @@ internal class SingleTestExecutor(
         {
             await logger.LogDebugAsync("Executing [After(Assembly)] hook");
 
-            await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
+            await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
         }
                 
         AssemblyHookContext.Current = null;
@@ -325,7 +324,7 @@ internal class SingleTestExecutor(
         await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token, cleanupExceptions);
     }
 
-    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
+    private async ValueTask ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
         var timeout = discoveredTest.TestDetails.Timeout;
 

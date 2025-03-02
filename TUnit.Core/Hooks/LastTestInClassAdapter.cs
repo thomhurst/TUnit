@@ -47,10 +47,8 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
         return false;
     }
 
-    public async Task ExecuteAsync(ClassHookContext context, CancellationToken cancellationToken)
+    public async ValueTask ExecuteAsync(ClassHookContext context, CancellationToken cancellationToken)
     {
         await lastTestInClassEventReceiver.OnLastTestInClass(context, testContext);
     }
-
-    public bool IsSynchronous => false;
 }

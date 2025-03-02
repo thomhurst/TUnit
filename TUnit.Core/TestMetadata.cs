@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 namespace TUnit.Core;
 
 public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TClassType> : TestMetadata where TClassType : class
 {
     public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
-    public required Func<TClassType, CancellationToken, Task> TestMethodFactory { get; init; }
+    public required Func<TClassType, CancellationToken, ValueTask> TestMethodFactory { get; init; }
     
     public override TestDetails BuildTestDetails()
     {
@@ -41,7 +40,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 	    };
     }
 
-    public override TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, Task> testMethodFactory)
+    public override TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, ValueTask> testMethodFactory)
     {
 	    return this with
 	    {
@@ -74,5 +73,5 @@ public abstract record TestMetadata
     public abstract TestDetails BuildTestDetails();
     internal abstract DiscoveredTest BuildDiscoveredTest(TestContext testContext);
 
-    public abstract TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, Task> testMethodFactory);
+    public abstract TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, ValueTask> testMethodFactory);
 }

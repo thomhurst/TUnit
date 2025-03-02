@@ -1,51 +1,85 @@
-﻿using System.Diagnostics;
+﻿using System.Runtime.CompilerServices;
 
 namespace TUnit.Core;
 
-[StackTraceHidden]
 public static class AsyncConvert
 {
-    public static Task Convert(Action action)
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    public static ValueTask Convert(Action action)
     {
         action();
-        return Task.CompletedTask;
+        return default;
     }
 
-    public static async Task Convert(Func<Task> action)
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    public static ValueTask Convert(Func<ValueTask> action)
     {
-        await action();
+        return action();
     }
     
-    public static async Task Convert(Func<ValueTask> action)
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    public static ValueTask Convert(Func<Task> action)
     {
-        await action();
+        var task = action();
+
+        if (task.IsCompleted && !task.IsFaulted)
+        {
+            return default;
+        }
+
+        return new ValueTask(task);
     }
 
-    public static async Task ConvertObject(object? invoke)
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    public static ValueTask ConvertObject(object? invoke)
     {
+        if (invoke is null)
+        {
+            return default;
+        }
+        
         if (invoke is Func<object> syncFunc)
         {
             syncFunc();
+            return default;
         }
         
         if (invoke is Func<Task> asyncFunc)
         {
-            await asyncFunc();
+            return Convert(asyncFunc);
         }
         
         if (invoke is Func<ValueTask> asyncValueFunc)
         {
-            await asyncValueFunc();
+            return Convert(asyncValueFunc);
         }
         
-        if (invoke is Task task)
+        if (invoke is Task task && (task.IsFaulted || !task.IsCompleted))
         {
-            await task;
+            return new ValueTask(task);
         }
 
         if (invoke is ValueTask valueTask)
         {
-            await valueTask;
+            return valueTask;
         }
+
+        throw new ArgumentException("Invalid object type");
     }
 }

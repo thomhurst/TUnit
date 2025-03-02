@@ -47,10 +47,8 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
         return false;
     }
 
-    public async Task ExecuteAsync(AssemblyHookContext context, CancellationToken cancellationToken)
+    public async ValueTask ExecuteAsync(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         await lastTestInAssemblyEventReceiver.OnLastTestInAssembly(context, testContext);
     }
-
-    public bool IsSynchronous => false;
 }
