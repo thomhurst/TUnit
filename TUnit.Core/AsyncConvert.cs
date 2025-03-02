@@ -1,27 +1,53 @@
-﻿using System.Diagnostics;
+﻿using System.Runtime.CompilerServices;
 
 namespace TUnit.Core;
 
-[StackTraceHidden]
 public static class AsyncConvert
 {
-    public static Task Convert(Action action)
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    public static ValueTask Convert(Action action)
     {
         action();
-        return Task.CompletedTask;
+        return default;
     }
 
-    public static async Task Convert(Func<Task> action)
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    public static ValueTask Convert(Func<ValueTask> action)
     {
-        await action();
+        return action();
     }
     
-    public static async Task Convert(Func<ValueTask> action)
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    public static ValueTask Convert(Func<Task> action)
     {
-        await action();
+        var task =  action();
+
+        if (!task.IsCompleted)
+        {
+            return Await(task);
+        }
+
+        return default;
     }
 
-    public static async Task ConvertObject(object? invoke)
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    public static async ValueTask ConvertObject(object? invoke)
     {
         if (invoke is Func<object> syncFunc)
         {
@@ -47,5 +73,15 @@ public static class AsyncConvert
         {
             await valueTask;
         }
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining
+#if NET
+                | MethodImplOptions.AggressiveOptimization
+#endif
+    )]
+    private static async ValueTask Await(Task task)
+    {
+        await task;
     }
 }

@@ -24,7 +24,7 @@ internal static class Timings
         }
     }  
     
-    public static async Task Record(string name, TestContext context, Func<Task> action)
+    public static async Task Record(string name, TestContext context, Func<ValueTask> action)
     {
         var start = DateTimeOffset.Now;
 

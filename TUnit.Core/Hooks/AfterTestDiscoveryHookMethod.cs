@@ -2,22 +2,9 @@
 
 public record AfterTestDiscoveryHookMethod : StaticHookMethod<TestDiscoveryContext>
 {
-    public override bool Execute(TestDiscoveryContext context, CancellationToken cancellationToken)
+    public override ValueTask ExecuteAsync(TestDiscoveryContext context, CancellationToken cancellationToken)
     {
-        if (Body != null)
-        {
-            HookExecutor.ExecuteSynchronousAfterTestDiscoveryHook(MethodInfo, context,
-                () => Body.Invoke(context, cancellationToken)
-            );
-            return true;
-        }
-
-        return false;
-    }
-
-    public override Task ExecuteAsync(TestDiscoveryContext context, CancellationToken cancellationToken)
-    {
-        return HookExecutor.ExecuteAsynchronousAfterTestDiscoveryHook(MethodInfo, context,
+        return HookExecutor.ExecuteAfterTestDiscoveryHook(MethodInfo, context,
             () => Body!.Invoke(context, cancellationToken)
         );
     }

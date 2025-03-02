@@ -68,7 +68,7 @@ internal static class RunHelpers
 #else
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    public static async Task RunSafelyAsync(Func<Task> action, List<Exception> exceptions)
+    public static async Task RunSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
     {
         try
         {

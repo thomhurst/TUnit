@@ -14,18 +14,18 @@
         <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
-<!--    <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">-->
-<!--        <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />-->
-<!--        <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />-->
-<!--    </Target>-->
+    <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">
+        <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />
+        <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />
+    </Target>
 
-<!--    <PropertyGroup>-->
-<!--        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
-<!--        <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>-->
-<!--    </PropertyGroup>-->
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
 
-<!--    <ItemGroup>-->
-<!--        <Compile Remove="SourceGeneratedViewer\**" />-->
-<!--        <None Include="SourceGeneratedViewer\**" />-->
-<!--    </ItemGroup>-->
+    <ItemGroup>
+        <Compile Remove="SourceGeneratedViewer\**" />
+        <None Include="SourceGeneratedViewer\**" />
+    </ItemGroup>
 </Project>

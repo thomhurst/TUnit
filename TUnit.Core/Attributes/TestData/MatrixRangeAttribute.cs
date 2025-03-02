@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace TUnit.Core;
 
