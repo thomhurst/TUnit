@@ -22,4 +22,6 @@ public class AssemblyHookContext : Context
     public IEnumerable<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests);
 
     public int TestCount => AllTests.Count();
+    
+    internal bool FirstTestStarted { get; set; }
 }

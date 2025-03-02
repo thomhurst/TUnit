@@ -18,6 +18,7 @@ public class ClassHookContext : Context
     public List<TestContext> Tests { get; init; } = [];
 
     public int TestCount => Tests.Count;
+    internal bool FirstTestStarted { get; set; }
 
     private bool Equals(ClassHookContext other)
     {
