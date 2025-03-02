@@ -49,6 +49,11 @@ public static class AsyncConvert
     )]
     public static ValueTask ConvertObject(object? invoke)
     {
+        if (invoke is null)
+        {
+            return default;
+        }
+        
         if (invoke is Func<object> syncFunc)
         {
             syncFunc();
