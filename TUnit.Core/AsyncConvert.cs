@@ -32,14 +32,15 @@ public static class AsyncConvert
     )]
     public static ValueTask Convert(Func<Task> action)
     {
-        var task =  action();
+        var task = action();
 
-        if (!task.IsCompleted)
+        if (task.IsCompleted)
         {
-            return Await(task);
+            return default;
         }
 
-        return default;
+        return new ValueTask(task);
+
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining
@@ -73,15 +74,5 @@ public static class AsyncConvert
         {
             await valueTask;
         }
-    }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining
-#if NET
-                | MethodImplOptions.AggressiveOptimization
-#endif
-    )]
-    private static async ValueTask Await(Task task)
-    {
-        await task;
     }
 }
