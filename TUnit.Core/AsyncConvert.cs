@@ -52,6 +52,7 @@ public static class AsyncConvert
         if (invoke is Func<object> syncFunc)
         {
             syncFunc();
+            return default;
         }
         
         if (invoke is Func<Task> asyncFunc)
@@ -74,6 +75,6 @@ public static class AsyncConvert
             return valueTask;
         }
 
-        return default;
+        throw new ArgumentException("Invalid object type");
     }
 }
