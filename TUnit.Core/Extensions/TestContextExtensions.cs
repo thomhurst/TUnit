@@ -107,6 +107,15 @@ public static class TestContextExtensions
     
     internal static IEnumerable<ILastTestInTestSessionEventReceiver> GetLastTestInTestSessionEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ILastTestInTestSessionEventReceiver>();
+    
+    internal static IEnumerable<IFirstTestInClassEventReceiver> GetFirstTestInClassEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<IFirstTestInClassEventReceiver>();
+    
+    internal static IEnumerable<IFirstTestInAssemblyEventReceiver> GetFirstTestInAssemblyEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<IFirstTestInAssemblyEventReceiver>();
+    
+    internal static IEnumerable<IFirstTestInTestSessionEventReceiver> GetFirstTestInTestSessionEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<IFirstTestInTestSessionEventReceiver>();
 
     private static IEnumerable<object?> GetPossibleEventObjects(this TestContext context)
     {
