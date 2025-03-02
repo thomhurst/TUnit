@@ -25,7 +25,7 @@ internal static class DelegateExtensions
         }
     }
     
-    public static async ValueTask<AssertionData> AsAssertionData(this Func<ValueTask> action, string? actualExpression)
+    public static async ValueTask<AssertionData> AsAssertionData(this Func<Task> action, string? actualExpression)
     {
         var start = DateTimeOffset.Now;
 

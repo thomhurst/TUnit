@@ -34,13 +34,12 @@ public static class AsyncConvert
     {
         var task = action();
 
-        if (task.IsCompletedSuccessfully)
+        if (task.IsCompleted && !task.IsFaulted)
         {
             return default;
         }
 
         return new ValueTask(task);
-
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining
@@ -48,7 +47,7 @@ public static class AsyncConvert
                 | MethodImplOptions.AggressiveOptimization
 #endif
     )]
-    public static async ValueTask ConvertObject(object? invoke)
+    public static ValueTask ConvertObject(object? invoke)
     {
         if (invoke is Func<object> syncFunc)
         {
@@ -57,22 +56,24 @@ public static class AsyncConvert
         
         if (invoke is Func<Task> asyncFunc)
         {
-            await asyncFunc();
+            return Convert(asyncFunc);
         }
         
         if (invoke is Func<ValueTask> asyncValueFunc)
         {
-            await asyncValueFunc();
+            return Convert(asyncValueFunc);
         }
         
-        if (invoke is Task task)
+        if (invoke is Task task && (task.IsFaulted || !task.IsCompleted))
         {
-            await task;
+            return new ValueTask(task);
         }
 
         if (invoke is ValueTask valueTask)
         {
-            await valueTask;
+            return valueTask;
         }
+
+        return default;
     }
 }
