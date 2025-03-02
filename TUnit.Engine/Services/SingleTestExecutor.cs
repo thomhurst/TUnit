@@ -176,7 +176,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                _assemblyEventsLock.Release();
+                _sessionEventsLock.Release();
             }
         }
         
@@ -236,7 +236,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                _assemblyEventsLock.Release();
+                _classEventsLock.Release();
             }
         }
         
