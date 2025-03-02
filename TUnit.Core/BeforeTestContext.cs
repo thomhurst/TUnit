@@ -28,4 +28,6 @@ public class BeforeTestContext
     {
         DiscoveredTest.TestContext.LinkedCancellationTokens.Add(cancellationToken);
     }
+    
+    public void AddAsyncLocalValues() => TestContext.AddAsyncLocalValues();
 }

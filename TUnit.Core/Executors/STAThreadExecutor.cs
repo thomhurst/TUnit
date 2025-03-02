@@ -5,7 +5,7 @@ namespace TUnit.Core;
 [SupportedOSPlatform("windows")]
 public class STAThreadExecutor : GenericAbstractExecutor
 {
-    protected override async Task ExecuteAsync(Func<Task> action)
+    protected override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
         var tcs = new TaskCompletionSource<object?>();
         
@@ -26,14 +26,5 @@ public class STAThreadExecutor : GenericAbstractExecutor
         thread.Start();
         
         await tcs.Task;
-    }
-
-    protected override void ExecuteSync(Action action)
-    {
-        var thread = new Thread(() => action());
-        
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
     }
 }

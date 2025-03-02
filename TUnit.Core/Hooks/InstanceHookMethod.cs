@@ -33,11 +33,11 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     
     public required int Order { get; init; }
     
-    public Func<object, TestContext, CancellationToken, Task>? Body { get; init; }
+    public Func<object, TestContext, CancellationToken, ValueTask>? Body { get; init; }
 
-    public Task ExecuteAsync(TestContext context, CancellationToken cancellationToken)
+    public ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
-        return HookExecutor.ExecuteAsynchronousBeforeTestHook(MethodInfo, context,
+        return HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
             () => Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
         );
     }

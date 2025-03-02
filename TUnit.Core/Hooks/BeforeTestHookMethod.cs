@@ -2,22 +2,9 @@
 
 public record BeforeTestHookMethod : StaticHookMethod<TestContext>
 {
-    public override bool Execute(TestContext context, CancellationToken cancellationToken)
+    public override ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
-        if (Body != null)
-        {
-            HookExecutor.ExecuteSynchronousBeforeTestHook(MethodInfo, context,
-                () => Body.Invoke(context, cancellationToken)
-            );
-            return true;
-        }
-
-        return false;
-    }
-
-    public override Task ExecuteAsync(TestContext context, CancellationToken cancellationToken)
-    {
-        return HookExecutor.ExecuteAsynchronousBeforeTestHook(MethodInfo, context,
+        return HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
             () => Body!.Invoke(context, cancellationToken)
         );
     }
