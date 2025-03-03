@@ -1,11 +1,17 @@
 ﻿using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
+using Xunit;
+
+namespace Playground;
 
 public class Tests
 {
     [Test, Repeat(1000)]
     public void Test()
     {
+        var one = "1";
+        
+        Assert.Equal("1", one);
     }
 }
 

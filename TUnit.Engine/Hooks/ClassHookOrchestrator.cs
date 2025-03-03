@@ -102,9 +102,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
             yield break;
         }
         
-        var allTestContextsInClass = GetContext(testClassType).Tests;
-
-        foreach (var testEndEventsObject in allTestContextsInClass.SelectMany(tc => tc.GetLastTestInClassEventObjects()))
+        foreach (var testEndEventsObject in testContext.GetLastTestInClassEventObjects())
         {
             yield return new LastTestInClassAdapter(testEndEventsObject, testContext);
         }

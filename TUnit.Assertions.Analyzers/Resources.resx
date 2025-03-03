@@ -96,4 +96,13 @@
     <data name="TUnitAssertions0008Title" xml:space="preserve">
         <value>ValueTasks should be awaited when used within Assert.That(...)</value>
     </data>
+    <data name="TUnitAssertions0009Description" xml:space="preserve">
+        <value>xUnit assertion can be converted to TUnit assertion.</value>
+    </data>
+    <data name="TUnitAssertions0009MessageFormat" xml:space="preserve">
+        <value>xUnit assertion can be converted to TUnit assertion</value>
+    </data>
+    <data name="TUnitAssertions0009Title" xml:space="preserve">
+        <value>xUnit assertion can be converted to TUnit assertion</value>
+    </data>
 </root>

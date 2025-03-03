@@ -329,8 +329,8 @@ internal class SingleTestExecutor(
         if (instanceTracker.IsLastTest())
         {
             var testSessionContext = TestSessionContext.Current!;
-            var allTests = testSessionContext.AllTests;
-            foreach (var testEndEventsObject in allTests.SelectMany(tc => tc.GetLastTestInTestSessionEventObjects()))
+
+            foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
             {
                 await logger.LogDebugAsync("Executing ILastTestInTestSessionEventReceivers");
 
