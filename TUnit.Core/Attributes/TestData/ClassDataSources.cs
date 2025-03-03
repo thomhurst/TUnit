@@ -87,6 +87,7 @@ internal class ClassDataSources
         switch (shared)
         {
             case SharedType.None:
+                break;
             case SharedType.PerClass:
                 TestDataContainer.IncrementTestClassUsage(testContext.TestDetails.TestClass.Type, typeof(T));
                 break;
