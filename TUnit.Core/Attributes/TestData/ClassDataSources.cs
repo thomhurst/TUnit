@@ -175,17 +175,17 @@ internal class ClassDataSources
                 
         if (shared == SharedType.PerClass)
         {
-            await TestDataContainer.ConsumeTestClassCount(testContext.TestDetails.TestClass.Type, typeof(T));
+            await TestDataContainer.ConsumeTestClassCount(testContext.TestDetails.TestClass.Type, item);
         }
 
         if (shared == SharedType.PerAssembly)
         {
-            await TestDataContainer.ConsumeAssemblyCount(testContext.TestDetails.TestClass.Type.Assembly, typeof(T));
+            await TestDataContainer.ConsumeAssemblyCount(testContext.TestDetails.TestClass.Type.Assembly, item);
         }
         
         if (shared == SharedType.PerTestSession)
         {
-            await TestDataContainer.ConsumeGlobalCount(typeof(T));
+            await TestDataContainer.ConsumeGlobalCount(item);
         }
     }
     

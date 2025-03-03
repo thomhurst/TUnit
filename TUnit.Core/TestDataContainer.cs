@@ -24,6 +24,7 @@ internal static class TestDataContainer
     public static T GetInstanceForClass<T>(Type testClass, Func<T> func)
     {
         var objectsForClass = InjectedSharedPerClassType.GetOrAdd(testClass, _ => new GetOnlyDictionary<Type, object>());
+        
         return (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
     }
     
@@ -86,33 +87,33 @@ internal static class TestDataContainer
         await Disposer.DisposeAsync(instancesForType.Remove(key));
     }
 
-    internal static async ValueTask ConsumeGlobalCount(Type type)
+    internal static async ValueTask ConsumeGlobalCount<T>(T? item)
     {
-        if (CountsPerTestSession[type].Decrement() > 0)
+        if (CountsPerTestSession[typeof(T)].Decrement() > 0)
         {
             return;
         }
         
-        await Disposer.DisposeAsync(InjectedSharedGlobally.Remove(type));
+        await Disposer.DisposeAsync(item);
     }
     
-    internal static async ValueTask ConsumeAssemblyCount(Assembly assembly, Type type)
+    internal static async ValueTask ConsumeAssemblyCount<T>(Assembly assembly, T? item)
     {
-        if (CountsPerAssembly[assembly][type].Decrement() > 0)
+        if (CountsPerAssembly[assembly][typeof(T)].Decrement() > 0)
         {
             return;
         }
         
-        await Disposer.DisposeAsync(InjectedSharedPerAssembly[assembly].Remove(type));
+        await Disposer.DisposeAsync(item);
     }
     
-    internal static async ValueTask ConsumeTestClassCount(Type testClassType, Type type)
+    internal static async ValueTask ConsumeTestClassCount<T>(Type testClassType, T? item)
     {
-        if (CountsPerTestClass[testClassType][type].Decrement() > 0)
+        if (CountsPerTestClass[testClassType][typeof(T)].Decrement() > 0)
         {
             return;
         }
         
-        await Disposer.DisposeAsync(InjectedSharedPerClassType[testClassType].Remove(type));
+        await Disposer.DisposeAsync(item);
     }
 }
