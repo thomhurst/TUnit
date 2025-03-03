@@ -51,12 +51,12 @@ internal class ClassDataSources
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return TestDataContainer.GetGlobalInstance(Create<T>, dataGeneratorMetadata);
+            return TestDataContainer.GetGlobalInstance(Create<T>);
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return TestDataContainer.GetInstanceForClass(testClassType, Create<T>, dataGeneratorMetadata);
+            return TestDataContainer.GetInstanceForClass(testClassType, Create<T>);
         }
 
         if (sharedType == SharedType.Keyed)
@@ -66,7 +66,7 @@ internal class ClassDataSources
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, Create<T>, dataGeneratorMetadata);
+            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, Create<T>);
         }
 
         throw new ArgumentOutOfRangeException();
@@ -87,8 +87,12 @@ internal class ClassDataSources
         switch (shared)
         {
             case SharedType.None:
+                break;
             case SharedType.PerClass:
+                TestDataContainer.IncrementTestClassUsage(testContext.TestDetails.TestClass.Type, typeof(T));
+                break;
             case SharedType.PerAssembly:
+                TestDataContainer.IncrementAssemblyUsage(testContext.TestDetails.TestClass.Type.Assembly, typeof(T));
                 break;
             case SharedType.PerTestSession:
                 TestDataContainer.IncrementGlobalUsage(typeof(T));
@@ -158,7 +162,7 @@ internal class ClassDataSources
         throw new ArgumentOutOfRangeException(nameof(shared));
     }
 
-    public async ValueTask OnDispose<T>(SharedType shared, string key, T? item)
+    public async ValueTask OnDispose<T>(TestContext testContext, SharedType shared, string key, T? item)
     {
         if (shared is SharedType.None)
         {
@@ -169,10 +173,20 @@ internal class ClassDataSources
         {
             await TestDataContainer.ConsumeKey(key, typeof(T));
         }
+                
+        if (shared == SharedType.PerClass)
+        {
+            await TestDataContainer.ConsumeTestClassCount(testContext.TestDetails.TestClass.Type, item);
+        }
 
+        if (shared == SharedType.PerAssembly)
+        {
+            await TestDataContainer.ConsumeAssemblyCount(testContext.TestDetails.TestClass.Type.Assembly, item);
+        }
+        
         if (shared == SharedType.PerTestSession)
         {
-            await TestDataContainer.ConsumeGlobalCount(typeof(T));
+            await TestDataContainer.ConsumeGlobalCount(item);
         }
     }
     

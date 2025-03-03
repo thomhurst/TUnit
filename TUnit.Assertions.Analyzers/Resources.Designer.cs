@@ -292,5 +292,32 @@ namespace TUnit.Assertions.Analyzers {
                 return ResourceManager.GetString("TUnitAssertions0008Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit assertion can be converted to TUnit assertion..
+        /// </summary>
+        internal static string TUnitAssertions0009Description {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0009Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit assertion can be converted to TUnit assertion.
+        /// </summary>
+        internal static string TUnitAssertions0009MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0009MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit assertion can be converted to TUnit assertion.
+        /// </summary>
+        internal static string TUnitAssertions0009Title {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0009Title", resourceCulture);
+            }
+        }
     }
 }
