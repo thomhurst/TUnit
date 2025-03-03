@@ -58,7 +58,6 @@ public abstract class InvokableTestBase
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
-
         await AssertTrx(result, assertions, trxFilename, assertionExpression);
     }
     
