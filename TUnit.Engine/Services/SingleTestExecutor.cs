@@ -164,12 +164,13 @@ internal class SingleTestExecutor(
             {
                 if (!testSessionContext.FirstTestStarted)
                 {
-                    testSessionContext.FirstTestStarted = true;
                     foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInTestSessionEventObjects())
                     {
                         await firstTestInAssemblyEventReceiver.OnFirstTestInTestSession(testSessionContext, testContext);
                         ExecutionContextHelper.RestoreContext(testContext);
                     }
+                    
+                    testSessionContext.FirstTestStarted = true;
                     
                     return ExecutionContext.Capture();
                 }
@@ -194,12 +195,13 @@ internal class SingleTestExecutor(
             {
                 if (!assemblyHookContext.FirstTestStarted)
                 {
-                    assemblyHookContext.FirstTestStarted = true;
                     foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInAssemblyEventObjects())
                     {
                         await firstTestInAssemblyEventReceiver.OnFirstTestInAssembly(assemblyHookContext, testContext);
                         ExecutionContextHelper.RestoreContext(testContext);
                     }
+
+                    assemblyHookContext.FirstTestStarted = true;
 
                     return ExecutionContext.Capture();
                 }
@@ -224,13 +226,14 @@ internal class SingleTestExecutor(
             {
                 if (!classHookContext.FirstTestStarted)
                 {
-                    classHookContext.FirstTestStarted = true;
                     foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInClassEventObjects())
                     {
                         await firstTestInAssemblyEventReceiver.OnFirstTestInClass(classHookContext, testContext);
                         ExecutionContextHelper.RestoreContext(testContext);
                     }
                     
+                    classHookContext.FirstTestStarted = true;
+
                     return ExecutionContext.Capture();
                 }
             }
