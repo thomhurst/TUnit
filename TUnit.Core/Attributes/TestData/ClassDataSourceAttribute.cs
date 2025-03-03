@@ -32,14 +32,14 @@ public sealed class ClassDataSourceAttribute<T> : DataSourceGeneratorAttribute<T
                     item);
             };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, _) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, context) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(Shared, Key, item);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared, Key, item);
             };
             
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, _) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, context) =>
             {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(Shared, Key, item);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared, Key, item);
             };
             
             return item;
