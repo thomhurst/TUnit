@@ -477,4 +477,13 @@
     <data name="TUnit0051Title" xml:space="preserve">
         <value>Type must be public</value>
     </data>
+    <data name="TUnit0052Description" xml:space="preserve">
+        <value>xUnit attribute can be converted to TUnit attribute.</value>
+    </data>
+    <data name="TUnit0052MessageFormat" xml:space="preserve">
+        <value>xUnit attribute can be converted to TUnit attribute</value>
+    </data>
+    <data name="TUnit0052Title" xml:space="preserve">
+        <value>xUnit attribute can be converted to TUnit attribute</value>
+    </data>
 </root>

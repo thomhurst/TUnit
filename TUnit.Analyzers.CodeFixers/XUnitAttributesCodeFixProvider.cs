@@ -37,11 +37,6 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
     
     private static async Task<Document> ConvertAttributesAsync(Document document, SyntaxNode? node, CancellationToken cancellationToken)
     {
-        if (!Debugger.IsAttached)
-        {
-            Debugger.Launch();
-        }
-
         if (node is not AttributeSyntax attributeSyntax)
         {
             return document;
@@ -65,12 +60,12 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
 
         return name switch
         {
-            "FactAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test")),
-            "TheoryAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test")),
-            "TraitAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"), attributeSyntax.ArgumentList),
-            "InlineDataAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"), attributeSyntax.ArgumentList),
-            "MemberDataAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MethodDataSource"), attributeSyntax.ArgumentList),
-            "ClassDataAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MethodDataSource"), (attributeSyntax.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(SyntaxFactory.AttributeArgument(SyntaxFactory.IdentifierName("GetEnumerator")))),
+            "Fact" or "FactAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test")),
+            "Theory" or "TheoryAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test")),
+            "Trait" or "TraitAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"), attributeSyntax.ArgumentList),
+            "InlineData" or "InlineDataAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"), attributeSyntax.ArgumentList),
+            "MemberData" or "MemberDataAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MethodDataSource"), attributeSyntax.ArgumentList),
+            "ClassData" or "ClassDataAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MethodDataSource"), (attributeSyntax.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(SyntaxFactory.AttributeArgument(SyntaxFactory.IdentifierName("GetEnumerator")))),
             _ => null
         };
     }
