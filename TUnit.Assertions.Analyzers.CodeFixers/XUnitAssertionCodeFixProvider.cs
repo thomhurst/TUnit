@@ -126,7 +126,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableFrom<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableFrom({expected})"),
             "All" => SyntaxFactory.ParseExpression($"Assert.That({actual}).All().Satisfy({expected})"),
-            "Single" => SyntaxFactory.ParseExpression($"Assert.That({actual}).HasSingleItem({expected})"),
+            "Single" => SyntaxFactory.ParseExpression($"Assert.That({actual}).HasSingleItem()"),
             "IsType" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTypeOf<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTypeOf({expected})"),
