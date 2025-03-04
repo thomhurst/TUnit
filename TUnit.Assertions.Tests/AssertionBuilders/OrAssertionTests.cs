@@ -34,7 +34,6 @@ public sealed class OrAssertionTests
         await Assert.That(action).ThrowsNothing();
     }
     
-    
     [Test]
     public async Task Short_Circuits_When_First_Assertion_Succeeds()
     {
