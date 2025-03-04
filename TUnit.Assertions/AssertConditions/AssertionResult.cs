@@ -56,6 +56,7 @@ public class AssertionResult
             : Fail(Message + " and " + other.Message);
     }
 
+    // TODO: Should this be removed/obsoleted?
     public AssertionResult Or(AssertionResult other)
     {
         if (!IsPassed && !other.IsPassed)
