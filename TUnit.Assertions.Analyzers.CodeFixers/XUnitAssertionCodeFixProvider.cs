@@ -61,17 +61,17 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         
         if (newExpression != null)
         {
-            editor.ReplaceNode(expressionSyntax, newExpression);    
+            editor.ReplaceNode(expressionSyntax, newExpression.WithTriviaFrom(expressionSyntax));    
         }
 
-        TryRemoveUsingStatement(editor, expressionSyntax);
+        TryRemoveUsingStatement(editor);
         
         return editor.GetChangedDocument();
     }
 
-    private static void TryRemoveUsingStatement(DocumentEditor editor, InvocationExpressionSyntax expressionSyntax)
+    private static void TryRemoveUsingStatement(DocumentEditor editor)
     {
-        foreach (var usingDirectiveSyntax in expressionSyntax.Ancestors().Last().DescendantNodes().OfType<UsingDirectiveSyntax>().Where(x => x.Name?.ToString() == "Xunit.Assert"))
+        foreach (var usingDirectiveSyntax in editor.GetChangedRoot().DescendantNodes().OfType<UsingDirectiveSyntax>().Where(x => x.Name?.ToString().StartsWith("Xunit") is true))
         {
             editor.RemoveNode(usingDirectiveSyntax);
         }
