@@ -18,6 +18,20 @@ public sealed class OrAssertionTests
 
         await Assert.That(action).Throws<MixedAndOrAssertionsException>();
     }
+    
+    
+    [Test]
+    public async Task Basic()
+    {
+        var foo = await Assert.That(ThrowException).ThrowsException();
+        await Assert.That(foo)
+                    .IsNotAssignableTo<ArgumentOutOfRangeException>()
+                    .Or
+                    .Satisfies(x => (ArgumentOutOfRangeException)x,
+                               x => x.HasMember(y => y.ActualValue).EqualTo("foo"));
+    }
+    
+    private void ThrowException() => throw new InvalidOperationException("foo");
 
     [Test]
     public async Task Does_Not_Throw_For_Multiple_Or()
