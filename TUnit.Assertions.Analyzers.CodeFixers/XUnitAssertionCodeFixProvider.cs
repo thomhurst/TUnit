@@ -64,16 +64,29 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             editor.ReplaceNode(expressionSyntax, newExpression.WithTriviaFrom(expressionSyntax));    
         }
 
-        TryRemoveUsingStatement(editor);
+        await TryRemoveUsingStatement(editor);
         
         return editor.GetChangedDocument();
     }
 
-    private static void TryRemoveUsingStatement(DocumentEditor editor)
+    private static async Task TryRemoveUsingStatement(DocumentEditor editor)
     {
-        foreach (var usingDirectiveSyntax in editor.GetChangedRoot().DescendantNodes().OfType<UsingDirectiveSyntax>().Where(x => x.Name?.ToString().StartsWith("Xunit") is true))
+        var syntaxTree = await editor.GetChangedDocument().GetSyntaxTreeAsync();
+        
+        foreach (var usingDirectiveSyntax in editor.GetChangedRoot()
+                     .DescendantNodes()
+                     .OfType<UsingDirectiveSyntax>()
+                     .Where(x => x.Name?.ToString().StartsWith("Xunit") is true)
+                     .Where(x => x.SyntaxTree == syntaxTree))
         {
-            editor.RemoveNode(usingDirectiveSyntax);
+            try
+            {
+                editor.RemoveNode(usingDirectiveSyntax);
+            }
+            catch
+            {
+                // Ignored
+            }
         }
     }
 
