@@ -9,7 +9,7 @@
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="CliWrap" Version="3.8.1" />
+    <PackageVersion Include="CliWrap" Version="3.8.2" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="2.1.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageVersion Include="Humanizer" Version="2.14.1" />
