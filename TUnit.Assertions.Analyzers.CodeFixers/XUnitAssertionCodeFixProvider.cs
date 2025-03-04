@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
-using Microsoft.CodeAnalysis.Formatting;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
 
@@ -48,16 +47,21 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
     
     private static async Task<Document> ConvertAssertionAsync(Document document, InvocationExpressionSyntax expressionSyntax, CancellationToken cancellationToken)
     {
+        if (expressionSyntax.Expression is not MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+        {
+            return document;
+        }
+        
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
 
         var expected = expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(0);
         var actual = expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(1) ?? expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(0);
 
-        var method = GetMethodName(expressionSyntax);
+        var methodName = memberAccessExpressionSyntax.Name.Identifier.ValueText;
 
-        var genericArgs = GetGenericArguments(expressionSyntax);
+        var genericArgs = GetGenericArguments(memberAccessExpressionSyntax.Name);
 
-        var newExpression = GetNewExpression(method, actual, expected, genericArgs);
+        var newExpression = GetNewExpression(methodName, actual, expected, genericArgs);
         
         if (newExpression != null)
         {
@@ -71,9 +75,9 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
     private static async Task TryRemoveUsingStatement(DocumentEditor editor)
     {
-        var syntaxTree = await editor.GetChangedDocument().GetSyntaxTreeAsync();
+        var syntaxTree = await editor.OriginalDocument.GetSyntaxTreeAsync();
         
-        foreach (var usingDirectiveSyntax in editor.GetChangedRoot()
+        foreach (var usingDirectiveSyntax in editor.OriginalRoot
                      .DescendantNodes()
                      .OfType<UsingDirectiveSyntax>()
                      .Where(x => x.Name?.ToString().StartsWith("Xunit") is true)
@@ -143,19 +147,9 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         };
     }
 
-    private static string GetMethodName(InvocationExpressionSyntax invocationExpression)
+    public static string GetGenericArguments(ExpressionSyntax expressionSyntax)
     {
-        if (invocationExpression.Expression is MemberAccessExpressionSyntax memberAccess)
-        {
-            return memberAccess.Name.Identifier.Text;
-        }
-        
-        return string.Empty;
-    }
-    
-    public static string GetGenericArguments(InvocationExpressionSyntax invocationExpression)
-    {
-        if (invocationExpression.Expression is GenericNameSyntax genericName)
+        if (expressionSyntax is GenericNameSyntax genericName)
         {
             return string.Join(", ", genericName.TypeArgumentList.Arguments.ToList());
         }
