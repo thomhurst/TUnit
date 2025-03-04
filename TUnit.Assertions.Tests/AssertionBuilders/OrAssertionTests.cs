@@ -18,20 +18,6 @@ public sealed class OrAssertionTests
 
         await Assert.That(action).Throws<MixedAndOrAssertionsException>();
     }
-    
-    
-    [Test]
-    public async Task Basic()
-    {
-        var foo = await Assert.That(ThrowException).ThrowsException();
-        await Assert.That(foo)
-                    .IsNotAssignableTo<ArgumentOutOfRangeException>()
-                    .Or
-                    .Satisfies(x => (ArgumentOutOfRangeException)x,
-                               x => x.HasMember(y => y.ActualValue).EqualTo("foo"));
-    }
-    
-    private void ThrowException() => throw new InvalidOperationException("foo");
 
     [Test]
     public async Task Does_Not_Throw_For_Multiple_Or()
@@ -46,5 +32,17 @@ public sealed class OrAssertionTests
 #pragma warning restore TUnitAssertions0001
 
         await Assert.That(action).ThrowsNothing();
+    }
+    
+    
+    [Test]
+    public async Task Short_Circuits_When_First_Assertion_Succeeds()
+    {
+        var exception = await Assert.That(() => throw new InvalidOperationException()).ThrowsException();
+        await Assert.That(exception)
+                    .IsNotAssignableTo<ArgumentOutOfRangeException>()
+                    .Or
+                    .Satisfies(x => (ArgumentOutOfRangeException)x,
+                               x => x.HasMember(y => y.ActualValue).EqualTo("foo"));
     }
 }
