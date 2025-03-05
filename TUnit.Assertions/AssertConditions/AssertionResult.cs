@@ -56,19 +56,6 @@ public class AssertionResult
             : Fail(Message + " and " + other.Message);
     }
 
-    // TODO: Should this be removed/obsoleted?
-    public AssertionResult Or(AssertionResult other)
-    {
-        if (!IsPassed && !other.IsPassed)
-        {
-            return Message == other.Message 
-                ? Fail(Message) 
-                : Fail(Message + " and " + other.Message);
-        }
-
-        return Passed;
-    }
-
     public async ValueTask<AssertionResult> OrAsync(Func<ValueTask<AssertionResult>> otherResult)
     {
         if (IsPassed)
