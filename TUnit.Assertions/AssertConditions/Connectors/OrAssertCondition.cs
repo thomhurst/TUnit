@@ -23,8 +23,8 @@ internal class OrAssertCondition : BaseAssertCondition
 
     internal sealed override async ValueTask<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata, string? actualExpression)
     {
-        return (await _condition1.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression))
-            .Or(await _condition2.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression));
+        return  await (await _condition1.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression))
+            .OrAsync(() => _condition2.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression));
     }
 
     internal override void SetBecauseReason(BecauseReason becauseReason)
