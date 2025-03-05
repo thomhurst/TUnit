@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
+using TUnit.Assertions.Analyzers.CodeFixers.Extensions;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
 
@@ -59,6 +60,8 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
     {
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
 
+        await editor.AddUsingDirective("System.Threading.Tasks");
+        
         // Add await to the invocation expression
         var awaitExpression = SyntaxFactory.AwaitExpression(expressionSyntax.WithLeadingTrivia(SyntaxFactory.Space))
             .WithLeadingTrivia(expressionSyntax.GetLeadingTrivia());

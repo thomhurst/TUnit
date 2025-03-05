@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using TUnit.Assertions.Analyzers.CodeFixers.Extensions;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
 
@@ -54,6 +55,8 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
 
+        await editor.AddUsingDirective("TUnit.Assertions");
+        
         var expected = expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(0);
         var actual = expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(1) ?? expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(0);
 

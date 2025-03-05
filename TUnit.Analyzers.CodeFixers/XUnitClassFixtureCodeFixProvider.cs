@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using TUnit.Analyzers.CodeFixers.Extensions;
 
 namespace TUnit.Analyzers.CodeFixers;
 
@@ -43,6 +44,8 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
         }
 
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
+        
+        await editor.AddUsingDirective("TUnit.Core");
         
         var newExpression = GetNewExpression(simpleBaseTypeSyntax);
         
