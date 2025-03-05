@@ -25,6 +25,7 @@
         <PackageReference Include="Testcontainers.Redis" />
         <PackageReference Include="Vogen" />
         <PackageReference Include="xunit.assert" />
+        <PackageReference Include="xunit.v3.extensibility.core" />
     </ItemGroup>
 
     <ItemGroup>

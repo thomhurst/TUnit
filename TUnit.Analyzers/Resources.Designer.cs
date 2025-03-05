@@ -1302,7 +1302,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests..
+        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests..
         /// </summary>
         internal static string TUnit0047Description {
             get {
@@ -1311,7 +1311,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests..
+        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests..
         /// </summary>
         internal static string TUnit0047MessageFormat {
             get {
@@ -1320,7 +1320,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Call `context.AddAsyncLocalValues`.
+        ///   Looks up a localized string similar to Call `context.FlowAsyncLocalValues`.
         /// </summary>
         internal static string TUnit0047Title {
             get {
@@ -1433,6 +1433,60 @@ namespace TUnit.Analyzers {
         internal static string TUnit0051Title {
             get {
                 return ResourceManager.GetString("TUnit0051Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit attribute can be converted to TUnit attribute..
+        /// </summary>
+        internal static string TUnit0052Description {
+            get {
+                return ResourceManager.GetString("TUnit0052Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit attribute can be converted to TUnit attribute.
+        /// </summary>
+        internal static string TUnit0052MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0052MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit attribute can be converted to TUnit attribute.
+        /// </summary>
+        internal static string TUnit0052Title {
+            get {
+                return ResourceManager.GetString("TUnit0052Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute..
+        /// </summary>
+        internal static string TUnit0053Description {
+            get {
+                return ResourceManager.GetString("TUnit0053Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute.
+        /// </summary>
+        internal static string TUnit0053MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0053MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute.
+        /// </summary>
+        internal static string TUnit0053Title {
+            get {
+                return ResourceManager.GetString("TUnit0053Title", resourceCulture);
             }
         }
     }

@@ -34,7 +34,8 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         {
             TestCode = source,
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net90
+                .AddPackages([new PackageIdentity("xunit.v3.assert", "2.0.0")]),
             TestState =
             {
                 AdditionalReferences =

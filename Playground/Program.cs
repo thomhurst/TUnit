@@ -6,7 +6,7 @@ namespace Playground;
 
 public class Tests
 {
-    [Test, Repeat(1000)]
+    [Fact]
     public void Test()
     {
         var one = "1";
