@@ -1462,5 +1462,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0052Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute..
+        /// </summary>
+        internal static string TUnit0053Description {
+            get {
+                return ResourceManager.GetString("TUnit0053Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute.
+        /// </summary>
+        internal static string TUnit0053MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0053MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute.
+        /// </summary>
+        internal static string TUnit0053Title {
+            get {
+                return ResourceManager.GetString("TUnit0053Title", resourceCulture);
+            }
+        }
     }
 }
