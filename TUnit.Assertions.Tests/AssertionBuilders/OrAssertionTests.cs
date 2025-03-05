@@ -42,6 +42,6 @@ public sealed class OrAssertionTests
                     .IsNotAssignableTo<ArgumentOutOfRangeException>()
                     .Or
                     .Satisfies(x => (ArgumentOutOfRangeException)x,
-                               x => x.HasMember(y => y.ActualValue).EqualTo("foo"));
+                               x => x.HasMember(y => y!.ActualValue).EqualTo("foo"));
     }
 }
