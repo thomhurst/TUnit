@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using TUnit.Assertions.Analyzers.CodeFixers.Tests.Extensions;
 using Verifier = TUnit.Assertions.Analyzers.CodeFixers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Assertions.Analyzers.XUnitAssertionAnalyzer, TUnit.Assertions.Analyzers.CodeFixers.XUnitAssertionCodeFixProvider>;
 #pragma warning disable CS0162 // Unreachable code detected
 
@@ -21,7 +22,7 @@ public class XUnitAssertionCodeFixProviderTests
                         {|#0:Xunit.Assert.Equal(1, 1)|};
                     }
                 }
-                """.ReplaceLineEndings(),
+                """.NormalizeLineEndings(),
                 Verifier.Diagnostic(Rules.XUnitAssertion)
                     .WithLocation(0),
                 """
@@ -36,7 +37,7 @@ public class XUnitAssertionCodeFixProviderTests
                         Assert.That(1).IsEqualTo(1);
                     }
                 }
-                """.ReplaceLineEndings()
+                """.NormalizeLineEndings()
             );
     }
 }

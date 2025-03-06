@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using TUnit.Analyzers.Tests.Extensions;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitClassFixtureAnalyzer>;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitClassFixtureAnalyzer, TUnit.Analyzers.CodeFixers.XUnitClassFixtureCodeFixProvider>;
 
@@ -45,7 +46,7 @@ public class XUnitClassFixtureAnalyzerTests
                     {
                     }
                 }
-                """.ReplaceLineEndings(),
+                """.NormalizeLineEndings(),
                 Verifier.Diagnostic(Rules.XunitClassFixtures).WithLocation(0),
                 """
                 using Xunit;
@@ -61,7 +62,7 @@ public class XUnitClassFixtureAnalyzerTests
                     {
                     }
                 }
-                """.ReplaceLineEndings()
+                """.NormalizeLineEndings()
             );
     }
 }
