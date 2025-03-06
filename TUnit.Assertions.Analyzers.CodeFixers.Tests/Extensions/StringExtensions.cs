@@ -4,6 +4,6 @@ public static class StringExtensions
 {
     public static string NormalizeLineEndings(this string input)
     {
-        return input.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+        return input.Replace("\r\n", "\n");
     }
 }
