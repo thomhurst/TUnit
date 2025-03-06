@@ -43,18 +43,30 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
-        
-        //await editor.AddUsingDirective("TUnit.Core");
-        
+        var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+
+        if (root is null)
+        {
+            return document;
+        }
+
         var newExpression = GetNewExpression(attributeSyntax);
-        
+
         if (newExpression != null)
         {
-            editor.ReplaceNode(attributeSyntax, newExpression.WithTriviaFrom(attributeSyntax));    
+            root = root.ReplaceNode(attributeSyntax, newExpression.WithTriviaFrom(attributeSyntax));
         }
-        
-        return editor.GetChangedDocument();
+
+        var compilationUnit = root as CompilationUnitSyntax;
+
+        if (compilationUnit is null)
+        {
+            return document.WithSyntaxRoot(root);
+        }
+
+        root = await document.AddUsingDirectiveIfNotExistsAsync(compilationUnit, "TUnit.Core", cancellationToken);
+
+        return document.WithSyntaxRoot(root);
     }
 
     private static SyntaxNode? GetNewExpression(AttributeSyntax attributeSyntax)
