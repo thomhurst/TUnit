@@ -1,13 +1,10 @@
 using System.Collections.Immutable;
 using System.Composition;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
-using TUnit.Analyzers.CodeFixers.Extensions;
 
 namespace TUnit.Analyzers.CodeFixers;
 
@@ -26,7 +23,7 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
             var diagnosticSpan = diagnostic.Location.SourceSpan;
 
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-            
+
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Rules.XunitClassFixtures.Title.ToString(),
@@ -35,7 +32,7 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
                 diagnostic);
         }
     }
-    
+
     private static async Task<Document> ConvertAttributesAsync(Document document, SyntaxNode? node, CancellationToken cancellationToken)
     {
         if (node is not SimpleBaseTypeSyntax simpleBaseTypeSyntax)
@@ -43,12 +40,20 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
-        
-        await editor.AddUsingDirective("TUnit.Core");
-        
+        var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+        var compilationUnit = root as CompilationUnitSyntax;
+
+        if (compilationUnit is null)
+        {
+            return document;
+        }
+
+        var newRoot = compilationUnit.AddUsings(
+            SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Core"))
+        );
+
         var newExpression = GetNewExpression(simpleBaseTypeSyntax);
-        
+
         if (newExpression != null)
         {
             var classDeclaration = GetClassDeclaration(simpleBaseTypeSyntax)!;
@@ -57,7 +62,7 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
                 ? simpleBaseTypeSyntax
                 : classDeclaration.BaseList!;
 
-            editor.ReplaceNode(classDeclaration,
+            newRoot = newRoot.ReplaceNode(classDeclaration,
                 classDeclaration
                     .RemoveNode(toRemove, SyntaxRemoveOptions.KeepTrailingTrivia)!
                     .AddAttributeLists(
@@ -65,14 +70,14 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
                     )
             );
         }
-        
-        return editor.GetChangedDocument();
+
+        return document.WithSyntaxRoot(newRoot);
     }
 
     private static ClassDeclarationSyntax? GetClassDeclaration(SimpleBaseTypeSyntax simpleBaseTypeSyntax)
     {
         var parent = simpleBaseTypeSyntax.Parent;
-        
+
         while (parent != null && !parent.IsKind(SyntaxKind.ClassDeclaration))
         {
             parent = parent.Parent;

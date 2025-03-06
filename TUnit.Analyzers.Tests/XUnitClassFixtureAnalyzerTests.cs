@@ -34,7 +34,6 @@ public class XUnitClassFixtureAnalyzerTests
         await CodeFixer
             .VerifyCodeFixAsync(
                 """
-                using TUnit.Core;
                 using Xunit;
 
                 public class MyType;
