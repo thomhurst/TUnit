@@ -98,13 +98,6 @@ internal class SingleTestExecutor(
                 TestContext.Current = testContext;
 
                 await RunFirstTestEventReceivers(testContext);
-
-                foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
-                {
-                    await logger.LogDebugAsync("Executing ITestStartEventReceivers");
-
-                    await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
-                }
                 
                 await ExecuteWithRetries(test, cleanUpExceptions);
 
