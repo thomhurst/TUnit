@@ -44,9 +44,13 @@ Running them in a specific order is recommended.
 So try the following:
 
 `dotnet format analyzers --severity info --diagnostics TUnit0052`
+
 `dotnet format analyzers --severity info --diagnostics TUnit0053`
+
 `dotnet format analyzers --severity info --diagnostics TUnitAssertions0009`
+
 `dotnet format analyzers --severity info --diagnostics TUnitAssertions0002`
+
 `dotnet format analyzers --severity info --diagnostics TUnit0054`
 
 The diagnostics that have "Assertions" in them are if you're switching to TUnit assertions.
