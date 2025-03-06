@@ -21,7 +21,7 @@ public class XUnitAssertionCodeFixProviderTests
                         {|#0:Xunit.Assert.Equal(1, 1)|};
                     }
                 }
-                """,
+                """.ReplaceLineEndings(),
                 Verifier.Diagnostic(Rules.XUnitAssertion)
                     .WithLocation(0),
                 """
@@ -36,7 +36,7 @@ public class XUnitAssertionCodeFixProviderTests
                         Assert.That(1).IsEqualTo(1);
                     }
                 }
-                """
+                """.ReplaceLineEndings()
             );
     }
 }

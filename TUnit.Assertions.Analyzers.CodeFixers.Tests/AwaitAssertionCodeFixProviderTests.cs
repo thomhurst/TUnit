@@ -24,7 +24,7 @@ public class AwaitAssertionCodeFixProviderTests
                         {|#0:Assert.That(1)|}.IsEqualTo(1);
                     }
                 }
-                """,
+                """.ReplaceLineEndings(),
                 Verifier.Diagnostic(Rules.AwaitAssertion)
                     .WithLocation(0),
                 """
@@ -40,7 +40,7 @@ public class AwaitAssertionCodeFixProviderTests
                         await Assert.That(1).IsEqualTo(1);
                     }
                 }
-                """
+                """.ReplaceLineEndings()
             );
     }
     

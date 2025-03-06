@@ -45,7 +45,7 @@ public class XUnitClassFixtureAnalyzerTests
                     {
                     }
                 }
-                """,
+                """.ReplaceLineEndings(),
                 Verifier.Diagnostic(Rules.XunitClassFixtures).WithLocation(0),
                 """
                 using Xunit;
@@ -61,7 +61,7 @@ public class XUnitClassFixtureAnalyzerTests
                     {
                     }
                 }
-                """
+                """.ReplaceLineEndings()
             );
     }
 }

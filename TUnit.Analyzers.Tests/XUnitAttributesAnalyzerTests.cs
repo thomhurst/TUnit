@@ -43,7 +43,7 @@ public class XUnitAttributesAnalyzerTests
                     {
                     }
                 }
-                """,
+                """.ReplaceLineEndings(),
                 Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
                 $$"""
                 using TUnit.Core;
@@ -56,7 +56,7 @@ public class XUnitAttributesAnalyzerTests
                     {
                     }
                 }
-                """
+                """.ReplaceLineEndings()
             );
     }
 }
