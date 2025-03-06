@@ -11,15 +11,15 @@ internal record DiscoveredTest<
 {
     public TTestClass TestClass => ResettableLazyTestClassFactory.Value;
     
-    public required Func<TTestClass, CancellationToken, Task> TestBody { get; init; }
+    public required Func<TTestClass, CancellationToken, ValueTask> TestBody { get; init; }
 
-    public override async Task ExecuteTest(CancellationToken cancellationToken)
+    public override async ValueTask ExecuteTest(CancellationToken cancellationToken)
     {
         TestContext.CancellationToken = cancellationToken;
         await TestExecutor.ExecuteTest(TestContext, () => TestBody.Invoke(TestClass, cancellationToken));
     }
     
-    public override async Task ResetTestInstance()
+    public override async ValueTask ResetTestInstance()
     {
         await ResettableLazyTestClassFactory.ResetLazy();
     }
@@ -32,9 +32,9 @@ internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparab
 {
     public required TestContext TestContext { get; init; }
 
-    public abstract Task ExecuteTest(CancellationToken cancellationToken);
+    public abstract ValueTask ExecuteTest(CancellationToken cancellationToken);
 
-    public abstract Task ResetTestInstance();
+    public abstract ValueTask ResetTestInstance();
     
     public TestDetails TestDetails => TestContext.TestDetails;
     

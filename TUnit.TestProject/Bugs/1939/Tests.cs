@@ -52,7 +52,11 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
 
             if (!dataClass.Disposed)
             {
-                throw new Exception(test.TestDetails.TestClass.ToString());
+                var classDataSourceAttribute =
+                    test.TestDetails.DataAttributes.OfType<ClassDataSourceAttribute<DataClass>>()
+                        .First();
+                
+                throw new Exception($"Not Disposed: {classDataSourceAttribute.Shared}");
             }
         }
     }

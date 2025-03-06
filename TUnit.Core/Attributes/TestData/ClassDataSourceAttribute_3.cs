@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<
@@ -82,37 +80,43 @@ public sealed class ClassDataSourceAttribute<
                     itemsWithMetadata.Item3.T);
             };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, _) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, context) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
+                    context, 
                     itemsWithMetadata.Item1.SharedType,
                     itemsWithMetadata.Item1.Key,
                     itemsWithMetadata.Item1.T);
 
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
+                    context, 
                     itemsWithMetadata.Item2.SharedType,
                     itemsWithMetadata.Item2.Key,
                     itemsWithMetadata.Item2.T);
 
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
+                    context, 
                     itemsWithMetadata.Item3.SharedType,
                     itemsWithMetadata.Item3.Key,
                     itemsWithMetadata.Item3.T);
             };
             
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, _) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, context) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
+                    context, 
                     itemsWithMetadata.Item1.SharedType,
                     itemsWithMetadata.Item1.Key,
                     itemsWithMetadata.Item1.T);
 
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
+                    context, 
                     itemsWithMetadata.Item2.SharedType,
                     itemsWithMetadata.Item2.Key,
                     itemsWithMetadata.Item2.T);
 
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
+                    context, 
                     itemsWithMetadata.Item3.SharedType,
                     itemsWithMetadata.Item3.Key,
                     itemsWithMetadata.Item3.T);

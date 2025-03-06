@@ -32,7 +32,6 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
                 await logger.LogDebugAsync($"Executing ITestStartEventReceiver: {testStartEventsObject.GetType().Name}");
 
                 await testStartEventsObject.OnTestStart(new BeforeTestContext(discoveredTest));
-                testStartEventsObject.OnTestStartSynchronous(new BeforeTestContext(discoveredTest));
             }
 
             await logger.LogDebugAsync("Executing test body");

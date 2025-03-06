@@ -29,6 +29,9 @@ internal static class Rules
     
     public static readonly DiagnosticDescriptor AwaitValueTaskInAssertThat =
         CreateDescriptor("TUnitAssertions0008", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor XUnitAssertion =
+        CreateDescriptor("TUnitAssertions0009", UsageCategory, DiagnosticSeverity.Info);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

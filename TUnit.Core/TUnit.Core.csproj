@@ -38,6 +38,9 @@
             Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll"
             Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
 
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.CodeFixers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.CodeFixers.dll" 
+              Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+
         <None
             Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll"
             Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />

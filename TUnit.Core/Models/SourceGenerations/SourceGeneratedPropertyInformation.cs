@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public record SourceGeneratedPropertyInformation : SourceGeneratedMemberInformation
 {

@@ -31,17 +31,20 @@ internal class SingleTestExecutor(
     : IDataProducer
 {
     private static readonly Lock Lock = new();
+    private static SemaphoreSlim _assemblyEventsLock = new(1, 1);
+    private static SemaphoreSlim _classEventsLock = new(1, 1);
+    private static SemaphoreSlim _sessionEventsLock = new(1, 1);
     
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
         bool isStartedAsDependencyForAnotherTest)
     {
         lock (Lock)
         {
-            return test.TestContext.TestTask ??= Task.Run(() => ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest));
+            return test.TestContext.TestTask ??= Task.Run(async () => await ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest));
         }
     }
 
-    private async Task ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter,
+    private async ValueTask ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
     {
         var semaphore = WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
@@ -62,7 +65,7 @@ internal class SingleTestExecutor(
 
                 engineCancellationToken.Token.ThrowIfCancellationRequested();
             }
-
+            
             await messageBus.InProgress(testContext);
 
             var cleanUpExceptions = new List<Exception>();
@@ -94,12 +97,13 @@ internal class SingleTestExecutor(
                 
                 TestContext.Current = testContext;
 
+                await RunFirstTestEventReceivers(testContext);
+
                 foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
                 {
                     await logger.LogDebugAsync("Executing ITestStartEventReceivers");
 
                     await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
-                    testStartEventsObject.OnTestStartSynchronous(new BeforeTestContext(testContext.InternalDiscoveredTest));
                 }
                 
                 await ExecuteWithRetries(test, cleanUpExceptions);
@@ -140,6 +144,106 @@ internal class SingleTestExecutor(
 
             await task;
         }
+    }
+
+    private async Task RunFirstTestEventReceivers(TestContext testContext)
+    {
+        ExecutionContextHelper.RestoreContext(await RunFirstTestInSessionEventReceivers(testContext));
+        ExecutionContextHelper.RestoreContext(await RunFirstTestInAssemblyEventReceivers(testContext));
+        ExecutionContextHelper.RestoreContext(await RunFirstTestInClassEventReceivers(testContext));
+    }
+
+    private async Task<ExecutionContext?> RunFirstTestInSessionEventReceivers(TestContext testContext)
+    {
+        var testSessionContext = TestSessionContext.Current!;
+
+        if (!testSessionContext.FirstTestStarted)
+        {
+            await _sessionEventsLock.WaitAsync();
+            try
+            {
+                if (!testSessionContext.FirstTestStarted)
+                {
+                    foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInTestSessionEventObjects())
+                    {
+                        await firstTestInAssemblyEventReceiver.OnFirstTestInTestSession(testSessionContext, testContext);
+                        ExecutionContextHelper.RestoreContext(testContext);
+                    }
+                    
+                    testSessionContext.FirstTestStarted = true;
+                    
+                    return ExecutionContext.Capture();
+                }
+            }
+            finally
+            {
+                _sessionEventsLock.Release();
+            }
+        }
+        
+        return null;
+    }
+    
+    private async Task<ExecutionContext?> RunFirstTestInAssemblyEventReceivers(TestContext testContext)
+    {
+        var assemblyHookContext = assemblyHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type.Assembly);
+
+        if (!assemblyHookContext.FirstTestStarted)
+        {
+            await _assemblyEventsLock.WaitAsync();
+            try
+            {
+                if (!assemblyHookContext.FirstTestStarted)
+                {
+                    foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInAssemblyEventObjects())
+                    {
+                        await firstTestInAssemblyEventReceiver.OnFirstTestInAssembly(assemblyHookContext, testContext);
+                        ExecutionContextHelper.RestoreContext(testContext);
+                    }
+
+                    assemblyHookContext.FirstTestStarted = true;
+
+                    return ExecutionContext.Capture();
+                }
+            }
+            finally
+            {
+                _assemblyEventsLock.Release();
+            }
+        }
+
+        return null;
+    }
+    
+    private async Task<ExecutionContext?> RunFirstTestInClassEventReceivers(TestContext testContext)
+    {
+        var classHookContext = classHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type);
+
+        if (!classHookContext.FirstTestStarted)
+        {
+            await _classEventsLock.WaitAsync();
+            try
+            {
+                if (!classHookContext.FirstTestStarted)
+                {
+                    foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInClassEventObjects())
+                    {
+                        await firstTestInAssemblyEventReceiver.OnFirstTestInClass(classHookContext, testContext);
+                        ExecutionContextHelper.RestoreContext(testContext);
+                    }
+                    
+                    classHookContext.FirstTestStarted = true;
+
+                    return ExecutionContext.Capture();
+                }
+            }
+            finally
+            {
+                _classEventsLock.Release();
+            }
+        }
+        
+        return null;
     }
 
     private ValueTask RegisterIfNotAlready(TestContext testContext)
@@ -191,7 +295,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
+    private async ValueTask ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
         var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type);
@@ -203,7 +307,7 @@ internal class SingleTestExecutor(
         {
             await logger.LogDebugAsync("Executing [After(Class)] hook");
 
-            await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
+            await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
         }
                 
         ClassHookContext.Current = null;
@@ -217,7 +321,7 @@ internal class SingleTestExecutor(
         {
             await logger.LogDebugAsync("Executing [After(Assembly)] hook");
 
-            await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
+            await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
         }
                 
         AssemblyHookContext.Current = null;
@@ -225,8 +329,8 @@ internal class SingleTestExecutor(
         if (instanceTracker.IsLastTest())
         {
             var testSessionContext = TestSessionContext.Current!;
-            var allTests = testSessionContext.AllTests;
-            foreach (var testEndEventsObject in allTests.SelectMany(tc => tc.GetLastTestInTestSessionEventObjects()))
+
+            foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
             {
                 await logger.LogDebugAsync("Executing ILastTestInTestSessionEventReceivers");
 
@@ -325,7 +429,7 @@ internal class SingleTestExecutor(
         await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token, cleanupExceptions);
     }
 
-    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
+    private async ValueTask ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
         var timeout = discoveredTest.TestDetails.Timeout;
 

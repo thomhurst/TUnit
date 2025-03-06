@@ -21,6 +21,7 @@ public class TestSessionContext : Context
     public IEnumerable<ClassHookContext> TestClasses => Assemblies.SelectMany(x => x.TestClasses);
 
     public IEnumerable<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests);
+    internal bool FirstTestStarted { get; set; }
 
     internal readonly List<Artifact> Artifacts = [];
 

@@ -8,13 +8,8 @@ public class DefaultExecutor : GenericAbstractExecutor
     {
     }
 
-    protected override Task ExecuteAsync(Func<Task> action)
+    protected override ValueTask ExecuteAsync(Func<ValueTask> action)
     {
         return action();
-    }
-
-    protected override void ExecuteSync(Action action)
-    {
-        action();
     }
 }
