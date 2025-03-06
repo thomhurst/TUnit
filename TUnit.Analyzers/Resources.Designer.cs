@@ -1489,5 +1489,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0053Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit..
+        /// </summary>
+        internal static string TUnit0054Description {
+            get {
+                return ResourceManager.GetString("TUnit0054Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit.
+        /// </summary>
+        internal static string TUnit0054MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0054MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit.
+        /// </summary>
+        internal static string TUnit0054Title {
+            get {
+                return ResourceManager.GetString("TUnit0054Title", resourceCulture);
+            }
+        }
     }
 }

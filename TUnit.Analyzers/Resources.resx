@@ -495,4 +495,13 @@
     <data name="TUnit0053Title" xml:space="preserve">
         <value>xUnit class fixture can be converted to TUnit attribute</value>
     </data>
+    <data name="TUnit0054Description" xml:space="preserve">
+        <value>xUnit using directives can be removed once migrated to TUnit.</value>
+    </data>
+    <data name="TUnit0054MessageFormat" xml:space="preserve">
+        <value>xUnit using directives can be removed once migrated to TUnit</value>
+    </data>
+    <data name="TUnit0054Title" xml:space="preserve">
+        <value>xUnit using directives can be removed once migrated to TUnit</value>
+    </data>
 </root>
