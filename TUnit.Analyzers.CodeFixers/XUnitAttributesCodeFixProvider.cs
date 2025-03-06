@@ -45,7 +45,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
 
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
         
-        await editor.AddUsingDirective("TUnit.Core");
+        //await editor.AddUsingDirective("TUnit.Core");
         
         var newExpression = GetNewExpression(attributeSyntax);
         

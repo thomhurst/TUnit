@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Analyzers.CodeFixers.Extensions;
 
 namespace TUnit.Analyzers.CodeFixers;
 
@@ -41,17 +42,12 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
         }
 
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-        var compilationUnit = root as CompilationUnitSyntax;
 
-        if (compilationUnit is null)
+        if (root is null)
         {
             return document;
         }
-
-        var newRoot = compilationUnit.AddUsings(
-            SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Core"))
-        );
-
+        
         var newExpression = GetNewExpression(simpleBaseTypeSyntax);
 
         if (newExpression != null)
@@ -62,16 +58,26 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
                 ? simpleBaseTypeSyntax
                 : classDeclaration.BaseList!;
 
-            newRoot = newRoot.ReplaceNode(classDeclaration,
+            root = root.ReplaceNode(classDeclaration,
                 classDeclaration
                     .RemoveNode(toRemove, SyntaxRemoveOptions.KeepTrailingTrivia)!
                     .AddAttributeLists(
                         SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(newExpression))
-                    )
+                    )!
             );
+            
+            var compilationUnit = root as CompilationUnitSyntax;
+
+            if (compilationUnit is null)
+            {
+                return document.WithSyntaxRoot(root);
+            }
+
+            root = await document.AddUsingDirectiveIfNotExistsAsync(compilationUnit, "TUnit.Core",
+                cancellationToken: cancellationToken);
         }
 
-        return document.WithSyntaxRoot(newRoot);
+        return document.WithSyntaxRoot(root);
     }
 
     private static ClassDeclarationSyntax? GetClassDeclaration(SimpleBaseTypeSyntax simpleBaseTypeSyntax)

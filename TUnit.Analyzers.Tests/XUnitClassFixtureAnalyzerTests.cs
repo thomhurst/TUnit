@@ -48,8 +48,8 @@ public class XUnitClassFixtureAnalyzerTests
                 """,
                 Verifier.Diagnostic(Rules.XunitClassFixtures).WithLocation(0),
                 """
-                using TUnit.Core;
                 using Xunit;
+                using TUnit.Core;
 
                 public class MyType;
 
