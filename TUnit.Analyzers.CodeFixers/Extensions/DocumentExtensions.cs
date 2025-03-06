@@ -15,7 +15,7 @@ public static class DocumentExtensions
         }
 
         var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(namespaceName).WithLeadingTrivia(SyntaxFactory.Space))
-            .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+            .WithTrailingTrivia(SyntaxFactory.ElasticLineFeed);
 
         return root.AddUsings(usingDirective);
     }
