@@ -11,4 +11,6 @@ public class ClassDisplayNameAttribute : Attribute, ITestDiscoveryEventReceiver
     {
         discoveredTestContext.SetDisplayName($"{discoveredTestContext.TestDetails.TestClass.Name}.{discoveredTestContext.TestContext.GetTestDisplayName()}");
     }
+
+    public int Order { get; } = 0;
 }
