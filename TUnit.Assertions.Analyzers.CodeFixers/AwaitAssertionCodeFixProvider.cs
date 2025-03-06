@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
+using TUnit.Assertions.Analyzers.CodeFixers.Extensions;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
 
@@ -46,16 +47,11 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
     private static async Task<Document> AwaitAssertionAsync(Document document, ExpressionSyntax expressionSyntax, CancellationToken cancellationToken)
     {
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-        var compilationUnit = root as CompilationUnitSyntax;
 
-        if (compilationUnit is null)
+        if (root is null)
         {
             return document;
         }
-
-        var newRoot = compilationUnit.AddUsings(
-            SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks"))
-        );
 
         var awaitExpression = SyntaxFactory.AwaitExpression(expressionSyntax.WithLeadingTrivia(SyntaxFactory.Space))
             .WithLeadingTrivia(expressionSyntax.GetLeadingTrivia());
@@ -66,7 +62,7 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
 
         if (methodDeclaration == null)
         {
-            return document.WithSyntaxRoot(newRoot);
+            return document.WithSyntaxRoot(root);
         }
 
         var modifiers = methodDeclaration.Modifiers;
@@ -94,8 +90,13 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
             .WithReturnType(newReturnType)
             .WithAdditionalAnnotations(Formatter.Annotation);
 
-        newRoot = newRoot.ReplaceNode(methodDeclaration, newMethodDeclaration);
+        root = root.ReplaceNode(methodDeclaration, newMethodDeclaration);
 
-        return document.WithSyntaxRoot(newRoot);
+        if (root is CompilationUnitSyntax compilationUnit)
+        {
+            root = await document.AddUsingDirectiveIfNotExistsAsync(compilationUnit, "System.Threading.Tasks", cancellationToken);
+        }
+
+        return document.WithSyntaxRoot(root);
     }
 }
