@@ -38,6 +38,9 @@ If you have the TUnit or TUnit.Assertions package installed, in your csproj add:
 
 This is temporary - Just to make sure no types clash, and so the code fixers can distinguish between xUnit and TUnit types with similar names.
 
+### Rebuild the project
+This ensures the TUnit packages have been restored and the analyzers should be loaded.
+
 #### Run the code fixers via the dotnet CLI
 
 Running them in a specific order is recommended.

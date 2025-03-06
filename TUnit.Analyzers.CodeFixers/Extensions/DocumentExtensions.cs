@@ -34,12 +34,14 @@ public static class DocumentExtensions
         }
     
         var root = await document.GetSyntaxRootAsync(cancellationToken);
+        
         if (root == null)
         {
             return false;
         }
     
         var usingDirectives = root.DescendantNodes().OfType<UsingDirectiveSyntax>();
+        
         return usingDirectives.Any(u => u.Name?.ToString() == namespaceName);
     }
 }

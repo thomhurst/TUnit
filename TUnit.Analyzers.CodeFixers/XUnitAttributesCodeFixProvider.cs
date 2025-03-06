@@ -48,7 +48,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var newExpression = GetNewExpression(attributeSyntax);
+        var newExpression = await GetNewExpression(document, root, attributeSyntax);
 
         if (newExpression != null)
         {
@@ -67,7 +67,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
         return document.WithSyntaxRoot(root);
     }
 
-    private static SyntaxNode? GetNewExpression(AttributeSyntax attributeSyntax)
+    private static async Task<SyntaxNode?> GetNewExpression(Document document, SyntaxNode root, AttributeSyntax attributeSyntax)
     {
         var name = attributeSyntax.Name.ToString();
 
@@ -93,7 +93,8 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
                         SyntaxFactory.Literal("GetEnumerator"))))),
 
             "Collection" or "CollectionAttribute" => SyntaxFactory.Attribute(
-                SyntaxFactory.GenericName("ClassDataSource"),
+                SyntaxFactory.GenericName(SyntaxFactory.Identifier("ClassDataSource"),
+                    await GetGenericArguments(document, attributeSyntax)),
                 SyntaxFactory.AttributeArgumentList()
                     .AddArguments(
                         SyntaxFactory.AttributeArgument(
@@ -111,25 +112,84 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
                     )
             ),
 
-            "AssemblyFixture" or "AssemblyFixtureAttribute" =>
-                SyntaxFactory.AttributeList(
-                    target: SyntaxFactory.AttributeTargetSpecifier(SyntaxFactory.Token(SyntaxKind.AssemblyKeyword)),
-                    SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.Attribute(
-                            SyntaxFactory.GenericName(
-                                identifier: SyntaxFactory.Identifier("ClassDataSource"),
-                                typeArgumentList: SyntaxFactory.TypeArgumentList(
-                                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
-                                        SyntaxFactory.IdentifierName(
-                                            attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken() ??
-                                            SyntaxFactory.Literal(""))
-                                    )
-                                )
-                            )
-                        )
-                    )
-                ),
+            // "AssemblyFixture" or "AssemblyFixtureAttribute" =>
+            //     SyntaxFactory.Attribute(
+            //         SyntaxFactory.GenericName(
+            //             identifier: SyntaxFactory.Identifier("ClassDataSource"),
+            //             typeArgumentList: SyntaxFactory.TypeArgumentList(
+            //                 SyntaxFactory.SingletonSeparatedList(
+            //                     (attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.Expression as TypeOfExpressionSyntax)?.Type ?? SyntaxFactory.ParseTypeName("T")
+            //                 )
+            //             )
+            //         )
+            //     ).WithArgumentList(SyntaxFactory.AttributeArgumentList()
+            //             .AddArguments(
+            //                 SyntaxFactory.AttributeArgument(
+            //                     nameEquals: SyntaxFactory.NameEquals("Shared"),
+            //                     nameColon: null,
+            //                     expression: SyntaxFactory.ParseExpression("SharedType.PerAssembly")
+            //                 ))
+            //         ),
+
+            "CollectionDefinition" or "CollectionDefinitionAttribute" => SyntaxFactory.Attribute(
+                SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
+                    SyntaxFactory.IdentifierName("Obsolete"))),
+
             _ => null
         };
+    }
+
+    private static async Task<TypeArgumentListSyntax> GetGenericArguments(Document document,
+        AttributeSyntax attributeSyntax)
+    {
+        var compilation = await document.Project.GetCompilationAsync();
+
+        if (compilation is null)
+        {
+            return SyntaxFactory.TypeArgumentList();
+        }
+
+        var collectionName = attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken().ValueText;
+
+        if (collectionName is null)
+        {
+            return SyntaxFactory.TypeArgumentList();
+        }
+
+        var collectionAttribute = compilation.SyntaxTrees
+            .Select(x => x.GetRoot())
+            .SelectMany(x => x.DescendantNodes().OfType<AttributeSyntax>())
+            .Where(attr => attr.Name.ToString() == "CollectionDefinition")
+            .FirstOrDefault(x => x.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken().ValueText == collectionName);
+
+        if (collectionAttribute is null)
+        {
+            return SyntaxFactory.TypeArgumentList();
+        }
+
+        var classDeclaration = collectionAttribute.Parent?.Parent;
+        
+        if (classDeclaration is null)
+        {
+            return SyntaxFactory.TypeArgumentList();
+        }
+        
+        var classSymbol = compilation.GetSemanticModel(classDeclaration.SyntaxTree).GetDeclaredSymbol(classDeclaration);
+        
+        if (classSymbol is not ITypeSymbol typeSymbol)
+        {
+            return SyntaxFactory.TypeArgumentList();
+        }
+        
+        var interfaceType = typeSymbol.AllInterfaces.FirstOrDefault(x => x.Name == "ICollectionFixture");
+
+        if (interfaceType is null)
+        {
+            return SyntaxFactory.TypeArgumentList();
+        }
+        
+        return SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+            SyntaxFactory.IdentifierName(interfaceType.TypeArguments.First().Name)
+        ));
     }
 }
