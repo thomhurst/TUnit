@@ -42,7 +42,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                 {
                     typeof(TUnitAttribute).Assembly.Location,
                 },
-            },
+            }
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
@@ -77,6 +77,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                     typeof(TUnitAttribute).Assembly.Location,
                 },
             },
+            CodeActionValidationMode = CodeActionValidationMode.SemanticStructure
         };
 
         test.ExpectedDiagnostics.AddRange(expected);

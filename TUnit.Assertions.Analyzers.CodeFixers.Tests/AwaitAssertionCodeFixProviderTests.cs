@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using TUnit.Assertions.Analyzers.CodeFixers.Tests.Extensions;
 using Verifier = TUnit.Assertions.Analyzers.CodeFixers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Assertions.Analyzers.AwaitAssertionAnalyzer, TUnit.Assertions.Analyzers.CodeFixers.AwaitAssertionCodeFixProvider>;
 #pragma warning disable CS0162 // Unreachable code detected
 
@@ -25,7 +24,7 @@ public class AwaitAssertionCodeFixProviderTests
                         {|#0:Assert.That(1)|}.IsEqualTo(1);
                     }
                 }
-                """.NormalizeLineEndings(),
+                """,
                 Verifier.Diagnostic(Rules.AwaitAssertion)
                     .WithLocation(0),
                 """
@@ -41,7 +40,7 @@ public class AwaitAssertionCodeFixProviderTests
                         await Assert.That(1).IsEqualTo(1);
                     }
                 }
-                """.NormalizeLineEndings()
+                """
             );
     }
     

@@ -23,4 +23,7 @@
         <PackageReference Include="NUnit3TestAdapter" />
         <PackageReference Include="xunit.v3.assert" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Extensions\" />
+    </ItemGroup>
 </Project>

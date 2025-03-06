@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using TUnit.Analyzers.Tests.Extensions;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitAttributesAnalyzer>;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitAttributesAnalyzer, TUnit.Analyzers.CodeFixers.XUnitAttributesCodeFixProvider>;
 
@@ -44,7 +43,7 @@ public class XUnitAttributesAnalyzerTests
                     {
                     }
                 }
-                """.NormalizeLineEndings(),
+                """,
                 Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
                 $$"""
                 using TUnit.Core;
@@ -57,7 +56,7 @@ public class XUnitAttributesAnalyzerTests
                     {
                     }
                 }
-                """.NormalizeLineEndings()
+                """
             );
     }
 }
