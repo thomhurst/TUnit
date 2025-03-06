@@ -24,7 +24,7 @@ public class XUnitUsingDirectiveAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (usingDirectiveSyntax.NamespaceOrType is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Xunit" } }
+        if (usingDirectiveSyntax.Name is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Xunit" } }
             or IdentifierNameSyntax { Identifier.Text: "Xunit" })
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.XunitUsingDirectives, usingDirectiveSyntax.GetLocation()));
