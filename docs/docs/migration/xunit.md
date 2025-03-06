@@ -14,6 +14,9 @@ If you think something could be improved, or something seemed to break, raise an
 
 ### Steps
 
+#### Install the TUnit packages to your test projects
+Use your IDE or the dotnet CLI to add the TUnit packages to your test projects
+
 #### Remove the automatically added global usings
 If you have the TUnit, TUnit.Engine or TUnit.Core package installed, in your csproj add:
 
@@ -64,17 +67,27 @@ Undo step 1, and you won't have to have `using TUnit.Core` or `using TUnit.Asser
 ## Manually
 
 `[Fact]` becomes `[Test]`
+
 `[Theory]` becomes `[Test]`
+
 `[Trait]` becomes `[Property]`
+
 `[InlineData]` becomes `[Arguments]`
+
 `[MemberData]` becomes `[MethodDataSource]`
+
 `[ClassData]` becomes `[MethodDataSource]` and point to the GetEnumerator method. Objects will need to be converted from `object` to their actual expected types
+
 `[Collection]` becomes `[ClassDataSource<>(Shared = SharedType.Keyed/PerTestSession)]`
+
 `[AssemblyFixture]` becomes `[ClassDataSource<>(Shared = SharedType.PerAssembly)]`
 
 Interfaces:
 
 `IClassFixture<>` becomes an attribute `[ClassDataSource<>(Shared = SharedType.PerClass)]`
+
 `IAsyncLifetime` on a test class becomes a method attributed with `[Before(Test)]`
+
 `IAsyncLifetime` on injected data becomes `IAsyncInitializer`
+
 `I(Async)Disposable` on a test class can remain, or be converted to a method attributed with `[After(Test)]`
