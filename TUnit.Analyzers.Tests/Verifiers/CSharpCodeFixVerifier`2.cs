@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Analyzers.Tests.Extensions;
 using TUnit.Core;
 
 namespace TUnit.Analyzers.Tests.Verifiers;
@@ -32,7 +33,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     {
         var test = new Test
         {
-            TestCode = source,
+            TestCode = source.NormalizeLineEndings(),
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,
             ReferenceAssemblies = ReferenceAssemblies.Net.Net90
                 .AddPackages([new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")]),
@@ -42,7 +43,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                 {
                     typeof(TUnitAttribute).Assembly.Location,
                 },
-            },
+            }
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
@@ -66,8 +67,8 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     {
         var test = new Test
         {
-            TestCode = source,
-            FixedCode = fixedSource,
+            TestCode = source.NormalizeLineEndings(),
+            FixedCode = fixedSource.NormalizeLineEndings(),
             ReferenceAssemblies = ReferenceAssemblies.Net.Net90
                 .AddPackages([new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")]),
             TestState =
@@ -77,6 +78,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                     typeof(TUnitAttribute).Assembly.Location,
                 },
             },
+            CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
