@@ -54,7 +54,7 @@ public class XUnitClassFixtureAnalyzerTests
                 public class MyType;
 
                 [ClassDataSource<MyType>(Shared = SharedType.PerClass)]
-                public class MyClass(MyType myType) 
+                public class MyClass(MyType myType)
                 {
                     [Fact]
                     public void MyTest()

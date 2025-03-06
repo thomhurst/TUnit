@@ -60,7 +60,7 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
 
             root = root.ReplaceNode(classDeclaration,
                 classDeclaration
-                    .RemoveNode(toRemove, SyntaxRemoveOptions.KeepTrailingTrivia)!
+                    .RemoveNode(toRemove, SyntaxRemoveOptions.AddElasticMarker)!
                     .AddAttributeLists(
                         SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(newExpression))
                     )!
@@ -101,7 +101,7 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
         }
 
         return SyntaxFactory.Attribute(
-            SyntaxFactory.GenericName(SyntaxFactory.ParseToken("ClassDataSource"), genericNameSyntax.TypeArgumentList),
+            SyntaxFactory.GenericName(SyntaxFactory.ParseToken("ClassDataSource"), genericNameSyntax.TypeArgumentList).WithoutTrailingTrivia(),
             SyntaxFactory.AttributeArgumentList()
                 .AddArguments(
                     SyntaxFactory.AttributeArgument(
@@ -110,6 +110,6 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
                         expression: SyntaxFactory.ParseExpression("SharedType.PerClass")
                     )
                 )
-        ).NormalizeWhitespace();
+        ).WithLeadingTrivia(SyntaxFactory.ElasticMarker);
     }
 }

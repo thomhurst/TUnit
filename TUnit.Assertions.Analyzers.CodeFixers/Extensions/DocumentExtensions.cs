@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Runtime.InteropServices;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -16,7 +17,7 @@ public static class DocumentExtensions
         }
 
         var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(namespaceName).WithLeadingTrivia(SyntaxFactory.Space))
-            .WithTrailingTrivia(SyntaxFactory.ElasticLineFeed);
+            .WithTrailingTrivia(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.ElasticLineFeed);
 
         return root.AddUsings(usingDirective);
     }
