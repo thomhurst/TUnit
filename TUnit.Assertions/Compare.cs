@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions;
@@ -116,8 +117,16 @@ public static class Compare
                 continue;
             }
 
-            var actualFieldValue = actual.GetType().GetField(fieldName, BindingFlags)?.GetValue(actual);
-            var expectedFieldValue = expected.GetType().GetField(fieldName, BindingFlags)?.GetValue(expected);
+            var actualFieldInfo = actual.GetType().GetField(fieldName, BindingFlags);
+            var expectedFieldInfo = expected.GetType().GetField(fieldName, BindingFlags);
+
+            if (options.EquivalencyKind == EquivalencyKind.Partial && expectedFieldInfo is null)
+            {
+                continue;
+            }
+            
+            var actualFieldValue = actualFieldInfo?.GetValue(actual);
+            var expectedFieldValue = expectedFieldInfo?.GetValue(expected);
 
             if (actualFieldValue?.Equals(actual) == true && expectedFieldValue?.Equals(expected) == true)
             {
@@ -157,8 +166,16 @@ public static class Compare
                 continue;
             }
 
-            var actualPropertyValue = actual.GetType().GetProperty(propertyName, BindingFlags)?.GetValue(actual);
-            var expectedPropertyValue = expected.GetType().GetProperty(propertyName, BindingFlags)?.GetValue(expected);
+            var actualPropertyInfo = actual.GetType().GetProperty(propertyName, BindingFlags);
+            var expectedPropertyInfo = expected.GetType().GetProperty(propertyName, BindingFlags);
+
+            if (options.EquivalencyKind == EquivalencyKind.Partial && expectedPropertyInfo is null)
+            {
+                continue;
+            }
+            
+            var actualPropertyValue = actualPropertyInfo?.GetValue(actual);
+            var expectedPropertyValue = expectedPropertyInfo?.GetValue(expected);
 
             if (actualPropertyValue?.Equals(actual) == true && expectedPropertyValue?.Equals(expected) == true)
             {
