@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Equality;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Helpers;
@@ -15,6 +16,8 @@ public class EquivalentToExpectedValueAssertCondition<
 {
     private readonly List<string> _ignoredMembers = [];
 
+    public EquivalencyKind EquivalencyKind { get; set; } = EquivalencyKind.Full;
+    
     protected override string GetExpectation()
         => $"to be equivalent to {expectedExpression ?? "null"}";
 
@@ -39,7 +42,8 @@ public class EquivalentToExpectedValueAssertCondition<
             var collectionEquivalentToEqualityComparer = new CollectionEquivalentToEqualityComparer<object?>(
                 new CompareOptions
                 {
-                    MembersToIgnore = [.._ignoredMembers]
+                    MembersToIgnore = [.._ignoredMembers],
+                    EquivalencyKind = EquivalencyKind,
                 });
             
             var castedActual = actualEnumerable.Cast<object?>().ToArray();
@@ -77,6 +81,7 @@ public class EquivalentToExpectedValueAssertCondition<
         var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions
         {
             MembersToIgnore = [.._ignoredMembers],
+            EquivalencyKind = EquivalencyKind
         }, null).ToList();
 
         if (failures.FirstOrDefault() is { } firstFailure)
