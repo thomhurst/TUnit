@@ -69,7 +69,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 #else
             return Enum.GetValues(type)
                 .Cast<object>()
-                .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(type))) ?? [])
+                .Except(matrixAttribute?.Excluding ?? [])
                 .ToArray();
 #endif
         }
