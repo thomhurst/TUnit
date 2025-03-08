@@ -53,6 +53,9 @@ internal class TestsExecutor
 
     public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
+#if NET
+        await
+#endif
         using var _ = _engineCancellationToken.Token.Register(() =>
         {
             _onFinished.TrySetCanceled();

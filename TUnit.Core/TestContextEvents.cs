@@ -67,10 +67,6 @@ public record TestContextEvents :
         return OnTestRetry?.InvokeAsync(this, (testContext, retryAttempt)) ?? default;
     }
 
-    public void OnTestStartSynchronous(BeforeTestContext beforeTestContext)
-    {
-    }
-
     public async Task InitializeAsync()
     {
         if (OnInitialize != null)

@@ -37,10 +37,6 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
         return default;
     }
 
-    public void OnTestStartSynchronous(BeforeTestContext beforeTestContext)
-    {
-    }
-
     [Experimental("WIP")]
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Dynamic Code Only attribute on test")]
     public async ValueTask OnTestEnd(TestContext testContext)
