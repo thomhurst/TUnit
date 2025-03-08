@@ -18,9 +18,9 @@ If you think something could be improved, or something seemed to break, raise an
 Use your IDE or the dotnet CLI to add the TUnit packages to your test projects
 
 #### Remove the automatically added global usings
-n your csproj add:
+In your csproj add:
 
-```
+```xml
     <PropertyGroup>
         <TUnitImplicitUsings>false</TUnitImplicitUsings>
         <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
