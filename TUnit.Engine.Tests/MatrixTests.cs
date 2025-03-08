@@ -7,7 +7,7 @@ public class MatrixTests : InvokableTestBase
     [Test]
     public async Task Test()
     {
-        var expectedCount = IsNetFramework ? 260 : 122;
+        var expectedCount = IsNetFramework ? 122 : 260;
         
         await RunTestsWithFilter(
             "/*/*/MatrixTests/*",
