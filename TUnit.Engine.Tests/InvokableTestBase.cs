@@ -9,6 +9,8 @@ public abstract class InvokableTestBase
 {
     private static readonly string GetEnvironmentVariable = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net9.0";
 
+    public static bool IsNetFramework => GetEnvironmentVariable == "net472";
+    
     protected Task RunTestsWithFilter(string filter,
         List<Action<TestRun>> assertions,
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
