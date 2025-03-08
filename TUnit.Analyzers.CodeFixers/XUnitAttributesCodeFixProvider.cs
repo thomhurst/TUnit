@@ -61,9 +61,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
         {
             return document.WithSyntaxRoot(root);
         }
-
-        root = await document.AddUsingDirectiveIfNotExistsAsync(compilationUnit, "TUnit.Core", cancellationToken);
-
+        
         return document.WithSyntaxRoot(root);
     }
 
@@ -111,25 +109,6 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
                         )
                     )
             ),
-
-            // "AssemblyFixture" or "AssemblyFixtureAttribute" =>
-            //     SyntaxFactory.Attribute(
-            //         SyntaxFactory.GenericName(
-            //             identifier: SyntaxFactory.Identifier("ClassDataSource"),
-            //             typeArgumentList: SyntaxFactory.TypeArgumentList(
-            //                 SyntaxFactory.SingletonSeparatedList(
-            //                     (attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.Expression as TypeOfExpressionSyntax)?.Type ?? SyntaxFactory.ParseTypeName("T")
-            //                 )
-            //             )
-            //         )
-            //     ).WithArgumentList(SyntaxFactory.AttributeArgumentList()
-            //             .AddArguments(
-            //                 SyntaxFactory.AttributeArgument(
-            //                     nameEquals: SyntaxFactory.NameEquals("Shared"),
-            //                     nameColon: null,
-            //                     expression: SyntaxFactory.ParseExpression("SharedType.PerAssembly")
-            //                 ))
-            //         ),
 
             "CollectionDefinition" or "CollectionDefinitionAttribute" => SyntaxFactory.Attribute(
                 SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),

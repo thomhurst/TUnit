@@ -70,9 +70,6 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             compilationUnit = compilationUnit.ReplaceNode(expressionSyntax, newExpression.WithTriviaFrom(expressionSyntax));
         }
         
-        compilationUnit = await document.AddUsingDirectiveIfNotExistsAsync(compilationUnit, "TUnit.Assertions", cancellationToken);
-        compilationUnit = await document.AddUsingDirectiveIfNotExistsAsync(compilationUnit, "TUnit.Assertions.Extensions", cancellationToken);
-        
         return document.WithSyntaxRoot(compilationUnit);
     }
 

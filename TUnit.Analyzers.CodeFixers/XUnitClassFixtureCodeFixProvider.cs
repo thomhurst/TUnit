@@ -72,9 +72,6 @@ public class XUnitClassFixtureCodeFixProvider : CodeFixProvider
             {
                 return document.WithSyntaxRoot(root);
             }
-
-            root = await document.AddUsingDirectiveIfNotExistsAsync(compilationUnit, "TUnit.Core",
-                cancellationToken: cancellationToken);
         }
 
         return document.WithSyntaxRoot(root);
