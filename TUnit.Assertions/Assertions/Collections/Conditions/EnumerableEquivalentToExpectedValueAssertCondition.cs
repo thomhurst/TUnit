@@ -39,7 +39,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
             .OrFailIf(enumeratedExpected is null,
                 "it is not null")
             .OrFailIf(collectionOrdering == CollectionOrdering.Matching && !enumeratedActual!.SequenceEqual(enumeratedExpected!, equalityComparer), FailureMessage(enumeratedActual))
-            .OrFailIf(!EqualsAnyOrder(enumeratedActual!, enumeratedExpected!), FailureMessage(enumeratedActual));
+            .OrFailIf(collectionOrdering == CollectionOrdering.Any && !EqualsAnyOrder(enumeratedActual!, enumeratedExpected!), FailureMessage(enumeratedActual));
     }
 
     private static bool EqualsAnyOrder(TInner[] actualValue, TInner[] expectedValue)
