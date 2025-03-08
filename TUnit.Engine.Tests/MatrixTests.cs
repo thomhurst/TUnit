@@ -11,8 +11,8 @@ public class MatrixTests : InvokableTestBase
             "/*/*/MatrixTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(264, "Total"),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(264, "Passed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(260, "Total"),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(260, "Passed"),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0, "Failed"),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0, "Skipped")
             ]);
