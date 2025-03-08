@@ -70,7 +70,9 @@ public class MatrixTests
         [Matrix<CountToTenEnum>(Excluding = [CountToTenEnum.Three, CountToTenEnum.Seven])] CountToTenEnum @enum,
         [Matrix] bool boolean)
     {
-        await Task.CompletedTask;
+        await Assert.That(@enum).IsNotEqualTo(CountToTenEnum.Three)
+            .And
+            .IsNotEqualTo(CountToTenEnum.Seven);
     }
 
 #if NET7_0_OR_GREATER
