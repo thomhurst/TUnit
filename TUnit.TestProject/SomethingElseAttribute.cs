@@ -9,9 +9,5 @@ public class SomethingElseAttribute : Attribute, ITestStartEventReceiver
         return default;
     }
 
-    public void OnTestStartSynchronous(BeforeTestContext beforeTestContext)
-    {
-    }
-
     public int Order => 0;
 }
