@@ -18,22 +18,13 @@ If you think something could be improved, or something seemed to break, raise an
 Use your IDE or the dotnet CLI to add the TUnit packages to your test projects
 
 #### Remove the automatically added global usings
-If you have the TUnit, TUnit.Engine or TUnit.Core package installed, in your csproj add:
+n your csproj add:
 
 ```
-    <ItemGroup>
-        <Using Remove="TUnit.Core.HookType" Static="True" />
-        <Using Remove="TUnit.Core" />
-    </ItemGroup>
-```
-
-If you have the TUnit or TUnit.Assertions package installed, in your csproj add:
-
-```
-    <ItemGroup>
-        <Using Remove="TUnit.Assertions" />
-        <Using Remove="TUnit.Assertions.Extensions" />
-    </ItemGroup>
+    <PropertyGroup>
+        <TUnitImplicitUsings>false</TUnitImplicitUsings>
+        <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+    </PropertyGroup>
 ```
 
 This is temporary - Just to make sure no types clash, and so the code fixers can distinguish between xUnit and TUnit types with similar names.
