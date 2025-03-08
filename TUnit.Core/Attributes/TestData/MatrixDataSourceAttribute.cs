@@ -64,6 +64,11 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
             throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
         }
 
+        if (matrixAttribute.Excluding is not null)
+        {
+            return matrixAttribute.Objects.Except(matrixAttribute.Excluding).ToArray();
+        }
+        
         return matrixAttribute.Objects;
     }
     
