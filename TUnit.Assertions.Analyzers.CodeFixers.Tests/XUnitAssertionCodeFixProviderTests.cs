@@ -37,4 +37,36 @@ public class XUnitAssertionCodeFixProviderTests
                 """
             );
     }
+    
+    [Test]
+    public async Task Xunit_Contains_Predicate_Overload()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        {|#0:Xunit.Assert.Contains(new[] { 22, 75, 19 }, x => x == 22)|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        Assert.That(new[] { 22, 75, 19 }).Contains(x => x == 22);
+                    }
+                }
+                """
+            );
+    }
 }

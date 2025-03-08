@@ -35,14 +35,16 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Resources.TUnitAssertions0009Title,
-                    createChangedDocument: c => ConvertAssertionAsync(context.Document, expressionSyntax, c),
+                    createChangedDocument: c => ConvertAssertionAsync(context, expressionSyntax, c),
                     equivalenceKey: nameof(Resources.TUnitAssertions0009Title)),
                 diagnostic);
         }
     }
     
-    private static async Task<Document> ConvertAssertionAsync(Document document, InvocationExpressionSyntax expressionSyntax, CancellationToken cancellationToken)
+    private static async Task<Document> ConvertAssertionAsync(CodeFixContext context, InvocationExpressionSyntax expressionSyntax, CancellationToken cancellationToken)
     {
+        var document = context.Document;
+        
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         var compilationUnit = root as CompilationUnitSyntax;
 
@@ -63,7 +65,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
         var genericArgs = GetGenericArguments(memberAccessExpressionSyntax.Name);
 
-        var newExpression = GetNewExpression(methodName, actual, expected, genericArgs);
+        var newExpression = await GetNewExpression(context, memberAccessExpressionSyntax, methodName, actual, expected, genericArgs);
         
         if (newExpression != null)
         {
@@ -73,7 +75,8 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         return document.WithSyntaxRoot(compilationUnit);
     }
 
-    private static ExpressionSyntax? GetNewExpression(string method,
+    private static async Task<ExpressionSyntax?> GetNewExpression(CodeFixContext context,
+        MemberAccessExpressionSyntax memberAccessExpressionSyntax, string method,
         ArgumentSyntax? actual, ArgumentSyntax? expected, string genericArgs)
     {
         var isGeneric = !string.IsNullOrEmpty(genericArgs);
@@ -84,7 +87,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             
             "NotEqual" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotEqualTo({expected})"),
             
-            "Contains" => SyntaxFactory.ParseExpression($"Assert.That({actual}).Contains({expected})"),
+            "Contains" => await Contains(context, memberAccessExpressionSyntax, actual, expected),
             
             "DoesNotContain" => SyntaxFactory.ParseExpression($"Assert.That({actual}).DoesNotContain({expected})"),
             
@@ -150,6 +153,24 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             
             _ => null
         };
+    }
+
+    private static async Task<ExpressionSyntax> Contains(CodeFixContext context,
+        MemberAccessExpressionSyntax memberAccessExpressionSyntax, ArgumentSyntax? actual, ArgumentSyntax? expected)
+    {
+        var semanticModel = await context.Document.GetSemanticModelAsync();
+
+        var symbol = semanticModel.GetSymbolInfo(memberAccessExpressionSyntax).Symbol;
+
+        if (symbol is IMethodSymbol methodSymbol &&
+            methodSymbol.Parameters.Length == 2 &&
+            methodSymbol.Parameters[0].Type.Name == "IEnumerable" && methodSymbol.Parameters[1].Type.Name == "Predicate")
+        {
+            // Swap them - This overload is the other way around to the other ones.
+            (actual, expected) = (expected, actual);
+        }
+        
+        return SyntaxFactory.ParseExpression($"Assert.That({actual}).Contains({expected})");
     }
 
     public static string GetGenericArguments(ExpressionSyntax expressionSyntax)

@@ -43,12 +43,11 @@ So try the following:
 
 `dotnet format analyzers --severity info --diagnostics TUnitAssertions0009`
 
-`dotnet format analyzers --severity info --diagnostics TUnitAssertions0002`
+Revert step 1
 
 `dotnet format analyzers --severity info --diagnostics TUnit0054`
 
-The diagnostics that have "Assertions" in them are if you're switching to TUnit assertions.
-The last one attempts to remove all `using Xunit;` directives in your code.
+`dotnet format analyzers --severity info --diagnostics TUnitAssertions0002`
 
 #### Perform any manual bits that are still necessary
 This bit's on you! You'll have to work out what still needs doing.
@@ -56,9 +55,6 @@ Raise an issue if you think it could be automated.
 
 #### Remove the xUnit packages
 Simply uninstall them once you've migrated
-
-#### Revert step 1
-Undo step 1, and you won't have to have `using TUnit.Core` or `using TUnit.Assertions` in every file.
 
 #### Done! (Hopefully)
 
