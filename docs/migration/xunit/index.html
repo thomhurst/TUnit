@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.7.0">
 <title data-rh="true">Migrating from xUnit.net | TUnit</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://thomhurst.github.io/TUnit/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://thomhurst.github.io/TUnit/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://thomhurst.github.io/TUnit/docs/migration/xunit"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Migrating from xUnit.net | TUnit"><meta data-rh="true" name="description" content="Using TUnit&#x27;s Code Fixers"><meta data-rh="true" property="og:description" content="Using TUnit&#x27;s Code Fixers"><link data-rh="true" rel="icon" href="/TUnit/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://thomhurst.github.io/TUnit/docs/migration/xunit"><link data-rh="true" rel="alternate" href="https://thomhurst.github.io/TUnit/docs/migration/xunit" hreflang="en"><link data-rh="true" rel="alternate" href="https://thomhurst.github.io/TUnit/docs/migration/xunit" hreflang="x-default"><link rel="stylesheet" href="/TUnit/assets/css/styles.9ac438e9.css">
-<script src="/TUnit/assets/js/runtime~main.943f74c7.js" defer="defer"></script>
+<script src="/TUnit/assets/js/runtime~main.7f65122e.js" defer="defer"></script>
 <script src="/TUnit/assets/js/main.4ec5158a.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -28,17 +28,14 @@ So try the following:</p>
 <p><code>dotnet format analyzers --severity info --diagnostics TUnit0052</code></p>
 <p><code>dotnet format analyzers --severity info --diagnostics TUnit0053</code></p>
 <p><code>dotnet format analyzers --severity info --diagnostics TUnitAssertions0009</code></p>
-<p><code>dotnet format analyzers --severity info --diagnostics TUnitAssertions0002</code></p>
+<p>Revert step 1</p>
 <p><code>dotnet format analyzers --severity info --diagnostics TUnit0054</code></p>
-<p>The diagnostics that have &quot;Assertions&quot; in them are if you&#x27;re switching to TUnit assertions.
-The last one attempts to remove all <code>using Xunit;</code> directives in your code.</p>
+<p><code>dotnet format analyzers --severity info --diagnostics TUnitAssertions0002</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="perform-any-manual-bits-that-are-still-necessary">Perform any manual bits that are still necessary<a href="#perform-any-manual-bits-that-are-still-necessary" class="hash-link" aria-label="Direct link to Perform any manual bits that are still necessary" title="Direct link to Perform any manual bits that are still necessary">​</a></h4>
 <p>This bit&#x27;s on you! You&#x27;ll have to work out what still needs doing.
 Raise an issue if you think it could be automated.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="remove-the-xunit-packages">Remove the xUnit packages<a href="#remove-the-xunit-packages" class="hash-link" aria-label="Direct link to Remove the xUnit packages" title="Direct link to Remove the xUnit packages">​</a></h4>
 <p>Simply uninstall them once you&#x27;ve migrated</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="revert-step-1">Revert step 1<a href="#revert-step-1" class="hash-link" aria-label="Direct link to Revert step 1" title="Direct link to Revert step 1">​</a></h4>
-<p>Undo step 1, and you won&#x27;t have to have <code>using TUnit.Core</code> or <code>using TUnit.Assertions</code> in every file.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="done-hopefully">Done! (Hopefully)<a href="#done-hopefully" class="hash-link" aria-label="Direct link to Done! (Hopefully)" title="Direct link to Done! (Hopefully)">​</a></h4>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="manually">Manually<a href="#manually" class="hash-link" aria-label="Direct link to Manually" title="Direct link to Manually">​</a></h2>
 <p><code>[Fact]</code> becomes <code>[Test]</code></p>
