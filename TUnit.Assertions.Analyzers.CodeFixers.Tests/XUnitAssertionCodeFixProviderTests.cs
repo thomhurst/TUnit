@@ -26,8 +26,6 @@ public class XUnitAssertionCodeFixProviderTests
                     .WithLocation(0),
                 """
                 using System.Threading.Tasks;
-                using TUnit.Assertions;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {

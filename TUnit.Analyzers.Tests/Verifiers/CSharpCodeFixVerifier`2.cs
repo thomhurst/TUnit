@@ -79,6 +79,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                 },
             },
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,
+            CompilerDiagnostics = CompilerDiagnostics.None
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
