@@ -43,7 +43,7 @@ So try the following:
 
 `dotnet format analyzers --severity info --diagnostics TUnitAssertions0009`
 
-Revert step 1
+Revert step `Remove the automatically added global usings`
 
 `dotnet format analyzers --severity info --diagnostics TUnit0054`
 
