@@ -43,33 +43,43 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
     {
         var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault();
 
+        var type = sourceGeneratedParameterInformation.Type;
+
         if (matrixAttribute is null or { Objects.Length: 0 })
         {
-            var type = sourceGeneratedParameterInformation.Type;
-            
             if (type == typeof(bool))
             {
                 return [true, false];
             }
 
-            if (type.IsEnum)
+            if (!type.IsEnum)
             {
-#if NET
-                return Enum.GetValuesAsUnderlyingType(type).Cast<object>().Except(matrixAttribute?.Excluding ?? []).ToArray();
-#else
-                return Enum.GetValues(type).Cast<object>().Except(matrixAttribute?.Excluding ?? []).ToArray();
-#endif
+                throw new ArgumentNullException(
+                    $"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
             }
-            
-            throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
         }
 
-        if (matrixAttribute.Excluding is not null)
+        if (type.IsEnum && matrixAttribute?.Objects is null or { Length: 0 })
+        {
+#if NET
+            return Enum.GetValuesAsUnderlyingType(type)
+                .Cast<object>()
+                .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(type))) ?? [])
+                .ToArray();
+#else
+            return Enum.GetValues(type)
+                .Cast<object>()
+                .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(type))) ?? [])
+                .ToArray();
+#endif
+        }
+
+        if (matrixAttribute?.Excluding is not null)
         {
             return matrixAttribute.Objects.Except(matrixAttribute.Excluding).ToArray();
         }
         
-        return matrixAttribute.Objects;
+        return matrixAttribute!.Objects;
     }
     
     private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];
