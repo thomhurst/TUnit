@@ -2,11 +2,11 @@ using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableOrderedByAssertCondition<TInner, TComparisonItem>(
+public class EnumerableOrderedByAssertCondition<TActual, TInner, TComparisonItem>(
     IComparer<TComparisonItem?> comparer, 
     Func<TInner, TComparisonItem> comparisonItemSelector, 
     Order order)
-    : BaseAssertCondition<IEnumerable<TInner>>
+    : BaseAssertCondition<TActual> where TActual : IEnumerable<TInner>
 {
     protected override string GetExpectation()
     {
@@ -14,7 +14,7 @@ public class EnumerableOrderedByAssertCondition<TInner, TComparisonItem>(
     }
     
     protected override ValueTask<AssertionResult> GetResult(
-        IEnumerable<TInner>? actualValue, Exception? exception,
+        TActual? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata
     )
     {

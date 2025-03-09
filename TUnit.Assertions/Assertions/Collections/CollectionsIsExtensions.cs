@@ -1,5 +1,6 @@
 ﻿#nullable disable
 
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Collections;
@@ -113,6 +114,6 @@ public static class CollectionsIsExtensions
 
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsEmpty<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
     {
-        return valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<TInner>(0), []);
+        return valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(0), []);
     }
 }
