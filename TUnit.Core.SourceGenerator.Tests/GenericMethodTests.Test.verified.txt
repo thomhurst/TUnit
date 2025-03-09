@@ -95,6 +95,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.GenericMethodTests? classInstance = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData())
 				{
 					testMethodDataIndex++;
@@ -110,8 +111,8 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
 					new global::TUnit.TestProject.GenericMethodTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.GenericMethodTests>
 					{
@@ -216,6 +217,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.GenericMethodTests? classInstance = null;
 					foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData())
 					{
 						testMethodDataIndex++;
@@ -231,8 +233,8 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
 						new global::TUnit.TestProject.GenericMethodTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.GenericMethodTests>
 						{

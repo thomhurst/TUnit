@@ -6,7 +6,7 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-public record GeneratedArgumentsContainer(
+public record DataSourceGeneratorContainer(
     GeneratorAttributeSyntaxContext Context, 
     AttributeData AttributeData,
     ArgumentsType ArgumentsType, 
@@ -43,6 +43,7 @@ public record GeneratedArgumentsContainer(
         SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, Parameters, null, ArgumentsType);
         
         sourceCodeWriter.WriteLine("TestSessionId = sessionId,");
+        sourceCodeWriter.WriteLine("TestClassInstance = classInstance,");
         sourceCodeWriter.WriteLine("};");
         
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
@@ -118,6 +119,7 @@ public record GeneratedArgumentsContainer(
             SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, ImmutableArray<IParameterSymbol>.Empty, Property, ArgumentsType.Property);
                 
             sourceCodeWriter.WriteLine("TestSessionId = sessionId,");
+            sourceCodeWriter.WriteLine("TestClassInstance = classInstance,");
             sourceCodeWriter.WriteLine("}).ElementAtOrDefault(0)();");
             sourceCodeWriter.WriteLine();
             return;

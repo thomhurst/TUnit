@@ -80,6 +80,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod())
 				{
 					testMethodDataIndex++;
@@ -92,8 +93,8 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
 					{
@@ -183,6 +184,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
 					foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod())
 					{
 						testMethodDataIndex++;
@@ -195,8 +197,8 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
 						new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
 						{

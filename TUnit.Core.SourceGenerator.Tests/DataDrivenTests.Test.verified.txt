@@ -72,14 +72,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				int methodArg = 1;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -159,14 +160,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 					int methodArg = 2;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 					new global::TUnit.TestProject.DataDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 					{
@@ -246,14 +248,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 						int methodArg = 3;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 						new global::TUnit.TestProject.DataDrivenTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 						{
@@ -368,6 +371,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				int methodArg = 1;
 				string methodArg1 = "String";
@@ -375,8 +379,8 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -461,6 +465,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 					int methodArg = 2;
 					string methodArg1 = "String2";
@@ -468,8 +473,8 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 					new global::TUnit.TestProject.DataDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 					{
@@ -554,6 +559,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 						int methodArg = 3;
 						string methodArg1 = "String3";
@@ -561,8 +567,8 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 						new global::TUnit.TestProject.DataDrivenTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 						{
@@ -672,14 +678,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				global::TUnit.TestProject.TestEnum methodArg = global::TUnit.TestProject.TestEnum.One;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -759,14 +766,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 					global::TUnit.TestProject.TestEnum methodArg = global::TUnit.TestProject.TestEnum.Two;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 					new global::TUnit.TestProject.DataDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 					{
@@ -846,14 +854,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 						global::TUnit.TestProject.TestEnum methodArg = (global::TUnit.TestProject.TestEnum)(-1);
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 						new global::TUnit.TestProject.DataDrivenTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 						{
@@ -956,14 +965,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				string methodArg = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -1066,14 +1076,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				string methodArg = "";
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -1176,14 +1187,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				string methodArg = "Foo bar!";
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -1293,14 +1305,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				bool? methodArg = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -1380,14 +1393,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 					bool? methodArg = false;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 					new global::TUnit.TestProject.DataDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 					{
@@ -1467,14 +1481,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 						bool? methodArg = true;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 						new global::TUnit.TestProject.DataDrivenTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 						{
@@ -1577,14 +1592,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				global::System.Type methodArg = typeof(object);
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -1687,14 +1703,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				int[] methodArg = new[] { 1, 2, 3 };
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{
@@ -1797,14 +1814,15 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
 
 				int methodArg = 2147483647;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 				new global::TUnit.TestProject.DataDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataDrivenTests>
 				{

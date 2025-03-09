@@ -3,7 +3,11 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Parameter)]
 public class MatrixAttribute(params object?[]? objects) : TestDataAttribute
 {
-    public object?[] Objects { get; } = objects ?? [ null ];
+    protected MatrixAttribute() : this(null)
+    {
+    }
+
+    public virtual object?[] GetObjects(object? instance) => objects ?? [ null ];
 
     public object?[]? Excluding { get; init; }
 }
