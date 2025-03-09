@@ -12,8 +12,8 @@ public record MethodDataSourceAttributeContainer(
     bool IsExpandableFunc,
     bool IsExpandableEnumerable,
     bool IsExpandableTuples,
-    string TestClassTypeName,
-    string TypeName,
+    INamedTypeSymbol TestClassType,
+    ITypeSymbol Type,
     string MethodName,
     bool IsStatic,
     ITypeSymbol MethodReturnType,
@@ -147,10 +147,21 @@ public record MethodDataSourceAttributeContainer(
     {
         if (IsStatic)
         {
-            return $"{TypeName}.{MethodName}({ArgumentsExpression})";
+            return $"{Type.GloballyQualified()}.{MethodName}({ArgumentsExpression})";
         }
         
-        return $"new {TypeName}().{MethodName}({ArgumentsExpression})";
+        if (SymbolEqualityComparer.Default.Equals(Type, TestClassType) && ArgumentsType != ArgumentsType.Method)
+        {
+            return $"resettableClassFactoryDelegate().Value.{MethodName}({ArgumentsExpression})";
+        }
+
+        if (Type is INamedTypeSymbol namedTypeSymbol &&
+            namedTypeSymbol.Constructors.Any(x => x.Parameters.IsDefaultOrEmpty))
+        {
+            return $"new {Type.GloballyQualified()}().{MethodName}({ArgumentsExpression})";
+        }
+        
+        throw new ArgumentException("Only test arguments can reference non-static MethodDataSources");
     }
 
     public override void CloseScope(SourceCodeWriter sourceCodeWriter)

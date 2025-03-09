@@ -244,7 +244,6 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								}).ElementAtOrDefault(0)();
 
 
-								global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PropertySetterTests>(() => 
 								new global::TUnit.TestProject.PropertySetterTests()
 								{
@@ -256,6 +255,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									Property6 = propertyArg5,
 								}
 								, sessionId, testBuilderContext);
+								global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;
 
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -473,7 +473,6 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 								}).ElementAtOrDefault(0)();
 
 
-								global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty = propertyArg6;
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedPropertySetterTests>(() => 
 								new global::TUnit.TestProject.InheritedPropertySetterTests()
 								{
@@ -485,6 +484,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 									Property6 = propertyArg5,
 								}
 								, sessionId, testBuilderContext);
+								global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty = propertyArg6;
 
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
