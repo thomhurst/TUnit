@@ -504,4 +504,13 @@
     <data name="TUnit0054Title" xml:space="preserve">
         <value>xUnit using directives can be removed once migrated to TUnit</value>
     </data>
+    <data name="TUnit0055Description" xml:space="preserve">
+        <value>Overwriting the Console writer can break TUnit logging.</value>
+    </data>
+    <data name="TUnit0055MessageFormat" xml:space="preserve">
+        <value>Overwriting the Console writer can break TUnit logging</value>
+    </data>
+    <data name="TUnit0055Title" xml:space="preserve">
+        <value>Do not overwrite the Console writer</value>
+    </data>
 </root>
