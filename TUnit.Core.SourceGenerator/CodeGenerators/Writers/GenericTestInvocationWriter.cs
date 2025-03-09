@@ -106,6 +106,11 @@ public static class GenericTestInvocationWriter
 
     private static bool NeedsClassInstantiatedForMethodData(TestSourceDataModel testSourceDataModel)
     {
+        if (testSourceDataModel.MethodArguments.Attribute?.NamedArguments.FirstOrDefault(x => x.Key == "AccessesInstanceData").Value.Value as bool? == true)
+        {
+            return true;
+        }
+            
         if (testSourceDataModel.MethodArguments is MethodDataSourceAttributeContainer { IsStatic: false })
         {
             return true;
