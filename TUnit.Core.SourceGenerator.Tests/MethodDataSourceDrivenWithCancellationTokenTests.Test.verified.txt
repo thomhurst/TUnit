@@ -92,9 +92,8 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
 				new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 				{
@@ -191,9 +190,8 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
 					new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 					{
@@ -293,9 +291,8 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
 							new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
 							, sessionId, testBuilderContext);
-
 							var resettableClassFactory = resettableClassFactoryDelegate();
-							classInstance = resettableClassFactory.Value;
+
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 							{
@@ -396,9 +393,8 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
 								new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
 								, sessionId, testBuilderContext);
-
 								var resettableClassFactory = resettableClassFactoryDelegate();
-								classInstance = resettableClassFactory.Value;
+
 
 								nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 								{
@@ -499,9 +495,8 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
 									new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
 									, sessionId, testBuilderContext);
-
 									var resettableClassFactory = resettableClassFactoryDelegate();
-									classInstance = resettableClassFactory.Value;
+
 
 									nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 									{
@@ -602,9 +597,8 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 										var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
 										new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
 										, sessionId, testBuilderContext);
-
 										var resettableClassFactory = resettableClassFactoryDelegate();
-										classInstance = resettableClassFactory.Value;
+
 
 										nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 										{

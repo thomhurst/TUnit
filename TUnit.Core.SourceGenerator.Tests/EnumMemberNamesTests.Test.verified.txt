@@ -79,9 +79,8 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
 				new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 				{
@@ -168,9 +167,8 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
 					new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 					{
@@ -257,9 +255,8 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
 						new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
-						classInstance = resettableClassFactory.Value;
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 						{

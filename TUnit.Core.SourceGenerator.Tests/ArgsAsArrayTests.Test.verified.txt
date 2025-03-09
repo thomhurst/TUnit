@@ -72,9 +72,8 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
@@ -184,9 +183,8 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
@@ -296,9 +294,8 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
@@ -408,9 +405,8 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
@@ -526,9 +522,8 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{

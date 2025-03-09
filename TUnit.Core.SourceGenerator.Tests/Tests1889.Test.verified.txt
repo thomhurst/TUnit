@@ -70,9 +70,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 				new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 				{
@@ -181,9 +180,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 						new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
-						classInstance = resettableClassFactory.Value;
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 						{
@@ -268,9 +266,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 						new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
-						classInstance = resettableClassFactory.Value;
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 						{
@@ -354,9 +351,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 							new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 							, sessionId, testBuilderContext);
-
 							var resettableClassFactory = resettableClassFactoryDelegate();
-							classInstance = resettableClassFactory.Value;
+
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 							{

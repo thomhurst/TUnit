@@ -97,9 +97,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 				new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 				{
@@ -198,9 +197,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 					new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 					{
@@ -299,9 +297,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 						new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
-						classInstance = resettableClassFactory.Value;
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 						{
@@ -400,9 +397,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 							new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 							, sessionId, testBuilderContext);
-
 							var resettableClassFactory = resettableClassFactoryDelegate();
-							classInstance = resettableClassFactory.Value;
+
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 							{
@@ -501,9 +497,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 								new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 								, sessionId, testBuilderContext);
-
 								var resettableClassFactory = resettableClassFactoryDelegate();
-								classInstance = resettableClassFactory.Value;
+
 
 								nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 								{
@@ -602,9 +597,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 									new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 									, sessionId, testBuilderContext);
-
 									var resettableClassFactory = resettableClassFactoryDelegate();
-									classInstance = resettableClassFactory.Value;
+
 
 									nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 									{
@@ -703,9 +697,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 										new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 										, sessionId, testBuilderContext);
-
 										var resettableClassFactory = resettableClassFactoryDelegate();
-										classInstance = resettableClassFactory.Value;
+
 
 										nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 										{
@@ -804,9 +797,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 											new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 											, sessionId, testBuilderContext);
-
 											var resettableClassFactory = resettableClassFactoryDelegate();
-											classInstance = resettableClassFactory.Value;
+
 
 											nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 											{
@@ -905,9 +897,8 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 												new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 												, sessionId, testBuilderContext);
-
 												var resettableClassFactory = resettableClassFactoryDelegate();
-												classInstance = resettableClassFactory.Value;
+
 
 												nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 												{

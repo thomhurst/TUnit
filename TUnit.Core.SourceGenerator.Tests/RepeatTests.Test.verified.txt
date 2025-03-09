@@ -70,9 +70,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 				new global::TUnit.TestProject.RepeatTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 				{
@@ -151,9 +150,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 					new global::TUnit.TestProject.RepeatTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 					{
@@ -262,9 +260,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 				new global::TUnit.TestProject.RepeatTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 				{
@@ -343,9 +340,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 					new global::TUnit.TestProject.RepeatTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 					{
@@ -424,9 +420,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 						new global::TUnit.TestProject.RepeatTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
-						classInstance = resettableClassFactory.Value;
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 						{
@@ -535,9 +530,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 				new global::TUnit.TestProject.RepeatTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 				{
@@ -615,9 +609,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 					new global::TUnit.TestProject.RepeatTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 					{
@@ -695,9 +688,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 						new global::TUnit.TestProject.RepeatTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
-						classInstance = resettableClassFactory.Value;
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 						{
@@ -775,9 +767,8 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 							new global::TUnit.TestProject.RepeatTests()
 							, sessionId, testBuilderContext);
-
 							var resettableClassFactory = resettableClassFactoryDelegate();
-							classInstance = resettableClassFactory.Value;
+
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
 							{

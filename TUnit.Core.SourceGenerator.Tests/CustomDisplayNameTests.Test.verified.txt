@@ -72,9 +72,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
@@ -184,9 +183,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
@@ -323,9 +321,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
@@ -433,9 +430,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 					new global::TUnit.TestProject.CustomDisplayNameTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 					{
@@ -554,9 +550,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
@@ -698,9 +693,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 					new global::TUnit.TestProject.CustomDisplayNameTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 					{
@@ -811,9 +805,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
@@ -923,9 +916,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
@@ -1035,9 +1027,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{

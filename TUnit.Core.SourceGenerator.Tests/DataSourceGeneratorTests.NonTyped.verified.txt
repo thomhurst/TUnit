@@ -130,9 +130,8 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AutoDataTests>(() => 
 					new global::TUnit.TestProject.AutoDataTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.AutoDataTests>
 					{

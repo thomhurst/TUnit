@@ -95,9 +95,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
@@ -231,9 +230,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
@@ -367,9 +365,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
@@ -516,9 +513,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
@@ -676,9 +672,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
@@ -847,9 +842,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
@@ -1029,9 +1023,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{

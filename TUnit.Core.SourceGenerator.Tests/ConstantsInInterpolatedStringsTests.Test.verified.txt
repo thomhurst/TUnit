@@ -72,9 +72,8 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests>(() => 
 				new global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests>
 				{

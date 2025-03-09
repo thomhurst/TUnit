@@ -63,9 +63,8 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
@@ -166,9 +165,8 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
@@ -269,9 +267,8 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
@@ -372,9 +369,8 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
@@ -475,9 +471,8 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{
@@ -578,9 +573,8 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
 				{

@@ -74,9 +74,8 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.EnumerableDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>
 					{
@@ -189,9 +188,8 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.EnumerableDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>
 					{
@@ -304,9 +302,8 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.EnumerableDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>
 					{

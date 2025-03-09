@@ -77,9 +77,8 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
 				new global::TUnit.TestProject.NullableByteArgumentTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 				{
@@ -165,9 +164,8 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
 					new global::TUnit.TestProject.NullableByteArgumentTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 					{
@@ -288,9 +286,8 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
 				new global::TUnit.TestProject.NullableByteArgumentTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 				{
@@ -382,9 +379,8 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
 					new global::TUnit.TestProject.NullableByteArgumentTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
-					classInstance = resettableClassFactory.Value;
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 					{

@@ -72,9 +72,8 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests>(() => 
 				new global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests>
 				{

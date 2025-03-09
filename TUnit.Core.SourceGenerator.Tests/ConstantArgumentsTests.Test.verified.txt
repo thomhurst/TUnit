@@ -72,9 +72,8 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -184,9 +183,8 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -296,9 +294,8 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -408,9 +405,8 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -520,9 +516,8 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -632,9 +627,8 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -744,9 +738,8 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
-				classInstance = resettableClassFactory.Value;
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
