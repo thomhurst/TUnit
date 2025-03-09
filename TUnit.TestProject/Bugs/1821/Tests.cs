@@ -7,7 +7,7 @@ namespace TUnit.TestProject.Bugs._1821;
 public class Tests(MyData data)
 {
     [Test]
-    [MethodDataSource(nameof(DataSource))]
+    [InstanceMethodDataSource(nameof(DataSource))]
     public async Task MethodDataSource(string value)
     {
         await Assert.That(value).IsEqualTo("Hello World!");
@@ -15,7 +15,7 @@ public class Tests(MyData data)
     
     [Test]
     [MatrixDataSource]
-    public async Task MatrixDataSource([MatrixMethod<Tests>(nameof(DataSource))] string value)
+    public async Task MatrixDataSource([MatrixInstanceMethod<Tests>(nameof(DataSource))] string value)
     {
         await Assert.That(value).IsEqualTo("Hello World!");
     }

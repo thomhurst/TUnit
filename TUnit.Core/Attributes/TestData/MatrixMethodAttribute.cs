@@ -7,8 +7,7 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Parameter)]
 public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClass>(string methodName) : MatrixAttribute where TClass : class
 {
-    private static readonly BindingFlags InstanceBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Static;
-    private static readonly BindingFlags StaticBinding = BindingFlags.Public | BindingFlags.Static;
+    private static readonly BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Static;
 
     public override object?[] GetObjects(object? instance)
     {
@@ -17,9 +16,7 @@ public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccess
 
     private static object?[] GetMethodValue(string methodName, TClass? instance)
     {
-        var methodInfo = instance != null
-            ? typeof(TClass).GetMethod(methodName, InstanceBinding)
-            : typeof(TClass).GetMethod(methodName, StaticBinding);
+        var methodInfo = typeof(TClass).GetMethod(methodName, BindingFlags);
 
         if (methodInfo == null)
         {

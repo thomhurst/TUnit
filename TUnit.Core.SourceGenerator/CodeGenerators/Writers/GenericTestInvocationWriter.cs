@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
@@ -37,11 +38,6 @@ public static class GenericTestInvocationWriter
         
         sourceBuilder.WriteLine();
         
-        sourceBuilder.WriteLine(
-            "var resettableClassFactory = resettableClassFactoryDelegate();");
-        
-        sourceBuilder.WriteLine("classInstance = resettableClassFactory.Value;");
-
         sourceBuilder.WriteLine();
         
         sourceBuilder.WriteLine($"nodes.Add(new TestMetadata<{fullyQualifiedClassType}>");
@@ -88,6 +84,11 @@ public static class GenericTestInvocationWriter
             testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
 
             NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
+            
+            sourceBuilder.WriteLine(
+                "var resettableClassFactory = resettableClassFactoryDelegate();");
+            
+            sourceBuilder.WriteLine("classInstance = resettableClassFactory.Value;");
         
             testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
 
@@ -104,6 +105,9 @@ public static class GenericTestInvocationWriter
         testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
+        
+        sourceBuilder.WriteLine(
+            "var resettableClassFactory = resettableClassFactoryDelegate();");
     }
 
     private static bool NeedsClassInstantiatedForMethodData(TestSourceDataModel testSourceDataModel)
@@ -117,15 +121,11 @@ public static class GenericTestInvocationWriter
         {
             return true;
         }
-            
-        if (testSourceDataModel.MethodArguments is MethodDataSourceAttributeContainer { IsStatic: false })
-        {
-            return true;
-        }
-        
-        if (testSourceDataModel.MethodArguments is DataSourceGeneratorContainer dataSourceGeneratorContainer
-            && dataSourceGeneratorContainer.AttributeData.AttributeClass?.GloballyQualified() == "global::TUnit.Core.MatrixDataSourceAttribute"
-            && dataSourceGeneratorContainer.TestMethod.Parameters.Any(x => x.GetAttributes().Select(a => a.AttributeClass?.GloballyQualifiedNonGeneric()).Contains("global::TUnit.Core.MatrixMethodAttribute")))
+
+        if (testSourceDataModel.TestMethod.Parameters
+            .SelectMany(x => x.GetAttributes())
+            .SelectMany(x => x.AttributeClass?.Interfaces ?? ImmutableArray<INamedTypeSymbol>.Empty)
+            .Any(x => x.GloballyQualified() == "global::TUnit.Core.IAccessesInstanceData"))
         {
             return true;
         }

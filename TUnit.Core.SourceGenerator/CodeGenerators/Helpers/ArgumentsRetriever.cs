@@ -46,7 +46,8 @@ public static class ArgumentsRetriever
                         parameterOrPropertyTypes, argumentsType, index);
                 }
 
-                if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix)
+                if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix 
+                    || name == WellKnownFullyQualifiedClassNames.InstanceMethodDataSourceAttribute.WithGlobalPrefix)
                 {
                     yield return MethodDataSourceRetriever.ParseMethodData(context, parameterOrPropertyTypes,
                         testClass, dataAttribute, argumentsType, index);
