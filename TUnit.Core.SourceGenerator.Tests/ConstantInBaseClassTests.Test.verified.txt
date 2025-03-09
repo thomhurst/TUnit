@@ -67,14 +67,14 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests? classInstance = null;
 
+				string methodArg = "Value";
+
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests>(() => 
 				new global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
-				string methodArg = "Value";
-
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests>
 				{

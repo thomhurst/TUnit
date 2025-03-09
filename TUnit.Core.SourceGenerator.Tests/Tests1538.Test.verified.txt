@@ -101,14 +101,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1538.Tests? classInstance = null;
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1538.Tests>(() => 
-				new global::TUnit.TestProject.Bugs._1538.Tests()
-				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.EightItems())
 				{
 					testMethodDataIndex++;
+
 					var methodData = methodDataAccessor;
 					var methodArgTuples = global::System.TupleExtensions.ToTuple<bool, string, string, string, string, string, string, string>(methodData);
 					bool methodArg = methodArgTuples.Item1;
@@ -119,8 +115,12 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					string methodArg5 = methodArgTuples.Item6;
 					string methodArg6 = methodArgTuples.Item7;
 					string methodArg7 = methodArgTuples.Rest.Item1;
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1538.Tests>(() => 
+					new global::TUnit.TestProject.Bugs._1538.Tests()
+					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
 					{
@@ -300,14 +300,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1538.Tests? classInstance = null;
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1538.Tests>(() => 
-				new global::TUnit.TestProject.Bugs._1538.Tests()
-				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems())
 				{
 					testMethodDataIndex++;
+
 					var methodData = methodDataAccessor;
 					var methodArgTuples = global::System.TupleExtensions.ToTuple<bool, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string>(methodData);
 					bool methodArg = methodArgTuples.Item1;
@@ -326,8 +322,12 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					string methodArg13 = methodArgTuples.Rest.Item7;
 					string methodArg14 = methodArgTuples.Rest.Rest.Item1;
 					string methodArg15 = methodArgTuples.Rest.Rest.Item2;
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1538.Tests>(() => 
+					new global::TUnit.TestProject.Bugs._1538.Tests()
+					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
 					{

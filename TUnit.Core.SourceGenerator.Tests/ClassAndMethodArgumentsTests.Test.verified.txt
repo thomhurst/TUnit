@@ -79,9 +79,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 				new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 				{
@@ -169,9 +169,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 					new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 					, sessionId, testBuilderContext);
-					classInstance = resettableClassFactoryDelegate().Value;
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 					{
@@ -301,9 +301,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 				new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 				{
@@ -402,9 +402,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 					new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 					, sessionId, testBuilderContext);
-					classInstance = resettableClassFactoryDelegate().Value;
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 					{
@@ -503,9 +503,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 						new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 						, sessionId, testBuilderContext);
-						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
+						classInstance = resettableClassFactory.Value;
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 						{
@@ -604,9 +604,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 							new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 							, sessionId, testBuilderContext);
-							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
+							classInstance = resettableClassFactory.Value;
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 							{
@@ -736,9 +736,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 				new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 				{
@@ -837,9 +837,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 					new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 					, sessionId, testBuilderContext);
-					classInstance = resettableClassFactoryDelegate().Value;
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 					{
@@ -938,9 +938,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 						new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 						, sessionId, testBuilderContext);
-						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
+						classInstance = resettableClassFactory.Value;
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 						{
@@ -1039,9 +1039,9 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 							new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
 							, sessionId, testBuilderContext);
-							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
+							classInstance = resettableClassFactory.Value;
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 							{

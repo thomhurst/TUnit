@@ -112,6 +112,11 @@ public static class GenericTestInvocationWriter
         {
             return true;
         }
+        
+        if (testSourceDataModel.MethodArguments.Attribute?.AttributeClass?.Interfaces.Any(x => x.GloballyQualified() == "global::TUnit.Core.IAccessesInstanceData") is true)
+        {
+            return true;
+        }
             
         if (testSourceDataModel.MethodArguments is MethodDataSourceAttributeContainer { IsStatic: false })
         {

@@ -72,14 +72,14 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
 
+				byte? methodArg = (byte)1;
+
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
 				new global::TUnit.TestProject.NullableByteArgumentTests()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
-				byte? methodArg = (byte)1;
-
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 				{
@@ -160,14 +160,14 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
 
+					byte? methodArg = null;
+
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
 					new global::TUnit.TestProject.NullableByteArgumentTests()
 					, sessionId, testBuilderContext);
-					classInstance = resettableClassFactoryDelegate().Value;
-					byte? methodArg = null;
-
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 					{
@@ -282,15 +282,15 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
 
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
-				new global::TUnit.TestProject.NullableByteArgumentTests()
-				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 				byte methodArg = (byte)1;
 				byte? methodArg1 = (byte)1;
 
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
+				new global::TUnit.TestProject.NullableByteArgumentTests()
+				, sessionId, testBuilderContext);
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 				{
@@ -376,15 +376,15 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
 
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
-					new global::TUnit.TestProject.NullableByteArgumentTests()
-					, sessionId, testBuilderContext);
-					classInstance = resettableClassFactoryDelegate().Value;
 					byte methodArg = (byte)1;
 					byte? methodArg1 = (byte?)(null);
 
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
+					new global::TUnit.TestProject.NullableByteArgumentTests()
+					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
 					{

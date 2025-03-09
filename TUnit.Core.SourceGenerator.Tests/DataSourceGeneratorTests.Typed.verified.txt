@@ -156,9 +156,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 						new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 						, sessionId, testBuilderContext);
-						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
+						classInstance = resettableClassFactory.Value;
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 						{
@@ -325,9 +325,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 							new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 							, sessionId, testBuilderContext);
-							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
+							classInstance = resettableClassFactory.Value;
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 							{
@@ -547,9 +547,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 						new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 						, sessionId, testBuilderContext);
-						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
+						classInstance = resettableClassFactory.Value;
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 						{
@@ -740,9 +740,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 							new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 							, sessionId, testBuilderContext);
-							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
+							classInstance = resettableClassFactory.Value;
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 							{
@@ -962,9 +962,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 						new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 						, sessionId, testBuilderContext);
-						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
+						classInstance = resettableClassFactory.Value;
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 						{
@@ -1155,9 +1155,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 							new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 							, sessionId, testBuilderContext);
-							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
+							classInstance = resettableClassFactory.Value;
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 							{

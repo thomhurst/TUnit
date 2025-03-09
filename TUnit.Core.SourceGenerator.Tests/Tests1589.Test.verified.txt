@@ -98,9 +98,9 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1589.MyTests>(() => 
 						new global::TUnit.TestProject.Bugs._1589.MyTests(classArgGeneratedData)
 						, sessionId, testBuilderContext);
-						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
+						classInstance = resettableClassFactory.Value;
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1589.MyTests>
 						{

@@ -96,14 +96,10 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.GenericMethodTests? classInstance = null;
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
-				new global::TUnit.TestProject.GenericMethodTests()
-				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData())
 				{
 					testMethodDataIndex++;
+
 					var methodData = methodDataAccessor();
 					var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Collections.Generic.IEnumerable<int>, global::System.Func<int, int>, global::System.Func<int, int>, global::System.Func<int, int, int>, global::System.Collections.Generic.IEqualityComparer<int>, global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>>(methodData);
 					global::System.Collections.Generic.IEnumerable<int> methodArg = methodArgTuples.Item1;
@@ -112,8 +108,12 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					global::System.Func<int, int, int> methodArg3 = methodArgTuples.Item4;
 					global::System.Collections.Generic.IEqualityComparer<int> methodArg4 = methodArgTuples.Item5;
 					global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>> methodArg5 = methodArgTuples.Item6;
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
+					new global::TUnit.TestProject.GenericMethodTests()
+					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.GenericMethodTests>
 					{
@@ -219,14 +219,10 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.GenericMethodTests? classInstance = null;
-
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
-					new global::TUnit.TestProject.GenericMethodTests()
-					, sessionId, testBuilderContext);
-					classInstance = resettableClassFactoryDelegate().Value;
 					foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData())
 					{
 						testMethodDataIndex++;
+
 						var methodData = methodDataAccessor();
 						var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Collections.Generic.IEnumerable<string>, global::System.Func<string, string>, global::System.Func<string, string>, global::System.Func<string, string, string>, global::System.Collections.Generic.IEqualityComparer<string>, global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>>(methodData);
 						global::System.Collections.Generic.IEnumerable<string> methodArg = methodArgTuples.Item1;
@@ -235,8 +231,12 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 						global::System.Func<string, string, string> methodArg3 = methodArgTuples.Item4;
 						global::System.Collections.Generic.IEqualityComparer<string> methodArg4 = methodArgTuples.Item5;
 						global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>> methodArg5 = methodArgTuples.Item6;
+						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 
+						new global::TUnit.TestProject.GenericMethodTests()
+						, sessionId, testBuilderContext);
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
+						classInstance = resettableClassFactory.Value;
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.GenericMethodTests>
 						{

@@ -65,9 +65,9 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => 
 				new global::TUnit.TestProject.AbstractTests.ConcreteClass1()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass1>
 				{

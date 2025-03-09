@@ -261,10 +261,10 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									Property6 = propertyArg5,
 								}
 								, sessionId, testBuilderContext);
-								classInstance = resettableClassFactoryDelegate().Value;
 								global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;
 
 								var resettableClassFactory = resettableClassFactoryDelegate();
+								classInstance = resettableClassFactory.Value;
 
 								nodes.Add(new TestMetadata<global::TUnit.TestProject.PropertySetterTests>
 								{
@@ -497,10 +497,10 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 									Property6 = propertyArg5,
 								}
 								, sessionId, testBuilderContext);
-								classInstance = resettableClassFactoryDelegate().Value;
 								global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty = propertyArg6;
 
 								var resettableClassFactory = resettableClassFactoryDelegate();
+								classInstance = resettableClassFactory.Value;
 
 								nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedPropertySetterTests>
 								{

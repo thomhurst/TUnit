@@ -168,9 +168,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					Property4 = propertyArg3,
 				}
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 				{
@@ -345,9 +345,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						Property4 = propertyArg3,
 					}
 					, sessionId, testBuilderContext);
-					classInstance = resettableClassFactoryDelegate().Value;
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
+					classInstance = resettableClassFactory.Value;
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 					{
@@ -522,9 +522,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							Property4 = propertyArg3,
 						}
 						, sessionId, testBuilderContext);
-						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
+						classInstance = resettableClassFactory.Value;
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 						{
@@ -699,9 +699,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								Property4 = propertyArg3,
 							}
 							, sessionId, testBuilderContext);
-							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
+							classInstance = resettableClassFactory.Value;
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 							{

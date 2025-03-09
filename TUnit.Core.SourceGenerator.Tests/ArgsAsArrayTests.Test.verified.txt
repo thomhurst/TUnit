@@ -67,14 +67,14 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 
+				string[] methodArg = ["arg1", "arg2", "arg3"];
+
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
-				string[] methodArg = ["arg1", "arg2", "arg3"];
-
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
@@ -179,14 +179,14 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 
+				string[] methodArg = ["arg1", "arg2", "arg3"];
+
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
-				string[] methodArg = ["arg1", "arg2", "arg3"];
-
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
@@ -291,14 +291,14 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 
+				global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
+
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
-				global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
-
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
@@ -403,14 +403,14 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 
+				global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
+
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 				new global::TUnit.TestProject.ArgsAsArrayTests()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
-				global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
-
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{
@@ -520,15 +520,15 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
-				new global::TUnit.TestProject.ArgsAsArrayTests()
-				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 				int methodArg = 1;
 				global::System.Collections.Generic.IEnumerable<string> methodArg1 = ["arg1", "arg2", "arg3"];
 
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
+				new global::TUnit.TestProject.ArgsAsArrayTests()
+				, sessionId, testBuilderContext);
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 				{

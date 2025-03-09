@@ -66,9 +66,9 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 
 				new global::TUnit.TestProject.AbstractTests.ConcreteClass2()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
 				{
@@ -172,9 +172,9 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 
 				new global::TUnit.TestProject.AbstractTests.ConcreteClass2()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
 				{
@@ -277,9 +277,9 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => 
 				new global::TUnit.TestProject.AbstractTests.ConcreteClass1()
 				, sessionId, testBuilderContext);
-				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass1>
 				{
