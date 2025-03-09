@@ -39,6 +39,8 @@ public static class GenericTestInvocationWriter
         
         sourceBuilder.WriteLine(
             "var resettableClassFactory = resettableClassFactoryDelegate();");
+        
+        sourceBuilder.WriteLine("classInstance = resettableClassFactory.Value;");
 
         sourceBuilder.WriteLine();
         
