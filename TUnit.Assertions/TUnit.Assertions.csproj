@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <IsLibraryPackage>true</IsLibraryPackage>
-      <LangVersion>preview</LangVersion>
+        <IsLibraryPackage>true</IsLibraryPackage>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,39 +15,43 @@
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Assertions.Analyzers.CodeFixers\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.Analyzers.CodeFixers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
-<ItemGroup>
-  <Compile Remove="AssertConditions\Generic\EquatableAssertCondition.cs" />
-</ItemGroup>
+    <ItemGroup>
+        <Compile Remove="AssertConditions\Generic\EquatableAssertCondition.cs" />
+    </ItemGroup>
 
-<ItemGroup>
-  <Compile Include="..\TUnit.Engine\PolyfillExtensions.cs" Link="PolyfillExtensions.cs" />
-  <Compile Include="..\TUnit.Engine\Verify.cs" Link="Verify.cs" />
-</ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\TUnit.Engine\PolyfillExtensions.cs" Link="PolyfillExtensions.cs" />
+        <Compile Include="..\TUnit.Engine\Verify.cs" Link="Verify.cs" />
+    </ItemGroup>
 
-<ItemGroup>
-    <TfmSpecificPackageFile Include="TUnit.Assertions.props">
-        <Pack>true</Pack>
-        <PackagePath>$(BuildTransitivePath)</PackagePath>
-    </TfmSpecificPackageFile>
+    <ItemGroup>
+        <TfmSpecificPackageFile Include="TUnit.Assertions.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
 
-    <TfmSpecificPackageFile Include="TUnit.Assertions.props">
-        <Pack>true</Pack>
-        <PackagePath>$(BuildPath)</PackagePath>
-    </TfmSpecificPackageFile>
+        <TfmSpecificPackageFile Include="TUnit.Assertions.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </TfmSpecificPackageFile>
 
-    <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
-        <Pack>true</Pack>
-        <PackagePath>$(BuildTransitivePath)</PackagePath>
-    </TfmSpecificPackageFile>
+        <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
 
-    <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
-        <Pack>true</Pack>
-        <PackagePath>$(BuildPath)</PackagePath>
-    </TfmSpecificPackageFile>
-</ItemGroup>
+        <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </TfmSpecificPackageFile>
+    </ItemGroup>
 
-<ItemGroup>
-  <PackageReference Remove="Backport.System.Threading.Lock" />
-</ItemGroup>
+    <ItemGroup>
+        <PackageReference Remove="Backport.System.Threading.Lock" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="System.Collections.Immutable" />
+    </ItemGroup>
 
 </Project>

@@ -56,6 +56,7 @@
     <PackageVersion Include="Sourcy.DotNet" Version="0.7.6" />
     <PackageVersion Include="Sourcy.Git" Version="0.7.6" />
     <PackageVersion Include="StreamJsonRpc" Version="2.21.10" />
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.2" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.2" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.0" />

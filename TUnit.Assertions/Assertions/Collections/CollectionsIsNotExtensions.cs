@@ -18,7 +18,7 @@ public static class CollectionsIsNotExtensions
     
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsNotEmpty<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
     {
-        return valueSource.RegisterAssertion(new EnumerableCountNotEqualToExpectedValueAssertCondition<TInner>(0)
+        return valueSource.RegisterAssertion(new EnumerableCountNotEqualToExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(0)
             , []);
     }
 }
