@@ -1516,5 +1516,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0054Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwriting the Console writer can break TUnit logging..
+        /// </summary>
+        internal static string TUnit0055Description {
+            get {
+                return ResourceManager.GetString("TUnit0055Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwriting the Console writer can break TUnit logging.
+        /// </summary>
+        internal static string TUnit0055MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0055MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not overwrite the Console writer.
+        /// </summary>
+        internal static string TUnit0055Title {
+            get {
+                return ResourceManager.GetString("TUnit0055Title", resourceCulture);
+            }
+        }
     }
 }
