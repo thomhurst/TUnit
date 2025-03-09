@@ -10,6 +10,7 @@ public static class NewClassWriter
         if (argumentsContainer is ClassConstructorAttributeContainer classConstructorAttributeContainer)
         {
             sourceCodeWriter.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>(sessionId, testBuilderContext);");
+            sourceCodeWriter.WriteLine("classInstance = resettableClassFactoryDelegate().Value;");
             return;
         }
         
@@ -20,5 +21,7 @@ public static class NewClassWriter
         classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
         
         sourceCodeWriter.WriteLine(", sessionId, testBuilderContext);");
+        
+        sourceCodeWriter.WriteLine("classInstance = resettableClassFactoryDelegate().Value;");
     }
 }

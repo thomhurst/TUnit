@@ -86,12 +86,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-				string methodArg = "";
+				global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 				new global::TUnit.TestProject.StringArgumentTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
+				string methodArg = "";
+
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -182,12 +184,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-					string methodArg = @"\";
+					global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 					new global::TUnit.TestProject.StringArgumentTests()
 					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
+					string methodArg = @"\";
+
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -278,12 +282,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-						string methodArg = @"\t";
+						global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 						new global::TUnit.TestProject.StringArgumentTests()
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
+						string methodArg = @"\t";
+
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -374,12 +380,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-							string methodArg = "\t";
+							global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 							new global::TUnit.TestProject.StringArgumentTests()
 							, sessionId, testBuilderContext);
+							classInstance = resettableClassFactoryDelegate().Value;
+							string methodArg = "\t";
+
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -470,12 +478,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-								string methodArg = "\\t";
+								global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 								new global::TUnit.TestProject.StringArgumentTests()
 								, sessionId, testBuilderContext);
+								classInstance = resettableClassFactoryDelegate().Value;
+								string methodArg = "\\t";
+
 
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -566,12 +576,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-									string methodArg = "\\\t";
+									global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 									new global::TUnit.TestProject.StringArgumentTests()
 									, sessionId, testBuilderContext);
+									classInstance = resettableClassFactoryDelegate().Value;
+									string methodArg = "\\\t";
+
 
 									var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -662,12 +674,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 										var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-										string methodArg = "\\\\t";
+										global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 										var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 										new global::TUnit.TestProject.StringArgumentTests()
 										, sessionId, testBuilderContext);
+										classInstance = resettableClassFactoryDelegate().Value;
+										string methodArg = "\\\\t";
+
 
 										var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -758,15 +772,17 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+											global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
+											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
+											new global::TUnit.TestProject.StringArgumentTests()
+											, sessionId, testBuilderContext);
+											classInstance = resettableClassFactoryDelegate().Value;
 											string methodArg = """
         Hello
         World
         """;
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
-											new global::TUnit.TestProject.StringArgumentTests()
-											, sessionId, testBuilderContext);
 
 											var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -888,12 +904,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-				string methodArg = "";
+				global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 				new global::TUnit.TestProject.StringArgumentTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
+				string methodArg = "";
+
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -980,12 +998,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-					string methodArg = @"\";
+					global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 					new global::TUnit.TestProject.StringArgumentTests()
 					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
+					string methodArg = @"\";
+
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1072,12 +1092,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-						string methodArg = @"\t";
+						global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 						new global::TUnit.TestProject.StringArgumentTests()
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
+						string methodArg = @"\t";
+
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1164,12 +1186,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-							string methodArg = "\t";
+							global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 							new global::TUnit.TestProject.StringArgumentTests()
 							, sessionId, testBuilderContext);
+							classInstance = resettableClassFactoryDelegate().Value;
+							string methodArg = "\t";
+
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1256,12 +1280,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-								string methodArg = "\\t";
+								global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 								new global::TUnit.TestProject.StringArgumentTests()
 								, sessionId, testBuilderContext);
+								classInstance = resettableClassFactoryDelegate().Value;
+								string methodArg = "\\t";
+
 
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1348,12 +1374,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-									string methodArg = "\\\t";
+									global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 									new global::TUnit.TestProject.StringArgumentTests()
 									, sessionId, testBuilderContext);
+									classInstance = resettableClassFactoryDelegate().Value;
+									string methodArg = "\\\t";
+
 
 									var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1440,12 +1468,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 										var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-										string methodArg = "\\\\t";
+										global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 										var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 										new global::TUnit.TestProject.StringArgumentTests()
 										, sessionId, testBuilderContext);
+										classInstance = resettableClassFactoryDelegate().Value;
+										string methodArg = "\\\\t";
+
 
 										var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1532,12 +1562,14 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-											string methodArg = null;
+											global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 
 											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.StringArgumentTests>(() => 
 											new global::TUnit.TestProject.StringArgumentTests()
 											, sessionId, testBuilderContext);
+											classInstance = resettableClassFactoryDelegate().Value;
+											string methodArg = null;
+
 
 											var resettableClassFactory = resettableClassFactoryDelegate();
 

@@ -80,18 +80,20 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
+				new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod())
 				{
 					testMethodDataIndex++;
-
 					var methodData = methodDataAccessor;
 					var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(methodData);
 					int methodArg = methodArgTuples.Item1;
 					string methodArg1 = methodArgTuples.Item2;
 					bool methodArg2 = methodArgTuples.Item3;
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
-					new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -183,18 +185,20 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
+
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
+					new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
+					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
 					foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod())
 					{
 						testMethodDataIndex++;
-
 						var methodData = methodDataAccessor;
 						var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(methodData);
 						int methodArg = methodArgTuples.Item1;
 						string methodArg1 = methodArgTuples.Item2;
 						bool methodArg2 = methodArgTuples.Item3;
-						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
-						new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
-						, sessionId, testBuilderContext);
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 

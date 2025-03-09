@@ -58,10 +58,12 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -159,10 +161,12 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -260,10 +264,12 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -361,10 +367,12 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -462,10 +470,12 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -563,10 +573,12 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => 
 				new global::TUnit.TestProject.PriorityFilteringTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Models.Arguments;
@@ -72,8 +73,10 @@ public static class GenericTestInvocationWriter
         var methodVariablesIndex = 0;
         var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
+        
+        sourceBuilder.WriteLine($"{testSourceDataModel.TestClass.GloballyQualified()}? classInstance = null;");;
 
-        if (testSourceDataModel.MethodArguments is MethodDataSourceAttributeContainer { IsStatic: false })
+        if (NeedsClassInstantiatedForMethodData(testSourceDataModel))
         {
             // Instance method data sources need to access the class, so we need to tweak the ordering of how they're generated
             // We don't want to do this always because the standard ordering is better at reducing data re-use or leakage between tests
@@ -99,5 +102,22 @@ public static class GenericTestInvocationWriter
         testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
+    }
+
+    private static bool NeedsClassInstantiatedForMethodData(TestSourceDataModel testSourceDataModel)
+    {
+        if (testSourceDataModel.MethodArguments is MethodDataSourceAttributeContainer { IsStatic: false })
+        {
+            return true;
+        }
+        
+        if (testSourceDataModel.MethodArguments is DataSourceGeneratorContainer dataSourceGeneratorContainer
+            && dataSourceGeneratorContainer.AttributeData.AttributeClass?.GloballyQualified() == "global::TUnit.Core.MatrixDataSourceAttribute"
+            && dataSourceGeneratorContainer.TestMethod.Parameters.Any(x => x.GetAttributes().Select(a => a.AttributeClass?.GloballyQualifiedNonGeneric()).Contains("global::TUnit.Core.MatrixMethodAttribute")))
+        {
+            return true;
+        }
+
+        return false;
     }
 }

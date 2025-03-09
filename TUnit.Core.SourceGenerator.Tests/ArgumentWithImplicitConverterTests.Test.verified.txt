@@ -72,12 +72,14 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-				global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(1);
+				global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
 				new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
+				global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(1);
+
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -159,12 +161,14 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-					global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(2);
+					global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
 					new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
 					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
+					global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(2);
+
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -246,12 +250,14 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-						global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(3);
+						global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
 						new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
+						global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(3);
+
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -363,12 +369,14 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-				global::TUnit.TestProject.ImplicitInteger methodArg = 1;
+				global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
 				new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
+				global::TUnit.TestProject.ImplicitInteger methodArg = 1;
+
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -450,12 +458,14 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-					global::TUnit.TestProject.ImplicitInteger methodArg = 2;
+					global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
 					new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
 					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
+					global::TUnit.TestProject.ImplicitInteger methodArg = 2;
+
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -537,12 +547,14 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-						global::TUnit.TestProject.ImplicitInteger methodArg = 3;
+						global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
 						new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
+						global::TUnit.TestProject.ImplicitInteger methodArg = 3;
+
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 

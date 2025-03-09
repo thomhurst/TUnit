@@ -86,11 +86,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
 
-				int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
 				new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
+				int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T();
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -183,11 +185,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
 
-					int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
 					new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
 					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
+					int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()();
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -280,14 +284,16 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+
+						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
+						new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
+						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
 						foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT())
 						{
 							testMethodDataIndex++;
-
 							var methodData = methodDataAccessor;
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
-							new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
-							, sessionId, testBuilderContext);
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -381,14 +387,16 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+							global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
+							new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
+							, sessionId, testBuilderContext);
+							classInstance = resettableClassFactoryDelegate().Value;
 							foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT())
 							{
 								testMethodDataIndex++;
-
 								var methodData = methodDataAccessor();
-								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
-								new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
-								, sessionId, testBuilderContext);
 
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -482,14 +490,16 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 
 								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+								global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+
+								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
+								new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
+								, sessionId, testBuilderContext);
+								classInstance = resettableClassFactoryDelegate().Value;
 								foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT())
 								{
 									testMethodDataIndex++;
-
 									var methodData = methodDataAccessor;
-									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
-									new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
-									, sessionId, testBuilderContext);
 
 									var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -583,14 +593,16 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 
 									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+									global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+
+									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
+									new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
+									, sessionId, testBuilderContext);
+									classInstance = resettableClassFactoryDelegate().Value;
 									foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT())
 									{
 										testMethodDataIndex++;
-
 										var methodData = methodDataAccessor();
-										var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
-										new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests()
-										, sessionId, testBuilderContext);
 
 										var resettableClassFactory = resettableClassFactoryDelegate();
 

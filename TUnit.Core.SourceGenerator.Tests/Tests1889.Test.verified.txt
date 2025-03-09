@@ -65,10 +65,12 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 				new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -147,6 +149,12 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
+
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
+					new global::TUnit.TestProject.Bugs._1889.DerivedTest()
+					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
 					var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -161,6 +169,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
 					};
 					var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -171,12 +180,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 					{
 						testMethodDataIndex++;
-
 						var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 						bool methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[0]);
-						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
-						new global::TUnit.TestProject.Bugs._1889.DerivedTest()
-						, sessionId, testBuilderContext);
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -256,12 +261,14 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-						bool methodArg = false;
+						global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 						new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
+						bool methodArg = false;
+
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -340,12 +347,14 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-							bool methodArg = true;
+							global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 							new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 							, sessionId, testBuilderContext);
+							classInstance = resettableClassFactoryDelegate().Value;
+							bool methodArg = true;
+
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 

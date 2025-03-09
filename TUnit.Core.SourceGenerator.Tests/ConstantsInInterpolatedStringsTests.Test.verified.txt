@@ -65,12 +65,14 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-				string methodArg = $"{"Value"}1";
+				global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests>(() => 
 				new global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
+				string methodArg = $"{"Value"}1";
+
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 

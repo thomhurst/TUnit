@@ -80,6 +80,12 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.AutoDataTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AutoDataTests>(() => 
+				new global::TUnit.TestProject.AutoDataTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -109,6 +115,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.TestProject.Attributes.AutoDataAttribute();
 
@@ -119,15 +126,11 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
 					int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
 					double methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<double>(methodArgGeneratedData[2]);
 					bool methodArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[3]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AutoDataTests>(() => 
-					new global::TUnit.TestProject.AutoDataTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 

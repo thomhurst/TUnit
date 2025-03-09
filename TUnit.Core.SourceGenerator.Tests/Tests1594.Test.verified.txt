@@ -64,6 +64,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.Bugs._1594.MyTests? classInstance = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -78,6 +79,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>()
 				{
@@ -96,6 +98,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1594.MyTests>(() => 
 						new global::TUnit.TestProject.Bugs._1594.MyTests(classArgGeneratedData)
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 

@@ -84,6 +84,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -117,6 +123,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -127,14 +134,10 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
 					int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
 					bool methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[2]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -267,6 +270,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -308,6 +317,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -318,15 +328,11 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
 					int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
 					int methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[2]);
 					bool methodArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[3]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -443,6 +449,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -468,6 +480,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -478,13 +491,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
 					global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(methodArgGeneratedData[1]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -598,6 +607,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -620,6 +635,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -630,13 +646,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
 					bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -753,6 +765,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -778,6 +796,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -788,13 +807,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
 					bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -911,6 +926,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -936,6 +957,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -946,13 +968,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					OneOf<global::TUnit.TestProject.TestEnum, TestEnum2> methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>(methodArgGeneratedData[0]);
 					bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1072,6 +1090,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+					new global::TUnit.TestProject.MatrixTests()
+					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
 					var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1100,6 +1124,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								},
 							],
 							TestSessionId = sessionId,
+							TestClassInstance = classInstance,
 						};
 						var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1110,13 +1135,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 						{
 							testMethodDataIndex++;
-
 							var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 							global::TUnit.TestProject.MatrixTests.CountToTenEnum methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MatrixTests.CountToTenEnum>(methodArgGeneratedData[0]);
 							bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-							new global::TUnit.TestProject.MatrixTests()
-							, sessionId, testBuilderContext);
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1225,6 +1246,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1242,6 +1269,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1252,12 +1280,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1366,6 +1390,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1383,6 +1413,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1393,12 +1424,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1507,6 +1534,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1524,6 +1557,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1534,12 +1568,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1648,6 +1678,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1665,6 +1701,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1675,12 +1712,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1800,6 +1833,12 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MatrixTests? classInstance = null;
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
+				new global::TUnit.TestProject.MatrixTests()
+				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1825,6 +1864,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1835,13 +1875,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
 					int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
-					new global::TUnit.TestProject.MatrixTests()
-					, sessionId, testBuilderContext);
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 

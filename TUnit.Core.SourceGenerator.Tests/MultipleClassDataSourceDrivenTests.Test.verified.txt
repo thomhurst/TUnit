@@ -84,6 +84,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests? classInstance = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -118,6 +119,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
 				{
@@ -142,6 +144,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(() => 
 						new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(classArg, classArg1, classArg2, classArg3, classArg4)
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -266,6 +269,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests? classInstance = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -300,6 +304,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
 				{
@@ -324,6 +329,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(() => 
 						new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(classArg, classArg1, classArg2, classArg3, classArg4)
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 

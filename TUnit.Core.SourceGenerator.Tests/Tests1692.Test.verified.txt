@@ -70,12 +70,14 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-				string methodArg = (string)(null);
+				global::TUnit.TestProject.Bugs._1692.Tests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1692.Tests>(() => 
 				new global::TUnit.TestProject.Bugs._1692.Tests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
+				string methodArg = (string)(null);
+
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -156,12 +158,14 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-					string methodArg = null;
+					global::TUnit.TestProject.Bugs._1692.Tests? classInstance = null;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1692.Tests>(() => 
 					new global::TUnit.TestProject.Bugs._1692.Tests()
 					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
+					string methodArg = null;
+
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 

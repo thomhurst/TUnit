@@ -127,6 +127,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.PropertySetterTests? classInstance = null;
 				string propertyArg = "1";
 
 				string propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
@@ -148,6 +149,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				}).ElementAtOrDefault(0)();
 
 				var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -171,6 +173,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
 					}).ElementAtOrDefault(0)();
 
 					var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -194,6 +197,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								},
 							],
 							TestSessionId = sessionId,
+							TestClassInstance = classInstance,
 						}).ElementAtOrDefault(0)();
 
 						var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -218,6 +222,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									},
 								],
 								TestSessionId = sessionId,
+								TestClassInstance = classInstance,
 							}).ElementAtOrDefault(0)();
 
 							var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
@@ -241,6 +246,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 										},
 									],
 									TestSessionId = sessionId,
+									TestClassInstance = classInstance,
 								}).ElementAtOrDefault(0)();
 
 
@@ -255,6 +261,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									Property6 = propertyArg5,
 								}
 								, sessionId, testBuilderContext);
+								classInstance = resettableClassFactoryDelegate().Value;
 								global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;
 
 								var resettableClassFactory = resettableClassFactoryDelegate();

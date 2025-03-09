@@ -65,12 +65,14 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-
-				string methodArg = "TestName";
+				global::TUnit.TestProject.NameOfArgumentTests? classInstance = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NameOfArgumentTests>(() => 
 				new global::TUnit.TestProject.NameOfArgumentTests()
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
+				string methodArg = "TestName";
+
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 

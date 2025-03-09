@@ -90,12 +90,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 				int classArg = global::TUnit.TestProject.CommonTestData.One();
 
 				int methodArg = global::TUnit.TestProject.CommonTestData.One();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 				new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 				, sessionId, testBuilderContext);
+				classInstance = resettableClassFactoryDelegate().Value;
 
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -189,12 +191,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 					int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
 					int methodArg = global::TUnit.TestProject.CommonTestData.One();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 					new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 					, sessionId, testBuilderContext);
+					classInstance = resettableClassFactoryDelegate().Value;
 
 					var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -288,12 +292,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 						int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
 						int methodArg = global::TUnit.TestProject.CommonTestData.One();
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 						new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -387,12 +393,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+							global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 							int classArg = global::TUnit.TestProject.CommonTestData.One();
 
 							int methodArg = global::TUnit.TestProject.CommonTestData.Two();
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 							new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 							, sessionId, testBuilderContext);
+							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -486,12 +494,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+								global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 								int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
 								int methodArg = global::TUnit.TestProject.CommonTestData.Two();
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 								new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 								, sessionId, testBuilderContext);
+								classInstance = resettableClassFactoryDelegate().Value;
 
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -585,12 +595,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+									global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 									int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
 									int methodArg = global::TUnit.TestProject.CommonTestData.Two();
 									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 									new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 									, sessionId, testBuilderContext);
+									classInstance = resettableClassFactoryDelegate().Value;
 
 									var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -684,12 +696,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 										var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+										global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 										int classArg = global::TUnit.TestProject.CommonTestData.One();
 
 										int methodArg = global::TUnit.TestProject.CommonTestData.Three();
 										var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 										new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 										, sessionId, testBuilderContext);
+										classInstance = resettableClassFactoryDelegate().Value;
 
 										var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -783,12 +797,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+											global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 											int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
 											int methodArg = global::TUnit.TestProject.CommonTestData.Three();
 											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 											new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 											, sessionId, testBuilderContext);
+											classInstance = resettableClassFactoryDelegate().Value;
 
 											var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -882,12 +898,14 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 
 												var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 												var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+												global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 												int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
 												int methodArg = global::TUnit.TestProject.CommonTestData.Three();
 												var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
 												new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)
 												, sessionId, testBuilderContext);
+												classInstance = resettableClassFactoryDelegate().Value;
 
 												var resettableClassFactory = resettableClassFactoryDelegate();
 

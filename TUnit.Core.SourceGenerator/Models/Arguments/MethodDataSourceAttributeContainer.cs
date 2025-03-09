@@ -150,15 +150,15 @@ public record MethodDataSourceAttributeContainer(
             return $"{Type.GloballyQualified()}.{MethodName}({ArgumentsExpression})";
         }
         
-        if (SymbolEqualityComparer.Default.Equals(Type, TestClassType) && ArgumentsType != ArgumentsType.Method)
-        {
-            return $"resettableClassFactoryDelegate().Value.{MethodName}({ArgumentsExpression})";
-        }
-
         if (Type is INamedTypeSymbol namedTypeSymbol &&
             namedTypeSymbol.Constructors.Any(x => x.Parameters.IsDefaultOrEmpty))
         {
             return $"new {Type.GloballyQualified()}().{MethodName}({ArgumentsExpression})";
+        }
+        
+        if (SymbolEqualityComparer.Default.Equals(Type, TestClassType) && ArgumentsType == ArgumentsType.Method)
+        {
+            return $"classInstance.{MethodName}({ArgumentsExpression})";
         }
         
         throw new ArgumentException("Only test arguments can reference non-static MethodDataSources");

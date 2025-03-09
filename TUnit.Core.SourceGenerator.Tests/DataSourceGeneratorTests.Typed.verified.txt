@@ -85,6 +85,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -109,6 +110,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
@@ -133,6 +135,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
 					};
 					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
 
@@ -153,6 +156,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 						new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -250,6 +254,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
 					var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -274,6 +279,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
 					};
 					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
@@ -298,6 +304,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								},
 							],
 							TestSessionId = sessionId,
+							TestClassInstance = classInstance,
 						};
 						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
 
@@ -318,6 +325,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 							new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 							, sessionId, testBuilderContext);
+							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -454,6 +462,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -478,6 +487,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
@@ -512,6 +522,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
 					};
 					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
@@ -536,6 +547,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 						new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -643,6 +655,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
 					var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -667,6 +680,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
 					};
 					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
@@ -701,6 +715,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								},
 							],
 							TestSessionId = sessionId,
+							TestClassInstance = classInstance,
 						};
 						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
@@ -725,6 +740,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 							new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 							, sessionId, testBuilderContext);
+							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -861,6 +877,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -885,6 +902,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						},
 					],
 					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
 				};
 				var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
@@ -919,6 +937,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
 					};
 					var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
@@ -943,6 +962,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 						new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 						, sessionId, testBuilderContext);
+						classInstance = resettableClassFactoryDelegate().Value;
 
 						var resettableClassFactory = resettableClassFactoryDelegate();
 
@@ -1050,6 +1070,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
 					var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -1074,6 +1095,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
 					};
 					var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
@@ -1108,6 +1130,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								},
 							],
 							TestSessionId = sessionId,
+							TestClassInstance = classInstance,
 						};
 						var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
@@ -1132,6 +1155,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
 							new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2)
 							, sessionId, testBuilderContext);
+							classInstance = resettableClassFactoryDelegate().Value;
 
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
