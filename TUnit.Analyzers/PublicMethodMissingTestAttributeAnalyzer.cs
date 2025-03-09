@@ -28,7 +28,9 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
 
         var methods = namedTypeSymbol.GetMembers().OfType<IMethodSymbol>().ToArray();
         
-        if (!methods.Any(x => x.IsTestMethod(context.Compilation)))
+        var testMethods = methods.Where(x => x.IsTestMethod(context.Compilation)).ToArray();
+        
+        if (!testMethods.Any())
         {
             return;
         }
@@ -42,10 +44,26 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
                      .Where(x => !x.IsTestMethod(context.Compilation))
                      .Where(x => !x.IsStandardHookMethod(context.Compilation, out _, out _, out _))
                      .Where(x => !IsDisposableDispose(x))
-                     .Where(x => !IsAsyncDisposableDispose(x)))
+                     .Where(x => !IsAsyncDisposableDispose(x))
+                     .Where(x => !IsInitializeAsync(x))
+                     .Where(x => !IsTestDataSource(x, testMethods)))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.PublicMethodMissingTestAttribute, method.Locations.FirstOrDefault()));
         }
+    }
+
+    private bool IsTestDataSource(IMethodSymbol methodSymbol, IMethodSymbol[] testMethods)
+    {
+        var attributes = testMethods.SelectMany(x => x.GetAttributes())
+            .Concat(testMethods.SelectMany(x => x.Parameters).SelectMany(x => x.GetAttributes()));
+        
+        if(attributes.Any(x => !x.ConstructorArguments.IsDefaultOrEmpty 
+                               && x.ConstructorArguments.Any(a => a is { Kind: TypedConstantKind.Primitive, Value: string s } && s == methodSymbol.Name)))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private bool IsDisposableDispose(IMethodSymbol method)
@@ -57,5 +75,10 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
     private bool IsAsyncDisposableDispose(IMethodSymbol method)
     {
         return method is { ReturnsVoid: false, Name: "DisposeAsync" };
+    }
+    
+    private bool IsInitializeAsync(IMethodSymbol method)
+    {
+        return method is { ReturnsVoid: false, Name: "InitializeAsync" };
     }
 }
