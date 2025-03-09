@@ -185,12 +185,12 @@ public class TestsGenerator : IIncrementalGenerator
         {
             var descriptor = new DiagnosticDescriptor(id: "TUnit0000",
                 title: "Error Generating Source",
-                messageFormat: "{0} {1}",
+                messageFormat: "{0}",
                 category: "SourceGenerator",
                 DiagnosticSeverity.Error,
                 isEnabledByDefault: true);
                 
-            context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.Message, ex.StackTrace));
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));
         }
     }
 }

@@ -197,12 +197,12 @@ public class TestHooksGenerator : IIncrementalGenerator
         {
             var descriptor = new DiagnosticDescriptor(id: "TUnit0000",
                 title: "Error Generating Source",
-                messageFormat: "{0} {1}",
+                messageFormat: "{0}",
                 category: "SourceGenerator",
                 DiagnosticSeverity.Error,
                 isEnabledByDefault: true);
                 
-            productionContext.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.Message, ex.StackTrace));
+            productionContext.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));
         }
     }
 

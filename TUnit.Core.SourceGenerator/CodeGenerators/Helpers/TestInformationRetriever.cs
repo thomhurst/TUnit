@@ -21,7 +21,7 @@ public static class TestInformationRetriever
     {
         var stringBuilder = new StringBuilder();
 
-        if (testGenerationContext.ClassArguments is DataAttributeContainer { Attribute.AttributeClass: not null } classDataAttributeContainer)
+        if (testGenerationContext.ClassArguments is DataSourceAttributeContainer { Attribute.AttributeClass: not null } classDataAttributeContainer)
         {
             stringBuilder.Append($"{classDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.ClassDataIndex}}}:");
         }
@@ -43,12 +43,12 @@ public static class TestInformationRetriever
             stringBuilder.Append($"CL-CCA{classLevelClassConstructorAttribute.AttributeIndex}:");
         }
         
-        if (testGenerationContext.ClassArguments is GeneratedArgumentsContainer classLevelGeneratedArgumentsContainer)
+        if (testGenerationContext.ClassArguments is DataSourceGeneratorContainer classLevelGeneratedArgumentsContainer)
         {
             stringBuilder.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
         
-        if (testGenerationContext.TestArguments is DataAttributeContainer { Attribute.AttributeClass: not null } testMethodDataAttributeContainer)
+        if (testGenerationContext.TestArguments is DataSourceAttributeContainer { Attribute.AttributeClass: not null } testMethodDataAttributeContainer)
         {
             stringBuilder.Append($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
         }
@@ -65,7 +65,7 @@ public static class TestInformationRetriever
             stringBuilder.Append($"TL-ARGS{testLevelArgumentsContainer.AttributeIndex}:");
         }
         
-        if (testGenerationContext.TestArguments is GeneratedArgumentsContainer testLevelGeneratedArgumentsContainer)
+        if (testGenerationContext.TestArguments is DataSourceGeneratorContainer testLevelGeneratedArgumentsContainer)
         {
             stringBuilder.Append($"TL-GAC{testLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }

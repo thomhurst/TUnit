@@ -44,7 +44,7 @@ public static class MethodDataSourceRetriever
         return new MethodDataSourceAttributeContainer
         (
             context.SemanticModel.Compilation,
-            TestClassTypeName: namedTypeSymbol.GloballyQualified(),
+            TestClassType: namedTypeSymbol,
             ArgumentsType: argumentsType,
             TypesToInject: types,
             IsExpandableEnumerable: isExpandableEnumerable,
@@ -52,7 +52,7 @@ public static class MethodDataSourceRetriever
             IsExpandableTuples: isExpandableTuples,
             IsStatic: isStatic,
             MethodName: methodName,
-            TypeName: type.GloballyQualified(),
+            Type: type,
             MethodReturnType: dataSourceMethod.ReturnType,
             ArgumentsExpression: argumentsExpression
         )

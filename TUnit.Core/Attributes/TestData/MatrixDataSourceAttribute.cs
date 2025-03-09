@@ -21,7 +21,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
         var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
         ? dataGeneratorMetadata.TestInformation.Attributes : dataGeneratorMetadata.TestInformation.Class.Attributes);
         
-        foreach (var row in GetMatrixValues(parameterInformation.Select(GetAllArguments)))
+        foreach (var row in GetMatrixValues(parameterInformation.Select(p => GetAllArguments(dataGeneratorMetadata, p))))
         {
             if (exclusions.Any(e => e.SequenceEqual(row)))
             {
@@ -39,13 +39,16 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
             .ToArray();
     }
 
-    private IReadOnlyList<object?> GetAllArguments(SourceGeneratedParameterInformation sourceGeneratedParameterInformation)
+    private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
+        SourceGeneratedParameterInformation sourceGeneratedParameterInformation)
     {
         var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault();
 
         var type = sourceGeneratedParameterInformation.Type;
 
-        if (matrixAttribute is null or { Objects.Length: 0 })
+        var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata.TestClassInstance);
+        
+        if (matrixAttribute is null || objects is { Length: 0 })
         {
             if (type == typeof(bool))
             {
@@ -59,7 +62,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
             }
         }
 
-        if (type.IsEnum && matrixAttribute?.Objects is null or { Length: 0 })
+        if (type.IsEnum && objects is null or { Length: 0 })
         {
 #if NET
             return Enum.GetValuesAsUnderlyingType(type)
@@ -76,10 +79,10 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 
         if (matrixAttribute?.Excluding is not null)
         {
-            return matrixAttribute.Objects.Except(matrixAttribute.Excluding).ToArray();
+            return objects?.Except(matrixAttribute.Excluding).ToArray() ?? [];
         }
         
-        return matrixAttribute!.Objects;
+        return objects ?? [];
     }
     
     private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];

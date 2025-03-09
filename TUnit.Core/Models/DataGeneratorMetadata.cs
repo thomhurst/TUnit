@@ -10,4 +10,5 @@ public record DataGeneratorMetadata
     public required SourceGeneratedMethodInformation TestInformation { get; init; }
     public required DataGeneratorType Type { get; init; }
     public required string TestSessionId { get; init; }
+    public required object? TestClassInstance { get; init; }
 }
