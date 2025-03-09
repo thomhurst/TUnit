@@ -11,7 +11,7 @@ public static partial class HasExtensions
 {
     public static SingleItemAssertionBuilderWrapper<IEnumerable<TInner>, TInner> HasSingleItem<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
     {
-        var invokableValueAssertionBuilder = valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<TInner>(1), []);
+        var invokableValueAssertionBuilder = valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(1), []);
         
         return new SingleItemAssertionBuilderWrapper<IEnumerable<TInner>, TInner>(invokableValueAssertionBuilder);
     }
@@ -23,12 +23,12 @@ public static partial class HasExtensions
     
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, IEqualityComparer<TInner> equalityComparer) 
     {
-        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<TInner>(equalityComparer), []);
+        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(equalityComparer), []);
     }
     
-    public static EnumerableCount<TInner> HasCount<TInner>(this IValueSource<IEnumerable<TInner>> valueSource) 
+    public static EnumerableCount<IEnumerable<TInner>, TInner> HasCount<TInner>(this IValueSource<IEnumerable<TInner>> valueSource) 
     {
         valueSource.AppendExpression("HasCount()");
-        return new EnumerableCount<TInner>(valueSource);
+        return new EnumerableCount<IEnumerable<TInner>, TInner>(valueSource);
     }
 }

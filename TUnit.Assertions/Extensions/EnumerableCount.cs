@@ -6,15 +6,15 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
-public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSource)
+public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource) where TActual : IEnumerable<TInner>
 {
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> EqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public InvokableValueAssertionBuilder<TActual> EqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected, (enumerable, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(IEnumerable<TInner>).Name} is null";
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
 
@@ -26,12 +26,12 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Empty =>
-        valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(0, (enumerable, _, self) =>
+    public InvokableValueAssertionBuilder<TActual> Empty =>
+        valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(0, (enumerable, _, self) =>
                 {
                     if (enumerable is null)
                     {
-                        self.OverriddenMessage = $"{self.ActualExpression ?? typeof(IEnumerable<TInner>).Name} is null";
+                        self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
                 
@@ -42,14 +42,14 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
                 $"to be empty")
         , []);
     
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> GreaterThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public InvokableValueAssertionBuilder<TActual> GreaterThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected,
             (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(IEnumerable<TInner>).Name} is null";
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -61,13 +61,13 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public InvokableValueAssertionBuilder<TActual> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected, (enumerable, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(IEnumerable<TInner>).Name} is null";
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -79,13 +79,13 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> LessThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public InvokableValueAssertionBuilder<TActual> LessThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected, (enumerable, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(IEnumerable<TInner>).Name} is null";
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -97,13 +97,13 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> LessThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public InvokableValueAssertionBuilder<TActual> LessThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected, (enumerable, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(IEnumerable<TInner>).Name} is null";
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -115,15 +115,15 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
             , [doNotPopulateThisValue]);
     }
     
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Negative() => LessThan(0);
+    public InvokableValueAssertionBuilder<TActual> Negative() => LessThan(0);
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> EqualToZero() => EqualTo(0);
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> EqualToOne() => EqualTo(1);
+    public InvokableValueAssertionBuilder<TActual> EqualToZero() => EqualTo(0);
+    public InvokableValueAssertionBuilder<TActual> EqualToOne() => EqualTo(1);
     
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Positive() => GreaterThan(0);
+    public InvokableValueAssertionBuilder<TActual> Positive() => GreaterThan(0);
 
 
-    private int GetCount(IEnumerable<TInner>? actualValue)
+    private int GetCount(TActual? actualValue)
     {
         if (actualValue is ICollection collection)
         {
