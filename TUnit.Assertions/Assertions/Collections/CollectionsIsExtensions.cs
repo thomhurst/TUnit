@@ -98,7 +98,7 @@ public static class CollectionsIsExtensions
         [CallerArgumentExpression(nameof(comparer))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(
-            new EnumerableOrderedByAssertCondition<TInner, TComparisonItem>(comparer, comparisonItemSelector, Order.Ascending), [doNotPopulateThisValue, doNotPopulateThisValue2]);
+            new EnumerableOrderedByAssertCondition<IEnumerable<TInner>, TInner, TComparisonItem>(comparer, comparisonItemSelector, Order.Ascending), [doNotPopulateThisValue, doNotPopulateThisValue2]);
     }
     
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedByDescending<TInner, TComparisonItem>(
@@ -109,7 +109,7 @@ public static class CollectionsIsExtensions
         [CallerArgumentExpression(nameof(comparer))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(
-            new EnumerableOrderedByAssertCondition<TInner, TComparisonItem>(comparer, comparisonItemSelector, Order.Descending), [doNotPopulateThisValue, doNotPopulateThisValue2]);
+            new EnumerableOrderedByAssertCondition<IEnumerable<TInner>, TInner, TComparisonItem>(comparer, comparisonItemSelector, Order.Descending), [doNotPopulateThisValue, doNotPopulateThisValue2]);
     }
 
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsEmpty<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
