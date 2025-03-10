@@ -708,7 +708,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 using TUnit.Core;
                 using System;
 
-                public class MyClass
+                [Arguments(1)]
+                public class MyClass(int _)
                 {
                     [{|#0:MethodDataSource(nameof(One))|}]
                     [Test]
