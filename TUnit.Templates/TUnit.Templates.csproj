@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://www.github.com/thomhurst/TUnit</PackageProjectUrl>
 
     <PackageType>Template</PackageType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
