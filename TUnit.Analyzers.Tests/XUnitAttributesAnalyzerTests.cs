@@ -115,6 +115,110 @@ public class XUnitAttributesAnalyzerTests
                     """
             );
     }
+    
+    [Test]
+    public async Task Collection_Disable_Parallelism_Attributes_Can_Be_Fixed()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                using TUnit.Core;
+                using Xunit;
+
+                public class MyType;
+
+                [{|#1:Collection("MyCollection")|}]
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+
+                [{|#0:CollectionDefinition("MyCollection", DisableParallelization = true)|}]
+                public class MyCollection
+                {
+                }
+                """,
+                [
+                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
+                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(1)
+                ],
+                """
+                using TUnit.Core;
+                using Xunit;
+
+                public class MyType;
+
+                [NotInParallel]
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+
+                [System.Obsolete]
+                public class MyCollection
+                {
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Combined_Collection_Fixture_And_Disable_Parallelism_Attributes_Can_Be_Fixed()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                using TUnit.Core;
+                using Xunit;
+
+                public class MyType;
+
+                [{|#1:Collection("MyCollection")|}]
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+
+                [{|#0:CollectionDefinition("MyCollection", DisableParallelization = true)|}]
+                public class MyCollection : ICollectionFixture<MyType>
+                {
+                }
+                """,
+                [
+                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
+                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(1)
+                ],
+                """
+                using TUnit.Core;
+                using Xunit;
+
+                public class MyType;
+
+                [NotInParallel, ClassDataSource<MyType>(Shared = SharedType.Keyed, Key = "MyCollection")]
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+
+                [System.Obsolete]
+                public class MyCollection : ICollectionFixture<MyType>
+                {
+                }
+                """
+            );
+    }
 
     [TestCase("AssemblyFixture(typeof(Exception))", "ClassDataSource<Exception>(Shared = SharedType.PerAssembly)")]
     [Ignore("TODO")]
