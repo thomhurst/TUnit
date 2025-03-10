@@ -45,7 +45,9 @@ public class XUnitUsingDirectiveCodeFixProvider : CodeFixProvider
         {
             return document;
         }
+
+        var newNode = root.RemoveNode(usingDirectiveSyntax, SyntaxRemoveOptions.KeepNoTrivia);
         
-        return document.WithSyntaxRoot(root.RemoveNode(usingDirectiveSyntax, SyntaxRemoveOptions.KeepNoTrivia)!); 
+        return newNode is not null ? document.WithSyntaxRoot(newNode!) : document;
     }
 }
