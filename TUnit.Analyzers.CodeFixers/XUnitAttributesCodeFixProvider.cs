@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace TUnit.Analyzers.CodeFixers;
 
@@ -49,10 +50,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
 
         var newExpression = await GetNewExpression(document, attributeSyntax);
 
-        if (newExpression != null)
-        {
-            root = root.ReplaceNode(attributeSyntax, newExpression.WithTriviaFrom(attributeSyntax));
-        }
+        root = root.ReplaceNode(attributeSyntax, newExpression);
 
         var compilationUnit = root as CompilationUnitSyntax;
 
@@ -64,55 +62,109 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
         return document.WithSyntaxRoot(root);
     }
 
-    private static async Task<SyntaxNode?> GetNewExpression(Document document, AttributeSyntax attributeSyntax)
+    private static async Task<IEnumerable<SyntaxNode>> GetNewExpression(Document document, AttributeSyntax attributeSyntax)
     {
         var name = attributeSyntax.Name.ToString();
 
         return name switch
         {
-            "Fact" or "FactAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test")),
+            "Fact" or "FactAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test"))],
 
-            "Theory" or "TheoryAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test")),
+            "Theory" or "TheoryAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test"))],
 
-            "Trait" or "TraitAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"),
-                attributeSyntax.ArgumentList),
+            "Trait" or "TraitAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"),
+                attributeSyntax.ArgumentList)],
 
-            "InlineData" or "InlineDataAttribute" => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"),
-                attributeSyntax.ArgumentList),
+            "InlineData" or "InlineDataAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"),
+                attributeSyntax.ArgumentList)],
 
-            "MemberData" or "MemberDataAttribute" => SyntaxFactory.Attribute(
-                SyntaxFactory.IdentifierName("MethodDataSource"), attributeSyntax.ArgumentList),
+            "MemberData" or "MemberDataAttribute" => [SyntaxFactory.Attribute(
+                SyntaxFactory.IdentifierName("MethodDataSource"), attributeSyntax.ArgumentList)],
 
-            "ClassData" or "ClassDataAttribute" => SyntaxFactory.Attribute(
+            "ClassData" or "ClassDataAttribute" => [SyntaxFactory.Attribute(
                 SyntaxFactory.IdentifierName("MethodDataSource"),
                 (attributeSyntax.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(
                     SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal("GetEnumerator"))))),
+                        SyntaxFactory.Literal("GetEnumerator")))))],
 
-            "Collection" or "CollectionAttribute" => SyntaxFactory.Attribute(
-                SyntaxFactory.GenericName(SyntaxFactory.Identifier("ClassDataSource"),
-                    await GetGenericArguments(document, attributeSyntax)),
-                SyntaxFactory.AttributeArgumentList()
-                    .AddArguments(
-                        SyntaxFactory.AttributeArgument(
-                            nameEquals: SyntaxFactory.NameEquals("Shared"),
-                            nameColon: null,
-                            expression: SyntaxFactory.ParseExpression("SharedType.Keyed")
-                        ),
-                        SyntaxFactory.AttributeArgument(
-                            nameEquals: SyntaxFactory.NameEquals("Key"),
-                            nameColon: null,
-                            expression: GetMethodArgumentName(attributeSyntax)
-                        )
-                    )
-            ),
+            "Collection" or "CollectionAttribute" => await ConvertCollection(document, attributeSyntax),
 
-            "CollectionDefinition" or "CollectionDefinitionAttribute" => SyntaxFactory.Attribute(
+            "CollectionDefinition" or "CollectionDefinitionAttribute" => [SyntaxFactory.Attribute(
                 SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
-                    SyntaxFactory.IdentifierName("Obsolete"))),
+                    SyntaxFactory.IdentifierName("Obsolete")))],
 
-            _ => null
+            _ => []
         };
+    }
+
+    private static async Task<IEnumerable<AttributeSyntax>> ConvertCollection(Document document, AttributeSyntax attributeSyntax)
+    {
+        var compilation = await document.Project.GetCompilationAsync();
+
+        if (compilation is null)
+        {
+            return [];
+        }
+        
+        var collectionDefinition = GetCollectionAttribute(compilation, attributeSyntax);
+
+        if (collectionDefinition is null)
+        {
+            return [];
+        }
+
+        var disableParallelism =
+            collectionDefinition.ArgumentList?.Arguments.Any(
+                x => x.NameEquals?.Name.Identifier.Text == "DisableParallelization"
+                     && x.Expression is LiteralExpressionSyntax { Token.ValueText: "true" }) ?? false;
+
+        var attributes = new List<AttributeSyntax>();
+        
+        if (disableParallelism)
+        {
+            attributes.Add(SyntaxFactory.Attribute(SyntaxFactory.ParseName("NotInParallel")));
+        }
+        
+        var baseListSyntax = collectionDefinition.Parent?.Parent?.ChildNodes().OfType<BaseListSyntax>().FirstOrDefault();
+
+        if (baseListSyntax is null)
+        {
+            return attributes;
+        }
+        
+        var collectionFixture = baseListSyntax.Types.Select(x => x.Type).OfType<GenericNameSyntax>().FirstOrDefault(x => x.Identifier.Text == "ICollectionFixture");
+        
+        if (collectionFixture is null)
+        {
+            return attributes;
+        }
+        
+        var type = collectionFixture.TypeArgumentList.Arguments.FirstOrDefault();
+
+        if (type is null)
+        {
+            return attributes;
+        }
+        
+        attributes.Add(SyntaxFactory.Attribute(
+            SyntaxFactory.GenericName(SyntaxFactory.Identifier("ClassDataSource"),
+                SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList(type))),
+            SyntaxFactory.AttributeArgumentList()
+                .AddArguments(
+                    SyntaxFactory.AttributeArgument(
+                        nameEquals: SyntaxFactory.NameEquals("Shared"),
+                        nameColon: null,
+                        expression: SyntaxFactory.ParseExpression("SharedType.Keyed")
+                    ),
+                    SyntaxFactory.AttributeArgument(
+                        nameEquals: SyntaxFactory.NameEquals("Key"),
+                        nameColon: null,
+                        expression: GetMethodArgumentName(attributeSyntax)
+                    )
+                )
+        ));
+
+        return attributes;
     }
 
     private static ExpressionSyntax GetMethodArgumentName(AttributeSyntax attributeSyntax)
@@ -127,30 +179,10 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
         return SyntaxFactory.ParseExpression(firstToken.Value.Text);
     }
 
-    private static async Task<TypeArgumentListSyntax> GetGenericArguments(Document document,
+    private static TypeArgumentListSyntax GetGenericArguments(Compilation compilation, Document document,
         AttributeSyntax attributeSyntax)
     {
-        var compilation = await document.Project.GetCompilationAsync();
-
-        if (compilation is null)
-        {
-            return SyntaxFactory.TypeArgumentList();
-        }
-
-        var collectionName = attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken().ValueText;
-
-        if (collectionName is null)
-        {
-            return SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
-                SyntaxFactory.IdentifierName("T")
-            ));
-        }
-
-        var collectionAttribute = compilation.SyntaxTrees
-            .Select(x => x.GetRoot())
-            .SelectMany(x => x.DescendantNodes().OfType<AttributeSyntax>())
-            .Where(attr => attr.Name.ToString() == "CollectionDefinition")
-            .FirstOrDefault(x => x.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken().ValueText == collectionName);
+        var collectionAttribute = GetCollectionAttribute(compilation, attributeSyntax);
 
         if (collectionAttribute is null)
         {
@@ -181,5 +213,55 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
         return SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
             SyntaxFactory.IdentifierName(interfaceType.TypeArguments.First().Name)
         ));
+    }
+
+    private static AttributeSyntax? GetCollectionAttribute(Compilation compilation, AttributeSyntax attributeSyntax)
+    {
+        var firstToken = attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken();
+
+        if (!firstToken.HasValue)
+        {
+            return null;
+        }
+
+        var collectionName = firstToken.Value.IsKind(SyntaxKind.NameOfKeyword)
+            ? GetNameFromNameOfToken(firstToken.Value) : firstToken.Value.ValueText;
+
+        if (collectionName is null)
+        {
+            return null;
+        }
+
+        return compilation.SyntaxTrees
+            .Select(x => x.GetRoot())
+            .SelectMany(x => x.DescendantNodes().OfType<AttributeSyntax>())
+            .Where(attr => attr.Name.ToString() == "CollectionDefinition")
+            .FirstOrDefault(x =>
+            {
+                var syntaxToken = x.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken();
+                
+                if (!syntaxToken.HasValue)
+                {
+                    return false;
+                }
+                
+                var name = syntaxToken.Value.IsKind(SyntaxKind.NameOfKeyword)
+                    ? GetNameFromNameOfToken(syntaxToken.Value) : syntaxToken.Value.ValueText;
+                
+                return name == collectionName;
+            });
+    }
+
+    private static string? GetNameFromNameOfToken(SyntaxToken token)
+    {
+        var expression = SyntaxFactory.ParseExpression(token.Text) as InvocationExpressionSyntax;
+
+        if (expression?.Expression is IdentifierNameSyntax { Identifier.Text: "nameof" } &&
+            expression.ArgumentList.Arguments.FirstOrDefault()?.Expression is IdentifierNameSyntax nameOfArgument)
+        {
+            return nameOfArgument.Identifier.Text;
+        }
+
+        return null;
     }
 }
