@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TUnit.Analyzers.CodeFixers.Extensions;
 
 namespace TUnit.Analyzers.CodeFixers;
 
@@ -48,7 +47,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var newExpression = await GetNewExpression(document, root, attributeSyntax);
+        var newExpression = await GetNewExpression(document, attributeSyntax);
 
         if (newExpression != null)
         {
@@ -65,7 +64,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
         return document.WithSyntaxRoot(root);
     }
 
-    private static async Task<SyntaxNode?> GetNewExpression(Document document, SyntaxNode root, AttributeSyntax attributeSyntax)
+    private static async Task<SyntaxNode?> GetNewExpression(Document document, AttributeSyntax attributeSyntax)
     {
         var name = attributeSyntax.Name.ToString();
 
@@ -104,8 +103,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
                             nameEquals: SyntaxFactory.NameEquals("Key"),
                             nameColon: null,
                             expression: SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
-                                attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken() ??
-                                SyntaxFactory.Literal(""))
+                                SyntaxFactory.Literal(attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken().ValueText ?? "Name"))
                         )
                     )
             ),
@@ -132,7 +130,9 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
 
         if (collectionName is null)
         {
-            return SyntaxFactory.TypeArgumentList();
+            return SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                SyntaxFactory.IdentifierName("T")
+            ));
         }
 
         var collectionAttribute = compilation.SyntaxTrees
