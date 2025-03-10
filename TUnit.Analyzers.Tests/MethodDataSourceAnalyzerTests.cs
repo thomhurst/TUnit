@@ -698,4 +698,33 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
+    
+    [Test]
+    public async Task Method_Data_Source_Is_Flagged_When_Instance_Method_And_Wrong_Attribute()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+
+                [Arguments(1)]
+                public class MyClass(int _)
+                {
+                    [{|#0:MethodDataSource(nameof(One))|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+                    
+                    public int One()
+                    {
+                        return 1;
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.InstanceMethodSource)
+                    .WithLocation(0)
+            );
+    }
 }

@@ -1543,5 +1543,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0055Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Instance methods used as data sources must use the `InstanceMethodDataSource` attribute..
+        /// </summary>
+        internal static string TUnit0056Description {
+            get {
+                return ResourceManager.GetString("TUnit0056Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Instance methods used as data sources must use the `InstanceMethodDataSource` attribute.
+        /// </summary>
+        internal static string TUnit0056MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0056MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Instance methods used as data sources must use the `InstanceMethodDataSource` attribute.
+        /// </summary>
+        internal static string TUnit0056Title {
+            get {
+                return ResourceManager.GetString("TUnit0056Title", resourceCulture);
+            }
+        }
     }
 }

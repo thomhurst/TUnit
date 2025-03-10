@@ -135,6 +135,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor OverwriteConsole =
         CreateDescriptor("TUnit0055", UsageCategory, DiagnosticSeverity.Warning);
     
+    public static readonly DiagnosticDescriptor InstanceMethodSource =
+        CreateDescriptor("TUnit0056", UsageCategory, DiagnosticSeverity.Error);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(
