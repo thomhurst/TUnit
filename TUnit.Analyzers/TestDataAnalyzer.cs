@@ -25,7 +25,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MustHavePropertySetter,
             Rules.ReturnFunc,
             Rules.MatrixDataSourceAttributeRequired,
-            Rules.TooManyArguments);
+            Rules.TooManyArguments,
+            Rules.InstanceMethodSource);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -317,6 +318,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.ReportDiagnostic(
                     Diagnostic.Create(
                         Rules.MethodMustReturnData,
+                        attribute.GetLocation())
+                );
+                return;
+            }
+
+            if (!dataSourceMethod.IsStatic)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.InstanceMethodSource,
                         attribute.GetLocation())
                 );
                 return;

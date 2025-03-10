@@ -513,4 +513,13 @@
     <data name="TUnit0055Title" xml:space="preserve">
         <value>Do not overwrite the Console writer</value>
     </data>
+    <data name="TUnit0056Description" xml:space="preserve">
+        <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute.</value>
+    </data>
+    <data name="TUnit0056MessageFormat" xml:space="preserve">
+        <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute</value>
+    </data>
+    <data name="TUnit0056Title" xml:space="preserve">
+        <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute</value>
+    </data>
 </root>
