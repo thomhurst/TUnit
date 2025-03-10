@@ -323,7 +323,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (!dataSourceMethod.IsStatic)
+            if (!dataSourceMethod.IsStatic 
+                && !dataSourceMethod.ContainingType.InstanceConstructors.Any(c => c.Parameters.IsDefaultOrEmpty)
+                && SymbolEqualityComparer.Default.Equals(dataSourceMethod.ContainingType, testClassType))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
