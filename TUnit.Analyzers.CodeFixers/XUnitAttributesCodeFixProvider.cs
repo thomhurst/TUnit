@@ -102,8 +102,7 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
                         SyntaxFactory.AttributeArgument(
                             nameEquals: SyntaxFactory.NameEquals("Key"),
                             nameColon: null,
-                            expression: SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
-                                SyntaxFactory.Literal(attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken().ValueText ?? "Name"))
+                            expression: GetMethodArgumentName(attributeSyntax)
                         )
                     )
             ),
@@ -114,6 +113,18 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
 
             _ => null
         };
+    }
+
+    private static ExpressionSyntax GetMethodArgumentName(AttributeSyntax attributeSyntax)
+    {
+        var firstToken = attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken();
+
+        if (!firstToken.HasValue)
+        {
+            return SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(""));
+        }
+        
+        return SyntaxFactory.ParseExpression(firstToken.Value.Text);
     }
 
     private static async Task<TypeArgumentListSyntax> GetGenericArguments(Document document,
