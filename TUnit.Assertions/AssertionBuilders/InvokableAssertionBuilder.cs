@@ -20,10 +20,10 @@ public class InvokableAssertionBuilder<TActual> :
         }
     }
 
-    internal async Task<T> ProcessAssertionsAsync<T>(Func<AssertionData, T> mapper)
+    internal async Task<T> ProcessAssertionsAsync<T>(Func<AssertionData, Task<T>> mapper)
     {
         var assertionData = await ProcessAssertionsAsync();
-        return mapper(assertionData);
+        return await mapper(assertionData);
     }
     
     public TaskAwaiter GetAwaiter() => ((Task)ProcessAssertionsAsync()).GetAwaiter();

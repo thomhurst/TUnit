@@ -37,7 +37,7 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
             ((ISource)AssertionBuilder).Assertions.Push(condition);
         }
         
-        return (TActual?) await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => x.Result);
+        return (TActual?) await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => Task.FromResult(x.Result));
     }
 
     private void Push(TAssertionBuilder assertionBuilder, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
