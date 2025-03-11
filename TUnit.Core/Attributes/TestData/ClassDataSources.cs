@@ -108,6 +108,11 @@ internal class ClassDataSources
         {
             await Initialize(testContext, shared, key, item);
         }
+
+        if (item is ITestRegisteredEventReceiver testRegisteredEventReceiver)
+        {
+            await testRegisteredEventReceiver.OnTestRegistered(new TestRegisteredContext(testContext.InternalDiscoveredTest));
+        }
     }
 
     public async ValueTask OnInitialize<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
@@ -213,6 +218,22 @@ internal class ClassDataSources
             }
 
             throw;
+        }
+    }
+
+    public async Task OnTestStart<T>(BeforeTestContext context, T item) where T : new()
+    {
+        if (item is ITestStartEventReceiver testStartEventReceiver)
+        {
+            await testStartEventReceiver.OnTestStart(context);
+        }
+    }
+    
+    public async Task OnTestEnd<T>(TestContext context, T item) where T : new()
+    {
+        if (item is ITestEndEventReceiver testEndEventReceiver)
+        {
+            await testEndEventReceiver.OnTestEnd(context);
         }
     }
 }
