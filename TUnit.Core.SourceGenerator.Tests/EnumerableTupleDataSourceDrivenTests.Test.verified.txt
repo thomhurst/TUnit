@@ -81,6 +81,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod())
 				{
 					testMethodDataIndex++;
@@ -185,6 +186,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod())
 					{
 						testMethodDataIndex++;

@@ -65,6 +65,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -80,6 +81,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
 				{
@@ -204,6 +206,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -219,6 +222,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
 				{

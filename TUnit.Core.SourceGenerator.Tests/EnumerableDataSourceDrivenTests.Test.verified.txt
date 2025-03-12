@@ -66,6 +66,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.EnumerableDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())
 				{
 					testMethodDataIndex++;
@@ -180,6 +181,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.EnumerableDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())
 				{
 					testMethodDataIndex++;
@@ -294,6 +296,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.EnumerableDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.MethodWithBaseReturn())
 				{
 					testMethodDataIndex++;

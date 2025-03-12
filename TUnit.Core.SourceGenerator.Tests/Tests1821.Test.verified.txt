@@ -73,6 +73,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1821.Tests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -88,6 +89,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>();
 
@@ -105,6 +107,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					, sessionId, testBuilderContext);
 					var resettableClassFactory = resettableClassFactoryDelegate();
 					classInstance = resettableClassFactory.Value;
+					classInstanceArguments = [classArgGeneratedData];
 					foreach (var methodDataAccessor in classInstance.DataSource())
 					{
 						testMethodDataIndex++;
@@ -225,6 +228,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1821.Tests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -240,6 +244,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>();
 
@@ -257,6 +262,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					, sessionId, testBuilderContext);
 					var resettableClassFactory = resettableClassFactoryDelegate();
 					classInstance = resettableClassFactory.Value;
+					classInstanceArguments = [classArgGeneratedData];
 					var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -275,6 +281,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						],
 						TestSessionId = sessionId,
 						TestClassInstance = classInstance,
+						ClassInstanceArguments = classInstanceArguments,
 					};
 					var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 

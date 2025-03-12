@@ -146,6 +146,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ClassTupleDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
 				int classArg = classArgTuples.Item1;
 				string classArg1 = classArgTuples.Item2;
@@ -322,6 +323,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.ClassTupleDataSourceDrivenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
 					int classArg = classArgTuples.Item1;
 					string classArg1 = classArgTuples.Item2;
@@ -498,6 +500,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.ClassTupleDataSourceDrivenTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 						var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
 						int classArg = classArgTuples.Item1;
 						string classArg1 = classArgTuples.Item2;
@@ -674,6 +677,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.ClassTupleDataSourceDrivenTests? classInstance = null;
+							object?[]? classInstanceArguments = null;
 							var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
 							int classArg = classArgTuples.Item1;
 							string classArg1 = classArgTuples.Item2;

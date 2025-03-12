@@ -73,6 +73,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string methodArg = "A";
 
@@ -161,6 +162,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					string methodArg = "B";
 
@@ -249,6 +251,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						string methodArg = "C";
 

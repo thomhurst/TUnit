@@ -73,6 +73,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(1);
 
@@ -161,6 +162,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(2);
 
@@ -249,6 +251,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(3);
 
@@ -367,6 +370,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				global::TUnit.TestProject.ImplicitInteger methodArg = 1;
 
@@ -455,6 +459,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					global::TUnit.TestProject.ImplicitInteger methodArg = 2;
 
@@ -543,6 +548,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						global::TUnit.TestProject.ImplicitInteger methodArg = 3;
 

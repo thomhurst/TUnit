@@ -61,6 +61,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
 				new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
@@ -173,6 +174,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string methodArg = global::TUnit.TestProject.TestData.Foo();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
@@ -286,6 +288,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string methodArg = global::TUnit.TestProject.TestData.Foo();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
@@ -391,6 +394,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
 				new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()

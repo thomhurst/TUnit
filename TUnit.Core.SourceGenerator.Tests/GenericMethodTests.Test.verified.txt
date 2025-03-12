@@ -96,6 +96,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.GenericMethodTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData())
 				{
 					testMethodDataIndex++;
@@ -218,6 +219,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.GenericMethodTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					foreach (var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData())
 					{
 						testMethodDataIndex++;

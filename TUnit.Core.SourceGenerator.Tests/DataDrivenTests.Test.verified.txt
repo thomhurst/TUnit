@@ -73,6 +73,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				int methodArg = 1;
 
@@ -161,6 +162,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					int methodArg = 2;
 
@@ -249,6 +251,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						int methodArg = 3;
 
@@ -372,6 +375,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				int methodArg = 1;
 				string methodArg1 = "String";
@@ -466,6 +470,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					int methodArg = 2;
 					string methodArg1 = "String2";
@@ -560,6 +565,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						int methodArg = 3;
 						string methodArg1 = "String3";
@@ -679,6 +685,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				global::TUnit.TestProject.TestEnum methodArg = global::TUnit.TestProject.TestEnum.One;
 
@@ -767,6 +774,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					global::TUnit.TestProject.TestEnum methodArg = global::TUnit.TestProject.TestEnum.Two;
 
@@ -855,6 +863,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						global::TUnit.TestProject.TestEnum methodArg = (global::TUnit.TestProject.TestEnum)(-1);
 
@@ -966,6 +975,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string methodArg = null;
 
@@ -1077,6 +1087,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string methodArg = "";
 
@@ -1188,6 +1199,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string methodArg = "Foo bar!";
 
@@ -1306,6 +1318,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				bool? methodArg = null;
 
@@ -1394,6 +1407,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					bool? methodArg = false;
 
@@ -1482,6 +1496,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						bool? methodArg = true;
 
@@ -1593,6 +1608,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				global::System.Type methodArg = typeof(object);
 
@@ -1704,6 +1720,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				int[] methodArg = new[] { 1, 2, 3 };
 
@@ -1815,6 +1832,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				int methodArg = 2147483647;
 

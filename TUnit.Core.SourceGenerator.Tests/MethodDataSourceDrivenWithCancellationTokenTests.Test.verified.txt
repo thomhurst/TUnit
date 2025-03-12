@@ -87,6 +87,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
@@ -185,6 +186,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => 
@@ -283,6 +285,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 						foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT())
 						{
 							testMethodDataIndex++;
@@ -385,6 +388,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+							object?[]? classInstanceArguments = null;
 							foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT())
 							{
 								testMethodDataIndex++;
@@ -487,6 +491,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 								global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+								object?[]? classInstanceArguments = null;
 								foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT())
 								{
 									testMethodDataIndex++;
@@ -589,6 +594,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 									global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+									object?[]? classInstanceArguments = null;
 									foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT())
 									{
 										testMethodDataIndex++;

@@ -128,6 +128,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.PropertySetterTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				string propertyArg = "1";
 
 				string propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
@@ -150,6 +151,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				}).ElementAtOrDefault(0)();
 
 				var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -174,6 +176,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						],
 						TestSessionId = sessionId,
 						TestClassInstance = classInstance,
+						ClassInstanceArguments = classInstanceArguments,
 					}).ElementAtOrDefault(0)();
 
 					var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -198,6 +201,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							],
 							TestSessionId = sessionId,
 							TestClassInstance = classInstance,
+							ClassInstanceArguments = classInstanceArguments,
 						}).ElementAtOrDefault(0)();
 
 						var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -223,6 +227,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								],
 								TestSessionId = sessionId,
 								TestClassInstance = classInstance,
+								ClassInstanceArguments = classInstanceArguments,
 							}).ElementAtOrDefault(0)();
 
 							var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
@@ -247,6 +252,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									],
 									TestSessionId = sessionId,
 									TestClassInstance = classInstance,
+									ClassInstanceArguments = classInstanceArguments,
 								}).ElementAtOrDefault(0)();
 
 
@@ -363,6 +369,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.InheritedPropertySetterTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				string propertyArg = "1";
 
 				string propertyArg1 = global::TUnit.TestProject.InheritedPropertySetterTests.MethodData();
@@ -385,6 +392,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				}).ElementAtOrDefault(0)();
 
 				var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -409,6 +417,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 						],
 						TestSessionId = sessionId,
 						TestClassInstance = classInstance,
+						ClassInstanceArguments = classInstanceArguments,
 					}).ElementAtOrDefault(0)();
 
 					var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -433,6 +442,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 							],
 							TestSessionId = sessionId,
 							TestClassInstance = classInstance,
+							ClassInstanceArguments = classInstanceArguments,
 						}).ElementAtOrDefault(0)();
 
 						var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
@@ -458,6 +468,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 								],
 								TestSessionId = sessionId,
 								TestClassInstance = classInstance,
+								ClassInstanceArguments = classInstanceArguments,
 							}).ElementAtOrDefault(0)();
 
 							var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
@@ -482,6 +493,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 									],
 									TestSessionId = sessionId,
 									TestClassInstance = classInstance,
+									ClassInstanceArguments = classInstanceArguments,
 								}).ElementAtOrDefault(0)();
 
 

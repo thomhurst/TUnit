@@ -91,6 +91,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				int classArg = global::TUnit.TestProject.CommonTestData.One();
 
 				int methodArg = global::TUnit.TestProject.CommonTestData.One();
@@ -191,6 +192,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
 					int methodArg = global::TUnit.TestProject.CommonTestData.One();
@@ -291,6 +293,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+						object?[]? classInstanceArguments = null;
 						int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
 						int methodArg = global::TUnit.TestProject.CommonTestData.One();
@@ -391,6 +394,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+							object?[]? classInstanceArguments = null;
 							int classArg = global::TUnit.TestProject.CommonTestData.One();
 
 							int methodArg = global::TUnit.TestProject.CommonTestData.Two();
@@ -491,6 +495,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 								global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+								object?[]? classInstanceArguments = null;
 								int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
 								int methodArg = global::TUnit.TestProject.CommonTestData.Two();
@@ -591,6 +596,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 									global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+									object?[]? classInstanceArguments = null;
 									int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
 									int methodArg = global::TUnit.TestProject.CommonTestData.Two();
@@ -691,6 +697,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 										var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 										global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+										object?[]? classInstanceArguments = null;
 										int classArg = global::TUnit.TestProject.CommonTestData.One();
 
 										int methodArg = global::TUnit.TestProject.CommonTestData.Three();
@@ -791,6 +798,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 											global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+											object?[]? classInstanceArguments = null;
 											int classArg = global::TUnit.TestProject.CommonTestData.Two();
 
 											int methodArg = global::TUnit.TestProject.CommonTestData.Three();
@@ -891,6 +899,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 												var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 												global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
+												object?[]? classInstanceArguments = null;
 												int classArg = global::TUnit.TestProject.CommonTestData.Three();
 
 												int methodArg = global::TUnit.TestProject.CommonTestData.Three();

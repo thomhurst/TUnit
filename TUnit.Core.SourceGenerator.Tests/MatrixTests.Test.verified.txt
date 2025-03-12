@@ -85,6 +85,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -119,6 +120,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -270,6 +272,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -312,6 +315,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -448,6 +452,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -474,6 +479,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -605,6 +611,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -628,6 +635,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -762,6 +770,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -788,6 +797,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -922,6 +932,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -948,6 +959,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1085,6 +1097,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.MatrixTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1114,6 +1127,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							],
 							TestSessionId = sessionId,
 							TestClassInstance = classInstance,
+							ClassInstanceArguments = classInstanceArguments,
 						};
 						var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1240,6 +1254,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1258,6 +1273,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1383,6 +1399,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1401,6 +1418,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1526,6 +1544,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1544,6 +1563,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1669,6 +1689,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1687,6 +1708,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -1823,6 +1845,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MatrixTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -1849,6 +1872,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 

@@ -81,6 +81,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.AutoDataTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -111,6 +112,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.TestProject.Attributes.AutoDataAttribute();
 
