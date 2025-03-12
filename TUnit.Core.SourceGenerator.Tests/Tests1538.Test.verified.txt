@@ -101,6 +101,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1538.Tests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.EightItems())
 				{
 					testMethodDataIndex++;
@@ -299,6 +300,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1538.Tests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems())
 				{
 					testMethodDataIndex++;

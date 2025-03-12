@@ -62,6 +62,7 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.AbstractTests.ConcreteClass2? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 
 				new global::TUnit.TestProject.AbstractTests.ConcreteClass2()
@@ -167,6 +168,7 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.AbstractTests.ConcreteClass2? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 
 				new global::TUnit.TestProject.AbstractTests.ConcreteClass2()
@@ -271,6 +273,7 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.AbstractTests.ConcreteClass1? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => 
 				new global::TUnit.TestProject.AbstractTests.ConcreteClass1()

@@ -73,6 +73,7 @@ public static class GenericTestInvocationWriter
         var propertiesVariablesIndex = 0;
         
         sourceBuilder.WriteLine($"{testSourceDataModel.TestClass.GloballyQualified()}? classInstance = null;");;
+        sourceBuilder.WriteLine("object?[]? classInstanceArguments = null;");;
 
         if (NeedsClassInstantiatedForMethodData(testSourceDataModel))
         {
@@ -89,6 +90,7 @@ public static class GenericTestInvocationWriter
                 "var resettableClassFactory = resettableClassFactoryDelegate();");
             
             sourceBuilder.WriteLine("classInstance = resettableClassFactory.Value;");
+            sourceBuilder.WriteLine($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
         
             testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
 

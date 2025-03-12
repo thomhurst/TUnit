@@ -71,6 +71,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1692.Tests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string methodArg = (string)(null);
 
@@ -158,6 +159,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.Bugs._1692.Tests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					string methodArg = null;
 

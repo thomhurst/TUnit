@@ -76,6 +76,7 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.TupleDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod());
 				int methodArg = methodArgTuples.Item1;

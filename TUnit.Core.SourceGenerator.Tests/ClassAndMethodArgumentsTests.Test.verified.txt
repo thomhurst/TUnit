@@ -73,6 +73,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				string classArg = "1";
 
 
@@ -162,6 +163,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					string classArg = "2";
 
 
@@ -291,6 +293,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				string classArg = "1";
 
 
@@ -391,6 +394,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					string classArg = "2";
 
 
@@ -491,6 +495,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 						string classArg = "1";
 
 
@@ -591,6 +596,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+							object?[]? classInstanceArguments = null;
 							string classArg = "2";
 
 
@@ -722,6 +728,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				string classArg = "1";
 
 
@@ -822,6 +829,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					string classArg = "2";
 
 
@@ -922,6 +930,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 						string classArg = "1";
 
 
@@ -1022,6 +1031,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.ClassAndMethodArgumentsTests? classInstance = null;
+							object?[]? classInstanceArguments = null;
 							string classArg = "2";
 
 

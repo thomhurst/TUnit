@@ -66,6 +66,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.RepeatTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 				new global::TUnit.TestProject.RepeatTests()
@@ -146,6 +147,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.RepeatTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 					new global::TUnit.TestProject.RepeatTests()
@@ -256,6 +258,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.RepeatTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 				new global::TUnit.TestProject.RepeatTests()
@@ -336,6 +339,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.RepeatTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 					new global::TUnit.TestProject.RepeatTests()
@@ -416,6 +420,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.RepeatTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 						new global::TUnit.TestProject.RepeatTests()
@@ -526,6 +531,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.RepeatTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 				new global::TUnit.TestProject.RepeatTests()
@@ -605,6 +611,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.RepeatTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 					new global::TUnit.TestProject.RepeatTests()
@@ -684,6 +691,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.RepeatTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 						new global::TUnit.TestProject.RepeatTests()
@@ -763,6 +771,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.RepeatTests? classInstance = null;
+							object?[]? classInstanceArguments = null;
 
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => 
 							new global::TUnit.TestProject.RepeatTests()

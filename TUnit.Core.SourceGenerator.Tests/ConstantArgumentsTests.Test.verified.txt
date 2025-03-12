@@ -66,6 +66,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string methodArg = "123";
 
@@ -177,6 +178,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				int methodArg = 123;
 
@@ -288,6 +290,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				double methodArg = 1.23;
 
@@ -399,6 +402,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				float methodArg = 1.23F;
 
@@ -510,6 +514,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				long methodArg = 123L;
 
@@ -621,6 +626,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				uint methodArg = 123U;
 
@@ -732,6 +738,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				ulong methodArg = 123UL;
 

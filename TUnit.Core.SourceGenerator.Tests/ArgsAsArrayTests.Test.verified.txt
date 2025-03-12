@@ -66,6 +66,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string[] methodArg = ["arg1", "arg2", "arg3"];
 
@@ -177,6 +178,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				string[] methodArg = ["arg1", "arg2", "arg3"];
 
@@ -288,6 +290,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
 
@@ -399,6 +402,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
 
@@ -515,6 +519,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 
 				int methodArg = 1;
 				global::System.Collections.Generic.IEnumerable<string> methodArg1 = ["arg1", "arg2", "arg3"];

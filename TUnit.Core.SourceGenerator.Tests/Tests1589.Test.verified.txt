@@ -65,6 +65,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1589.MyTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
@@ -80,6 +81,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
 				{

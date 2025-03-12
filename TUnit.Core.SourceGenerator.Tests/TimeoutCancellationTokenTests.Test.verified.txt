@@ -76,6 +76,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.TimeoutCancellationTokenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
@@ -198,6 +199,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.TimeoutCancellationTokenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
@@ -319,6 +321,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.TimeoutCancellationTokenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
@@ -446,6 +449,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.TimeoutCancellationTokenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 				int methodArg = 1;
@@ -575,6 +579,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.TimeoutCancellationTokenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 				int methodArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
@@ -707,6 +712,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.TimeoutCancellationTokenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 				{
 					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -725,6 +731,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
 				};
 				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 

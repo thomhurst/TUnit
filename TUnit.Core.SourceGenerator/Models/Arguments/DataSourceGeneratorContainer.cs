@@ -44,6 +44,7 @@ public record DataSourceGeneratorContainer(
         
         sourceCodeWriter.WriteLine("TestSessionId = sessionId,");
         sourceCodeWriter.WriteLine("TestClassInstance = classInstance,");
+        sourceCodeWriter.WriteLine("ClassInstanceArguments = classInstanceArguments,");
         sourceCodeWriter.WriteLine("};");
         
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
@@ -120,6 +121,7 @@ public record DataSourceGeneratorContainer(
                 
             sourceCodeWriter.WriteLine("TestSessionId = sessionId,");
             sourceCodeWriter.WriteLine("TestClassInstance = classInstance,");
+            sourceCodeWriter.WriteLine("ClassInstanceArguments = classInstanceArguments,");
             sourceCodeWriter.WriteLine("}).ElementAtOrDefault(0)();");
             sourceCodeWriter.WriteLine();
             return;
