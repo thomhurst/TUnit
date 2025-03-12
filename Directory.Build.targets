@@ -3,6 +3,14 @@
     Condition="('$(IsLibraryPackage)' == 'true' or '$(IsLibraryTestProject)' == 'true') and '$(EnablePolyfill)' != 'false'"
     Project="$(MSBuildThisFileDirectory)Polyfill.props" />
 
+  <PropertyGroup Condition="'$(IsLibraryPackage)' == 'true'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsLibraryTestProject)' == 'true'">
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <PropertyGroup>
     <TargetFrameworks Condition="'$(IsLibraryPackage)' == 'true'">netstandard2.0;net8.0;net9.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(IsLibraryTestProject)' == 'true'">net472;net8.0;net9.0</TargetFrameworks>
