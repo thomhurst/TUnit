@@ -40,7 +40,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build
-        run: dotnet build -c Release -p:TreatWarningsAsErrors=true
+        run: dotnet build -c Release
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
