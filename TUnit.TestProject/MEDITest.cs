@@ -38,9 +38,7 @@ public class MEDITest(MEDIClass mediClass)
     }
 
     [After(TestSession)]
-#pragma warning disable TUnit0042
     public static async Task CheckDisposed(TestSessionContext testSessionContext)
-#pragma warning restore TUnit0042
     {
         var mediClass = testSessionContext.TestClasses
                 .FirstOrDefault(x => x.ClassType == typeof(MEDITest))
