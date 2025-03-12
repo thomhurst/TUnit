@@ -30,20 +30,20 @@
             <PackagePath>$(BuildTransitivePath)</PackagePath>
         </TfmSpecificPackageFile>
 
-        <TfmSpecificPackageFile Include="TUnit.Assertions.props">
+        <None Include="TUnit.Assertions.props">
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
-        </TfmSpecificPackageFile>
+        </None>
 
         <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
             <Pack>true</Pack>
             <PackagePath>$(BuildTransitivePath)</PackagePath>
         </TfmSpecificPackageFile>
 
-        <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
+        <None Include="TUnit.Assertions.targets">
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
-        </TfmSpecificPackageFile>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
