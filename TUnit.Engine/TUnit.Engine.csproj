@@ -22,10 +22,10 @@
       <PackagePath>$(BuildTransitivePath)</PackagePath>
     </TfmSpecificPackageFile>
     
-    <TfmSpecificPackageFile Include="TUnit.Engine.props">
+    <None Include="TUnit.Engine.props">
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>
-    </TfmSpecificPackageFile>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />

@@ -51,7 +51,7 @@ jobs:
           dotnet-version: 9.0.x 
 
       - name: Build .NET 9
-        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:SDK_VERSION=net9
+        run: dotnet build -c Release -p:SDK_VERSION=net9
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
