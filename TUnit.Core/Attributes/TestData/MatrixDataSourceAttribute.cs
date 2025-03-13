@@ -72,10 +72,10 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
         }
 
 #if NET
-        var enumValues = Enum.GetValuesAsUnderlyingType(type)
+        var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
                              .Cast<object?>();
 #else
-        var enumValues = Enum.GetValues(type)
+        var enumValues = Enum.GetValues(resolvedType)
                              .Cast<object?>();
 #endif
         if (underlyingType is not null)

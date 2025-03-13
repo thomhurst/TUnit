@@ -13,21 +13,28 @@ public static class CastHelper
             return default;
         }
 
-        if (value.GetType().IsAssignableTo<T>())
+        if (value is T successfulCast)
+        {
+            return successfulCast;
+        }
+
+        var underlyingType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+
+        if (value.GetType().IsAssignableTo(underlyingType))
         {
             return (T)value;
         }
         
-        if (typeof(T).IsEnum)
+        if (underlyingType.IsEnum)
         {
-            return (T?) Enum.ToObject(typeof(T), value);
+            return (T?) Enum.ToObject(underlyingType, value);
         }
 
-        var conversionMethod = GetConversionMethod(value.GetType(), typeof(T));
+        var conversionMethod = GetConversionMethod(value.GetType(), underlyingType);
 
         if (conversionMethod is null)
         {
-            return (T?) Convert.ChangeType(value, typeof(T));
+            return (T?) Convert.ChangeType(value, underlyingType);
         }
         
         return (T?) conversionMethod.Invoke(null, [value]);
