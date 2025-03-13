@@ -104,6 +104,9 @@ public static class GenericTestInvocationWriter
         testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
 
         testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
+        
+        sourceBuilder.WriteLine($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
+        
         testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
         testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
