@@ -63,7 +63,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 
         if (resolvedType == typeof(bool))
         {
-            return underlyingType is null ? [true, false, null] : [true, false];
+            return underlyingType is null ? [true, false] : [true, false, null];
         }
 
 #if NET

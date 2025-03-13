@@ -434,6 +434,11 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							new global::TUnit.Core.MatrixAttribute(-1, global::TUnit.TestProject.TestEnum.One)
 						],
 					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum?>
+					{
+						Name = "testEnum2",
+						Attributes = [],
+					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
@@ -478,6 +483,11 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								new global::TUnit.Core.MatrixAttribute(-1, global::TUnit.TestProject.TestEnum.One)
 							],
 						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum?>
+						{
+							Name = "testEnum2",
+							Attributes = [],
+						},
 					],
 					TestSessionId = sessionId,
 					TestClassInstance = classInstance,
@@ -497,6 +507,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
 					global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(methodArgGeneratedData[1]);
+					global::TUnit.TestProject.TestEnum? methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum?>(methodArgGeneratedData[2]);
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
 					new global::TUnit.TestProject.MatrixTests()
 					, sessionId, testBuilderContext);
@@ -505,14 +516,14 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 					{
-						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum):0",
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum,TUnit.TestProject.TestEnum?):0",
 						TestClassArguments = [],
-						TestMethodArguments = [methodArg, methodArg1],
+						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = [],
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
-						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest_Enum(methodArg, methodArg1)),
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest_Enum(methodArg, methodArg1, methodArg2)),
 						TestFilePath = @"",
 						TestLineNumber = 31,
 						TestMethod = testInformation,
@@ -527,7 +538,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum,TUnit.TestProject.TestEnum?):0",
 					MethodName = $"MatrixTest_Enum",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.MatrixTest_Enum failed to initialize", exception),
 					TestFilePath = @"",
@@ -671,7 +682,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AutoGenerateBools(methodArg, methodArg1)),
 						TestFilePath = @"",
-						TestLineNumber = 40,
+						TestLineNumber = 41,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -688,7 +699,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					MethodName = $"AutoGenerateBools",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.AutoGenerateBools failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 40,
+					TestLineNumber = 41,
 				});
 			}
 			return nodes;
@@ -746,7 +757,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							new global::TUnit.Core.MatrixAttribute("A", "B", "C")
 						],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool?>
 					{
 						Name = "boolean",
 						Attributes = 
@@ -790,7 +801,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								new global::TUnit.Core.MatrixAttribute("A", "B", "C")
 							],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool?>
 						{
 							Name = "boolean",
 							Attributes = 
@@ -816,7 +827,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
-					bool methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[1]);
+					bool? methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<bool?>(methodArgGeneratedData[1]);
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
 					new global::TUnit.TestProject.MatrixTests()
 					, sessionId, testBuilderContext);
@@ -825,7 +836,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 					{
-						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool):0",
+						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool?):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1],
 						TestClassProperties = [],
@@ -834,7 +845,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AutoGenerateBools2(methodArg, methodArg1)),
 						TestFilePath = @"",
-						TestLineNumber = 49,
+						TestLineNumber = 50,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -847,11 +858,11 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool?):0",
 					MethodName = $"AutoGenerateBools2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.AutoGenerateBools2 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 49,
+					TestLineNumber = 50,
 				});
 			}
 			return nodes;
@@ -997,7 +1008,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ImplicitConversion(methodArg, methodArg1)),
 						TestFilePath = @"",
-						TestLineNumber = 58,
+						TestLineNumber = 59,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -1014,7 +1025,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					MethodName = $"ImplicitConversion",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.ImplicitConversion failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 58,
+					TestLineNumber = 59,
 				});
 			}
 			return nodes;
@@ -1166,7 +1177,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								ResettableClassFactory = resettableClassFactory,
 								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ExcludingAutoGeneratedMatrixValues(methodArg, methodArg1)),
 								TestFilePath = @"",
-								TestLineNumber = 67,
+								TestLineNumber = 68,
 								TestMethod = testInformation,
 								TestBuilderContext = testBuilderContext,
 							});
@@ -1183,7 +1194,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							MethodName = $"ExcludingAutoGeneratedMatrixValues",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.ExcludingAutoGeneratedMatrixValues failed to initialize", exception),
 							TestFilePath = @"",
-							TestLineNumber = 67,
+							TestLineNumber = 68,
 						});
 					}
 					return nodes;
@@ -1312,7 +1323,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method1(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 116,
+						TestLineNumber = 117,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -1329,7 +1340,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					MethodName = $"Method1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method1 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 116,
+					TestLineNumber = 117,
 				});
 			}
 			return nodes;
@@ -1458,7 +1469,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method2(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 124,
+						TestLineNumber = 125,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -1475,7 +1486,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					MethodName = $"Method2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method2 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 124,
+					TestLineNumber = 125,
 				});
 			}
 			return nodes;
@@ -1604,7 +1615,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method3(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 132,
+						TestLineNumber = 133,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -1621,7 +1632,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					MethodName = $"Method3",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method3 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 132,
+					TestLineNumber = 133,
 				});
 			}
 			return nodes;
@@ -1750,7 +1761,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method4(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 140,
+						TestLineNumber = 141,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -1767,7 +1778,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					MethodName = $"Method4",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method4 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 140,
+					TestLineNumber = 141,
 				});
 			}
 			return nodes;
@@ -1916,7 +1927,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Exclusion(methodArg, methodArg1)),
 						TestFilePath = @"",
-						TestLineNumber = 148,
+						TestLineNumber = 149,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -1933,7 +1944,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					MethodName = $"Exclusion",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Exclusion failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 148,
+					TestLineNumber = 149,
 				});
 			}
 			return nodes;
