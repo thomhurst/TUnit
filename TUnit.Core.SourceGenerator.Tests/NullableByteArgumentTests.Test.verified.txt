@@ -72,6 +72,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				byte? methodArg = (byte)1;
 
@@ -160,6 +161,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
 					object?[]? classInstanceArguments = null;
+					classInstanceArguments = [];
 
 					byte? methodArg = null;
 
@@ -282,6 +284,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				byte methodArg = (byte)1;
 				byte? methodArg1 = (byte)1;
@@ -376,6 +379,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
 					object?[]? classInstanceArguments = null;
+					classInstanceArguments = [];
 
 					byte methodArg = (byte)1;
 					byte? methodArg1 = (byte?)(null);

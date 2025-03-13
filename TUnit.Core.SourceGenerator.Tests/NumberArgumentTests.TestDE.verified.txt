@@ -67,6 +67,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NumberArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				int methodArg = 1;
 
@@ -179,6 +180,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NumberArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				double methodArg = 1.1;
 
@@ -291,6 +293,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NumberArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				float methodArg = 1.1f;
 
@@ -403,6 +406,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NumberArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				long methodArg = 1L;
 
@@ -515,6 +519,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NumberArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				ulong methodArg = 1UL;
 
@@ -627,6 +632,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.NumberArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				uint methodArg = 1U;
 

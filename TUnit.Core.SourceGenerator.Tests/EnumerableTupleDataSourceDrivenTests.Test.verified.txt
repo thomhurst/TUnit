@@ -85,6 +85,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod())
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodData = methodDataAccessor;
 					var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(methodData);
@@ -190,6 +191,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod())
 					{
 						testMethodDataIndex++;
+						classInstanceArguments = [];
 
 						var methodData = methodDataAccessor;
 						var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(methodData);

@@ -63,6 +63,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1539.Tests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1539.Tests>(() => 
 				new global::TUnit.TestProject.Bugs._1539.Tests()

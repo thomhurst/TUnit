@@ -69,6 +69,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
@@ -181,6 +182,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
@@ -316,6 +318,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string methodArg = "foo";
 				int methodArg1 = 1;
@@ -426,6 +429,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 					object?[]? classInstanceArguments = null;
+					classInstanceArguments = [];
 
 					string methodArg = "bar";
 					int methodArg1 = 2;
@@ -550,6 +554,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string methodArg = global::TUnit.TestProject.CustomDisplayNameTests.Method();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
@@ -695,6 +700,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
@@ -809,6 +815,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
@@ -921,6 +928,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()
@@ -1033,6 +1041,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 				new global::TUnit.TestProject.CustomDisplayNameTests()

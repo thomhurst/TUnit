@@ -76,6 +76,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				object?[]? classInstanceArguments = null;
 				string classArg = "1";
 
+				classInstanceArguments = [classArg];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 				new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -166,6 +167,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					object?[]? classInstanceArguments = null;
 					string classArg = "2";
 
+					classInstanceArguments = [classArg];
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 					new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -296,6 +298,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				object?[]? classInstanceArguments = null;
 				string classArg = "1";
 
+				classInstanceArguments = [classArg];
 
 				string methodArg = "3";
 
@@ -397,6 +400,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					object?[]? classInstanceArguments = null;
 					string classArg = "2";
 
+					classInstanceArguments = [classArg];
 
 					string methodArg = "3";
 
@@ -498,6 +502,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						object?[]? classInstanceArguments = null;
 						string classArg = "1";
 
+						classInstanceArguments = [classArg];
 
 						string methodArg = "4";
 
@@ -599,6 +604,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							object?[]? classInstanceArguments = null;
 							string classArg = "2";
 
+							classInstanceArguments = [classArg];
 
 							string methodArg = "4";
 
@@ -731,6 +737,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 				object?[]? classInstanceArguments = null;
 				string classArg = "1";
 
+				classInstanceArguments = [classArg];
 
 				string methodArg = "3";
 
@@ -832,6 +839,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					object?[]? classInstanceArguments = null;
 					string classArg = "2";
 
+					classInstanceArguments = [classArg];
 
 					string methodArg = "3";
 
@@ -933,6 +941,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						object?[]? classInstanceArguments = null;
 						string classArg = "1";
 
+						classInstanceArguments = [classArg];
 
 						string methodArg = "4";
 
@@ -1034,6 +1043,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							object?[]? classInstanceArguments = null;
 							string classArg = "2";
 
+							classInstanceArguments = [classArg];
 
 							string methodArg = "4";
 

@@ -96,6 +96,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 					{
 						classDataIndex++;
 						var classArgGeneratedData = classArgGeneratedDataAccessor();
+						classInstanceArguments = [classArgGeneratedData];
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1594.MyTests>(() => 
 						new global::TUnit.TestProject.Bugs._1594.MyTests(classArgGeneratedData)

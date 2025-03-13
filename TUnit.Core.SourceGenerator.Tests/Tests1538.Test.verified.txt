@@ -105,6 +105,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				foreach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.EightItems())
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodData = methodDataAccessor;
 					var methodArgTuples = global::System.TupleExtensions.ToTuple<bool, string, string, string, string, string, string, string>(methodData);
@@ -304,6 +305,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				foreach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems())
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodData = methodDataAccessor;
 					var methodArgTuples = global::System.TupleExtensions.ToTuple<bool, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string>(methodData);

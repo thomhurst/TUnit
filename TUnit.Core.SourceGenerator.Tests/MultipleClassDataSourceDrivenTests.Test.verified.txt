@@ -142,6 +142,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = classArgGeneratedData.Item4;
 						global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = classArgGeneratedData.Item5;
 
+						classInstanceArguments = [classArg, classArg1, classArg2, classArg3, classArg4];
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(() => 
 						new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(classArg, classArg1, classArg2, classArg3, classArg4)
@@ -328,6 +329,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = classArgGeneratedData.Item4;
 						global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = classArgGeneratedData.Item5;
 
+						classInstanceArguments = [classArg, classArg1, classArg2, classArg3, classArg4];
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(() => 
 						new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(classArg, classArg1, classArg2, classArg3, classArg4)

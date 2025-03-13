@@ -129,6 +129,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.PropertySetterTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 				string propertyArg = "1";
 
 				string propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();

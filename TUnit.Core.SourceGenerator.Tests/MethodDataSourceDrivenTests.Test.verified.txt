@@ -67,6 +67,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -178,6 +179,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -289,6 +291,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				global::System.Action methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction()();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -411,6 +414,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 						object?[]? classInstanceArguments = null;
+						classInstanceArguments = [];
 
 						int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(5);
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -504,6 +508,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 									global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 									object?[]? classInstanceArguments = null;
+									classInstanceArguments = [];
 
 									int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(5 );
 									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -636,6 +641,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 								global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 								object?[]? classInstanceArguments = null;
+								classInstanceArguments = [];
 
 								int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod("Hello World!", 5, true);
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -737,6 +743,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 													var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 													global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 													object?[]? classInstanceArguments = null;
+													classInstanceArguments = [];
 
 													int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod("Hello World!", 6, true );
 													var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -838,6 +845,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																		var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 																		global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 																		object?[]? classInstanceArguments = null;
+																		classInstanceArguments = [];
 
 																		int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod("Hello World!", 7, true);
 																		var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -939,6 +947,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 																							global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 																							object?[]? classInstanceArguments = null;
+																							classInstanceArguments = [];
 
 																							int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod("Hello World!", 8, true );
 																							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -1050,6 +1059,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.MethodDataSourceDrivenTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.MethodWithBaseReturn()();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 
@@ -1164,6 +1174,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTestData())
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodData = methodDataAccessor();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenTests>(() => 

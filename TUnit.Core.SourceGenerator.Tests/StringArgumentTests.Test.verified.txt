@@ -88,6 +88,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string methodArg = "";
 
@@ -186,6 +187,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 					object?[]? classInstanceArguments = null;
+					classInstanceArguments = [];
 
 					string methodArg = @"\";
 
@@ -284,6 +286,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 						object?[]? classInstanceArguments = null;
+						classInstanceArguments = [];
 
 						string methodArg = @"\t";
 
@@ -382,6 +385,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 							object?[]? classInstanceArguments = null;
+							classInstanceArguments = [];
 
 							string methodArg = "\t";
 
@@ -480,6 +484,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 								global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 								object?[]? classInstanceArguments = null;
+								classInstanceArguments = [];
 
 								string methodArg = "\\t";
 
@@ -578,6 +583,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 									global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 									object?[]? classInstanceArguments = null;
+									classInstanceArguments = [];
 
 									string methodArg = "\\\t";
 
@@ -676,6 +682,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 										global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 										object?[]? classInstanceArguments = null;
+										classInstanceArguments = [];
 
 										string methodArg = "\\\\t";
 
@@ -774,6 +781,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 											global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 											object?[]? classInstanceArguments = null;
+											classInstanceArguments = [];
 
 											string methodArg = """
         Hello
@@ -906,6 +914,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string methodArg = "";
 
@@ -1000,6 +1009,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 					global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 					object?[]? classInstanceArguments = null;
+					classInstanceArguments = [];
 
 					string methodArg = @"\";
 
@@ -1094,6 +1104,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 						object?[]? classInstanceArguments = null;
+						classInstanceArguments = [];
 
 						string methodArg = @"\t";
 
@@ -1188,6 +1199,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 							object?[]? classInstanceArguments = null;
+							classInstanceArguments = [];
 
 							string methodArg = "\t";
 
@@ -1282,6 +1294,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 								global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 								object?[]? classInstanceArguments = null;
+								classInstanceArguments = [];
 
 								string methodArg = "\\t";
 
@@ -1376,6 +1389,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 									global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 									object?[]? classInstanceArguments = null;
+									classInstanceArguments = [];
 
 									string methodArg = "\\\t";
 
@@ -1470,6 +1484,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 										global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 										object?[]? classInstanceArguments = null;
+										classInstanceArguments = [];
 
 										string methodArg = "\\\\t";
 
@@ -1564,6 +1579,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 											global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 											object?[]? classInstanceArguments = null;
+											classInstanceArguments = [];
 
 											string methodArg = null;
 

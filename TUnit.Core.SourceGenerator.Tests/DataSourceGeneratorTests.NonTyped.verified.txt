@@ -123,6 +123,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);

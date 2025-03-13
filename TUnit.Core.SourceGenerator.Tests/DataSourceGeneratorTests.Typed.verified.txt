@@ -154,6 +154,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						string classArg1 = classArgGeneratedData.Item2;
 						bool classArg2 = classArgGeneratedData.Item3;
 
+						classInstanceArguments = [classArg, classArg1, classArg2];
 
 						var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
@@ -325,6 +326,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							string classArg1 = classArgGeneratedData.Item2;
 							bool classArg2 = classArgGeneratedData.Item3;
 
+							classInstanceArguments = [classArg, classArg1, classArg2];
 
 							var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => 
@@ -545,6 +547,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						string classArg1 = classArgGeneratedData.Item2;
 						bool classArg2 = classArgGeneratedData.Item3;
 
+						classInstanceArguments = [classArg, classArg1, classArg2];
 
 						var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 						int methodArg = methodArgGeneratedData.Item1;
@@ -740,6 +743,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							string classArg1 = classArgGeneratedData.Item2;
 							bool classArg2 = classArgGeneratedData.Item3;
 
+							classInstanceArguments = [classArg, classArg1, classArg2];
 
 							var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 							int methodArg = methodArgGeneratedData.Item1;
@@ -964,6 +968,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						string classArg1 = classArgGeneratedData.Item2;
 						bool classArg2 = classArgGeneratedData.Item3;
 
+						classInstanceArguments = [classArg, classArg1, classArg2];
 
 						var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 						int methodArg = methodArgGeneratedData.Item1;
@@ -1159,6 +1164,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							string classArg1 = classArgGeneratedData.Item2;
 							bool classArg2 = classArgGeneratedData.Item3;
 
+							classInstanceArguments = [classArg, classArg1, classArg2];
 
 							var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 							int methodArg = methodArgGeneratedData.Item1;
