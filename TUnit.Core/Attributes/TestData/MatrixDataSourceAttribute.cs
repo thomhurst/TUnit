@@ -44,45 +44,56 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
     {
         var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault();
 
-        var type = sourceGeneratedParameterInformation.Type;
-
         var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata.TestClassInstance);
-        
-        if (matrixAttribute is null || objects is { Length: 0 })
-        {
-            if (type == typeof(bool))
-            {
-                return [true, false];
-            }
 
-            if (!type.IsEnum)
-            {
-                throw new ArgumentNullException(
-                    $"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
-            }
+        if (matrixAttribute is not null && objects is {Length: > 0})
+        {
+            return matrixAttribute.Excluding is not null
+                       ? objects.Except(matrixAttribute.Excluding).ToArray()
+                       : objects;
         }
 
-        if (type.IsEnum && objects is null or { Length: 0 })
+        var type = sourceGeneratedParameterInformation.Type;
+        var underlyingType = Nullable.GetUnderlyingType(type);
+        var resolvedType = underlyingType ?? type;
+        if (resolvedType != typeof(bool) && !resolvedType.IsEnum)
         {
+            throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
+        }
+
+        if (resolvedType == typeof(bool))
+        {
+            if (matrixAttribute?.Excluding is not null)
+            {
+                throw new InvalidOperationException("Do not exclude values from a boolean.");
+            }
+            
+            return underlyingType is null ? [true, false] : [true, false, null];
+        }
+
 #if NET
-            return Enum.GetValuesAsUnderlyingType(type)
-                .Cast<object>()
-                .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(type))) ?? [])
-                .ToArray();
+        var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
+                             .Cast<object?>();
 #else
-            return Enum.GetValues(type)
-                .Cast<object>()
-                .Except(matrixAttribute?.Excluding ?? [])
-                .ToArray();
+        var enumValues = Enum.GetValues(resolvedType)
+                             .Cast<object?>();
 #endif
+        if (underlyingType is not null)
+        {
+            enumValues = enumValues.Append(null);
+            if (matrixAttribute?.Excluding?.Any(x => x is null) ?? false)
+            {
+                throw new InvalidOperationException("Do not exclude null from a nullable enum - instead use the enum directly");
+            }
         }
 
-        if (matrixAttribute?.Excluding is not null)
-        {
-            return objects?.Except(matrixAttribute.Excluding).ToArray() ?? [];
-        }
-        
-        return objects ?? [];
+        return enumValues
+#if NET
+               .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(type))) ?? [])
+#else
+               .Except(matrixAttribute?.Excluding ?? [])
+#endif
+               .ToArray();
     }
     
     private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];

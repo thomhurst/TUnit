@@ -32,7 +32,8 @@ public class MatrixTests
     [MatrixDataSource]
     public async Task MatrixTest_Enum(
         [Matrix(1, 2)] int i,
-        [Matrix(-1, TestEnum.One)] TestEnum testEnum)
+        [Matrix(-1, TestEnum.One)] TestEnum testEnum,
+        TestEnum? testEnum2)
     {
         await Task.CompletedTask;
     }
@@ -50,7 +51,7 @@ public class MatrixTests
     [MatrixDataSource]
     public async Task AutoGenerateBools2(
         [Matrix("A", "B", "C")] string str,
-        [Matrix] bool boolean)
+        [Matrix] bool? boolean)
     {
         await Task.CompletedTask;
     }
