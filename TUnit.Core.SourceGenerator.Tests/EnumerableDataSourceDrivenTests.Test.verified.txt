@@ -70,6 +70,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodData = methodDataAccessor;
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 
@@ -185,6 +186,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodData = methodDataAccessor;
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 
@@ -300,6 +302,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.MethodWithBaseReturn())
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodData = methodDataAccessor();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 

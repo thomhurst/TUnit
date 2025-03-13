@@ -131,6 +131,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
@@ -326,6 +327,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
@@ -490,6 +492,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
@@ -646,6 +649,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
@@ -808,6 +812,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
@@ -970,6 +975,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					OneOf<global::TUnit.TestProject.TestEnum, TestEnum2> methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>(methodArgGeneratedData[0]);
@@ -1138,6 +1144,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 						{
 							testMethodDataIndex++;
+							classInstanceArguments = [];
 
 							var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 							global::TUnit.TestProject.MatrixTests.CountToTenEnum methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MatrixTests.CountToTenEnum>(methodArgGeneratedData[0]);
@@ -1284,6 +1291,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
@@ -1429,6 +1437,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
@@ -1574,6 +1583,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
@@ -1719,6 +1729,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
@@ -1883,6 +1894,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);

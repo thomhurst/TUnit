@@ -78,6 +78,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ClassConstructorTest? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DependencyInjectionClassConstructor, global::TUnit.TestProject.ClassConstructorTest>(sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();

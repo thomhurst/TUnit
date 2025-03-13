@@ -151,6 +151,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				int classArg = classArgTuples.Item1;
 				string classArg1 = classArgTuples.Item2;
 				bool classArg2 = classArgTuples.Item3;
+				classInstanceArguments = [classArg, classArg1, classArg2];
 				(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
 				(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 				(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
@@ -328,6 +329,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					int classArg = classArgTuples.Item1;
 					string classArg1 = classArgTuples.Item2;
 					bool classArg2 = classArgTuples.Item3;
+					classInstanceArguments = [classArg, classArg1, classArg2];
 					(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
 					(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 					(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
@@ -505,6 +507,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						int classArg = classArgTuples.Item1;
 						string classArg1 = classArgTuples.Item2;
 						bool classArg2 = classArgTuples.Item3;
+						classInstanceArguments = [classArg, classArg1, classArg2];
 						(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
 						(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 						(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
@@ -682,6 +685,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							int classArg = classArgTuples.Item1;
 							string classArg1 = classArgTuples.Item2;
 							bool classArg2 = classArgTuples.Item3;
+							classInstanceArguments = [classArg, classArg1, classArg2];
 							(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
 							(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 							(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();

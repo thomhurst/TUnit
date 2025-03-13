@@ -67,6 +67,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string[] methodArg = ["arg1", "arg2", "arg3"];
 
@@ -179,6 +180,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string[] methodArg = ["arg1", "arg2", "arg3"];
 
@@ -291,6 +293,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
 
@@ -403,6 +406,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
 
@@ -520,6 +524,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.ArgsAsArrayTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				int methodArg = 1;
 				global::System.Collections.Generic.IEnumerable<string> methodArg1 = ["arg1", "arg2", "arg3"];

@@ -92,6 +92,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
@@ -229,6 +230,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
@@ -366,6 +368,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
@@ -513,6 +516,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					global::TUnit.TestProject.InitializableClass methodArg = methodArgGeneratedData.Item1;
@@ -673,6 +677,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					global::TUnit.TestProject.InitializableClass methodArg = methodArgGeneratedData.Item1;
@@ -844,6 +849,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					global::TUnit.TestProject.InitializableClass methodArg = methodArgGeneratedData.Item1;
@@ -1026,6 +1032,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 					global::TUnit.TestProject.InitializableClass methodArg = methodArgGeneratedData.Item1;

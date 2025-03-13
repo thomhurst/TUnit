@@ -93,6 +93,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 				object?[]? classInstanceArguments = null;
 				int classArg = global::TUnit.TestProject.CommonTestData.One();
+				classInstanceArguments = [classArg];
 
 				int methodArg = global::TUnit.TestProject.CommonTestData.One();
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
@@ -194,6 +195,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 					object?[]? classInstanceArguments = null;
 					int classArg = global::TUnit.TestProject.CommonTestData.Two();
+					classInstanceArguments = [classArg];
 
 					int methodArg = global::TUnit.TestProject.CommonTestData.One();
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
@@ -295,6 +297,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 						object?[]? classInstanceArguments = null;
 						int classArg = global::TUnit.TestProject.CommonTestData.Three();
+						classInstanceArguments = [classArg];
 
 						int methodArg = global::TUnit.TestProject.CommonTestData.One();
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
@@ -396,6 +399,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 							object?[]? classInstanceArguments = null;
 							int classArg = global::TUnit.TestProject.CommonTestData.One();
+							classInstanceArguments = [classArg];
 
 							int methodArg = global::TUnit.TestProject.CommonTestData.Two();
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
@@ -497,6 +501,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 								object?[]? classInstanceArguments = null;
 								int classArg = global::TUnit.TestProject.CommonTestData.Two();
+								classInstanceArguments = [classArg];
 
 								int methodArg = global::TUnit.TestProject.CommonTestData.Two();
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
@@ -598,6 +603,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 									object?[]? classInstanceArguments = null;
 									int classArg = global::TUnit.TestProject.CommonTestData.Three();
+									classInstanceArguments = [classArg];
 
 									int methodArg = global::TUnit.TestProject.CommonTestData.Two();
 									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
@@ -699,6 +705,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 										object?[]? classInstanceArguments = null;
 										int classArg = global::TUnit.TestProject.CommonTestData.One();
+										classInstanceArguments = [classArg];
 
 										int methodArg = global::TUnit.TestProject.CommonTestData.Three();
 										var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
@@ -800,6 +807,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 											object?[]? classInstanceArguments = null;
 											int classArg = global::TUnit.TestProject.CommonTestData.Two();
+											classInstanceArguments = [classArg];
 
 											int methodArg = global::TUnit.TestProject.CommonTestData.Three();
 											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 
@@ -901,6 +909,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 												object?[]? classInstanceArguments = null;
 												int classArg = global::TUnit.TestProject.CommonTestData.Three();
+												classInstanceArguments = [classArg];
 
 												int methodArg = global::TUnit.TestProject.CommonTestData.Three();
 												var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 

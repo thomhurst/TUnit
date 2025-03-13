@@ -67,6 +67,7 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string methodArg = "Value";
 

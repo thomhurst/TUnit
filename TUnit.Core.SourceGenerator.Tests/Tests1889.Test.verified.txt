@@ -67,6 +67,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 				global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 				new global::TUnit.TestProject.Bugs._1889.DerivedTest()
@@ -177,6 +178,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 					{
 						testMethodDataIndex++;
+						classInstanceArguments = [];
 
 						var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 						bool methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[0]);
@@ -264,6 +266,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 						global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 						object?[]? classInstanceArguments = null;
+						classInstanceArguments = [];
 
 						bool methodArg = false;
 
@@ -350,6 +353,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 							global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 							object?[]? classInstanceArguments = null;
+							classInstanceArguments = [];
 
 							bool methodArg = true;
 

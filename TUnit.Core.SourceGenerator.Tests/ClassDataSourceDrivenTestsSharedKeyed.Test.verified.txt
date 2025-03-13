@@ -96,6 +96,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 					{
 						testMethodDataIndex++;
+						classInstanceArguments = [];
 
 						var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(() => 
@@ -237,6 +238,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 					{
 						testMethodDataIndex++;
+						classInstanceArguments = [];
 
 						var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(() => 
