@@ -63,6 +63,11 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 
         if (resolvedType == typeof(bool))
         {
+            if (matrixAttribute?.Excluding is not null)
+            {
+                throw new InvalidOperationException("Do not exclude values from a boolean.");
+            }
+            
             return underlyingType is null ? [true, false] : [true, false, null];
         }
 
@@ -78,7 +83,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
             enumValues = enumValues.Append(null);
             if (matrixAttribute?.Excluding?.Any(x => x is null) ?? false)
             {
-                throw new ArgumentOutOfRangeException($"Do not exclude null from a nullable enum - instead use the enum directly");
+                throw new InvalidOperationException("Do not exclude null from a nullable enum - instead use the enum directly");
             }
         }
 
