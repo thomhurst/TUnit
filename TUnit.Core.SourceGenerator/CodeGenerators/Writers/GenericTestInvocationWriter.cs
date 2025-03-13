@@ -82,6 +82,8 @@ public static class GenericTestInvocationWriter
             testSourceDataModel.ClassArguments.OpenScope(sourceBuilder, ref classVariablesIndex);
             testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
             
+            sourceBuilder.WriteLine($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
+            
             testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
 
             NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
@@ -90,7 +92,6 @@ public static class GenericTestInvocationWriter
                 "var resettableClassFactory = resettableClassFactoryDelegate();");
             
             sourceBuilder.WriteLine("classInstance = resettableClassFactory.Value;");
-            sourceBuilder.WriteLine($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
         
             testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
 
