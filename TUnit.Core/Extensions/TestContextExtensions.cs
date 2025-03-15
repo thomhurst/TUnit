@@ -10,11 +10,24 @@ public static class TestContextExtensions
 {
     private static readonly char[] ClassTypeNameSplitter = { '.' };
 
+    /// <summary>
+    /// Gets the tests for the specified test name.
+    /// </summary>
+    /// <param name="context">The test context.</param>
+    /// <param name="testName">The test name.</param>
+    /// <returns>An array of test contexts.</returns>
     public static TestContext[] GetTests(this TestContext context, string testName)
     {
         return GetTests(context, testName, []);
     }
     
+    /// <summary>
+    /// Gets the tests for the specified test name and parameter types.
+    /// </summary>
+    /// <param name="context">The test context.</param>
+    /// <param name="testName">The test name.</param>
+    /// <param name="parameterTypes">The parameter types.</param>
+    /// <returns>An array of test contexts.</returns>
     public static TestContext[] GetTests(this TestContext context, string testName, Type[] parameterTypes)
     {
         var tests = context.GetService<ITestFinder>().GetTestsByNameAndParameters(
@@ -32,6 +45,11 @@ public static class TestContextExtensions
         return tests;
     }
 
+    /// <summary>
+    /// Gets the class type name for the test context.
+    /// </summary>
+    /// <param name="testContext">The test context.</param>
+    /// <returns>The class type name.</returns>
     public static string GetClassTypeName(this TestContext testContext)
     {
         var testDetails = testContext.TestDetails;
@@ -50,6 +68,11 @@ public static class TestContextExtensions
             $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
     }
     
+    /// <summary>
+    /// Gets the test display name for the test context.
+    /// </summary>
+    /// <param name="testContext">The test context.</param>
+    /// <returns>The test display name.</returns>
     public static string GetTestDisplayName(this TestContext testContext)
     {
         var testDetails = testContext.TestDetails;

@@ -156,6 +156,12 @@ internal static class TestDataContainer
         await Disposer.DisposeAsync(item);
     }
     
+    /// <summary>
+    /// Consumes the assembly count for the specified item.
+    /// </summary>
+    /// <typeparam name="T">The type of the item.</typeparam>
+    /// <param name="assembly">The assembly.</param>
+    /// <param name="item">The item.</param>
     internal static async ValueTask ConsumeAssemblyCount<T>(Assembly assembly, T? item)
     {
         if (CountsPerAssembly[assembly][typeof(T)].Decrement() > 0)
@@ -166,6 +172,12 @@ internal static class TestDataContainer
         await Disposer.DisposeAsync(item);
     }
     
+    /// <summary>
+    /// Consumes the test class count for the specified item.
+    /// </summary>
+    /// <typeparam name="T">The type of the item.</typeparam>
+    /// <param name="testClassType">The test class type.</param>
+    /// <param name="item">The item.</param>
     internal static async ValueTask ConsumeTestClassCount<T>(Type testClassType, T? item)
     {
         if (CountsPerTestClass[testClassType][typeof(T)].Decrement() > 0)

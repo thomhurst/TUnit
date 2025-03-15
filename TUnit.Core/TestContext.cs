@@ -69,19 +69,35 @@ public partial class TestContext : Context
     
     public CancellationToken CancellationToken { get; internal set; }
     
+    /// <summary>
+    /// Gets or sets the internal discovered test.
+    /// </summary>
     internal DiscoveredTest InternalDiscoveredTest { get; set; } = null!;
 
+    /// <summary>
+    /// Suppresses reporting the result.
+    /// </summary>
     public void SuppressReportingResult()
     {
         ReportResult = false;
     }
     
+    /// <summary>
+    /// Adds an artifact to the test context.
+    /// </summary>
+    /// <param name="artifact">The artifact to add.</param>
     public void AddArtifact(Artifact artifact)
     {
         Artifacts.Add(artifact);
     }
     
+    /// <summary>
+    /// Gets or sets the reason for skipping the test.
+    /// </summary>
     internal string? SkipReason { get; set; }
     
+    /// <summary>
+    /// Gets or sets the event objects.
+    /// </summary>
     internal object?[]? EventObjects { get; set; }
 }
