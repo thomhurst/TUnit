@@ -2,6 +2,9 @@
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Provides methods to convert tasks to async methods.
+/// </summary>
 public static class AsyncConvert
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining

@@ -2,6 +2,9 @@
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Represents the events for a test context.
+/// </summary>
 public record TestContextEvents : 
     IAsyncInitializer,
     IAsyncDisposable,

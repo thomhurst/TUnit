@@ -2,11 +2,23 @@
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Represents the metadata for a test.
+/// </summary>
+/// <typeparam name="TClassType">The type of the test class.</typeparam>
 public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TClassType> : TestMetadata where TClassType : class
 {
+    /// <summary>
+    /// Gets or sets the resettable class factory.
+    /// </summary>
     public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
+
+    /// <summary>
+    /// Gets or sets the test method factory.
+    /// </summary>
     public required Func<TClassType, CancellationToken, ValueTask> TestMethodFactory { get; init; }
-    
+
+    /// <inheritdoc />
     public override TestDetails BuildTestDetails()
     {
 		var testId = TestId;
@@ -31,6 +43,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 		return testDetails;
     }
 
+    /// <inheritdoc />
     internal override DiscoveredTest BuildDiscoveredTest(TestContext testContext)
     {
 	    return new DiscoveredTest<TClassType>(ResettableClassFactory)
@@ -40,6 +53,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 	    };
     }
 
+    /// <inheritdoc />
     public override TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, ValueTask> testMethodFactory)
     {
 	    return this with
@@ -50,6 +64,9 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     }
 }
 
+/// <summary>
+/// Represents the base metadata for a test.
+/// </summary>
 public abstract record TestMetadata
 {
     public required string TestId { get; init; }

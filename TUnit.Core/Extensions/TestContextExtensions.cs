@@ -3,6 +3,9 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Extensions;
 
+/// <summary>
+/// Provides extension methods for <see cref="TestContext"/>.
+/// </summary>
 public static class TestContextExtensions
 {
     private static readonly char[] ClassTypeNameSplitter = { '.' };
