@@ -5,6 +5,9 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Represents the context for a test.
+/// </summary>
 public partial class TestContext
 {
     private static readonly AsyncLocal<TestContext?> TestContexts = new();

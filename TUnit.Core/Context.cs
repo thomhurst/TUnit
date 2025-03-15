@@ -10,6 +10,9 @@ namespace TUnit.Core;
 /// </summary>
 public abstract class Context : IContext, IDisposable
 {
+    /// <summary>
+    /// Gets the current context.
+    /// </summary>
     public static Context Current =>
         TestContext.Current as Context
         ?? ClassHookContext.Current as Context
