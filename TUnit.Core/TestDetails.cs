@@ -139,6 +139,12 @@ public abstract record TestDetails
     [field: AllowNull, MaybeNull]
     public Attribute[] Attributes => field ??= [..TestAttributes, ..ClassAttributes, ..AssemblyAttributes, ..DataAttributes];
 
+    /// <summary>
+    /// Gets the attributes that specify the test data.
+    /// </summary>
+    [JsonIgnore]
+    public required Attribute[] DataAttributes { get; init; }
+    
     [JsonIgnore]
     internal Func<TestContext, Exception, int, Task<bool>>? RetryLogic { get; set; }
     
