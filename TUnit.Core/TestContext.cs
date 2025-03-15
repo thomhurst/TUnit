@@ -7,6 +7,11 @@ public partial class TestContext : Context
 {
     private readonly IServiceProvider _serviceProvider;
 
+    /// <summary>
+    /// Gets a service of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of the service.</typeparam>
+    /// <returns>The service instance.</returns>
     internal T GetService<T>() => (T) _serviceProvider.GetService(typeof(T))!;
     
     internal readonly List<Artifact> Artifacts = [];
@@ -14,13 +19,25 @@ public partial class TestContext : Context
     internal readonly TestMetadata OriginalMetadata;
 
 #if NET9_0_OR_GREATER
+    /// <summary>
+    /// Gets the lock object.
+    /// </summary>
     public readonly Lock Lock = new();
 #else
+    /// <summary>
+    /// Gets the lock object.
+    /// </summary>
     public readonly object Lock = new();
 #endif
 
     internal bool ReportResult = true;
     
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestContext"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider.</param>
+    /// <param name="testDetails">The test details.</param>
+    /// <param name="originalMetadata">The original metadata.</param>
     internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestMetadata originalMetadata)
     {
         _serviceProvider = serviceProvider;
@@ -62,11 +79,24 @@ public partial class TestContext : Context
     /// </summary>
     public List<ArgumentDisplayFormatter> ArgumentDisplayFormatters { get; } = [];
     
+    /// <summary>
+    /// Gets the timings for the test.
+    /// </summary>
     public List<Timing> Timings { get; } = [];
+    
+    /// <summary>
+    /// Gets the object bag for the test.
+    /// </summary>
     public Dictionary<string, object?> ObjectBag { get; }
     
+    /// <summary>
+    /// Gets or sets the result of the test.
+    /// </summary>
     public TestResult? Result { get; internal set; }
     
+    /// <summary>
+    /// Gets or sets the cancellation token for the test.
+    /// </summary>
     public CancellationToken CancellationToken { get; internal set; }
     
     /// <summary>
