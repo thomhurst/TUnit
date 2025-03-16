@@ -40,6 +40,8 @@
 
   <ItemGroup Condition="'$(IsLibraryPackage)' == 'true'">
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
