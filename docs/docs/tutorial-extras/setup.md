@@ -86,7 +86,7 @@ public class MyTestClass
 
 If you are wanting to set AsyncLocal values within your `[Before(...)]` hooks, this is supported.
 
-But to propagate the values into the test framework, you must call `context.FlowAsyncLocalValues()` - Where `context` is the relevant context object injected into your hook method.
+But to propagate the values into the test framework, you must call `context.AddAsyncLocalValues()` - Where `context` is the relevant context object injected into your hook method.
 
 E.g.
 
@@ -95,6 +95,6 @@ E.g.
     public static void BeforeClass(ClassHookContext context)
     {
         _myAsyncLocal.Value = "Some Value";
-        context.FlowAsyncLocalValues();
+        context.AddAsyncLocalValues();
     }
 ```
