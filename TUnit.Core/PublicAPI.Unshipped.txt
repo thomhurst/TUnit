@@ -1,1 +1,949 @@
 ﻿#nullable enable
+abstract TUnit.Core.ArgumentDisplayFormatter.CanHandle(object? value) -> bool
+abstract TUnit.Core.ArgumentDisplayFormatter.FormatValue(object? value) -> string!
+abstract TUnit.Core.ArgumentDisplayFormatterAttribute.Formatter.get -> TUnit.Core.ArgumentDisplayFormatter!
+abstract TUnit.Core.ClassConstructorAttribute.ClassConstructorType.get -> System.Type!
+abstract TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<(T1, T2, T3, T4, T5)>!>!
+abstract TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<(T1, T2, T3, T4)>!>!
+abstract TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<(T1, T2, T3)>!>!
+abstract TUnit.Core.DataSourceGeneratorAttribute<T1, T2>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<(T1, T2)>!>!
+abstract TUnit.Core.DataSourceGeneratorAttribute<T>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<T>!>!
+abstract TUnit.Core.DependencyInjectionDataSourceAttribute<TScope>.Create(TScope scope, System.Type! type) -> object?
+abstract TUnit.Core.DependencyInjectionDataSourceAttribute<TScope>.CreateScope(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> TScope
+abstract TUnit.Core.DisplayNameFormatterAttribute.FormatDisplayName(TUnit.Core.TestContext! testContext) -> string!
+abstract TUnit.Core.Executors.HookExecutorAttribute.HookExecutorType.get -> System.Type!
+abstract TUnit.Core.GenericAbstractExecutor.ExecuteAsync(System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+abstract TUnit.Core.Hooks.StaticHookMethod<T>.ExecuteAsync(T context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+abstract TUnit.Core.Logging.TUnitLogger.Log<TState>(TUnit.Core.Logging.LogLevel logLevel, TState state, System.Exception? exception, System.Func<TState, System.Exception?, string!>! formatter) -> void
+abstract TUnit.Core.Logging.TUnitLogger.LogAsync<TState>(TUnit.Core.Logging.LogLevel logLevel, TState state, System.Exception? exception, System.Func<TState, System.Exception?, string!>! formatter) -> System.Threading.Tasks.ValueTask
+abstract TUnit.Core.NonTypedDataSourceGeneratorAttribute.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<object?[]?>!>!
+abstract TUnit.Core.SourceGeneratedMemberInformation.Type.get -> System.Type!
+abstract TUnit.Core.SourceGeneratedMemberInformation.Type.init -> void
+abstract TUnit.Core.TestDetails.ClassInstance.get -> object!
+abstract TUnit.Core.TestMetadata.BuildTestDetails() -> TUnit.Core.TestDetails!
+abstract TUnit.Core.TestMetadata.CloneWithNewMethodFactory(System.Func<object!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>! testMethodFactory) -> TUnit.Core.TestMetadata!
+override TUnit.Core.ArgumentDisplayFormatterAttribute<T>.Formatter.get -> TUnit.Core.ArgumentDisplayFormatter!
+override TUnit.Core.ClassConstructorAttribute<T>.ClassConstructorType.get -> System.Type!
+override TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4, T5>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<(T1, T2, T3, T4, T5)>!>!
+override TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<(T1, T2, T3, T4)>!>!
+override TUnit.Core.ClassDataSourceAttribute<T1, T2, T3>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<(T1, T2, T3)>!>!
+override TUnit.Core.ClassDataSourceAttribute<T1, T2>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<(T1, T2)>!>!
+override TUnit.Core.ClassDataSourceAttribute<T>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<T>!>!
+override TUnit.Core.ClassHookContext.Equals(object? obj) -> bool
+override TUnit.Core.ClassHookContext.GetHashCode() -> int
+override TUnit.Core.DependencyInjectionDataSourceAttribute<TScope>.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<object?[]?>!>!
+override TUnit.Core.DependsOnAttribute.ToString() -> string!
+override TUnit.Core.Executors.HookExecutorAttribute<T>.HookExecutorType.get -> System.Type!
+override TUnit.Core.Hooks.AfterAssemblyHookMethod.ExecuteAsync(TUnit.Core.AssemblyHookContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.AfterClassHookMethod.ExecuteAsync(TUnit.Core.ClassHookContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.AfterTestDiscoveryHookMethod.ExecuteAsync(TUnit.Core.TestDiscoveryContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.AfterTestHookMethod.ExecuteAsync(TUnit.Core.TestContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.AfterTestSessionHookMethod.ExecuteAsync(TUnit.Core.TestSessionContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.BeforeAssemblyHookMethod.ExecuteAsync(TUnit.Core.AssemblyHookContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.BeforeClassHookMethod.ExecuteAsync(TUnit.Core.ClassHookContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod.ExecuteAsync(TUnit.Core.BeforeTestDiscoveryContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.BeforeTestHookMethod.ExecuteAsync(TUnit.Core.TestContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Hooks.BeforeTestSessionHookMethod.ExecuteAsync(TUnit.Core.TestSessionContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.Logging.DefaultLogger.Log<TState>(TUnit.Core.Logging.LogLevel logLevel, TState state, System.Exception? exception, System.Func<TState, System.Exception?, string!>! formatter) -> void
+override TUnit.Core.Logging.DefaultLogger.LogAsync<TState>(TUnit.Core.Logging.LogLevel logLevel, TState state, System.Exception? exception, System.Func<TState, System.Exception?, string!>! formatter) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.MatrixDataSourceAttribute.GenerateDataSources(TUnit.Core.DataGeneratorMetadata! dataGeneratorMetadata) -> System.Collections.Generic.IEnumerable<System.Func<object?[]?>!>!
+override TUnit.Core.MatrixMethodAttribute<TClass>.GetObjects(object? instance) -> object?[]!
+override TUnit.Core.ParallelGroupConstraint.GetHashCode() -> int
+override TUnit.Core.ResettableLazy<TClassConstructor, T>.ResetLazy() -> System.Threading.Tasks.ValueTask
+override TUnit.Core.SourceGeneratedAssemblyInformation.GetHashCode() -> int
+override TUnit.Core.SourceGeneratedClassInformation.GetHashCode() -> int
+override TUnit.Core.SourceGeneratedClassInformation.Type.get -> System.Type!
+override TUnit.Core.SourceGeneratedClassInformation.Type.init -> void
+override TUnit.Core.SourceGeneratedMemberInformation.GetHashCode() -> int
+override TUnit.Core.SourceGeneratedMethodInformation.GetHashCode() -> int
+override TUnit.Core.SourceGeneratedMethodInformation.PrintMembers(System.Text.StringBuilder! stringBuilder) -> bool
+override TUnit.Core.SourceGeneratedMethodInformation.Type.get -> System.Type!
+override TUnit.Core.SourceGeneratedMethodInformation.Type.init -> void
+override TUnit.Core.SourceGeneratedParameterInformation.Type.get -> System.Type!
+override TUnit.Core.SourceGeneratedParameterInformation.Type.init -> void
+override TUnit.Core.SourceGeneratedPropertyInformation.Type.get -> System.Type!
+override TUnit.Core.SourceGeneratedPropertyInformation.Type.init -> void
+override TUnit.Core.STAThreadExecutor.ExecuteAsync(System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+override TUnit.Core.TestDetails<TClassType>.ClassInstance.get -> object!
+override TUnit.Core.TestMetadata<TClassType>.BuildTestDetails() -> TUnit.Core.TestDetails!
+override TUnit.Core.TestMetadata<TClassType>.CloneWithNewMethodFactory(System.Func<object!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>! testMethodFactory) -> TUnit.Core.TestMetadata!
+readonly TUnit.Core.BaseTestAttribute.File -> string!
+readonly TUnit.Core.BaseTestAttribute.Line -> int
+readonly TUnit.Core.ResettableLazy<T>.SessionId -> string!
+readonly TUnit.Core.TestContext.Lock -> System.Threading.Lock!
+static readonly TUnit.Core.DefaultExecutor.Instance -> TUnit.Core.DefaultExecutor!
+static readonly TUnit.Core.GlobalSharedDataKey.RandomKey -> System.Guid
+static TUnit.Core.AssemblyHookContext.Current.get -> TUnit.Core.AssemblyHookContext?
+static TUnit.Core.AsyncConvert.Convert(System.Action! action) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.AsyncConvert.Convert(System.Func<System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.AsyncConvert.Convert(System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.AsyncConvert.ConvertObject(object? invoke) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.AsyncEvent<TEventArgs>.operator +(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object!, TEventArgs, System.Threading.Tasks.Task!>! callback) -> TUnit.Core.AsyncEvent<TEventArgs>!
+static TUnit.Core.AsyncEvent<TEventArgs>.operator -(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object!, TEventArgs, System.Threading.Tasks.Task!>! callback) -> TUnit.Core.AsyncEvent<TEventArgs>?
+static TUnit.Core.BeforeTestDiscoveryContext.Current.get -> TUnit.Core.BeforeTestDiscoveryContext?
+static TUnit.Core.ClassHookContext.Current.get -> TUnit.Core.ClassHookContext?
+static TUnit.Core.Context.Current.get -> TUnit.Core.Context!
+static TUnit.Core.Extensions.TestContextExtensions.GetClassTypeName(this TUnit.Core.TestContext! testContext) -> string!
+static TUnit.Core.Extensions.TestContextExtensions.GetTestDisplayName(this TUnit.Core.TestContext! testContext) -> string!
+static TUnit.Core.Extensions.TestContextExtensions.GetTests(this TUnit.Core.TestContext! context, string! testName) -> TUnit.Core.TestContext![]!
+static TUnit.Core.Extensions.TestContextExtensions.GetTests(this TUnit.Core.TestContext! context, string! testName, System.Type![]! parameterTypes) -> TUnit.Core.TestContext![]!
+static TUnit.Core.FailedTestMetadata<TClassType>.implicit operator TUnit.Core.TestMetadata<TClassType!>!(TUnit.Core.FailedTestMetadata<TClassType!>! failedTestMetadata) -> TUnit.Core.TestMetadata<TClassType!>!
+static TUnit.Core.GlobalContext.Current.get -> TUnit.Core.GlobalContext!
+static TUnit.Core.Helpers.CastHelper.Cast<T>(object? value) -> T?
+static TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(System.Type! type, string! methodName, int genericParameterCount, System.Type![]! parameterTypes) -> System.Reflection.MethodInfo!
+static TUnit.Core.Hooks.HookMethod.implicit operator TUnit.Core.Hooks.HookMethod!(TUnit.Core.Hooks.InstanceHookMethod! instanceHookMethod) -> TUnit.Core.Hooks.HookMethod!
+static TUnit.Core.Hooks.HookMethod.implicit operator TUnit.Core.Hooks.HookMethod!(TUnit.Core.Hooks.StaticHookMethod! staticHookMethod) -> TUnit.Core.Hooks.HookMethod!
+static TUnit.Core.Logging.LoggingExtensions.LogCritical(this TUnit.Core.Logging.ILogger! logger, string! message) -> void
+static TUnit.Core.Logging.LoggingExtensions.LogCriticalAsync(this TUnit.Core.Logging.ILogger! logger, string! message) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.Logging.LoggingExtensions.LogDebug(this TUnit.Core.Logging.ILogger! logger, string! message) -> void
+static TUnit.Core.Logging.LoggingExtensions.LogDebugAsync(this TUnit.Core.Logging.ILogger! logger, string! message) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.Logging.LoggingExtensions.LogError(this TUnit.Core.Logging.ILogger! logger, string! message) -> void
+static TUnit.Core.Logging.LoggingExtensions.LogError(this TUnit.Core.Logging.ILogger! logger, string! message, System.Exception! ex) -> void
+static TUnit.Core.Logging.LoggingExtensions.LogError(this TUnit.Core.Logging.ILogger! logger, System.Exception! ex) -> void
+static TUnit.Core.Logging.LoggingExtensions.LogErrorAsync(this TUnit.Core.Logging.ILogger! logger, string! message) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.Logging.LoggingExtensions.LogErrorAsync(this TUnit.Core.Logging.ILogger! logger, string! message, System.Exception! ex) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.Logging.LoggingExtensions.LogErrorAsync(this TUnit.Core.Logging.ILogger! logger, System.Exception! ex) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.Logging.LoggingExtensions.LogInformation(this TUnit.Core.Logging.ILogger! logger, string! message) -> void
+static TUnit.Core.Logging.LoggingExtensions.LogInformationAsync(this TUnit.Core.Logging.ILogger! logger, string! message) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.Logging.LoggingExtensions.LogTrace(this TUnit.Core.Logging.ILogger! logger, string! message) -> void
+static TUnit.Core.Logging.LoggingExtensions.LogTraceAsync(this TUnit.Core.Logging.ILogger! logger, string! message) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.Logging.LoggingExtensions.LogWarning(this TUnit.Core.Logging.ILogger! logger, string! message) -> void
+static TUnit.Core.Logging.LoggingExtensions.LogWarningAsync(this TUnit.Core.Logging.ILogger! logger, string! message) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.ResettableLazy<T>.DisposeAsync(object? obj) -> System.Threading.Tasks.ValueTask
+static TUnit.Core.Skip.Test(string! reason) -> void
+static TUnit.Core.Skip.Unless(bool condition, string! reason) -> void
+static TUnit.Core.Skip.When(bool condition, string! reason) -> void
+static TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd(string! name, System.Func<TUnit.Core.SourceGeneratedAssemblyInformation!>! factory) -> TUnit.Core.SourceGeneratedAssemblyInformation!
+static TUnit.Core.SourceGeneratedClassInformation.GetOrAdd(string! name, System.Func<TUnit.Core.SourceGeneratedClassInformation!>! factory) -> TUnit.Core.SourceGeneratedClassInformation!
+static TUnit.Core.SourceRegistrar.Register(TUnit.Core.Interfaces.SourceGenerator.ITestSource! testSource) -> void
+static TUnit.Core.SourceRegistrar.RegisterAssemblyHookSource(TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource! testSource) -> void
+static TUnit.Core.SourceRegistrar.RegisterClassHookSource(TUnit.Core.Interfaces.SourceGenerator.IClassHookSource! testSource) -> void
+static TUnit.Core.SourceRegistrar.RegisterTestDiscoveryHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource! testSource) -> void
+static TUnit.Core.SourceRegistrar.RegisterTestHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestHookSource! testSource) -> void
+static TUnit.Core.SourceRegistrar.RegisterTestSessionHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource! testSource) -> void
+static TUnit.Core.TestContext.Configuration.get -> TUnit.Core.Interfaces.IConfiguration!
+static TUnit.Core.TestContext.Current.get -> TUnit.Core.TestContext?
+static TUnit.Core.TestContext.OutputDirectory.get -> string?
+static TUnit.Core.TestContext.Parameters.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+static TUnit.Core.TestContext.WorkingDirectory.get -> string!
+static TUnit.Core.TestContext.WorkingDirectory.set -> void
+static TUnit.Core.TestDiscoveryContext.Current.get -> TUnit.Core.TestDiscoveryContext?
+static TUnit.Core.TestSessionContext.Current.get -> TUnit.Core.TestSessionContext?
+TUnit.Core.AfterAttribute
+TUnit.Core.AfterAttribute.AfterAttribute(TUnit.Core.HookType hookType, string! file = "", int line = 0) -> void
+TUnit.Core.AfterEveryAttribute
+TUnit.Core.AfterEveryAttribute.AfterEveryAttribute(TUnit.Core.HookType hookType, string! file = "", int line = 0) -> void
+TUnit.Core.ArgumentDisplayFormatter
+TUnit.Core.ArgumentDisplayFormatter.ArgumentDisplayFormatter() -> void
+TUnit.Core.ArgumentDisplayFormatterAttribute
+TUnit.Core.ArgumentDisplayFormatterAttribute.ArgumentDisplayFormatterAttribute() -> void
+TUnit.Core.ArgumentDisplayFormatterAttribute.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.ArgumentDisplayFormatterAttribute<T>
+TUnit.Core.ArgumentDisplayFormatterAttribute<T>.ArgumentDisplayFormatterAttribute() -> void
+TUnit.Core.ArgumentsAttribute
+TUnit.Core.ArgumentsAttribute.ArgumentsAttribute() -> void
+TUnit.Core.ArgumentsAttribute.ArgumentsAttribute(params object?[]? values) -> void
+TUnit.Core.ArgumentsAttribute.Values.get -> object?[]!
+TUnit.Core.Artifact
+TUnit.Core.Artifact.Artifact() -> void
+TUnit.Core.Artifact.Description.get -> string?
+TUnit.Core.Artifact.Description.init -> void
+TUnit.Core.Artifact.DisplayName.get -> string!
+TUnit.Core.Artifact.DisplayName.init -> void
+TUnit.Core.Artifact.File.get -> System.IO.FileInfo!
+TUnit.Core.Artifact.File.init -> void
+TUnit.Core.AssemblyHookContext
+TUnit.Core.AssemblyHookContext.AllTests.get -> System.Collections.Generic.IEnumerable<TUnit.Core.TestContext!>!
+TUnit.Core.AssemblyHookContext.Assembly.get -> System.Reflection.Assembly!
+TUnit.Core.AssemblyHookContext.Assembly.init -> void
+TUnit.Core.AssemblyHookContext.TestClasses.get -> System.Collections.Generic.HashSet<TUnit.Core.ClassHookContext!>!
+TUnit.Core.AssemblyHookContext.TestClasses.init -> void
+TUnit.Core.AssemblyHookContext.TestCount.get -> int
+TUnit.Core.AsyncConvert
+TUnit.Core.AsyncEvent<TEventArgs>
+TUnit.Core.AsyncEvent<TEventArgs>.InvokeAsync(object! sender, TEventArgs eventArgs) -> System.Threading.Tasks.ValueTask
+TUnit.Core.AsyncEvent<TEventArgs>.Unregister() -> void
+TUnit.Core.BaseTestAttribute
+TUnit.Core.BeforeAttribute
+TUnit.Core.BeforeAttribute.BeforeAttribute(TUnit.Core.HookType hookType, string! file = "", int line = 0) -> void
+TUnit.Core.BeforeEveryAttribute
+TUnit.Core.BeforeEveryAttribute.BeforeEveryAttribute(TUnit.Core.HookType hookType, string! file = "", int line = 0) -> void
+TUnit.Core.BeforeTestContext
+TUnit.Core.BeforeTestContext.AddAsyncLocalValues() -> void
+TUnit.Core.BeforeTestContext.AddLinkedCancellationToken(System.Threading.CancellationToken cancellationToken) -> void
+TUnit.Core.BeforeTestContext.SetHookExecutor(TUnit.Core.Interfaces.IHookExecutor! hookExecutor) -> void
+TUnit.Core.BeforeTestContext.SetTestExecutor(TUnit.Core.Interfaces.ITestExecutor! testExecutor) -> void
+TUnit.Core.BeforeTestContext.TestContext.get -> TUnit.Core.TestContext!
+TUnit.Core.BeforeTestContext.TestDetails.get -> TUnit.Core.TestDetails!
+TUnit.Core.BeforeTestDiscoveryContext
+TUnit.Core.BeforeTestDiscoveryContext.TestFilter.get -> string?
+TUnit.Core.BeforeTestDiscoveryContext.TestFilter.init -> void
+TUnit.Core.CategoryAttribute
+TUnit.Core.CategoryAttribute.Category.get -> string!
+TUnit.Core.CategoryAttribute.CategoryAttribute(string! category) -> void
+TUnit.Core.CategoryAttribute.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.CategoryAttribute.Order.get -> int
+TUnit.Core.ClassConstructorAttribute
+TUnit.Core.ClassConstructorAttribute<T>
+TUnit.Core.ClassConstructorAttribute<T>.ClassConstructorAttribute() -> void
+TUnit.Core.ClassConstructorMetadata
+TUnit.Core.ClassConstructorMetadata.TestBuilderContext.get -> TUnit.Core.TestBuilderContext!
+TUnit.Core.ClassConstructorMetadata.TestBuilderContext.init -> void
+TUnit.Core.ClassConstructorMetadata.TestSessionId.get -> string!
+TUnit.Core.ClassConstructorMetadata.TestSessionId.init -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4, T5>
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4, T5>.ClassDataSourceAttribute() -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4, T5>.Keys.get -> string![]!
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4, T5>.Keys.set -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4, T5>.Shared.get -> TUnit.Core.SharedType[]!
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4, T5>.Shared.set -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4>
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4>.ClassDataSourceAttribute() -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4>.Keys.get -> string![]!
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4>.Keys.set -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4>.Shared.get -> TUnit.Core.SharedType[]!
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4>.Shared.set -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3>
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3>.ClassDataSourceAttribute() -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3>.Keys.get -> string![]!
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3>.Keys.set -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3>.Shared.get -> TUnit.Core.SharedType[]!
+TUnit.Core.ClassDataSourceAttribute<T1, T2, T3>.Shared.set -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2>
+TUnit.Core.ClassDataSourceAttribute<T1, T2>.ClassDataSourceAttribute() -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2>.Keys.get -> string![]!
+TUnit.Core.ClassDataSourceAttribute<T1, T2>.Keys.set -> void
+TUnit.Core.ClassDataSourceAttribute<T1, T2>.Shared.get -> TUnit.Core.SharedType[]!
+TUnit.Core.ClassDataSourceAttribute<T1, T2>.Shared.set -> void
+TUnit.Core.ClassDataSourceAttribute<T>
+TUnit.Core.ClassDataSourceAttribute<T>.ClassDataSourceAttribute() -> void
+TUnit.Core.ClassDataSourceAttribute<T>.Key.get -> string!
+TUnit.Core.ClassDataSourceAttribute<T>.Key.set -> void
+TUnit.Core.ClassDataSourceAttribute<T>.Shared.get -> TUnit.Core.SharedType
+TUnit.Core.ClassDataSourceAttribute<T>.Shared.set -> void
+TUnit.Core.ClassHookContext
+TUnit.Core.ClassHookContext.ClassType.get -> System.Type!
+TUnit.Core.ClassHookContext.ClassType.init -> void
+TUnit.Core.ClassHookContext.TestCount.get -> int
+TUnit.Core.ClassHookContext.Tests.get -> System.Collections.Generic.List<TUnit.Core.TestContext!>!
+TUnit.Core.ClassHookContext.Tests.init -> void
+TUnit.Core.Context
+TUnit.Core.Context.AddAsyncLocalValues() -> void
+TUnit.Core.Context.Dispose() -> void
+TUnit.Core.Context.ErrorOutputWriter.get -> System.IO.TextWriter!
+TUnit.Core.Context.GetDefaultLogger() -> TUnit.Core.Logging.TUnitLogger!
+TUnit.Core.Context.GetErrorOutput() -> string!
+TUnit.Core.Context.GetStandardOutput() -> string!
+TUnit.Core.Context.OutputWriter.get -> System.IO.TextWriter!
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>.GetOnlyDictionary() -> void
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>.GetOrAdd(TKey key, System.Func<TKey, TValue>! func) -> TValue
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>.GetOrAdd(TKey key, System.Func<TKey, TValue>! func, out bool previouslyExisted) -> TValue
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>.Keys.get -> System.Collections.Generic.ICollection<TKey>!
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>.Remove(TKey key) -> TValue?
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>.this[TKey key].get -> TValue
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue? value) -> bool
+TUnit.Core.Data.GetOnlyDictionary<TKey, TValue>.Values.get -> System.Collections.Generic.ICollection<TValue>!
+TUnit.Core.DataGeneratorMetadata
+TUnit.Core.DataGeneratorMetadata.ClassInstanceArguments.get -> object?[]?
+TUnit.Core.DataGeneratorMetadata.ClassInstanceArguments.init -> void
+TUnit.Core.DataGeneratorMetadata.MembersToGenerate.get -> TUnit.Core.SourceGeneratedMemberInformation![]!
+TUnit.Core.DataGeneratorMetadata.MembersToGenerate.init -> void
+TUnit.Core.DataGeneratorMetadata.TestBuilderContext.get -> TUnit.Core.TestBuilderContextAccessor!
+TUnit.Core.DataGeneratorMetadata.TestBuilderContext.init -> void
+TUnit.Core.DataGeneratorMetadata.TestClassInstance.get -> object?
+TUnit.Core.DataGeneratorMetadata.TestClassInstance.init -> void
+TUnit.Core.DataGeneratorMetadata.TestClassType.get -> System.Type!
+TUnit.Core.DataGeneratorMetadata.TestInformation.get -> TUnit.Core.SourceGeneratedMethodInformation!
+TUnit.Core.DataGeneratorMetadata.TestInformation.init -> void
+TUnit.Core.DataGeneratorMetadata.TestSessionId.get -> string!
+TUnit.Core.DataGeneratorMetadata.TestSessionId.init -> void
+TUnit.Core.DataGeneratorMetadata.Type.get -> TUnit.Core.Enums.DataGeneratorType
+TUnit.Core.DataGeneratorMetadata.Type.init -> void
+TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
+TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.DataSourceGeneratorAttribute() -> void
+TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4>
+TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4>.DataSourceGeneratorAttribute() -> void
+TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3>
+TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3>.DataSourceGeneratorAttribute() -> void
+TUnit.Core.DataSourceGeneratorAttribute<T1, T2>
+TUnit.Core.DataSourceGeneratorAttribute<T1, T2>.DataSourceGeneratorAttribute() -> void
+TUnit.Core.DataSourceGeneratorAttribute<T>
+TUnit.Core.DataSourceGeneratorAttribute<T>.DataSourceGeneratorAttribute() -> void
+TUnit.Core.DefaultExecutor
+TUnit.Core.DependencyInjectionDataSourceAttribute<TScope>
+TUnit.Core.DependencyInjectionDataSourceAttribute<TScope>.DependencyInjectionDataSourceAttribute() -> void
+TUnit.Core.DependsOnAttribute
+TUnit.Core.DependsOnAttribute.DependsOnAttribute(string! testName) -> void
+TUnit.Core.DependsOnAttribute.DependsOnAttribute(string! testName, System.Type![]! parameterTypes) -> void
+TUnit.Core.DependsOnAttribute.DependsOnAttribute(System.Type! testClass) -> void
+TUnit.Core.DependsOnAttribute.DependsOnAttribute(System.Type! testClass, string! testName) -> void
+TUnit.Core.DependsOnAttribute.DependsOnAttribute(System.Type! testClass, string! testName, System.Type![]! parameterTypes) -> void
+TUnit.Core.DependsOnAttribute.ParameterTypes.get -> System.Type![]?
+TUnit.Core.DependsOnAttribute.ProceedOnFailure.get -> bool
+TUnit.Core.DependsOnAttribute.ProceedOnFailure.set -> void
+TUnit.Core.DependsOnAttribute.TestClass.get -> System.Type?
+TUnit.Core.DependsOnAttribute.TestName.get -> string?
+TUnit.Core.DependsOnAttribute<T>
+TUnit.Core.DependsOnAttribute<T>.DependsOnAttribute() -> void
+TUnit.Core.DependsOnAttribute<T>.DependsOnAttribute(string! testName) -> void
+TUnit.Core.DependsOnAttribute<T>.DependsOnAttribute(string! testName, System.Type![]! parameterTypes) -> void
+TUnit.Core.DiscoveredTestContext
+TUnit.Core.DiscoveredTestContext.AddArgumentDisplayFormatter(TUnit.Core.ArgumentDisplayFormatter! formatter) -> void
+TUnit.Core.DiscoveredTestContext.AddCategory(string! category) -> void
+TUnit.Core.DiscoveredTestContext.AddProperty(string! key, string! value) -> void
+TUnit.Core.DiscoveredTestContext.SetDisplayName(string! displayName) -> void
+TUnit.Core.DiscoveredTestContext.SetParallelConstraint(TUnit.Core.Interfaces.IParallelConstraint! parallelConstraint) -> void
+TUnit.Core.DiscoveredTestContext.SetRetryCount(int times) -> void
+TUnit.Core.DiscoveredTestContext.SetRetryCount(int times, System.Func<TUnit.Core.TestContext!, System.Exception!, int, System.Threading.Tasks.Task<bool>!>! shouldRetry) -> void
+TUnit.Core.DiscoveredTestContext.TestContext.get -> TUnit.Core.TestContext!
+TUnit.Core.DiscoveredTestContext.TestDetails.get -> TUnit.Core.TestDetails!
+TUnit.Core.DisplayNameAttribute
+TUnit.Core.DisplayNameAttribute.DisplayNameAttribute(string! displayName) -> void
+TUnit.Core.DisplayNameFormatterAttribute
+TUnit.Core.DisplayNameFormatterAttribute.DisplayNameFormatterAttribute() -> void
+TUnit.Core.DisplayNameFormatterAttribute.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.DisplayNameFormatterAttribute.Order.get -> int
+TUnit.Core.EngineCancellationToken
+TUnit.Core.EngineCancellationToken.Dispose() -> void
+TUnit.Core.EngineCancellationToken.EngineCancellationToken() -> void
+TUnit.Core.EngineCancellationToken.Token.get -> System.Threading.CancellationToken
+TUnit.Core.Enums.DataGeneratorType
+TUnit.Core.Enums.DataGeneratorType.ClassParameters = 0 -> TUnit.Core.Enums.DataGeneratorType
+TUnit.Core.Enums.DataGeneratorType.Property = 2 -> TUnit.Core.Enums.DataGeneratorType
+TUnit.Core.Enums.DataGeneratorType.TestParameters = 1 -> TUnit.Core.Enums.DataGeneratorType
+TUnit.Core.Enums.LogLevel
+TUnit.Core.Enums.LogLevel.Critical = 5 -> TUnit.Core.Enums.LogLevel
+TUnit.Core.Enums.LogLevel.Debug = 1 -> TUnit.Core.Enums.LogLevel
+TUnit.Core.Enums.LogLevel.Error = 4 -> TUnit.Core.Enums.LogLevel
+TUnit.Core.Enums.LogLevel.Information = 2 -> TUnit.Core.Enums.LogLevel
+TUnit.Core.Enums.LogLevel.None = -1 -> TUnit.Core.Enums.LogLevel
+TUnit.Core.Enums.LogLevel.Trace = 0 -> TUnit.Core.Enums.LogLevel
+TUnit.Core.Enums.LogLevel.Warning = 3 -> TUnit.Core.Enums.LogLevel
+TUnit.Core.Enums.Status
+TUnit.Core.Enums.Status.Failed = 2 -> TUnit.Core.Enums.Status
+TUnit.Core.Enums.Status.None = 0 -> TUnit.Core.Enums.Status
+TUnit.Core.Enums.Status.Passed = 1 -> TUnit.Core.Enums.Status
+TUnit.Core.Enums.Status.Skipped = 3 -> TUnit.Core.Enums.Status
+TUnit.Core.Exceptions.AfterAssemblyException
+TUnit.Core.Exceptions.AfterAssemblyException.AfterAssemblyException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.AfterClassException
+TUnit.Core.Exceptions.AfterClassException.AfterClassException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.AfterTestDiscoveryException
+TUnit.Core.Exceptions.AfterTestDiscoveryException.AfterTestDiscoveryException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.AfterTestException
+TUnit.Core.Exceptions.AfterTestException.AfterTestException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.AfterTestSessionException
+TUnit.Core.Exceptions.AfterTestSessionException.AfterTestSessionException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.BeforeAssemblyException
+TUnit.Core.Exceptions.BeforeAssemblyException.BeforeAssemblyException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.BeforeClassException
+TUnit.Core.Exceptions.BeforeClassException.BeforeClassException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.BeforeTestDiscoveryException
+TUnit.Core.Exceptions.BeforeTestDiscoveryException.BeforeTestDiscoveryException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.BeforeTestException
+TUnit.Core.Exceptions.BeforeTestException.BeforeTestException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.BeforeTestSessionException
+TUnit.Core.Exceptions.BeforeTestSessionException.BeforeTestSessionException(string! message, System.Exception! innerException) -> void
+TUnit.Core.Exceptions.DependencyConflictException
+TUnit.Core.Exceptions.FailTestException
+TUnit.Core.Exceptions.FailTestException.FailTestException(string! reason) -> void
+TUnit.Core.Exceptions.FailTestException.Reason.get -> string!
+TUnit.Core.Exceptions.InconclusiveTestException
+TUnit.Core.Exceptions.InconclusiveTestException.InconclusiveTestException(string! message, System.Exception! exception) -> void
+TUnit.Core.Exceptions.SkipTestException
+TUnit.Core.Exceptions.SkipTestException.Reason.get -> string!
+TUnit.Core.Exceptions.SkipTestException.SkipTestException(string! reason) -> void
+TUnit.Core.Exceptions.TestFailedInitializationException
+TUnit.Core.Exceptions.TestFailedInitializationException.TestFailedInitializationException(string? message, System.Exception? innerException) -> void
+TUnit.Core.Exceptions.TestNotExecutedException
+TUnit.Core.Exceptions.TestRunCanceledException
+TUnit.Core.Exceptions.TestRunCanceledException.TestRunCanceledException() -> void
+TUnit.Core.Exceptions.TimeoutException
+TUnit.Core.Exceptions.TUnitException
+TUnit.Core.Exceptions.TUnitException.TUnitException() -> void
+TUnit.Core.Exceptions.TUnitException.TUnitException(string? message) -> void
+TUnit.Core.Exceptions.TUnitException.TUnitException(string? message, System.Exception? innerException) -> void
+TUnit.Core.Executors.HookExecutorAttribute
+TUnit.Core.Executors.HookExecutorAttribute<T>
+TUnit.Core.Executors.HookExecutorAttribute<T>.HookExecutorAttribute() -> void
+TUnit.Core.Executors.TestExecutorAttribute<T>
+TUnit.Core.Executors.TestExecutorAttribute<T>.OnTestRegistered(TUnit.Core.TestRegisteredContext! context) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Executors.TestExecutorAttribute<T>.Order.get -> int
+TUnit.Core.Executors.TestExecutorAttribute<T>.TestExecutorAttribute() -> void
+TUnit.Core.ExplicitAttribute
+TUnit.Core.ExplicitAttribute.ExplicitAttribute(string! callerFile = "", string! callerMemberName = "") -> void
+TUnit.Core.ExplicitAttribute.For.get -> string!
+TUnit.Core.Extensions.TestContextExtensions
+TUnit.Core.FailedTestMetadata<TClassType>
+TUnit.Core.FailedTestMetadata<TClassType>.Exception.get -> System.Exception!
+TUnit.Core.FailedTestMetadata<TClassType>.Exception.init -> void
+TUnit.Core.FailedTestMetadata<TClassType>.MethodName.get -> string!
+TUnit.Core.FailedTestMetadata<TClassType>.MethodName.init -> void
+TUnit.Core.FailedTestMetadata<TClassType>.TestFilePath.get -> string!
+TUnit.Core.FailedTestMetadata<TClassType>.TestFilePath.init -> void
+TUnit.Core.FailedTestMetadata<TClassType>.TestId.get -> string!
+TUnit.Core.FailedTestMetadata<TClassType>.TestId.init -> void
+TUnit.Core.FailedTestMetadata<TClassType>.TestLineNumber.get -> int
+TUnit.Core.FailedTestMetadata<TClassType>.TestLineNumber.init -> void
+TUnit.Core.GenericAbstractExecutor
+TUnit.Core.GenericAbstractExecutor.ExecuteAfterAssemblyHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.AssemblyHookContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteAfterClassHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.ClassHookContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteAfterTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestDiscoveryContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteAfterTestHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteAfterTestSessionHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestSessionContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteBeforeAssemblyHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.AssemblyHookContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteBeforeClassHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.ClassHookContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteBeforeTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.BeforeTestDiscoveryContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteBeforeTestHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteBeforeTestSessionHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestSessionContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.ExecuteTest(TUnit.Core.TestContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.GenericAbstractExecutor.GenericAbstractExecutor() -> void
+TUnit.Core.GlobalContext
+TUnit.Core.GlobalContext.TestFilter.get -> string?
+TUnit.Core.GlobalSharedDataKey
+TUnit.Core.GlobalSharedDataKey.GlobalSharedDataKey(System.Type! Type) -> void
+TUnit.Core.Helpers.CastHelper
+TUnit.Core.Helpers.Counter
+TUnit.Core.Helpers.Counter.Counter() -> void
+TUnit.Core.Helpers.Counter.CurrentCount.get -> int
+TUnit.Core.Helpers.Counter.Decrement() -> int
+TUnit.Core.Helpers.Counter.Increment() -> int
+TUnit.Core.Helpers.Counter.OnCountChanged -> System.EventHandler<int>?
+TUnit.Core.Helpers.DefaultParallelLimit
+TUnit.Core.Helpers.DefaultParallelLimit.DefaultParallelLimit() -> void
+TUnit.Core.Helpers.DefaultParallelLimit.Limit.get -> int
+TUnit.Core.Helpers.MethodInfoRetriever
+TUnit.Core.Helpers.MethodInfoRetriever.MethodInfoRetriever() -> void
+TUnit.Core.HookAttribute
+TUnit.Core.HookAttribute.Order.get -> int
+TUnit.Core.HookAttribute.Order.init -> void
+TUnit.Core.Hooks.AfterAssemblyHookMethod
+TUnit.Core.Hooks.AfterClassHookMethod
+TUnit.Core.Hooks.AfterTestDiscoveryHookMethod
+TUnit.Core.Hooks.AfterTestHookMethod
+TUnit.Core.Hooks.AfterTestSessionHookMethod
+TUnit.Core.Hooks.BeforeAssemblyHookMethod
+TUnit.Core.Hooks.BeforeClassHookMethod
+TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod
+TUnit.Core.Hooks.BeforeTestHookMethod
+TUnit.Core.Hooks.BeforeTestSessionHookMethod
+TUnit.Core.Hooks.HookMethod
+TUnit.Core.Hooks.HookMethod.HookMethod(TUnit.Core.Hooks.InstanceHookMethod! instanceHookMethod) -> void
+TUnit.Core.Hooks.HookMethod.HookMethod(TUnit.Core.Hooks.StaticHookMethod! staticHookMethod) -> void
+TUnit.Core.Hooks.HookMethod.InstanceHookMethod.get -> TUnit.Core.Hooks.InstanceHookMethod?
+TUnit.Core.Hooks.HookMethod.StaticHookMethod.get -> TUnit.Core.Hooks.StaticHookMethod?
+TUnit.Core.Hooks.IExecutableHook<T>
+TUnit.Core.Hooks.IExecutableHook<T>.ExecuteAsync(T context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Hooks.IExecutableHook<T>.MethodInfo.get -> TUnit.Core.SourceGeneratedMethodInformation!
+TUnit.Core.Hooks.IExecutableHook<T>.Name.get -> string!
+TUnit.Core.Hooks.IExecutableHook<T>.Order.get -> int
+TUnit.Core.Hooks.IHookMessagePublisher
+TUnit.Core.Hooks.IHookMessagePublisher.Discover(string! sessionId, string! displayName, TUnit.Core.Hooks.StaticHookMethod! hookMethod) -> System.Threading.Tasks.Task!
+TUnit.Core.Hooks.IHookMessagePublisher.Push(string! sessionId, string! displayName, TUnit.Core.Hooks.StaticHookMethod! hookMethod, System.Func<System.Threading.Tasks.Task!>! func) -> System.Threading.Tasks.Task!
+TUnit.Core.Hooks.InstanceHookMethod
+TUnit.Core.Hooks.InstanceHookMethod.Assembly.get -> System.Reflection.Assembly!
+TUnit.Core.Hooks.InstanceHookMethod.AssemblyAttributes.get -> System.Attribute![]!
+TUnit.Core.Hooks.InstanceHookMethod.AssemblyAttributes.init -> void
+TUnit.Core.Hooks.InstanceHookMethod.Attributes.get -> System.Collections.Generic.IEnumerable<System.Attribute!>!
+TUnit.Core.Hooks.InstanceHookMethod.Body.get -> System.Func<object!, TUnit.Core.TestContext!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>?
+TUnit.Core.Hooks.InstanceHookMethod.Body.init -> void
+TUnit.Core.Hooks.InstanceHookMethod.ClassAttributes.get -> System.Attribute![]!
+TUnit.Core.Hooks.InstanceHookMethod.ClassAttributes.init -> void
+TUnit.Core.Hooks.InstanceHookMethod.ClassType.get -> System.Type!
+TUnit.Core.Hooks.InstanceHookMethod.ClassType.init -> void
+TUnit.Core.Hooks.InstanceHookMethod.ExecuteAsync(TUnit.Core.TestContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Hooks.InstanceHookMethod.GetAttribute<TAttribute>() -> TAttribute?
+TUnit.Core.Hooks.InstanceHookMethod.HookExecutor.get -> TUnit.Core.Interfaces.IHookExecutor!
+TUnit.Core.Hooks.InstanceHookMethod.HookExecutor.init -> void
+TUnit.Core.Hooks.InstanceHookMethod.MethodAttributes.get -> System.Attribute![]!
+TUnit.Core.Hooks.InstanceHookMethod.MethodAttributes.init -> void
+TUnit.Core.Hooks.InstanceHookMethod.MethodInfo.get -> TUnit.Core.SourceGeneratedMethodInformation!
+TUnit.Core.Hooks.InstanceHookMethod.MethodInfo.init -> void
+TUnit.Core.Hooks.InstanceHookMethod.Name.get -> string!
+TUnit.Core.Hooks.InstanceHookMethod.Order.get -> int
+TUnit.Core.Hooks.InstanceHookMethod.Order.init -> void
+TUnit.Core.Hooks.InstanceHookMethod.Timeout.get -> System.TimeSpan?
+TUnit.Core.Hooks.LastTestInAssemblyAdapter
+TUnit.Core.Hooks.LastTestInAssemblyAdapter.Execute(TUnit.Core.AssemblyHookContext! context, System.Threading.CancellationToken cancellationToken) -> bool
+TUnit.Core.Hooks.LastTestInAssemblyAdapter.ExecuteAsync(TUnit.Core.AssemblyHookContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Hooks.LastTestInAssemblyAdapter.LastTestInAssemblyAdapter(TUnit.Core.Interfaces.ILastTestInAssemblyEventReceiver! lastTestInAssemblyEventReceiver, TUnit.Core.TestContext! testContext) -> void
+TUnit.Core.Hooks.LastTestInAssemblyAdapter.MethodInfo.get -> TUnit.Core.SourceGeneratedMethodInformation!
+TUnit.Core.Hooks.LastTestInAssemblyAdapter.Name.get -> string!
+TUnit.Core.Hooks.LastTestInAssemblyAdapter.Order.get -> int
+TUnit.Core.Hooks.LastTestInClassAdapter
+TUnit.Core.Hooks.LastTestInClassAdapter.Execute(TUnit.Core.ClassHookContext! context, System.Threading.CancellationToken cancellationToken) -> bool
+TUnit.Core.Hooks.LastTestInClassAdapter.ExecuteAsync(TUnit.Core.ClassHookContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Hooks.LastTestInClassAdapter.LastTestInClassAdapter(TUnit.Core.Interfaces.ILastTestInClassEventReceiver! lastTestInClassEventReceiver, TUnit.Core.TestContext! testContext) -> void
+TUnit.Core.Hooks.LastTestInClassAdapter.MethodInfo.get -> TUnit.Core.SourceGeneratedMethodInformation!
+TUnit.Core.Hooks.LastTestInClassAdapter.Name.get -> string!
+TUnit.Core.Hooks.LastTestInClassAdapter.Order.get -> int
+TUnit.Core.Hooks.StaticHookMethod
+TUnit.Core.Hooks.StaticHookMethod.Assembly.get -> System.Reflection.Assembly!
+TUnit.Core.Hooks.StaticHookMethod.AssemblyAttributes.get -> System.Attribute![]!
+TUnit.Core.Hooks.StaticHookMethod.AssemblyAttributes.init -> void
+TUnit.Core.Hooks.StaticHookMethod.Attributes.get -> System.Collections.Generic.IEnumerable<System.Attribute!>!
+TUnit.Core.Hooks.StaticHookMethod.ClassAttributes.get -> System.Attribute![]!
+TUnit.Core.Hooks.StaticHookMethod.ClassAttributes.init -> void
+TUnit.Core.Hooks.StaticHookMethod.ClassType.get -> System.Type!
+TUnit.Core.Hooks.StaticHookMethod.FilePath.get -> string!
+TUnit.Core.Hooks.StaticHookMethod.FilePath.init -> void
+TUnit.Core.Hooks.StaticHookMethod.GetAttribute<TAttribute>() -> TAttribute?
+TUnit.Core.Hooks.StaticHookMethod.HookExecutor.get -> TUnit.Core.Interfaces.IHookExecutor!
+TUnit.Core.Hooks.StaticHookMethod.HookExecutor.init -> void
+TUnit.Core.Hooks.StaticHookMethod.LineNumber.get -> int
+TUnit.Core.Hooks.StaticHookMethod.LineNumber.init -> void
+TUnit.Core.Hooks.StaticHookMethod.MethodAttributes.get -> System.Attribute![]!
+TUnit.Core.Hooks.StaticHookMethod.MethodAttributes.init -> void
+TUnit.Core.Hooks.StaticHookMethod.MethodInfo.get -> TUnit.Core.SourceGeneratedMethodInformation!
+TUnit.Core.Hooks.StaticHookMethod.MethodInfo.init -> void
+TUnit.Core.Hooks.StaticHookMethod.Name.get -> string!
+TUnit.Core.Hooks.StaticHookMethod.Order.get -> int
+TUnit.Core.Hooks.StaticHookMethod.Order.init -> void
+TUnit.Core.Hooks.StaticHookMethod.Timeout.get -> System.TimeSpan?
+TUnit.Core.Hooks.StaticHookMethod<T>
+TUnit.Core.Hooks.StaticHookMethod<T>.Body.get -> System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>?
+TUnit.Core.Hooks.StaticHookMethod<T>.Body.init -> void
+TUnit.Core.HookType
+TUnit.Core.HookType.Assembly = 2 -> TUnit.Core.HookType
+TUnit.Core.HookType.Class = 1 -> TUnit.Core.HookType
+TUnit.Core.HookType.Test = 0 -> TUnit.Core.HookType
+TUnit.Core.HookType.TestDiscovery = 4 -> TUnit.Core.HookType
+TUnit.Core.HookType.TestSession = 3 -> TUnit.Core.HookType
+TUnit.Core.IAccessesInstanceData
+TUnit.Core.IDataAttribute
+TUnit.Core.InheritsTestsAttribute
+TUnit.Core.InheritsTestsAttribute.InheritsTestsAttribute() -> void
+TUnit.Core.InstanceMethodDataSourceAttribute
+TUnit.Core.InstanceMethodDataSourceAttribute.InstanceMethodDataSourceAttribute(string! methodNameProvidingDataSource) -> void
+TUnit.Core.InstanceMethodDataSourceAttribute.InstanceMethodDataSourceAttribute(System.Type! classProvidingDataSource, string! methodNameProvidingDataSource) -> void
+TUnit.Core.InstanceMethodDataSourceAttribute<T>
+TUnit.Core.InstanceMethodDataSourceAttribute<T>.InstanceMethodDataSourceAttribute(string! methodNameProvidingDataSource) -> void
+TUnit.Core.Interfaces.IAsyncInitializer
+TUnit.Core.Interfaces.IAsyncInitializer.InitializeAsync() -> System.Threading.Tasks.Task!
+TUnit.Core.Interfaces.IClassConstructor
+TUnit.Core.Interfaces.IClassConstructor.Create<T>(TUnit.Core.ClassConstructorMetadata! classConstructorMetadata) -> T!
+TUnit.Core.Interfaces.IConfiguration
+TUnit.Core.Interfaces.IConfiguration.Get(string! key) -> string?
+TUnit.Core.Interfaces.IContext
+TUnit.Core.Interfaces.IContext.ErrorOutputWriter.get -> System.IO.TextWriter!
+TUnit.Core.Interfaces.IContext.GetDefaultLogger() -> TUnit.Core.Logging.TUnitLogger!
+TUnit.Core.Interfaces.IContext.OutputWriter.get -> System.IO.TextWriter!
+TUnit.Core.Interfaces.IEventReceiver
+TUnit.Core.Interfaces.IEventReceiver.Order.get -> int
+TUnit.Core.Interfaces.IFirstTestInAssemblyEventReceiver
+TUnit.Core.Interfaces.IFirstTestInAssemblyEventReceiver.OnFirstTestInAssembly(TUnit.Core.AssemblyHookContext! context, TUnit.Core.TestContext! testContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IFirstTestInClassEventReceiver
+TUnit.Core.Interfaces.IFirstTestInClassEventReceiver.OnFirstTestInClass(TUnit.Core.ClassHookContext! context, TUnit.Core.TestContext! testContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IFirstTestInTestSessionEventReceiver
+TUnit.Core.Interfaces.IFirstTestInTestSessionEventReceiver.OnFirstTestInTestSession(TUnit.Core.TestSessionContext! current, TUnit.Core.TestContext! testContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHasLoggers
+TUnit.Core.Interfaces.IHasLoggers.Loggers.get -> System.Collections.Generic.List<TUnit.Core.Logging.TUnitLogger!>!
+TUnit.Core.Interfaces.IHookExecutor
+TUnit.Core.Interfaces.IHookExecutor.ExecuteAfterAssemblyHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.AssemblyHookContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteAfterClassHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.ClassHookContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteAfterTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestDiscoveryContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteAfterTestHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteAfterTestSessionHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestSessionContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteBeforeAssemblyHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.AssemblyHookContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteBeforeClassHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.ClassHookContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteBeforeTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.BeforeTestDiscoveryContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteBeforeTestHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IHookExecutor.ExecuteBeforeTestSessionHook(TUnit.Core.SourceGeneratedMethodInformation! hookMethodInfo, TUnit.Core.TestSessionContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.ILastTestInAssemblyEventReceiver
+TUnit.Core.Interfaces.ILastTestInAssemblyEventReceiver.OnLastTestInAssembly(TUnit.Core.AssemblyHookContext! context, TUnit.Core.TestContext! testContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.ILastTestInClassEventReceiver
+TUnit.Core.Interfaces.ILastTestInClassEventReceiver.OnLastTestInClass(TUnit.Core.ClassHookContext! context, TUnit.Core.TestContext! testContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.ILastTestInTestSessionEventReceiver
+TUnit.Core.Interfaces.ILastTestInTestSessionEventReceiver.OnLastTestInTestSession(TUnit.Core.TestSessionContext! current, TUnit.Core.TestContext! testContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.IParallelConstraint
+TUnit.Core.Interfaces.IParallelLimit
+TUnit.Core.Interfaces.IParallelLimit.Limit.get -> int
+TUnit.Core.Interfaces.ITestDiscoveryEventReceiver
+TUnit.Core.Interfaces.ITestDiscoveryEventReceiver.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.Interfaces.ITestEndEventReceiver
+TUnit.Core.Interfaces.ITestEndEventReceiver.OnTestEnd(TUnit.Core.TestContext! testContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.ITestExecutor
+TUnit.Core.Interfaces.ITestExecutor.ExecuteTest(TUnit.Core.TestContext! context, System.Func<System.Threading.Tasks.ValueTask>! action) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.ITestFinder
+TUnit.Core.Interfaces.ITestFinder.GetTests(System.Type! classType) -> System.Collections.Generic.IEnumerable<TUnit.Core.TestContext!>!
+TUnit.Core.Interfaces.ITestFinder.GetTestsByNameAndParameters(string! testName, System.Collections.Generic.IEnumerable<System.Type!>! methodParameterTypes, System.Type! classType, System.Collections.Generic.IEnumerable<System.Type!>! classParameterTypes, System.Collections.Generic.IEnumerable<object?>! classArguments) -> TUnit.Core.TestContext![]!
+TUnit.Core.Interfaces.ITestRegisteredEventReceiver
+TUnit.Core.Interfaces.ITestRegisteredEventReceiver.OnTestRegistered(TUnit.Core.TestRegisteredContext! context) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.ITestRetryEventReceiver
+TUnit.Core.Interfaces.ITestRetryEventReceiver.OnTestRetry(TUnit.Core.TestContext! testContext, int retryAttempt) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.ITestSkippedEventReceiver
+TUnit.Core.Interfaces.ITestSkippedEventReceiver.OnTestSkipped(TUnit.Core.TestContext! testContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.ITestStartEventReceiver
+TUnit.Core.Interfaces.ITestStartEventReceiver.OnTestStart(TUnit.Core.BeforeTestContext! beforeTestContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
+TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource.CollectAfterAssemblyHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.AssemblyHookContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource.CollectAfterEveryAssemblyHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.AssemblyHookContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource.CollectBeforeAssemblyHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.AssemblyHookContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource.CollectBeforeEveryAssemblyHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.AssemblyHookContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.IClassHookSource
+TUnit.Core.Interfaces.SourceGenerator.IClassHookSource.CollectAfterClassHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.IClassHookSource.CollectAfterEveryClassHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.IClassHookSource.CollectBeforeClassHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.IClassHookSource.CollectBeforeEveryClassHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
+TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource.CollectAfterTestDiscoveryHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestDiscoveryContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource.CollectBeforeTestDiscoveryHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.BeforeTestDiscoveryContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+TUnit.Core.Interfaces.SourceGenerator.ITestHookSource.CollectAfterEveryTestHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestHookSource.CollectAfterTestHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.InstanceHookMethod!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestHookSource.CollectBeforeEveryTestHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestHookSource.CollectBeforeTestHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.InstanceHookMethod!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource
+TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource.CollectAfterTestSessionHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestSessionContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource.CollectBeforeTestSessionHooks(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestSessionContext!>!>!
+TUnit.Core.Interfaces.SourceGenerator.ITestSource
+TUnit.Core.Interfaces.SourceGenerator.ITestSource.CollectTests(string! sessionId) -> System.Collections.Generic.IReadOnlyList<TUnit.Core.TestMetadata!>!
+TUnit.Core.Logging.DefaultLogger
+TUnit.Core.Logging.DefaultLogger.DefaultLogger() -> void
+TUnit.Core.Logging.DefaultLogger.PushProperties(System.Collections.Generic.IDictionary<string!, System.Collections.Generic.List<object!>!>! dictionary) -> void
+TUnit.Core.Logging.DefaultLogger.PushProperty(string! name, object? value) -> void
+TUnit.Core.Logging.ILogger
+TUnit.Core.Logging.ILogger.IsEnabled(TUnit.Core.Logging.LogLevel logLevel) -> bool
+TUnit.Core.Logging.ILogger.Log<TState>(TUnit.Core.Logging.LogLevel logLevel, TState state, System.Exception? exception, System.Func<TState, System.Exception?, string!>! formatter) -> void
+TUnit.Core.Logging.ILogger.LogAsync<TState>(TUnit.Core.Logging.LogLevel logLevel, TState state, System.Exception? exception, System.Func<TState, System.Exception?, string!>! formatter) -> System.Threading.Tasks.ValueTask
+TUnit.Core.Logging.ILogger<TCategoryName>
+TUnit.Core.Logging.LoggingExtensions
+TUnit.Core.Logging.LogLevel
+TUnit.Core.Logging.LogLevel.Critical = 5 -> TUnit.Core.Logging.LogLevel
+TUnit.Core.Logging.LogLevel.Debug = 1 -> TUnit.Core.Logging.LogLevel
+TUnit.Core.Logging.LogLevel.Error = 4 -> TUnit.Core.Logging.LogLevel
+TUnit.Core.Logging.LogLevel.Information = 2 -> TUnit.Core.Logging.LogLevel
+TUnit.Core.Logging.LogLevel.None = 6 -> TUnit.Core.Logging.LogLevel
+TUnit.Core.Logging.LogLevel.Trace = 0 -> TUnit.Core.Logging.LogLevel
+TUnit.Core.Logging.LogLevel.Warning = 3 -> TUnit.Core.Logging.LogLevel
+TUnit.Core.Logging.TUnitLogger
+TUnit.Core.Logging.TUnitLogger.TUnitLogger() -> void
+TUnit.Core.MatrixAttribute
+TUnit.Core.MatrixAttribute.Excluding.get -> object?[]?
+TUnit.Core.MatrixAttribute.Excluding.init -> void
+TUnit.Core.MatrixAttribute.MatrixAttribute() -> void
+TUnit.Core.MatrixAttribute.MatrixAttribute(params object?[]? objects) -> void
+TUnit.Core.MatrixAttribute<T>
+TUnit.Core.MatrixAttribute<T>.MatrixAttribute(params T?[]? objects) -> void
+TUnit.Core.MatrixDataSourceAttribute
+TUnit.Core.MatrixDataSourceAttribute.MatrixDataSourceAttribute() -> void
+TUnit.Core.MatrixExclusionAttribute
+TUnit.Core.MatrixExclusionAttribute.MatrixExclusionAttribute(params object?[]? objects) -> void
+TUnit.Core.MatrixExclusionAttribute.Objects.get -> object?[]!
+TUnit.Core.MatrixInstanceMethodAttribute<TClass>
+TUnit.Core.MatrixInstanceMethodAttribute<TClass>.MatrixInstanceMethodAttribute(string! methodName) -> void
+TUnit.Core.MatrixMethodAttribute<TClass>
+TUnit.Core.MatrixMethodAttribute<TClass>.MatrixMethodAttribute(string! methodName) -> void
+TUnit.Core.MatrixRangeAttribute<T>
+TUnit.Core.MatrixRangeAttribute<T>.MatrixRangeAttribute(T min, T max) -> void
+TUnit.Core.MatrixRangeAttribute<T>.MatrixRangeAttribute(T min, T max, T step) -> void
+TUnit.Core.MethodDataSourceAttribute
+TUnit.Core.MethodDataSourceAttribute.Arguments.get -> object?[]!
+TUnit.Core.MethodDataSourceAttribute.Arguments.set -> void
+TUnit.Core.MethodDataSourceAttribute.ClassProvidingDataSource.get -> System.Type?
+TUnit.Core.MethodDataSourceAttribute.MethodDataSourceAttribute(string! methodNameProvidingDataSource) -> void
+TUnit.Core.MethodDataSourceAttribute.MethodDataSourceAttribute(System.Type! classProvidingDataSource, string! methodNameProvidingDataSource) -> void
+TUnit.Core.MethodDataSourceAttribute.MethodNameProvidingDataSource.get -> string!
+TUnit.Core.MethodDataSourceAttribute<T>
+TUnit.Core.MethodDataSourceAttribute<T>.MethodDataSourceAttribute(string! methodNameProvidingDataSource) -> void
+TUnit.Core.NonTypedDataSourceGeneratorAttribute
+TUnit.Core.NonTypedDataSourceGeneratorAttribute.NonTypedDataSourceGeneratorAttribute() -> void
+TUnit.Core.NotInParallelAttribute
+TUnit.Core.NotInParallelAttribute.ConstraintKeys.get -> string![]!
+TUnit.Core.NotInParallelAttribute.NotInParallelAttribute() -> void
+TUnit.Core.NotInParallelAttribute.NotInParallelAttribute(string! constraintKey) -> void
+TUnit.Core.NotInParallelAttribute.NotInParallelAttribute(string![]! constraintKeys) -> void
+TUnit.Core.NotInParallelAttribute.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.NotInParallelAttribute.Order.get -> int
+TUnit.Core.NotInParallelAttribute.Order.init -> void
+TUnit.Core.NotInParallelConstraint
+TUnit.Core.NotInParallelConstraint.NotInParallelConstraint(System.Collections.Generic.IReadOnlyList<string!>! NotInParallelConstraintKeys) -> void
+TUnit.Core.NotInParallelConstraint.NotInParallelConstraintKeys.get -> System.Collections.Generic.IReadOnlyList<string!>!
+TUnit.Core.NotInParallelConstraint.NotInParallelConstraintKeys.init -> void
+TUnit.Core.NotInParallelConstraint.Order.get -> int
+TUnit.Core.NotInParallelConstraint.Order.set -> void
+TUnit.Core.ParallelGroupAttribute
+TUnit.Core.ParallelGroupAttribute.Group.get -> string!
+TUnit.Core.ParallelGroupAttribute.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.ParallelGroupAttribute.Order.get -> int
+TUnit.Core.ParallelGroupAttribute.Order.set -> void
+TUnit.Core.ParallelGroupAttribute.ParallelGroupAttribute(string! group) -> void
+TUnit.Core.ParallelGroupConstraint
+TUnit.Core.ParallelGroupConstraint.CompareTo(object? obj) -> int
+TUnit.Core.ParallelGroupConstraint.CompareTo(TUnit.Core.ParallelGroupConstraint? other) -> int
+TUnit.Core.ParallelGroupConstraint.Group.get -> string!
+TUnit.Core.ParallelGroupConstraint.Group.init -> void
+TUnit.Core.ParallelGroupConstraint.Order.get -> int
+TUnit.Core.ParallelGroupConstraint.Order.init -> void
+TUnit.Core.ParallelGroupConstraint.ParallelGroupConstraint(string! Group, int Order) -> void
+TUnit.Core.ParallelLimiterAttribute<TParallelLimit>
+TUnit.Core.ParallelLimiterAttribute<TParallelLimit>.OnTestRegistered(TUnit.Core.TestRegisteredContext! testRegisteredContext) -> System.Threading.Tasks.ValueTask
+TUnit.Core.ParallelLimiterAttribute<TParallelLimit>.Order.get -> int
+TUnit.Core.ParallelLimiterAttribute<TParallelLimit>.ParallelLimiterAttribute() -> void
+TUnit.Core.ParallelLimitLockProvider
+TUnit.Core.ParallelLimitLockProvider.ParallelLimitLockProvider() -> void
+TUnit.Core.PropertyAttribute
+TUnit.Core.PropertyAttribute.Name.get -> string!
+TUnit.Core.PropertyAttribute.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.PropertyAttribute.Order.get -> int
+TUnit.Core.PropertyAttribute.PropertyAttribute(string! name, string! value) -> void
+TUnit.Core.PropertyAttribute.Value.get -> string!
+TUnit.Core.RepeatAttribute
+TUnit.Core.RepeatAttribute.RepeatAttribute(int times) -> void
+TUnit.Core.RepeatAttribute.Times.get -> int
+TUnit.Core.ResettableLazy<T>
+TUnit.Core.ResettableLazy<T>.ClassConstructor.get -> TUnit.Core.Interfaces.IClassConstructor?
+TUnit.Core.ResettableLazy<T>.ClassConstructor.set -> void
+TUnit.Core.ResettableLazy<T>.Clone() -> TUnit.Core.ResettableLazy<T!>!
+TUnit.Core.ResettableLazy<T>.DisposeAsync() -> System.Threading.Tasks.ValueTask
+TUnit.Core.ResettableLazy<T>.ResettableLazy(System.Func<T!>! factory, string! sessionId, TUnit.Core.TestBuilderContext! testBuilderContext) -> void
+TUnit.Core.ResettableLazy<T>.ResettableLazy(TUnit.Core.Interfaces.IClassConstructor! classConstructor, string! sessionId, TUnit.Core.TestBuilderContext! testBuilderContext) -> void
+TUnit.Core.ResettableLazy<T>.TestBuilderContext.get -> TUnit.Core.TestBuilderContext!
+TUnit.Core.ResettableLazy<T>.Value.get -> T!
+TUnit.Core.ResettableLazy<T>._factory -> System.Func<T!>!
+TUnit.Core.ResettableLazy<TClassConstructor, T>
+TUnit.Core.ResettableLazy<TClassConstructor, T>.ResettableLazy(string! sessionId, TUnit.Core.TestBuilderContext! testBuilderContext) -> void
+TUnit.Core.RetryAttribute
+TUnit.Core.RetryAttribute.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.RetryAttribute.Order.get -> int
+TUnit.Core.RetryAttribute.RetryAttribute(int times) -> void
+TUnit.Core.RetryAttribute.Times.get -> int
+TUnit.Core.SharedDataKey
+TUnit.Core.SharedDataKey.Key.get -> string!
+TUnit.Core.SharedDataKey.Key.init -> void
+TUnit.Core.SharedDataKey.SharedDataKey(string! Key, System.Type! Type) -> void
+TUnit.Core.SharedDataKey.Type.get -> System.Type!
+TUnit.Core.SharedDataKey.Type.init -> void
+TUnit.Core.SharedType
+TUnit.Core.SharedType.Keyed = 4 -> TUnit.Core.SharedType
+TUnit.Core.SharedType.None = 0 -> TUnit.Core.SharedType
+TUnit.Core.SharedType.PerAssembly = 2 -> TUnit.Core.SharedType
+TUnit.Core.SharedType.PerClass = 1 -> TUnit.Core.SharedType
+TUnit.Core.SharedType.PerTestSession = 3 -> TUnit.Core.SharedType
+TUnit.Core.SingleTUnitAttribute
+TUnit.Core.Skip
+TUnit.Core.SkipAttribute
+TUnit.Core.SkipAttribute.OnTestRegistered(TUnit.Core.TestRegisteredContext! context) -> System.Threading.Tasks.ValueTask
+TUnit.Core.SkipAttribute.Order.get -> int
+TUnit.Core.SkipAttribute.Reason.get -> string!
+TUnit.Core.SkipAttribute.Reason.set -> void
+TUnit.Core.SkipAttribute.SkipAttribute(string! reason) -> void
+TUnit.Core.SourceGeneratedAssemblyInformation
+TUnit.Core.SourceGeneratedAssemblyInformation.Attributes.get -> System.Attribute![]!
+TUnit.Core.SourceGeneratedAssemblyInformation.Attributes.init -> void
+TUnit.Core.SourceGeneratedAssemblyInformation.Name.get -> string!
+TUnit.Core.SourceGeneratedAssemblyInformation.Name.init -> void
+TUnit.Core.SourceGeneratedClassInformation
+TUnit.Core.SourceGeneratedClassInformation.Assembly.get -> TUnit.Core.SourceGeneratedAssemblyInformation!
+TUnit.Core.SourceGeneratedClassInformation.Assembly.init -> void
+TUnit.Core.SourceGeneratedClassInformation.Namespace.get -> string?
+TUnit.Core.SourceGeneratedClassInformation.Namespace.init -> void
+TUnit.Core.SourceGeneratedClassInformation.Parameters.get -> TUnit.Core.SourceGeneratedParameterInformation![]!
+TUnit.Core.SourceGeneratedClassInformation.Parameters.init -> void
+TUnit.Core.SourceGeneratedClassInformation.Properties.get -> TUnit.Core.SourceGeneratedPropertyInformation![]!
+TUnit.Core.SourceGeneratedClassInformation.Properties.init -> void
+TUnit.Core.SourceGeneratedMemberInformation
+TUnit.Core.SourceGeneratedMemberInformation.Attributes.get -> System.Attribute![]!
+TUnit.Core.SourceGeneratedMemberInformation.Attributes.init -> void
+TUnit.Core.SourceGeneratedMemberInformation.Name.get -> string!
+TUnit.Core.SourceGeneratedMemberInformation.Name.init -> void
+TUnit.Core.SourceGeneratedMethodInformation
+TUnit.Core.SourceGeneratedMethodInformation.Class.get -> TUnit.Core.SourceGeneratedClassInformation!
+TUnit.Core.SourceGeneratedMethodInformation.Class.init -> void
+TUnit.Core.SourceGeneratedMethodInformation.GenericTypeCount.get -> int
+TUnit.Core.SourceGeneratedMethodInformation.GenericTypeCount.init -> void
+TUnit.Core.SourceGeneratedMethodInformation.Parameters.get -> TUnit.Core.SourceGeneratedParameterInformation![]!
+TUnit.Core.SourceGeneratedMethodInformation.Parameters.init -> void
+TUnit.Core.SourceGeneratedMethodInformation.ReflectionInformation.get -> System.Reflection.MethodInfo!
+TUnit.Core.SourceGeneratedMethodInformation.ReturnType.get -> System.Type!
+TUnit.Core.SourceGeneratedMethodInformation.ReturnType.init -> void
+TUnit.Core.SourceGeneratedParameterInformation
+TUnit.Core.SourceGeneratedParameterInformation.SourceGeneratedParameterInformation(System.Type! Type) -> void
+TUnit.Core.SourceGeneratedParameterInformation<T>
+TUnit.Core.SourceGeneratedParameterInformation<T>.SourceGeneratedParameterInformation() -> void
+TUnit.Core.SourceGeneratedPropertyInformation
+TUnit.Core.SourceGeneratedPropertyInformation.IsStatic.get -> bool
+TUnit.Core.SourceGeneratedPropertyInformation.IsStatic.init -> void
+TUnit.Core.SourceRegistrar
+TUnit.Core.SourceRegistrar.SourceRegistrar() -> void
+TUnit.Core.STAThreadExecutor
+TUnit.Core.STAThreadExecutor.STAThreadExecutor() -> void
+TUnit.Core.TestAttribute
+TUnit.Core.TestAttribute.TestAttribute(string! file = "", int line = 0) -> void
+TUnit.Core.TestBuilderContext
+TUnit.Core.TestBuilderContext.DataAttributes.get -> System.Collections.Generic.List<TUnit.Core.IDataAttribute!>!
+TUnit.Core.TestBuilderContext.Events.get -> TUnit.Core.TestContextEvents!
+TUnit.Core.TestBuilderContext.Id.get -> System.Guid
+TUnit.Core.TestBuilderContext.ObjectBag.get -> System.Collections.Generic.Dictionary<string!, object?>!
+TUnit.Core.TestBuilderContextAccessor
+TUnit.Core.TestBuilderContextAccessor.Current.get -> TUnit.Core.TestBuilderContext!
+TUnit.Core.TestBuilderContextAccessor.Current.set -> void
+TUnit.Core.TestBuilderContextAccessor.TestBuilderContextAccessor(TUnit.Core.TestBuilderContext! context) -> void
+TUnit.Core.TestContext
+TUnit.Core.TestContext.AddArtifact(TUnit.Core.Artifact! artifact) -> void
+TUnit.Core.TestContext.ArgumentDisplayFormatters.get -> System.Collections.Generic.List<TUnit.Core.ArgumentDisplayFormatter!>!
+TUnit.Core.TestContext.CancellationToken.get -> System.Threading.CancellationToken
+TUnit.Core.TestContext.CurrentRetryAttempt.get -> int
+TUnit.Core.TestContext.Events.get -> TUnit.Core.TestContextEvents!
+TUnit.Core.TestContext.IsRegistered.get -> bool
+TUnit.Core.TestContext.ObjectBag.get -> System.Collections.Generic.Dictionary<string!, object?>!
+TUnit.Core.TestContext.Result.get -> TUnit.Core.TestResult?
+TUnit.Core.TestContext.SuppressReportingResult() -> void
+TUnit.Core.TestContext.TestDetails.get -> TUnit.Core.TestDetails!
+TUnit.Core.TestContext.TestStart.get -> System.DateTimeOffset?
+TUnit.Core.TestContext.Timings.get -> System.Collections.Generic.List<TUnit.Core.Timing!>!
+TUnit.Core.TestContextEvents
+TUnit.Core.TestContextEvents.DisposeAsync() -> System.Threading.Tasks.ValueTask
+TUnit.Core.TestContextEvents.InitializeAsync() -> System.Threading.Tasks.Task!
+TUnit.Core.TestContextEvents.OnDispose.get -> TUnit.Core.AsyncEvent<TUnit.Core.TestContext!>?
+TUnit.Core.TestContextEvents.OnDispose.set -> void
+TUnit.Core.TestContextEvents.OnInitialize.get -> TUnit.Core.AsyncEvent<TUnit.Core.TestContext!>?
+TUnit.Core.TestContextEvents.OnInitialize.set -> void
+TUnit.Core.TestContextEvents.OnLastTestInAssembly.get -> TUnit.Core.AsyncEvent<(TUnit.Core.AssemblyHookContext!, TUnit.Core.TestContext!)>?
+TUnit.Core.TestContextEvents.OnLastTestInAssembly.set -> void
+TUnit.Core.TestContextEvents.OnLastTestInClass.get -> TUnit.Core.AsyncEvent<(TUnit.Core.ClassHookContext!, TUnit.Core.TestContext!)>?
+TUnit.Core.TestContextEvents.OnLastTestInClass.set -> void
+TUnit.Core.TestContextEvents.OnLastTestInTestSession.get -> TUnit.Core.AsyncEvent<(TUnit.Core.TestSessionContext!, TUnit.Core.TestContext!)>?
+TUnit.Core.TestContextEvents.OnLastTestInTestSession.set -> void
+TUnit.Core.TestContextEvents.OnTestEnd.get -> TUnit.Core.AsyncEvent<TUnit.Core.TestContext!>?
+TUnit.Core.TestContextEvents.OnTestEnd.set -> void
+TUnit.Core.TestContextEvents.OnTestRegistered.get -> TUnit.Core.AsyncEvent<TUnit.Core.TestRegisteredContext!>?
+TUnit.Core.TestContextEvents.OnTestRegistered.set -> void
+TUnit.Core.TestContextEvents.OnTestRetry.get -> TUnit.Core.AsyncEvent<(TUnit.Core.TestContext!, int RetryAttempt)>?
+TUnit.Core.TestContextEvents.OnTestRetry.set -> void
+TUnit.Core.TestContextEvents.OnTestSkipped.get -> TUnit.Core.AsyncEvent<TUnit.Core.TestContext!>?
+TUnit.Core.TestContextEvents.OnTestSkipped.set -> void
+TUnit.Core.TestContextEvents.OnTestStart.get -> TUnit.Core.AsyncEvent<TUnit.Core.BeforeTestContext!>?
+TUnit.Core.TestContextEvents.OnTestStart.set -> void
+TUnit.Core.TestContextEvents.Order.get -> int
+TUnit.Core.TestDataAttribute
+TUnit.Core.TestDataAttribute.AccessesInstanceData.get -> bool
+TUnit.Core.TestDataAttribute.AccessesInstanceData.init -> void
+TUnit.Core.TestDataAttribute.TestDataAttribute() -> void
+TUnit.Core.TestDetails
+TUnit.Core.TestDetails.AssemblyAttributes.get -> System.Attribute![]!
+TUnit.Core.TestDetails.Attributes.get -> System.Attribute![]!
+TUnit.Core.TestDetails.Categories.get -> System.Collections.Generic.IReadOnlyList<string!>!
+TUnit.Core.TestDetails.ClassAttributes.get -> System.Attribute![]!
+TUnit.Core.TestDetails.CurrentRepeatAttempt.get -> int
+TUnit.Core.TestDetails.CurrentRepeatAttempt.init -> void
+TUnit.Core.TestDetails.CustomProperties.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+TUnit.Core.TestDetails.DataAttributes.get -> System.Attribute![]!
+TUnit.Core.TestDetails.DataAttributes.init -> void
+TUnit.Core.TestDetails.ParallelConstraint.get -> TUnit.Core.Interfaces.IParallelConstraint?
+TUnit.Core.TestDetails.ParallelLimit.get -> TUnit.Core.Interfaces.IParallelLimit?
+TUnit.Core.TestDetails.RepeatLimit.get -> int
+TUnit.Core.TestDetails.RepeatLimit.init -> void
+TUnit.Core.TestDetails.RetryLimit.get -> int
+TUnit.Core.TestDetails.ReturnType.get -> System.Type!
+TUnit.Core.TestDetails.ReturnType.init -> void
+TUnit.Core.TestDetails.TestAttributes.get -> System.Attribute![]!
+TUnit.Core.TestDetails.TestClass.get -> TUnit.Core.SourceGeneratedClassInformation!
+TUnit.Core.TestDetails.TestClassArguments.get -> object?[]!
+TUnit.Core.TestDetails.TestClassArguments.init -> void
+TUnit.Core.TestDetails.TestClassInjectedPropertyArguments.get -> object?[]!
+TUnit.Core.TestDetails.TestClassInjectedPropertyArguments.init -> void
+TUnit.Core.TestDetails.TestClassParameterTypes.get -> System.Type![]!
+TUnit.Core.TestDetails.TestFilePath.get -> string!
+TUnit.Core.TestDetails.TestFilePath.init -> void
+TUnit.Core.TestDetails.TestId.get -> string!
+TUnit.Core.TestDetails.TestId.init -> void
+TUnit.Core.TestDetails.TestLineNumber.get -> int
+TUnit.Core.TestDetails.TestLineNumber.init -> void
+TUnit.Core.TestDetails.TestMethod.get -> TUnit.Core.SourceGeneratedMethodInformation!
+TUnit.Core.TestDetails.TestMethod.init -> void
+TUnit.Core.TestDetails.TestMethodArguments.get -> object?[]!
+TUnit.Core.TestDetails.TestMethodArguments.init -> void
+TUnit.Core.TestDetails.TestMethodParameterTypes.get -> System.Type![]!
+TUnit.Core.TestDetails.TestName.get -> string!
+TUnit.Core.TestDetails.TestName.init -> void
+TUnit.Core.TestDetails.Timeout.get -> System.TimeSpan?
+TUnit.Core.TestDetails<TClassType>
+TUnit.Core.TestDetails<TClassType>.LazyClassInstance.get -> TUnit.Core.ResettableLazy<TClassType!>!
+TUnit.Core.TestDetails<TClassType>.LazyClassInstance.init -> void
+TUnit.Core.TestDiscoveryContext
+TUnit.Core.TestDiscoveryContext.AllTests.get -> System.Collections.Generic.IEnumerable<TUnit.Core.TestContext!>!
+TUnit.Core.TestDiscoveryContext.Assemblies.get -> System.Collections.Generic.IEnumerable<TUnit.Core.AssemblyHookContext!>!
+TUnit.Core.TestDiscoveryContext.TestClasses.get -> System.Collections.Generic.IEnumerable<TUnit.Core.ClassHookContext!>!
+TUnit.Core.TestDiscoveryContext.TestFilter.get -> string?
+TUnit.Core.TestDiscoveryContext.TestFilter.init -> void
+TUnit.Core.TestMetadata
+TUnit.Core.TestMetadata.CurrentRepeatAttempt.get -> int
+TUnit.Core.TestMetadata.CurrentRepeatAttempt.init -> void
+TUnit.Core.TestMetadata.DiscoveryException.get -> System.Exception?
+TUnit.Core.TestMetadata.DiscoveryException.init -> void
+TUnit.Core.TestMetadata.RepeatLimit.get -> int
+TUnit.Core.TestMetadata.RepeatLimit.init -> void
+TUnit.Core.TestMetadata.TestBuilderContext.get -> TUnit.Core.TestBuilderContext!
+TUnit.Core.TestMetadata.TestBuilderContext.init -> void
+TUnit.Core.TestMetadata.TestClassArguments.get -> object?[]!
+TUnit.Core.TestMetadata.TestClassArguments.init -> void
+TUnit.Core.TestMetadata.TestClassProperties.get -> object?[]!
+TUnit.Core.TestMetadata.TestClassProperties.init -> void
+TUnit.Core.TestMetadata.TestFilePath.get -> string!
+TUnit.Core.TestMetadata.TestFilePath.init -> void
+TUnit.Core.TestMetadata.TestId.get -> string!
+TUnit.Core.TestMetadata.TestId.init -> void
+TUnit.Core.TestMetadata.TestLineNumber.get -> int
+TUnit.Core.TestMetadata.TestLineNumber.init -> void
+TUnit.Core.TestMetadata.TestMethod.get -> TUnit.Core.SourceGeneratedMethodInformation!
+TUnit.Core.TestMetadata.TestMethod.init -> void
+TUnit.Core.TestMetadata.TestMethodArguments.get -> object?[]!
+TUnit.Core.TestMetadata.TestMethodArguments.init -> void
+TUnit.Core.TestMetadata<TClassType>
+TUnit.Core.TestMetadata<TClassType>.ResettableClassFactory.get -> TUnit.Core.ResettableLazy<TClassType!>!
+TUnit.Core.TestMetadata<TClassType>.ResettableClassFactory.init -> void
+TUnit.Core.TestMetadata<TClassType>.TestMethodFactory.get -> System.Func<TClassType!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>!
+TUnit.Core.TestMetadata<TClassType>.TestMethodFactory.init -> void
+TUnit.Core.TestRegisteredContext
+TUnit.Core.TestRegisteredContext.SetParallelLimiter(TUnit.Core.Interfaces.IParallelLimit! parallelLimit) -> void
+TUnit.Core.TestRegisteredContext.SkipTest(string! reason) -> void
+TUnit.Core.TestResult
+TUnit.Core.TestResult.ComputerName.get -> string!
+TUnit.Core.TestResult.ComputerName.init -> void
+TUnit.Core.TestResult.Duration.get -> System.TimeSpan?
+TUnit.Core.TestResult.Duration.init -> void
+TUnit.Core.TestResult.End.get -> System.DateTimeOffset?
+TUnit.Core.TestResult.End.init -> void
+TUnit.Core.TestResult.Exception.get -> System.Exception?
+TUnit.Core.TestResult.Exception.init -> void
+TUnit.Core.TestResult.Output.get -> string?
+TUnit.Core.TestResult.Start.get -> System.DateTimeOffset?
+TUnit.Core.TestResult.Start.init -> void
+TUnit.Core.TestResult.Status.get -> TUnit.Core.Enums.Status
+TUnit.Core.TestResult.Status.init -> void
+TUnit.Core.TestSessionContext
+TUnit.Core.TestSessionContext.AddArtifact(TUnit.Core.Artifact! artifact) -> void
+TUnit.Core.TestSessionContext.AllTests.get -> System.Collections.Generic.IEnumerable<TUnit.Core.TestContext!>!
+TUnit.Core.TestSessionContext.Assemblies.get -> System.Collections.Generic.IEnumerable<TUnit.Core.AssemblyHookContext!>!
+TUnit.Core.TestSessionContext.TestClasses.get -> System.Collections.Generic.IEnumerable<TUnit.Core.ClassHookContext!>!
+TUnit.Core.TestSessionContext.TestFilter.get -> string?
+TUnit.Core.TestSessionContext.TestFilter.init -> void
+TUnit.Core.TimeoutAttribute
+TUnit.Core.TimeoutAttribute.OnTestDiscovery(TUnit.Core.DiscoveredTestContext! discoveredTestContext) -> void
+TUnit.Core.TimeoutAttribute.Order.get -> int
+TUnit.Core.TimeoutAttribute.Timeout.get -> System.TimeSpan
+TUnit.Core.TimeoutAttribute.TimeoutAttribute(int timeoutInMilliseconds) -> void
+TUnit.Core.Timing
+TUnit.Core.Timing.Duration.get -> System.TimeSpan
+TUnit.Core.Timing.End.get -> System.DateTimeOffset
+TUnit.Core.Timing.End.init -> void
+TUnit.Core.Timing.Start.get -> System.DateTimeOffset
+TUnit.Core.Timing.Start.init -> void
+TUnit.Core.Timing.StepName.get -> string!
+TUnit.Core.Timing.StepName.init -> void
+TUnit.Core.Timing.Timing(string! StepName, System.DateTimeOffset Start, System.DateTimeOffset End) -> void
+TUnit.Core.TUnitAttribute
+virtual TUnit.Core.ArgumentDisplayFormatterAttribute.Order.get -> int
+virtual TUnit.Core.Logging.TUnitLogger.IsEnabled(TUnit.Core.Logging.LogLevel logLevel) -> bool
+virtual TUnit.Core.MatrixAttribute.GetObjects(object? instance) -> object?[]!
+virtual TUnit.Core.ParallelGroupConstraint.Equals(TUnit.Core.ParallelGroupConstraint? other) -> bool
+virtual TUnit.Core.ResettableLazy<T>.ResetLazy() -> System.Threading.Tasks.ValueTask
+virtual TUnit.Core.RetryAttribute.ShouldRetry(TUnit.Core.TestContext! context, System.Exception! exception, int currentRetryCount) -> System.Threading.Tasks.Task<bool>!
+virtual TUnit.Core.SkipAttribute.ShouldSkip(TUnit.Core.BeforeTestContext! context) -> System.Threading.Tasks.Task<bool>!
+virtual TUnit.Core.SourceGeneratedAssemblyInformation.Equals(TUnit.Core.SourceGeneratedAssemblyInformation? other) -> bool
+virtual TUnit.Core.SourceGeneratedClassInformation.Equals(TUnit.Core.SourceGeneratedClassInformation? other) -> bool
+virtual TUnit.Core.SourceGeneratedMemberInformation.Equals(TUnit.Core.SourceGeneratedMemberInformation? other) -> bool
+virtual TUnit.Core.SourceGeneratedMemberInformation.PrintMembers(System.Text.StringBuilder! stringBuilder) -> bool
+virtual TUnit.Core.SourceGeneratedMethodInformation.Equals(TUnit.Core.SourceGeneratedMethodInformation? other) -> bool
