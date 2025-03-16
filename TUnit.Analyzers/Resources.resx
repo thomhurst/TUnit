@@ -433,13 +433,13 @@
         <value>Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`</value>
     </data>
     <data name="TUnit0047Description" xml:space="preserve">
-        <value>For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests.</value>
+        <value>For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests.</value>
     </data>
     <data name="TUnit0047MessageFormat" xml:space="preserve">
-        <value>For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests.</value>
+        <value>For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests.</value>
     </data>
     <data name="TUnit0047Title" xml:space="preserve">
-        <value>Call `context.FlowAsyncLocalValues`</value>
+        <value>Call `context.AddAsyncLocalValues`</value>
     </data>
     <data name="TUnit0048Description" xml:space="preserve">
         <value>Test methods must not be static.</value>
