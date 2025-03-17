@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using PublicApiGenerator;
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.PublicAPI;
 
@@ -29,10 +31,20 @@ public class Tests
         return VerifyPublicApi(typeof(Playwright.PageTest).Assembly);
     }
 
-    private Task VerifyPublicApi(Assembly assembly)
+    private async Task VerifyPublicApi(Assembly assembly)
     {
         var publicApi = assembly.GeneratePublicApi();
 
-        return Verify(publicApi).UniqueForTargetFrameworkAndVersion(assembly);   
+        await Verify(publicApi)
+            .DisableDiff()
+            .OnVerifyMismatch(async (pair, message, verify) =>
+            {
+                var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
+                var verified = await FilePolyfill.ReadAllTextAsync(pair.VerifiedPath);
+                
+                // Better diff message since original one is too large
+                await Assert.That(received).IsEqualTo(verified);
+            })
+            .UniqueForTargetFrameworkAndVersion(assembly);
     }
 }

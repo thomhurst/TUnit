@@ -11,7 +11,7 @@
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-        
+        <Configuration>Release</Configuration>
         <RuntimeIdentifier Condition="'$(TargetFramework)' == 'net472'">win-x64</RuntimeIdentifier>
     </PropertyGroup>
 

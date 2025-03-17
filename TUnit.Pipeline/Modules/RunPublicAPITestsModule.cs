@@ -24,6 +24,7 @@ public class RunPublicAPITestsModule : Module<CommandResult>
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
+                ["GITHUB_ACTIONS"] = "false",
             }
         }, cancellationToken);
     }
