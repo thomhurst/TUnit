@@ -72,14 +72,17 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string methodArg = "A";
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
 				new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 				{
@@ -159,14 +162,17 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
+					classInstanceArguments = [];
 
 					string methodArg = "B";
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
 					new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 					{
@@ -246,14 +252,17 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
+						classInstanceArguments = [];
 
 						string methodArg = "C";
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(() => 
 						new global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
 						{

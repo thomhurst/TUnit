@@ -2,6 +2,9 @@
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Represents the events for a test context.
+/// </summary>
 public record TestContextEvents : 
     IAsyncInitializer,
     IAsyncDisposable,
@@ -65,10 +68,6 @@ public record TestContextEvents :
     ValueTask ITestRetryEventReceiver.OnTestRetry(TestContext testContext, int retryAttempt)
     {
         return OnTestRetry?.InvokeAsync(this, (testContext, retryAttempt)) ?? default;
-    }
-
-    public void OnTestStartSynchronous(BeforeTestContext beforeTestContext)
-    {
     }
 
     public async Task InitializeAsync()

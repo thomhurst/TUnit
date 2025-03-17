@@ -1,12 +1,12 @@
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableDistinctItemsExpectedValueAssertCondition<TInner>(IEqualityComparer<TInner?>? equalityComparer)
-    : BaseAssertCondition<IEnumerable<TInner>>
+public class EnumerableDistinctItemsExpectedValueAssertCondition<TActual, TInner>(IEqualityComparer<TInner?>? equalityComparer)
+    : BaseAssertCondition<TActual> where TActual : IEnumerable<TInner>
 {
     protected override string GetExpectation() => "items to be distinct";
 
     protected override ValueTask<AssertionResult> GetResult(
-        IEnumerable<TInner>? actualValue, Exception? exception,
+        TActual? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata
     )
     {

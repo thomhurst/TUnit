@@ -21,7 +21,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
         var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
         ? dataGeneratorMetadata.TestInformation.Attributes : dataGeneratorMetadata.TestInformation.Class.Attributes);
         
-        foreach (var row in GetMatrixValues(parameterInformation.Select(GetAllArguments)))
+        foreach (var row in GetMatrixValues(parameterInformation.Select(p => GetAllArguments(dataGeneratorMetadata, p))))
         {
             if (exclusions.Any(e => e.SequenceEqual(row)))
             {
@@ -39,32 +39,61 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
             .ToArray();
     }
 
-    private IReadOnlyList<object?> GetAllArguments(SourceGeneratedParameterInformation sourceGeneratedParameterInformation)
+    private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
+        SourceGeneratedParameterInformation sourceGeneratedParameterInformation)
     {
         var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault();
 
-        if (matrixAttribute is null or { Objects.Length: 0 })
-        {
-            var type = sourceGeneratedParameterInformation.Type;
-            
-            if (type == typeof(bool))
-            {
-                return [true, false];
-            }
+        var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata.TestClassInstance);
 
-            if (type.IsEnum)
-            {
-#if NET
-                return Enum.GetValuesAsUnderlyingType(type).Cast<object>().Except(matrixAttribute?.Excluding ?? []).ToArray();
-#else
-                return Enum.GetValues(type).Cast<object>().Except(matrixAttribute?.Excluding ?? []).ToArray();
-#endif
-            }
-            
+        if (matrixAttribute is not null && objects is {Length: > 0})
+        {
+            return matrixAttribute.Excluding is not null
+                       ? objects.Except(matrixAttribute.Excluding).ToArray()
+                       : objects;
+        }
+
+        var type = sourceGeneratedParameterInformation.Type;
+        var underlyingType = Nullable.GetUnderlyingType(type);
+        var resolvedType = underlyingType ?? type;
+        if (resolvedType != typeof(bool) && !resolvedType.IsEnum)
+        {
             throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
         }
 
-        return matrixAttribute.Objects;
+        if (resolvedType == typeof(bool))
+        {
+            if (matrixAttribute?.Excluding is not null)
+            {
+                throw new InvalidOperationException("Do not exclude values from a boolean.");
+            }
+            
+            return underlyingType is null ? [true, false] : [true, false, null];
+        }
+
+#if NET
+        var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
+                             .Cast<object?>();
+#else
+        var enumValues = Enum.GetValues(resolvedType)
+                             .Cast<object?>();
+#endif
+        if (underlyingType is not null)
+        {
+            enumValues = enumValues.Append(null);
+            if (matrixAttribute?.Excluding?.Any(x => x is null) ?? false)
+            {
+                throw new InvalidOperationException("Do not exclude null from a nullable enum - instead use the enum directly");
+            }
+        }
+
+        return enumValues
+#if NET
+               .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(type))) ?? [])
+#else
+               .Except(matrixAttribute?.Excluding ?? [])
+#endif
+               .ToArray();
     }
     
     private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];

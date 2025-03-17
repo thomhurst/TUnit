@@ -2,10 +2,9 @@
 
 namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
-public class NoOpWithMessageAssertionCondition<TActual>(string expectation) : BaseAssertCondition<TActual>
+public class NoOpAssertionCondition<TActual> : BaseAssertCondition<TActual>
 {
-    protected override string GetExpectation()
-        => expectation;
+    protected override string GetExpectation() => string.Empty;
 
     protected override ValueTask<AssertionResult> GetResult(
         TActual? actualValue, Exception? exception,

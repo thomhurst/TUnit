@@ -1,5 +1,8 @@
 ﻿namespace TUnit.Core;
 
+/// <summary>
+/// Represents the context for test discovery.
+/// </summary>
 public class TestDiscoveryContext : Context
 {
     private static readonly AsyncLocal<TestDiscoveryContext?> Contexts = new();

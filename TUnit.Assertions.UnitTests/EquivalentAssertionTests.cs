@@ -376,6 +376,162 @@ public class EquivalentAssertionTests
         await TUnitAssert.That(object1).IsEquivalentTo(object2);
     }
     
+    [Test]
+    public void Objects_With_Partial_Properties_Match_With_Full_Equivalency_Are_Not_Equivalent()
+    {
+        var object1 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar"
+            }
+        };
+        var object2 = new
+        {
+            Value = "Foo",
+        };
+        
+
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(
+            async () => await TUnitAssert.That(object1)
+                                         .IsEquivalentTo(object2));
+        
+        NUnitAssert.That(exception!.Message, Is.EqualTo(
+                             """
+                             Expected object1 to be equivalent to object2
+
+                             but Property MyClass.Inner did not match
+                             Expected: null
+                             Received: TUnit.Assertions.UnitTests.EquivalentAssertionTests+InnerClass
+
+                             at Assert.That(object1).IsEquivalentTo(object2)
+                             """
+                         ));
+    }
+    
+    [Test]
+    public async Task Objects_With_Partial_Properties_Match_With_Partial_Equivalency_Are_Equivalent()
+    {
+        var object1 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar"
+            }
+        };
+        var object2 = new
+        {
+            Value = "Foo",
+        };
+        
+
+        await TUnitAssert.That(object1)
+                         .IsEquivalentTo(object2)
+                         .WithPartialEquivalency();
+    }
+    
+    [Test]
+    public void Objects_With_Mismatch_With_Partial_Equivalency_Kind_Are_Not_Equivalent()
+    {
+        var object1 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar"
+            }
+        };
+        var object2 = new
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Baz",
+            }
+        };
+        
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(
+            async () => await TUnitAssert.That(object1)
+                                         .IsEquivalentTo(object2)
+                                         .WithPartialEquivalency());
+        
+        NUnitAssert.That(exception!.Message, Is.EqualTo(
+                             """
+                             Expected object1 to be equivalent to object2
+
+                             but Property MyClass.Inner.Value did not match
+                             Expected: "Baz"
+                             Received: "Bar"
+
+                             at Assert.That(object1).IsEquivalentTo(object2)
+                             """
+                         ));
+    }
+
+    [Test]
+    public void Object_With_Partial_Fields_Match_With_Full_Equivalency_Are_Not_Equivalent()
+    {
+        var object1 = new MyClassWithMultipleFields
+        {
+            value = "Foo",
+            intValue = 10
+        };
+        var object2 = new MyClassWithSingleField
+        {
+            value = "Foo",
+        };
+        
+
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(
+            async () => await TUnitAssert.That(object1)
+                                         .IsEquivalentTo(object2));
+        
+        NUnitAssert.That(exception!.Message, Is.EqualTo(
+                             """
+                             Expected object1 to be equivalent to object2
+
+                             but Field MyClassWithMultipleFields.intValue did not match
+                             Expected: null
+                             Received: 10
+
+                             at Assert.That(object1).IsEquivalentTo(object2)
+                             """
+                         ));
+    }
+    
+    [Test]
+    public async Task Object_With_Partial_Fields_Match_With_Partial_Equivalency_Are_Equivalent()
+    {
+        var object1 = new MyClassWithMultipleFields
+        {
+            value = "Foo",
+            intValue = 10
+        };
+        var object2 = new MyClassWithSingleField
+        {
+            value = "Foo",
+        };
+        
+
+        await TUnitAssert.That(object1)
+                         .IsEquivalentTo(object2)
+                         .WithPartialEquivalency();
+    }
+
+    
+    public class MyClassWithMultipleFields
+    {
+        public string? value;
+        public int intValue;
+    }
+
+    public class MyClassWithSingleField
+    {
+        public string? value;
+    }
+    
     public class MyClass
     {
         public string? Value { get; set; }

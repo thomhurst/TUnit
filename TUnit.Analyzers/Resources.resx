@@ -433,13 +433,13 @@
         <value>Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`</value>
     </data>
     <data name="TUnit0047Description" xml:space="preserve">
-        <value>For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests.</value>
+        <value>For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests.</value>
     </data>
     <data name="TUnit0047MessageFormat" xml:space="preserve">
-        <value>For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests.</value>
+        <value>For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests.</value>
     </data>
     <data name="TUnit0047Title" xml:space="preserve">
-        <value>Call `context.FlowAsyncLocalValues`</value>
+        <value>Call `context.AddAsyncLocalValues`</value>
     </data>
     <data name="TUnit0048Description" xml:space="preserve">
         <value>Test methods must not be static.</value>
@@ -494,5 +494,32 @@
     </data>
     <data name="TUnit0053Title" xml:space="preserve">
         <value>xUnit class fixture can be converted to TUnit attribute</value>
+    </data>
+    <data name="TUnit0054Description" xml:space="preserve">
+        <value>xUnit using directives can be removed once migrated to TUnit.</value>
+    </data>
+    <data name="TUnit0054MessageFormat" xml:space="preserve">
+        <value>xUnit using directives can be removed once migrated to TUnit</value>
+    </data>
+    <data name="TUnit0054Title" xml:space="preserve">
+        <value>xUnit using directives can be removed once migrated to TUnit</value>
+    </data>
+    <data name="TUnit0055Description" xml:space="preserve">
+        <value>Overwriting the Console writer can break TUnit logging.</value>
+    </data>
+    <data name="TUnit0055MessageFormat" xml:space="preserve">
+        <value>Overwriting the Console writer can break TUnit logging</value>
+    </data>
+    <data name="TUnit0055Title" xml:space="preserve">
+        <value>Do not overwrite the Console writer</value>
+    </data>
+    <data name="TUnit0056Description" xml:space="preserve">
+        <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute.</value>
+    </data>
+    <data name="TUnit0056MessageFormat" xml:space="preserve">
+        <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute</value>
+    </data>
+    <data name="TUnit0056Title" xml:space="preserve">
+        <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute</value>
     </data>
 </root>

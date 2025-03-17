@@ -65,14 +65,17 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				string methodArg = "123";
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -175,14 +178,17 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				int methodArg = 123;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -285,14 +291,17 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				double methodArg = 1.23;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -395,14 +404,17 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				float methodArg = 1.23F;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -505,14 +517,17 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				long methodArg = 123L;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -615,14 +630,17 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				uint methodArg = 123U;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{
@@ -725,14 +743,17 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.ConstantArgumentsTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				ulong methodArg = 123UL;
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ConstantArgumentsTests>(() => 
 				new global::TUnit.TestProject.ConstantArgumentsTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
 				{

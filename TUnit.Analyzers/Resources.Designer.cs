@@ -1302,7 +1302,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests..
+        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests..
         /// </summary>
         internal static string TUnit0047Description {
             get {
@@ -1311,7 +1311,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.FlowAsyncLocalValues` to access them within tests..
+        ///   Looks up a localized string similar to For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests..
         /// </summary>
         internal static string TUnit0047MessageFormat {
             get {
@@ -1320,7 +1320,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Call `context.FlowAsyncLocalValues`.
+        ///   Looks up a localized string similar to Call `context.AddAsyncLocalValues`.
         /// </summary>
         internal static string TUnit0047Title {
             get {
@@ -1487,6 +1487,87 @@ namespace TUnit.Analyzers {
         internal static string TUnit0053Title {
             get {
                 return ResourceManager.GetString("TUnit0053Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit..
+        /// </summary>
+        internal static string TUnit0054Description {
+            get {
+                return ResourceManager.GetString("TUnit0054Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit.
+        /// </summary>
+        internal static string TUnit0054MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0054MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit.
+        /// </summary>
+        internal static string TUnit0054Title {
+            get {
+                return ResourceManager.GetString("TUnit0054Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwriting the Console writer can break TUnit logging..
+        /// </summary>
+        internal static string TUnit0055Description {
+            get {
+                return ResourceManager.GetString("TUnit0055Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwriting the Console writer can break TUnit logging.
+        /// </summary>
+        internal static string TUnit0055MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0055MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not overwrite the Console writer.
+        /// </summary>
+        internal static string TUnit0055Title {
+            get {
+                return ResourceManager.GetString("TUnit0055Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Instance methods used as data sources must use the `InstanceMethodDataSource` attribute..
+        /// </summary>
+        internal static string TUnit0056Description {
+            get {
+                return ResourceManager.GetString("TUnit0056Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Instance methods used as data sources must use the `InstanceMethodDataSource` attribute.
+        /// </summary>
+        internal static string TUnit0056MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0056MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Instance methods used as data sources must use the `InstanceMethodDataSource` attribute.
+        /// </summary>
+        internal static string TUnit0056Title {
+            get {
+                return ResourceManager.GetString("TUnit0056Title", resourceCulture);
             }
         }
     }

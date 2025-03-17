@@ -65,12 +65,15 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 				new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 				{
@@ -147,6 +150,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 					{
 						Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
@@ -161,6 +166,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							},
 						],
 						TestSessionId = sessionId,
+						TestClassInstance = classInstance,
+						ClassInstanceArguments = classInstanceArguments,
 					};
 					var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
 
@@ -171,14 +178,15 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 					{
 						testMethodDataIndex++;
+						classInstanceArguments = [];
 
 						var methodArgGeneratedData = methodArgGeneratedDataAccessor();
 						bool methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[0]);
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 						new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 						{
@@ -256,14 +264,17 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
+						object?[]? classInstanceArguments = null;
+						classInstanceArguments = [];
 
 						bool methodArg = false;
 
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 						new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 						{
@@ -340,14 +351,17 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+							global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
+							object?[]? classInstanceArguments = null;
+							classInstanceArguments = [];
 
 							bool methodArg = true;
 
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => 
 							new global::TUnit.TestProject.Bugs._1889.DerivedTest()
 							, sessionId, testBuilderContext);
-
 							var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 							{

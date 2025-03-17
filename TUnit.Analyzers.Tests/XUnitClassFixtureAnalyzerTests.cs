@@ -34,7 +34,6 @@ public class XUnitClassFixtureAnalyzerTests
         await CodeFixer
             .VerifyCodeFixAsync(
                 """
-                using TUnit.Core;
                 using Xunit;
 
                 public class MyType;
@@ -49,13 +48,12 @@ public class XUnitClassFixtureAnalyzerTests
                 """,
                 Verifier.Diagnostic(Rules.XunitClassFixtures).WithLocation(0),
                 """
-                using TUnit.Core;
                 using Xunit;
 
                 public class MyType;
 
                 [ClassDataSource<MyType>(Shared = SharedType.PerClass)]
-                public class MyClass(MyType myType) 
+                public class MyClass(MyType myType)
                 {
                     [Fact]
                     public void MyTest()

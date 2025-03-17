@@ -50,10 +50,23 @@ public class AssertionResult
         {
             return this;
         }
+
+        if (Message == other.Message)
+        {
+            return Fail(Message);
+        }
+
+        if (string.IsNullOrEmpty(Message))
+        {
+            return Fail(other.Message);
+        }
         
-        return Message == other.Message 
-            ? Fail(Message) 
-            : Fail(Message + " and " + other.Message);
+        if(string.IsNullOrEmpty(other.Message))
+        {
+            return Fail(Message);
+        }
+
+        return Fail(Message + " and " + other.Message);
     }
 
     public async ValueTask<AssertionResult> OrAsync(Func<ValueTask<AssertionResult>> otherResult)
@@ -64,14 +77,28 @@ public class AssertionResult
         }
 
         var other = await otherResult();
+        
         if (other.IsPassed)
         {
             return Passed;
         }
 
-        return Message == other.Message 
-                   ? Fail(Message) 
-                   : Fail(Message + " and " + other.Message);
+        if (Message == other.Message)
+        {
+            return Fail(Message);
+        }
+
+        if (string.IsNullOrEmpty(Message))
+        {
+            return Fail(other.Message);
+        }
+        
+        if(string.IsNullOrEmpty(other.Message))
+        {
+            return Fail(Message);
+        }
+
+        return Fail(Message + " and " + other.Message);
     }
 
     public AssertionResult OrFailIf(bool isFailed, string message)

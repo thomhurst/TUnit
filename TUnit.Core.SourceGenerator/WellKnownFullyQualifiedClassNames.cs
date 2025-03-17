@@ -12,6 +12,7 @@ public static class WellKnownFullyQualifiedClassNames
     // Test Data Attributes
     public static readonly FullyQualifiedTypeName ArgumentsAttribute = "TUnit.Core.ArgumentsAttribute";
     public static readonly FullyQualifiedTypeName MethodDataSourceAttribute = "TUnit.Core.MethodDataSourceAttribute";
+    public static readonly FullyQualifiedTypeName InstanceMethodDataSourceAttribute = "TUnit.Core.InstanceMethodDataSourceAttribute";
     public static readonly FullyQualifiedTypeName ClassDataSourceAttribute = "TUnit.Core.ClassDataSourceAttribute";
     public static readonly FullyQualifiedTypeName ClassConstructorAttribute = "TUnit.Core.ClassConstructorAttribute";
     public static readonly FullyQualifiedTypeName DataSourceGeneratorAttribute = "TUnit.Core.DataSourceGeneratorAttribute";

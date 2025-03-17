@@ -5,6 +5,9 @@ using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Provides helper methods for running tasks.
+/// </summary>
 internal static class RunHelpers
 {
     internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan timeout, CancellationToken token)
@@ -50,6 +53,11 @@ internal static class RunHelpers
 #else
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+    /// <summary>
+    /// Runs the specified action safely and adds any exceptions to the provided list.
+    /// </summary>
+    /// <param name="action">The action to run.</param>
+    /// <param name="exceptions">The list to add exceptions to.</param>
     public static void RunSafely(Action action, List<Exception> exceptions)
     {
         try
@@ -68,6 +76,11 @@ internal static class RunHelpers
 #else
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+    /// <summary>
+    /// Runs the specified asynchronous action safely and adds any exceptions to the provided list.
+    /// </summary>
+    /// <param name="action">The asynchronous action to run.</param>
+    /// <param name="exceptions">The list to add exceptions to.</param>
     public static async Task RunSafelyAsync(Func<Task> action, List<Exception> exceptions)
     {
         try
@@ -86,6 +99,11 @@ internal static class RunHelpers
 #else
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+    /// <summary>
+    /// Runs the specified value task safely and adds any exceptions to the provided list.
+    /// </summary>
+    /// <param name="action">The value task to run.</param>
+    /// <param name="exceptions">The list to add exceptions to.</param>
     public static async Task RunValueTaskSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
     {
         try

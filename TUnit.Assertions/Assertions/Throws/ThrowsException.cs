@@ -43,17 +43,16 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public TaskAwaiter<TException?> GetAwaiter()
     {
-        var task = _delegateAssertionBuilder.ProcessAssertionsAsync(
-            d => d.Exception as TException);
+        var task = _delegateAssertionBuilder.ProcessAssertionsAsync(d => Task.FromResult(d.Exception as TException));
         return task.GetAwaiter();
     }
 
-    public AndConvertedTypeAssertionBuilder<TException> And
+    public AndConvertedDelegateAssertionBuilder<TException> And
     {
         get
         {
             _source.ExpressionBuilder.Append(".And");
-            return new AndConvertedTypeAssertionBuilder<TException>(_source, AssertionDataTask());
+            return new AndConvertedDelegateAssertionBuilder<TException>(_source, AssertionDataTask());
         }
     }
 

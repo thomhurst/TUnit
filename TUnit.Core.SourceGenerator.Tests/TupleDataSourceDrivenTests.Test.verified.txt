@@ -75,6 +75,9 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.TupleDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
+				classInstanceArguments = [];
 
 				var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod());
 				int methodArg = methodArgTuples.Item1;
@@ -83,8 +86,8 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TupleDataSourceDrivenTests>(() => 
 				new global::TUnit.TestProject.TupleDataSourceDrivenTests()
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.TupleDataSourceDrivenTests>
 				{

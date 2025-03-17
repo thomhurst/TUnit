@@ -5,20 +5,22 @@ namespace TUnit.Core.Helpers;
 
 public class MethodInfoRetriever
 {
-    public static MethodInfo GetMethodInfo([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, 
+    private static readonly BindingFlags BindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
+
+    public static MethodInfo GetMethodInfo([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, 
         string methodName, 
         int genericParameterCount, 
         Type[] parameterTypes)
     {
         if (genericParameterCount == 0)
         {
-            return type.GetMethod(methodName, parameterTypes)
+            return type.GetMethod(methodName, BindingFlags, null, parameterTypes, [])
                    ?? throw new ArgumentException(
                        $"Method not found: {type}.{methodName}({string.Join(", ", parameterTypes.Select(x => x.Name))})");
         }
 
         return type
-                   .GetMethods()
+                   .GetMethods(BindingFlags)
                    .Where(x => x.Name == methodName)
                    .Where(x => x.IsGenericMethod)
                    .Where(x => x.GetGenericArguments().Length == genericParameterCount)

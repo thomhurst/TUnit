@@ -33,6 +33,11 @@ public static class TestContextExtensions
             testBuilderContext.ObjectBag.Add(key, value);
         }
         
+        foreach (var dataAttribute in testContext.OriginalMetadata.TestBuilderContext.DataAttributes)
+        {
+            testBuilderContext.DataAttributes.Add(dataAttribute);
+        }
+        
         var newTestMetaData = testMetadata.CloneWithNewMethodFactory(async (@class, token) =>
                 {
                     var hasTimeout = testContext.TestDetails.Timeout != null;
@@ -58,6 +63,8 @@ public static class TestContextExtensions
         var newTest = testContext.GetService<TestsConstructor>().ConstructTest(newTestMetaData);
         
         var startTime = DateTimeOffset.UtcNow;
+
+        await testContext.GetService<TUnitMessageBus>().Discovered(newTest.TestContext);
         
         await testContext.GetService<TestRegistrar>().RegisterInstance(newTest,
             onFailureToInitialize: exception => testContext.GetService<ITUnitMessageBus>().Failed(newTest.TestContext, exception, startTime));

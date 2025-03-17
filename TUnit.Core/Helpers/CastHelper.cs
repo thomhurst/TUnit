@@ -13,28 +13,50 @@ public static class CastHelper
             return default;
         }
 
-        if (value.GetType().IsAssignableTo<T>())
+        if (value is T successfulCast)
+        {
+            return successfulCast;
+        }
+
+        var underlyingType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+
+        if (value.GetType().IsAssignableTo(underlyingType))
         {
             return (T)value;
         }
         
-        if (typeof(T).IsEnum)
+        if (underlyingType.IsEnum)
         {
-            return (T?) Enum.ToObject(typeof(T), value);
+            return (T?) Enum.ToObject(underlyingType, value);
         }
 
-        return (T?) GetImplicitConversion(value.GetType(), typeof(T)).Invoke(null, [value]);
+        var conversionMethod = GetConversionMethod(value.GetType(), underlyingType);
+
+        if (conversionMethod is null)
+        {
+            return (T?) Convert.ChangeType(value, underlyingType);
+        }
+        
+        return (T?) conversionMethod.Invoke(null, [value]);
     }
 
-    private static MethodInfo GetImplicitConversion([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType)
+    private static MethodInfo? GetConversionMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType)
     {
-        return baseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+        var methods = baseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
             .Concat(targetType.GetMethods(BindingFlags.Public | BindingFlags.Static))
-            .Where(mi => mi.Name == "op_Implicit" && mi.ReturnType == targetType)
-            .FirstOrDefault(mi =>
-            {
-                var pi = mi.GetParameters().FirstOrDefault();
-                return pi != null && pi.ParameterType == baseType;
-            }) ?? throw new ArgumentException($"Cannot convert from {baseType} to {targetType}");
+            .ToArray();
+
+        return methods
+                   .FirstOrDefault(mi =>
+                       mi.Name == "op_Implicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi))
+               ?? methods
+                   .FirstOrDefault(mi =>
+                       mi.Name == "op_Explicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi));
+    }
+
+    private static bool HasCorrectInputType(Type baseType, MethodInfo mi)
+    {
+        var pi = mi.GetParameters().FirstOrDefault();
+        return pi != null && pi.ParameterType == baseType;
     }
 }

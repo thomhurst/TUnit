@@ -78,12 +78,15 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 
 								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+								global::TUnit.TestProject.AttributeTests? classInstance = null;
+								object?[]? classInstanceArguments = null;
+								classInstanceArguments = [];
 
 								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AttributeTests>(() => 
 								new global::TUnit.TestProject.AttributeTests()
 								, sessionId, testBuilderContext);
-
 								var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 								nodes.Add(new TestMetadata<global::TUnit.TestProject.AttributeTests>
 								{

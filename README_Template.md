@@ -135,7 +135,7 @@ This provides you base classes, similarly to Microsoft.Playwright.NUnit or Micro
   - Test
 
 - Designed to avoid common pitfalls such as leaky test states
-- Dependency injection support ([See here](https://thomhurst.github.io/TUnit/docs/tutorial-extras/class-constructors))
+- Dependency injection support ([See here](https://thomhurst.github.io/TUnit/docs/tutorial-extras/dependency-injection))
 - Ability to view and interrogate metadata and results from various assembly/class/test context objects
 
 # Installation

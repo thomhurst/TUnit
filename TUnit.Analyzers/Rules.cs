@@ -126,8 +126,17 @@ public static class Rules
     public static readonly DiagnosticDescriptor XunitAttributes =
         CreateDescriptor("TUnit0052", UsageCategory, DiagnosticSeverity.Info);
     
-        public static readonly DiagnosticDescriptor XunitClassFixtures =
-            CreateDescriptor("TUnit0053", UsageCategory, DiagnosticSeverity.Info);
+    public static readonly DiagnosticDescriptor XunitClassFixtures =
+        CreateDescriptor("TUnit0053", UsageCategory, DiagnosticSeverity.Info);
+    
+    public static readonly DiagnosticDescriptor XunitUsingDirectives =
+        CreateDescriptor("TUnit0054", UsageCategory, DiagnosticSeverity.Info);
+    
+    public static readonly DiagnosticDescriptor OverwriteConsole =
+        CreateDescriptor("TUnit0055", UsageCategory, DiagnosticSeverity.Warning);
+    
+    public static readonly DiagnosticDescriptor InstanceMethodSource =
+        CreateDescriptor("TUnit0056", UsageCategory, DiagnosticSeverity.Error);
     
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

@@ -1,4 +1,7 @@
 ﻿using OneOf;
+using TUnit.Assertions;
+using TUnit.Assertions.AssertionBuilders.Groups;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 
@@ -29,7 +32,8 @@ public class MatrixTests
     [MatrixDataSource]
     public async Task MatrixTest_Enum(
         [Matrix(1, 2)] int i,
-        [Matrix(-1, TestEnum.One)] TestEnum testEnum)
+        [Matrix(-1, TestEnum.One)] TestEnum testEnum,
+        TestEnum? testEnum2)
     {
         await Task.CompletedTask;
     }
@@ -47,7 +51,7 @@ public class MatrixTests
     [MatrixDataSource]
     public async Task AutoGenerateBools2(
         [Matrix("A", "B", "C")] string str,
-        [Matrix] bool boolean)
+        [Matrix] bool? boolean)
     {
         await Task.CompletedTask;
     }
@@ -67,7 +71,9 @@ public class MatrixTests
         [Matrix<CountToTenEnum>(Excluding = [CountToTenEnum.Three, CountToTenEnum.Seven])] CountToTenEnum @enum,
         [Matrix] bool boolean)
     {
-        await Task.CompletedTask;
+        await Assert.That(@enum).IsNotEqualTo(CountToTenEnum.Three)
+            .And
+            .IsNotEqualTo(CountToTenEnum.Seven);
     }
 
 #if NET7_0_OR_GREATER
@@ -85,6 +91,26 @@ public class MatrixTests
             [MatrixRange<int>(-50, 50, 5)] int item)
         {
             await Task.CompletedTask;
+        }
+
+        [Test]
+        [MatrixDataSource]
+        [MatrixExclusion(3)]
+        [MatrixExclusion(7)]
+        public async Task Range_Exclusion([MatrixRange<int>(1, 10)] int item)
+        {
+            await Assert.That(item).IsNotEqualTo(3)
+                .And
+                .IsNotEqualTo(7);
+        }
+        
+        [Test]
+        [MatrixDataSource]
+        public async Task Range_Exclusion2([MatrixRange<int>(1, 10, Excluding = [3, 7])] int item)
+        {
+            await Assert.That(item).IsNotEqualTo(3)
+                .And
+                .IsNotEqualTo(7);
         }
 #endif
 
@@ -129,7 +155,7 @@ public class MatrixTests
         [MatrixMethod<MatrixTests>(nameof(EnumerableMethod))] int item,
         [MatrixMethod<MatrixTests>(nameof(EnumerableMethod))] int item2)
     {
-        await Task.CompletedTask;
+        await Assert.That(item).IsNotEqualTo(item2);
     }
 
     public enum CountToTenEnum

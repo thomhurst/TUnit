@@ -48,7 +48,7 @@ public class AssertionGroupTests
     }
     
     [Test]
-    public async Task And_Condition_Thows_As_Expected()
+    public async Task And_Condition_Throws_As_Expected()
     {
         var value = "Foo";
         

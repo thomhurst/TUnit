@@ -80,9 +80,12 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod())
 				{
 					testMethodDataIndex++;
+					classInstanceArguments = [];
 
 					var methodData = methodDataAccessor;
 					var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(methodData);
@@ -92,8 +95,8 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
 					{
@@ -183,9 +186,12 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod())
 					{
 						testMethodDataIndex++;
+						classInstanceArguments = [];
 
 						var methodData = methodDataAccessor;
 						var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(methodData);
@@ -195,8 +201,8 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
 						new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
 						{

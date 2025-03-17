@@ -40,7 +40,7 @@ public sealed class ClassDataSourceAttribute<
                         .GetItemForIndex<T5>(4, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata)
                 );
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (obj, context) =>
             {
                 var testContext = context.TestContext;
 
@@ -80,7 +80,7 @@ public sealed class ClassDataSourceAttribute<
                     itemsWithMetadata.Item5.T);
             };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (obj, context) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                     context,
@@ -117,8 +117,26 @@ public sealed class ClassDataSourceAttribute<
                     itemsWithMetadata.Item5.Key,
                     itemsWithMetadata.Item5.T);
             };
+            
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (obj, context) =>
+            {
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, itemsWithMetadata.Item1.T);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, itemsWithMetadata.Item2.T);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, itemsWithMetadata.Item2.T);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, itemsWithMetadata.Item4.T);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, itemsWithMetadata.Item5.T);
+            };
+            
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (obj, context) =>
+            {
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, itemsWithMetadata.Item1.T);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, itemsWithMetadata.Item2.T);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, itemsWithMetadata.Item3.T);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, itemsWithMetadata.Item4.T);
+                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, itemsWithMetadata.Item5.T);
+            };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (obj, context) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
                     context,
@@ -151,7 +169,7 @@ public sealed class ClassDataSourceAttribute<
                     itemsWithMetadata.Item5.T);
             };
             
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, context) =>
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (obj, context) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
                     context,

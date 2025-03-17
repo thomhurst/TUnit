@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.Assertions.Generics.Conditions;
+using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
@@ -17,6 +18,15 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Invokable
         
         AppendCallerMethod([doNotPopulateThis]);
         
+        return this;
+    }
+
+    public EquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency()
+    {
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+
+        assertion.EquivalencyKind = EquivalencyKind.Partial;
+
         return this;
     }
 }

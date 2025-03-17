@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace TUnit.Analyzers;
@@ -12,17 +14,13 @@ public class XUnitAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method, SymbolKind.NamedType);
+        // context.RegisterSyntaxNodeAction(AnalyzeAttribute, SyntaxKind.Attribute);
     }
     
     private void AnalyzeSymbol(SymbolAnalysisContext context)
     {
-        if (context.Symbol is not IMethodSymbol methodSymbol)
-        {
-            return;
-        }
-        
-        foreach (var attributeData in methodSymbol.GetAttributes())
+        foreach (var attributeData in context.Symbol.GetAttributes())
         {
             var @namespace = attributeData.AttributeClass?.ContainingNamespace?.Name;
             
@@ -32,6 +30,32 @@ public class XUnitAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
                     Diagnostic.Create(Rules.XunitAttributes, attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation())
                 );
             }
+        }
+    }
+
+    private void AnalyzeAttribute(SyntaxNodeAnalysisContext context)
+    {
+        var attributeSyntax = (AttributeSyntax)context.Node;
+        
+        var attributeListSyntax = attributeSyntax.Parent as AttributeListSyntax;
+
+        if (attributeListSyntax?.Target?.Identifier.ValueText is not "assembly")
+        {
+            return;
+        }
+
+        var symbol = context.SemanticModel.GetSymbolInfo(attributeSyntax).Symbol;
+
+        if (symbol is not IMethodSymbol)
+        {
+            return;
+        }
+        
+        if (symbol.ContainingNamespace.Name.StartsWith("Xunit"))
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(Rules.XunitAttributes, attributeSyntax.GetLocation())
+            );
         }
     }
 }

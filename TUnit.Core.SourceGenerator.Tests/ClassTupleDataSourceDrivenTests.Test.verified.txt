@@ -145,10 +145,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 
 				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+				global::TUnit.TestProject.ClassTupleDataSourceDrivenTests? classInstance = null;
+				object?[]? classInstanceArguments = null;
 				var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
 				int classArg = classArgTuples.Item1;
 				string classArg1 = classArgTuples.Item2;
 				bool classArg2 = classArgTuples.Item3;
+				classInstanceArguments = [classArg, classArg1, classArg2];
 				(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
 				(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 				(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
@@ -167,8 +170,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					Property4 = propertyArg3,
 				}
 				, sessionId, testBuilderContext);
-
 				var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 				{
@@ -320,10 +323,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 
 					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+					global::TUnit.TestProject.ClassTupleDataSourceDrivenTests? classInstance = null;
+					object?[]? classInstanceArguments = null;
 					var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
 					int classArg = classArgTuples.Item1;
 					string classArg1 = classArgTuples.Item2;
 					bool classArg2 = classArgTuples.Item3;
+					classInstanceArguments = [classArg, classArg1, classArg2];
 					(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
 					(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 					(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
@@ -342,8 +348,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						Property4 = propertyArg3,
 					}
 					, sessionId, testBuilderContext);
-
 					var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 					{
@@ -495,10 +501,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 
 						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+						global::TUnit.TestProject.ClassTupleDataSourceDrivenTests? classInstance = null;
+						object?[]? classInstanceArguments = null;
 						var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
 						int classArg = classArgTuples.Item1;
 						string classArg1 = classArgTuples.Item2;
 						bool classArg2 = classArgTuples.Item3;
+						classInstanceArguments = [classArg, classArg1, classArg2];
 						(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
 						(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 						(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
@@ -517,8 +526,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							Property4 = propertyArg3,
 						}
 						, sessionId, testBuilderContext);
-
 						var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 						nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 						{
@@ -670,10 +679,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 
 							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+							global::TUnit.TestProject.ClassTupleDataSourceDrivenTests? classInstance = null;
+							object?[]? classInstanceArguments = null;
 							var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
 							int classArg = classArgTuples.Item1;
 							string classArg1 = classArgTuples.Item2;
 							bool classArg2 = classArgTuples.Item3;
+							classInstanceArguments = [classArg, classArg1, classArg2];
 							(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
 							(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 							(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
@@ -692,8 +704,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								Property4 = propertyArg3,
 							}
 							, sessionId, testBuilderContext);
-
 							var resettableClassFactory = resettableClassFactoryDelegate();
+
 
 							nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 							{

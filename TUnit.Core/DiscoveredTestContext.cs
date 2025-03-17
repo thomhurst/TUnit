@@ -4,6 +4,9 @@
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Represents the context for a discovered test.
+/// </summary>
 public class DiscoveredTestContext
 {
     public TestContext TestContext { get; }

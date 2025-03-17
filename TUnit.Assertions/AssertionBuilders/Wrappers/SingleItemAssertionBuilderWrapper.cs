@@ -14,12 +14,12 @@ public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValue
         {
             if (d.Result is IEnumerable<TInner> enumerable)
             {
-                return enumerable.SingleOrDefault();
+                return Task.FromResult(enumerable.SingleOrDefault());
             }
 
-            return default;
+            return Task.FromResult<TInner?>(default)!;
         });
         
-        return task.GetAwaiter();
+        return task.GetAwaiter()!;
     }
 }
