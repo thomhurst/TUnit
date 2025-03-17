@@ -40,8 +40,6 @@ public partial class Tests
 
         await Verify(publicApi)
             .AddScrubber(sb => Scrub(sb))
-            .ScrubMachineName()
-            .DisableDiff()
             .OnVerifyMismatch(async (pair, message, verify) =>
             {
                 var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
@@ -77,6 +75,6 @@ public partial class Tests
         }
 #endif
         
-        return new Regex(@"([a-zA-Z]:\\\\(?:[^\\\/:*?""<>|\r\n]+\\\\)*[^\\\/:*?""<>|\r\n]*)");
+        return new Regex(@"([a-zA-Z]:\\{1,2}(?:[^\\\/:*?""<>|\r\n]+\\b)*[^\\\/:*?""<>|\r\n]*)");
     }
 }
