@@ -26,14 +26,14 @@ public class BrowserTest : PlaywrightTest
         return context;
     }
 
-    [Before(HookType.Test)]
+    [Before(HookType.Test, "", 0)]
     public async Task BrowserSetup()
     {
         var service = await BrowserService.Register(this, BrowserType, _options).ConfigureAwait(false);
         Browser = service.Browser;
     }
 
-    [After(HookType.Test)]
+    [After(HookType.Test, "", 0)]
     public async Task BrowserTearDown(TestContext testContext)
     {
         if (TestOk(testContext))

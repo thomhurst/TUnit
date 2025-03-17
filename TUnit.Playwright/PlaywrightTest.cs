@@ -12,14 +12,14 @@ public class PlaywrightTest : WorkerAwareTest
 
     public static IPlaywright Playwright { get; private set; } = null!;
 
-    [Before(HookType.TestSession)]
+    [Before(HookType.TestSession, "", 0)]
     public static async Task PlaywrightSetup()
     {
         Playwright = await PlaywrightTask.ConfigureAwait(false);
         Playwright.Selectors.SetTestIdAttribute("data-testid");
     }
     
-    [After(HookType.TestSession)]
+    [After(HookType.TestSession, "", 0)]
     public static void PlaywrightCleanup()
     {
         Playwright.Dispose();
