@@ -44,8 +44,8 @@
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.43.0" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.43.0" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.43.0" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.8.2" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.8.2" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.8.3" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.8.3" />
     <PackageVersion Include="NUnit" Version="4.3.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.6.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
@@ -69,7 +69,7 @@
     <PackageVersion Include="TUnit.Core" Version="0.18.33" />
     <PackageVersion Include="TUnit.Assertions" Version="0.18.33" />
     <PackageVersion Include="Verify.TUnit" Version="28.16.0" />
-    <PackageVersion Include="Vogen" Version="7.0.1" />
+    <PackageVersion Include="Vogen" Version="7.0.2" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.2" />
