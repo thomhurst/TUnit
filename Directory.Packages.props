@@ -52,6 +52,7 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.5.2" />
     <PackageVersion Include="Polyfill" Version="7.21.0" />
+    <PackageVersion Include="PublicApiGenerator" Version="11.4.5" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="0.7.6" />
     <PackageVersion Include="Sourcy.Git" Version="0.7.6" />
@@ -63,11 +64,11 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.3.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.3.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="Verify.NUnit" Version="28.15.0" />
+    <PackageVersion Include="Verify.NUnit" Version="28.16.0" />
     <PackageVersion Include="TUnit" Version="0.18.33" />
     <PackageVersion Include="TUnit.Core" Version="0.18.33" />
     <PackageVersion Include="TUnit.Assertions" Version="0.18.33" />
-    <PackageVersion Include="Verify.TUnit" Version="28.15.0" />
+    <PackageVersion Include="Verify.TUnit" Version="28.16.0" />
     <PackageVersion Include="Vogen" Version="7.0.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />

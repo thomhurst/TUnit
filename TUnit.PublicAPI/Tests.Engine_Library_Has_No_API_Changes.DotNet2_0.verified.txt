@@ -1,0 +1,187 @@
+﻿[assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/thomhurst/TUnit.git")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
+namespace TUnit.Engine.Exceptions
+{
+    public class TestFailedException : TUnit.Core.Exceptions.TUnitException
+    {
+        public TestFailedException(System.Exception exception) { }
+        public override string StackTrace { get; }
+    }
+}
+namespace TUnit.Engine.Extensions
+{
+    public static class JsonExtensions
+    {
+        public static TUnit.Engine.Json.ExceptionJson ToJsonModel(this System.Exception exception) { }
+        public static TUnit.Engine.Json.TestAssemblyJson ToJsonModel(this TUnit.Core.AssemblyHookContext context) { }
+        public static TUnit.Engine.Json.TestClassJson ToJsonModel(this TUnit.Core.ClassHookContext context) { }
+        public static TUnit.Engine.Json.TestJson ToJsonModel(this TUnit.Core.TestContext context) { }
+        public static TUnit.Engine.Json.TestResultJson ToJsonModel(this TUnit.Core.TestResult result) { }
+        public static TUnit.Engine.Json.TestSessionJson ToJsonModel(this TUnit.Core.TestSessionContext context) { }
+    }
+    public static class TestContextExtensions
+    {
+        public static System.Threading.Tasks.Task ReregisterTestWithArguments(this TUnit.Core.TestContext testContext, object?[]? methodArguments, System.Collections.Generic.Dictionary<string, object?>? objectBag = null) { }
+    }
+}
+namespace TUnit.Engine.Framework
+{
+    public interface IFilterReceiver
+    {
+        string? Filter { set; }
+    }
+    public static class TestingPlatformBuilderHook
+    {
+        public static void AddExtensions(Microsoft.Testing.Platform.Builder.ITestApplicationBuilder testApplicationBuilder, string[] _) { }
+    }
+}
+namespace TUnit.Engine.Json
+{
+    public class ExceptionJson : System.IEquatable<TUnit.Engine.Json.ExceptionJson>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public ExceptionJson() { }
+        public TUnit.Engine.Json.ExceptionJson? InnerException { get; init; }
+        public string Message { get; init; }
+        public string? Stacktrace { get; init; }
+        public string? Type { get; init; }
+    }
+    public class TestAssemblyJson : System.IEquatable<TUnit.Engine.Json.TestAssemblyJson>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public TestAssemblyJson() { }
+        public string? AssemblyName { get; init; }
+        public TUnit.Engine.Json.TestClassJson[] Classes { get; init; }
+    }
+    public class TestClassJson : System.IEquatable<TUnit.Engine.Json.TestClassJson>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public TestClassJson() { }
+        public TUnit.Engine.Json.TestJson[] Tests { get; init; }
+        public string? Type { get; init; }
+    }
+    public class TestJson : System.IEquatable<TUnit.Engine.Json.TestJson>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public TestJson() { }
+        public System.Collections.Generic.IReadOnlyList<string> Categories { get; init; }
+        public string? ClassType { get; init; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> CustomProperties { get; init; }
+        public string DisplayName { get; set; }
+        public System.Collections.Generic.Dictionary<string, object?> ObjectBag { get; init; }
+        public TUnit.Engine.Json.TestResultJson? Result { get; set; }
+        public int RetryLimit { get; init; }
+        public string? ReturnType { get; init; }
+        public object?[]? TestClassArguments { get; init; }
+        public string?[]? TestClassParameterTypes { get; init; }
+        public string TestFilePath { get; init; }
+        public string TestId { get; init; }
+        public int TestLineNumber { get; init; }
+        public object?[]? TestMethodArguments { get; init; }
+        public string?[]? TestMethodParameterTypes { get; init; }
+        public string TestName { get; init; }
+        public System.TimeSpan? Timeout { get; init; }
+    }
+    public class TestResultJson : System.IEquatable<TUnit.Engine.Json.TestResultJson>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public TestResultJson() { }
+        public string ComputerName { get; init; }
+        public System.TimeSpan? Duration { get; init; }
+        public System.DateTimeOffset? End { get; init; }
+        public TUnit.Engine.Json.ExceptionJson? Exception { get; init; }
+        public string? Output { get; init; }
+        public System.DateTimeOffset? Start { get; init; }
+        public TUnit.Core.Enums.Status Status { get; init; }
+    }
+    public class TestSessionJson : System.IEquatable<TUnit.Engine.Json.TestSessionJson>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public TestSessionJson() { }
+        public TUnit.Engine.Json.TestAssemblyJson[] Assemblies { get; init; }
+    }
+}
+namespace TUnit.Engine
+{
+    public class PriorityQueue<TElement, TPriority>
+        where TPriority : System.IComparable<TPriority>
+    {
+        public PriorityQueue() { }
+        public int Count { get; }
+        public TElement Dequeue() { }
+        public void Enqueue(TElement value, TPriority priority) { }
+        public TElement Peek() { }
+        public bool TryDequeue([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out TElement? value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out TPriority? priority) { }
+    }
+    public class TUnitMessageBus : Microsoft.Testing.Platform.Extensions.IExtension, Microsoft.Testing.Platform.Extensions.Messages.IDataProducer
+    {
+        public TUnitMessageBus(Microsoft.Testing.Platform.Extensions.IExtension extension, Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions, Microsoft.Testing.Platform.Extensions.TestFramework.ExecuteRequestContext context) { }
+        public System.Type[] DataTypesProduced { get; }
+        public string Description { get; }
+        public string DisplayName { get; }
+        public string Uid { get; }
+        public string Version { get; }
+        public System.Threading.Tasks.ValueTask Cancelled(TUnit.Core.TestContext testContext) { }
+        public System.Threading.Tasks.ValueTask Discovered(TUnit.Core.TestContext testContext) { }
+        public System.Threading.Tasks.ValueTask Failed(TUnit.Core.TestContext testContext, System.Exception exception, System.DateTimeOffset start) { }
+        public System.Threading.Tasks.ValueTask InProgress(TUnit.Core.TestContext testContext) { }
+        public System.Threading.Tasks.Task<bool> IsEnabledAsync() { }
+        public System.Threading.Tasks.ValueTask Passed(TUnit.Core.TestContext testContext, System.DateTimeOffset start) { }
+        public System.Threading.Tasks.ValueTask SessionArtifact(TUnit.Core.Artifact artifact) { }
+        public System.Threading.Tasks.ValueTask Skipped(TUnit.Core.TestContext testContext, string reason) { }
+        public System.Threading.Tasks.ValueTask TestArtifact(TUnit.Core.TestContext testContext, TUnit.Core.Artifact artifact) { }
+    }
+}
+namespace TUnit.Engine.Reporters
+{
+    public class GitHubReporter : Microsoft.Testing.Platform.Extensions.IExtension, Microsoft.Testing.Platform.Extensions.TestHost.IDataConsumer, Microsoft.Testing.Platform.Extensions.TestHost.ITestApplicationLifecycleCallbacks, Microsoft.Testing.Platform.Extensions.TestHost.ITestHostExtension, TUnit.Engine.Framework.IFilterReceiver
+    {
+        public GitHubReporter(Microsoft.Testing.Platform.Extensions.IExtension extension) { }
+        public System.Type[] DataTypesConsumed { get; }
+        public string Description { get; }
+        public string DisplayName { get; }
+        public string? Filter { get; set; }
+        public string Uid { get; }
+        public string Version { get; }
+        public System.Threading.Tasks.Task AfterRunAsync(int exitCode, System.Threading.CancellationToken cancellation) { }
+        public System.Threading.Tasks.Task BeforeRunAsync(System.Threading.CancellationToken cancellationToken) { }
+        public System.Threading.Tasks.Task ConsumeAsync(Microsoft.Testing.Platform.Extensions.Messages.IDataProducer dataProducer, Microsoft.Testing.Platform.Extensions.Messages.IData value, System.Threading.CancellationToken cancellationToken) { }
+        public System.Threading.Tasks.Task<bool> IsEnabledAsync() { }
+    }
+}
+namespace TUnit.Engine.Services
+{
+    public class FilterParser
+    {
+        public FilterParser() { }
+        public string? GetTestFilter(Microsoft.Testing.Platform.Extensions.TestFramework.ExecuteRequestContext context) { }
+        public static string? StringifyFilter(Microsoft.Testing.Platform.Requests.ITestExecutionFilter filter) { }
+    }
+    public class HookMessagePublisher : Microsoft.Testing.Platform.Extensions.IExtension, Microsoft.Testing.Platform.Extensions.Messages.IDataProducer, TUnit.Core.Hooks.IHookMessagePublisher
+    {
+        public HookMessagePublisher(Microsoft.Testing.Platform.Extensions.IExtension extension, Microsoft.Testing.Platform.Messages.IMessageBus messageBus) { }
+        public System.Type[] DataTypesProduced { get; }
+        public string Description { get; }
+        public string DisplayName { get; }
+        public string Uid { get; }
+        public string Version { get; }
+        public System.Threading.Tasks.Task Discover(string sessionId, string displayName, TUnit.Core.Hooks.StaticHookMethod hookMethod) { }
+        public System.Threading.Tasks.Task<bool> IsEnabledAsync() { }
+        public System.Threading.Tasks.Task Push(string sessionId, string displayName, TUnit.Core.Hooks.StaticHookMethod hookMethod, System.Func<System.Threading.Tasks.Task> func) { }
+    }
+    public class LogLevelProvider
+    {
+        public LogLevelProvider(Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions) { }
+        public TUnit.Core.Enums.LogLevel LogLevel { get; }
+    }
+    public static class TUnitRunner
+    {
+        public static System.Threading.Tasks.Task<int> RunTests(params string[] args) { }
+    }
+}
