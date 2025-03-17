@@ -8,9 +8,9 @@ namespace TUnit.Playwright
         public BrowserTest() { }
         public BrowserTest(Microsoft.Playwright.BrowserTypeLaunchOptions options) { }
         public Microsoft.Playwright.IBrowser Browser { get; }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "C:\\git\\TUnit\\TUnit.Playwright\\BrowserTest.cs", 29)]
+        [TUnit.Core.Before(TUnit.Core.HookType.Test, "<FilePath>", 29)]
         public System.Threading.Tasks.Task BrowserSetup() { }
-        [TUnit.Core.After(TUnit.Core.HookType.Test, "C:\\git\\TUnit\\TUnit.Playwright\\BrowserTest.cs", 36)]
+        [TUnit.Core.After(TUnit.Core.HookType.Test, "<FilePath>", 36)]
         public System.Threading.Tasks.Task BrowserTearDown(TUnit.Core.TestContext testContext) { }
         public System.Threading.Tasks.Task<Microsoft.Playwright.IBrowserContext> NewContext(Microsoft.Playwright.BrowserNewContextOptions options) { }
     }
@@ -19,7 +19,7 @@ namespace TUnit.Playwright
         public ContextTest() { }
         public Microsoft.Playwright.IBrowserContext Context { get; }
         public virtual Microsoft.Playwright.BrowserNewContextOptions ContextOptions(TUnit.Core.TestContext testContext) { }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "C:\\git\\TUnit\\TUnit.Playwright\\ContextTest.cs", 19)]
+        [TUnit.Core.Before(TUnit.Core.HookType.Test, "<FilePath>", 19)]
         public System.Threading.Tasks.Task ContextSetup(TUnit.Core.TestContext testContext) { }
     }
     public sealed class DefaultPlaywrightParallelLimiter : TUnit.Core.Interfaces.IParallelLimit
@@ -36,7 +36,7 @@ namespace TUnit.Playwright
     {
         public PageTest() { }
         public Microsoft.Playwright.IPage Page { get; }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "C:\\git\\TUnit\\TUnit.Playwright\\PageTest.cs", 10)]
+        [TUnit.Core.Before(TUnit.Core.HookType.Test, "<FilePath>", 10)]
         public System.Threading.Tasks.Task PageSetup() { }
     }
     public class PlaywrightSkipAttribute : TUnit.Core.SkipAttribute
@@ -64,9 +64,9 @@ namespace TUnit.Playwright
         public Microsoft.Playwright.IAPIResponseAssertions Expect(Microsoft.Playwright.IAPIResponse response) { }
         public Microsoft.Playwright.ILocatorAssertions Expect(Microsoft.Playwright.ILocator locator) { }
         public Microsoft.Playwright.IPageAssertions Expect(Microsoft.Playwright.IPage page) { }
-        [TUnit.Core.After(TUnit.Core.HookType.TestSession, "C:\\git\\TUnit\\TUnit.Playwright\\PlaywrightTest.cs", 22)]
+        [TUnit.Core.After(TUnit.Core.HookType.TestSession, "<FilePath>", 22)]
         public static void PlaywrightCleanup() { }
-        [TUnit.Core.Before(TUnit.Core.HookType.TestSession, "C:\\git\\TUnit\\TUnit.Playwright\\PlaywrightTest.cs", 15)]
+        [TUnit.Core.Before(TUnit.Core.HookType.TestSession, "<FilePath>", 15)]
         public static System.Threading.Tasks.Task PlaywrightSetup() { }
         public static void SetDefaultExpectTimeout(float timeout) { }
     }
@@ -79,9 +79,9 @@ namespace TUnit.Playwright
         public System.Threading.Tasks.Task<T> RegisterService<T>(string name, System.Func<System.Threading.Tasks.Task<T>> factory)
             where T :  class, TUnit.Playwright.IWorkerService { }
         protected bool TestOk(TUnit.Core.TestContext testContext) { }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "C:\\git\\TUnit\\TUnit.Playwright\\WorkerAwareTest.cs", 34)]
+        [TUnit.Core.Before(TUnit.Core.HookType.Test, "<FilePath>", 34)]
         public void WorkerSetup() { }
-        [TUnit.Core.After(TUnit.Core.HookType.Test, "C:\\git\\TUnit\\TUnit.Playwright\\WorkerAwareTest.cs", 45)]
+        [TUnit.Core.After(TUnit.Core.HookType.Test, "<FilePath>", 45)]
         public System.Threading.Tasks.Task WorkerTeardown(TUnit.Core.TestContext testContext) { }
     }
 }
