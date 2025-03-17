@@ -16,7 +16,7 @@ public class ContextTest : BrowserTest
         };
     }
 
-    [Before(HookType.Test)]
+    [Before(HookType.Test, "", 0)]
     public async Task ContextSetup(TestContext testContext)
     {
         Context = await NewContext(ContextOptions(testContext)).ConfigureAwait(false);

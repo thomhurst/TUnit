@@ -31,7 +31,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         return (_currentWorker.Services[name] as T)!;
     }
 
-    [Before(HookType.Test)]
+    [Before(HookType.Test, "", 0)]
     public void WorkerSetup()
     {
         if (!AllWorkers.TryPop(out _currentWorker!))
@@ -42,7 +42,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         WorkerIndex = _currentWorker.WorkerIndex;
     }
 
-    [After(HookType.Test)]
+    [After(HookType.Test, "", 0)]
     public async Task WorkerTeardown(TestContext testContext)
     {
         if (TestOk(testContext))
