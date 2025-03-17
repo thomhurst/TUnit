@@ -78,9 +78,9 @@ namespace TUnit.Playwright
         public System.Threading.Tasks.Task<T> RegisterService<T>(string name, System.Func<System.Threading.Tasks.Task<T>> factory)
             where T :  class, TUnit.Playwright.IWorkerService { }
         protected bool TestOk(TUnit.Core.TestContext testContext) { }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "C:\\git\\TUnit\\TUnit.Playwright\\WorkerAwareTest.cs", 34)]
+        [TUnit.Core.Before(TUnit.Core.HookType.Test, "", 0)]
         public void WorkerSetup() { }
-        [TUnit.Core.After(TUnit.Core.HookType.Test, "C:\\git\\TUnit\\TUnit.Playwright\\WorkerAwareTest.cs", 45)]
+        [TUnit.Core.After(TUnit.Core.HookType.Test, "", 0)]
         public System.Threading.Tasks.Task WorkerTeardown(TUnit.Core.TestContext testContext) { }
     }
 }
