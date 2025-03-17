@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsLibraryTestProject>true</IsLibraryTestProject>
+        <IsPackable>false</IsPackable>
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <Configuration>Release</Configuration>
+        <RuntimeIdentifier Condition="'$(TargetFramework)' == 'net472'">win-x64</RuntimeIdentifier>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="PublicApiGenerator" />
+      <PackageReference Include="Verify.TUnit" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TUnit.Playwright\TUnit.Playwright.csproj" />
+    </ItemGroup>
+
+</Project>

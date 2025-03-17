@@ -105,6 +105,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleNamespace.TestProjec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Analyzers.CodeFixers", "TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj", "{5C2033DE-A8D4-4F2D-9B3A-55FB419C4D6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.PublicAPI", "TUnit.PublicAPI\TUnit.PublicAPI.csproj", "{123BEDCE-BBA6-46E0-9A55-7135CEB77CDC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -267,6 +269,10 @@ Global
 		{5C2033DE-A8D4-4F2D-9B3A-55FB419C4D6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C2033DE-A8D4-4F2D-9B3A-55FB419C4D6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C2033DE-A8D4-4F2D-9B3A-55FB419C4D6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{123BEDCE-BBA6-46E0-9A55-7135CEB77CDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{123BEDCE-BBA6-46E0-9A55-7135CEB77CDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{123BEDCE-BBA6-46E0-9A55-7135CEB77CDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{123BEDCE-BBA6-46E0-9A55-7135CEB77CDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -312,6 +318,7 @@ Global
 		{92F3F6A7-C5A9-C032-4C6E-9D9EF718656D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{AAF81E48-0ED8-FB25-A113-7C47AEC54463} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{5C2033DE-A8D4-4F2D-9B3A-55FB419C4D6F} = {503DA9FA-045D-4910-8AF6-905E6048B1F1}
+		{123BEDCE-BBA6-46E0-9A55-7135CEB77CDC} = {62AD1EAF-43C4-4AC0-B9FA-CD59739B3850}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {109D285A-36B3-4503-BCDF-8E26FB0E2C5B}
