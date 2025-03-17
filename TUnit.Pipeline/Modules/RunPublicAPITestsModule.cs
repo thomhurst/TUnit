@@ -16,8 +16,9 @@ public class RunPublicAPITestsModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.PublicAPI.csproj").AssertExists();
         
-        return await context.DotNet().Test(new DotNetTestOptions(project)
+        return await context.DotNet().Run(new DotNetRunOptions
         {
+            Project = project,
             NoBuild = true,
             Configuration = Configuration.Release,
             Framework = Environment.GetEnvironmentVariable("NET_VERSION"),

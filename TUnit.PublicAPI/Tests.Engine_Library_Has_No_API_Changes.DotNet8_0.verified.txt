@@ -1,5 +1,5 @@
 ﻿[assembly: System.Reflection.AssemblyMetadata("IsTrimmable", "True")]
-[assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/thomhurst/TUnit.git")]
+[assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/thomhurst/TUnit")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
 namespace TUnit.Engine.Exceptions
 {

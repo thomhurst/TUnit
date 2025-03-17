@@ -1,12 +1,14 @@
 ﻿using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using PublicApiGenerator;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.PublicAPI;
 
-public class Tests
+public partial class Tests
 {
     [Test]
     public Task Core_Library_Has_No_API_Changes()
@@ -38,6 +40,7 @@ public class Tests
 
         await Verify(publicApi)
             .AddScrubber(sb => Scrub(sb))
+            .ScrubMachineName()
             .DisableDiff()
             .OnVerifyMismatch(async (pair, message, verify) =>
             {
@@ -52,12 +55,28 @@ public class Tests
     
     private StringBuilder Scrub(StringBuilder text)
     {
-        return text
+        var stringBuilder = text
             .Replace(".git\"", "\"");
+        
+        var scrubbed = FilePathRegex().Replace(stringBuilder.ToString(), "<FilePath>");
+        
+        return new StringBuilder(scrubbed);
     }
     
     private string Scrub(string text)
     {
         return Scrub(new StringBuilder(text)).ToString();
+    }
+
+    private static Regex FilePathRegex()
+    {
+#if NET
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new Regex(@"(\/{1,2}(?:[^\\\/:*?""<>|\r\n]+\/{1,2})*[^\\\/:*?""<>|\r\n]*)");
+        }
+#endif
+        
+        return new Regex(@"([a-zA-Z]:\\\\(?:[^\\\/:*?""<>|\r\n]+\\\\)*[^\\\/:*?""<>|\r\n]*)");
     }
 }
