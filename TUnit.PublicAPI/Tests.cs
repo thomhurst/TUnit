@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text;
 using PublicApiGenerator;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
@@ -36,6 +37,7 @@ public class Tests
         var publicApi = assembly.GeneratePublicApi();
 
         await Verify(publicApi)
+            .AddScrubber(sb => Scrub(sb))
             .DisableDiff()
             .OnVerifyMismatch(async (pair, message, verify) =>
             {
@@ -43,8 +45,19 @@ public class Tests
                 var verified = await FilePolyfill.ReadAllTextAsync(pair.VerifiedPath);
                 
                 // Better diff message since original one is too large
-                await Assert.That(received).IsEqualTo(verified);
+                await Assert.That(Scrub(received)).IsEqualTo(Scrub(verified));
             })
             .UniqueForTargetFrameworkAndVersion(assembly);
+    }
+    
+    private StringBuilder Scrub(StringBuilder text)
+    {
+        return text
+            .Replace(".git\"", "\"");
+    }
+    
+    private string Scrub(string text)
+    {
+        return Scrub(new StringBuilder(text)).ToString();
     }
 }
