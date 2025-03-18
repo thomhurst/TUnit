@@ -19,7 +19,6 @@ internal class Tests2075 : TestsBase<TestsGenerator>
                 "#define NET9_0_OR_GREATER",
             ],
 #endif
-            VerifyConfigurator = task => task.UniqueForTargetFrameworkAndVersion()
         },
          _ => Task.CompletedTask);
 }
