@@ -56,7 +56,7 @@
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="0.7.6" />
     <PackageVersion Include="Sourcy.Git" Version="0.7.6" />
-    <PackageVersion Include="StreamJsonRpc" Version="2.21.10" />
+    <PackageVersion Include="StreamJsonRpc" Version="2.21.69" />
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.3" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.3" />
