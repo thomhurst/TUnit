@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace TUnit.Core.Helpers;
@@ -8,6 +9,11 @@ public static class CastHelper
     [UnconditionalSuppressMessage("", "IL2072")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
     {
+        if (value is IEnumerable enumerable && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+        {
+            value = enumerable.Cast<object>().ElementAtOrDefault(0);
+        }
+        
         if (value is null)
         {
             return default;

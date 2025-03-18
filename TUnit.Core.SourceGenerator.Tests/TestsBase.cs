@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Tests.Options;
@@ -40,10 +39,11 @@ internal partial class TestsBase<TGenerator> where TGenerator : IIncrementalGene
             global using static global::TUnit.Core.HookType;
             """,
 #if NET
-            ..await Task.WhenAll(runTestOptions.AdditionalFiles.Select(x => File.ReadAllTextAsync(x)))
+            ..await Task.WhenAll(runTestOptions.AdditionalFiles.Select(x => File.ReadAllTextAsync(x))),
 #else
-            ..runTestOptions.AdditionalFiles.Select(x => File.ReadAllText(x))
+            ..runTestOptions.AdditionalFiles.Select(x => File.ReadAllText(x)),
 #endif
+            ..runTestOptions.AdditionalSyntaxes,
         ];
 
         // Create an instance of the source generator.

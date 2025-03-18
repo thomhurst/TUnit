@@ -73,4 +73,7 @@
   <ItemGroup>
     <Compile Remove="Test.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
 </Project>
