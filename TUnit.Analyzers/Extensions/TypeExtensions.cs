@@ -124,6 +124,13 @@ public static class TypeExtensions
 
     public static bool IsCollectionType(this ITypeSymbol typeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
     {
+        if (typeSymbol.SpecialType == SpecialType.System_String)
+        {
+            // Technically a collection but not what we're looking for
+            innerType = null;
+            return false;
+        }
+        
         if (typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
         {
             innerType = arrayTypeSymbol.ElementType;

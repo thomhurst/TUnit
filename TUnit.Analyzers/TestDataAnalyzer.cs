@@ -213,7 +213,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             var argument = arguments.ElementAtOrDefault(i);
             
             if (typeSymbol.IsCollectionType(context.Compilation, out var innerType)
-                && arguments.Skip(i).Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
+                && arguments.Skip(i).Select(x => x.Type).All(x => CanConvert(context, x, innerType)))
             {
                 break;
             }
@@ -596,9 +596,14 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
 
-        if (argument.Type is not null
+        return CanConvert(context, argument.Type, methodParameterType);
+    }
+    
+    private static bool CanConvert(SymbolAnalysisContext context, ITypeSymbol? argumentType, ITypeSymbol? methodParameterType)
+    {
+        if (argumentType is not null
             && methodParameterType is not null
-            && context.Compilation.ClassifyConversion(argument.Type, methodParameterType)
+            && context.Compilation.ClassifyConversion(argumentType, methodParameterType)
                 is { IsImplicit: true }
                 or { IsExplicit: true }
                 or { IsNumeric: true })
@@ -606,7 +611,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
 
-        return context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, methodParameterType);
+        return context.Compilation.HasImplicitConversionOrGenericParameter(argumentType, methodParameterType);
     }
 
     private bool IsEnumAndInteger(ITypeSymbol? type1, ITypeSymbol? type2)

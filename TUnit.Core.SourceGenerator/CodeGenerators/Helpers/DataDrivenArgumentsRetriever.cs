@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
+using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
@@ -74,7 +76,7 @@ public static class DataDrivenArgumentsRetriever
         for (var index = 0; index < objectArray.Length; index++)
         {
             if (parameterOrPropertyTypeSymbols[index].IsCollectionType(context.SemanticModel.Compilation, out var innerType)
-                && objectArray.Skip(index).Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
+                && objectArray.Skip(index).Select(x => x.Type).All(x => CanConvert(context, x, innerType)))
             {
                 var paramArgs = objectArray.Skip(index)
                     .Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x, arguments.Skip(index).ElementAt(i)), x.Type));
@@ -128,5 +130,20 @@ public static class DataDrivenArgumentsRetriever
         }
 
         return parameterSymbols.ElementAtOrDefault(index);
+    }
+    
+    private static bool CanConvert(GeneratorAttributeSyntaxContext context, ITypeSymbol? argumentType, ITypeSymbol? methodParameterType)
+    {
+        if (argumentType is not null
+            && methodParameterType is not null
+            && context.SemanticModel.Compilation.ClassifyConversion(argumentType, methodParameterType)
+                is { IsImplicit: true }
+                or { IsExplicit: true }
+                or { IsNumeric: true })
+        {
+            return true;
+        }
+
+        return context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(argumentType, methodParameterType);
     }
 }
