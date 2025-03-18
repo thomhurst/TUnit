@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Enums;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
@@ -49,7 +50,8 @@ public record ClassPropertiesContainer(
         
         foreach (var (propertySymbol, argumentsContainer) in InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
-            sourceCodeWriter.WriteLine($"{propertySymbol.Name} = {argumentsContainer.DataVariables.Select(x => x.Name).ElementAt(0)},");
+            var firstElement = argumentsContainer.DataVariables.ElementAt(0).Name;
+            sourceCodeWriter.WriteLine($"{propertySymbol.Name} = global::TUnit.Core.Helpers.CastHelper.Cast<{propertySymbol.Type.GloballyQualified()}>({firstElement}),");
         }
 
         sourceCodeWriter.WriteLine("}");

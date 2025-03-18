@@ -164,10 +164,10 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => 
 				new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)
 				{
-					Property1 = propertyArg,
-					Property2 = propertyArg1,
-					Property3 = propertyArg2,
-					Property4 = propertyArg3,
+					Property1 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg),
+					Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg1),
+					Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg2),
+					Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg3),
 				}
 				, sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
@@ -342,10 +342,10 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)
 					{
-						Property1 = propertyArg,
-						Property2 = propertyArg1,
-						Property3 = propertyArg2,
-						Property4 = propertyArg3,
+						Property1 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg),
+						Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg1),
+						Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg2),
+						Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg3),
 					}
 					, sessionId, testBuilderContext);
 					var resettableClassFactory = resettableClassFactoryDelegate();
@@ -520,10 +520,10 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => 
 						new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)
 						{
-							Property1 = propertyArg,
-							Property2 = propertyArg1,
-							Property3 = propertyArg2,
-							Property4 = propertyArg3,
+							Property1 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg),
+							Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg1),
+							Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg2),
+							Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg3),
 						}
 						, sessionId, testBuilderContext);
 						var resettableClassFactory = resettableClassFactoryDelegate();
@@ -698,10 +698,10 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => 
 							new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)
 							{
-								Property1 = propertyArg,
-								Property2 = propertyArg1,
-								Property3 = propertyArg2,
-								Property4 = propertyArg3,
+								Property1 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg),
+								Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg1),
+								Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg2),
+								Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg3),
 							}
 							, sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
