@@ -32,6 +32,8 @@ public abstract class BaseAssertCondition
 
     protected abstract string GetExpectation();
 
+    internal string Expectation => GetExpectation();
+
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";
 

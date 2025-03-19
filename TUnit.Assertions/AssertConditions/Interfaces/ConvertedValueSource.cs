@@ -8,7 +8,7 @@ namespace TUnit.Assertions.AssertConditions.Interfaces;
 public class ConvertedValueSource<TFromType, TToType>(IValueSource<TFromType> source, ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition) : IValueSource<TToType?>
 {
     public string? ActualExpression { get; } = source.ActualExpression;
-    public Stack<BaseAssertCondition> Assertions { get; } = new([new NoOpAssertionCondition<TToType>()]);
+    public Stack<BaseAssertCondition> Assertions { get; } = new([new NoOpAssertionCondition<TToType>(convertToAssertCondition.Expectation)]);
     public ValueTask<AssertionData> AssertionDataTask { get; } = ConvertAsync(source, convertToAssertCondition);
 
     public StringBuilder ExpressionBuilder { get; } = source.ExpressionBuilder;

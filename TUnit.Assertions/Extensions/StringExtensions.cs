@@ -26,6 +26,11 @@ public static class StringExtensions
 
     public static string TruncateWithEllipsis(this string value, int maxLength)
     {
+        if (Environment.GetEnvironmentVariable("TUNIT_ASSERTIONS_DISABLE_TRUNCATION") == "true")
+        {
+            return value;
+        }
+        
         if (value.Length <= maxLength)
         {
             return value;

@@ -6,7 +6,7 @@ using TUnit.Assertions.Helpers;
 namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(
-    IEnumerable<TInner> expected,
+    IEnumerable<TInner>? expected,
     IEqualityComparer<TInner?> equalityComparer,
     CollectionOrdering collectionOrdering)
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)

@@ -26,26 +26,27 @@ public static class CollectionsIsExtensions
         TActual,
         TInner>(this IValueSource<TActual> valueSource,
         IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer,
-        [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+        [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null,
+        [CallerArgumentExpression(nameof(comparer))] string doNotPopulateThisValue2 = null)
         where TActual : IEnumerable<TInner>
     {
-        return IsEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue);
+        return IsEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue, doNotPopulateThisValue2);
     }
 
     public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual,  
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-        TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+        TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(collectionOrdering))] string doNotPopulateThisValue2 = null)
         where TActual : IEnumerable<TInner>
     {
-        return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue);
+        return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue, doNotPopulateThisValue2);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(collectionOrdering))] string doNotPopulateThisValue2 = null)
         where TActual : IEnumerable<TInner>
     {
         return valueSource.RegisterAssertion(
             new EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(expected,
-                comparer, collectionOrdering), [doNotPopulateThisValue]);
+                comparer, collectionOrdering), [doNotPopulateThisValue, doNotPopulateThisValue2]);
     }
 
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsInOrder<TInner>(

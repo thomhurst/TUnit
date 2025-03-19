@@ -19,7 +19,13 @@ public class EquivalentToExpectedValueAssertCondition<
     public EquivalencyKind EquivalencyKind { get; set; } = EquivalencyKind.Full;
     
     protected override string GetExpectation()
-        => $"to be equivalent to {expectedExpression ?? "null"}";
+    {
+        var expectedMessage = typeof(TExpected).IsSimpleType() || typeof(IEnumerable).IsAssignableFrom(typeof(TExpected)) 
+            ? Formatter.Format(expected)
+            : expectedExpression;
+        
+        return $"to be equivalent to {expectedMessage ?? "null"}";
+    }
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
     {
