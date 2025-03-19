@@ -49,6 +49,7 @@ public abstract class InvokableTestBase
                     "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
+                    "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}_", 
                     "--timeout", "5m",
                     "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.txt", "--hangdump-timeout", "3m",
@@ -86,6 +87,7 @@ public abstract class InvokableTestBase
                 [
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
+                    "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}_AOT_", 
                     "--timeout", "5m",
                     ..runOptions.AdditionalArguments
@@ -120,6 +122,7 @@ public abstract class InvokableTestBase
                 [
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
+                    "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}_SINGLEFILE_", 
                     "--timeout", "5m",
                     ..runOptions.AdditionalArguments
