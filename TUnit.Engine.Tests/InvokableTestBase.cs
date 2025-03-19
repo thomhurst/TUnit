@@ -49,6 +49,7 @@ public abstract class InvokableTestBase
                     "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
+                    "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}_", 
                     "--timeout", "5m",
                     "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.txt", "--hangdump-timeout", "3m",
