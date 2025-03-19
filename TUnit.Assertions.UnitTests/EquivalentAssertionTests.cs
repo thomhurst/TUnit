@@ -88,7 +88,7 @@ public class EquivalentAssertionTests
             
             but it is [1, 5, 2, 3, 4]
             
-            at Assert.That(array).IsEquivalentTo(list)
+            at Assert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching)
             """
         ));    }
     
@@ -107,7 +107,7 @@ public class EquivalentAssertionTests
             
             but it is [1, 5, 2, 3, 4]
             
-            at Assert.That(array).IsEquivalentTo(list)
+            at Assert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching)
             """
         ));
     }

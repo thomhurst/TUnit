@@ -26,6 +26,7 @@ public abstract class Formatter
         new SimpleFormatter<string>(value => $"\"{value}\""),
         new SimpleFormatter<char>(value => $"'{value}'"),
         new SimpleFormatter<DateTime>(value => $"<{value:O}>"),
+        new SimpleFormatter<TimeSpan>(value => value.PrettyPrint()),
         new SimpleFormatter<DateTimeOffset>(value => value.ToString("<yyyy-MM-dd HH:mm:ss.fff tt>", CultureInfo.InvariantCulture)),
 #if NET
         new SimpleFormatter<DateOnly>(value => value.ToString("<yyyy-MM-dd>", CultureInfo.InvariantCulture)),
