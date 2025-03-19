@@ -24,11 +24,6 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         {
             return false;
         }
-        
-        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is null)
-        {
-            return false;
-        }
 
         if (Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY") is not { } fileName
             || !File.Exists(fileName))
