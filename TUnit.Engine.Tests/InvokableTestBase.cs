@@ -40,7 +40,8 @@ public abstract class InvokableTestBase
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        var result = await Cli.Wrap("dotnet")
+        var binLogFilename = guid + ".binlog";
+        var command = Cli.Wrap("dotnet")
             .WithArguments(
                 [
                     "run",
@@ -52,16 +53,18 @@ public abstract class InvokableTestBase
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}_", 
                     "--timeout", "5m",
+                    $"-bl:{binLogFilename}",
                     "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.txt", "--hangdump-timeout", "3m",
 
                     ..runOptions.AdditionalArguments
                 ]
             )
             .WithWorkingDirectory(testProject.DirectoryName!)
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+            .WithValidation(CommandResultValidation.None);
+        var result = await command
+            .ExecuteBufferedAsync(TestContext.Current!.CancellationToken);
 
-        await AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await AssertTrx(command, result, assertions, trxFilename, assertionExpression);
     }
     
     private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
@@ -81,8 +84,8 @@ public abstract class InvokableTestBase
 
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        
-        var result = await Cli.Wrap(aotApp.FullName)
+
+        var command = Cli.Wrap(aotApp.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -93,10 +96,12 @@ public abstract class InvokableTestBase
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+            .WithValidation(CommandResultValidation.None);
+        
+        var result = await command
+            .ExecuteBufferedAsync(TestContext.Current!.CancellationToken);
 
-        await AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await AssertTrx(command, result, assertions, trxFilename, assertionExpression);
     }
     
     private async Task RunWithSingleFile(string filter,
@@ -116,8 +121,8 @@ public abstract class InvokableTestBase
 
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        
-        var result = await Cli.Wrap(aotApp.FullName)
+
+        var command = Cli.Wrap(aotApp.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -128,10 +133,12 @@ public abstract class InvokableTestBase
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+            .WithValidation(CommandResultValidation.None);
+        
+        var result = await command
+            .ExecuteBufferedAsync(TestContext.Current!.CancellationToken);
 
-        await AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await AssertTrx(command, result, assertions, trxFilename, assertionExpression);
     }
 
     protected static FileInfo? FindFile(Func<FileInfo, bool> predicate)
@@ -144,7 +151,7 @@ public abstract class InvokableTestBase
         return FileSystemHelpers.FindFolder(predicate);
     }
 
-    private async Task AssertTrx(BufferedCommandResult commandResult,
+    private async Task AssertTrx(Command command, BufferedCommandResult commandResult,
         List<Action<TestRun>> assertions,
         string trxFilename, string assertionExpression)
     {
@@ -160,7 +167,7 @@ public abstract class InvokableTestBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(@$"Command Input: {commandResult}");
+            Console.WriteLine(@$"Command Input: {command}");
             Console.WriteLine(@$"Error: {commandResult.StandardError}");
             Console.WriteLine(@$"Output: {commandResult.StandardOutput}");
 
