@@ -8,12 +8,16 @@ public class STAThreadExecutor : GenericAbstractExecutor
     protected override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
         var tcs = new TaskCompletionSource<object?>();
-        
+
         var thread = new Thread(() =>
         {
             try
             {
-                action().GetAwaiter().GetResult();
+                var valueTask = action();
+                if (!valueTask.IsCompleted)
+                {
+                    valueTask.AsTask().GetAwaiter().GetResult();
+                }
                 tcs.SetResult(null);
             }
             catch (Exception e)
@@ -21,10 +25,10 @@ public class STAThreadExecutor : GenericAbstractExecutor
                 tcs.SetException(e);
             }
         });
-        
+
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
-        
+
         await tcs.Task;
     }
 }
