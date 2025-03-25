@@ -63,6 +63,40 @@ public class XUnitAttributesAnalyzerTests
                 """
             );
     }
+    
+    [TestCase("Fact")]
+    [TestCase("Theory")]
+    public async Task Skipped_Test_Attributes_Can_Be_Fixed(string attribute)
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                $$"""
+                  using TUnit.Core;
+                  using Xunit;
+
+                  public class MyClass
+                  {
+                      [{|#0:{{attribute}}(Skip = "Reason")|}]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
+                $$"""
+                  using TUnit.Core;
+                  using Xunit;
+
+                  public class MyClass
+                  {
+                      [Test, Skip("Reason")]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """
+            );
+    }
 
     [Test]
     public async Task Collection_Attributes_Can_Be_Fixed()
