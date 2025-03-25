@@ -61,7 +61,12 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         if (actualValue is not null && actualValue is not TActual)
         {
             throw new AssertionException($"Expected {typeof(TActual).Name} but received {actualValue.GetType().Name}");
-        } 
+        }
+
+        if (actualValue is null && typeof(TActual).IsValueType)
+        {
+            actualValue = default(TActual);
+        }
         
         return GetAssertionResult((TActual?) actualValue, exception, assertionMetadata, actualExpression);
     }
