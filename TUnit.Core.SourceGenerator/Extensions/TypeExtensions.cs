@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using TUnit.Analyzers.Extensions;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
@@ -117,6 +118,21 @@ public static class TypeExtensions
         
         innerType = null;
         return false;
+    }
+    
+    public static string GloballyQualifiedOrFallback(this ITypeSymbol? typeSymbol, TypedConstant? typedConstant = null)
+    {
+        if (typeSymbol is not null and not ITypeParameterSymbol)
+        {
+            return typeSymbol.GloballyQualified();
+        }
+        
+        if (typedConstant is not null)
+        {
+            return TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(typedConstant.Value);
+        }
+
+        return "var";
     }
 
     public static bool EnumerableGenericTypeIs(this ITypeSymbol enumerable, GeneratorAttributeSyntaxContext context,
