@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Assertions.Analyzers.CodeFixers.Extensions;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
 
@@ -46,9 +47,8 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         var document = context.Document;
         
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-        var compilationUnit = root as CompilationUnitSyntax;
 
-        if (compilationUnit is null)
+        if (root is not CompilationUnitSyntax compilationUnit)
         {
             return document;
         }
@@ -65,7 +65,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
         var genericArgs = GetGenericArguments(memberAccessExpressionSyntax.Name);
 
-        var newExpression = await GetNewExpression(context, memberAccessExpressionSyntax, methodName, actual, expected, genericArgs);
+        var newExpression = await GetNewExpression(context, memberAccessExpressionSyntax, methodName, actual, expected, genericArgs, expressionSyntax.ArgumentList.Arguments);
         
         if (newExpression != null)
         {
@@ -77,15 +77,16 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
     private static async Task<ExpressionSyntax?> GetNewExpression(CodeFixContext context,
         MemberAccessExpressionSyntax memberAccessExpressionSyntax, string method,
-        ArgumentSyntax? actual, ArgumentSyntax? expected, string genericArgs)
+        ArgumentSyntax? actual, ArgumentSyntax? expected, string genericArgs,
+        SeparatedSyntaxList<ArgumentSyntax> argumentListArguments)
     {
         var isGeneric = !string.IsNullOrEmpty(genericArgs);
 
         return method switch
         {
-            "Equal" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsEqualTo({expected})"),
+            "Equal" => await IsEqualTo(context, argumentListArguments, actual, expected),
             
-            "NotEqual" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotEqualTo({expected})"),
+            "NotEqual" => await IsNotEqualTo(context, argumentListArguments, actual, expected),
             
             "Contains" => await Contains(context, memberAccessExpressionSyntax, actual, expected),
             
@@ -155,6 +156,103 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         };
     }
 
+    private static async Task<ExpressionSyntax> IsNotEqualTo(CodeFixContext context,
+        SeparatedSyntaxList<ArgumentSyntax> argumentListArguments,
+        ArgumentSyntax? actual, ArgumentSyntax? expected)
+    {
+        if (argumentListArguments.Count >= 3 && argumentListArguments[2].Expression is LiteralExpressionSyntax literalExpressionSyntax
+                                             && decimal.TryParse(literalExpressionSyntax.Token.ValueText, out _))
+        {
+            return SyntaxFactory.ParseExpression(
+                $"Assert.That({actual}).IsNotEqualTo({expected}).Within({literalExpressionSyntax})");
+        }
+        
+        var semanticModel = await context.Document.GetSemanticModelAsync();
+        
+        var actualSymbol = semanticModel.GetSymbolInfo(actual!.Expression).Symbol;
+        var expectedSymbol = semanticModel.GetSymbolInfo(expected!.Expression).Symbol;
+
+        if (actualSymbol is not null && expectedSymbol is not null
+                                     && GetType(actualSymbol) is { } actualSymbolType
+                                     && GetType(expectedSymbol) is { } expectedSymbolType
+                                     && IsEnumerable(actualSymbolType)
+                                     && IsEnumerable(expectedSymbolType))
+        {
+            return SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotEquivalentTo({expected})");
+        }
+        
+        return SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotEqualTo({expected})");
+    }
+
+    private static async Task<ExpressionSyntax> IsEqualTo(CodeFixContext context,
+        SeparatedSyntaxList<ArgumentSyntax> argumentListArguments,
+        ArgumentSyntax? actual, ArgumentSyntax? expected)
+    {
+        if (argumentListArguments.Count >= 3 && argumentListArguments[2].Expression is LiteralExpressionSyntax literalExpressionSyntax
+            && decimal.TryParse(literalExpressionSyntax.Token.ValueText, out _))
+        {
+            return SyntaxFactory.ParseExpression(
+                $"Assert.That({actual}).IsEqualTo({expected}).Within({literalExpressionSyntax})");
+        }
+        
+        var semanticModel = await context.Document.GetSemanticModelAsync();
+        
+        var actualSymbol = semanticModel.GetSymbolInfo(actual!.Expression).Symbol;
+        var expectedSymbol = semanticModel.GetSymbolInfo(expected!.Expression).Symbol;
+
+        if (actualSymbol is not null && expectedSymbol is not null
+                                     && GetType(actualSymbol) is { } actualSymbolType
+                                     && GetType(expectedSymbol) is { } expectedSymbolType
+                                     && IsEnumerable(actualSymbolType)
+                                     && IsEnumerable(expectedSymbolType))
+        {
+            return SyntaxFactory.ParseExpression($"Assert.That({actual}).IsEquivalentTo({expected})");
+        }
+
+        return SyntaxFactory.ParseExpression($"Assert.That({actual}).IsEqualTo({expected})");
+    }
+
+    private static ITypeSymbol? GetType(ISymbol symbol)
+    {
+        if (symbol is ITypeSymbol typeSymbol)
+        {
+            return typeSymbol;
+        }
+        
+        if (symbol is IPropertySymbol propertySymbol)
+        {
+            return propertySymbol.Type;
+        }
+        
+        if (symbol is IFieldSymbol fieldSymbol)
+        {
+            return fieldSymbol.Type;
+        }
+
+        if (symbol is ILocalSymbol localSymbol)
+        {
+            return localSymbol.Type;
+        }
+
+        return null;
+    }
+
+    private static bool IsEnumerable(ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is IArrayTypeSymbol)
+        {
+            return true;
+        }
+        
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol
+            && namedTypeSymbol.GloballyQualifiedNonGeneric() is "global::System.Collections.IEnumerable" or "global::System.Collections.Generic.IEnumerable")
+        {
+            return true;
+        }
+        
+        return typeSymbol.AllInterfaces.Any(i => i.GloballyQualified() == "global::System.Collections.IEnumerable");
+    }
+
     private static async Task<ExpressionSyntax> Contains(CodeFixContext context,
         MemberAccessExpressionSyntax memberAccessExpressionSyntax, ArgumentSyntax? actual, ArgumentSyntax? expected)
     {
@@ -162,8 +260,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
         var symbol = semanticModel.GetSymbolInfo(memberAccessExpressionSyntax).Symbol;
 
-        if (symbol is IMethodSymbol methodSymbol &&
-            methodSymbol.Parameters.Length == 2 &&
+        if (symbol is IMethodSymbol { Parameters.Length: 2 } methodSymbol &&
             methodSymbol.Parameters[0].Type.Name == "IEnumerable" && methodSymbol.Parameters[1].Type.Name == "Predicate")
         {
             // Swap them - This overload is the other way around to the other ones.

@@ -51,27 +51,19 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
         var newExpression = await GetNewExpression(document, attributeSyntax);
 
         root = root.ReplaceNode(attributeSyntax, newExpression);
-
-        var compilationUnit = root as CompilationUnitSyntax;
-
-        if (compilationUnit is null)
-        {
-            return document.WithSyntaxRoot(root);
-        }
         
         return document.WithSyntaxRoot(root);
     }
 
     private static async Task<IEnumerable<SyntaxNode>> GetNewExpression(Document document, AttributeSyntax attributeSyntax)
     {
-        var name = attributeSyntax.Name.ToString();
+        var name = GetSimpleName(attributeSyntax);
 
         return name switch
         {
-            "Fact" or "FactAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test"))],
-
-            "Theory" or "TheoryAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test"))],
-
+            "Fact" or "FactAttribute"
+                or "Theory" or "TheoryAttribute" => ConvertTestAttribute(attributeSyntax),
+            
             "Trait" or "TraitAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"),
                 attributeSyntax.ArgumentList)],
 
@@ -95,6 +87,29 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
 
             _ => []
         };
+    }
+
+    private static string GetSimpleName(AttributeSyntax attributeSyntax)
+    {
+        var name = attributeSyntax.Name;
+
+        while (name is not SimpleNameSyntax)
+        {
+            name = (name as QualifiedNameSyntax)?.Right;
+        }
+
+        return name.ToString();
+    }
+
+    private static IEnumerable<AttributeSyntax> ConvertTestAttribute(AttributeSyntax attributeSyntax)
+    {
+        yield return SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test"));
+
+        if (attributeSyntax.ArgumentList?.Arguments.FirstOrDefault(x => x.NameEquals?.Name.Identifier.ValueText == "Skip") is {} skip)
+        {
+            yield return SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Skip"))
+                .AddArgumentListArguments(SyntaxFactory.AttributeArgument(skip.Expression));
+        }
     }
 
     private static async Task<IEnumerable<AttributeSyntax>> ConvertCollection(Document document, AttributeSyntax attributeSyntax)

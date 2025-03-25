@@ -6,17 +6,20 @@ namespace TUnit.Analyzers.Tests;
 
 public class XUnitAttributesAnalyzerTests
 {
-    [Test]
-    public async Task Test_Attribute_Flagged()
+    [TestCase("Fact")]
+    [TestCase("Theory")]
+    [TestCase("Xunit.Fact")]
+    [TestCase("Xunit.Theory")]
+    public async Task Test_Attribute_Flagged(string attributeName)
     {
         await Verifier
             .VerifyAnalyzerAsync(
-                """
+                $$"""
                 using Xunit;
 
                 public class MyClass
                 {
-                    [{|#0:Fact|}]
+                    [{|#0:{{attributeName}}|}]
                     public void MyTest()
                     {
                     }
@@ -32,6 +35,13 @@ public class XUnitAttributesAnalyzerTests
     [TestCase("Trait(\"Key\", \"Value\")", "Property(\"Key\", \"Value\")")]
     [TestCase("MemberData(\"SomeMethod\")", "MethodDataSource(\"SomeMethod\")")]
     [TestCase("ClassData(typeof(MyClass))", "MethodDataSource(typeof(MyClass), \"GetEnumerator\")")]
+    [TestCase("Xunit.Fact", "Test")]
+    [TestCase("Xunit.Theory", "Test")]
+    [TestCase("Xunit.InlineData", "Arguments")]
+    [TestCase("Xunit.Trait(\"Key\", \"Value\")", "Property(\"Key\", \"Value\")")]
+    [TestCase("Xunit.MemberData(\"SomeMethod\")", "MethodDataSource(\"SomeMethod\")")]
+    [TestCase("Xunit.ClassData(typeof(MyClass))", "MethodDataSource(typeof(MyClass), \"GetEnumerator\")")]
+
     public async Task Test_Attributes_Can_Be_Fixed(string attribute, string expected)
     {
         await CodeFixer
@@ -61,6 +71,42 @@ public class XUnitAttributesAnalyzerTests
                     }
                 }
                 """
+            );
+    }
+    
+    [TestCase("Fact")]
+    [TestCase("Theory")]
+    [TestCase("Xunit.Fact")]
+    [TestCase("Xunit.Theory")]
+    public async Task Skipped_Test_Attributes_Can_Be_Fixed(string attribute)
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                $$"""
+                  using TUnit.Core;
+                  using Xunit;
+
+                  public class MyClass
+                  {
+                      [{|#0:{{attribute}}(Skip = "Reason")|}]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
+                $$"""
+                  using TUnit.Core;
+                  using Xunit;
+
+                  public class MyClass
+                  {
+                      [Test, Skip("Reason")]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """
             );
     }
 
