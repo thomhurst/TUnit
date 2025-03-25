@@ -21,15 +21,17 @@ public static class DataDrivenArgumentsRetriever
 
         if (constructorArgument.IsNull)
         {
-            return new ArgumentsAttributeContainer(argumentsType, [new Argument(type: parameterOrPropertyTypeSymbols.SafeFirstOrDefault()?
-                    .GloballyQualified() ?? "var",
-                invocation: null
-            )])
+            var typeSymbol = parameterOrPropertyTypeSymbols.SafeFirstOrDefault();
+
+            return new ArgumentsAttributeContainer(argumentsType,
+                [new Argument(type: typeSymbol.GloballyQualifiedOrFallback(), invocation: null)])
             {
                 ArgumentsType = argumentsType,
                 Attribute = argumentAttribute,
                 AttributeIndex = dataAttributeIndex,
-                DisposeAfterTest = argumentAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
+                DisposeAfterTest =
+                    argumentAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value
+                        .Value as bool? ?? true,
             };
         }
 
@@ -66,10 +68,7 @@ public static class DataDrivenArgumentsRetriever
     {
         if (objectArray.IsDefaultOrEmpty)
         {
-            var type = parameterOrPropertyTypeSymbols.SafeFirstOrDefault()
-                ?.GloballyQualified() ?? "var";
-
-            yield return new Argument(type, null);
+            yield return new Argument(parameterOrPropertyTypeSymbols.SafeFirstOrDefault().GloballyQualifiedOrFallback(objectArray.SafeFirstOrDefault()), null);
             yield break;
         }
 
@@ -81,8 +80,10 @@ public static class DataDrivenArgumentsRetriever
                 var paramArgs = objectArray.Skip(index)
                     .Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x, arguments.Skip(index).ElementAt(i)), x.Type));
 
+                var globallyQualified = parameterOrPropertyTypeSymbols[index].GloballyQualifiedOrFallback(objectArray.Skip(index).SafeFirstOrDefault());
+                
                 yield return
-                    new Argument(parameterOrPropertyTypeSymbols[index].GloballyQualified(), $"[{string.Join(", ", paramArgs)}]");
+                    new Argument(globallyQualified, $"[{string.Join(", ", paramArgs)}]");
 
                 yield break;
             }
@@ -92,9 +93,7 @@ public static class DataDrivenArgumentsRetriever
 
             var type = GetTypeFromParameters(parameterOrPropertyTypeSymbols, index);
 
-            yield return new Argument(type?.GloballyQualified() ??
-                                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(
-                                    typedConstant),
+            yield return new Argument(type.GloballyQualifiedOrFallback(typedConstant),
 
                 TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (typedConstant, argumentAttribute), type));
         }
@@ -106,7 +105,7 @@ public static class DataDrivenArgumentsRetriever
         if (objectArray.IsDefaultOrEmpty)
         {
             var type = parameterOrPropertyTypeSymbols.SafeFirstOrDefault()
-                ?.GloballyQualified() ?? "var";
+                .GloballyQualifiedOrFallback(objectArray.SafeFirstOrDefault());
 
             yield return new Argument(type, null);
             yield break;
@@ -117,7 +116,7 @@ public static class DataDrivenArgumentsRetriever
             var typedConstant = objectArray[index];
             var type = GetTypeFromParameters(parameterOrPropertyTypeSymbols, index);
 
-            yield return new Argument(type?.GloballyQualified() ?? TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(typedConstant),
+            yield return new Argument(type.GloballyQualifiedOrFallback(typedConstant),
                 TypedConstantParser.GetRawTypedConstantValue(typedConstant));
         }
     }

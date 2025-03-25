@@ -601,6 +601,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     
     private static bool CanConvert(SymbolAnalysisContext context, ITypeSymbol? argumentType, ITypeSymbol? methodParameterType)
     {
+        if (methodParameterType is ITypeParameterSymbol)
+        {
+            return true;
+        }
+        
         if (argumentType is not null
             && methodParameterType is not null
             && context.Compilation.ClassifyConversion(argumentType, methodParameterType)
