@@ -216,6 +216,11 @@ namespace TUnit.Core
         public string GetErrorOutput() { }
         public string GetStandardOutput() { }
     }
+    public class CultureExecutor : TUnit.Core.DedicatedThreadExecutor
+    {
+        public CultureExecutor(System.Globalization.CultureInfo cultureInfo) { }
+        protected override void ConfigureThread(System.Threading.Thread thread) { }
+    }
     [System.Runtime.CompilerServices.RequiredMember]
     public class DataGeneratorMetadata : System.IEquatable<TUnit.Core.DataGeneratorMetadata>
     {
@@ -267,6 +272,14 @@ namespace TUnit.Core
     {
         protected DataSourceGeneratorAttribute() { }
         public abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4, T5>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+    }
+    public class DedicatedThreadExecutor : TUnit.Core.GenericAbstractExecutor
+    {
+        public DedicatedThreadExecutor() { }
+        protected virtual void CleanUp() { }
+        protected virtual void ConfigureThread(System.Threading.Thread thread) { }
+        protected override sealed System.Threading.Tasks.ValueTask ExecuteAsync(System.Func<System.Threading.Tasks.ValueTask> action) { }
+        protected virtual void Initialize() { }
     }
     public class DefaultExecutor : TUnit.Core.GenericAbstractExecutor
     {
@@ -571,10 +584,10 @@ namespace TUnit.Core
         public virtual System.Threading.Tasks.Task<bool> ShouldRetry(TUnit.Core.TestContext context, System.Exception exception, int currentRetryCount) { }
     }
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-    public class STAThreadExecutor : TUnit.Core.GenericAbstractExecutor
+    public class STAThreadExecutor : TUnit.Core.DedicatedThreadExecutor
     {
         public STAThreadExecutor() { }
-        protected override System.Threading.Tasks.ValueTask ExecuteAsync(System.Func<System.Threading.Tasks.ValueTask> action) { }
+        protected override void ConfigureThread(System.Threading.Thread thread) { }
     }
     public class SharedDataKey : System.IEquatable<TUnit.Core.SharedDataKey>
     {
@@ -1066,6 +1079,14 @@ namespace TUnit.Core.Exceptions
 }
 namespace TUnit.Core.Executors
 {
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public class CultureAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
+    {
+        public CultureAttribute(System.Globalization.CultureInfo cultureInfo) { }
+        public CultureAttribute(string cultureName) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
+    }
     public abstract class HookExecutorAttribute : TUnit.Core.TUnitAttribute
     {
         public abstract System.Type HookExecutorType { get; }
@@ -1076,6 +1097,19 @@ namespace TUnit.Core.Executors
     {
         public HookExecutorAttribute() { }
         public override System.Type HookExecutorType { get; }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public class InvariantCultureAttribute : TUnit.Core.Executors.CultureAttribute
+    {
+        public InvariantCultureAttribute() { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    public class STAThreadExecutorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
+    {
+        public STAThreadExecutorAttribute() { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public sealed class TestExecutorAttribute<T> : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver

@@ -20,7 +20,7 @@ public class STAThreadTests
     {
     }
 
-    [Test, TestExecutor<STAThreadExecutor>]
+    [Test, STAThreadExecutor]
     public async Task With_STA()
     {
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);

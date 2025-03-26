@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
@@ -28,6 +29,7 @@ public class MicrosoftDependencyInjectionDataSourceAttribute : DependencyInjecti
 }
 
 [MicrosoftDependencyInjectionDataSource]
+[SuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 public class MEDITest(MEDIClass mediClass)
 {
     [Test]
