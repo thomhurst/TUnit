@@ -9,7 +9,7 @@ public class AssertMultipleTests
     [Test]
     public void MultipleFailures()
     {
-        var assertionException = NUnitAssert.ThrowsAsync<AggregateException>(async () =>
+        var assertionException = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
         {
             using (TUnitAssert.Multiple())
             {
@@ -20,12 +20,14 @@ public class AssertMultipleTests
                 await TUnitAssert.That(5).IsEqualTo(6);
             }
         });
+
+        var aggregateException = (AggregateException) assertionException!.InnerException!;
         
-        var exception1 = (TUnitAssertionException)assertionException!.InnerExceptions[0];
-        var exception2 = (TUnitAssertionException)assertionException.InnerExceptions[1];
-        var exception3 = (TUnitAssertionException)assertionException.InnerExceptions[2];
-        var exception4 = (TUnitAssertionException)assertionException.InnerExceptions[3];
-        var exception5 = (TUnitAssertionException)assertionException.InnerExceptions[4];
+        var exception1 = (TUnitAssertionException)aggregateException!.InnerExceptions[0];
+        var exception2 = (TUnitAssertionException)aggregateException.InnerExceptions[1];
+        var exception3 = (TUnitAssertionException)aggregateException.InnerExceptions[2];
+        var exception4 = (TUnitAssertionException)aggregateException.InnerExceptions[3];
+        var exception5 = (TUnitAssertionException)aggregateException.InnerExceptions[4];
 
         NUnitAssert.That(exception1.Message, Is.EqualTo("""
                                                         Expected 1 to be equal to 2
@@ -71,7 +73,7 @@ public class AssertMultipleTests
     [Test]
     public void MultipleFailures_With_Connectors()
     {
-        var assertionException = NUnitAssert.ThrowsAsync<AggregateException>(async () =>
+        var assertionException = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
         {
             using (TUnitAssert.Multiple())
             {
@@ -82,12 +84,14 @@ public class AssertMultipleTests
                 await TUnitAssert.That(5).IsEqualTo(6).Or.IsEqualTo(7);
             }
         });
+        
+        var aggregateException = (AggregateException) assertionException!.InnerException!;
 
-        var exception1 = (TUnitAssertionException)assertionException!.InnerExceptions[0];
-        var exception2 = (TUnitAssertionException)assertionException.InnerExceptions[1];
-        var exception3 = (TUnitAssertionException)assertionException.InnerExceptions[2];
-        var exception4 = (TUnitAssertionException)assertionException.InnerExceptions[3];
-        var exception5 = (TUnitAssertionException)assertionException.InnerExceptions[4];
+        var exception1 = (TUnitAssertionException)aggregateException!.InnerExceptions[0];
+        var exception2 = (TUnitAssertionException)aggregateException.InnerExceptions[1];
+        var exception3 = (TUnitAssertionException)aggregateException.InnerExceptions[2];
+        var exception4 = (TUnitAssertionException)aggregateException.InnerExceptions[3];
+        var exception5 = (TUnitAssertionException)aggregateException.InnerExceptions[4];
 
         NUnitAssert.That(exception1.Message, Is.EqualTo("""
                                                         Expected 1 to be equal to 2
@@ -138,7 +142,7 @@ public class AssertMultipleTests
       [Test]
     public void Nested_Multiples()
     {
-        var aggregateException = NUnitAssert.ThrowsAsync<AggregateException>(async () =>
+        var assertionException = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
         {
             using (TUnitAssert.Multiple())
             {
@@ -159,6 +163,8 @@ public class AssertMultipleTests
                 }
             }
         });
+        
+        var aggregateException = (AggregateException) assertionException!.InnerException!;
         
         NUnitAssert.That(aggregateException!.InnerExceptions[0], Is.TypeOf<TUnitAssertionException>());
         NUnitAssert.That(aggregateException.InnerExceptions[1], Is.TypeOf<TUnitAssertionException>());
