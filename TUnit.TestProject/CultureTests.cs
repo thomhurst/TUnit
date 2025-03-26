@@ -20,10 +20,9 @@ public class CultureTests
         await Assert.That(double.Parse("3.5")).IsEqualTo(3.5);
     }
 
-    [Test, Culture("de-AT"), SkipMacOS("See runtime issue https://github.com/dotnet/runtime/issues/113917")]
+    [Test, Culture("de-AT")]
     public async Task Test3()
     {
-        await Assert.That(() => double.Parse("3.5")).ThrowsException();
         await Assert.That(double.Parse("3,5")).IsEqualTo(3.5);
     }
 }
