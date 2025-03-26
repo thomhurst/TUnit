@@ -57,7 +57,8 @@ internal class AssertionScope : IDisposable
 
         if (_exceptions.Count > 1)
         {
-            throw new AggregateException(_exceptions);
+            var message = string.Join(Environment.NewLine + Environment.NewLine, _exceptions.Select(e => e.Message));
+            throw new AssertionException(message, new AggregateException(_exceptions));
         }
     }
     
