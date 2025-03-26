@@ -8,14 +8,12 @@ public class CultureTests : InvokableTestBase
     [Test]
     public async Task Test()
     {
-        var expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? 2 : 3;
-        
         await RunTestsWithFilter(
             "/*/*/CultureTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(expected),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(expected),
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
