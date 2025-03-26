@@ -6,7 +6,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
     {
         var tcs = new TaskCompletionSource<object?>();
 
-        var thread = new Thread(async void () =>
+        var thread = new Thread(() =>
         {
             try
             {
@@ -16,7 +16,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
                 
                 if (!valueTask.IsCompletedSuccessfully)
                 {
-                    await valueTask;
+                    valueTask.AsTask().GetAwaiter().GetResult();
                 }
 
                 tcs.SetResult(null);
