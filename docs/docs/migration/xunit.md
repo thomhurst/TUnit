@@ -37,6 +37,8 @@ This ensures the TUnit packages have been restored and the analyzers should be l
 Running them in a specific order is recommended.
 So try the following:
 
+`dotnet format analyzers --severity info --diagnostics TUnit0057`
+
 `dotnet format analyzers --severity info --diagnostics TUnit0052`
 
 `dotnet format analyzers --severity info --diagnostics TUnit0053`

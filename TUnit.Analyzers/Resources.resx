@@ -522,4 +522,13 @@
     <data name="TUnit0056Title" xml:space="preserve">
         <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute</value>
     </data>
+    <data name="TUnit0057Description" xml:space="preserve">
+        <value>xUnit TestOutputHelper can be migrated to Console for use with TUnit.</value>
+    </data>
+    <data name="TUnit0057MessageFormat" xml:space="preserve">
+        <value>xUnit TestOutputHelper can be migrated to Console for use with TUnit</value>
+    </data>
+    <data name="TUnit0057Title" xml:space="preserve">
+        <value>xUnit TestOutputHelper can be migrated to Console for use with TUnit</value>
+    </data>
 </root>

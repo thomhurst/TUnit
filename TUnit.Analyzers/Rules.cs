@@ -138,6 +138,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor InstanceMethodSource =
         CreateDescriptor("TUnit0056", UsageCategory, DiagnosticSeverity.Error);
     
+    public static readonly DiagnosticDescriptor XunitTestOutputHelper =
+        CreateDescriptor("TUnit0057", UsageCategory, DiagnosticSeverity.Info);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

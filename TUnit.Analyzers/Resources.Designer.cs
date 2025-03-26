@@ -1570,5 +1570,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0056Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit TestOutputHelper can be migrated to Console for use with TUnit..
+        /// </summary>
+        internal static string TUnit0057Description {
+            get {
+                return ResourceManager.GetString("TUnit0057Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit TestOutputHelper can be migrated to Console for use with TUnit.
+        /// </summary>
+        internal static string TUnit0057MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0057MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit TestOutputHelper can be migrated to Console for use with TUnit.
+        /// </summary>
+        internal static string TUnit0057Title {
+            get {
+                return ResourceManager.GetString("TUnit0057Title", resourceCulture);
+            }
+        }
     }
 }
