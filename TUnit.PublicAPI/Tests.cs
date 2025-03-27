@@ -52,7 +52,7 @@ public partial class Tests
     
     private StringBuilder Scrub(StringBuilder text)
     {
-        var newText = UrlRegex().Replace(text.ToString(), "<URL>");
+        var newText = UrlRegex().Replace(text.ToString(), string.Empty);
         return new StringBuilder(newText);
     }
     
