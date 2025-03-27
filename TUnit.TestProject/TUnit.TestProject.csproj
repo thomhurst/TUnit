@@ -44,6 +44,7 @@
     <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="OneOf" />
+    <PackageReference Include="OneOf.SourceGenerator" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />

@@ -9,7 +9,14 @@ public static class CastHelper
     [UnconditionalSuppressMessage("", "IL2072")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
     {
-        if (value is IEnumerable enumerable && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+        if (value is T successfulCast)
+        {
+            return successfulCast;
+        }
+        
+        if (value is not string 
+            && value is IEnumerable enumerable 
+            && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
         {
             value = enumerable.Cast<object>().ElementAtOrDefault(0);
         }
@@ -17,11 +24,6 @@ public static class CastHelper
         if (value is null)
         {
             return default;
-        }
-
-        if (value is T successfulCast)
-        {
-            return successfulCast;
         }
 
         var underlyingType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
