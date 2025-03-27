@@ -213,11 +213,11 @@ namespace TUnit.Assertions.AssertConditions
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue) { }
     }
-    public class NotNullExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual>
+    public class NotNullExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.ConvertToAssertCondition<TActual?, TActual>
     {
         public NotNullExpectedValueAssertCondition() { }
+        public override System.Threading.Tasks.ValueTask<System.ValueTuple<TUnit.Assertions.AssertConditions.AssertionResult, TActual?>> ConvertValue(TActual? value) { }
         protected override string GetExpectation() { }
-        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }
     public class NullExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual>
     {
@@ -814,6 +814,10 @@ namespace TUnit.Assertions.AssertionBuilders.Wrappers
         public TUnit.Assertions.AssertionBuilders.Wrappers.NotBetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds() { }
         public TUnit.Assertions.AssertionBuilders.Wrappers.NotBetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds() { }
     }
+    public class NotNullAssertionBuilderWrapper<TActual> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
+    {
+        public new System.Runtime.CompilerServices.TaskAwaiter<TActual> GetAwaiter() { }
+    }
     public class SingleItemAssertionBuilderWrapper<TActual, TInner> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
         where TActual : System.Collections.Generic.IEnumerable<TInner>
     {
@@ -1304,10 +1308,11 @@ namespace TUnit.Assertions.Extensions
     {
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsDefault<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotDefault<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }
-        public static TUnit.Assertions.AssertionBuilders.Wrappers.GenericNotEqualToAssertionBuilderWrapper<TActual> IsNotEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotEquatableOrEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotNull<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotSameReferenceAs<TActual, TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TExpected expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null) { }
+        public static TUnit.Assertions.AssertionBuilders.Wrappers.GenericNotEqualToAssertionBuilderWrapper<TActual> IsNotEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotEquatableOrEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertionBuilders.Wrappers.NotNullAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual?> valueSource)
+            where TActual :  class { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotSameReferenceAs<TActual, TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TExpected expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue1 = null) { }
     }
     public static class GenericSatisfiesExtensions
     {
