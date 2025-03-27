@@ -303,6 +303,7 @@ namespace TUnit.Assertions.AssertConditions.Collections
         where TActual : System.Collections.Generic.IEnumerable<TInner>
     {
         public EnumerableContainsExpectedFuncAssertCondition(System.Func<TInner, bool> matcher, string? matcherString) { }
+        public TInner FoundItem { get; }
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }
@@ -662,6 +663,11 @@ namespace TUnit.Assertions.AssertionBuilders
         public TUnit.Assertions.AssertConditions.Operators.ValueDelegateOr<TActual> Or { get; }
     }
     public class MappableResultAssertionBuilder<TActual, TExpected> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
+    {
+        public new System.Runtime.CompilerServices.TaskAwaiter<TExpected?> GetAwaiter() { }
+    }
+    public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
+        where TAssertCondition : TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual>
     {
         public new System.Runtime.CompilerServices.TaskAwaiter<TExpected?> GetAwaiter() { }
     }
@@ -1188,7 +1194,7 @@ namespace TUnit.Assertions.Extensions
     {
         public static TUnit.Assertions.AssertionBuilders.Wrappers.StringContainsAssertionBuilderWrapper Contains(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<string> valueSource, string expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null) { }
         public static TUnit.Assertions.AssertionBuilders.Wrappers.StringContainsAssertionBuilderWrapper Contains(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<string> valueSource, string expected, System.StringComparison stringComparison, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null, [System.Runtime.CompilerServices.CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = null) { }
-        public static TUnit.Assertions.AssertionBuilders.MappableResultAssertionBuilder<System.Collections.Generic.IEnumerable<TInner>, TInner> Contains<TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<System.Collections.Generic.IEnumerable<TInner>> valueSource, System.Func<TInner, bool> matcher, [System.Runtime.CompilerServices.CallerArgumentExpression("matcher")] string doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertionBuilders.MappableResultAssertionBuilder<System.Collections.Generic.IEnumerable<TInner>, TUnit.Assertions.AssertConditions.Collections.EnumerableContainsExpectedFuncAssertCondition<System.Collections.Generic.IEnumerable<TInner>, TInner>, TInner> Contains<TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<System.Collections.Generic.IEnumerable<TInner>> valueSource, System.Func<TInner, bool> matcher, [System.Runtime.CompilerServices.CallerArgumentExpression("matcher")] string doNotPopulateThisValue = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> Contains<TActual, TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TInner expected, System.Collections.Generic.IEqualityComparer<TInner> equalityComparer = null, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null)
             where TActual : System.Collections.Generic.IEnumerable<TInner> { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TDictionary> ContainsKey<TDictionary, TKey>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TDictionary> valueSource, TKey expected, System.Collections.Generic.IEqualityComparer<TKey> equalityComparer = null, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null)
