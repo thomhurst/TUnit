@@ -28,7 +28,9 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        await Assert.That(array).Contains(x => x == 1);
+        var item = await Assert.That(array).Contains(x => x == 1);
+        
+        await Assert.That(item).IsEqualTo(1);
     }
     
     [Test]

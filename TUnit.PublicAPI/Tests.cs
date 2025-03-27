@@ -1,12 +1,13 @@
 ﻿using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using PublicApiGenerator;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.PublicAPI;
 
-public class Tests
+public partial class Tests
 {
     [Test]
     public Task Core_Library_Has_No_API_Changes()
@@ -34,7 +35,10 @@ public class Tests
 
     private async Task VerifyPublicApi(Assembly assembly)
     {
-        var publicApi = assembly.GeneratePublicApi();
+        var publicApi = assembly.GeneratePublicApi(new ApiGeneratorOptions
+        {
+            ExcludeAttributes = ["System.Reflection.AssemblyMetadataAttribute"]
+        });
 
         await Verify(publicApi)
             .AddScrubber(sb => Scrub(sb))
@@ -51,12 +55,22 @@ public class Tests
     
     private StringBuilder Scrub(StringBuilder text)
     {
-        return text
-            .Replace(".git\"", "\"");
+        var newText = UrlRegex().Replace(text.ToString(), string.Empty);
+        return new StringBuilder(newText);
     }
     
     private string Scrub(string text)
     {
         return Scrub(new StringBuilder(text)).ToString();
     }
+
+
+#if NET
+    [GeneratedRegex(@"((http|https):\/\/)?(www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(\/[a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]*)?")]
+    public static partial Regex UrlRegex();
+#else
+    public static Regex UrlRegex() =>
+        new Regex(
+            @"((http|https):\/\/)?(www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(\/[a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]*)?");
+#endif
 }
