@@ -47,19 +47,17 @@ public static class ThrowsExtensions
             e => e);
     }
 
-    public static CastableAssertionBuilder<object?, object?> ThrowsNothing(this IDelegateSource delegateSource)
+    public static CastableResultAssertionBuilder<object?, object?> ThrowsNothing(this IDelegateSource delegateSource)
     {
-        return new CastableAssertionBuilder<object?, object?>(
-            delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<object?>(), []),
-            assertionData => assertionData.Result);
+        return new CastableResultAssertionBuilder<object?, object?>(
+            delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<object?>(), []));
     }
 
-    public static CastableAssertionBuilder<TActual, TActual> ThrowsNothing<TActual>(this IValueDelegateSource<TActual> delegateSource)
+    public static CastableResultAssertionBuilder<TActual, TActual> ThrowsNothing<TActual>(this IValueDelegateSource<TActual> delegateSource)
     {
         IValueSource<TActual> valueSource = delegateSource;
-        return new CastableAssertionBuilder<TActual, TActual>(
-            valueSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>(), []),
-            assertionData => assertionData.Result is TActual actual ? actual : default);
+        return new CastableResultAssertionBuilder<TActual, TActual>(
+            valueSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>(), []));
     }
 
     public static ThrowsException<TActual, TException> WithParameterName<TActual, TException>(this ThrowsException<TActual, TException> throwsException, string expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)

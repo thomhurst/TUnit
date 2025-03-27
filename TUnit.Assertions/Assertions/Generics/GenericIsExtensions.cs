@@ -18,9 +18,9 @@ public static class GenericIsExtensions
             , [type.Name]);
     }
 
-    public static CastableAssertionBuilder<object, TExpected> IsTypeOf<TExpected>(this IValueSource<object> valueSource)
+    public static CastedAssertionBuilder<object, TExpected> IsTypeOf<TExpected>(this IValueSource<object> valueSource)
     {
-        return new CastableAssertionBuilder<object, TExpected>(IsTypeOf(valueSource, typeof(TExpected)));
+        return new CastedAssertionBuilder<object, TExpected>(IsTypeOf(valueSource, typeof(TExpected)));
     }
 
     public static InvokableValueAssertionBuilder<object> IsAssignableTo(this IValueSource<object> valueSource, Type type)
@@ -29,9 +29,9 @@ public static class GenericIsExtensions
             , [type.Name]);
     }
 
-    public static CastableAssertionBuilder<object, TExpected> IsAssignableTo<TExpected>(this IValueSource<object> valueSource)
+    public static CastedAssertionBuilder<object, TExpected> IsAssignableTo<TExpected>(this IValueSource<object> valueSource)
     {
-        return new CastableAssertionBuilder<object, TExpected>(IsAssignableTo(valueSource, typeof(TExpected)));
+        return new CastedAssertionBuilder<object, TExpected>(IsAssignableTo(valueSource, typeof(TExpected)));
     }
 
 
