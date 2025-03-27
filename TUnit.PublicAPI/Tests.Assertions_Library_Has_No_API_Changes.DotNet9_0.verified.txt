@@ -160,8 +160,8 @@ namespace TUnit.Assertions.AssertConditions
     {
         protected ConvertToAssertCondition() { }
         public TToType ConvertedValue { get; }
-        public abstract System.Threading.Tasks.ValueTask<System.ValueTuple<TUnit.Assertions.AssertConditions.AssertionResult, TToType?>> ConvertValue(TFromType value);
-        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TFromType? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
+        public abstract System.Threading.Tasks.ValueTask<System.ValueTuple<TUnit.Assertions.AssertConditions.AssertionResult, TToType?>> ConvertValue(TFromType? value);
+        protected override sealed System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TFromType? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }
     public abstract class DelegateAssertCondition : TUnit.Assertions.AssertConditions.DelegateAssertCondition<object?, System.Exception>
     {
@@ -213,11 +213,19 @@ namespace TUnit.Assertions.AssertConditions
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue) { }
     }
-    public class NotNullExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual>
+    public class NotNullExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.ConvertToAssertCondition<TActual?, TActual>
+        where TActual :  class?
     {
         public NotNullExpectedValueAssertCondition() { }
+        public override System.Threading.Tasks.ValueTask<System.ValueTuple<TUnit.Assertions.AssertConditions.AssertionResult, TActual?>> ConvertValue(TActual? value) { }
         protected override string GetExpectation() { }
-        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
+    }
+    public class NotNullStructExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.ConvertToAssertCondition<TActual?, TActual>
+        where TActual :  struct
+    {
+        public NotNullStructExpectedValueAssertCondition() { }
+        public override System.Threading.Tasks.ValueTask<System.ValueTuple<TUnit.Assertions.AssertConditions.AssertionResult, TActual>> ConvertValue(TActual? value) { }
+        protected override string GetExpectation() { }
     }
     public class NullExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual>
     {
@@ -459,6 +467,17 @@ namespace TUnit.Assertions.AssertConditions.Exceptions
 }
 namespace TUnit.Assertions.AssertConditions.Interfaces
 {
+    public class ConvertedDelegateSource<TToType> : TUnit.Assertions.AssertConditions.Interfaces.ISource, TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TToType?>
+        where TToType : System.Exception
+    {
+        public ConvertedDelegateSource(TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource source) { }
+        public string? ActualExpression { get; }
+        public System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertionData> AssertionDataTask { get; }
+        public System.Collections.Generic.Stack<TUnit.Assertions.AssertConditions.BaseAssertCondition> Assertions { get; }
+        public System.Text.StringBuilder ExpressionBuilder { get; }
+        public TUnit.Assertions.AssertConditions.Interfaces.ISource AppendExpression(string expression) { }
+        public TUnit.Assertions.AssertConditions.Interfaces.ISource WithAssertion(TUnit.Assertions.AssertConditions.BaseAssertCondition assertCondition) { }
+    }
     public class ConvertedValueSource<TFromType, TToType> : TUnit.Assertions.AssertConditions.Interfaces.ISource, TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TToType?>
     {
         public ConvertedValueSource(TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TFromType> source, TUnit.Assertions.AssertConditions.ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition) { }
@@ -560,7 +579,7 @@ namespace TUnit.Assertions.AssertConditions.Throws
         where TException : System.Exception
     {
         public ThrowsException(TUnit.Assertions.AssertionBuilders.InvokableDelegateAssertionBuilder delegateAssertionBuilder, TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource source, System.Func<System.Exception?, System.Exception?> selector) { }
-        public TUnit.Assertions.AssertionBuilders.AndConvertedDelegateAssertionBuilder<TException> And { get; }
+        public TUnit.Assertions.AssertConditions.Operators.ValueAnd<TException> And { get; }
         public TUnit.Assertions.AssertConditions.Operators.DelegateOr<object?> Or { get; }
         public System.Runtime.CompilerServices.TaskAwaiter<TException?> GetAwaiter() { }
         public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, System.Exception> WithInnerException() { }
@@ -619,10 +638,6 @@ namespace TUnit.Assertions.AssertConditions.Throws
 namespace TUnit.Assertions.AssertionBuilders
 {
     public class AndAssertionBuilder : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertionBuilders.IAndAssertionBuilder { }
-    public class AndConvertedDelegateAssertionBuilder<TToType> : TUnit.Assertions.AssertionBuilders.ConvertedDelegateAssertionBuilder<TToType>, TUnit.Assertions.AssertionBuilders.IAndAssertionBuilder
-    {
-        public AndConvertedDelegateAssertionBuilder(TUnit.Assertions.AssertConditions.Interfaces.ISource source, System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertionData> mappedData) { }
-    }
     public abstract class AssertionBuilder : TUnit.Assertions.AssertConditions.Interfaces.ISource
     {
         protected TUnit.Assertions.AssertionData? AwaitedAssertionData;
@@ -643,9 +658,10 @@ namespace TUnit.Assertions.AssertionBuilders
     public class AsyncValueDelegateAssertionBuilder<TActual> : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource, TUnit.Assertions.AssertConditions.Interfaces.ISource, TUnit.Assertions.AssertConditions.Interfaces.IValueDelegateSource<TActual>, TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> { }
     public class CastableResultAssertionBuilder<TActual, TExpected> : TUnit.Assertions.AssertionBuilders.MappableResultAssertionBuilder<TActual, TExpected> { }
     public class CastedAssertionBuilder<TActual, TExpected> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TExpected> { }
-    public abstract class ConvertedDelegateAssertionBuilder<TToType> : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertConditions.Interfaces.ISource, TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TToType>
+    public class ConvertedDelegateAssertionBuilder<TException> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TException>
+        where TException : System.Exception
     {
-        protected ConvertedDelegateAssertionBuilder(TUnit.Assertions.AssertConditions.Interfaces.ISource source, System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertionData> mappedData) { }
+        public ConvertedDelegateAssertionBuilder(TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource source) { }
     }
     public class ConvertedValueAssertionBuilder<TFromType, TToType> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TToType>
     {
@@ -665,7 +681,7 @@ namespace TUnit.Assertions.AssertionBuilders
         public System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TUnit.Assertions.AssertConditions.AssertionResult>> GetAssertionResults() { }
         public System.Runtime.CompilerServices.TaskAwaiter GetAwaiter() { }
     }
-    public class InvokableDelegateAssertionBuilder : TUnit.Assertions.AssertionBuilders.InvokableAssertionBuilder<object?>
+    public class InvokableDelegateAssertionBuilder : TUnit.Assertions.AssertionBuilders.InvokableAssertionBuilder<object?>, TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource, TUnit.Assertions.AssertConditions.Interfaces.ISource
     {
         public TUnit.Assertions.AssertConditions.Operators.DelegateAnd<object?> And { get; }
         public TUnit.Assertions.AssertionBuilders.AssertionBuilder AssertionBuilder { get; }
@@ -814,6 +830,16 @@ namespace TUnit.Assertions.AssertionBuilders.Wrappers
         public TUnit.Assertions.AssertionBuilders.Wrappers.NotBetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds() { }
         public TUnit.Assertions.AssertionBuilders.Wrappers.NotBetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds() { }
     }
+    public class NotNullAssertionBuilderWrapper<TActual> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
+        where TActual :  class
+    {
+        public new System.Runtime.CompilerServices.TaskAwaiter<TActual> GetAwaiter() { }
+    }
+    public class NotNullStructAssertionBuilderWrapper<TActual> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
+        where TActual :  struct
+    {
+        public new System.Runtime.CompilerServices.TaskAwaiter<TActual> GetAwaiter() { }
+    }
     public class SingleItemAssertionBuilderWrapper<TActual, TInner> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
         where TActual : System.Collections.Generic.IEnumerable<TInner>
     {
@@ -957,11 +983,26 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }
+    public class ConvertExceptionToValueAssertCondition<TException> : TUnit.Assertions.AssertConditions.BaseAssertCondition<object?>
+        where TException : System.Exception
+    {
+        public ConvertExceptionToValueAssertCondition() { }
+        public TException ConvertedExceptionValue { get; }
+        protected override string GetExpectation() { }
+        protected override sealed System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(object? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
+    }
     public class DefaultExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual>
     {
         public DefaultExpectedValueAssertCondition() { }
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
+    }
+    public class DelegateConversionAssertionCondition<TToType> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TToType>
+        where TToType : System.Exception
+    {
+        public DelegateConversionAssertionCondition(TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource source, TUnit.Assertions.AssertConditions.BaseAssertCondition<object?> assertCondition) { }
+        protected override string GetExpectation() { }
+        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TToType? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }
     public class EqualsExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.ExpectedValueAssertCondition<TActual, TActual>
     {
@@ -977,12 +1018,6 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue) { }
         public void IgnoringMember(string fieldName) { }
-    }
-    public class NoOpAssertionCondition<TActual> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual>
-    {
-        public NoOpAssertionCondition(string previousExpectation) { }
-        protected override string GetExpectation() { }
-        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }
     public class NotAssignableFromExpectedValueAssertCondition<TActual> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual>
     {
@@ -1031,6 +1066,12 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions
         public TypeOfExpectedValueAssertCondition(System.Type expectedType) { }
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
+    }
+    public class ValueConversionAssertionCondition<TFromType, TToType> : TUnit.Assertions.AssertConditions.BaseAssertCondition<TToType>
+    {
+        public ValueConversionAssertionCondition(TUnit.Assertions.AssertConditions.Interfaces.ISource source, TUnit.Assertions.AssertConditions.ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition) { }
+        protected override string GetExpectation() { }
+        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TToType? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }
 }
 namespace TUnit.Assertions.Assertions.Strings.Conditions
@@ -1304,10 +1345,13 @@ namespace TUnit.Assertions.Extensions
     {
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsDefault<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotDefault<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }
-        public static TUnit.Assertions.AssertionBuilders.Wrappers.GenericNotEqualToAssertionBuilderWrapper<TActual> IsNotEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotEquatableOrEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotNull<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotSameReferenceAs<TActual, TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TExpected expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null) { }
+        public static TUnit.Assertions.AssertionBuilders.Wrappers.GenericNotEqualToAssertionBuilderWrapper<TActual> IsNotEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotEquatableOrEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertionBuilders.Wrappers.NotNullAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual?> valueSource)
+            where TActual :  class { }
+        public static TUnit.Assertions.AssertionBuilders.Wrappers.NotNullStructAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual?> valueSource)
+            where TActual :  struct { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotSameReferenceAs<TActual, TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TExpected expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue1 = null) { }
     }
     public static class GenericSatisfiesExtensions
     {
@@ -1416,6 +1460,8 @@ namespace TUnit.Assertions.Extensions
     {
         public static TUnit.Assertions.AssertionBuilders.InvokableDelegateAssertionBuilder RegisterAssertion<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [System.Runtime.CompilerServices.CallerMemberName] string? caller = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> RegisterAssertion<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> source, TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [System.Runtime.CompilerServices.CallerMemberName] string? caller = null) { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TToType>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource source)
+            where TToType : System.Exception { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TFromType, TToType>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TFromType> source, TUnit.Assertions.AssertConditions.ConvertToAssertCondition<TFromType, TToType> assertCondition, string?[] argumentExpressions, [System.Runtime.CompilerServices.CallerMemberName] string? caller = null) { }
     }
     public static class StringExtensions

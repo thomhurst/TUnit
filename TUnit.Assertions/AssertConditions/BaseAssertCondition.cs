@@ -45,10 +45,11 @@ public abstract class BaseAssertCondition
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
+    private ValueTask<AssertionResult>? _result;
     
     internal ValueTask<AssertionResult> GetAssertionResult(AssertionData assertionData)
     {
-        return GetAssertionResult(assertionData.Result, assertionData.Exception, new AssertionMetadata
+        return _result ??= GetAssertionResult(assertionData.Result, assertionData.Exception, new AssertionMetadata
         {
             StartTime = assertionData.Start,
             EndTime = assertionData.End
@@ -68,7 +69,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
             actualValue = default(TActual);
         }
         
-        return GetAssertionResult((TActual?) actualValue, exception, assertionMetadata, actualExpression);
+        return _result ??= GetAssertionResult((TActual?) actualValue, exception, assertionMetadata, actualExpression);
     }
 
     internal TActual? ActualValue { get; private set; }
@@ -87,7 +88,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
             AssertionScope.GetCurrentAssertionScope()?.RemoveException(exception);
         }
 
-        return GetResult(actualValue, exception, assertionMetadata);
+        return _result ??= GetResult(actualValue, exception, assertionMetadata);
     }
 
     protected abstract ValueTask<AssertionResult> GetResult(TActual? actualValue, Exception? exception,
