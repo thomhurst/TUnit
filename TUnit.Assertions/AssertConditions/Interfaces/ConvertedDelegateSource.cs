@@ -5,14 +5,14 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Interfaces;
 
-public class ConvertedDelegateSource<TFromType, TToType> : IValueSource<TToType?> where TToType : Exception
+public class ConvertedDelegateSource<TToType> : IValueSource<TToType?> where TToType : Exception
 {
     public ConvertedDelegateSource(IDelegateSource source)
     {
         var convertToAssertCondition = new ConvertExceptionToValueAssertCondition<TToType>();
         
         ActualExpression = source.ActualExpression;
-        Assertions = new Stack<BaseAssertCondition>([new DelegateConversionAssertionCondition<TToType>(source, convertToAssertCondition)]);
+        Assertions = new Stack<BaseAssertCondition>([new DelegateConversionAssertionCondition<TToType>(source, (BaseAssertCondition<object?>)source.Assertions.Peek())]);
         AssertionDataTask = ConvertAsync(source, convertToAssertCondition);
         ExpressionBuilder = source.ExpressionBuilder;
     }
@@ -40,12 +40,12 @@ public class ConvertedDelegateSource<TFromType, TToType> : IValueSource<TToType?
         return this;
     }
 
-    private static async ValueTask<AssertionData> ConvertAsync(IDelegateSource valueSource, ConvertExceptionToValueAssertCondition<TToType> convertToAssertCondition)
+    private static async ValueTask<AssertionData> ConvertAsync(IDelegateSource delegateSource, ConvertExceptionToValueAssertCondition<TToType> convertToAssertCondition)
     {
-        var invokableAssertionBuilder = valueSource.RegisterAssertion(convertToAssertCondition, []);
+        var invokableAssertionBuilder = delegateSource.RegisterAssertion(convertToAssertCondition, [], null);
         
         return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData => 
-            Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedExceptionValue, End = DateTimeOffset.Now }));
+            Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedExceptionValue, Exception = null, End = DateTimeOffset.Now }));
 
     }
 }

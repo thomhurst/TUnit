@@ -3,6 +3,7 @@ using System.Text;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Assertions.Generics.Conditions;
 
 namespace TUnit.Assertions.Extensions;
 
@@ -58,6 +59,11 @@ public static class SourceExtensions
         }
 
         return new InvokableDelegateAssertionBuilder(new InvokableAssertionBuilder<object?>(source));
+    }
+    
+    public static InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TToType>(this IDelegateSource source) where TToType : Exception
+    {
+        return new ConvertedDelegateAssertionBuilder<TToType>(source);
     }
 
     private static string BuildExpression(string? caller, string?[] argumentExpressions)
