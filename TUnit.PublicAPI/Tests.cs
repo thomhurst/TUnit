@@ -35,7 +35,10 @@ public partial class Tests
 
     private async Task VerifyPublicApi(Assembly assembly)
     {
-        var publicApi = assembly.GeneratePublicApi();
+        var publicApi = assembly.GeneratePublicApi(new ApiGeneratorOptions
+        {
+            ExcludeAttributes = ["System.Reflection.AssemblyMetadataAttribute"]
+        });
 
         await Verify(publicApi)
             .AddScrubber(sb => Scrub(sb))
