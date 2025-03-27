@@ -14,6 +14,6 @@ internal class NullLogger : ILogger
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return false;
+        return logLevel >= LogLevel.Trace;
     }
 }

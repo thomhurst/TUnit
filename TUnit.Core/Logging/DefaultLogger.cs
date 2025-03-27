@@ -3,7 +3,7 @@ using System.Text;
 
 namespace TUnit.Core.Logging;
 
-public class DefaultLogger : TUnitLogger
+public class DefaultLogger(Context context) : TUnitLogger
 {
     private readonly ConcurrentDictionary<string, List<string>> _values = new();
 
@@ -47,11 +47,13 @@ public class DefaultLogger : TUnitLogger
         
         if (logLevel >= LogLevel.Error)
         {
-            await Console.Error.WriteLineAsync(message);
+            await context.ErrorOutputWriter.WriteLineAsync(message);
+            await GlobalContext.Current.OriginalConsoleError.WriteLineAsync(message);
         }
         else
         {
-            await Console.Out.WriteLineAsync(message);
+            await context.OutputWriter.WriteLineAsync(message);
+            await GlobalContext.Current.OriginalConsoleOut.WriteLineAsync(message);
         }
     }
 
@@ -61,11 +63,13 @@ public class DefaultLogger : TUnitLogger
         
         if (logLevel >= LogLevel.Error)
         {
-            Console.Error.WriteLine(message);
+            context.ErrorOutputWriter.WriteLine(message);
+            GlobalContext.Current.OriginalConsoleError.WriteLine(message);
         }
         else
         {
-            Console.WriteLine(message);
+            context.OutputWriter.WriteLine(message);
+            GlobalContext.Current.OriginalConsoleOut.WriteLine(message);
         }
     }
 

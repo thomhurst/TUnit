@@ -21,4 +21,6 @@ public class GlobalContext : Context
     internal ILogger GlobalLogger { get; set; } = new NullLogger();
     
     public string? TestFilter { get; internal set; }
+    public TextWriter OriginalConsoleOut { get; set; } = Console.Out;
+    public TextWriter OriginalConsoleError { get; set; } = Console.Error;
 }

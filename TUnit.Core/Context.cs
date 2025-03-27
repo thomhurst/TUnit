@@ -24,7 +24,8 @@ public abstract class Context : IContext, IDisposable
 
     private StringBuilder? _outputStringBuilder;
     private StringBuilder? _errorOutputStringBuilder;
-    
+    private DefaultLogger? _defaultLogger;
+
     [field: AllowNull, MaybeNull]
     public TextWriter OutputWriter => field ??= TextWriter.Synchronized(new StringWriter(_outputStringBuilder ??= new StringBuilder()));
     
@@ -74,9 +75,9 @@ public abstract class Context : IContext, IDisposable
     /// Gets the default logger.
     /// </summary>
     /// <returns>A <see cref="TUnitLogger"/> instance.</returns>
-    public TUnitLogger GetDefaultLogger()
+    public DefaultLogger GetDefaultLogger()
     {
-        return new DefaultLogger();
+        return _defaultLogger ??= new DefaultLogger(this);
     }
 
     /// <summary>
