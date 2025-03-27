@@ -53,7 +53,7 @@ public static class HttpResponseAssertionExtensions
 {
     public static InvokableValueAssertionBuilder<TToType> DeSerializesTo<TToType>(this IValueSource<HttpResponseMessage> valueSource, JsonTypeInfo<TToType> jsonTypeInfo)
     {
-        return new ConvertedValueAssertionBuilder<HttpResponseMessage, TToType>(valueSource, new HttpResponseDeserializesToAssertCondition<TToType>(jsonTypeInfo))!;
+        return valueSource.RegisterConversionAssertion(new HttpResponseDeserializesToAssertCondition<TToType>(jsonTypeInfo), [])!;
     }
     
     public static InvokableValueAssertionBuilder<ProblemDetails> IsProblemDetails(this IValueSource<HttpResponseMessage> valueSource)

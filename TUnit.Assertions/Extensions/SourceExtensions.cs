@@ -30,6 +30,12 @@ public static class SourceExtensions
         
         return new InvokableValueAssertionBuilder<TActual>(new InvokableAssertionBuilder<TActual>(invokeableAssertionBuilder));
     }
+    
+    public static InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TFromType, TToType>(this IValueSource<TFromType> source,
+        ConvertToAssertCondition<TFromType, TToType> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
+    {
+        return new ConvertedValueAssertionBuilder<TFromType, TToType>(source, assertCondition);
+    }
 
     public static InvokableDelegateAssertionBuilder RegisterAssertion<TActual>(this IDelegateSource delegateSource,
         BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
