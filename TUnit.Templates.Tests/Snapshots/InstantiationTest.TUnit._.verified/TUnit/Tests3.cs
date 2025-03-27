@@ -9,6 +9,6 @@ public class AndEvenMoreTests(DataClass dataClass)
     {
         Console.WriteLine(dataClass);
         Console.WriteLine("For more information, check out the documentation");
-        Console.WriteLine("https://thomhurst.github.io/TUnit/");
+        Console.WriteLine("https://tunit.dev/");
     }
 }

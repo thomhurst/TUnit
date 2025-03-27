@@ -11,7 +11,7 @@ So for most scenarios, you can just rely on `Console.WriteLine(...)`.
 ## Logger Objects
 If you want a logger object, you can call `TestContext.GetDefaultLogger()`, which will give you a logger that will write output to that test's output writer.
 
-This logger can also be used to map to other logging interfaces (e.g. Microsoft.Extensions.Logging), so that for example, Asp.NET web apps can log to your test's config, so that you have a cleaner, more isolated log output.
+This logger can also be used to map to other logging interfaces (e.g. Microsoft.Extensions.Logging), so that for example, Asp.NET web apps can log to your test's context, so that you have a cleaner, more isolated log output.
 
 ## Log Level
 TUnit will use the same log level as provided to the Microsoft.Testing.Platform, which is set on the command line when invoking the test suite. If not defined, the default log level should be `Trace`.

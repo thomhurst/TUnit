@@ -26,7 +26,7 @@ A new test project will be created for you with some samples of different test t
 
 # Documentation
 
-See here: <https://thomhurst.github.io/TUnit/>
+See here: <https://tunit.dev/>
 
 # Modern and Fast
 
@@ -135,7 +135,7 @@ This provides you base classes, similarly to Microsoft.Playwright.NUnit or Micro
   - Test
 
 - Designed to avoid common pitfalls such as leaky test states
-- Dependency injection support ([See here](https://thomhurst.github.io/TUnit/docs/tutorial-advanced/dependency-injection))
+- Dependency injection support ([See here](https://tunit.dev/docs/tutorial-advanced/dependency-injection))
 - Ability to view and interrogate metadata and results from various assembly/class/test context objects
 
 # Installation
@@ -259,7 +259,7 @@ TUnit is inspired by NUnit and xUnit - two of the most popular testing framework
 
 It aims to build upon the useful features of both while trying to address any pain points that they may have.
 
-[Read more here](https://thomhurst.github.io/TUnit/docs/comparison/framework-differences)
+[Read more here](https://tunit.dev/docs/comparison/framework-differences)
 
 # Prerelease
 
