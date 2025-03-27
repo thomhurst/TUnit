@@ -12,10 +12,23 @@ public class EnumerableContainsExpectedFuncAssertCondition<TActual, TInner>(
         AssertionMetadata assertionMetadata
     )
     {
+        if (actualValue is null)
+        {
+            return FailWithMessage($"{ActualExpression ?? typeof(TActual).Name} is null");
+        }
+
+        foreach (var inner in actualValue)
+        {
+            if (matcher(inner))
+            {
+                FoundItem = inner;
+                break;
+            }
+        }
+        
         return AssertionResult
-            .FailIf(actualValue is null,
-                $"{ActualExpression ?? typeof(TActual).Name} is null")
-            .OrFailIf(!actualValue!.Any(matcher),
-                "there was no match found in the collection");
+            .FailIf(FoundItem is null, "there was no match found in the collection");
     }
+
+    public TInner? FoundItem { get; private set; }
 }
