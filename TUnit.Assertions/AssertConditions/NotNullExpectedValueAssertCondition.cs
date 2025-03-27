@@ -1,6 +1,6 @@
 namespace TUnit.Assertions.AssertConditions;
 
-public class NotNullExpectedValueAssertCondition<TActual> : ConvertToAssertCondition<TActual?, TActual> where TActual : class
+public class NotNullExpectedValueAssertCondition<TActual> : ConvertToAssertCondition<TActual?, TActual> where TActual : class?
 {
     protected override string GetExpectation()
         => "to not be null";

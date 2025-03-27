@@ -3,7 +3,7 @@
 public class NullabilityInferenceTests
 {
     [Test]
-    public async Task NotNull()
+    public async Task NotNull_ReferenceType()
     {
         // ReSharper disable once SuggestVarOrType_BuiltInTypes
         // ReSharper disable once ConvertToConstant.Local
@@ -13,5 +13,18 @@ public class NullabilityInferenceTests
         var notNullValue = await Assert.That(nullableValue).IsNotNull();
         
         Console.WriteLine(notNullValue.Clone());
+    }
+    
+    [Test]
+    public async Task NotNull_ValueType()
+    {
+        // ReSharper disable once SuggestVarOrType_BuiltInTypes
+        // ReSharper disable once ConvertToConstant.Local
+        // ReSharper disable once VariableCanBeNotNullable
+        int? nullableValue = 1;
+
+        var notNullValue = await Assert.That(nullableValue).IsNotNull();
+        
+        Console.WriteLine(notNullValue.ToString());
     }
 }

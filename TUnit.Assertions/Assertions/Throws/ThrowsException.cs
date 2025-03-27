@@ -47,12 +47,12 @@ public class ThrowsException<TActual, TException> where TException : Exception
         return task.GetAwaiter();
     }
 
-    public AndConvertedDelegateAssertionBuilder<TException> And
+    public ConvertedDelegateAssertionBuilder<TException> And
     {
         get
         {
             _source.ExpressionBuilder.Append(".And");
-            return new AndConvertedDelegateAssertionBuilder<TException>(_source, AssertionDataTask());
+            return new ConvertedDelegateAssertionBuilder<TException>(_source);
         }
     }
 

@@ -5,12 +5,14 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Interfaces;
 
-public class ConvertedValueSource<TFromType, TToType> : IValueSource<TToType?>
+public class ConvertedDelegateSource<TFromType, TToType> : IValueSource<TToType?> where TToType : Exception
 {
-    public ConvertedValueSource(IValueSource<TFromType> source, ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition)
+    public ConvertedDelegateSource(IDelegateSource source)
     {
+        var convertToAssertCondition = new ConvertExceptionToValueAssertCondition<TToType>();
+        
         ActualExpression = source.ActualExpression;
-        Assertions = new Stack<BaseAssertCondition>([new ValueConversionAssertionCondition<TFromType, TToType>(source, convertToAssertCondition)]);
+        Assertions = new Stack<BaseAssertCondition>([new DelegateConversionAssertionCondition<TToType>(source, convertToAssertCondition)]);
         AssertionDataTask = ConvertAsync(source, convertToAssertCondition);
         ExpressionBuilder = source.ExpressionBuilder;
     }
@@ -38,12 +40,12 @@ public class ConvertedValueSource<TFromType, TToType> : IValueSource<TToType?>
         return this;
     }
 
-    private static async ValueTask<AssertionData> ConvertAsync(IValueSource<TFromType> valueSource, ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition)
+    private static async ValueTask<AssertionData> ConvertAsync(IDelegateSource valueSource, ConvertExceptionToValueAssertCondition<TToType> convertToAssertCondition)
     {
         var invokableAssertionBuilder = valueSource.RegisterAssertion(convertToAssertCondition, []);
         
         return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData => 
-            Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedValue, End = DateTimeOffset.Now }));
+            Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedExceptionValue, End = DateTimeOffset.Now }));
 
     }
 }

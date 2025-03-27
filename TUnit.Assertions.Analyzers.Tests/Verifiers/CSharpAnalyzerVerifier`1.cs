@@ -39,6 +39,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                     typeof(AssertionBuilder).Assembly.Location,
                 },
             },
+            CompilerDiagnostics = CompilerDiagnostics.None
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
