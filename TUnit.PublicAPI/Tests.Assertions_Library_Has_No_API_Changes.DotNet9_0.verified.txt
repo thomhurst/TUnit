@@ -1,5 +1,5 @@
 ﻿[assembly: System.Reflection.AssemblyMetadata("IsTrimmable", "True")]
-[assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/thomhurst/TUnit")]
+[assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v9.0", FrameworkDisplayName=".NET 9.0")]
 namespace TUnit.Assertions
 {
@@ -575,8 +575,8 @@ namespace TUnit.Assertions.AssertConditions.Throws
         public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsExactly<TException>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource)
             where TException : System.Exception { }
         public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsException(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource) { }
-        public static TUnit.Assertions.AssertionBuilders.CastableAssertionBuilder<object?, object?> ThrowsNothing(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource) { }
-        public static TUnit.Assertions.AssertionBuilders.CastableAssertionBuilder<TActual, TActual> ThrowsNothing<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueDelegateSource<TActual> delegateSource) { }
+        public static TUnit.Assertions.AssertionBuilders.CastableResultAssertionBuilder<object?, object?> ThrowsNothing(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource) { }
+        public static TUnit.Assertions.AssertionBuilders.CastableResultAssertionBuilder<TActual, TActual> ThrowsNothing<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueDelegateSource<TActual> delegateSource) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableDelegateAssertionBuilder ThrowsWithin(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, System.TimeSpan timeSpan, [System.Runtime.CompilerServices.CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableDelegateAssertionBuilder ThrowsWithin<TException>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, System.TimeSpan timeSpan, [System.Runtime.CompilerServices.CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
             where TException : System.Exception { }
@@ -642,10 +642,8 @@ namespace TUnit.Assertions.AssertionBuilders
     }
     public class AsyncDelegateAssertionBuilder : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource, TUnit.Assertions.AssertConditions.Interfaces.ISource { }
     public class AsyncValueDelegateAssertionBuilder<TActual> : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource, TUnit.Assertions.AssertConditions.Interfaces.ISource, TUnit.Assertions.AssertConditions.Interfaces.IValueDelegateSource<TActual>, TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> { }
-    public class CastableAssertionBuilder<TActual, TExpected> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TExpected>
-    {
-        public new System.Runtime.CompilerServices.TaskAwaiter<TExpected?> GetAwaiter() { }
-    }
+    public class CastableResultAssertionBuilder<TActual, TExpected> : TUnit.Assertions.AssertionBuilders.MappableResultAssertionBuilder<TActual, TExpected> { }
+    public class CastedAssertionBuilder<TActual, TExpected> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TExpected> { }
     public abstract class ConvertedDelegateAssertionBuilder<TToType> : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertConditions.Interfaces.ISource, TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TToType>
     {
         protected ConvertedDelegateAssertionBuilder(TUnit.Assertions.AssertConditions.Interfaces.ISource source, System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertionData> mappedData) { }
@@ -687,6 +685,10 @@ namespace TUnit.Assertions.AssertionBuilders
         public TUnit.Assertions.AssertConditions.Operators.ValueDelegateAnd<TActual> And { get; }
         public TUnit.Assertions.AssertionBuilders.AssertionBuilder AssertionBuilder { get; }
         public TUnit.Assertions.AssertConditions.Operators.ValueDelegateOr<TActual> Or { get; }
+    }
+    public class MappableResultAssertionBuilder<TActual, TExpected> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
+    {
+        public new System.Runtime.CompilerServices.TaskAwaiter<TExpected?> GetAwaiter() { }
     }
     public class OrAssertionBuilder : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertionBuilders.IOrAssertionBuilder { }
     public class ValueAssertionBuilder<TActual> : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertConditions.Interfaces.ISource, TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual>
@@ -1227,7 +1229,7 @@ namespace TUnit.Assertions.Extensions
     {
         public static TUnit.Assertions.AssertionBuilders.Wrappers.StringContainsAssertionBuilderWrapper Contains(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<string> valueSource, string expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null) { }
         public static TUnit.Assertions.AssertionBuilders.Wrappers.StringContainsAssertionBuilderWrapper Contains(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<string> valueSource, string expected, System.StringComparison stringComparison, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null, [System.Runtime.CompilerServices.CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = null) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<System.Collections.Generic.IEnumerable<TInner>> Contains<TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<System.Collections.Generic.IEnumerable<TInner>> valueSource, System.Func<TInner, bool> matcher, [System.Runtime.CompilerServices.CallerArgumentExpression("matcher")] string doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertionBuilders.MappableResultAssertionBuilder<System.Collections.Generic.IEnumerable<TInner>, TInner> Contains<TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<System.Collections.Generic.IEnumerable<TInner>> valueSource, System.Func<TInner, bool> matcher, [System.Runtime.CompilerServices.CallerArgumentExpression("matcher")] string doNotPopulateThisValue = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> Contains<TActual, TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TInner expected, System.Collections.Generic.IEqualityComparer<TInner> equalityComparer = null, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null)
             where TActual : System.Collections.Generic.IEnumerable<TInner> { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TDictionary> ContainsKey<TDictionary, TKey>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TDictionary> valueSource, TKey expected, System.Collections.Generic.IEqualityComparer<TKey> equalityComparer = null, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue = null)
@@ -1278,7 +1280,7 @@ namespace TUnit.Assertions.Extensions
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<object> IsAssignableFrom(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource, System.Type type) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<object> IsAssignableFrom<TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<object> IsAssignableTo(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource, System.Type type) { }
-        public static TUnit.Assertions.AssertionBuilders.CastableAssertionBuilder<object, TExpected> IsAssignableTo<TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource) { }
+        public static TUnit.Assertions.AssertionBuilders.CastedAssertionBuilder<object, TExpected> IsAssignableTo<TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource) { }
         public static TUnit.Assertions.AssertionBuilders.Wrappers.GenericEqualToAssertionBuilderWrapper<TActual> IsEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null) { }
         public static TUnit.Assertions.AssertionBuilders.Wrappers.GenericEqualToAssertionBuilderWrapper<TActual> IsEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, System.Collections.Generic.IEqualityComparer<TActual> equalityComparer, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsEquatableOrEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null) { }
@@ -1292,7 +1294,7 @@ namespace TUnit.Assertions.Extensions
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNull<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsSameReferenceAs<TActual, TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TExpected expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<object> IsTypeOf(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource, System.Type type) { }
-        public static TUnit.Assertions.AssertionBuilders.CastableAssertionBuilder<object, TExpected> IsTypeOf<TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource) { }
+        public static TUnit.Assertions.AssertionBuilders.CastedAssertionBuilder<object, TExpected> IsTypeOf<TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource) { }
     }
     public static class GenericIsNotExtensions
     {
