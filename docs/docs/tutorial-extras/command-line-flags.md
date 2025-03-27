@@ -4,6 +4,12 @@ sidebar_position: 13
 
 # Command Line Flags
 
+:::info
+
+Please note that for the coverage and trx report, you need to install [additional extensions](../extensions/extensions.md)
+
+:::
+
 <pre>
     --diagnostic
         Enable the diagnostic logging. The default log level is 'Trace'.
