@@ -20,6 +20,8 @@ public class EnumerableContainsExpectedFuncAssertCondition<TActual, TInner>(
     : BaseAssertCondition<TActual>
     where TActual : IEnumerable<TInner>
 {
+    private bool _wasFound;
+    
     protected override string GetExpectation() => $"to contain an entry matching {matcherString ?? "null"}";
     
     protected override ValueTask<AssertionResult> GetResult(
@@ -36,13 +38,14 @@ public class EnumerableContainsExpectedFuncAssertCondition<TActual, TInner>(
         {
             if (matcher(inner))
             {
+                _wasFound = true;
                 FoundItem = inner;
                 break;
             }
         }
         
         return AssertionResult
-            .FailIf(FoundItem is null, "there was no match found in the collection");
+            .FailIf(_wasFound is false, "there was no match found in the collection");
     }
 
     public TInner? FoundItem { get; private set; }
