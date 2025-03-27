@@ -6,7 +6,11 @@ sidebar_position: 3
 
 As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined with the fact that TUnit tests are source generated, running your tests is available in a variety of ways. 
 
+:::info
+
 Please note that for the coverage and trx report, you need to install [additional extensions](../extensions/extensions.md)
+
+:::
 
 ## [dotnet run](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-run)
 
