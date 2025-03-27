@@ -50,6 +50,7 @@
     <PackageVersion Include="NUnit.Analyzers" Version="4.6.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
+    <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.5.2" />
     <PackageVersion Include="Polyfill" Version="7.23.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.4.5" />
