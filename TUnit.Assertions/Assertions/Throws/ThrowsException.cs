@@ -47,14 +47,13 @@ public class ThrowsException<TActual, TException> where TException : Exception
         return task.GetAwaiter();
     }
 
-    public AndConvertedDelegateAssertionBuilder<TException> And
-    {
-        get
-        {
-            _source.ExpressionBuilder.Append(".And");
-            return new AndConvertedDelegateAssertionBuilder<TException>(_source, AssertionDataTask());
-        }
-    }
+    public ValueAnd<TException> And =>
+        new(
+            new AndAssertionBuilder(
+                _delegateAssertionBuilder.RegisterConversionAssertion<TException>()
+                    .AppendConnector(ChainType.And)
+            )
+        );
 
     public DelegateOr<object?> Or => _delegateAssertionBuilder.Or;
 
