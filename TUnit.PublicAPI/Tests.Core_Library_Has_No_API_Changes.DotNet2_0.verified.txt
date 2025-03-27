@@ -198,7 +198,7 @@ namespace TUnit.Core
         public static TUnit.Core.Context Current { get; }
         public void AddAsyncLocalValues() { }
         public void Dispose() { }
-        public TUnit.Core.Logging.TUnitLogger GetDefaultLogger() { }
+        public TUnit.Core.Logging.DefaultLogger GetDefaultLogger() { }
         public string GetErrorOutput() { }
         public string GetStandardOutput() { }
     }
@@ -361,6 +361,8 @@ namespace TUnit.Core
     }
     public class GlobalContext : TUnit.Core.Context
     {
+        public System.IO.TextWriter OriginalConsoleError { get; set; }
+        public System.IO.TextWriter OriginalConsoleOut { get; set; }
         public string? TestFilter { get; }
         public new static TUnit.Core.GlobalContext Current { get; }
     }
@@ -1236,7 +1238,7 @@ namespace TUnit.Core.Interfaces
     {
         System.IO.TextWriter ErrorOutputWriter { get; }
         System.IO.TextWriter OutputWriter { get; }
-        TUnit.Core.Logging.TUnitLogger GetDefaultLogger();
+        TUnit.Core.Logging.DefaultLogger GetDefaultLogger();
     }
     public interface IEventReceiver
     {
@@ -1364,7 +1366,7 @@ namespace TUnit.Core.Logging
 {
     public class DefaultLogger : TUnit.Core.Logging.TUnitLogger
     {
-        public DefaultLogger() { }
+        public DefaultLogger(TUnit.Core.Context context) { }
         public override void Log<TState>(TUnit.Core.Logging.LogLevel logLevel, TState state, System.Exception? exception, System.Func<TState, System.Exception?, string> formatter) { }
         public override System.Threading.Tasks.ValueTask LogAsync<TState>(TUnit.Core.Logging.LogLevel logLevel, TState state, System.Exception? exception, System.Func<TState, System.Exception?, string> formatter) { }
         public void PushProperties(System.Collections.Generic.IDictionary<string, System.Collections.Generic.List<object>> dictionary) { }
