@@ -21,7 +21,14 @@ public static class GenericIsNotExtensions
     {
         return new NotNullAssertionBuilderWrapper<TActual>(valueSource.RegisterConversionAssertion(new NotNullExpectedValueAssertCondition<TActual?>(), []));
     }
-    
+
+    public static NotNullStructAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this IValueSource<TActual?> valueSource) where TActual : struct
+    {
+        return new NotNullStructAssertionBuilderWrapper<TActual>(
+            valueSource.RegisterConversionAssertion(new NotNullStructExpectedValueAssertCondition<TActual>(), [])
+        );
+    }
+
     public static InvokableValueAssertionBuilder<TActual> IsNotEquatableOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TActual>(expected)
