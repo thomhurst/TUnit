@@ -6,5 +6,5 @@ public interface IContext
 {
     TextWriter OutputWriter { get; }
     TextWriter ErrorOutputWriter { get; }
-    TUnitLogger GetDefaultLogger();
+    DefaultLogger GetDefaultLogger();
 }

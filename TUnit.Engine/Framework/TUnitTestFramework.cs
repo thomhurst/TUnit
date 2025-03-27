@@ -8,6 +8,7 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Framework;
 
@@ -69,7 +70,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         GlobalContext.Current = new GlobalContext
         {
             TestFilter = stringFilter,
-            GlobalLogger = logger
+            GlobalLogger = logger,
+            OriginalConsoleOut = StandardOutConsoleInterceptor.DefaultOut,
+            OriginalConsoleError = StandardErrorConsoleInterceptor.DefaultError
         };
         
         serviceProvider.StandardOutConsoleInterceptor.Initialize();
