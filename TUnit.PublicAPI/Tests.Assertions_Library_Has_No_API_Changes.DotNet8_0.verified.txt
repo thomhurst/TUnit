@@ -1416,6 +1416,7 @@ namespace TUnit.Assertions.Extensions
     {
         public static TUnit.Assertions.AssertionBuilders.InvokableDelegateAssertionBuilder RegisterAssertion<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [System.Runtime.CompilerServices.CallerMemberName] string? caller = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> RegisterAssertion<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> source, TUnit.Assertions.AssertConditions.BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [System.Runtime.CompilerServices.CallerMemberName] string? caller = null) { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TFromType, TToType>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TFromType> source, TUnit.Assertions.AssertConditions.ConvertToAssertCondition<TFromType, TToType> assertCondition, string?[] argumentExpressions, [System.Runtime.CompilerServices.CallerMemberName] string? caller = null) { }
     }
     public static class StringExtensions
     {
