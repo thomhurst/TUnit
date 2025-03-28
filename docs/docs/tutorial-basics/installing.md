@@ -51,10 +51,12 @@ Your `.csproj` should be as simple as something like:
 </Project>
 ```
 
-## Incompatibilities
+:::danger
 
 If you're used to other testing frameworks, you're probably used to the package `Microsoft.NET.Test.Sdk`.
 This should NOT be used with TUnit. It'll stop test discovery from working properly.
+
+:::
 
 ## .NET Framework
 If you are still targeting .NET Framework, TUnit will try to Polyfill some missing types that are used by the compiler, such as the `ModuleInitialiserAttribute`.
