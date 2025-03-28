@@ -1,0 +1,6 @@
+@TUnit.Example.Asp.Net_HostAddress = http://localhost:5174
+
+GET {{TUnit.Example.Asp.Net_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
