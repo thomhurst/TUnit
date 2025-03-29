@@ -14,7 +14,9 @@ public class TestSessionContext : Context
         Assemblies = assemblies;
         Current = this;
     }
-    
+
+    public required string Id { get; init; }
+
     public required string? TestFilter { get; init; }
 
     public IEnumerable<AssemblyHookContext> Assemblies { get; }

@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
 
@@ -40,6 +41,11 @@ internal class TestsConstructor(IExtension extension,
         testContext.InternalDiscoveredTest = discoveredTest;
 
         return discoveredTest;
+    }
+
+    public IEnumerable<DiscoveredTest> ConstructTests(DynamicTest dynamicTest)
+    {
+        return dynamicTest.BuildTestMetadatas().Select(ConstructTest);
     }
 
     private static void RunOnTestDiscoveryAttributeHooks(IEnumerable<Attribute> attributes, TestContext testContext)

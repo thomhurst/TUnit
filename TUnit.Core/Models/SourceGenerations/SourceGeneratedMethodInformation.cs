@@ -45,6 +45,7 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
     {
         [RequiresUnreferencedCode("Reflection API")]
         get => field ??= MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
+        set => field = value;
     }
 
     public required Type ReturnType { get; init; }
