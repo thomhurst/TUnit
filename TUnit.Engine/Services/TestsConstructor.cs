@@ -3,20 +3,24 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
-using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
 
 internal class TestsConstructor(IExtension extension, 
-    TestMetadataCollector testMetadataCollector,
+    TestsCollector testsCollector,
     DependencyCollector dependencyCollector, 
     IServiceProvider serviceProvider) : IDataProducer
 {
     public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
     {
-        var testMetadatas = testMetadataCollector.GetTests();
+        var testMetadatas = testsCollector.GetTests();
+        
+        var dynamicTests = testsCollector.GetDynamicTests();
 
-        var discoveredTests = testMetadatas.Select(ConstructTest).ToArray();
+        var discoveredTests = testMetadatas.
+            Select(ConstructTest)
+            .Concat(dynamicTests.SelectMany(ConstructTests))
+            .ToArray();
 
         dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
         

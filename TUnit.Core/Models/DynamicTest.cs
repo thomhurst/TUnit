@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core;
 
-namespace TUnit.Engine.Models;
+namespace TUnit.Core;
 
 public abstract record DynamicTest
 {
@@ -19,7 +18,6 @@ public abstract record DynamicTest
     
     public required Dictionary<string, object?> Properties { get; init; }
     
-    public abstract TestDetails BuildTestDetails();
     public abstract IEnumerable<TestMetadata> BuildTestMetadatas();
 
     [field: AllowNull, MaybeNull]
@@ -42,26 +40,6 @@ public record DynamicTest<TClass> : DynamicTest where TClass : class
     
     public override Type TestClassType { get; } = typeof(TClass);
     
-    public override TestDetails BuildTestDetails()
-    {
-        return new TestDetails<TClass>
-        {
-            TestId = TestId,
-            LazyClassInstance = new ResettableLazy<TClass>(() => (TClass)Activator.CreateInstance(typeof(TClass), TestClassArguments)!, TestSessionContext.Current?.Id ?? "Unknown", new TestBuilderContext()),
-            TestClassArguments = TestClassArguments,
-            TestMethodArguments = TestMethodArguments,
-            TestClassInjectedPropertyArguments = Properties.Select(x => x.Value).ToArray(),
-            CurrentRepeatAttempt = 0,
-            RepeatLimit = Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0,
-            TestMethod = BuildTestMethod(TestBody),
-            TestName = TestName ?? TestBody.Name,
-            ReturnType = TestBody.ReturnType,
-            TestFilePath = "", // TODO
-            TestLineNumber = 0, // TODO
-            DataAttributes = Attributes.Where(x => x is IDataAttribute).ToArray()
-        };
-    }
-
     public override IEnumerable<TestMetadata<TClass>> BuildTestMetadatas()
     {
         var repeatLimit = Attributes.OfType<RepeatAttribute>()

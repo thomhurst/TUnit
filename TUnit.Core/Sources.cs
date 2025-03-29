@@ -8,6 +8,7 @@ namespace TUnit.Core;
 internal static class Sources
 {
     public static readonly List<ITestSource> TestSources = [];
+    public static readonly List<IDynamicTestSource> DynamicTestSources = [];
     
     public static readonly List<ITestHookSource> TestHookSources = [];
     public static readonly List<IClassHookSource> ClassHookSources = [];

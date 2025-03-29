@@ -75,7 +75,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var dependencyCollector = new DependencyCollector();
         
-        var testMetadataCollector = Register(new TestMetadataCollector(context.Request.Session.SessionUid.Value));
+        var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
         var testsConstructor = Register(new TestsConstructor(extension, testMetadataCollector, dependencyCollector, this));
         var testFilterService = Register(new TestFilterService(LoggerFactory));
         
