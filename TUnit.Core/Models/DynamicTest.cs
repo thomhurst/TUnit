@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace TUnit.Core;
@@ -9,23 +10,30 @@ public abstract record DynamicTest
 
     public string? TestName { get; init; }
 
-    public required MethodInfo TestBody { get; init; }
+    internal abstract MethodInfo TestBody { get; }
     
     public abstract Type TestClassType { get; }
     
-    public required object?[] TestClassArguments { get; init; }
+    public object?[]? TestClassArguments { get; init; }
     public required object?[] TestMethodArguments { get; init; }
     
-    public required Dictionary<string, object?> Properties { get; init; }
+    public Dictionary<string, object?>? Properties { get; init; }
     
     public abstract IEnumerable<TestMetadata> BuildTestMetadatas();
+    
+    internal string TestFilePath { get; init; } = string.Empty;
+    internal int TestLineNumber { get; init; } = 0;
 
     [field: AllowNull, MaybeNull]
     public Attribute[] Attributes => field ??=
         [..TestBody.GetCustomAttributes(), ..TestClassType.GetCustomAttributes(), ..TestClassType.Assembly.GetCustomAttributes()];
 }
 
-public record DynamicTest<TClass> : DynamicTest where TClass : class
+public record DynamicTest<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+                                | DynamicallyAccessedMemberTypes.PublicMethods
+                                | DynamicallyAccessedMemberTypes.PublicProperties)]
+    TClass> : DynamicTest where TClass : class
 {
     // ReSharper disable once StaticMemberInGenericType
     // We want a new static instance for each type of test
@@ -37,7 +45,9 @@ public record DynamicTest<TClass> : DynamicTest where TClass : class
     }
 
     public override string TestId => $"DynamicTest-{typeof(TClass).FullName}-{TestBody.Name}-{_dynamicTestCounter}";
-    
+
+    public required Expression<Func<TClass, Action>> TestMethod { get; init; }
+    internal override MethodInfo TestBody => ((MethodCallExpression)TestMethod.Body).Method;
     public override Type TestClassType { get; } = typeof(TClass);
     
     public override IEnumerable<TestMetadata<TClass>> BuildTestMetadatas()
@@ -51,7 +61,7 @@ public record DynamicTest<TClass> : DynamicTest where TClass : class
             yield return new TestMetadata<TClass>
             {
                 TestId = TestId,
-                TestClassArguments = TestClassArguments,
+                TestClassArguments = TestClassArguments ?? [],
                 TestMethodArguments = TestMethodArguments,
                 CurrentRepeatAttempt = 0,
                 RepeatLimit = repeatLimit,
@@ -72,10 +82,10 @@ public record DynamicTest<TClass> : DynamicTest where TClass : class
 
                     return AsyncConvert.ConvertObject(TestBody.Invoke(@class, arguments));
                 },
-                TestClassProperties = Properties.Select(x => x.Value).ToArray(),
+                TestClassProperties = Properties?.Select(x => x.Value).ToArray() ?? [],
                 TestBuilderContext = new TestBuilderContext(),
-                TestFilePath = "", // TODO
-                TestLineNumber = 0, // TODO
+                TestFilePath = TestFilePath,
+                TestLineNumber = TestLineNumber,
             };
         }
     }
@@ -104,7 +114,7 @@ public record DynamicTest<TClass> : DynamicTest where TClass : class
             Name = TestClassType.Name,
             Namespace = TestClassType.Namespace,
             Parameters = GetParameters(TestClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
-            Properties = Properties.Select(GenerateProperty).ToArray(),
+            Properties = Properties?.Select(GenerateProperty).ToArray() ?? [],
             Type = TestClassType
         };
     }
