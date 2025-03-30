@@ -37,11 +37,15 @@ public partial class Tests
     {
         var publicApi = assembly.GeneratePublicApi(new ApiGeneratorOptions
         {
-            ExcludeAttributes = ["System.Reflection.AssemblyMetadataAttribute"]
+            ExcludeAttributes =
+            [
+                "System.Reflection.AssemblyMetadataAttribute"
+            ]
         });
 
         await Verify(publicApi)
             .AddScrubber(sb => Scrub(sb))
+            .ScrubLinesWithReplace(x => x.Replace("\r\n", "\n"))
             .OnVerifyMismatch(async (pair, message, verify) =>
             {
                 var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
