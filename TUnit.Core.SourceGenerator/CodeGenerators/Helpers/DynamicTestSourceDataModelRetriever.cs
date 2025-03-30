@@ -13,6 +13,7 @@ public static class DynamicTestSourceDataModelRetriever
         return new DynamicTestSourceDataModel
         {
             Class = methodSymbol.ContainingType,
+            Method = methodSymbol,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
         };

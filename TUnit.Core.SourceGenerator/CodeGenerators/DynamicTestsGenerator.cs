@@ -33,11 +33,6 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             return null;
         }
 
-        if (methodSymbol.IsStatic)
-        {
-            return null;
-        }
-
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             return null;
@@ -79,6 +74,9 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                 "public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectTests(string sessionId)");
             sourceBuilder.WriteLine("{");
 
+            sourceBuilder.WriteLine("try");
+            sourceBuilder.WriteLine("{");
+
             sourceBuilder.WriteLine
             (
                 $"""
@@ -86,10 +84,20 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                  """
             );
 
-            sourceBuilder.WriteLine(
-                $"new {dynamicTestSource.Class.GloballyQualified()}().{dynamicTestSource.Method.Name}(context);");
+            var receiver = dynamicTestSource.Method.IsStatic
+                ? dynamicTestSource.Class.GloballyQualified()
+                : $"new {dynamicTestSource.Class.GloballyQualified()}()";
 
+            sourceBuilder.WriteLine($"{receiver}.{dynamicTestSource.Method.Name}(context);");
+            
             sourceBuilder.WriteLine("return context.Tests;");
+            
+            sourceBuilder.WriteLine("}");
+            sourceBuilder.WriteLine("catch (global::System.Exception exception)");
+            sourceBuilder.WriteLine("{");
+            FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, dynamicTestSource);
+            sourceBuilder.WriteLine("}");
+            
             sourceBuilder.WriteLine("}");
 
             sourceBuilder.WriteLine("}");

@@ -19,4 +19,22 @@ public static class FailedTestInitializationWriter
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine("});");
     }
+    
+    public static void GenerateFailedTestCode(SourceCodeWriter sourceBuilder,
+        DynamicTestSourceDataModel testSourceDataModel)
+    {
+        var testId = Guid.NewGuid().ToString("N");
+        
+        sourceBuilder.WriteLine("return");
+        sourceBuilder.WriteLine("[");
+        sourceBuilder.WriteLine($"new FailedDynamicTest<{testSourceDataModel.Class.GloballyQualified()}>");
+        sourceBuilder.WriteLine("{"); 
+        sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
+        sourceBuilder.WriteLine($"MethodName = $\"{testSourceDataModel.Method.Name}\",");
+        sourceBuilder.WriteLine($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.Class.Name}.{testSourceDataModel.Method.Name} failed to initialize\", exception),");
+        sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
+        sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
+        sourceBuilder.WriteLine("}");
+        sourceBuilder.WriteLine("];");
+    }
 }
