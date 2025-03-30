@@ -71,7 +71,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("}");
 
             sourceBuilder.WriteLine(
-                "public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectTests(string sessionId)");
+                "public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)");
             sourceBuilder.WriteLine("{");
 
             sourceBuilder.WriteLine("try");

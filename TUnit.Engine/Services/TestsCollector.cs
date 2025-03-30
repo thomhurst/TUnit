@@ -11,6 +11,6 @@ internal class TestsCollector(string sessionId)
     
     public IEnumerable<DynamicTest> GetDynamicTests()
     {
-        return Sources.DynamicTestSources.SelectMany(x => x.CollectTests(sessionId));
+        return Sources.DynamicTestSources.SelectMany(x => x.CollectDynamicTests(sessionId));
     }
 }

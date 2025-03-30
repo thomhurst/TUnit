@@ -2,5 +2,5 @@
 
 public interface IDynamicTestSource
 {
-    IReadOnlyList<DynamicTest> CollectTests(string sessionId);
+    IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId);
 }

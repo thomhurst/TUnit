@@ -74,5 +74,11 @@ public class Basic
             TestMethod = @class => @class.SomeMethod_ValueTask_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
         });
+        
+        context.AddTest(new DynamicTest<Basic>
+        {
+            TestMethod = @class => @class.SomeMethod_ValueTask_Args(1, "test", true),
+            TestMethodArguments = [2, "test", false],
+        });
     }
 }
