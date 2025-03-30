@@ -1,4 +1,5 @@
 ﻿using TUnit.Core.Extensions;
+#pragma warning disable WIP
 
 namespace TUnit.TestProject.DynamicTests;
 

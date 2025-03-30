@@ -69,6 +69,7 @@ public static class TestContextExtensions
             $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
     }
     
+    [Experimental("WIP")]
     public static Task AddDynamicTest<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
                                     | DynamicallyAccessedMemberTypes.PublicMethods
