@@ -23,13 +23,13 @@ public static class FailedTestInitializationWriter
     public static void GenerateFailedTestCode(SourceCodeWriter sourceBuilder,
         DynamicTestSourceDataModel testSourceDataModel)
     {
-        var testId = Guid.NewGuid().ToString("N");
+        var testId = $"{testSourceDataModel.Class.GloballyQualified()}{testSourceDataModel.Method.Name}";
         
         sourceBuilder.WriteLine("return");
         sourceBuilder.WriteLine("[");
         sourceBuilder.WriteLine($"new FailedDynamicTest<{testSourceDataModel.Class.GloballyQualified()}>");
         sourceBuilder.WriteLine("{"); 
-        sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
+        sourceBuilder.WriteLine($"TestId = @\"{testId}\",");
         sourceBuilder.WriteLine($"MethodName = $\"{testSourceDataModel.Method.Name}\",");
         sourceBuilder.WriteLine($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.Class.Name}.{testSourceDataModel.Method.Name} failed to initialize\", exception),");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");

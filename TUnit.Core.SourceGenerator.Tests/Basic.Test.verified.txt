@@ -21,7 +21,7 @@ file partial class Basic : global::TUnit.Core.Interfaces.SourceGenerator.IDynami
 	{
 		try
 		{
-			var context = new global::TUnit.Core.DynamicTestBuilderContext(@"", 39);
+			var context = new global::TUnit.Core.DynamicTestBuilderContext(@"", 40);
 			new global::TUnit.TestProject.DynamicTests.Basic().BuildTests(context);
 			return context.Tests;
 		}
@@ -31,11 +31,11 @@ file partial class Basic : global::TUnit.Core.Interfaces.SourceGenerator.IDynami
 			[
 				new FailedDynamicTest<global::TUnit.TestProject.DynamicTests.Basic>
 				{
-					TestId = $"d7d5673038de40a98cf02f75459269da",
+					TestId = @"global::TUnit.TestProject.DynamicTests.BasicBuildTests",
 					MethodName = $"BuildTests",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Basic.BuildTests failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 39,
+					TestLineNumber = 40,
 				}
 			];
 		}
