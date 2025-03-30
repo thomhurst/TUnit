@@ -31,21 +31,21 @@ internal class SingleTestExecutor(
     : IDataProducer
 {
     private static readonly Lock Lock = new();
-    private static SemaphoreSlim _assemblyEventsLock = new(1, 1);
-    private static SemaphoreSlim _classEventsLock = new(1, 1);
-    private static SemaphoreSlim _sessionEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim _assemblyEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim _classEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim _sessionEventsLock = new(1, 1);
     
-    public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
+    public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         bool isStartedAsDependencyForAnotherTest)
     {
         lock (Lock)
         {
-            return test.TestContext.TestTask ??= Task.Run(async () => await ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest));
+            return test.TestContext.TestTask ??= Task.Run(async () => await ExecuteTestInternalAsync(test, filter, isStartedAsDependencyForAnotherTest));
         }
     }
 
     private async ValueTask ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter,
-        ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
+        bool isStartedAsDependencyForAnotherTest)
     {
         var semaphore = WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
 
@@ -79,7 +79,7 @@ internal class SingleTestExecutor(
                     throw exception;
                 }
                 
-                await WaitForDependencies(test, filter, context);
+                await WaitForDependencies(test, filter);
 
                 start = DateTimeOffset.Now;
 
@@ -440,8 +440,7 @@ internal class SingleTestExecutor(
         return Task.Run(() => testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions), cancellationToken);
     }
 
-    private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter,
-        ExecuteRequestContext context)
+    private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)
     {
         // Reverse so most nested dependencies resolve first
         for (var index = test.Dependencies.Length - 1; index >= 0; index--)
@@ -449,7 +448,7 @@ internal class SingleTestExecutor(
             var dependency = test.Dependencies[index];
             try
             {
-                await ExecuteTestAsync(dependency.Test, filter, context, true);
+                await ExecuteTestAsync(dependency.Test, filter, true);
             }
             catch (Exception e) when (dependency.ProceedOnFailure)
             {

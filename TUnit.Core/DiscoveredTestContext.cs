@@ -21,17 +21,17 @@ public class DiscoveredTestContext
     {
         TestContext.TestDetails.InternalCustomProperties.Add(key, value);
     }
-    
+
     public void AddCategory(string category)
     {
         TestContext.TestDetails.MutableCategories.Add(category);
     }
-    
+
     public void SetDisplayName(string displayName)
     {
         TestContext.TestDetails.DisplayName = displayName;
     }
-    
+
     public void AddArgumentDisplayFormatter(ArgumentDisplayFormatter formatter)
     {
         TestContext.ArgumentDisplayFormatters.Add(formatter);
@@ -41,15 +41,21 @@ public class DiscoveredTestContext
     {
         TestContext.TestDetails.ParallelConstraint = parallelConstraint;
     }
-    
+
     public void SetRetryCount(int times)
     {
         SetRetryCount(times, (_, _, _) => Task.FromResult(true));
     }
-    
+
     public void SetRetryCount(int times, Func<TestContext, Exception, int, Task<bool>> shouldRetry)
     {
         TestContext.TestDetails.RetryLimit = times;
         TestContext.TestDetails.RetryLogic = shouldRetry;
+    }
+
+    public bool RunOnTestDiscovery
+    {
+        get => TestContext.RunOnTestDiscovery;
+        set => TestContext.RunOnTestDiscovery = value;
     }
 }

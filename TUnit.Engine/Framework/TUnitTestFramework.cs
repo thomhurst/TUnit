@@ -123,7 +123,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     ExecutionContextHelper.RestoreContext(await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(context));
 
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
-                        context);
+                        context.CancellationToken);
 
                     // Tests could reschedule separate invocations - This allows us to wait for all invocations
                     await serviceProvider.TestsExecutor.WaitForFinishAsync();

@@ -76,7 +76,7 @@ public static class TestContextExtensions
             NotInParallel = new PriorityQueue<DiscoveredTest, int>(),
             KeyedNotInParallel = new Dictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>(),
             ParallelGroups = new ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>>()
-        }, null, testContext.GetService<ExecuteRequestContext>());
+        }, null, testContext.GetService<EngineCancellationToken>().CancellationTokenSource.Token);
     }
     
     internal static void SetResult(this TestContext testContext, Exception? exception)

@@ -51,7 +51,7 @@ internal class TestsExecutor
         };
     }
 
-    public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter, ExecuteRequestContext context)
+    public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
 #if NET
         await
@@ -65,13 +65,13 @@ internal class TestsExecutor
         {
             _executionCounter.Increment();
 
-            await ProcessParallelTests(tests.Parallel, filter, context);
+            await ProcessParallelTests(tests.Parallel, filter, cancellationToken);
 
-            await ProcessParallelGroups(tests.ParallelGroups, filter, context);
+            await ProcessParallelGroups(tests.ParallelGroups, filter, cancellationToken);
 
-            await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context);
+            await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, cancellationToken);
 
-            await ProcessNotInParallelTests(tests.NotInParallel, filter, context);
+            await ProcessNotInParallelTests(tests.NotInParallel, filter, cancellationToken);
         }
         finally
         {
@@ -81,30 +81,30 @@ internal class TestsExecutor
 
     public Task WaitForFinishAsync() => _onFinished.Task;
 
-    private async Task ProcessNotInParallelTests(PriorityQueue<DiscoveredTest, int> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)
+    private async Task ProcessNotInParallelTests(PriorityQueue<DiscoveredTest, int> testsNotInParallel, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
-        await ProcessQueue(filter, context, testsNotInParallel);
+        await ProcessQueue(filter, testsNotInParallel, cancellationToken);
     }
 
     private async Task ProcessKeyedNotInParallelTests(IDictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>> testsToProcess,
-        ITestExecutionFilter? filter, ExecuteRequestContext context)
+        ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
         await testsToProcess.Values
-            .ForEachAsync(async group => await Task.Run(() => ProcessQueue(filter, context, group)))
+            .ForEachAsync(async group => await Task.Run(() => ProcessQueue(filter, group, cancellationToken), cancellationToken))
             .ProcessInParallel(_maximumParallelTests);
     }
 
     private async Task ProcessParallelGroups(ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>> groups,
-        ITestExecutionFilter? filter, ExecuteRequestContext context)
+        ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
         foreach (var (_, value) in groups.OrderBy(x => x.Key.Order))
         {
-            await ProcessParallelTests(value, filter, context);
+            await ProcessParallelTests(value, filter, cancellationToken);
         }
     }
 
-    private async Task ProcessQueue(ITestExecutionFilter? filter, ExecuteRequestContext context,
-        PriorityQueue<DiscoveredTest, int> tests)
+    private async Task ProcessQueue(ITestExecutionFilter? filter,
+        PriorityQueue<DiscoveredTest, int> tests, CancellationToken cancellationToken)
     {
         await Task.Run(async delegate
         {
@@ -117,27 +117,27 @@ internal class TestsExecutor
                     ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
                 }
 
-                await ProcessTest(test, filter, context, context.CancellationToken);
+                await ProcessTest(test, filter, cancellationToken);
             }
         });
     }
 
     private async Task ProcessParallelTests(IEnumerable<DiscoveredTest> queue, ITestExecutionFilter? filter,
-        ExecuteRequestContext context)
+        CancellationToken cancellationToken)
     {
-        await ProcessCollection(queue, filter, context);
+        await ProcessCollection(queue, filter, cancellationToken);
     }
 
     [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
     private async Task ProcessCollection(IEnumerable<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
-        ExecuteRequestContext context)
+        CancellationToken cancellationToken)
     {
 #if NET
         await Parallel.ForEachAsync(queue, new ParallelOptions
         {
             MaxDegreeOfParallelism = _maximumParallelTests,
-            CancellationToken = context.CancellationToken
+            CancellationToken = cancellationToken
         }, async (test, token) =>
         {
             if (test.TestContext.SkipReason == null)
@@ -147,7 +147,7 @@ internal class TestsExecutor
                 ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
             }
 
-            await ProcessTest(test, filter, context, token);
+            await ProcessTest(test, filter, token);
         });
 #else
         await queue
@@ -160,7 +160,7 @@ internal class TestsExecutor
                     ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
                 }
 
-                await ProcessTest(test, filter, context, context.CancellationToken);
+                await ProcessTest(test, filter, cancellationToken);
             })
             .ProcessInParallel(_maximumParallelTests);
 #endif
@@ -168,11 +168,11 @@ internal class TestsExecutor
 
 #if NET
     private async ValueTask ProcessTest(DiscoveredTest test,
-        ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
+        ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
         try
         {
-            await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context, false), cancellationToken);
+            await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, false), cancellationToken);
         }
         catch
         {
@@ -184,11 +184,11 @@ internal class TestsExecutor
     }
 #else
     private async Task ProcessTest(DiscoveredTest test,
-        ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
+        ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
         try
         {
-            await _singleTestExecutor.ExecuteTestAsync(test, filter, context, false);
+            await _singleTestExecutor.ExecuteTestAsync(test, filter, false);
         }
         catch
         {
