@@ -37,7 +37,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 			ReturnType = TestMethod.ReturnType,
 			TestFilePath = TestFilePath,
 			TestLineNumber = TestLineNumber,
-			ExtraAttributes = ExtraAttributes,
+			DynamicAttributes = DynamicAttributes,
 			DataAttributes = TestBuilderContext.DataAttributes.OfType<Attribute>().ToArray()
 		};
 
@@ -115,7 +115,7 @@ public abstract record TestMetadata
     /// </summary>
     public required object?[] TestClassProperties { get; init; }
     
-    public Attribute[] ExtraAttributes { get; init; } = [];
+    public Attribute[] DynamicAttributes { get; init; } = [];
     
     /// <summary>
     /// Gets or sets the test builder context.

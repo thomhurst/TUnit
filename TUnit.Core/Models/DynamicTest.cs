@@ -29,17 +29,18 @@ public abstract record DynamicTest
     
     internal Exception? Exception { get; set; }
 
-    public Attribute[] Attributes
+    public Attribute[] Attributes { get; init; } = [];
+    
+    public Attribute[] GetAttributes()
     {
-        get =>
+        return
         [
-            ..field,
+            ..Attributes,
             ..TestBody.GetCustomAttributes(),
             ..TestClassType.GetCustomAttributes(),
             ..TestClassType.Assembly.GetCustomAttributes()
         ];
-        set;
-    } = [];
+    }
 }
 
 public record DynamicTest<
@@ -69,7 +70,9 @@ public record DynamicTest<
     
     public override IEnumerable<TestMetadata> BuildTestMetadatas()
     {
-        var repeatLimit = Attributes.OfType<RepeatAttribute>()
+        var attributes = GetAttributes();
+        
+        var repeatLimit = attributes.OfType<RepeatAttribute>()
             .FirstOrDefault()
             ?.Times ?? 0;
 
@@ -103,7 +106,7 @@ public record DynamicTest<
                 TestBuilderContext = new TestBuilderContext(),
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
-                ExtraAttributes = Attributes,
+                DynamicAttributes = Attributes,
             };
         }
     }
