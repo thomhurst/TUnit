@@ -15,6 +15,8 @@ On the `context` parameter, you can call `.AddTest(...)`, and pass it a `new Dyn
 `T` is the class containing the method you want to invoke.
 If your class contains parameters or properties, or your method contains parameters, you can pass these into the test parameter
 
+For simple tests, there is not much point using this feature. But it may be helpful when wanting to generate lots of test cases with different data.
+
 Here's an example:
 
 ```csharp
