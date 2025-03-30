@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Helpers;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Extensions;
@@ -66,6 +67,15 @@ public static class TestContextExtensions
         
         return
             $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
+    }
+    
+    public static Task AddDynamicTest<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+                                    | DynamicallyAccessedMemberTypes.PublicMethods
+                                    | DynamicallyAccessedMemberTypes.PublicProperties)]
+        T>(this TestContext testContext, DynamicTest<T> dynamicTest) where T : class
+    {
+        return new DynamicTestBuilderContext(testContext).AddTestAtRuntime(testContext, dynamicTest);
     }
     
     /// <summary>

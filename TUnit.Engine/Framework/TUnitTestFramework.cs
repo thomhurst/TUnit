@@ -119,6 +119,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                             TestFilter = stringFilter,
                             Id = runTestExecutionRequest.Session.SessionUid.Value
                         };
+                    
+                    TestSessionContext.Current = testSessionContext;
 
                     ExecutionContextHelper.RestoreContext(await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(context));
 

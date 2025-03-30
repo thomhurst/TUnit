@@ -148,8 +148,13 @@ internal class SingleTestExecutor(
 
     private async Task<ExecutionContext?> RunFirstTestInSessionEventReceivers(TestContext testContext)
     {
-        var testSessionContext = TestSessionContext.Current!;
+        var testSessionContext = TestSessionContext.Current;
 
+        if (testSessionContext == null)
+        {
+            return null;
+        }
+        
         if (!testSessionContext.FirstTestStarted)
         {
             await _sessionEventsLock.WaitAsync();

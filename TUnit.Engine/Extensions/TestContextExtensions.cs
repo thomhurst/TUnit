@@ -24,6 +24,8 @@ public static class TestContextExtensions
         object?[]? methodArguments, 
         Dictionary<string, object?>? objectBag = null)
     {
+        // TODO: Rework to use DynamicTestRegistrar
+        
         var testMetadata = testContext.OriginalMetadata;
 
         var testBuilderContext = new TestBuilderContext();

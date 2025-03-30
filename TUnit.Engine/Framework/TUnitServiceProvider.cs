@@ -102,6 +102,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken, AssemblyHookOrchestrator, classHookOrchestrator));
         
         TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor, extension));
+
+        DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(testsConstructor, testRegistrar,
+            TestGrouper, TUnitMessageBus, TestsExecutor, EngineCancellationToken));
         
         TestFinder = Register(new TestsFinder(TestDiscoverer));
         Register<ITestFinder>(TestFinder);
@@ -111,7 +114,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }
-    
+
+    public IDynamicTestRegistrar DynamicTestRegistrar { get; }
+
     public Disposer Disposer { get; }
 
     public async ValueTask DisposeAsync()
