@@ -29,9 +29,17 @@ public abstract record DynamicTest
     
     internal Exception? Exception { get; set; }
 
-    [field: AllowNull, MaybeNull]
-    public Attribute[] Attributes => field ??=
-        [..TestBody.GetCustomAttributes(), ..TestClassType.GetCustomAttributes(), ..TestClassType.Assembly.GetCustomAttributes()];
+    public Attribute[] Attributes
+    {
+        get =>
+        [
+            ..field,
+            ..TestBody.GetCustomAttributes(),
+            ..TestClassType.GetCustomAttributes(),
+            ..TestClassType.Assembly.GetCustomAttributes()
+        ];
+        set;
+    } = [];
 }
 
 public record DynamicTest<
@@ -69,10 +77,10 @@ public record DynamicTest<
         {
             yield return new TestMetadata<TClass>
             {
-                TestId = TestId,
+                TestId = $"{TestId}-{i}",
                 TestClassArguments = TestClassArguments ?? [],
                 TestMethodArguments = TestMethodArguments,
-                CurrentRepeatAttempt = 0,
+                CurrentRepeatAttempt = i,
                 RepeatLimit = repeatLimit,
                 TestMethod = BuildTestMethod(TestBody),
                 ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)Activator.CreateInstance(
@@ -95,6 +103,7 @@ public record DynamicTest<
                 TestBuilderContext = new TestBuilderContext(),
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
+                ExtraAttributes = Attributes,
             };
         }
     }

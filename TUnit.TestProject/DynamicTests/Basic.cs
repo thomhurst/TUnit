@@ -36,49 +36,58 @@ public class Basic
         Console.WriteLine(@"Hello, World!");
     }
     
+#pragma warning disable TUnitWIP0001
     [DynamicTestBuilder]
+#pragma warning restore TUnitWIP0001
     public void BuildTests(DynamicTestBuilderContext context)
     {
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod(),
             TestMethodArguments = [],
+            Attributes = [new RepeatAttribute(5)]
         });
         
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_Task(),
             TestMethodArguments = [],
+            Attributes = [new RepeatAttribute(5)]
         });
         
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_ValueTask(),
             TestMethodArguments = [],
+            Attributes = [new RepeatAttribute(5)]
         });
         
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
+            Attributes = [new RepeatAttribute(5)]
         });
         
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_Task_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
+            Attributes = [new RepeatAttribute(5)]
         });
         
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_ValueTask_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
+            Attributes = [new RepeatAttribute(5)]
         });
         
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_ValueTask_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
+            Attributes = [new RepeatAttribute(5)]
         });
     }
 }

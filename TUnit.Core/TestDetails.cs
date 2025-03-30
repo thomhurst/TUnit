@@ -137,8 +137,10 @@ public abstract record TestDetails
     /// </summary>
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
-    public Attribute[] Attributes => field ??= [..TestAttributes, ..ClassAttributes, ..AssemblyAttributes, ..DataAttributes];
+    public Attribute[] Attributes => field ??= [..ExtraAttributes, ..TestAttributes, ..ClassAttributes, ..AssemblyAttributes, ..DataAttributes];
 
+    [JsonIgnore] internal Attribute[] ExtraAttributes { get; init; } = [];
+    
     /// <summary>
     /// Gets the attributes that specify the test data.
     /// </summary>
