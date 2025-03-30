@@ -1,4 +1,5 @@
-﻿using TUnit.Core;
+﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
+using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
 using TUnit.Engine.Helpers;
@@ -11,18 +12,18 @@ internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, Assemb
 {
     private TestSessionContext? _context;
     
-    public async Task<ExecutionContext?> RunBeforeTestSession(CancellationToken cancellationToken)
+    public async Task<ExecutionContext?> RunBeforeTestSession(ExecuteRequestContext executeRequestContext)
     {
         hooksCollector.CollectionTestSessionHooks();
         
-        var testSessionContext = GetContext();
+        var testSessionContext = GetContext(executeRequestContext);
         var beforeSessionHooks = CollectBeforeHooks();
 
         foreach (var beforeSessionHook in beforeSessionHooks)
         {
             await logger.LogDebugAsync("Executing [Before(TestSession)] hook");
 
-            await beforeSessionHook.ExecuteAsync(testSessionContext, cancellationToken);
+            await beforeSessionHook.ExecuteAsync(testSessionContext, executeRequestContext.CancellationToken);
             
             ExecutionContextHelper.RestoreContext(testSessionContext.ExecutionContext);
         }
@@ -46,11 +47,12 @@ internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, Assemb
             .OrderBy(x => x.Order);
     }
     
-    public TestSessionContext GetContext()
+    public TestSessionContext GetContext(ExecuteRequestContext executeRequestContext)
     {
         return _context ??= new TestSessionContext(assemblyHookOrchestrator.GetAllAssemblyHookContexts())
         {
-            TestFilter = stringFilter
+            TestFilter = stringFilter,
+            Id = executeRequestContext.Request.Session.SessionUid.Value
         };
     }
 }

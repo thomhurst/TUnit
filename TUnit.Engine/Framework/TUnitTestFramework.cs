@@ -116,10 +116,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     testSessionContext =
                         new TestSessionContext(serviceProvider.AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
                         {
-                            TestFilter = stringFilter
+                            TestFilter = stringFilter,
+                            Id = runTestExecutionRequest.Session.SessionUid.Value
                         };
 
-                    ExecutionContextHelper.RestoreContext(await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(context.CancellationToken));
+                    ExecutionContextHelper.RestoreContext(await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(context));
 
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context);

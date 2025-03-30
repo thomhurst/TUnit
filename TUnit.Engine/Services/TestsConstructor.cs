@@ -7,15 +7,20 @@ using TUnit.Engine.Extensions;
 namespace TUnit.Engine.Services;
 
 internal class TestsConstructor(IExtension extension, 
-    TestMetadataCollector testMetadataCollector,
+    TestsCollector testsCollector,
     DependencyCollector dependencyCollector, 
     IServiceProvider serviceProvider) : IDataProducer
 {
     public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
     {
-        var testMetadatas = testMetadataCollector.GetTests();
+        var testMetadatas = testsCollector.GetTests();
+        
+        var dynamicTests = testsCollector.GetDynamicTests();
 
-        var discoveredTests = testMetadatas.Select(ConstructTest).ToArray();
+        var discoveredTests = testMetadatas.
+            Select(ConstructTest)
+            .Concat(dynamicTests.SelectMany(ConstructTests))
+            .ToArray();
 
         dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
         
@@ -40,6 +45,11 @@ internal class TestsConstructor(IExtension extension,
         testContext.InternalDiscoveredTest = discoveredTest;
 
         return discoveredTest;
+    }
+
+    public IEnumerable<DiscoveredTest> ConstructTests(DynamicTest dynamicTest)
+    {
+        return dynamicTest.BuildTestMetadatas().Select(ConstructTest);
     }
 
     private static void RunOnTestDiscoveryAttributeHooks(IEnumerable<Attribute> attributes, TestContext testContext)

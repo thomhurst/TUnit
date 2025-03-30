@@ -318,6 +318,51 @@ namespace TUnit.Core
         protected abstract string FormatDisplayName(TUnit.Core.TestContext testContext);
         public void OnTestDiscovery(TUnit.Core.DiscoveredTestContext discoveredTestContext) { }
     }
+    public abstract class DynamicTest : System.IEquatable<TUnit.Core.DynamicTest>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        protected DynamicTest() { }
+        public System.Attribute[] Attributes { get; init; }
+        public System.Collections.Generic.Dictionary<string, object?>? Properties { get; init; }
+        public object?[]? TestClassArguments { get; init; }
+        public abstract System.Type TestClassType { get; }
+        public abstract string TestId { get; }
+        public object?[] TestMethodArguments { get; init; }
+        public string? TestName { get; init; }
+        public abstract System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas();
+        public System.Attribute[] GetAttributes() { }
+    }
+    public class DynamicTestBuilderAttribute : TUnit.Core.BaseTestAttribute
+    {
+        public DynamicTestBuilderAttribute([System.Runtime.CompilerServices.CallerFilePath] string file = "", [System.Runtime.CompilerServices.CallerLineNumber] int line = 0) { }
+    }
+    public class DynamicTestBuilderContext
+    {
+        public DynamicTestBuilderContext(string filePath, int lineNumber) { }
+        public System.Collections.Generic.List<TUnit.Core.DynamicTest> Tests { get; }
+        public void AddTest<TClass>(TUnit.Core.DynamicTest<TClass> dynamicTest)
+            where TClass :  class { }
+    }
+    public class DynamicTest<TClass> : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.DynamicTest<TClass>>
+        where TClass :  class
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public DynamicTest() { }
+        public override System.Type TestClassType { get; }
+        public override string TestId { get; }
+        public System.Linq.Expressions.Expression<System.Action<TClass>> TestMethod { get; init; }
+        public override System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas() { }
+        public class MethodBody : System.IEquatable<TUnit.Core.DynamicTest<TClass>.MethodBody>
+        {
+            public MethodBody() { }
+            public System.Action<TClass>? SynchronousBody { get; init; }
+            public System.Func<TClass, System.Threading.Tasks.Task>? TaskBody { get; init; }
+            public static TUnit.Core.DynamicTest<TClass>.MethodBody op_Implicit(System.Action<TClass> action) { }
+            public static TUnit.Core.DynamicTest<TClass>.MethodBody op_Implicit(System.Func<TClass, System.Threading.Tasks.Task> taskBody) { }
+        }
+    }
     public class EngineCancellationToken : System.IDisposable
     {
         public EngineCancellationToken() { }
@@ -329,6 +374,19 @@ namespace TUnit.Core
     {
         public ExplicitAttribute([System.Runtime.CompilerServices.CallerFilePath] string callerFile = "", [System.Runtime.CompilerServices.CallerMemberName] string callerMemberName = "") { }
         public string For { get; }
+    }
+    public class FailedDynamicTest<TClassType> : System.IEquatable<TUnit.Core.FailedDynamicTest<TClassType>>
+        where TClassType :  class
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public FailedDynamicTest() { }
+        public System.Exception Exception { get; init; }
+        public string MethodName { get; init; }
+        public string TestFilePath { get; init; }
+        public string TestId { get; init; }
+        public int TestLineNumber { get; init; }
+        public static TUnit.Core.DynamicTest<TClassType> op_Implicit(TUnit.Core.FailedDynamicTest<TClassType> failedTestMetadata) { }
     }
     public class FailedTestMetadata<TClassType> : System.IEquatable<TUnit.Core.FailedTestMetadata<TClassType>>
         where TClassType :  class
@@ -632,7 +690,7 @@ namespace TUnit.Core
         public int GenericTypeCount { get; init; }
         public TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
         [System.Text.Json.Serialization.JsonIgnore]
-        public System.Reflection.MethodInfo ReflectionInformation { get; }
+        public System.Reflection.MethodInfo ReflectionInformation { get; set; }
         public System.Type ReturnType { get; init; }
         public override System.Type Type { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedMethodInformation? other) { }
@@ -666,6 +724,7 @@ namespace TUnit.Core
         public static void Register(TUnit.Core.Interfaces.SourceGenerator.ITestSource testSource) { }
         public static void RegisterAssemblyHookSource(TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource testSource) { }
         public static void RegisterClassHookSource(TUnit.Core.Interfaces.SourceGenerator.IClassHookSource testSource) { }
+        public static void RegisterDynamic(TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource testSource) { }
         public static void RegisterTestDiscoveryHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource testSource) { }
         public static void RegisterTestHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestHookSource testSource) { }
         public static void RegisterTestSessionHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource testSource) { }
@@ -752,6 +811,8 @@ namespace TUnit.Core
         public System.Collections.Generic.IReadOnlyDictionary<string, string> CustomProperties { get; }
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Attribute[] DataAttributes { get; init; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public System.Attribute[] DynamicAttributes { get; init; }
         public TUnit.Core.Interfaces.IParallelConstraint? ParallelConstraint { get; }
         public TUnit.Core.Interfaces.IParallelLimit? ParallelLimit { get; }
         public int RepeatLimit { get; init; }
@@ -797,6 +858,7 @@ namespace TUnit.Core
         protected TestMetadata() { }
         public int CurrentRepeatAttempt { get; init; }
         public System.Exception? DiscoveryException { get; init; }
+        public System.Attribute[] DynamicAttributes { get; init; }
         public int RepeatLimit { get; init; }
         public TUnit.Core.TestBuilderContext TestBuilderContext { get; init; }
         public object?[] TestClassArguments { get; init; }
@@ -842,6 +904,7 @@ namespace TUnit.Core
     {
         public System.Collections.Generic.IEnumerable<TUnit.Core.TestContext> AllTests { get; }
         public System.Collections.Generic.IEnumerable<TUnit.Core.AssemblyHookContext> Assemblies { get; }
+        public string Id { get; init; }
         public System.Collections.Generic.IEnumerable<TUnit.Core.ClassHookContext> TestClasses { get; }
         public string? TestFilter { get; init; }
         public new static TUnit.Core.TestSessionContext? Current { get; }
@@ -1339,6 +1402,10 @@ namespace TUnit.Core.Interfaces.SourceGenerator
         System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext>> CollectAfterEveryClassHooks(string sessionId);
         System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext>> CollectBeforeClassHooks(string sessionId);
         System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext>> CollectBeforeEveryClassHooks(string sessionId);
+    }
+    public interface IDynamicTestSource
+    {
+        System.Collections.Generic.IReadOnlyList<TUnit.Core.DynamicTest> CollectDynamicTests(string sessionId);
     }
     public interface ITestDiscoveryHookSource
     {

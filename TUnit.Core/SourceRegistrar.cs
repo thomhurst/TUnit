@@ -20,6 +20,15 @@ public class SourceRegistrar
     {
         Sources.TestSources.Add(testSource);
     }
+    
+    /// <summary>
+    /// Registers a test source.
+    /// </summary>
+    /// <param name="testSource">The test source to register.</param>
+    public static void RegisterDynamic(IDynamicTestSource testSource)
+    {
+        Sources.DynamicTestSources.Add(testSource);
+    }
 
     /// <summary>
     /// Registers a test hook source.

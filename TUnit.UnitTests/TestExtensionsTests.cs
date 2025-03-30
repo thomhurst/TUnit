@@ -15,6 +15,7 @@ public class TestExtensionsTests
     public void TopLevelClass()
     {
         var testDetails = _fixture.Build<TestDetails<TestExtensionsTests>>()
+            .With(x => x.DynamicAttributes, [])
             .With(x => x.TestClassArguments, [])
             .With(x => x.DataAttributes, [])
             .With(x => x.TestMethod, new SourceGeneratedMethodInformation
@@ -53,6 +54,7 @@ public class TestExtensionsTests
     public void NestedClass()
     {
         var testDetails = _fixture.Build<TestDetails<InnerClass>>()
+            .With(x => x.DynamicAttributes, [])
             .With(x => x.TestClassArguments, [])
             .With(x => x.DataAttributes, [])
             .With(x => x.TestMethod, new SourceGeneratedMethodInformation
@@ -105,6 +107,7 @@ public class TestExtensionsTests
     private TestMetadata<TestExtensionsTests> CreateDummyMetadata()
     {
         return _fixture.Build<TestMetadata<TestExtensionsTests>>()
+            .With(x => x.DynamicAttributes, [])
             .With(x => x.TestMethod, new SourceGeneratedMethodInformation
             {
                 Attributes = [],

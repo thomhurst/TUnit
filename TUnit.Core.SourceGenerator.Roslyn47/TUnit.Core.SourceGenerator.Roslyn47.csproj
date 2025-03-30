@@ -15,6 +15,12 @@
 
     <ItemGroup>
         <Compile Include="..\TUnit.Core.SourceGenerator\**\*.cs" Exclude="..\TUnit.Core.SourceGenerator\obj\**\*.cs" />
+        <Compile Update="..\TUnit.Core.SourceGenerator\CodeGenerators\Helpers\DynamicTestSourceDataModelRetriever.cs">
+          <Link>CodeGenerators\Helpers\DynamicTestSourceDataModelRetriever.cs</Link>
+        </Compile>
+        <Compile Update="..\TUnit.Core.SourceGenerator\Models\DynamicTestSourceDataModel.cs">
+          <Link>Models\DynamicTestSourceDataModel.cs</Link>
+        </Compile>
     </ItemGroup>
 
 </Project>

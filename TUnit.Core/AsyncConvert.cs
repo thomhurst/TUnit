@@ -73,9 +73,18 @@ public static class AsyncConvert
             return Convert(asyncValueFunc);
         }
         
-        if (invoke is Task task && (task.IsFaulted || !task.IsCompleted))
+        
+        if (invoke is Task task)
         {
-            return new ValueTask(task);
+            if(task is { IsCompleted: true, IsFaulted: false })
+            {
+                return default;
+            }
+            
+            if(task.IsFaulted || !task.IsCompleted)
+            {
+                return new ValueTask(task);
+            }
         }
 
         if (invoke is ValueTask valueTask)
