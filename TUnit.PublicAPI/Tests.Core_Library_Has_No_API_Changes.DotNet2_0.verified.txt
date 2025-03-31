@@ -294,6 +294,7 @@ namespace TUnit.Core
     }
     public class DiscoveredTestContext
     {
+        public bool RunOnTestDiscovery { get; set; }
         public TUnit.Core.TestContext TestContext { get; }
         public TUnit.Core.TestDetails TestDetails { get; }
         public void AddArgumentDisplayFormatter(TUnit.Core.ArgumentDisplayFormatter formatter) { }
@@ -339,9 +340,12 @@ namespace TUnit.Core
     }
     public class DynamicTestBuilderContext
     {
+        public DynamicTestBuilderContext(TUnit.Core.TestContext testContext) { }
         public DynamicTestBuilderContext(string filePath, int lineNumber) { }
         public System.Collections.Generic.List<TUnit.Core.DynamicTest> Tests { get; }
         public void AddTest<TClass>(TUnit.Core.DynamicTest<TClass> dynamicTest)
+            where TClass :  class { }
+        public System.Threading.Tasks.Task AddTestAtRuntime<TClass>(TUnit.Core.TestContext testContext, TUnit.Core.DynamicTest<TClass> dynamicTest)
             where TClass :  class { }
     }
     public class DynamicTest<TClass> : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.DynamicTest<TClass>>
@@ -443,6 +447,11 @@ namespace TUnit.Core
     }
     public interface IAccessesInstanceData { }
     public interface IDataAttribute { }
+    public interface IDynamicTestRegistrar
+    {
+        System.Threading.Tasks.Task Register<TClass>(TUnit.Core.DynamicTest<TClass> dynamicTest)
+            where TClass :  class;
+    }
     [System.AttributeUsage(System.AttributeTargets.Class)]
     public sealed class InheritsTestsAttribute : TUnit.Core.TUnitAttribute
     {
@@ -607,6 +616,12 @@ namespace TUnit.Core
         public int Times { get; }
         public void OnTestDiscovery(TUnit.Core.DiscoveredTestContext discoveredTestContext) { }
         public virtual System.Threading.Tasks.Task<bool> ShouldRetry(TUnit.Core.TestContext context, System.Exception exception, int currentRetryCount) { }
+    }
+    public class RunOnDiscoveryAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestDiscoveryEventReceiver
+    {
+        public RunOnDiscoveryAttribute() { }
+        public int Order { get; }
+        public void OnTestDiscovery(TUnit.Core.DiscoveredTestContext discoveredTestContext) { }
     }
     public class STAThreadExecutor : TUnit.Core.DedicatedThreadExecutor
     {
@@ -1088,6 +1103,8 @@ namespace TUnit.Core.Extensions
 {
     public static class TestContextExtensions
     {
+        public static System.Threading.Tasks.Task AddDynamicTest<T>(this TUnit.Core.TestContext testContext, TUnit.Core.DynamicTest<T> dynamicTest)
+            where T :  class { }
         public static string GetClassTypeName(this TUnit.Core.TestContext testContext) { }
         public static string GetTestDisplayName(this TUnit.Core.TestContext testContext) { }
         public static TUnit.Core.TestContext[] GetTests(this TUnit.Core.TestContext context, string testName) { }

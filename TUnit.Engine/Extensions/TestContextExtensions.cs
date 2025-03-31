@@ -24,6 +24,8 @@ public static class TestContextExtensions
         object?[]? methodArguments, 
         Dictionary<string, object?>? objectBag = null)
     {
+        // TODO: Rework to use DynamicTestRegistrar
+        
         var testMetadata = testContext.OriginalMetadata;
 
         var testBuilderContext = new TestBuilderContext();
@@ -76,7 +78,7 @@ public static class TestContextExtensions
             NotInParallel = new PriorityQueue<DiscoveredTest, int>(),
             KeyedNotInParallel = new Dictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>(),
             ParallelGroups = new ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>>()
-        }, null, testContext.GetService<ExecuteRequestContext>());
+        }, null, testContext.GetService<EngineCancellationToken>().CancellationTokenSource.Token);
     }
     
     internal static void SetResult(this TestContext testContext, Exception? exception)

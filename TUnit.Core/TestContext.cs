@@ -130,4 +130,6 @@ public partial class TestContext : Context
     /// Gets or sets the event objects.
     /// </summary>
     internal object?[]? EventObjects { get; set; }
+
+    internal bool RunOnTestDiscovery { get; set; }
 }

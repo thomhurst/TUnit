@@ -16,6 +16,7 @@ internal class TUnitTestDiscoverer(
     TestRegistrar testRegistrar,
     ITUnitMessageBus tUnitMessageBus,
     TUnitFrameworkLogger logger,
+    TestsExecutor testsExecutor,
     IExtension extension) : IDataProducer
 {
     private IReadOnlyCollection<DiscoveredTest>? _cachedTests;
@@ -24,18 +25,31 @@ internal class TUnitTestDiscoverer(
     {
         return _cachedTests ??= testsConstructor.GetTests(cancellationToken);
     }
-    
+
     public async Task<GroupedTests> FilterTests(ExecuteRequestContext context, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
                 
-        var allDiscoveredTests = _cachedTests ??= GetTests(cancellationToken);
+        var allDiscoveredTests = GetTests(cancellationToken);
 
         var executionRequest = context.Request as TestExecutionRequest;
         
         var filteredTests = testFilterService.FilterTests(executionRequest, allDiscoveredTests);
         
         await logger.LogTraceAsync($"Found {filteredTests.Count} tests after filtering.");
+        
+        var runOnTestDiscoveryTests = filteredTests
+            .Where(x => x.TestContext.RunOnTestDiscovery)
+            .ToArray();
+
+        await testsExecutor.ExecuteAsync(new GroupedTests
+        {
+            AllValidTests = runOnTestDiscoveryTests,
+            Parallel = runOnTestDiscoveryTests,
+            ParallelGroups = [],
+            NotInParallel = new PriorityQueue<DiscoveredTest, int>(),
+            KeyedNotInParallel = new Dictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>()
+        }, executionRequest?.Filter, cancellationToken);
         
         var organisedTests = testGrouper.OrganiseTests(filteredTests);
         

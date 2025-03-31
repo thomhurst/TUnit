@@ -91,26 +91,32 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector, Logger));
 
         var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
-        TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, extension));
-        
-        TestFinder = Register(new TestsFinder(TestDiscoverer));
-        Register<ITestFinder>(TestFinder);
         
         Disposer = Register(new Disposer(Logger));
         
         var testInvoker = Register(new TestInvoker(testHookOrchestrator, Logger, Disposer));
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
         
-        // TODO
-        Register(new HookMessagePublisher(extension, messageBus));
-        
         var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar));
         
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken, AssemblyHookOrchestrator, classHookOrchestrator));
         
+        TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor, extension));
+
+        DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(testsConstructor, testRegistrar,
+            TestGrouper, TUnitMessageBus, TestsExecutor, EngineCancellationToken));
+        
+        TestFinder = Register(new TestsFinder(TestDiscoverer));
+        Register<ITestFinder>(TestFinder);
+        
+        // TODO
+        Register(new HookMessagePublisher(extension, messageBus));
+        
         OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }
-    
+
+    public IDynamicTestRegistrar DynamicTestRegistrar { get; }
+
     public Disposer Disposer { get; }
 
     public async ValueTask DisposeAsync()
