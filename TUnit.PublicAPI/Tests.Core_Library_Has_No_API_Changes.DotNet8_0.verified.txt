@@ -1216,6 +1216,7 @@ namespace TUnit.Core.Extensions
 {
     public static class TestContextExtensions
     {
+        [System.Diagnostics.CodeAnalysis.Experimental("WIP")]
         public static System.Threading.Tasks.Task AddDynamicTest<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]  T>(this TUnit.Core.TestContext testContext, TUnit.Core.DynamicTest<T> dynamicTest)
             where T :  class { }
         public static string GetClassTypeName(this TUnit.Core.TestContext testContext) { }
