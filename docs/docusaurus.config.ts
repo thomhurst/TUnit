@@ -54,6 +54,14 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
+    algolia: {
+      // The application ID provided by Algolia
+      appId: 'J62NJYZGVO',
+
+      apiKey: '67dac3fb36624f7e16bc4c1349216f2f',
+
+      indexName: 'thomhurstio',
+    },
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
       title: 'TUnit',
