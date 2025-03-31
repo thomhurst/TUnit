@@ -56,11 +56,11 @@ const config: Config = {
     // Replace with your project's social card
     algolia: {
       // The application ID provided by Algolia
-      appId: 'J62NJYZGVO',
+      appId: 'RLNKZO4OTO',
 
-      apiKey: '67dac3fb36624f7e16bc4c1349216f2f',
+      apiKey: 'a15e3e91bf0e4b10394321db84a1b658',
 
-      indexName: 'thomhurstio',
+      indexName: 'tunit',
     },
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
