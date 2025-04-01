@@ -47,7 +47,7 @@
     <PackageVersion Include="MSTest.TestAdapter" Version="3.8.3" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.8.3" />
     <PackageVersion Include="NUnit" Version="4.3.2" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.6.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.7.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
