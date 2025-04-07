@@ -4,6 +4,12 @@ sidebar_position: 11
 
 # Ordering Tests
 
+:::warning
+
+It is recommended to use [DependsOn(...)] as it provides more flexibility and doesnt sacrifice parallelisation.
+
+:::
+
 By default, TUnit tests will run in parallel. This means there is no order and it doesn't make sense to be able to control that.
 
 However, if tests aren't running in parallel, they can absolutely be ordered, and this is necessary for some systems.
