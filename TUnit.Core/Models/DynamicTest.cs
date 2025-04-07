@@ -41,6 +41,8 @@ public abstract record DynamicTest
             ..TestClassType.Assembly.GetCustomAttributes()
         ];
     }
+    
+    public static T Argument<T>() => default!;
 }
 
 public record DynamicTest<
@@ -57,7 +59,7 @@ public record DynamicTest<
     {
         _dynamicTestCounter = Interlocked.Increment(ref _dynamicTestCounter);
     }
-
+    
     public override string TestId => $"DynamicTest-{typeof(TClass).FullName}-{TestBody.Name}-{_dynamicTestCounter}";
 
     public required Expression<Action<TClass>> TestMethod { get; init; }

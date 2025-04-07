@@ -24,9 +24,9 @@ namespace TUnit.TestProject.DynamicTests;
 
 public class Basic
 {
-    public void SomeMethod()
+    public void SomeMethod(string name)
     {
-        Console.WriteLine(@"Hello, World!");
+        Console.WriteLine(@$"Hello, {name}!");
     }
     
     [DynamicTestBuilder]
@@ -34,8 +34,8 @@ public class Basic
     {
         context.AddTest(new DynamicTest<Basic>
         {
-            TestMethod = @class => @class.SomeMethod(),
-            TestMethodArguments = [],
+            TestMethod = @class => @class.SomeMethod(DynamicTest.Argument<string>()),
+            TestMethodArguments = [ "Tom" ],
             Attributes = [new RepeatAttribute(5)]
         });
     }
