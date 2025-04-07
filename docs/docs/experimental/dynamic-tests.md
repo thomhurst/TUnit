@@ -24,9 +24,9 @@ namespace TUnit.TestProject.DynamicTests;
 
 public class Basic
 {
-    public void SomeMethod()
+    public void SomeMethod(string name)
     {
-        Console.WriteLine(@"Hello, World!");
+        Console.WriteLine(@$"Hello, {name}!");
     }
     
     [DynamicTestBuilder]
@@ -34,13 +34,18 @@ public class Basic
     {
         context.AddTest(new DynamicTest<Basic>
         {
-            TestMethod = @class => @class.SomeMethod(),
-            TestMethodArguments = [],
+            TestMethod = @class => @class.SomeMethod(DynamicTest.Argument<string>()),
+            TestMethodArguments = [ "Tom" ],
             Attributes = [new RepeatAttribute(5)]
         });
     }
 }
 ```
+
+The test method body is used as an `Expression` - Not as a `delegate`. This means that arguments passed to it within the lambda will be ignored. And if the method is async, it does not need to be awaited.
+Arguments must be provided via the `TestMethodArguments` property.
+
+To make this clearer, it's recommended to use the `DynamicTest.Argument<T>()` helper.
 
 It is also possible to build a test from within another test:
 

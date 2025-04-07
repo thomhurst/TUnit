@@ -73,8 +73,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Test.cs" />
+    <Compile Remove="HookCallCounts\Test\One.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="HookCallCounts\Test\" />
   </ItemGroup>
 </Project>

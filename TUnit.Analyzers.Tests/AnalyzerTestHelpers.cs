@@ -114,6 +114,20 @@ public static class AnalyzerTestHelpers
 			ExpectedDiagnostics.AddRange(diagnostics);
 			return this;
 		}
+		
+		public CSharpSuppressorTest<TSuppressor, TVerifier> WithCompilerDiagnostics(
+			CompilerDiagnostics diagnostics
+		)
+		{
+			CompilerDiagnostics = diagnostics;
+			return this;
+		}
+
+		public CSharpSuppressorTest<TSuppressor, TVerifier> IgnoringDiagnostics(params string[] diagnostics)
+		{
+			DisabledDiagnostics.AddRange(diagnostics);
+			return this;
+		}
 	}
 	
 	public static CSharpSuppressorTest<TSuppressor, DefaultVerifier> CreateSuppressorTest<TSuppressor>(
@@ -140,7 +154,7 @@ public static class AnalyzerTestHelpers
 				MetadataReference.CreateFromFile(typeof(CircuitState).Assembly.Location),
 				MetadataReference.CreateFromFile(typeof(ProjectReferenceEnum).Assembly.Location)
 			]);
-
+		
 		return test;
 	}
 
