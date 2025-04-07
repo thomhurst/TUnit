@@ -42,6 +42,11 @@ public class Basic
 }
 ```
 
+The test method body is used as an `Expression` - Not as a `delegate`. This means that arguments passed to it within the lambda will be ignored. And if the method is async, it does not need to be awaited.
+Arguments must be provided via the `TestMethodArguments` property.
+
+To make this clearer, it's recommended to use the `DynamicTest.Argument<T>()` helper.
+
 It is also possible to build a test from within another test:
 
 ```csharp
