@@ -356,6 +356,7 @@ namespace TUnit.Core
         public string? TestName { get; init; }
         public abstract System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas();
         public System.Attribute[] GetAttributes() { }
+        public static T Argument<T>() { }
     }
     [System.Diagnostics.CodeAnalysis.Experimental("TUnitWIP0001")]
     public class DynamicTestBuilderAttribute : TUnit.Core.BaseTestAttribute
