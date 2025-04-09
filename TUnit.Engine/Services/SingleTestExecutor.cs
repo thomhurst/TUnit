@@ -8,6 +8,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Logging;
+using TUnit.Engine.Capabilities;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
@@ -27,7 +28,8 @@ internal class SingleTestExecutor(
     ITUnitMessageBus messageBus,
     TUnitFrameworkLogger logger,
     EngineCancellationToken engineCancellationToken,
-    TestRegistrar testRegistrar)
+    TestRegistrar testRegistrar,
+    StopExecutionCapability stopExecutionCapability)
     : IDataProducer
 {
     private static readonly Lock Lock = new();
@@ -59,11 +61,9 @@ internal class SingleTestExecutor(
         {
             var testContext = test.TestContext;
 
-            if (engineCancellationToken.Token.IsCancellationRequested)
+            if (stopExecutionCapability.IsStopRequested || engineCancellationToken.Token.IsCancellationRequested)
             {
-                await messageBus.Cancelled(testContext);
-
-                engineCancellationToken.Token.ThrowIfCancellationRequested();
+                throw new TestRunCanceledException();
             }
             
             await messageBus.InProgress(testContext);
@@ -110,6 +110,12 @@ internal class SingleTestExecutor(
                 testContext.SetResult(skipTestException);
 
                 await messageBus.Skipped(testContext, skipTestException.Reason);
+            }
+            catch (TestRunCanceledException testRunCanceledException)
+            {
+                testContext.SetResult(testRunCanceledException);
+
+                await messageBus.Cancelled(testContext, start.Value);
             }
             catch (Exception e)
             {
@@ -430,14 +436,8 @@ internal class SingleTestExecutor(
     private async ValueTask ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
         var timeout = discoveredTest.TestDetails.Timeout;
-
-        if (timeout == null || timeout.Value == TimeSpan.Zero)
-        {
-            await RunTest(discoveredTest, cancellationToken, cleanupExceptions);
-            return;
-        }
-
-        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token, cleanupExceptions), timeout.Value, cancellationToken);
+        
+        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token, cleanupExceptions), timeout, cancellationToken);
     }
 
     private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)

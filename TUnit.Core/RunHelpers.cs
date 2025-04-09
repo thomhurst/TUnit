@@ -10,7 +10,7 @@ namespace TUnit.Core;
 /// </summary>
 internal static class RunHelpers
 {
-    internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan timeout, CancellationToken token)
+    internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan? timeout, CancellationToken token)
     {
         using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
 
@@ -26,10 +26,13 @@ internal static class RunHelpers
                 return;
             }
 
-            taskCompletionSource.TrySetException(new TimeoutException(timeout));
+            taskCompletionSource.TrySetException(new TimeoutException(timeout ?? TimeSpan.Zero));
         });
         
-        cancellationTokenSource.CancelAfter(timeout);
+        if (timeout.HasValue && timeout.Value > TimeSpan.Zero)
+        {
+            cancellationTokenSource.CancelAfter(timeout.Value);
+        }
 
         try
         {

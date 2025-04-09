@@ -5,5 +5,6 @@ public enum Status
     None,
     Passed,
     Failed,
-    Skipped
+    Skipped,
+    Cancelled
 }

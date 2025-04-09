@@ -43,7 +43,8 @@ internal interface ITUnitMessageBus
     /// Sends a cancelled message for the specified test context.
     /// </summary>
     /// <param name="testContext">The test context.</param>
-    ValueTask Cancelled(TestContext testContext);
+    /// <param name="start">The time that the test started</param>
+    ValueTask Cancelled(TestContext testContext, DateTimeOffset start);
 
     /// <summary>
     /// Sends a session artifact message.

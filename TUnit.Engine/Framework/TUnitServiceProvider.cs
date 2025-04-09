@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
+﻿using Microsoft.Testing.Platform.Capabilities.TestFramework;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Logging;
@@ -8,14 +9,17 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Capabilities;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine.Framework;
 
 internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 {
+    private readonly ITestFrameworkCapabilities _capabilities;
     private readonly Dictionary<Type, object> _services = [];
 
     public ILoggerFactory LoggerFactory;
@@ -43,8 +47,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
         IMessageBus messageBus,
-        IServiceProvider frameworkServiceProvider)
+        IServiceProvider frameworkServiceProvider, 
+        ITestFrameworkCapabilities capabilities)
     {
+        _capabilities = capabilities;
+        
         Register(context);
         
         EngineCancellationToken = Register(new EngineCancellationToken());
@@ -97,7 +104,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testInvoker = Register(new TestInvoker(testHookOrchestrator, Logger, Disposer));
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
         
-        var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar));
+        var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar, GetCapability<StopExecutionCapability>()));
         
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken, AssemblyHookOrchestrator, classHookOrchestrator));
         
@@ -146,5 +153,18 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     {
         _services.TryGetValue(serviceType, out object? result);
         return result;
+    }
+    
+    public TCapability GetCapability<TCapability>()
+        where TCapability : class, ITestFrameworkCapability
+    {
+        var capability = _capabilities.GetCapability<TCapability>();
+
+        if (capability == null)
+        {
+            throw new InvalidOperationException($"No capability registered for {typeof(TCapability).Name}");
+        }
+        
+        return capability;
     }
 }

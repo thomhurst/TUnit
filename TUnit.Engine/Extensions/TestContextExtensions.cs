@@ -92,6 +92,7 @@ public static class TestContextExtensions
         {
             null => Status.Passed,
             SkipTestException => Status.Skipped,
+            TestRunCanceledException => Status.Cancelled,
             _ => Status.Failed,
         };
 

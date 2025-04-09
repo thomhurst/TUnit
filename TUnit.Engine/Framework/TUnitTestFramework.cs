@@ -5,10 +5,13 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
+using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Logging;
+using TUnit.Engine.Capabilities;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine.Framework;
 
@@ -55,8 +58,16 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 #endif
 
         var serviceProvider = ServiceProvidersPerSession.GetOrAdd(context.Request.Session.SessionUid.Value,
-            _ => new TUnitServiceProvider(_extension, context, context.MessageBus, _frameworkServiceProvider)
+            _ => new TUnitServiceProvider(_extension, context, context.MessageBus, _frameworkServiceProvider, _capabilities)
         );
+        
+        _capabilities.Capabilities
+            .OfType<StopExecutionCapability>()
+            .Single()
+            .OnStopRequested += async (o, args) =>
+        {
+            await serviceProvider.EngineCancellationToken.CancellationTokenSource.CancelAsync();
+        };
 
         var stringFilter = serviceProvider.FilterParser.GetTestFilter(context);
         
