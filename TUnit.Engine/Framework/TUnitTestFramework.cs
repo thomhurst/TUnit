@@ -61,10 +61,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             _ => new TUnitServiceProvider(_extension, context, context.MessageBus, _frameworkServiceProvider, _capabilities)
         );
         
-        _capabilities.Capabilities
-            .OfType<StopExecutionCapability>()
-            .Single()
-            .OnStopRequested += async (o, args) =>
+        _capabilities.GetCapability<StopExecutionCapability>()!
+            .OnStopRequested += async (_, _) =>
         {
             await serviceProvider.EngineCancellationToken.CancellationTokenSource.CancelAsync();
         };
