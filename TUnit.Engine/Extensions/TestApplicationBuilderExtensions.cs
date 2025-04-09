@@ -20,10 +20,12 @@ internal static class TestApplicationBuilderExtensions
         var githubReporter = new GitHubReporter(extension);
         
         testApplicationBuilder.RegisterTestFramework(
-            serviceProvider  => new TestFrameworkCapabilities(new TrxReportCapability(), new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>(), serviceProvider.GetCommandLineOptions())),
+            serviceProvider  => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities, [githubReporter]));
         
         testApplicationBuilder.AddTreeNodeFilterService(extension);
+        testApplicationBuilder.AddMaximumFailedTestsService(extension);
+        
         // TODO: testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new HideTestOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
@@ -34,5 +36,15 @@ internal static class TestApplicationBuilderExtensions
         
         testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
         testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(_ => githubReporter);
+    }
+
+    private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
+    {
+        return
+        [
+            new TrxReportCapability(),
+            new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>(), serviceProvider.GetCommandLineOptions()),
+            new StopExecutionCapability()
+        ];
     }
 }

@@ -982,6 +982,7 @@ namespace TUnit.Core.Enums
         Passed = 1,
         Failed = 2,
         Skipped = 3,
+        Cancelled = 4,
     }
 }
 namespace TUnit.Core.Exceptions

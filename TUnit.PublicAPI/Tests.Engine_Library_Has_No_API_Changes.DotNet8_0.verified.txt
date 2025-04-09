@@ -1,4 +1,15 @@
 ﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
+namespace TUnit.Engine.Capabilities
+{
+    [System.Diagnostics.CodeAnalysis.Experimental("TPEXP")]
+    public class StopExecutionCapability : Microsoft.Testing.Platform.Capabilities.ICapability, Microsoft.Testing.Platform.Capabilities.TestFramework.IGracefulStopTestExecutionCapability, Microsoft.Testing.Platform.Capabilities.TestFramework.ITestFrameworkCapability
+    {
+        public StopExecutionCapability() { }
+        public bool IsStopRequested { get; }
+        public TUnit.Core.AsyncEvent<System.EventArgs>? OnStopRequested { get; set; }
+        public System.Threading.Tasks.Task StopTestExecutionAsync(System.Threading.CancellationToken cancellationToken) { }
+    }
+}
 namespace TUnit.Engine.Exceptions
 {
     public class TestFailedException : TUnit.Core.Exceptions.TUnitException
@@ -192,26 +203,5 @@ namespace TUnit.Engine.Services
     public static class TUnitRunner
     {
         public static System.Threading.Tasks.Task<int> RunTests(params string[] args) { }
-    }
-}
-namespace TUnit.Engine
-{
-    public class TUnitMessageBus : Microsoft.Testing.Platform.Extensions.IExtension, Microsoft.Testing.Platform.Extensions.Messages.IDataProducer
-    {
-        public TUnitMessageBus(Microsoft.Testing.Platform.Extensions.IExtension extension, Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions, Microsoft.Testing.Platform.Extensions.TestFramework.ExecuteRequestContext context) { }
-        public System.Type[] DataTypesProduced { get; }
-        public string Description { get; }
-        public string DisplayName { get; }
-        public string Uid { get; }
-        public string Version { get; }
-        public System.Threading.Tasks.ValueTask Cancelled(TUnit.Core.TestContext testContext) { }
-        public System.Threading.Tasks.ValueTask Discovered(TUnit.Core.TestContext testContext) { }
-        public System.Threading.Tasks.ValueTask Failed(TUnit.Core.TestContext testContext, System.Exception exception, System.DateTimeOffset start) { }
-        public System.Threading.Tasks.ValueTask InProgress(TUnit.Core.TestContext testContext) { }
-        public System.Threading.Tasks.Task<bool> IsEnabledAsync() { }
-        public System.Threading.Tasks.ValueTask Passed(TUnit.Core.TestContext testContext, System.DateTimeOffset start) { }
-        public System.Threading.Tasks.ValueTask SessionArtifact(TUnit.Core.Artifact artifact) { }
-        public System.Threading.Tasks.ValueTask Skipped(TUnit.Core.TestContext testContext, string reason) { }
-        public System.Threading.Tasks.ValueTask TestArtifact(TUnit.Core.TestContext testContext, TUnit.Core.Artifact artifact) { }
     }
 }

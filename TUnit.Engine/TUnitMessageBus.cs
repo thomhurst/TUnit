@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -14,7 +13,7 @@ using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
 
-public class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
+internal class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
 {
     private readonly SessionUid _sessionSessionUid = context.Request.Session.SessionUid;
 
@@ -92,12 +91,15 @@ public class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLi
         ));
     }
 
-    public async ValueTask Cancelled(TestContext testContext)
+    public async ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
     {
+        var timingProperty = GetTimingProperty(testContext, start);
+
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(new CancelledTestNodeStateProperty())
+                .WithProperty(timingProperty)
         ));
     }
 
