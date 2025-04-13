@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions;
@@ -63,7 +64,16 @@ internal class TestsConstructor(IExtension extension,
                     {
                         foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, null, null))
                         {
-                            var instance = Activator.CreateInstance(type, classInstanceArguments);
+                            object? instance;
+                            try
+                            {
+                                instance = Activator.CreateInstance(type, classInstanceArguments);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e);
+                                throw;
+                            }
 
                             foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, instance, classInstanceArguments))
                             {
@@ -144,18 +154,25 @@ internal class TestsConstructor(IExtension extension,
                 ?? instance?.GetType()
                 ?? type;
 
-            var methodResult = methodDataSourceType.GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []);
-            
-            if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
+            var result = methodDataSourceType.GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []);
+
+            var enumerableResult = result is IEnumerable enumerable
+                ? enumerable.Cast<object?>().ToArray()
+                : [result];
+
+            foreach (var methodResult in enumerableResult)
             {
-                yield return objectArray;
-                yield break;
+                if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
+                {
+                    yield return objectArray;
+                    yield break;
+                }
+
+                yield return
+                [
+                    methodResult
+                ];
             }
-            
-            yield return
-            [
-                methodResult
-            ];
         }
         else if (testDataAttribute is MethodDataSourceAttribute methodDataSourceAttribute)
         {
@@ -163,18 +180,25 @@ internal class TestsConstructor(IExtension extension,
                 ?? instance?.GetType()
                 ?? type;
             
-            var methodResult = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []) ?? Array.Empty<object>();
+            var result = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []) ?? Array.Empty<object>();
 
-            if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
+            var enumerableResult = result is IEnumerable enumerable
+                ? enumerable.Cast<object?>().ToArray()
+                : [result];
+
+            foreach (var methodResult in enumerableResult)
             {
-                yield return objectArray;
-                yield break;
+                if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
+                {
+                    yield return objectArray;
+                    yield break;
+                }
+
+                yield return
+                [
+                    methodResult
+                ];
             }
-            
-            yield return
-            [
-                methodResult
-            ];
         }
         else if (testDataAttribute is NoOpDataAttribute)
         {
