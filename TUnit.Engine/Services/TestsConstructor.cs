@@ -34,10 +34,9 @@ internal class TestsConstructor(IExtension extension,
 
     private DiscoveredTest[] GetByReflectionScanner()
     {
-        var allTypes = GetTypesByReflection().ToArray();
+        var allTypes = GetTypesByReflection();
         
-        var testMethods = Assembly.GetEntryAssembly()
-            !.GetTypes()
+        var testMethods = allTypes
             .SelectMany(x => x.GetMethods())
             .Where(x => x.GetCustomAttributes<TestAttribute>().Any())
             .ToArray();
@@ -145,19 +144,21 @@ internal class TestsConstructor(IExtension extension,
             .ToArray();
     }
 
-    private static IEnumerable<Type> GetTypesByReflection()
+    private static Type[] GetTypesByReflection()
     {
-        try
-        {
-            return AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(assembly => assembly.GetTypes());
-        }
-        catch (ReflectionTypeLoadException e)
-        {
-            Console.WriteLine(e);
-            
-            return e.Types.OfType<Type>();
-        }
+        return AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(assembly =>
+            {
+                try
+                {
+                    return assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException e)
+                {
+                    return e.Types.OfType<Type>().ToArray();
+                }
+            })
+            .ToArray();
     }
 
     private DiscoveredTest[] GetBySourceGenerationRegistration()
@@ -166,8 +167,8 @@ internal class TestsConstructor(IExtension extension,
         
         var dynamicTests = testsCollector.GetDynamicTests();
 
-        var discoveredTests = testMetadatas.
-            Select(ConstructTest)
+        var discoveredTests = testMetadatas
+            .Select(ConstructTest)
             .Concat(dynamicTests.SelectMany(ConstructTests))
             .ToArray();
         

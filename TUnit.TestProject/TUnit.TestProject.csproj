@@ -1,4 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\TUnit.Core\TUnit.Core.props" />
+  <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
+  <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
+  
   <PropertyGroup>
     <IsLibraryTestProject>true</IsLibraryTestProject>
     <IsPackable>false</IsPackable>
@@ -71,14 +76,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Test.cs" />
-    <Compile Remove="HookCallCounts\Test\One.cs" />
-  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="HookCallCounts\Test\" />
-  </ItemGroup>
+
+  <Import Project="..\TUnit.Core\TUnit.Core.targets" />
+  <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
+  <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
 </Project>

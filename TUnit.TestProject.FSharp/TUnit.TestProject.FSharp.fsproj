@@ -3,9 +3,6 @@
     <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
     <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
     <Import Project="..\TUnit.Core\TUnit.Core.props" />
-    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
-    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
-    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
     
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -20,5 +17,13 @@
     <ItemGroup>
         <Compile Include="Tests.fs" />
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FSharp.Core" />
+    </ItemGroup>
+    
+    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
 
 </Project>
