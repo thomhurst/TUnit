@@ -54,10 +54,5 @@
     <ProjectReference
       Include="$(MSBuildThisFileDirectory)TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-    <TestingPlatformBuilderHook Include="6ADF853A-6945-4A06-9A4B-D99BC1DC1094">
-      <DisplayName>TUnit</DisplayName>
-      <TypeFullName>TUnit.Engine.Framework.TestingPlatformBuilderHook</TypeFullName>
-    </TestingPlatformBuilderHook>
   </ItemGroup>
 </Project>

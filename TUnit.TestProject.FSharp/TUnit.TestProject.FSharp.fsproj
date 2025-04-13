@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
+    <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
+    <Import Project="..\TUnit.Core\TUnit.Core.props" />
+    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
+    
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="Tests.fs" />
+    </ItemGroup>
+
+</Project>

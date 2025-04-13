@@ -1,4 +1,6 @@
-﻿using Microsoft.Testing.Platform.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -6,12 +8,36 @@ using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
+[SuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
+[SuppressMessage("Trimming", "IL2070:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
 internal class TestsConstructor(IExtension extension, 
     TestsCollector testsCollector,
     DependencyCollector dependencyCollector, 
     IServiceProvider serviceProvider) : IDataProducer
 {
     public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
+    {
+        var discoveredTests = IsReflectionScannerEnabled()
+            ? GetByReflectionScanner()
+            : GetBySourceGenerationRegistration();
+        
+        dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
+        
+        return discoveredTests;
+    }
+
+    private static DiscoveredTest[] GetByReflectionScanner()
+    {
+        var testMethods = Assembly.GetEntryAssembly()
+            !.GetTypes()
+            .SelectMany(x => x.GetMethods())
+            .Where(x => x.GetCustomAttributes<TestAttribute>().Any())
+            .ToArray();
+
+        return [];
+    }
+
+    private DiscoveredTest[] GetBySourceGenerationRegistration()
     {
         var testMetadatas = testsCollector.GetTests();
         
@@ -21,10 +47,16 @@ internal class TestsConstructor(IExtension extension,
             Select(ConstructTest)
             .Concat(dynamicTests.SelectMany(ConstructTests))
             .ToArray();
-
-        dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
-        
         return discoveredTests;
+    }
+
+    private static bool IsReflectionScannerEnabled()
+    {
+        return Assembly.GetEntryAssembly()?
+            .GetCustomAttributes()
+            .OfType<AssemblyMetadataAttribute>()
+            .FirstOrDefault(x => x.Key == "TUnit.ReflectionScanner")
+            ?.Value == "true";
     }
 
     public DiscoveredTest ConstructTest(TestMetadata testMetadata)

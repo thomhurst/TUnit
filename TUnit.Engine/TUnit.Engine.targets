@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-
+    
     <ItemGroup Condition="'$(TUnitImplicitUsings)' == 'true'">
         <Using Include="TUnit.Core" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyMetadata Include="TUnit.ReflectionScanner" Value="true" Condition=" '$(TUnitReflectionScanner)' == 'true' " />
     </ItemGroup>
 
 </Project>
