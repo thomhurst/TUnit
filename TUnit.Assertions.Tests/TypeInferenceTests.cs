@@ -25,7 +25,8 @@ public class TypeInferenceTests
                 .HasDistinctItems()
                 .And
                 .HasSingleItem()
-                .And.HasCount().EqualTo(0);
+                .And.HasCount().EqualTo(0)
+                .And.HasCount(0);
         }
         catch
         {

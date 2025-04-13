@@ -31,4 +31,9 @@ public static partial class HasExtensions
         valueSource.AppendExpression("HasCount()");
         return new EnumerableCount<IEnumerable<TInner>, TInner>(valueSource);
     }
+    
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasCount<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, int count) 
+    {
+        return HasCount(valueSource).EqualTo(count);
+    }
 }
