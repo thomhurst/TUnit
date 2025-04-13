@@ -19,6 +19,21 @@ public class EquivalentAssertionTests
 
         await TUnitAssert.That(object1).IsEquivalentTo(object2);
     }
+    
+    [Test]
+    public async Task Basic_Objects_Are_Not_Equivalent()
+    {
+        var object1 = new MyClass
+        {
+            Value = "Foo"
+        };
+        var object2 = new MyClass
+        {
+            Value = "Bar"
+        };
+
+        await TUnitAssert.That(object1).IsNotEquivalentTo(object2);
+    }
 
     [Test]
     public async Task Different_Objects_Still_Are_Equivalent()
@@ -31,6 +46,19 @@ public class EquivalentAssertionTests
         var result2 = new { Value = "Foo" };
 
         await TUnitAssert.That(result1).IsEquivalentTo(result2);
+    }
+    
+    [Test]
+    public async Task Different_Objects_Are_Not_Equivalent()
+    {
+        var result1 = new MyClass
+        {
+            Value = "Foo"
+        };
+        
+        var result2 = new { Value = "Bar" };
+
+        await TUnitAssert.That(result1).IsNotEquivalentTo(result2);
     }
     
     [Test]
@@ -200,6 +228,34 @@ public class EquivalentAssertionTests
             """
         ));
     }
+    
+    [Test]
+    public async Task Objects_With_Nested_Mismatch_Are_Not_Equivalent2()
+    {
+        var object1 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar",
+                Inner = new InnerClass()
+            }
+        };
+        var object2 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar",
+                Inner = new InnerClass
+                {
+                    Value = "Baz"
+                }
+            }
+        };
+
+        await TUnitAssert.That(object1).IsNotEquivalentTo(object2);
+    }
   
     [Test]
     public async Task Objects_With_Nested_Matches_Are_Equivalent()
@@ -310,6 +366,40 @@ public class EquivalentAssertionTests
     }
     
     [Test]
+    public async Task Objects_With_Nested_Enumerable_Mismatch_Are_Not_Equivalent2()
+    {
+        var object1 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar",
+                Inner = new InnerClass
+                {
+                    Value = "Baz",
+                    Collection = [ "1", "2", "3" ]
+                }
+            }
+        };
+        
+        var object2 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar",
+                Inner = new InnerClass
+                {
+                    Value = "Baz",
+                    Collection = [ "1", "2", "3", "4" ]
+                }
+            }
+        };
+
+        await TUnitAssert.That(object1).IsNotEquivalentTo(object2);
+    }
+    
+    [Test]
     public async Task Objects_With_Nested_Enumerable_Mismatch_With_Ignore_Rule_Are_Equivalent()
     {
         var object1 = new MyClass
@@ -411,6 +501,26 @@ public class EquivalentAssertionTests
     }
     
     [Test]
+    public async Task Objects_With_Partial_Properties_Match_With_Full_Equivalency_Are_Not_Equivalent2()
+    {
+        var object1 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar"
+            }
+        };
+        var object2 = new
+        {
+            Value = "Foo",
+        };
+        
+
+        await TUnitAssert.That(object1).IsNotEquivalentTo(object2);
+    }
+    
+    [Test]
     public async Task Objects_With_Partial_Properties_Match_With_Partial_Equivalency_Are_Equivalent()
     {
         var object1 = new MyClass
@@ -471,6 +581,31 @@ public class EquivalentAssertionTests
     }
 
     [Test]
+    public async Task Objects_With_Mismatch_With_Partial_Equivalency_Kind_Are_Not_Equivalent2()
+    {
+        var object1 = new MyClass
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar"
+            }
+        };
+        var object2 = new
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Baz",
+            }
+        };
+        
+        await TUnitAssert.That(object1)
+                .IsNotEquivalentTo(object2)
+                .WithPartialEquivalency();
+    }
+    
+    [Test]
     public void Object_With_Partial_Fields_Match_With_Full_Equivalency_Are_Not_Equivalent()
     {
         var object1 = new MyClassWithMultipleFields
@@ -486,21 +621,38 @@ public class EquivalentAssertionTests
 
         var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.That(object1)
-                                         .IsEquivalentTo(object2));
+                .IsEquivalentTo(object2));
         
         NUnitAssert.That(exception!.Message, Is.EqualTo(
-                             """
-                             Expected object1 to be equivalent to object2
+            """
+            Expected object1 to be equivalent to object2
 
-                             but Field MyClassWithMultipleFields.intValue did not match
-                             Expected: null
-                             Received: 10
+            but Field MyClassWithMultipleFields.intValue did not match
+            Expected: null
+            Received: 10
 
-                             at Assert.That(object1).IsEquivalentTo(object2)
-                             """
-                         ));
+            at Assert.That(object1).IsEquivalentTo(object2)
+            """
+        ));
     }
-    
+
+    [Test]
+    public async Task Object_With_Partial_Fields_Match_With_Full_Equivalency_Are_Not_Equivalent2()
+    {
+        var object1 = new MyClassWithMultipleFields
+        {
+            value = "Foo",
+            intValue = 10
+        };
+        var object2 = new MyClassWithSingleField
+        {
+            value = "Foo",
+        };
+        
+
+        await TUnitAssert.That(object1).IsNotEquivalentTo(object2);
+    }
+
     [Test]
     public async Task Object_With_Partial_Fields_Match_With_Partial_Equivalency_Are_Equivalent()
     {
