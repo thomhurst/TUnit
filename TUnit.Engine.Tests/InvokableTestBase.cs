@@ -23,6 +23,8 @@ public abstract class InvokableTestBase
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
         await RunWithoutAot(filter, assertions, runOptions, assertionExpression);
+        
+        await RunWithoutAot(filter, assertions, runOptions.WithArgument("/p:TUnitReflectionScanner=true"), assertionExpression);
 
         if (EnvironmentVariables.IsNet472)
         {
@@ -176,4 +178,10 @@ public abstract class InvokableTestBase
 public record RunOptions
 {
     public List<string> AdditionalArguments { get; init; } = [];
+    
+    public RunOptions WithArgument(string argument)
+    {
+        AdditionalArguments.Add(argument);
+        return this;
+    }
 }
