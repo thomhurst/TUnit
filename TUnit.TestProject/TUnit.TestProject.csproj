@@ -84,4 +84,8 @@
   <Import Project="..\TUnit.Core\TUnit.Core.targets" />
   <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
   <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
+  
+  <PropertyGroup>
+    <TUnitReflectionScanner>true</TUnitReflectionScanner>
+  </PropertyGroup>
 </Project>
