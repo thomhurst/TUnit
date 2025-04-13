@@ -830,6 +830,11 @@ namespace TUnit.Assertions.AssertionBuilders.Wrappers
         public TUnit.Assertions.AssertionBuilders.Wrappers.NotBetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds() { }
         public TUnit.Assertions.AssertionBuilders.Wrappers.NotBetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds() { }
     }
+    public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
+    {
+        public TUnit.Assertions.AssertionBuilders.Wrappers.NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [System.Runtime.CompilerServices.CallerArgumentExpression("propertyName")] string doNotPopulateThis = "") { }
+        public TUnit.Assertions.AssertionBuilders.Wrappers.NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency() { }
+    }
     public class NotNullAssertionBuilderWrapper<TActual> : TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual>
         where TActual :  class
     {
@@ -1042,6 +1047,14 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions
         public NotEqualsExpectedValueAssertCondition(TActual expected) { }
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, TActual? expectedValue) { }
+    }
+    public class NotEquivalentToExpectedValueAssertCondition<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties)]  TActual, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties)]  TExpected> : TUnit.Assertions.AssertConditions.ExpectedValueAssertCondition<TActual, TExpected>
+    {
+        public NotEquivalentToExpectedValueAssertCondition(TExpected expected, string? expectedExpression) { }
+        public TUnit.Assertions.Enums.EquivalencyKind EquivalencyKind { get; set; }
+        protected override string GetExpectation() { }
+        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue) { }
+        public void IgnoringMember(string fieldName) { }
     }
     public class NotSameReferenceExpectedValueAssertCondition<TActual, TExpected> : TUnit.Assertions.AssertConditions.ExpectedValueAssertCondition<TActual, TExpected>
     {
@@ -1347,6 +1360,7 @@ namespace TUnit.Assertions.Extensions
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotDefault<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }
         public static TUnit.Assertions.AssertionBuilders.Wrappers.GenericNotEqualToAssertionBuilderWrapper<TActual> IsNotEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsNotEquatableOrEqualTo<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TActual expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertionBuilders.Wrappers.NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IsNotEquivalentTo<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties)]  TActual, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties)]  TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TExpected expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue1 = null) { }
         public static TUnit.Assertions.AssertionBuilders.Wrappers.NotNullAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual?> valueSource)
             where TActual :  class { }
         public static TUnit.Assertions.AssertionBuilders.Wrappers.NotNullStructAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual?> valueSource)

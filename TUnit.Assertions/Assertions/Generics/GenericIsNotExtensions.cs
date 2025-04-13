@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
@@ -33,6 +34,18 @@ public static class GenericIsNotExtensions
     {
         return valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TActual>(expected)
             , [doNotPopulateThisValue]);
+    }
+    
+    public static NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IsNotEquivalentTo<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        TActual,  
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue1 = null)
+    {
+        var assertionBuilder = valueSource.RegisterAssertion(new NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>(expected, doNotPopulateThisValue1)
+            , [doNotPopulateThisValue1]);
+        
+        return new NotEquivalentToAssertionBuilderWrapper<TActual, TExpected>(assertionBuilder);
     }
     
     public static InvokableValueAssertionBuilder<TActual> IsNotSameReferenceAs<TActual, TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue1 = null)
