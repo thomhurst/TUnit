@@ -348,15 +348,21 @@ namespace TUnit.Core
         public System.Attribute[] Attributes { get; init; }
         public System.Collections.Generic.Dictionary<string, object?>? Properties { get; init; }
         public object?[]? TestClassArguments { get; init; }
-        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]
         public abstract System.Type TestClassType { get; }
         public abstract string TestId { get; }
         [System.Runtime.CompilerServices.RequiredMember]
         public object?[] TestMethodArguments { get; init; }
         public string? TestName { get; init; }
         public abstract System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas();
+        protected TUnit.Core.SourceGeneratedMethodInformation BuildTestMethod(System.Reflection.MethodInfo methodInfo) { }
+        protected TUnit.Core.SourceGeneratedAssemblyInformation GenerateAssembly() { }
+        protected TUnit.Core.SourceGeneratedClassInformation GenerateClass() { }
+        protected TUnit.Core.SourceGeneratedParameterInformation GenerateParameter(System.Reflection.ParameterInfo parameter) { }
         public System.Attribute[] GetAttributes() { }
+        protected TUnit.Core.SourceGeneratedParameterInformation[] GetParameters(System.Reflection.ParameterInfo[] parameters) { }
         public static T Argument<T>() { }
+        protected static TUnit.Core.SourceGeneratedPropertyInformation GenerateProperty(System.Collections.Generic.KeyValuePair<string, object?> property) { }
     }
     [System.Diagnostics.CodeAnalysis.Experimental("TUnitWIP0001")]
     public class DynamicTestBuilderAttribute : TUnit.Core.BaseTestAttribute
@@ -380,7 +386,7 @@ namespace TUnit.Core
         [System.Obsolete("Constructors of types with required members are not supported in this version of " +
             "your compiler.", true)]
         public DynamicTest() { }
-        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]
         public override System.Type TestClassType { get; }
         public override string TestId { get; }
         [System.Runtime.CompilerServices.RequiredMember]
@@ -427,7 +433,7 @@ namespace TUnit.Core
         public static TUnit.Core.DynamicTest<TClassType> op_Implicit(TUnit.Core.FailedDynamicTest<TClassType> failedTestMetadata) { }
     }
     [System.Runtime.CompilerServices.RequiredMember]
-    public class FailedTestMetadata<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  TClassType> : System.IEquatable<TUnit.Core.FailedTestMetadata<TClassType>>
+    public class FailedTestMetadata<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]  TClassType> : System.IEquatable<TUnit.Core.FailedTestMetadata<TClassType>>
         where TClassType :  class
     {
         [System.Obsolete("Constructors of types with required members are not supported in this version of " +
@@ -735,6 +741,7 @@ namespace TUnit.Core
         public TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public TUnit.Core.SourceGeneratedPropertyInformation[] Properties { get; init; }
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]
         [System.Runtime.CompilerServices.RequiredMember]
         public override System.Type Type { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedClassInformation? other) { }
@@ -751,6 +758,7 @@ namespace TUnit.Core
         public System.Attribute[] Attributes { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public string Name { get; init; }
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]
         public abstract System.Type Type { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedMemberInformation? other) { }
         public override int GetHashCode() { }
@@ -769,10 +777,10 @@ namespace TUnit.Core
         [System.Runtime.CompilerServices.RequiredMember]
         public TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
         [System.Text.Json.Serialization.JsonIgnore]
-        [get: System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection API")]
         public System.Reflection.MethodInfo ReflectionInformation { get; set; }
         [System.Runtime.CompilerServices.RequiredMember]
         public System.Type ReturnType { get; init; }
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]
         [System.Runtime.CompilerServices.RequiredMember]
         public override System.Type Type { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedMethodInformation? other) { }
@@ -800,6 +808,7 @@ namespace TUnit.Core
         public SourceGeneratedPropertyInformation() { }
         [System.Runtime.CompilerServices.RequiredMember]
         public bool IsStatic { get; init; }
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]
         [System.Runtime.CompilerServices.RequiredMember]
         public override System.Type Type { get; init; }
     }
@@ -973,6 +982,8 @@ namespace TUnit.Core
         public object?[] TestClassArguments { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public object?[] TestClassProperties { get; init; }
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+        public abstract System.Type TestClassType { get; }
         [System.Runtime.CompilerServices.RequiredMember]
         public string TestFilePath { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
@@ -995,6 +1006,8 @@ namespace TUnit.Core
         public TestMetadata() { }
         [System.Runtime.CompilerServices.RequiredMember]
         public TUnit.Core.ResettableLazy<TClassType> ResettableClassFactory { get; init; }
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+        public override System.Type TestClassType { get; }
         [System.Runtime.CompilerServices.RequiredMember]
         public System.Func<TClassType, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> TestMethodFactory { get; init; }
         public override TUnit.Core.TestDetails BuildTestDetails() { }
@@ -1053,6 +1066,38 @@ namespace TUnit.Core
         public System.DateTimeOffset End { get; init; }
         public System.DateTimeOffset Start { get; init; }
         public string StepName { get; init; }
+    }
+    public class UntypedDynamicTest : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.UntypedDynamicTest>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public UntypedDynamicTest(System.Reflection.MethodInfo testBody) { }
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public UntypedDynamicTest(System.Type testClassType, System.Reflection.MethodInfo testBody) { }
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]
+        public override System.Type TestClassType { get; }
+        public override string TestId { get; }
+        public override System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas() { }
+        public void Deconstruct(out System.Reflection.MethodInfo TestBody) { }
+    }
+    public class UntypedTestDetails : TUnit.Core.TestDetails, System.IEquatable<TUnit.Core.UntypedTestDetails>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public UntypedTestDetails(TUnit.Core.ResettableLazy<object> ResettableLazy) { }
+        public override object ClassInstance { get; }
+        public TUnit.Core.ResettableLazy<object> ResettableLazy { get; init; }
+    }
+    public class UntypedTestMetadata : TUnit.Core.TestMetadata, System.IEquatable<TUnit.Core.UntypedTestMetadata>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public UntypedTestMetadata([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type testClassType) { }
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+        public override System.Type TestClassType { get; }
+        public override TUnit.Core.TestDetails BuildTestDetails() { }
+        public override TUnit.Core.TestMetadata CloneWithNewMethodFactory(System.Func<object, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> testMethodFactory) { }
     }
 }
 namespace TUnit.Core.Data

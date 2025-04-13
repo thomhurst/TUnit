@@ -5,19 +5,30 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
-public record UntypedDynamicTest(MethodInfo TestBody) : DynamicTest 
+public record UntypedDynamicTest : DynamicTest 
 {
+    public UntypedDynamicTest(MethodInfo testBody) : this(testBody.ReflectedType ?? testBody.DeclaringType!, testBody)
+    {
+    }
+    
+    public UntypedDynamicTest(Type testClassType, MethodInfo testBody)
+    {
+        TestId = GetTestId(testBody);
+        TestBody = testBody;
+        TestClassType = testClassType;
+    }
+
     private static readonly ConcurrentDictionary<string, Counter> DynamicTestCounter = new();
     
     public override string TestId
     {
         get;
-    } = GetTestId(TestBody);
+    }
 
     internal override MethodInfo TestBody
     {
         get;
-    } = TestBody;
+    }
 
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
@@ -27,7 +38,7 @@ public record UntypedDynamicTest(MethodInfo TestBody) : DynamicTest
     public override Type TestClassType
     {
         get;
-    } = TestBody.ReflectedType ?? TestBody.DeclaringType!;
+    }
 
     public override IEnumerable<TestMetadata> BuildTestMetadatas()
     {
@@ -58,5 +69,10 @@ public record UntypedDynamicTest(MethodInfo TestBody) : DynamicTest
             .Increment();
         
         return $"{typeAndTestName}_{count}";
+    }
+
+    public void Deconstruct(out MethodInfo TestBody)
+    {
+        TestBody = this.TestBody;
     }
 }

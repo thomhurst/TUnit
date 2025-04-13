@@ -64,7 +64,7 @@ internal class TestsConstructor(IExtension extension,
 
                         var instance = Activator.CreateInstance(type, classInstanceArguments);
 
-                        yield return new UntypedDynamicTest(testMethod)
+                        yield return new UntypedDynamicTest(type, testMethod)
                         {
                             TestMethodArguments = GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, instance),
                             Attributes =

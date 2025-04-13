@@ -332,8 +332,14 @@ namespace TUnit.Core
         public object?[] TestMethodArguments { get; init; }
         public string? TestName { get; init; }
         public abstract System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas();
+        protected TUnit.Core.SourceGeneratedMethodInformation BuildTestMethod(System.Reflection.MethodInfo methodInfo) { }
+        protected TUnit.Core.SourceGeneratedAssemblyInformation GenerateAssembly() { }
+        protected TUnit.Core.SourceGeneratedClassInformation GenerateClass() { }
+        protected TUnit.Core.SourceGeneratedParameterInformation GenerateParameter(System.Reflection.ParameterInfo parameter) { }
         public System.Attribute[] GetAttributes() { }
+        protected TUnit.Core.SourceGeneratedParameterInformation[] GetParameters(System.Reflection.ParameterInfo[] parameters) { }
         public static T Argument<T>() { }
+        protected static TUnit.Core.SourceGeneratedPropertyInformation GenerateProperty(System.Collections.Generic.KeyValuePair<string, object?> property) { }
     }
     public class DynamicTestBuilderAttribute : TUnit.Core.BaseTestAttribute
     {
@@ -879,6 +885,7 @@ namespace TUnit.Core
         public TUnit.Core.TestBuilderContext TestBuilderContext { get; init; }
         public object?[] TestClassArguments { get; init; }
         public object?[] TestClassProperties { get; init; }
+        public abstract System.Type TestClassType { get; }
         public string TestFilePath { get; init; }
         public string TestId { get; init; }
         public int TestLineNumber { get; init; }
@@ -894,6 +901,7 @@ namespace TUnit.Core
             "your compiler.", true)]
         public TestMetadata() { }
         public TUnit.Core.ResettableLazy<TClassType> ResettableClassFactory { get; init; }
+        public override System.Type TestClassType { get; }
         public System.Func<TClassType, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> TestMethodFactory { get; init; }
         public override TUnit.Core.TestDetails BuildTestDetails() { }
         public override TUnit.Core.TestMetadata CloneWithNewMethodFactory(System.Func<object, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> testMethodFactory) { }
@@ -941,6 +949,36 @@ namespace TUnit.Core
         public System.DateTimeOffset End { get; init; }
         public System.DateTimeOffset Start { get; init; }
         public string StepName { get; init; }
+    }
+    public class UntypedDynamicTest : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.UntypedDynamicTest>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public UntypedDynamicTest(System.Reflection.MethodInfo testBody) { }
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public UntypedDynamicTest(System.Type testClassType, System.Reflection.MethodInfo testBody) { }
+        public override System.Type TestClassType { get; }
+        public override string TestId { get; }
+        public override System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas() { }
+        public void Deconstruct(out System.Reflection.MethodInfo TestBody) { }
+    }
+    public class UntypedTestDetails : TUnit.Core.TestDetails, System.IEquatable<TUnit.Core.UntypedTestDetails>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public UntypedTestDetails(TUnit.Core.ResettableLazy<object> ResettableLazy) { }
+        public override object ClassInstance { get; }
+        public TUnit.Core.ResettableLazy<object> ResettableLazy { get; init; }
+    }
+    public class UntypedTestMetadata : TUnit.Core.TestMetadata, System.IEquatable<TUnit.Core.UntypedTestMetadata>
+    {
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
+        public UntypedTestMetadata(System.Type testClassType) { }
+        public override System.Type TestClassType { get; }
+        public override TUnit.Core.TestDetails BuildTestDetails() { }
+        public override TUnit.Core.TestMetadata CloneWithNewMethodFactory(System.Func<object, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> testMethodFactory) { }
     }
 }
 namespace TUnit.Core.Data
