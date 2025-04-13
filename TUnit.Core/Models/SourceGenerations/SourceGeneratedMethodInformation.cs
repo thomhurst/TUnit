@@ -8,7 +8,9 @@ namespace TUnit.Core;
 
 public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
-    internal static SourceGeneratedMethodInformation Failure<TClassType>(string methodName) =>
+    internal static SourceGeneratedMethodInformation Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>(string methodName) =>
         new()
         {
             Attributes = [],
@@ -43,7 +45,6 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
     [JsonIgnore]
     public MethodInfo ReflectionInformation
     {
-        [RequiresUnreferencedCode("Reflection API")]
         get => field ??=
             MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
         set;
@@ -51,6 +52,9 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
 
     public required Type ReturnType { get; init; }
 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)]
     public override required Type Type { get; init; }
     
     protected override bool PrintMembers(StringBuilder stringBuilder)

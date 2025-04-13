@@ -47,6 +47,7 @@ internal class TestsConstructor(IExtension extension,
             Select(ConstructTest)
             .Concat(dynamicTests.SelectMany(ConstructTests))
             .ToArray();
+        
         return discoveredTests;
     }
 
