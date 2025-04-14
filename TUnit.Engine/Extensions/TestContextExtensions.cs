@@ -62,7 +62,7 @@ public static class TestContextExtensions
                 TestBuilderContext = testBuilderContext
             };
         
-        var newTest = testContext.GetService<TestsConstructor>().ConstructTest(newTestMetaData);
+        var newTest = testContext.GetService<BaseTestsConstructor>().ConstructTest(newTestMetaData);
         
         var startTime = DateTimeOffset.UtcNow;
 

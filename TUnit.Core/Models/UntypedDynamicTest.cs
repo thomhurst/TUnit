@@ -30,7 +30,6 @@ public record UntypedDynamicTest : DynamicTest
         get;
     }
 
-
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
         | DynamicallyAccessedMemberTypes.PublicMethods 
         | DynamicallyAccessedMemberTypes.NonPublicMethods

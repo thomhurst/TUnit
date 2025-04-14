@@ -3,39 +3,34 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
-[SuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
-[SuppressMessage("Trimming", "IL2070:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
-[SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-[SuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-internal class TestsConstructor(IExtension extension, 
-    TestsCollector testsCollector,
+[SuppressMessage("Trimming", "IL2026")]
+[SuppressMessage("Trimming", "IL2070")]
+[SuppressMessage("Trimming", "IL2067")]
+[SuppressMessage("Trimming", "IL2071")]
+[SuppressMessage("Trimming", "IL2072")]
+[SuppressMessage("Trimming", "IL2075")]
+[SuppressMessage("AOT", "IL3050")]
+internal class ReflectionTestsConstructor(IExtension extension, 
     DependencyCollector dependencyCollector, 
-    IServiceProvider serviceProvider) : IDataProducer
+    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, serviceProvider)
 {
-    public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
+    protected override DiscoveredTest[] DiscoverTests()
     {
-        var discoveredTests = IsReflectionScannerEnabled()
-            ? GetByReflectionScanner()
-            : GetBySourceGenerationRegistration();
-        
-        dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
-        
-        return discoveredTests;
-    }
-
-    private DiscoveredTest[] GetByReflectionScanner()
-    {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new InvalidOperationException("Reflection tests are not supported with AOT or trimming enabled.");
+        }
+#endif
         var allTypes = GetTypesByReflection();
         
         var testMethods = allTypes
@@ -64,16 +59,7 @@ internal class TestsConstructor(IExtension extension,
                     {
                         foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, null, null))
                         {
-                            object? instance;
-                            try
-                            {
-                                instance = Activator.CreateInstance(type, classInstanceArguments);
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e);
-                                throw;
-                            }
+                            var instance = CreateInstance(typeDataAttribute, type, classInstanceArguments, out var exception);
 
                             foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, instance, classInstanceArguments))
                             {
@@ -90,6 +76,7 @@ internal class TestsConstructor(IExtension extension,
                                     TestClassArguments = classInstanceArguments,
                                     TestFilePath = testAttribute.File,
                                     TestLineNumber = testAttribute.Line,
+                                    Exception = exception,
                                 };
                             }
                         }
@@ -97,6 +84,43 @@ internal class TestsConstructor(IExtension extension,
                 }
             }
         }
+    }
+
+    private static object? CreateInstance(IDataAttribute typeDataAttribute, Type type, object?[] classInstanceArguments, out Exception? exception)
+    {
+        exception = null;
+        
+        try
+        {
+            if (typeDataAttribute is ClassConstructorAttribute classConstructorAttribute)
+            {
+                return CreateByClassConstructor(type, classConstructorAttribute);
+            }
+        
+            return Activator.CreateInstance(type, classInstanceArguments);
+        }
+        catch (Exception e)
+        {
+            exception = e;
+            return null;
+        }
+    }
+
+    private static object CreateByClassConstructor(Type type, ClassConstructorAttribute classConstructorAttribute)
+    {
+        var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
+
+        var metadata = new ClassConstructorMetadata
+        {
+            TestBuilderContext = new TestBuilderContext(),
+            TestSessionId = string.Empty,
+        };
+        
+        var createMethod = typeof(IClassConstructor).GetMethod(nameof(IClassConstructor.Create))!.MakeGenericMethod(type);
+
+        var instance = createMethod.Invoke(classConstructor, [metadata]);
+        
+        return instance!;
     }
 
     private static IEnumerable<object?[]> 
@@ -127,9 +151,9 @@ internal class TestsConstructor(IExtension extension,
                     TestClassInstance = instance,
                     TestSessionId = string.Empty,
                 }
-            ]);
+            ]) as IEnumerable;
 
-            var funcEnumerable = Unsafe.As<IEnumerable<Func<object>>>(invoke)?.ToArray() ?? []!;
+            var funcEnumerable = invoke?.Cast<object>().ToArray() ?? []!;
 
             if (funcEnumerable.Length == 0)
             {
@@ -139,9 +163,15 @@ internal class TestsConstructor(IExtension extension,
             
             foreach (var func in funcEnumerable)
             {
-                var obj = func.Invoke();
+                var funcResult = func.GetType().GetMethod("Invoke")!.Invoke(func, []);
+                
+                if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var objectArray2))
+                {
+                    yield return objectArray2;
+                    yield break;
+                }
 
-                yield return obj as object[] ?? [obj];
+                yield return funcResult as object?[] ?? [funcResult];
             }
         }
         else if (testDataAttribute is ArgumentsAttribute argumentsAttribute)
@@ -162,6 +192,17 @@ internal class TestsConstructor(IExtension extension,
 
             foreach (var methodResult in enumerableResult)
             {
+                if(FuncHelper.TryInvokeFunc(methodResult, out var funcResult))
+                {
+                    if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var funcObjectArray))
+                    {
+                        yield return funcObjectArray;
+                        yield break;
+                    }
+
+                    yield return funcResult as object?[] ?? [funcResult];
+                }
+                
                 if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
                 {
                     yield return objectArray;
@@ -188,6 +229,17 @@ internal class TestsConstructor(IExtension extension,
 
             foreach (var methodResult in enumerableResult)
             {
+                if (FuncHelper.TryInvokeFunc(methodResult, out var funcResult))
+                {
+                    if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var funcObjectArray))
+                    {
+                        yield return funcObjectArray;
+                        yield break;
+                    }
+
+                    yield return funcResult as object?[] ?? [funcResult];
+                }
+                
                 if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
                 {
                     yield return objectArray;
@@ -200,7 +252,7 @@ internal class TestsConstructor(IExtension extension,
                 ];
             }
         }
-        else if (testDataAttribute is NoOpDataAttribute)
+        else if (testDataAttribute is NoOpDataAttribute or ClassConstructorAttribute)
         {
             yield return [];
         }
@@ -247,73 +299,4 @@ internal class TestsConstructor(IExtension extension,
             })
             .ToArray();
     }
-
-    private DiscoveredTest[] GetBySourceGenerationRegistration()
-    {
-        var testMetadatas = testsCollector.GetTests();
-        
-        var dynamicTests = testsCollector.GetDynamicTests();
-
-        var discoveredTests = testMetadatas
-            .Select(ConstructTest)
-            .Concat(dynamicTests.SelectMany(ConstructTests))
-            .ToArray();
-        
-        return discoveredTests;
-    }
-
-    private static bool IsReflectionScannerEnabled()
-    {
-        return Assembly.GetEntryAssembly()?
-            .GetCustomAttributes()
-            .OfType<AssemblyMetadataAttribute>()
-            .FirstOrDefault(x => x.Key == "TUnit.ReflectionScanner")
-            ?.Value == "true";
-    }
-
-    public DiscoveredTest ConstructTest(TestMetadata testMetadata)
-    {
-        var testDetails = testMetadata.BuildTestDetails();
-
-        var testContext = new TestContext(serviceProvider, testDetails, testMetadata);
-
-        if (testMetadata.DiscoveryException is not null)
-        {
-            testContext.SetResult(testMetadata.DiscoveryException);
-        }
-
-        RunOnTestDiscoveryAttributeHooks([..testDetails.DataAttributes, ..testDetails.Attributes], testContext);
-
-        var discoveredTest = testMetadata.BuildDiscoveredTest(testContext);
-
-        testContext.InternalDiscoveredTest = discoveredTest;
-
-        return discoveredTest;
-    }
-
-    public IEnumerable<DiscoveredTest> ConstructTests(DynamicTest dynamicTest)
-    {
-        return dynamicTest.BuildTestMetadatas().Select(ConstructTest);
-    }
-
-    private static void RunOnTestDiscoveryAttributeHooks(IEnumerable<Attribute> attributes, TestContext testContext)
-    {
-        DiscoveredTestContext? discoveredTestContext = null;
-        foreach (var onTestDiscoveryAttribute in attributes.OfType<ITestDiscoveryEventReceiver>().Reverse()) // Reverse to run assembly, then class, then method
-        {
-            onTestDiscoveryAttribute.OnTestDiscovery(discoveredTestContext ??= new DiscoveredTestContext(testContext));
-        }
-    }
-    
-    
-    public Task<bool> IsEnabledAsync()
-    {
-        return extension.IsEnabledAsync();
-    }
-
-    public string Uid => extension.Uid;
-    public string Version => extension.Version;
-    public string DisplayName => extension.DisplayName;
-    public string Description => extension.Description;
-    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
 }
