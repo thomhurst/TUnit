@@ -8,22 +8,8 @@ public static class AssemblyLoader
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialize()
 	{
-		try
-		{
-			_ = typeof(global::System.Runtime.CompilerServices.AsyncMethodBuilderAttribute).Assembly;
-		}
-		catch
-		{
-			// ignored
-		}
-		try
-		{
-			_ = typeof(global::TUnit.Core.AsyncEvent<>).Assembly;
-		}
-		catch
-		{
-			// ignored
-		}
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::System.Runtime.CompilerServices.AsyncMethodBuilderAttribute).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::TUnit.Core.AsyncEvent<>).Assembly);
 	}
 }
 

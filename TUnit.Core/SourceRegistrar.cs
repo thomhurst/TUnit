@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -12,6 +13,15 @@ namespace TUnit.Core;
 /// </summary>
 public class SourceRegistrar
 {
+    /// <summary>
+    /// Registers an assembly loader.
+    /// </summary>
+    /// <param name="assemblyLoader">The assembly loader to register.</param>
+    public static void RegisterAssembly(Func<Assembly> assemblyLoader)
+    {
+        Sources.AssemblyLoaders.Add(assemblyLoader);
+    }
+    
     /// <summary>
     /// Registers a test source.
     /// </summary>
