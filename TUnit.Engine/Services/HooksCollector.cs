@@ -2,6 +2,7 @@
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Hooks;
+using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Engine.Services;
 
@@ -29,7 +30,7 @@ internal class HooksCollector(string sessionId)
 
     public void CollectDiscoveryHooks()
     {
-        foreach (var hookSource in Sources.TestDiscoveryHookSources)
+        while (Sources.TestDiscoveryHookSources.TryDequeue(out var hookSource))
         {
             foreach (var beforeHook in hookSource.CollectBeforeTestDiscoveryHooks(sessionId))
             {
@@ -45,7 +46,7 @@ internal class HooksCollector(string sessionId)
 
     public void CollectionTestSessionHooks()
     {
-        foreach (var hookSource in Sources.TestSessionHookSources)
+        while (Sources.TestSessionHookSources.TryDequeue(out var hookSource))
         {
             foreach (var beforeHook in hookSource.CollectBeforeTestSessionHooks(sessionId))
             {
@@ -61,7 +62,7 @@ internal class HooksCollector(string sessionId)
 
     public void CollectHooks()
     {
-        foreach (var hookSource in Sources.TestHookSources)
+        while (Sources.TestHookSources.TryDequeue(out var hookSource))
         {
             foreach (var beforeHook in hookSource.CollectBeforeTestHooks(sessionId))
             {
@@ -86,7 +87,7 @@ internal class HooksCollector(string sessionId)
             }
         }
 
-        foreach (var hookSource in Sources.ClassHookSources)
+        while (Sources.ClassHookSources.TryDequeue(out var hookSource))
         {
             foreach (var beforeHook in hookSource.CollectBeforeClassHooks(sessionId))
             {
@@ -111,7 +112,7 @@ internal class HooksCollector(string sessionId)
             }
         }
 
-        foreach (var hookSource in Sources.AssemblyHookSources)
+        while (Sources.AssemblyHookSources.TryDequeue(out var hookSource))
         {
             foreach (var beforeHook in hookSource.CollectBeforeAssemblyHooks(sessionId))
             {
