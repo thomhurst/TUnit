@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -8,7 +9,7 @@ namespace TUnit.Core;
 #endif
 internal static class Sources
 {
-    public static readonly List<Func<Assembly>> AssemblyLoaders = [];
+    public static readonly ConcurrentQueue<Func<Assembly>> AssemblyLoaders = [];
     public static readonly List<ITestSource> TestSources = [];
     public static readonly List<IDynamicTestSource> DynamicTestSources = [];
     

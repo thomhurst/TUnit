@@ -46,7 +46,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     
     public Task<CreateTestSessionResult> CreateTestSessionAsync(CreateTestSessionContext context)
     {
-        Sources.AssemblyLoaders.ForEach(TryLoadAssembly);
+        while(Sources.AssemblyLoaders.TryDequeue(out var assemblyLoader))
+        {
+            TryLoadAssembly(assemblyLoader);
+        }
         
         return Task.FromResult(new CreateTestSessionResult
         {

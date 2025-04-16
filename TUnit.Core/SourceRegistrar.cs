@@ -19,7 +19,7 @@ public class SourceRegistrar
     /// <param name="assemblyLoader">The assembly loader to register.</param>
     public static void RegisterAssembly(Func<Assembly> assemblyLoader)
     {
-        Sources.AssemblyLoaders.Add(assemblyLoader);
+        Sources.AssemblyLoaders.Enqueue(assemblyLoader);
     }
     
     /// <summary>
