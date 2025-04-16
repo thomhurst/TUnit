@@ -31,9 +31,5 @@
     <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\$(TargetFramework)\TUnit.TestProject.Library.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="AssemblyLoaderTests.Test.verified.txt">
-      <ParentFile>BasicTests</ParentFile>
-      <DependentUpon>AssemblyLoaderTests.cs</DependentUpon>
-    </None>
   </ItemGroup>
 </Project>
