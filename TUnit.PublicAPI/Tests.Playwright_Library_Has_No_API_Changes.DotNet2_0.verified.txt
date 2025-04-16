@@ -1,6 +1,10 @@
 ﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
 namespace TUnit.Playwright
 {
+    public static class AssemblyLoader
+    {
+        public static void Initialize() { }
+    }
     public class BrowserTest : TUnit.Playwright.PlaywrightTest
     {
         public BrowserTest() { }
