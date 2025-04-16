@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -45,6 +46,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     
     public Task<CreateTestSessionResult> CreateTestSessionAsync(CreateTestSessionContext context)
     {
+        Sources.AssemblyLoaders.ForEach(TryLoadAssembly);
+        
         return Task.FromResult(new CreateTestSessionResult
         {
             IsSuccess = true
@@ -211,4 +214,16 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     [
         typeof(TestNodeUpdateMessage)
     ];
+
+    private static void TryLoadAssembly(Func<Assembly> assemblyLoader)
+    {
+        try
+        {
+            assemblyLoader.Invoke();
+        }
+        catch
+        {
+            // ignored
+        }
+    }
 }
