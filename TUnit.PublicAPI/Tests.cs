@@ -65,7 +65,7 @@ public partial class Tests
     
     private string Scrub(string text)
     {
-        return Scrub(new StringBuilder(text)).ToString();
+        return Scrub(new StringBuilder(text.Replace("\r\n", "\n"))).ToString();
     }
 
 
