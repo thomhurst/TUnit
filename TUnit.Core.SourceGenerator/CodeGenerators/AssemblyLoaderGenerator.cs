@@ -60,7 +60,14 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
                 typeName += $"<{new string(',', type.TypeParameters.Length - 1)}>";
             }
             
+            sourceBuilder.WriteLine("try");
+            sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine($"_ = typeof({typeName}).Assembly;");
+            sourceBuilder.WriteLine("}");
+            sourceBuilder.WriteLine("catch");
+            sourceBuilder.WriteLine("{");
+            sourceBuilder.WriteLine("// ignored");
+            sourceBuilder.WriteLine("}");
         }
         
         sourceBuilder.WriteLine("}");

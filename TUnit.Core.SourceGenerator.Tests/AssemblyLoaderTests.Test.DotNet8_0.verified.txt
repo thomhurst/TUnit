@@ -8,10 +8,38 @@ public static class AssemblyLoader
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialize()
 	{
-		_ = typeof(global::System.SequencePosition).Assembly;
-		_ = typeof(global::System.Xml.XmlNamedNodeMap).Assembly;
-		_ = typeof(global::System.Xml.Linq.XAttribute).Assembly;
-		_ = typeof(global::TUnit.Core.AsyncEvent<>).Assembly;
+		try
+		{
+			_ = typeof(global::System.SequencePosition).Assembly;
+		}
+		catch
+		{
+			// ignored
+		}
+		try
+		{
+			_ = typeof(global::System.Xml.XmlNamedNodeMap).Assembly;
+		}
+		catch
+		{
+			// ignored
+		}
+		try
+		{
+			_ = typeof(global::System.Xml.Linq.XAttribute).Assembly;
+		}
+		catch
+		{
+			// ignored
+		}
+		try
+		{
+			_ = typeof(global::TUnit.Core.AsyncEvent<>).Assembly;
+		}
+		catch
+		{
+			// ignored
+		}
 	}
 }
 
