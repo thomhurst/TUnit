@@ -27,8 +27,8 @@ public class NotNullStructExpectedValueAssertCondition<TActual> : ConvertToAsser
         return new ValueTask<(AssertionResult, TActual)>
         (
             (
-                AssertionResult.FailIf(value is null, "it was"),
-                value ?? default
+                AssertionResult.FailIf(!value.HasValue, "it was"),
+                value ?? default(TActual)
             )
         );
     }
