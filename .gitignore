@@ -399,3 +399,7 @@ FodyWeavers.xsd
 
 # Generated Code
 *.g.cs
+
+# Verify
+*.received.*
+*.received/
