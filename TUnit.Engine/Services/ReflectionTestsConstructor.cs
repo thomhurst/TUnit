@@ -45,6 +45,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
     private static IEnumerable<DynamicTest> Build(MethodInfo[] testMethods, Type[] allTypes)
     {
+        var testsBuilderDynamicTests = new List<DynamicTest>();
+        
         foreach (var testMethod in testMethods)
         {
             var testAttribute = testMethod.GetCustomAttribute<TestAttribute>()!;
@@ -53,36 +55,71 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             foreach (var type in types)
             {
-                foreach (var typeDataAttribute in GetDataAttributes(type))
+                try
                 {
-                    foreach (var testDataAttribute in GetDataAttributes(testMethod))
+                    foreach (var typeDataAttribute in GetDataAttributes(type))
                     {
-                        foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, null, null))
+                        foreach (var testDataAttribute in GetDataAttributes(testMethod))
                         {
-                            var instance = CreateInstance(typeDataAttribute, type, classInstanceArguments, out var exception);
-
-                            foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, instance, classInstanceArguments))
+                            foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, null, null))
                             {
-                                yield return new UntypedDynamicTest(type, testMethod)
-                                {
-                                    TestMethodArguments = testArguments,
-                                    Attributes =
-                                    [
-                                        ..testMethod.GetCustomAttributes(),
-                                        ..type.GetCustomAttributes(),
-                                        ..type.Assembly.GetCustomAttributes()
-                                    ],
-                                    TestName = testMethod.Name,
-                                    TestClassArguments = classInstanceArguments,
-                                    TestFilePath = testAttribute.File,
-                                    TestLineNumber = testAttribute.Line,
-                                    Exception = exception,
-                                };
+                                BuildTests(typeDataAttribute, type, classInstanceArguments, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute);
                             }
                         }
                     }
                 }
+                catch (Exception e)
+                {
+                    testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest
+                    {
+                        MethodName = testMethod.Name,
+                        TestFilePath = testAttribute.File,
+                        TestLineNumber = testAttribute.Line,
+                        Exception = e,
+                        TestClassType = type,
+                    });
+                }
             }
+        }
+        return testsBuilderDynamicTests;
+    }
+
+    private static void BuildTests(IDataAttribute typeDataAttribute, Type type, object?[] classInstanceArguments, MethodInfo testMethod, IDataAttribute testDataAttribute,
+        List<DynamicTest> testsBuilderDynamicTests, TestAttribute testAttribute)
+    {
+        try
+        {
+            var instance = CreateInstance(typeDataAttribute, type, classInstanceArguments, out var exception);
+
+            foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, instance, classInstanceArguments))
+            {
+                testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
+                {
+                    TestMethodArguments = testArguments,
+                    Attributes =
+                    [
+                        ..testMethod.GetCustomAttributes(),
+                        ..type.GetCustomAttributes(),
+                        ..type.Assembly.GetCustomAttributes()
+                    ],
+                    TestName = testMethod.Name,
+                    TestClassArguments = classInstanceArguments,
+                    TestFilePath = testAttribute.File,
+                    TestLineNumber = testAttribute.Line,
+                    Exception = exception,
+                });
+            }
+        }
+        catch (Exception e)
+        {
+            testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest
+            {
+                MethodName = testMethod.Name,
+                TestFilePath = testAttribute.File,
+                TestLineNumber = testAttribute.Line,
+                Exception = e,
+                TestClassType = type,
+            });
         }
     }
 

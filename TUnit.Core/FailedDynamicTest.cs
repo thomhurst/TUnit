@@ -20,6 +20,7 @@ public record FailedDynamicTest<
     {
         return new DynamicTest<TClassType>
         {
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             TestMethod = @class => @class.GetType(),
             TestClassArguments = [],
             Properties = [],
