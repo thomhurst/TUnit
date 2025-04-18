@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Testing;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -59,7 +60,7 @@ internal partial class TestsBase<TGenerator> where TGenerator : IIncrementalGene
                 )
             );
         }
-
+        
         // To run generators, we can use an empty compilation.
 
         var compilation = CSharpCompilation.Create(
@@ -72,6 +73,13 @@ internal partial class TestsBase<TGenerator> where TGenerator : IIncrementalGene
             .WithReferences(ReferencesHelper.References)
             .AddSyntaxTrees(additionalSources.Select(x => CSharpSyntaxTree.ParseText(x)));
 
+        foreach (var additionalPackage in runTestOptions.AdditionalPackages)
+        {
+            var downloaded = await NuGetDownloader.DownloadPackageAsync(additionalPackage.Id, additionalPackage.Version);
+            
+            compilation = compilation.AddReferences(downloaded);
+        }
+        
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
 
