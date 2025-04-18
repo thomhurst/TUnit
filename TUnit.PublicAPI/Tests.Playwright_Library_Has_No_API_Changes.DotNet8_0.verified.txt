@@ -1,11 +1,11 @@
 ﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
+public static class AssemblyLoader_Guid
+{
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    public static void Initialize() { }
+}
 namespace TUnit.Playwright
 {
-    public static class AssemblyLoader
-    {
-        [System.Runtime.CompilerServices.ModuleInitializer]
-        public static void Initialize() { }
-    }
     public class BrowserTest : TUnit.Playwright.PlaywrightTest
     {
         public BrowserTest() { }

@@ -10,7 +10,7 @@ internal class AssemblyLoaderTests : TestsBase<AssemblyLoaderGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "BasicTests.cs"),
-        new RunTestOptions()
+        new RunTestOptions
         {
             VerifyConfigurator = verify =>
             {
