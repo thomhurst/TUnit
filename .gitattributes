@@ -2,3 +2,6 @@
 # Set default behavior to automatically normalize line endings.
 ###############################################################################
 * text=auto
+
+# Verify
+*.verified.txt text eol=lf working-tree-encoding=UTF-8

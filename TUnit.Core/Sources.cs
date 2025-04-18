@@ -1,4 +1,6 @@
-﻿using TUnit.Core.Interfaces.SourceGenerator;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
+using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
 
@@ -7,12 +9,13 @@ namespace TUnit.Core;
 #endif
 internal static class Sources
 {
-    public static readonly List<ITestSource> TestSources = [];
-    public static readonly List<IDynamicTestSource> DynamicTestSources = [];
+    public static readonly ConcurrentQueue<Func<Assembly>> AssemblyLoaders = [];
+    public static readonly ConcurrentQueue<ITestSource> TestSources = [];
+    public static readonly ConcurrentQueue<IDynamicTestSource> DynamicTestSources = [];
     
-    public static readonly List<ITestHookSource> TestHookSources = [];
-    public static readonly List<IClassHookSource> ClassHookSources = [];
-    public static readonly List<IAssemblyHookSource> AssemblyHookSources = [];
-    public static readonly List<ITestSessionHookSource> TestSessionHookSources = [];
-    public static readonly List<ITestDiscoveryHookSource> TestDiscoveryHookSources = [];
+    public static readonly ConcurrentQueue<ITestHookSource> TestHookSources = [];
+    public static readonly ConcurrentQueue<IClassHookSource> ClassHookSources = [];
+    public static readonly ConcurrentQueue<IAssemblyHookSource> AssemblyHookSources = [];
+    public static readonly ConcurrentQueue<ITestSessionHookSource> TestSessionHookSources = [];
+    public static readonly ConcurrentQueue<ITestDiscoveryHookSource> TestDiscoveryHookSources = [];
 }

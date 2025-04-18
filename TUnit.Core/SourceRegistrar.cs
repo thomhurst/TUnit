@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -13,12 +14,21 @@ namespace TUnit.Core;
 public class SourceRegistrar
 {
     /// <summary>
+    /// Registers an assembly loader.
+    /// </summary>
+    /// <param name="assemblyLoader">The assembly loader to register.</param>
+    public static void RegisterAssembly(Func<Assembly> assemblyLoader)
+    {
+        Sources.AssemblyLoaders.Enqueue(assemblyLoader);
+    }
+    
+    /// <summary>
     /// Registers a test source.
     /// </summary>
     /// <param name="testSource">The test source to register.</param>
     public static void Register(ITestSource testSource)
     {
-        Sources.TestSources.Add(testSource);
+        Sources.TestSources.Enqueue(testSource);
     }
     
     /// <summary>
@@ -27,7 +37,7 @@ public class SourceRegistrar
     /// <param name="testSource">The test source to register.</param>
     public static void RegisterDynamic(IDynamicTestSource testSource)
     {
-        Sources.DynamicTestSources.Add(testSource);
+        Sources.DynamicTestSources.Enqueue(testSource);
     }
 
     /// <summary>
@@ -36,7 +46,7 @@ public class SourceRegistrar
     /// <param name="testSource">The test hook source to register.</param>
     public static void RegisterTestHookSource(ITestHookSource testSource)
     {
-        Sources.TestHookSources.Add(testSource);
+        Sources.TestHookSources.Enqueue(testSource);
     }
 
     /// <summary>
@@ -45,7 +55,7 @@ public class SourceRegistrar
     /// <param name="testSource">The class hook source to register.</param>
     public static void RegisterClassHookSource(IClassHookSource testSource)
     {
-        Sources.ClassHookSources.Add(testSource);
+        Sources.ClassHookSources.Enqueue(testSource);
     }
 
     /// <summary>
@@ -54,7 +64,7 @@ public class SourceRegistrar
     /// <param name="testSource">The assembly hook source to register.</param>
     public static void RegisterAssemblyHookSource(IAssemblyHookSource testSource)
     {
-        Sources.AssemblyHookSources.Add(testSource);
+        Sources.AssemblyHookSources.Enqueue(testSource);
     }
 
     /// <summary>
@@ -63,7 +73,7 @@ public class SourceRegistrar
     /// <param name="testSource">The test session hook source to register.</param>
     public static void RegisterTestSessionHookSource(ITestSessionHookSource testSource)
     {
-        Sources.TestSessionHookSources.Add(testSource);
+        Sources.TestSessionHookSources.Enqueue(testSource);
     }
 
     /// <summary>
@@ -72,6 +82,6 @@ public class SourceRegistrar
     /// <param name="testSource">The test discovery hook source to register.</param>
     public static void RegisterTestDiscoveryHookSource(ITestDiscoveryHookSource testSource)
     {
-        Sources.TestDiscoveryHookSources.Add(testSource);
+        Sources.TestDiscoveryHookSources.Enqueue(testSource);
     }
 }

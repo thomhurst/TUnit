@@ -53,7 +53,7 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.5.2" />
-    <PackageVersion Include="Polyfill" Version="7.26.0" />
+    <PackageVersion Include="Polyfill" Version="7.27.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.4.5" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="0.7.6" />
@@ -63,13 +63,13 @@
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.4" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.1" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.3.0" />
-    <PackageVersion Include="Testcontainers.Redis" Version="4.3.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.4.0" />
+    <PackageVersion Include="Testcontainers.Redis" Version="4.4.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="Verify.NUnit" Version="28.16.0" />
-    <PackageVersion Include="TUnit" Version="0.19.74" />
-    <PackageVersion Include="TUnit.Core" Version="0.19.74" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.19.74" />
+    <PackageVersion Include="Verify.NUnit" Version="29.2.0" />
+    <PackageVersion Include="TUnit" Version="0.19.82" />
+    <PackageVersion Include="TUnit.Core" Version="0.19.82" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.19.82" />
     <PackageVersion Include="Verify.TUnit" Version="29.2.0" />
     <PackageVersion Include="Vogen" Version="7.0.3" />
     <PackageVersion Include="xunit" Version="2.9.3" />

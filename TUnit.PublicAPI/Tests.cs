@@ -46,6 +46,15 @@ public partial class Tests
         await Verify(publicApi)
             .AddScrubber(sb => Scrub(sb))
             .ScrubLinesWithReplace(x => x.Replace("\r\n", "\n"))
+            .ScrubLinesWithReplace(line =>
+            {
+                if (line.Contains("public static class AssemblyLoader"))
+                {
+                    return "public static class AssemblyLoader_Guid";
+                }
+
+                return line;
+            })
             .OnVerifyMismatch(async (pair, message, verify) =>
             {
                 var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
@@ -65,7 +74,7 @@ public partial class Tests
     
     private string Scrub(string text)
     {
-        return Scrub(new StringBuilder(text)).ToString();
+        return Scrub(new StringBuilder(text.Replace("\r\n", "\n"))).ToString();
     }
 
 

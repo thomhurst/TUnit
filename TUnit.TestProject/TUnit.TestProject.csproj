@@ -61,10 +61,7 @@
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
   </ItemGroup>
-  <PropertyGroup>
-           <!-- <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles> -->
-           <!-- <CompilerGeneratedFilesOutputPath>EmittedSourceGeneratedFiles</CompilerGeneratedFilesOutputPath> -->
-  </PropertyGroup>
+
   <ItemGroup>
     <None Update="Data\Blah.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -80,6 +77,22 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
   </ItemGroup>
+
+<!--      <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">-->
+<!--          <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />-->
+<!--          <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />-->
+<!--      </Target>-->
+
+<!--      <PropertyGroup>-->
+<!--          <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+<!--          <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>-->
+<!--      </PropertyGroup>-->
+
+<!--      <ItemGroup>-->
+<!--          <Compile Remove="SourceGeneratedViewer\**" />-->
+<!--          <None Include="SourceGeneratedViewer\**" />-->
+<!--      </ItemGroup>-->
+    
 
   <Import Project="..\TUnit.Core\TUnit.Core.targets" />
   <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
