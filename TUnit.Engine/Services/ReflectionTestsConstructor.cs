@@ -136,6 +136,17 @@ internal class ReflectionTestsConstructor(IExtension extension,
         
             return Activator.CreateInstance(type, classInstanceArguments);
         }
+        catch (TargetInvocationException targetInvocationException)
+        {
+            if (targetInvocationException.InnerException != null)
+            {
+                exception = targetInvocationException.InnerException;
+                return null;
+            }
+
+            exception = targetInvocationException;
+            return null;
+        }
         catch (Exception e)
         {
             exception = e;
