@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
@@ -9,9 +10,21 @@ internal class AssemblyLoaderTests : TestsBase<AssemblyLoaderGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "BasicTests.cs"),
-        new RunTestOptions()
+        new RunTestOptions
         {
-            VerifyConfigurator = verify => verify.UniqueForTargetFrameworkAndVersion()
+            VerifyConfigurator = verify =>
+            {
+                return verify.UniqueForTargetFrameworkAndVersion()
+                    .ScrubLinesWithReplace(line =>
+                    {
+                        if (line.Contains("public static class AssemblyLoader"))
+                        {
+                            return "public static class AssemblyLoader_Guid";
+                        }
+
+                        return line;
+                    });
+            }
         },
         async generatedFiles =>
         {
