@@ -6,7 +6,18 @@ public static class AssemblyLoader_Guid
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialize()
 	{
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::NUnit.Compatibility.LongLivedMarshalByRefObject).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::NUnit.Engine.AsyncTestEngineResult).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::TUnit.Core.SourceGenerator.Tests.Options.RunTestOptions).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::TUnit.Core.SourceGenerator.DisplayFormats).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::Microsoft.CodeAnalysis.AnalyzerConfig).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::NuGet.Protocol.CachingSourceProvider).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::Microsoft.CodeAnalysis.Testing.AnalyzerTest<>).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::Microsoft.CodeAnalysis.CSharp.Conversion).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::TUnit.Assertions.AssertionData).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::TUnit.TestProject.Library.BaseTests).Assembly);
 		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::TUnit.Core.AsyncEvent<>).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::Confluent.SchemaRegistry.Serdes.ProtobufDeserializer<>).Assembly);
 	}
 }
 

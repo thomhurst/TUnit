@@ -24,11 +24,16 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         var assemblySymbols = assemblyReferences
             .Select(compilation.GetAssemblyOrModuleSymbol)
             .OfType<IAssemblySymbol>()
+            .GroupBy(x => x.Name)
+            .Where(x => x.Count() == 1)
+            .Select(x => x.First())
             .Where(x => !IsSystemAssembly(x))
             .ToArray();
 
         var types = assemblySymbols
             .Select(x => x.GlobalNamespace)
+            .Distinct(SymbolEqualityComparer.Default)
+            .OfType<INamespaceSymbol>()
             .Select(GetFirstType)
             .OfType<INamedTypeSymbol>()
             .Where(x => x.TypeKind is TypeKind.Class or TypeKind.Struct)
@@ -47,6 +52,14 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
 
         foreach (var type in types)
         {
+            if(compilation.GetTypesByMetadataName(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Length > 1)
+            {
+                // This will cause compilation errors if there are two types with the same name in different assemblies
+                // but the same namespace. We can ignore this for now.
+                // e.g. Public Signed Assembly with different versions
+                continue;
+            }
+            
             var typeName = type.GloballyQualifiedNonGeneric();
 
             if (type.IsGenericType)
