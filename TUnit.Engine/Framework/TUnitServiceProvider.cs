@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.Capabilities.TestFramework;
+﻿using System.Reflection;
+using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -83,7 +84,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var dependencyCollector = new DependencyCollector();
         
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
-        var testsConstructor = Register(new TestsConstructor(extension, testMetadataCollector, dependencyCollector, this));
+        var testsConstructor = Register<BaseTestsConstructor>(
+            IsReflectionScannerEnabled()
+                ? new ReflectionTestsConstructor(extension, dependencyCollector, this)
+                : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, this)
+        );
         var testFilterService = Register(new TestFilterService(LoggerFactory));
         
         TestGrouper = Register(new TestGrouper());
@@ -108,7 +113,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken, AssemblyHookOrchestrator, classHookOrchestrator));
         
-        TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor, extension));
+        TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor));
 
         DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(testsConstructor, testRegistrar,
             TestGrouper, TUnitMessageBus, TestsExecutor, EngineCancellationToken));
@@ -166,5 +171,14 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
         
         return capability;
+    }
+    
+    private static bool IsReflectionScannerEnabled()
+    {
+        return Assembly.GetEntryAssembly()?
+            .GetCustomAttributes()
+            .OfType<AssemblyMetadataAttribute>()
+            .FirstOrDefault(x => x.Key == "TUnit.ReflectionScanner")
+            ?.Value == "true";
     }
 }

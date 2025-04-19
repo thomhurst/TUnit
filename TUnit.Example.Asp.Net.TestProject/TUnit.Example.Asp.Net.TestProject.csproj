@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\TUnit.Core\TUnit.Core.props" />
+    <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
+    
     <PropertyGroup>
         <TargetFrameworks>net9.0</TargetFrameworks>
         <IsPackable>false</IsPackable>
@@ -24,5 +28,9 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"/>
     </ItemGroup>
+
+    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
+    <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
 
 </Project>

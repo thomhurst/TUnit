@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\TUnit.Core\TUnit.Core.props" />
+    <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
+    
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -23,5 +27,9 @@
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Playwright\TUnit.Playwright.csproj" />
     </ItemGroup>
+
+    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
+    <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
 
 </Project>

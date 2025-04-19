@@ -1,4 +1,6 @@
-﻿using Microsoft.Testing.Platform.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -6,28 +8,28 @@ using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
-internal class TestsConstructor(IExtension extension, 
-    TestsCollector testsCollector,
+[SuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
+[SuppressMessage("Trimming", "IL2070:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
+[SuppressMessage("Trimming", "IL2071:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
+[SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[SuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[SuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+internal abstract class BaseTestsConstructor(IExtension extension, 
     DependencyCollector dependencyCollector, 
     IServiceProvider serviceProvider) : IDataProducer
 {
     public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
     {
-        var testMetadatas = testsCollector.GetTests();
+        var discoveredTests = DiscoverTests();
         
-        var dynamicTests = testsCollector.GetDynamicTests();
-
-        var discoveredTests = testMetadatas.
-            Select(ConstructTest)
-            .Concat(dynamicTests.SelectMany(ConstructTests))
-            .ToArray();
-
         dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
         
         return discoveredTests;
     }
 
-    public DiscoveredTest ConstructTest(TestMetadata testMetadata)
+    protected abstract DiscoveredTest[] DiscoverTests();
+
+    internal protected DiscoveredTest ConstructTest(TestMetadata testMetadata)
     {
         var testDetails = testMetadata.BuildTestDetails();
 
@@ -47,7 +49,7 @@ internal class TestsConstructor(IExtension extension,
         return discoveredTest;
     }
 
-    public IEnumerable<DiscoveredTest> ConstructTests(DynamicTest dynamicTest)
+    internal protected IEnumerable<DiscoveredTest> ConstructTests(DynamicTest dynamicTest)
     {
         return dynamicTest.BuildTestMetadatas().Select(ConstructTest);
     }
@@ -60,7 +62,6 @@ internal class TestsConstructor(IExtension extension,
             onTestDiscoveryAttribute.OnTestDiscovery(discoveredTestContext ??= new DiscoveredTestContext(testContext));
         }
     }
-    
     
     public Task<bool> IsEnabledAsync()
     {

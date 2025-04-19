@@ -18,6 +18,9 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     /// </summary>
     public required Func<TClassType, CancellationToken, ValueTask> TestMethodFactory { get; init; }
 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    public override Type TestClassType => typeof(TClassType);
+
     /// <inheritdoc />
     public override TestDetails BuildTestDetails()
     {
@@ -74,6 +77,9 @@ public abstract record TestMetadata
     /// Gets or sets the test ID.
     /// </summary>
     public required string TestId { get; init; }
+    
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    public abstract Type TestClassType { get; }
     
     /// <summary>
     /// Gets or sets the test method information.

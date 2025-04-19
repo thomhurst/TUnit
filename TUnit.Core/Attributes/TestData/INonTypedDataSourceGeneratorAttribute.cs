@@ -1,3 +1,3 @@
 namespace TUnit.Core;
 
-internal interface INonTypedDataSource : IDataAttribute;
+internal interface INonTypedDataSourceGeneratorAttribute : IDataAttribute;

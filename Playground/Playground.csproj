@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\TUnit.Core\TUnit.Core.props" />
+    <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
+    
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
@@ -36,5 +40,9 @@
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
+
+    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
+    <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
+    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
     
 </Project>

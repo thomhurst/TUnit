@@ -2,7 +2,10 @@
 
 namespace TUnit.Core;
 
-public record FailedTestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TClassType>
+public record FailedTestMetadata<[DynamicallyAccessedMembers(
+    DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.PublicMethods
+    | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>
     where TClassType : class
 {
     public required string TestId { get; init; }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
@@ -27,6 +28,10 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
         }
     }
 
+    [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)]
     public override required Type Type { get; init; }
 
     public required string? Namespace {get; init;}

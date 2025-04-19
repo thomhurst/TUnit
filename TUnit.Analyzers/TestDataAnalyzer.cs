@@ -144,7 +144,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 CheckMethodDataSource(context, attribute, testClassType, types);
             }
             
-            if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithoutGlobalPrefix))) == true)
+            if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithoutGlobalPrefix))) == true
+                && attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.INonTypedDataSourceGeneratorAttribute.WithoutGlobalPrefix))) != true)
             {
                 CheckDataGenerator(context, attribute, types);
             }

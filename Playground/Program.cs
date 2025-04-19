@@ -11,7 +11,7 @@ public class Tests
     {
         var one = "1";
         
-        Assert.Equal("1", one);
+        Xunit.Assert.Equal("1", one);
     }
 }
 
