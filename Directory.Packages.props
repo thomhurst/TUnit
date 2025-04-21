@@ -71,7 +71,7 @@
     <PackageVersion Include="TUnit" Version="0.19.86" />
     <PackageVersion Include="TUnit.Core" Version="0.19.86" />
     <PackageVersion Include="TUnit.Assertions" Version="0.19.86" />
-    <PackageVersion Include="Verify.TUnit" Version="29.2.0" />
+    <PackageVersion Include="Verify.TUnit" Version="29.3.0" />
     <PackageVersion Include="Vogen" Version="7.0.3" />
     <PackageVersion Include="WireMock.Net" Version="1.7.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />
