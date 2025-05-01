@@ -3,7 +3,8 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 
-public partial class StringRegexAssertionTests {
+public partial class StringRegexAssertionTests 
+{
     
     #region Matches Succeeds
     [Test]
@@ -51,7 +52,11 @@ public partial class StringRegexAssertionTests {
         AsyncTestDelegate action = async () => await TUnitAssert.That(text).Matches(pattern);
 
         Exception? exception = NUnitAssert.ThrowsAsync(exceptionType,action);
-        if (exceptionType != typeof(TUnitAssertionException)) return;
+        if (exceptionType != typeof(TUnitAssertionException)) 
+        {
+            return;
+        }
+        
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             $"""
              Expected text match pattern
@@ -73,7 +78,11 @@ public partial class StringRegexAssertionTests {
         AsyncTestDelegate action = async () => await TUnitAssert.That(text).Matches(pattern); 
 
         var exception = NUnitAssert.ThrowsAsync(exceptionType, action);
-        if (exceptionType != typeof(TUnitAssertionException)) return;
+        if (exceptionType != typeof(TUnitAssertionException)) 
+        {
+            return;
+        }
+
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             $"""
              Expected text match pattern
@@ -99,7 +108,11 @@ public partial class StringRegexAssertionTests {
         AsyncTestDelegate action = async () => await TUnitAssert.That(text).Matches(regex);
 
         Exception? exception = NUnitAssert.ThrowsAsync(exceptionType, action);
-        if (exceptionType != typeof(TUnitAssertionException)) return;
+        if (exceptionType != typeof(TUnitAssertionException)) 
+        {
+            return;
+        }
+        
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             $"""
              Expected text match regex
@@ -178,7 +191,11 @@ public partial class StringRegexAssertionTests {
         AsyncTestDelegate action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
 
         Exception? exception = NUnitAssert.ThrowsAsync(exceptionType, action);
-        if (exceptionType != typeof(TUnitAssertionException)) return;
+        if (exceptionType != typeof(TUnitAssertionException)) 
+        {
+            return;
+        }
+        
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             $"""
              Expected text to not match with pattern
@@ -200,7 +217,11 @@ public partial class StringRegexAssertionTests {
         AsyncTestDelegate action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
 
         Exception? exception = NUnitAssert.ThrowsAsync(exceptionType, action);
-        if (exceptionType != typeof(TUnitAssertionException)) return;
+        if (exceptionType != typeof(TUnitAssertionException)) 
+        {
+            return;
+        }
+        
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             $"""
              Expected text to not match with pattern
@@ -226,7 +247,11 @@ public partial class StringRegexAssertionTests {
         AsyncTestDelegate action = async () => await TUnitAssert.That(text).DoesNotMatch(regex);
 
         Exception? exception = NUnitAssert.ThrowsAsync(exceptionType, action);
-        if (exceptionType != typeof(TUnitAssertionException)) return;
+        if (exceptionType != typeof(TUnitAssertionException)) 
+        {
+            return;
+        }
+        
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             $"""
              Expected text to not match with regex
