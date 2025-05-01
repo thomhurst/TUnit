@@ -73,7 +73,7 @@ public static partial class DoesNotExtensions
                     return !regex.IsMatch(actual);
                 },
                 (actual, _, _) => $"The regex \"{regex}\" matches with \"{actual}\"",
-                $"does not match with {expression}")
+                $"to not match with {expression}")
             , [expression]);
     }
 }
