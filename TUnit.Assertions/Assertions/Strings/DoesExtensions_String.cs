@@ -84,22 +84,4 @@ public static partial class DoesExtensions
             $"match {expression}")
             , [expression]);
     }
-    
-    public static InvokableValueAssertionBuilder<string> DoesNotMatch(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
-    {
-        return DoesNotMatch(valueSource, new Regex(regex), expression);
-    }
-    
-    public static InvokableValueAssertionBuilder<string> DoesNotMatch(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
-    {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, Regex>(regex,
-                (actual, _, _) =>
-                {
-                    Verify.ArgNotNull(actual);
-                    return !regex.IsMatch(actual);
-                },
-                (actual, _, _) => $"The regex \"{regex}\" matches with \"{actual}\"",
-                $"does not match with {expression}")
-            , [expression]);
-    }
 }
