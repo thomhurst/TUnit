@@ -38,8 +38,8 @@ public abstract class InvokableTestBase(TestMode testMode)
     {
         return testMode switch
         {
-            TestMode.SourceGenerated => RunWithoutAot(filter, assertions, runOptions.WithArgument("/p:TUnitReflectionScanner=false"), assertionExpression),
-            TestMode.Reflection => RunWithoutAot(filter, assertions, runOptions.WithArgument("/p:TUnitReflectionScanner=true"), assertionExpression),
+            TestMode.SourceGenerated => RunWithoutAot(filter, assertions, runOptions.WithArgument("--property:TUnitReflectionScanner=false"), assertionExpression),
+            TestMode.Reflection => RunWithoutAot(filter, assertions, runOptions.WithArgument("--property:TUnitReflectionScanner=true"), assertionExpression),
             TestMode.AOT => RunWithAot(filter, assertions, runOptions, assertionExpression),
             TestMode.SingleFileApplication => RunWithSingleFile(filter, assertions, runOptions, assertionExpression),
             _ => throw new ArgumentOutOfRangeException(nameof(testMode), testMode, null)
