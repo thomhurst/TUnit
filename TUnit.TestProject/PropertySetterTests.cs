@@ -96,7 +96,7 @@ public class PropertySetterTests
 
             if (IsMatchingTestFilter())
             {
-                await FilePolyfill.WriteAllTextAsync($"Property_IAsyncDisposable_{TestSessionContext.Current!.Id}.txt", "true");
+                await FilePolyfill.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
             }
         }
     }
@@ -119,7 +119,7 @@ public class PropertySetterTests
 
             if (IsMatchingTestFilter())
             {
-                await FilePolyfill.WriteAllTextAsync($"StaticProperty_IAsyncDisposable_{TestSessionContext.Current!.Id}.txt", "true");
+                await FilePolyfill.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
             }
         }
     }
@@ -131,13 +131,13 @@ public class PropertySetterTests
         if (GlobalContext.Current.TestFilter is "/*/*/PropertySetterTests/*")
         {
             Console.WriteLine(message);
-            await FilePolyfill.AppendAllLinesAsync($"PropertySetterTests_CapturedOutput_{TestSessionContext.Current!.Id}.txt", [message]);
+            await FilePolyfill.AppendAllLinesAsync($"PropertySetterTests_CapturedOutput.txt", [message]);
         }
 
         if (GlobalContext.Current.TestFilter is "/*/*/InheritedPropertySetterTests/*")
         {
             Console.WriteLine(message);
-            await FilePolyfill.AppendAllLinesAsync($"InheritedPropertySetterTests_CapturedOutput_{TestSessionContext.Current!.Id}.txt", [message]);
+            await FilePolyfill.AppendAllLinesAsync("InheritedPropertySetterTests_CapturedOutput.txt", [message]);
         }
     }
 
