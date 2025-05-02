@@ -106,6 +106,7 @@ namespace TUnit.Assertions
         Field = 1,
         Value = 2,
         EnumerableItem = 3,
+        DictionaryItem = 4,
     }
 }
 namespace TUnit.Assertions.AssertConditions

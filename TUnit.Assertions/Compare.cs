@@ -26,7 +26,11 @@ public static class Compare
         TExpected expected, CompareOptions options, 
         int? index)
     {
-        return CheckEquivalent(actual, expected, options, [InitialMemberName<TActual>(actual, index)], MemberType.Value, []);
+        var initialMemberName = InitialMemberName<TActual>(actual, index);
+        
+        string[] memberNames = string.IsNullOrEmpty(initialMemberName) ? [] : [initialMemberName];
+        
+        return CheckEquivalent(actual, expected, options, memberNames, MemberType.Value, []);
     }
     
     private static IEnumerable<ComparisonFailure> CheckEquivalent<
@@ -75,6 +79,27 @@ public static class Compare
 
         if (!visited.Add(actual))
         {
+            yield break;
+        }
+        
+        if(actual is IDictionary actualDictionary && expected is IDictionary expectedDictionary)
+        {
+            var keys = actualDictionary.Keys.Cast<object>()
+                .Concat(expectedDictionary.Keys.Cast<object>())
+                .Distinct()
+                .ToArray();
+
+            foreach (var key in keys)
+            {
+                var actualObject = actualDictionary[key];
+                var expectedObject = expectedDictionary[key];
+
+                foreach (var comparisonFailure in CheckEquivalent(actualObject, expectedObject, options,
+                             [..memberNames, $"[{key}]"], MemberType.EnumerableItem, visited))
+                {
+                    yield return comparisonFailure;
+                }
+            }
             yield break;
         }
 
@@ -206,6 +231,11 @@ public static class Compare
 
     private static string InitialMemberName<TActual>(object? actual, int? index)
     {
+        if (actual is IEnumerable)
+        {
+            return string.Empty;
+        }
+        
         var type = actual?.GetType().Name ?? typeof(TActual).Name;
         
         if (index is null)

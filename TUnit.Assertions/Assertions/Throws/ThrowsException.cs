@@ -38,7 +38,7 @@ public class ThrowsException<TActual, TException> where TException : Exception
     public ThrowsException<TActual, Exception> WithInnerException()
     {
         _source.AppendExpression($"{nameof(WithInnerException)}()");
-        return new(_delegateAssertionBuilder, _source, e => _selector(e)?.InnerException);
+        return new ThrowsException<TActual, Exception>(_delegateAssertionBuilder, _source, e => _selector(e)?.InnerException);
     }
 
     public TaskAwaiter<TException?> GetAwaiter()
@@ -57,18 +57,5 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public DelegateOr<object?> Or => _delegateAssertionBuilder.Or;
 
-    internal void RegisterAssertion(BaseAssertCondition<TActual> condition, string?[] argumentExpressions, [CallerMemberName] string? caller = null) => _source.RegisterAssertion(condition, argumentExpressions, caller);
-
     internal void RegisterAssertion(Func<Func<Exception?, Exception?>, BaseAssertCondition<TActual>> conditionFunc, string?[] argumentExpressions, [CallerMemberName] string? caller = null) => _source.RegisterAssertion(conditionFunc(_selector), argumentExpressions, caller);
-
-    private async ValueTask<AssertionData> AssertionDataTask()
-    {
-        var assertionData = await _delegateAssertionBuilder.ProcessAssertionsAsync();
-
-        return assertionData with
-        {
-            Result = assertionData.Exception as TException,
-            Exception = null
-        };
-    }
 }
