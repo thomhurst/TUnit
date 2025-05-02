@@ -36,8 +36,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -182,8 +181,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[

@@ -36,8 +36,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -216,8 +215,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -413,8 +411,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -587,8 +584,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -744,8 +740,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -907,8 +902,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1070,8 +1064,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1239,8 +1232,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1385,8 +1377,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1531,8 +1522,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1677,8 +1667,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1824,7 +1813,6 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				Attributes = 
 				[
 					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute(),
 					new global::TUnit.Core.MatrixExclusionAttribute(1, 1),
 					new global::TUnit.Core.MatrixExclusionAttribute(2, 2),
 					new global::TUnit.Core.MatrixExclusionAttribute(3, 3)

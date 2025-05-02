@@ -120,7 +120,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					ReturnType = typeof(void),
 					Attributes = 
 					[
-																	],
+											],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>

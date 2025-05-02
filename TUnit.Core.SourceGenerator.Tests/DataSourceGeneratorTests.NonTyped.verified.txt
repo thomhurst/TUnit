@@ -36,7 +36,6 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.TestProject.Attributes.AutoDataAttribute(),
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 

@@ -667,7 +667,6 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				Attributes = 
 				[
 					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute(),
 					new global::TUnit.Core.TimeoutAttribute(5_000),
 					new global::TUnit.Core.CategoryAttribute("Blah")
 				],
