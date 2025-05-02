@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 

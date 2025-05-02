@@ -1,5 +1,6 @@
 ﻿using Shouldly;
 using TUnit.Engine.Tests.Attributes;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 

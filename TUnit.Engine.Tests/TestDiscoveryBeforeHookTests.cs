@@ -1,4 +1,5 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 using TUnit.Engine.Tests.Extensions;
 
 namespace TUnit.Engine.Tests;
