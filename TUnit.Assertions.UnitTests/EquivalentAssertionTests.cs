@@ -82,6 +82,24 @@ public class EquivalentAssertionTests
     }
     
     [Test]
+    public async Task Different_Dictionaries_Are_Equivalent_With_Different_Ordered_Keys()
+    {
+        var dict1 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "A", "A" },
+            { "B", "B" },
+        };
+
+        var dict2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "B", "B" },
+            { "A", "A" },
+        };
+
+        await TUnitAssert.That(dict1).IsEquivalentTo(dict2);
+    }
+    
+    [Test]
     public async Task Different_Enumerables_Are_Equivalent_Any_Order()
     {
         List<int> list = [1, 2, 3, 4, 5];
@@ -356,7 +374,7 @@ public class EquivalentAssertionTests
             """
             Expected object1 to be equivalent to object2
             
-            but EnumerableItem MyClass.Inner.Inner.Collection.[3] did not match
+            but MyClass.Inner.Inner.Collection.[3] did not match
             Expected: "4"
             Received: null
             
