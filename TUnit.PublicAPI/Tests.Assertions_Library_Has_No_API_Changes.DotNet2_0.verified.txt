@@ -51,12 +51,10 @@ namespace TUnit.Assertions
     }
     public class AssertionMetadata
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public AssertionMetadata() { }
         public System.TimeSpan Duration { get; }
-        public System.DateTimeOffset EndTime { get; init; }
-        public System.DateTimeOffset StartTime { get; init; }
+        public required System.DateTimeOffset EndTime { get; init; }
+        public required System.DateTimeOffset StartTime { get; init; }
     }
     public class CollectionWrapper<TInner>
     {
@@ -77,13 +75,11 @@ namespace TUnit.Assertions
     }
     public class ComparisonFailure : System.IEquatable<TUnit.Assertions.ComparisonFailure>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public ComparisonFailure() { }
-        public object? Actual { get; init; }
-        public object? Expected { get; init; }
-        public string[] NestedMemberNames { get; init; }
-        public TUnit.Assertions.MemberType Type { get; init; }
+        public required object? Actual { get; init; }
+        public required object? Expected { get; init; }
+        public required string[] NestedMemberNames { get; init; }
+        public required TUnit.Assertions.MemberType Type { get; init; }
     }
     public static class Fail
     {
