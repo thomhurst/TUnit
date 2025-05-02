@@ -10,6 +10,7 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 using TUnit.Engine.Capabilities;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
@@ -85,7 +86,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
         var testsConstructor = Register<BaseTestsConstructor>(
-            IsReflectionScannerEnabled()
+            IsReflectionScannerEnabled(Logger)
                 ? new ReflectionTestsConstructor(extension, dependencyCollector, this)
                 : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, this)
         );
@@ -173,12 +174,19 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         return capability;
     }
     
-    private static bool IsReflectionScannerEnabled()
+    private static bool IsReflectionScannerEnabled(TUnitFrameworkLogger logger)
     {
-        return Assembly.GetEntryAssembly()?
+        var isReflectionScannerEnabled = Assembly.GetEntryAssembly()?
             .GetCustomAttributes()
             .OfType<AssemblyMetadataAttribute>()
             .FirstOrDefault(x => x.Key == "TUnit.ReflectionScanner")
             ?.Value == "true";
+
+        if (isReflectionScannerEnabled)
+        {
+            logger.LogInformation("TUnit is in ReflectionScanner mode as opposed to SourceGenerated mode.");
+        }
+        
+        return isReflectionScannerEnabled;
     }
 }
