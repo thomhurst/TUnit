@@ -43,22 +43,23 @@ public class EquivalentToExpectedValueAssertCondition<
                     "it is not null");
         }
 
-        if (actualValue is IEnumerable actualEnumerable && ExpectedValue is IEnumerable expectedEnumerable)
-        {
-            var collectionEquivalentToEqualityComparer = new CollectionEquivalentToEqualityComparer<object?>(
-                new CompareOptions
-                {
-                    MembersToIgnore = [.._ignoredMembers],
-                    EquivalencyKind = EquivalencyKind,
-                });
-            
-            var castedActual = actualEnumerable.Cast<object?>().ToArray();
-
-            return AssertionResult
-                .FailIf(!castedActual.SequenceEqual(expectedEnumerable.Cast<object?>(),
-                        collectionEquivalentToEqualityComparer),
-                    $"{GetFailureMessage(castedActual, collectionEquivalentToEqualityComparer)}");
-        }
+        // if (actualValue is IEnumerable actualEnumerable && ExpectedValue is IEnumerable expectedEnumerable
+        //     && actualValue is not IDictionary && ExpectedValue is not IDictionary)
+        // {
+        //     var collectionEquivalentToEqualityComparer = new CollectionEquivalentToEqualityComparer<object?>(
+        //         new CompareOptions
+        //         {
+        //             MembersToIgnore = [.._ignoredMembers],
+        //             EquivalencyKind = EquivalencyKind,
+        //         });
+        //     
+        //     var castedActual = actualEnumerable.Cast<object?>().ToArray();
+        //
+        //     return AssertionResult
+        //         .FailIf(!castedActual.SequenceEqual(expectedEnumerable.Cast<object?>(),
+        //                 collectionEquivalentToEqualityComparer),
+        //             $"{GetFailureMessage(castedActual, collectionEquivalentToEqualityComparer)}");
+        // }
 
         bool? isEqual = null;
         
@@ -69,13 +70,6 @@ public class EquivalentToExpectedValueAssertCondition<
         else if (ExpectedValue is IEqualityComparer expectedBasicEqualityComparer)
         {
             isEqual = expectedBasicEqualityComparer.Equals(actualValue, ExpectedValue);
-        }
-        else if (actualValue is IEnumerable enumerable && ExpectedValue is IEnumerable enumerable2)
-        {
-            IEnumerable<object> castedEnumerable = [..enumerable];
-            IEnumerable<object> castedEnumerable2 = [..enumerable2];
-            
-            isEqual = castedEnumerable.SequenceEqual(castedEnumerable2);
         }
         if (isEqual != null)
         {
@@ -95,6 +89,15 @@ public class EquivalentToExpectedValueAssertCondition<
             if (firstFailure.Type == MemberType.Value)
             {
                 return FailWithMessage(Formatter.Format(firstFailure.Actual));
+            }
+            
+            if (firstFailure.Type == MemberType.EnumerableItem)
+            {
+                return FailWithMessage($"""
+                                        {string.Join(".", firstFailure.NestedMemberNames)} did not match
+                                        Expected: {Formatter.Format(firstFailure.Expected)}
+                                        Received: {Formatter.Format(firstFailure.Actual)}
+                                        """);
             }
 
             return FailWithMessage($"""

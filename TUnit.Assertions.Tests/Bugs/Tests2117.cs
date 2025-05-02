@@ -26,17 +26,21 @@ public class Tests2117
     [Arguments(new[] { 1, 2, 3 }, new[] { 1, 2, 3, 4 }, null,
         """
         Expected a to be equivalent to [1, 2, 3, 4]
-
-        but it is [1, 2, 3]
-
+        
+        but [3] did not match
+        Expected: 4
+        Received: null
+        
         at Assert.That(a).IsEquivalentTo(b)
         """)]
     [Arguments(new[] { 1, 2, 3 }, new[] { 3, 2, 1 }, null,
         """
         Expected a to be equivalent to [3, 2, 1]
-
-        but it is [1, 2, 3]
-
+        
+        but [0] did not match
+        Expected: 3
+        Received: 1
+        
         at Assert.That(a).IsEquivalentTo(b)
         """)]
     public async Task IsEquivalent_Fail(int[] a, int[] b, CollectionOrdering? collectionOrdering, string expectedError)
@@ -69,9 +73,9 @@ public class Tests2117
     [Arguments(new[] { 1, 2, 3 }, new[] { 1, 2, 3 }, null,
         """
         Expected a to not be equivalent to [1, 2, 3]
-
-        but the two Enumerables were equivalent
-
+        
+        but it is
+        
         at Assert.That(a).IsNotEquivalentTo(b)
         """)]
     public async Task IsNotEquivalent_Fail(int[] a, int[] b, CollectionOrdering? collectionOrdering, string expectedError)
