@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
@@ -19,20 +18,16 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
 
     private void GenerateCode(SourceProductionContext context, Compilation compilation, ImmutableArray<MetadataReference> metadataReferences)
     {
-        var assemblyReferences = metadataReferences.Where(x => x.Properties.Kind == MetadataImageKind.Assembly);
+        var assemblyReferences = metadataReferences
+            .Where(x => x.Properties.Kind == MetadataImageKind.Assembly)
+            .Where(x => !string.IsNullOrEmpty(x.Display));
 
         var assemblySymbols = assemblyReferences
             .Select(compilation.GetAssemblyOrModuleSymbol)
             .OfType<IAssemblySymbol>()
             .Where(x => !IsSystemAssembly(x))
-            .ToArray();
-
-        var types = assemblySymbols
-            .Select(x => x.GlobalNamespace)
-            .Select(GetFirstType)
-            .OfType<INamedTypeSymbol>()
-            .Where(x => x.TypeKind is TypeKind.Class or TypeKind.Struct)
-            .ToArray();
+            .Select(GetAssemblyFullName)
+            .Distinct();
         
         var sourceBuilder = new SourceCodeWriter();
 
@@ -45,16 +40,9 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("public static void Initialize()");
         sourceBuilder.WriteLine("{");
 
-        foreach (var type in types)
+        foreach (var assembly in assemblySymbols)
         {
-            var typeName = type.GloballyQualifiedNonGeneric();
-
-            if (type.IsGenericType)
-            {
-                typeName += $"<{new string(',', type.TypeParameters.Length - 1)}>";
-            }
-
-            sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof({typeName}).Assembly);");
+            sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{assembly}\"));");
         }
 
         sourceBuilder.WriteLine("}");
@@ -63,33 +51,6 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         context.AddSource("AssemblyLoader.g.cs", sourceBuilder.ToString());
     }
 
-    private static INamedTypeSymbol? GetFirstType(INamespaceSymbol @namespace)
-    {
-        var typeMembers = @namespace.GetTypeMembers()
-            .Where(x => x.DeclaredAccessibility == Accessibility.Public && !x.IsStatic)
-            .ToImmutableArray();
-        
-        if (!typeMembers.IsDefaultOrEmpty)
-        {
-            return typeMembers[0];
-        }
-
-        var namespaceMembers = @namespace.GetNamespaceMembers().ToImmutableArray();
-
-        if (!namespaceMembers.IsDefaultOrEmpty)
-        {
-            foreach (var namespaceMember in namespaceMembers)
-            {
-                if (GetFirstType(namespaceMember) is { } namedType)
-                {
-                    return namedType;
-                }
-            }
-        }
-        
-        return null;
-    }
-    
     private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)
     {
         // Check for well-known public key tokens of system assemblies
@@ -104,6 +65,12 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
             || publicKeyToken.SequenceEqual(new byte[] { 0x7c, 0xec, 0x85, 0xd7, 0xbe, 0xa7, 0x79, 0x8e }) // .NET Core
             || publicKeyToken.SequenceEqual(new byte[] { 0xcc, 0x7b, 0x13, 0xff, 0xcd, 0x2d, 0xdd, 0x51 }) // System.Private
             || publicKeyToken.SequenceEqual(new byte[] { 0xb0, 0x3f, 0x5f, 0x7f, 0x11, 0xd5, 0x0a, 0x3a }); // mscorlib
+    }
+    
+    private static string GetAssemblyFullName(IAssemblySymbol assemblySymbol)
+    {
+        var identity = assemblySymbol.Identity;
+        return $"{identity.Name}, Version={identity.Version}, Culture={(string.IsNullOrEmpty(identity.CultureName) ? "neutral" : identity.CultureName)}, PublicKeyToken={(identity.PublicKeyToken.Length > 0 ? BitConverter.ToString(identity.PublicKeyToken.ToArray()).Replace("-", "").ToLowerInvariant() : "null")}";
     }
 
     private class AssemblyComparer : IEqualityComparer<ImmutableArray<MetadataReference>>

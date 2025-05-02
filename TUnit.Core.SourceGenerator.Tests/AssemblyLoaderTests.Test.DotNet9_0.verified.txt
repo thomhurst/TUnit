@@ -6,7 +6,27 @@ public static class AssemblyLoader_Guid
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialize()
 	{
-		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => typeof(global::TUnit.Core.AsyncEvent<>).Assembly);
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("NUnit3.TestAdapter, Version=4.6.0.0, Culture=neutral, PublicKeyToken=4cb40d35494691ac"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("nunit.engine.api, Version=3.0.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("nunit.engine, Version=3.18.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("nunit.engine.core, Version=3.18.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("testcentric.engine.metadata, Version=2.0.0.0, Culture=neutral, PublicKeyToken=6fe0a02d2036aa1d"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Core.SourceGenerator.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("nunit.framework, Version=4.3.2.0, Culture=neutral, PublicKeyToken=2638cd05610744eb"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Core.SourceGenerator, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Microsoft.CodeAnalysis, Version=4.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("NuGet.Protocol, Version=6.13.2.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Verify, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Microsoft.CodeAnalysis.Analyzer.Testing, Version=1.1.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Microsoft.CodeAnalysis.CSharp, Version=4.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Verify.NUnit, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("DiffEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Assertions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b8d4030011dbd70c"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.TestProject.Library, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b8d4030011dbd70c"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Confluent.SchemaRegistry.Serdes.Protobuf, Version=2.10.0.0, Culture=neutral, PublicKeyToken=6f85e24b3ffa9bd0"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("WireMock.Net, Version=1.7.4.0, Culture=neutral, PublicKeyToken=c8d65537854e1f03"));
 	}
 }
 

@@ -5,5 +5,6 @@ public enum MemberType
     Property,
     Field,
     Value,
-    EnumerableItem
+    EnumerableItem,
+    DictionaryItem
 }

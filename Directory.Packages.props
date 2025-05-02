@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Protobuf" Version="2.10.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="CliWrap" Version="3.8.2" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="2.1.0" />
@@ -33,7 +34,7 @@
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageVersion Include="Microsoft.Playwright" Version="1.51.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.52.0" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="1.6.3" />
@@ -47,6 +48,7 @@
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.43.0" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.8.3" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.8.3" />
+    <PackageVersion Include="NuGet.Protocol" Version="6.13.2" />
     <PackageVersion Include="NUnit" Version="4.3.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.7.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
@@ -54,7 +56,7 @@
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.5.2" />
     <PackageVersion Include="Polyfill" Version="7.27.0" />
-    <PackageVersion Include="PublicApiGenerator" Version="11.4.5" />
+    <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="0.7.6" />
     <PackageVersion Include="Sourcy.Git" Version="0.7.6" />
@@ -66,12 +68,13 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.4.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.4.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="Verify.NUnit" Version="29.2.0" />
-    <PackageVersion Include="TUnit" Version="0.19.82" />
-    <PackageVersion Include="TUnit.Core" Version="0.19.82" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.19.82" />
-    <PackageVersion Include="Verify.TUnit" Version="29.2.0" />
+    <PackageVersion Include="Verify.NUnit" Version="29.5.0" />
+    <PackageVersion Include="TUnit" Version="0.19.112" />
+    <PackageVersion Include="TUnit.Core" Version="0.19.112" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.19.112" />
+    <PackageVersion Include="Verify.TUnit" Version="30.0.0" />
     <PackageVersion Include="Vogen" Version="7.0.3" />
+    <PackageVersion Include="WireMock.Net" Version="1.8.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.2" />
