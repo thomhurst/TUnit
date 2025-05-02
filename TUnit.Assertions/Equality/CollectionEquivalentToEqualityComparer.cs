@@ -9,7 +9,6 @@ public class CollectionEquivalentToEqualityComparer<[DynamicallyAccessedMembers(
 {
     public CollectionEquivalentToEqualityComparer() : this(new CompareOptions())
     {
-        Assembly.
     }
     
     public override int? EnumerableIndex { get; protected set; } = 0;
