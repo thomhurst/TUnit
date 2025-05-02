@@ -41,17 +41,15 @@ namespace TUnit.Core
     }
     public class Artifact
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public Artifact() { }
         public string? Description { get; init; }
-        public string DisplayName { get; init; }
-        public System.IO.FileInfo File { get; init; }
+        public required string DisplayName { get; init; }
+        public required System.IO.FileInfo File { get; init; }
     }
     public class AssemblyHookContext : TUnit.Core.Context
     {
         public System.Collections.Generic.IEnumerable<TUnit.Core.TestContext> AllTests { get; }
-        public System.Reflection.Assembly Assembly { get; init; }
+        public required System.Reflection.Assembly Assembly { get; init; }
         public System.Collections.Generic.HashSet<TUnit.Core.ClassHookContext> TestClasses { get; init; }
         public int TestCount { get; }
         public new static TUnit.Core.AssemblyHookContext? Current { get; }
@@ -97,7 +95,7 @@ namespace TUnit.Core
     }
     public class BeforeTestDiscoveryContext : TUnit.Core.Context
     {
-        public string? TestFilter { get; init; }
+        public required string? TestFilter { get; init; }
         public new static TUnit.Core.BeforeTestDiscoveryContext? Current { get; }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
@@ -121,11 +119,9 @@ namespace TUnit.Core
     }
     public class ClassConstructorMetadata : System.IEquatable<TUnit.Core.ClassConstructorMetadata>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public ClassConstructorMetadata() { }
-        public TUnit.Core.TestBuilderContext TestBuilderContext { get; init; }
-        public string TestSessionId { get; init; }
+        public required TUnit.Core.TestBuilderContext TestBuilderContext { get; init; }
+        public required string TestSessionId { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T> : TUnit.Core.DataSourceGeneratorAttribute<T>
@@ -184,7 +180,7 @@ namespace TUnit.Core
     }
     public class ClassHookContext : TUnit.Core.Context
     {
-        public System.Type ClassType { get; init; }
+        public required System.Type ClassType { get; init; }
         public int TestCount { get; }
         public System.Collections.Generic.List<TUnit.Core.TestContext> Tests { get; init; }
         public new static TUnit.Core.ClassHookContext? Current { get; }
@@ -209,17 +205,15 @@ namespace TUnit.Core
     }
     public class DataGeneratorMetadata : System.IEquatable<TUnit.Core.DataGeneratorMetadata>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public DataGeneratorMetadata() { }
-        public object?[]? ClassInstanceArguments { get; init; }
-        public TUnit.Core.SourceGeneratedMemberInformation[] MembersToGenerate { get; init; }
-        public TUnit.Core.TestBuilderContextAccessor TestBuilderContext { get; init; }
-        public object? TestClassInstance { get; init; }
+        public required object?[]? ClassInstanceArguments { get; init; }
+        public required TUnit.Core.SourceGeneratedMemberInformation[] MembersToGenerate { get; init; }
+        public required TUnit.Core.TestBuilderContextAccessor TestBuilderContext { get; init; }
+        public required object? TestClassInstance { get; init; }
         public System.Type TestClassType { get; }
-        public TUnit.Core.SourceGeneratedMethodInformation TestInformation { get; init; }
-        public string TestSessionId { get; init; }
-        public TUnit.Core.Enums.DataGeneratorType Type { get; init; }
+        public required TUnit.Core.SourceGeneratedMethodInformation TestInformation { get; init; }
+        public required string TestSessionId { get; init; }
+        public required TUnit.Core.Enums.DataGeneratorType Type { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
     public abstract class DataSourceGeneratorAttribute<T> : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
@@ -321,15 +315,13 @@ namespace TUnit.Core
     }
     public abstract class DynamicTest : System.IEquatable<TUnit.Core.DynamicTest>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         protected DynamicTest() { }
         public System.Attribute[] Attributes { get; init; }
         public System.Collections.Generic.Dictionary<string, object?>? Properties { get; init; }
         public object?[]? TestClassArguments { get; init; }
         public abstract System.Type TestClassType { get; }
         public abstract string TestId { get; }
-        public object?[] TestMethodArguments { get; init; }
+        public required object?[] TestMethodArguments { get; init; }
         public string? TestName { get; init; }
         public abstract System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas();
         public System.Attribute[] GetAttributes() { }
@@ -352,12 +344,10 @@ namespace TUnit.Core
     public class DynamicTest<TClass> : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.DynamicTest<TClass>>
         where TClass :  class
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public DynamicTest() { }
         public override System.Type TestClassType { get; }
         public override string TestId { get; }
-        public System.Linq.Expressions.Expression<System.Action<TClass>> TestMethod { get; init; }
+        public required System.Linq.Expressions.Expression<System.Action<TClass>> TestMethod { get; init; }
         public override System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas() { }
         public class MethodBody : System.IEquatable<TUnit.Core.DynamicTest<TClass>.MethodBody>
         {
@@ -383,27 +373,23 @@ namespace TUnit.Core
     public class FailedDynamicTest<TClassType> : System.IEquatable<TUnit.Core.FailedDynamicTest<TClassType>>
         where TClassType :  class
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public FailedDynamicTest() { }
-        public System.Exception Exception { get; init; }
-        public string MethodName { get; init; }
-        public string TestFilePath { get; init; }
-        public string TestId { get; init; }
-        public int TestLineNumber { get; init; }
+        public required System.Exception Exception { get; init; }
+        public required string MethodName { get; init; }
+        public required string TestFilePath { get; init; }
+        public required string TestId { get; init; }
+        public required int TestLineNumber { get; init; }
         public static TUnit.Core.DynamicTest<TClassType> op_Implicit(TUnit.Core.FailedDynamicTest<TClassType> failedTestMetadata) { }
     }
     public class FailedTestMetadata<TClassType> : System.IEquatable<TUnit.Core.FailedTestMetadata<TClassType>>
         where TClassType :  class
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public FailedTestMetadata() { }
-        public System.Exception Exception { get; init; }
-        public string MethodName { get; init; }
-        public string TestFilePath { get; init; }
-        public string TestId { get; init; }
-        public int TestLineNumber { get; init; }
+        public required System.Exception Exception { get; init; }
+        public required string MethodName { get; init; }
+        public required string TestFilePath { get; init; }
+        public required string TestId { get; init; }
+        public required int TestLineNumber { get; init; }
         public static TUnit.Core.TestMetadata<TClassType> op_Implicit(TUnit.Core.FailedTestMetadata<TClassType> failedTestMetadata) { }
     }
     public abstract class GenericAbstractExecutor : TUnit.Core.Interfaces.IHookExecutor, TUnit.Core.Interfaces.ITestExecutor
@@ -662,36 +648,30 @@ namespace TUnit.Core
     }
     public class SourceGeneratedAssemblyInformation : System.IEquatable<TUnit.Core.SourceGeneratedAssemblyInformation>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public SourceGeneratedAssemblyInformation() { }
-        public System.Attribute[] Attributes { get; init; }
-        public string Name { get; init; }
+        public required System.Attribute[] Attributes { get; init; }
+        public required string Name { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedAssemblyInformation? other) { }
         public override int GetHashCode() { }
         public static TUnit.Core.SourceGeneratedAssemblyInformation GetOrAdd(string name, System.Func<TUnit.Core.SourceGeneratedAssemblyInformation> factory) { }
     }
     public class SourceGeneratedClassInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedClassInformation>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public SourceGeneratedClassInformation() { }
-        public TUnit.Core.SourceGeneratedAssemblyInformation Assembly { get; init; }
-        public string? Namespace { get; init; }
-        public TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
-        public TUnit.Core.SourceGeneratedPropertyInformation[] Properties { get; init; }
-        public override System.Type Type { get; init; }
+        public required TUnit.Core.SourceGeneratedAssemblyInformation Assembly { get; init; }
+        public required string? Namespace { get; init; }
+        public required TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
+        public required TUnit.Core.SourceGeneratedPropertyInformation[] Properties { get; init; }
+        public override required System.Type Type { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedClassInformation? other) { }
         public override int GetHashCode() { }
         public static TUnit.Core.SourceGeneratedClassInformation GetOrAdd(string name, System.Func<TUnit.Core.SourceGeneratedClassInformation> factory) { }
     }
     public abstract class SourceGeneratedMemberInformation : System.IEquatable<TUnit.Core.SourceGeneratedMemberInformation>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         protected SourceGeneratedMemberInformation() { }
-        public System.Attribute[] Attributes { get; init; }
-        public string Name { get; init; }
+        public required System.Attribute[] Attributes { get; init; }
+        public required string Name { get; init; }
         public abstract System.Type Type { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedMemberInformation? other) { }
         public override int GetHashCode() { }
@@ -699,40 +679,32 @@ namespace TUnit.Core
     }
     public class SourceGeneratedMethodInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedMethodInformation>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public SourceGeneratedMethodInformation() { }
-        public TUnit.Core.SourceGeneratedClassInformation Class { get; init; }
-        public int GenericTypeCount { get; init; }
-        public TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
+        public required TUnit.Core.SourceGeneratedClassInformation Class { get; init; }
+        public required int GenericTypeCount { get; init; }
+        public required TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Reflection.MethodInfo ReflectionInformation { get; set; }
-        public System.Type ReturnType { get; init; }
-        public override System.Type Type { get; init; }
+        public required System.Type ReturnType { get; init; }
+        public override required System.Type Type { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedMethodInformation? other) { }
         public override int GetHashCode() { }
         protected override bool PrintMembers(System.Text.StringBuilder stringBuilder) { }
     }
     public class SourceGeneratedParameterInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public SourceGeneratedParameterInformation(System.Type Type) { }
         public override System.Type Type { get; init; }
     }
     public class SourceGeneratedParameterInformation<T> : TUnit.Core.SourceGeneratedParameterInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation<T>>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public SourceGeneratedParameterInformation() { }
     }
     public class SourceGeneratedPropertyInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedPropertyInformation>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public SourceGeneratedPropertyInformation() { }
-        public bool IsStatic { get; init; }
-        public override System.Type Type { get; init; }
+        public required bool IsStatic { get; init; }
+        public override required System.Type Type { get; init; }
     }
     public class SourceRegistrar
     {
@@ -813,8 +785,6 @@ namespace TUnit.Core
     }
     public abstract class TestDetails : System.IEquatable<TUnit.Core.TestDetails>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         protected TestDetails() { }
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Attribute[] AssemblyAttributes { get; }
@@ -824,78 +794,72 @@ namespace TUnit.Core
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Attribute[] ClassAttributes { get; }
         public abstract object ClassInstance { get; }
-        public int CurrentRepeatAttempt { get; init; }
+        public required int CurrentRepeatAttempt { get; init; }
         public System.Collections.Generic.IReadOnlyDictionary<string, string> CustomProperties { get; }
         [System.Text.Json.Serialization.JsonIgnore]
-        public System.Attribute[] DataAttributes { get; init; }
+        public required System.Attribute[] DataAttributes { get; init; }
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Attribute[] DynamicAttributes { get; init; }
         public TUnit.Core.Interfaces.IParallelConstraint? ParallelConstraint { get; }
         public TUnit.Core.Interfaces.IParallelLimit? ParallelLimit { get; }
-        public int RepeatLimit { get; init; }
+        public required int RepeatLimit { get; init; }
         public int RetryLimit { get; }
-        public System.Type ReturnType { get; init; }
+        public required System.Type ReturnType { get; init; }
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Attribute[] TestAttributes { get; }
         public TUnit.Core.SourceGeneratedClassInformation TestClass { get; }
-        public object?[] TestClassArguments { get; init; }
-        public object?[] TestClassInjectedPropertyArguments { get; init; }
+        public required object?[] TestClassArguments { get; init; }
+        public required object?[] TestClassInjectedPropertyArguments { get; init; }
         public System.Type[] TestClassParameterTypes { get; }
-        public string TestFilePath { get; init; }
-        public string TestId { get; init; }
-        public int TestLineNumber { get; init; }
-        public TUnit.Core.SourceGeneratedMethodInformation TestMethod { get; init; }
-        public object?[] TestMethodArguments { get; init; }
+        public required string TestFilePath { get; init; }
+        public required string TestId { get; init; }
+        public required int TestLineNumber { get; init; }
+        public required TUnit.Core.SourceGeneratedMethodInformation TestMethod { get; init; }
+        public required object?[] TestMethodArguments { get; init; }
         public System.Type[] TestMethodParameterTypes { get; }
-        public string TestName { get; init; }
+        public required string TestName { get; init; }
         public System.TimeSpan? Timeout { get; }
     }
     public class TestDetails<TClassType> : TUnit.Core.TestDetails, System.IEquatable<TUnit.Core.TestDetails<TClassType>>
         where TClassType :  class
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public TestDetails() { }
         public override object ClassInstance { get; }
         [System.Text.Json.Serialization.JsonIgnore]
-        public TUnit.Core.ResettableLazy<TClassType> LazyClassInstance { get; init; }
+        public required TUnit.Core.ResettableLazy<TClassType> LazyClassInstance { get; init; }
     }
     public class TestDiscoveryContext : TUnit.Core.Context
     {
         public System.Collections.Generic.IEnumerable<TUnit.Core.TestContext> AllTests { get; }
         public System.Collections.Generic.IEnumerable<TUnit.Core.AssemblyHookContext> Assemblies { get; }
         public System.Collections.Generic.IEnumerable<TUnit.Core.ClassHookContext> TestClasses { get; }
-        public string? TestFilter { get; init; }
+        public required string? TestFilter { get; init; }
         public new static TUnit.Core.TestDiscoveryContext? Current { get; }
     }
     public abstract class TestMetadata : System.IEquatable<TUnit.Core.TestMetadata>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         protected TestMetadata() { }
-        public int CurrentRepeatAttempt { get; init; }
+        public required int CurrentRepeatAttempt { get; init; }
         public System.Exception? DiscoveryException { get; init; }
         public System.Attribute[] DynamicAttributes { get; init; }
-        public int RepeatLimit { get; init; }
-        public TUnit.Core.TestBuilderContext TestBuilderContext { get; init; }
-        public object?[] TestClassArguments { get; init; }
-        public object?[] TestClassProperties { get; init; }
-        public string TestFilePath { get; init; }
-        public string TestId { get; init; }
-        public int TestLineNumber { get; init; }
-        public TUnit.Core.SourceGeneratedMethodInformation TestMethod { get; init; }
-        public object?[] TestMethodArguments { get; init; }
+        public required int RepeatLimit { get; init; }
+        public required TUnit.Core.TestBuilderContext TestBuilderContext { get; init; }
+        public required object?[] TestClassArguments { get; init; }
+        public required object?[] TestClassProperties { get; init; }
+        public required string TestFilePath { get; init; }
+        public required string TestId { get; init; }
+        public required int TestLineNumber { get; init; }
+        public required TUnit.Core.SourceGeneratedMethodInformation TestMethod { get; init; }
+        public required object?[] TestMethodArguments { get; init; }
         public abstract TUnit.Core.TestDetails BuildTestDetails();
         public abstract TUnit.Core.TestMetadata CloneWithNewMethodFactory(System.Func<object, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> testMethodFactory);
     }
     public class TestMetadata<TClassType> : TUnit.Core.TestMetadata, System.IEquatable<TUnit.Core.TestMetadata<TClassType>>
         where TClassType :  class
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public TestMetadata() { }
-        public TUnit.Core.ResettableLazy<TClassType> ResettableClassFactory { get; init; }
-        public System.Func<TClassType, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> TestMethodFactory { get; init; }
+        public required TUnit.Core.ResettableLazy<TClassType> ResettableClassFactory { get; init; }
+        public required System.Func<TClassType, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> TestMethodFactory { get; init; }
         public override TUnit.Core.TestDetails BuildTestDetails() { }
         public override TUnit.Core.TestMetadata CloneWithNewMethodFactory(System.Func<object, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> testMethodFactory) { }
     }
@@ -906,24 +870,22 @@ namespace TUnit.Core
     }
     public class TestResult : System.IEquatable<TUnit.Core.TestResult>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public TestResult() { }
-        public string ComputerName { get; init; }
-        public System.TimeSpan? Duration { get; init; }
-        public System.DateTimeOffset? End { get; init; }
-        public System.Exception? Exception { get; init; }
+        public required string ComputerName { get; init; }
+        public required System.TimeSpan? Duration { get; init; }
+        public required System.DateTimeOffset? End { get; init; }
+        public required System.Exception? Exception { get; init; }
         public string? Output { get; }
-        public System.DateTimeOffset? Start { get; init; }
-        public TUnit.Core.Enums.Status Status { get; init; }
+        public required System.DateTimeOffset? Start { get; init; }
+        public required TUnit.Core.Enums.Status Status { get; init; }
     }
     public class TestSessionContext : TUnit.Core.Context
     {
         public System.Collections.Generic.IEnumerable<TUnit.Core.TestContext> AllTests { get; }
         public System.Collections.Generic.IEnumerable<TUnit.Core.AssemblyHookContext> Assemblies { get; }
-        public string Id { get; init; }
+        public required string Id { get; init; }
         public System.Collections.Generic.IEnumerable<TUnit.Core.ClassHookContext> TestClasses { get; }
-        public string? TestFilter { get; init; }
+        public required string? TestFilter { get; init; }
         public new static TUnit.Core.TestSessionContext? Current { get; }
         public void AddArtifact(TUnit.Core.Artifact artifact) { }
     }
@@ -1144,71 +1106,51 @@ namespace TUnit.Core.Hooks
 {
     public class AfterAssemblyHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.AssemblyHookContext>, System.IEquatable<TUnit.Core.Hooks.AfterAssemblyHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public AfterAssemblyHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.AssemblyHookContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class AfterClassHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext>, System.IEquatable<TUnit.Core.Hooks.AfterClassHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public AfterClassHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.ClassHookContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class AfterTestDiscoveryHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestDiscoveryContext>, System.IEquatable<TUnit.Core.Hooks.AfterTestDiscoveryHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public AfterTestDiscoveryHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.TestDiscoveryContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class AfterTestHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestContext>, System.IEquatable<TUnit.Core.Hooks.AfterTestHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public AfterTestHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.TestContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class AfterTestSessionHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestSessionContext>, System.IEquatable<TUnit.Core.Hooks.AfterTestSessionHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public AfterTestSessionHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.TestSessionContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class BeforeAssemblyHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.AssemblyHookContext>, System.IEquatable<TUnit.Core.Hooks.BeforeAssemblyHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public BeforeAssemblyHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.AssemblyHookContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class BeforeClassHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.ClassHookContext>, System.IEquatable<TUnit.Core.Hooks.BeforeClassHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public BeforeClassHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.ClassHookContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class BeforeTestDiscoveryHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.BeforeTestDiscoveryContext>, System.IEquatable<TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public BeforeTestDiscoveryHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.BeforeTestDiscoveryContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class BeforeTestHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestContext>, System.IEquatable<TUnit.Core.Hooks.BeforeTestHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public BeforeTestHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.TestContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class BeforeTestSessionHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestSessionContext>, System.IEquatable<TUnit.Core.Hooks.BeforeTestSessionHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public BeforeTestSessionHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.TestSessionContext context, System.Threading.CancellationToken cancellationToken) { }
     }
@@ -1235,20 +1177,18 @@ namespace TUnit.Core.Hooks
     }
     public class InstanceHookMethod : System.IEquatable<TUnit.Core.Hooks.InstanceHookMethod>, TUnit.Core.Hooks.IExecutableHook<TUnit.Core.TestContext>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public InstanceHookMethod() { }
         public System.Reflection.Assembly Assembly { get; }
-        public System.Attribute[] AssemblyAttributes { get; init; }
+        public required System.Attribute[] AssemblyAttributes { get; init; }
         public System.Collections.Generic.IEnumerable<System.Attribute> Attributes { get; }
         public System.Func<object, TUnit.Core.TestContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>? Body { get; init; }
-        public System.Attribute[] ClassAttributes { get; init; }
-        public System.Type ClassType { get; init; }
-        public TUnit.Core.Interfaces.IHookExecutor HookExecutor { get; init; }
-        public System.Attribute[] MethodAttributes { get; init; }
-        public TUnit.Core.SourceGeneratedMethodInformation MethodInfo { get; init; }
+        public required System.Attribute[] ClassAttributes { get; init; }
+        public required System.Type ClassType { get; init; }
+        public required TUnit.Core.Interfaces.IHookExecutor HookExecutor { get; init; }
+        public required System.Attribute[] MethodAttributes { get; init; }
+        public required TUnit.Core.SourceGeneratedMethodInformation MethodInfo { get; init; }
         public string Name { get; }
-        public int Order { get; init; }
+        public required int Order { get; init; }
         public System.TimeSpan? Timeout { get; }
         public System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.TestContext context, System.Threading.CancellationToken cancellationToken) { }
         public TAttribute? GetAttribute<TAttribute>()
@@ -1274,29 +1214,25 @@ namespace TUnit.Core.Hooks
     }
     public abstract class StaticHookMethod : System.IEquatable<TUnit.Core.Hooks.StaticHookMethod>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         protected StaticHookMethod() { }
         public System.Reflection.Assembly Assembly { get; }
-        public System.Attribute[] AssemblyAttributes { get; init; }
+        public required System.Attribute[] AssemblyAttributes { get; init; }
         public System.Collections.Generic.IEnumerable<System.Attribute> Attributes { get; }
-        public System.Attribute[] ClassAttributes { get; init; }
+        public required System.Attribute[] ClassAttributes { get; init; }
         public System.Type ClassType { get; }
-        public string FilePath { get; init; }
-        public TUnit.Core.Interfaces.IHookExecutor HookExecutor { get; init; }
-        public int LineNumber { get; init; }
-        public System.Attribute[] MethodAttributes { get; init; }
-        public TUnit.Core.SourceGeneratedMethodInformation MethodInfo { get; init; }
+        public required string FilePath { get; init; }
+        public required TUnit.Core.Interfaces.IHookExecutor HookExecutor { get; init; }
+        public required int LineNumber { get; init; }
+        public required System.Attribute[] MethodAttributes { get; init; }
+        public required TUnit.Core.SourceGeneratedMethodInformation MethodInfo { get; init; }
         public string Name { get; }
-        public int Order { get; init; }
+        public required int Order { get; init; }
         public System.TimeSpan? Timeout { get; }
         public TAttribute? GetAttribute<TAttribute>()
             where TAttribute : System.Attribute { }
     }
     public abstract class StaticHookMethod<T> : TUnit.Core.Hooks.StaticHookMethod, System.IEquatable<TUnit.Core.Hooks.StaticHookMethod<T>>, TUnit.Core.Hooks.IExecutableHook<T>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         protected StaticHookMethod() { }
         public System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>? Body { get; init; }
         public abstract System.Threading.Tasks.ValueTask ExecuteAsync(T context, System.Threading.CancellationToken cancellationToken);

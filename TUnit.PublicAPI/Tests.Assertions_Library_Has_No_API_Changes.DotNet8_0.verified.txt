@@ -49,17 +49,12 @@ namespace TUnit.Assertions
         public static TUnit.Assertions.AssertionDecision Pass { get; }
         public static TUnit.Assertions.AssertionDecision Fail(string message) { }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public class AssertionMetadata
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public AssertionMetadata() { }
         public System.TimeSpan Duration { get; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public System.DateTimeOffset EndTime { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public System.DateTimeOffset StartTime { get; init; }
+        public required System.DateTimeOffset EndTime { get; init; }
+        public required System.DateTimeOffset StartTime { get; init; }
     }
     public class CollectionWrapper<TInner>
     {
@@ -78,20 +73,13 @@ namespace TUnit.Assertions
         public TUnit.Assertions.Enums.EquivalencyKind EquivalencyKind { get; set; }
         public string[] MembersToIgnore { get; init; }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public class ComparisonFailure : System.IEquatable<TUnit.Assertions.ComparisonFailure>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public ComparisonFailure() { }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public object? Actual { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public object? Expected { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public string[] NestedMemberNames { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public TUnit.Assertions.MemberType Type { get; init; }
+        public required object? Actual { get; init; }
+        public required object? Expected { get; init; }
+        public required string[] NestedMemberNames { get; init; }
+        public required TUnit.Assertions.MemberType Type { get; init; }
     }
     public static class Fail
     {

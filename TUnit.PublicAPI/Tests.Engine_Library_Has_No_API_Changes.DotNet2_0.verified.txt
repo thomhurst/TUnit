@@ -48,72 +48,60 @@ namespace TUnit.Engine.Json
 {
     public class ExceptionJson : System.IEquatable<TUnit.Engine.Json.ExceptionJson>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public ExceptionJson() { }
-        public TUnit.Engine.Json.ExceptionJson? InnerException { get; init; }
-        public string Message { get; init; }
-        public string? Stacktrace { get; init; }
-        public string? Type { get; init; }
+        public required TUnit.Engine.Json.ExceptionJson? InnerException { get; init; }
+        public required string Message { get; init; }
+        public required string? Stacktrace { get; init; }
+        public required string? Type { get; init; }
     }
     public class TestAssemblyJson : System.IEquatable<TUnit.Engine.Json.TestAssemblyJson>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public TestAssemblyJson() { }
-        public string? AssemblyName { get; init; }
-        public TUnit.Engine.Json.TestClassJson[] Classes { get; init; }
+        public required string? AssemblyName { get; init; }
+        public required TUnit.Engine.Json.TestClassJson[] Classes { get; init; }
     }
     public class TestClassJson : System.IEquatable<TUnit.Engine.Json.TestClassJson>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public TestClassJson() { }
-        public TUnit.Engine.Json.TestJson[] Tests { get; init; }
-        public string? Type { get; init; }
+        public required TUnit.Engine.Json.TestJson[] Tests { get; init; }
+        public required string? Type { get; init; }
     }
     public class TestJson : System.IEquatable<TUnit.Engine.Json.TestJson>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public TestJson() { }
-        public System.Collections.Generic.IReadOnlyList<string> Categories { get; init; }
-        public string? ClassType { get; init; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> CustomProperties { get; init; }
-        public string DisplayName { get; set; }
-        public System.Collections.Generic.Dictionary<string, object?> ObjectBag { get; init; }
-        public TUnit.Engine.Json.TestResultJson? Result { get; set; }
-        public int RetryLimit { get; init; }
-        public string? ReturnType { get; init; }
-        public object?[]? TestClassArguments { get; init; }
-        public string?[]? TestClassParameterTypes { get; init; }
-        public string TestFilePath { get; init; }
-        public string TestId { get; init; }
-        public int TestLineNumber { get; init; }
-        public object?[]? TestMethodArguments { get; init; }
-        public string?[]? TestMethodParameterTypes { get; init; }
-        public string TestName { get; init; }
-        public System.TimeSpan? Timeout { get; init; }
+        public required System.Collections.Generic.IReadOnlyList<string> Categories { get; init; }
+        public required string? ClassType { get; init; }
+        public required System.Collections.Generic.IReadOnlyDictionary<string, string> CustomProperties { get; init; }
+        public required string DisplayName { get; set; }
+        public required System.Collections.Generic.Dictionary<string, object?> ObjectBag { get; init; }
+        public required TUnit.Engine.Json.TestResultJson? Result { get; set; }
+        public required int RetryLimit { get; init; }
+        public required string? ReturnType { get; init; }
+        public required object?[]? TestClassArguments { get; init; }
+        public required string?[]? TestClassParameterTypes { get; init; }
+        public required string TestFilePath { get; init; }
+        public required string TestId { get; init; }
+        public required int TestLineNumber { get; init; }
+        public required object?[]? TestMethodArguments { get; init; }
+        public required string?[]? TestMethodParameterTypes { get; init; }
+        public required string TestName { get; init; }
+        public required System.TimeSpan? Timeout { get; init; }
     }
     public class TestResultJson : System.IEquatable<TUnit.Engine.Json.TestResultJson>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public TestResultJson() { }
-        public string ComputerName { get; init; }
-        public System.TimeSpan? Duration { get; init; }
-        public System.DateTimeOffset? End { get; init; }
-        public TUnit.Engine.Json.ExceptionJson? Exception { get; init; }
-        public string? Output { get; init; }
-        public System.DateTimeOffset? Start { get; init; }
-        public TUnit.Core.Enums.Status Status { get; init; }
+        public required string ComputerName { get; init; }
+        public required System.TimeSpan? Duration { get; init; }
+        public required System.DateTimeOffset? End { get; init; }
+        public required TUnit.Engine.Json.ExceptionJson? Exception { get; init; }
+        public required string? Output { get; init; }
+        public required System.DateTimeOffset? Start { get; init; }
+        public required TUnit.Core.Enums.Status Status { get; init; }
     }
     public class TestSessionJson : System.IEquatable<TUnit.Engine.Json.TestSessionJson>
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
         public TestSessionJson() { }
-        public TUnit.Engine.Json.TestAssemblyJson[] Assemblies { get; init; }
+        public required TUnit.Engine.Json.TestAssemblyJson[] Assemblies { get; init; }
     }
 }
 namespace TUnit.Engine
