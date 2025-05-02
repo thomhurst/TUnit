@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class MEDITest : InvokableTestBase
+public class MEDITest(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

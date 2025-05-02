@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class InheritedTestsFromDifferentProjectTests : InvokableTestBase
+public class InheritedTestsFromDifferentProjectTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

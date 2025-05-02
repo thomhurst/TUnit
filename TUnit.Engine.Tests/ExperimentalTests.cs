@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class ExperimentalTests : InvokableTestBase
+public class ExperimentalTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

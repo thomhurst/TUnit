@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class DisposedReproTests : InvokableTestBase
+public class DisposedReproTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

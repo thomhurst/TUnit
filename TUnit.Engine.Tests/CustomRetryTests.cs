@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class CustomRetryTests : InvokableTestBase
+public class CustomRetryTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

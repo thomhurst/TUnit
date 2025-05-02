@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class PriorityFilteringTests3 : InvokableTestBase
+public class PriorityFilteringTests3(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

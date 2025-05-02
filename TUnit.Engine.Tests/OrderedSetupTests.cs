@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class OrderedSetupTests : InvokableTestBase
+public class OrderedSetupTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

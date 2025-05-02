@@ -3,7 +3,7 @@ using Shouldly;
 
 namespace TUnit.Engine.Tests;
 
-public class CultureTests : InvokableTestBase
+public class CultureTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

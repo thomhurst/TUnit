@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class JsonOutputTests : InvokableTestBase
+public class JsonOutputTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     [Skip("TODO")]

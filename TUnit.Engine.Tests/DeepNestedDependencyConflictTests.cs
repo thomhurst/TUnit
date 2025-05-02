@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class DeepNestedDependencyConflictTests : InvokableTestBase
+public class DeepNestedDependencyConflictTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

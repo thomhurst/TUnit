@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class FailedInitializationTests2 : InvokableTestBase
+public class FailedInitializationTests2(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

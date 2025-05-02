@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class CustomPropertyTests : InvokableTestBase
+public class CustomPropertyTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

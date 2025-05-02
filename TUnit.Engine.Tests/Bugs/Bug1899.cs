@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests.Bugs;
 
-public class Bug1899 : InvokableTestBase
+public class Bug1899(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

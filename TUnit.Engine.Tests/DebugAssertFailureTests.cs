@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class DebugAssertFailureTests : InvokableTestBase
+public class DebugAssertFailureTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

@@ -2,11 +2,25 @@
 using CliWrap;
 using CliWrap.Buffered;
 using TrxTools.TrxParser;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public abstract class InvokableTestBase
+[MethodDataSource(nameof(GetTestModes))]
+public abstract class InvokableTestBase(TestMode testMode)
 {
+    public static IEnumerable<TestMode> GetTestModes()
+    {
+        yield return TestMode.SourceGenerated;
+        yield return TestMode.Reflection;
+        
+        if (!EnvironmentVariables.IsNet472)
+        {
+            yield return TestMode.AOT;
+            yield return TestMode.SingleFileApplication;
+        }
+    }
+    
     private static readonly string GetEnvironmentVariable = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net9.0";
 
     public static bool IsNetFramework => GetEnvironmentVariable == "net472";
@@ -18,22 +32,18 @@ public abstract class InvokableTestBase
         return RunTestsWithFilter(filter, assertions, new RunOptions(), assertionExpression);
     }
 
-    protected async Task RunTestsWithFilter(string filter,
+    protected Task RunTestsWithFilter(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions,
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
-        await RunWithoutAot(filter, assertions, runOptions, assertionExpression);
-        
-        await RunWithoutAot(filter, assertions, runOptions.WithArgument("/p:TUnitReflectionScanner=true"), assertionExpression);
-
-        if (EnvironmentVariables.IsNet472)
+        return testMode switch
         {
-            return;
-        }
-        
-        await RunWithAot(filter, assertions, runOptions, assertionExpression);
-
-        await RunWithSingleFile(filter, assertions, runOptions, assertionExpression);
+            TestMode.SourceGenerated => RunWithoutAot(filter, assertions, runOptions.WithArgument("/p:TUnitReflectionScanner=false"), assertionExpression),
+            TestMode.Reflection => RunWithoutAot(filter, assertions, runOptions.WithArgument("/p:TUnitReflectionScanner=true"), assertionExpression),
+            TestMode.AOT => RunWithAot(filter, assertions, runOptions, assertionExpression),
+            TestMode.SingleFileApplication => RunWithSingleFile(filter, assertions, runOptions, assertionExpression),
+            _ => throw new ArgumentOutOfRangeException(nameof(testMode), testMode, null)
+        };
     }
 
     private async Task RunWithoutAot(string filter,

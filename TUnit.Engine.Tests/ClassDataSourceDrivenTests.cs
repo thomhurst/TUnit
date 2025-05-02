@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class ClassDataSourceDrivenTests : InvokableTestBase
+public class ClassDataSourceDrivenTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

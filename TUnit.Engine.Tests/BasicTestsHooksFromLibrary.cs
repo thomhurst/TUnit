@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class BasicTestsHooksFromLibrary : InvokableTestBase
+public class BasicTestsHooksFromLibrary(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()
