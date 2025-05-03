@@ -16,8 +16,8 @@ public class GenerateAssertionDto(
 ) {
     public string ClassName => symbol.Name;
     public string Namespace => symbol.ContainingNamespace.ToDisplayString();
-    // public bool IsEmpty => isAssertions.Length == 0 && isNotAssertions.Length == 0;
-    public bool IsEmpty => false;
+    public bool IsEmpty => isAssertions.Length == 0 && isNotAssertions.Length == 0;
+    // public bool IsEmpty => false;
     
     public IEnumerable<AttributeData> IsAssertions { get; } = isAssertions;
     public IEnumerable<AttributeData> IsNotAssertions { get; } = isNotAssertions;

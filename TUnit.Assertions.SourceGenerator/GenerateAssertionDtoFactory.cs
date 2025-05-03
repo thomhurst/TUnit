@@ -11,8 +11,8 @@ namespace TUnit.Assertions.SourceGenerator;
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
 public static class GenerateAssertionDtoFactory {
-    public const string GenerateIsAssertionAttribute = "TUnit.Assertions.GenerateIsAssertionAttribute<TBase>";
-    public const string GenerateIsNotAssertionAttribute = "TUnit.Assertions.GenerateIsNotAssertionAttribute<TBase>";
+    public const string GenerateIsAssertionAttribute = "TUnit.Assertions.GenerateIsAssertionAttribute";
+    public const string GenerateIsNotAssertionAttribute = "TUnit.Assertions.GenerateIsNotAssertionAttribute";
     
     public static GenerateAssertionDto? Create(GeneratorSyntaxContext context, CancellationToken ct) {
         var classNode = (ClassDeclarationSyntax)context.Node;
@@ -26,19 +26,17 @@ public static class GenerateAssertionDtoFactory {
         ImmutableArray<AttributeData> attributes = classSymbol.GetAttributes();
                     
         var isAssertions = attributes
-            .Where(attr => attr.AttributeClass?.ToDisplayString() == GenerateIsAssertionAttribute)
+            .Where(attr => attr.AttributeClass?.ToDisplayString().Contains(GenerateIsAssertionAttribute) == true)
             .ToImmutableArray();
         
         var isNotAssertions = attributes
-            .Where(attr => attr.AttributeClass?.ToDisplayString() == GenerateIsNotAssertionAttribute)
+            .Where(attr => attr.AttributeClass?.ToDisplayString().Contains(GenerateIsNotAssertionAttribute) == true)
             .ToImmutableArray();
         
         return new GenerateAssertionDto(
             classSymbol,
-            // isAssertions,
-            // isNotAssertions
-            ImmutableArray<AttributeData>.Empty, 
-            ImmutableArray<AttributeData>.Empty
+            isAssertions,
+            isNotAssertions
         );
     }
 }

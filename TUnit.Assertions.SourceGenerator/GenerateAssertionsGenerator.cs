@@ -18,7 +18,7 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator  {
             .CreateSyntaxProvider(
                 predicate: (s, _) => s is ClassDeclarationSyntax,
                 GenerateAssertionDtoFactory.Create)
-            .Where(dto => dto is not null)
+            .Where(dto => dto is not null && !dto.IsEmpty)
             .Collect()!;
         
         context.RegisterSourceOutput(context.CompilationProvider.Combine(data), 
