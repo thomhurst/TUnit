@@ -25,17 +25,20 @@ public static class GenerateAssertionDtoFactory {
         // Look for our attributes
         ImmutableArray<AttributeData> attributes = classSymbol.GetAttributes();
                     
-        bool hasIsAssertion = attributes
-            .Any(attr => attr.AttributeClass?.ToDisplayString() == GenerateIsAssertionAttribute);
-                    
-        bool hasIsNotAssertion = attributes
-            .Any(attr => attr.AttributeClass?.ToDisplayString() == GenerateIsNotAssertionAttribute);
-
-                    
-        if (!hasIsAssertion || !hasIsNotAssertion) return null;
-                    
+        var isAssertions = attributes
+            .Where(attr => attr.AttributeClass?.ToDisplayString() == GenerateIsAssertionAttribute)
+            .ToImmutableArray();
+        
+        var isNotAssertions = attributes
+            .Where(attr => attr.AttributeClass?.ToDisplayString() == GenerateIsNotAssertionAttribute)
+            .ToImmutableArray();
+        
         return new GenerateAssertionDto(
-            classSymbol
+            classSymbol,
+            // isAssertions,
+            // isNotAssertions
+            ImmutableArray<AttributeData>.Empty, 
+            ImmutableArray<AttributeData>.Empty
         );
     }
 }
