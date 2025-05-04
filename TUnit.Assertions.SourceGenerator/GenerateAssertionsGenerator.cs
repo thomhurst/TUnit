@@ -25,7 +25,6 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
         context.RegisterSourceOutput(context.CompilationProvider.Combine(data),
             static (SourceProductionContext spc,
                 (Compilation Compilation, ImmutableArray<AssertionHolderDto> DtoArray) box) => {
-                Compilation compilation = box.Compilation;
                 
                 var dtoArray = box.DtoArray;
                 var builder = new GeneratorStringBuilder();
@@ -45,14 +44,18 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                     builder.AppendLine($"public static partial class {holderDto.ClassName}")
                         .AppendAutoClosedScope(scopeBuilder => {
                             foreach (GenerateAssertionDto assertionDto in holderDto.GenerateAssertions) {
+                                if (!assertionDto.TryVerify(out var diagnostics)) {
+                                    foreach (Diagnostic diagnostic in diagnostics) {
+                                        spc.ReportDiagnostic(diagnostic);
+                                    }
+                                    continue;
+                                }
+                                
                                 string typeName = assertionDto.GetTypeName();
-                                string methodName = assertionDto.GetMethodName();
-                                string messageFactory = assertionDto.GetMessageFactoryOrDefault();
-                                string expectationExpression = assertionDto.GetExpectationExpressionOrDefault();
-
+                                
                                 scopeBuilder.AppendBodyIndented(
                                     $$"""
-                                    public static InvokableValueAssertionBuilder<{{typeName}}> {{methodName}}(this IValueSource<{{typeName}}> valueSource)
+                                    public static InvokableValueAssertionBuilder<{{typeName}}> {{assertionDto.GetMethodName()}}(this IValueSource<{{typeName}}> valueSource)
                                     {
                                         return valueSource.RegisterAssertion(new FuncValueAssertCondition<{{typeName}}, int>(0,
                                             (value, _, self) =>
@@ -60,8 +63,8 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                                                 {{assertionDto.GetNullCheck()}}
                                                 return {{assertionDto.GetActualCheck()}};
                                             },
-                                            {{messageFactory}},
-                                            {{expectationExpression}}),
+                                            {{assertionDto.GetMessageFactoryOrDefault()}},
+                                            {{ assertionDto.GetExpectationExpressionOrDefault()}}),
                                             []
                                         ); 
                                     }
