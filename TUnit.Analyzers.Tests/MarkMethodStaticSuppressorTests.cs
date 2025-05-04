@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#if NET8_0_OR_GREATER
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeQuality.Analyzers.QualityGuidelines;
 
@@ -51,3 +52,4 @@ public class MarkMethodStaticSuppressorTests
             .WithExpectedDiagnosticsResults(CA1822.WithLocation(0).WithIsSuppressed(false))
             .RunAsync();
 }
+#endif

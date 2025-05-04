@@ -1,9 +1,6 @@
 <Project>
-    <Import
-        Condition="'$(EnablePolyfill)' != 'false'"
-        Project="$(MSBuildThisFileDirectory)Polyfill.props" />
+    <Import Project="$(MSBuildThisFileDirectory)TestLibrary.props" />
 
-    <Import Project="$(MSBuildThisFileDirectory)TUnit.Core\TUnit.Core.props" />
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Engine\TUnit.Engine.props" />
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions\TUnit.Assertions.props" />
 
@@ -12,10 +9,6 @@
 
         <OutputType>Exe</OutputType>
 
-        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-
-        <IsPackable>false</IsPackable>
-
         <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
@@ -23,30 +16,12 @@
 
         <IsTestProject>true</IsTestProject>
 
-        <ImportTUnitGlobalUsings Condition="'$(ImportTUnitGlobalUsings)' == ''">true</ImportTUnitGlobalUsings>
     </PropertyGroup>
-
-    <ItemGroup Condition="'$(ImportTUnitGlobalUsings)' == 'true'">
-        <Using Include="TUnit.Core.HookType" Static="True" />
-        <Using Include="TUnit.Core" />
-    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
         <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
         <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
-
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Analyzers\TUnit.Analyzers.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 
         <ProjectReference
             Include="$(MSBuildThisFileDirectory)TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"

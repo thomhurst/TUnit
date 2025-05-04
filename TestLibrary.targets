@@ -1,0 +1,8 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Core\TUnit.Core.targets" />
+
+    <ItemGroup Condition="'$(ImportTUnitGlobalUsings)' == 'true'">
+        <Using Include="TUnit.Core.HookType" Static="True" />
+        <Using Include="TUnit.Core" />
+    </ItemGroup>
+</Project>
