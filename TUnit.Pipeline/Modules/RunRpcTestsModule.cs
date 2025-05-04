@@ -13,6 +13,11 @@ namespace TUnit.Pipeline.Modules;
 [NotInParallel("DotNetTests")]
 public class RunRpcTestsModule : TestBaseModule
 {
+    protected override IEnumerable<string> TestableFrameworks =>
+    [
+        "net8.0"
+    ];
+
     protected override Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.RpcTests.csproj").AssertExists();
