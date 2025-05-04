@@ -1,7 +1,4 @@
-﻿using TUnit.Core;
-using static TUnit.Core.HookType;
-
-namespace TUnit.TestProject.Library;
+﻿namespace TUnit.TestProject.Library;
 
 public class Hooks
 {
