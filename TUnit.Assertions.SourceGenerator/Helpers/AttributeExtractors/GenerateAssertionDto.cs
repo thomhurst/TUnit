@@ -21,9 +21,11 @@ public class GenerateAssertionDto(
     public bool RequiresNullCheck => !typeArg.IsValueType;
     private readonly HashSet<char> _vowels = ['a', 'e', 'i', 'o', 'u'];
     private ISymbol? _memberSymbol;
+    
+    public string TypeName { get; } = GetTypeName(typeArg);
 
-    public string GetTypeName() {
-        string typeName = typeArg.Name;
+    private static string GetTypeName(ITypeSymbol typeArg) {
+        // ReSharper disable once ConvertIfStatementToReturnStatement
         if (typeArg.SpecialType is
             SpecialType.System_Char
             or SpecialType.System_String
@@ -32,10 +34,10 @@ public class GenerateAssertionDto(
             or SpecialType.System_Double
             or SpecialType.System_Single
             or SpecialType.System_Byte) {
-            typeName = typeName.ToLowerInvariant();
+            return typeArg.Name.ToLowerInvariant();
         }
-
-        return typeName;
+        
+        return typeArg.ToDisplayString();
     }
 
     public string GetMethodName() {
@@ -76,13 +78,12 @@ public class GenerateAssertionDto(
     }
 
     public string GetNullCheck() {
-        if (!RequiresNullCheck) return "";
-        string typeName = GetTypeName();
+        if (!RequiresNullCheck) return "// No null check required";
 
         return $$"""
         if (value is null)
                     {
-                        self.FailWithMessage("Actual {{typeName}} is null");
+                        self.FailWithMessage("Actual {{TypeName}} is null");
                         return false;
                     }
         """;
@@ -187,12 +188,12 @@ public class GenerateAssertionDto(
     }
 
     public string GetActualCheck() {
-        if (_memberSymbol == null) throw new InvalidOperationException("TryVerify must be called before GetActualCheck");
+        if (_memberSymbol == null) throw new InvalidOperationException("TryVerifyOrGetDiagnostics must be called before GetActualCheck");
         
         // ReSharper disable once ConvertSwitchStatementToSwitchExpression
         switch (_memberSymbol, assertionType) {
             case (IMethodSymbol { IsStatic: true }, AssertionType.Is) : {
-                return $"{GetTypeName()}.{methodName}(value)"; 
+                return $"{TypeName}.{methodName}(value)"; 
             }
 
             case (IMethodSymbol, AssertionType.Is): {
@@ -204,7 +205,7 @@ public class GenerateAssertionDto(
             }
 
             case (IMethodSymbol { IsStatic: true }, AssertionType.IsNot) : {
-                return $"!{GetTypeName()}.{methodName}(value)";
+                return $"!{TypeName}.{methodName}(value)";
             }
 
             case (IMethodSymbol, AssertionType.IsNot): {

@@ -51,13 +51,11 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                                     continue;
                                 }
                                 
-                                string typeName = assertionDto.GetTypeName();
-                                
                                 scopeBuilder.AppendBody(
                                     $$"""
-                                    public static InvokableValueAssertionBuilder<{{typeName}}> {{assertionDto.GetMethodName()}}(this IValueSource<{{typeName}}> valueSource)
+                                    public static InvokableValueAssertionBuilder<{{assertionDto.TypeName}}> {{assertionDto.GetMethodName()}}(this IValueSource<{{assertionDto.TypeName}}> valueSource)
                                     {
-                                        return valueSource.RegisterAssertion(new FuncValueAssertCondition<{{typeName}}, int>(0,
+                                        return valueSource.RegisterAssertion(new FuncValueAssertCondition<{{assertionDto.TypeName}}, int>(0,
                                             (value, _, self) =>
                                             {
                                                 {{assertionDto.GetNullCheck()}}
