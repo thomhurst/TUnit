@@ -108,6 +108,8 @@ internal class SingleTestExecutor(
                 await logger.LogInformationAsync($"Skipping {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}...");
                 
                 testContext.SetResult(skipTestException);
+                
+                await messageBus.Skipped(testContext, skipTestException.Reason);
             }
             catch (Exception e)
             {
