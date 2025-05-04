@@ -111,7 +111,7 @@ internal class SingleTestExecutor(
 
                 await messageBus.Skipped(testContext, skipTestException.Reason);
             }
-            catch (TestRunCanceledException testRunCanceledException)
+            catch (Exception testRunCanceledException) when (IsCancelled(testRunCanceledException))
             {
                 testContext.SetResult(testRunCanceledException);
 
@@ -143,6 +143,22 @@ internal class SingleTestExecutor(
 
             await task;
         }
+    }
+
+    private bool IsCancelled(Exception ex)
+    {
+        if (ex is TestRunCanceledException)
+        {
+            return true;
+        }
+
+        if (ex is TaskCanceledException or OperationCanceledException
+            && engineCancellationToken.Token.IsCancellationRequested)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private async Task RunFirstTestEventReceivers(TestContext testContext)

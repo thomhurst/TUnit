@@ -511,7 +511,7 @@ public class EquivalentAssertionTests
 
                              but Property MyClass.Inner did not match
                              Expected: null
-                             Received: TUnit.Assertions.UnitTests.EquivalentAssertionTests+InnerClass
+                             Received: TUnit.Assertions.Tests.Old.EquivalentAssertionTests+InnerClass
 
                              at Assert.That(object1).IsEquivalentTo(object2)
                              """
