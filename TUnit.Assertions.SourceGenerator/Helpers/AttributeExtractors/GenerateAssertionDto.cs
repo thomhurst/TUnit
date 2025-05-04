@@ -80,7 +80,7 @@ public class GenerateAssertionDto(
         string typeName = GetTypeName();
 
         return $$"""
-                    if (value is null)
+        if (value is null)
                     {
                         self.FailWithMessage("Actual {{typeName}} is null");
                         return false;
