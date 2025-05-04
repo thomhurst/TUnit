@@ -190,8 +190,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     
     private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions, TUnitFrameworkLogger logger)
     {
-        Debugger.Launch();
-
         var isReflectionScannerEnabled = commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner);
 
         if (isReflectionScannerEnabled)
