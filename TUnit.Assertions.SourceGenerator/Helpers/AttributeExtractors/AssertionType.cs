@@ -7,7 +7,7 @@ namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
 public enum AssertionType {
-    Undefined,
-    Is,
-    IsNot
+    Undefined = 0,
+    Is = 1,
+    IsNot = 2
 }
