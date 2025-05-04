@@ -5,8 +5,8 @@
         <Using Include="TUnit.Core" />
     </ItemGroup>
 
-    <ItemGroup>
-        <AssemblyMetadata Include="TUnit.ReflectionScanner" Value="true" Condition=" '$(TUnitReflectionScanner)' == 'true' " />
-    </ItemGroup>
+    <PropertyGroup Condition="'$(TUnitReflectionScanner)' == 'true'">
+        <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --reflection-scanner</TestingPlatformCommandLineArguments>
+    </PropertyGroup>
 
 </Project>

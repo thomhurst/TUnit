@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+    
     <Import Project="..\TestProject.props" />
+
+    <PropertyGroup>
+        <TUnitReflectionScanner>true</TUnitReflectionScanner>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="AutoFixture" />
@@ -23,5 +27,9 @@
     </ItemGroup>
 
     <Import Project="..\TestProject.targets" />
-    
+
+    <PropertyGroup>
+        <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
+    </PropertyGroup>
+
 </Project>

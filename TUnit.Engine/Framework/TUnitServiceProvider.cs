@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
@@ -13,6 +14,7 @@ using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
@@ -82,7 +84,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var instanceTracker = Register(new InstanceTracker());
         
-        var isReflectionScannerEnabled = IsReflectionScannerEnabled(Logger);
+        var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions, Logger);
 
         HooksCollector = Register<HooksCollectorBase>
         (
@@ -186,13 +188,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         return capability;
     }
     
-    private static bool IsReflectionScannerEnabled(TUnitFrameworkLogger logger)
+    private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions, TUnitFrameworkLogger logger)
     {
-        var isReflectionScannerEnabled = Assembly.GetEntryAssembly()?
-            .GetCustomAttributes()
-            .OfType<AssemblyMetadataAttribute>()
-            .FirstOrDefault(x => x.Key == "TUnit.ReflectionScanner")
-            ?.Value == "true";
+        Debugger.Launch();
+
+        var isReflectionScannerEnabled = commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner);
 
         if (isReflectionScannerEnabled)
         {
