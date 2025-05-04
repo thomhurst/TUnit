@@ -19,7 +19,7 @@ public class RunAssertionsTestsModule : TestBaseModule
         
         return Task.FromResult(new DotNetRunOptions
         {
-            Project = project,
+            WorkingDirectory = project.Folder!,
             NoBuild = true,
             Configuration = Configuration.Release,
             Framework = framework,

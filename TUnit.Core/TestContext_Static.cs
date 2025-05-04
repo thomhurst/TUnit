@@ -47,10 +47,8 @@ public partial class TestContext
                 return AppContext.BaseDirectory;
             }
 #endif
-
             return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
                    ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
         }
     }
 

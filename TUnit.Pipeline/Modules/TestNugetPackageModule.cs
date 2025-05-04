@@ -49,7 +49,7 @@ public class TestNugetPackageModule : TestBaseModule
 
         return new DotNetRunOptions
         {
-            Project = project,
+            WorkingDirectory = project.Folder!,
             Framework = framework,
             Properties =
             [
