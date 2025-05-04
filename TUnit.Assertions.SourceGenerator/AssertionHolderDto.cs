@@ -17,7 +17,4 @@ public record AssertionHolderDto(
     public string ClassName => Symbol.Name;
     public string Namespace => Symbol.ContainingNamespace.ToDisplayString();
     public bool IsEmpty => GenerateAssertions.Length == 0;
-    
-    public IEnumerable<GenerateAssertionDto> IsAssertions { get; } = GenerateAssertions.Where(static dto => dto.Type == AssertionType.Is);
-    public IEnumerable<GenerateAssertionDto> IsNotAssertions { get; }  = GenerateAssertions.Where(static dto => dto.Type == AssertionType.IsNot);
 }

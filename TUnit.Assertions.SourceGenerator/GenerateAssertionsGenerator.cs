@@ -44,9 +44,9 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
 
                     builder.AppendLine($"public static partial class {holderDto.ClassName}")
                         .AppendAutoClosedScope(scopeBuilder => {
-                            foreach (GenerateAssertionDto assertionDto in holderDto.IsAssertions) {
+                            foreach (GenerateAssertionDto assertionDto in holderDto.GenerateAssertions) {
                                 string typeName = assertionDto.GetTypeName();
-                                string methodName = assertionDto.MethodName;
+                                string methodName = assertionDto.GetMethodName();
                                 string messageFactory = assertionDto.GetMessageFactoryOrDefault();
                                 string expectationExpression = assertionDto.GetExpectationExpressionOrDefault();
 
@@ -58,7 +58,7 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                                             (value, _, self) =>
                                             {
                                                 {{assertionDto.GetNullCheck()}}
-                                                return {{typeName}}.{{methodName}}(value);
+                                                return {{assertionDto.GetActualCheck()}};
                                             },
                                             {{messageFactory}},
                                             {{expectationExpression}}),
