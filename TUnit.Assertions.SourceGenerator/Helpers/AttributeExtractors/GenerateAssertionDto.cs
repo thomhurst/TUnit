@@ -18,11 +18,11 @@ public class GenerateAssertionDto(
     string? messageFactoryMethodName,
     string? expectationExpression
 ) {
-    public bool RequiresNullCheck => !typeArg.IsValueType;
+    public bool RequiresNullCheck { get; } = !typeArg.IsValueType;
+    public string TypeName { get; } = GetTypeName(typeArg);
+    
     private readonly HashSet<char> _vowels = ['a', 'e', 'i', 'o', 'u'];
     private ISymbol? _memberSymbol;
-    
-    public string TypeName { get; } = GetTypeName(typeArg);
 
     private static string GetTypeName(ITypeSymbol typeArg) {
         // ReSharper disable once ConvertIfStatementToReturnStatement
@@ -78,6 +78,7 @@ public class GenerateAssertionDto(
     }
 
     public string GetNullCheck() {
+        // ReSharper disable once ConvertIfStatementToReturnStatement
         if (!RequiresNullCheck) return "// No null check required";
 
         return $$"""

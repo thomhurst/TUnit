@@ -48,6 +48,7 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                                     foreach (Diagnostic diagnostic in diagnostics) {
                                         spc.ReportDiagnostic(diagnostic);
                                     }
+                                    // Skip the generation of this one as it is expected that it will cause issues.
                                     continue;
                                 }
                                 
@@ -70,9 +71,7 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                                     .AppendLine();
                             }
                         });
-
-
-                    // spc.AddSource($"GenerateAssertionsGenerator.{dto.Namespace}.{dto.ClassName}.g.cs", builder.ToString());
+                    
                     spc.AddSource($"{holderDto.Namespace}.{holderDto.ClassName}.g.cs", builder.ToStringAndClear());
                 }
             });

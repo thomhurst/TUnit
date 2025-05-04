@@ -26,7 +26,7 @@ public static class StringCaseExtensions {
 
             var wordSpan = t1.AsSpan();
 
-            // add seperator
+            // add separator
             if (position > 0) result[position++] = ' ';
 
             // Append the word in lowercase
