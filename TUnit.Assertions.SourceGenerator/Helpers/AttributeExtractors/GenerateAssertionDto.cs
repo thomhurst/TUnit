@@ -111,7 +111,6 @@ public class GenerateAssertionDto(
                 );
                 break;
             }
-                
 
             // Check if it's a property
             case IPropertySymbol { Type.SpecialType: not SpecialType.System_Boolean } propertySymbol: {
@@ -127,6 +126,7 @@ public class GenerateAssertionDto(
                     methodName, propertySymbol.Type));
                 break;
             }
+            
             // Check if it's a method
             case IMethodSymbol { ReturnType.SpecialType: not SpecialType.System_Boolean } methodSymbol: {
                 diagnosticsBuilder.Add(Diagnostic.Create(
@@ -141,6 +141,7 @@ public class GenerateAssertionDto(
                     methodName, methodSymbol.ReturnType));
                 break;
             }
+            
             case IMethodSymbol methodSymbol when methodSymbol.Parameters.Length > (methodSymbol.IsExtensionMethod ? 1 : 0)
                 && typeArg.SpecialType is not (
                     SpecialType.System_Char

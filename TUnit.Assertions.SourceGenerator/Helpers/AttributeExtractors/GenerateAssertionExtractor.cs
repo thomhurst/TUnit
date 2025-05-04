@@ -22,7 +22,7 @@ public static class GenerateAssertionExtractor {
         
         if (attributes.Length == 0) return ImmutableArray<GenerateAssertionDto>.Empty;
         
-        List<GenerateAssertionDto> assertions = new(attributes.Length);
+        ImmutableArray<GenerateAssertionDto>.Builder assertions = ImmutableArray.CreateBuilder<GenerateAssertionDto>();
         foreach (AttributeData attribute in attributes) {
             ITypeSymbol? typeArg = attribute?.AttributeClass?.TypeArguments.FirstOrDefault();
             if (typeArg is null) continue;
