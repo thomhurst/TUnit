@@ -55,8 +55,8 @@ public class GenerateAssertionDto(
 
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return assertionType switch {
-            AssertionType.Is => $"(s, _, _) => $\"'{{s}}' was not {a} {strippedMethodName}\"",
-            AssertionType.IsNot => $"(s, _, _) => $\"'{{s}}' was {a} {strippedMethodName}\"",
+            AssertionType.Is => $"(s, _, _) => $\"'{{s}}' was not {a} {strippedMethodName.ToSpaceSeperated()}\"",
+            AssertionType.IsNot => $"(s, _, _) => $\"'{{s}}' was {a} {strippedMethodName.ToSpaceSeperated()}\"",
             _ => throw new ArgumentOutOfRangeException(nameof(assertionType), assertionType, null),
         };
     }
@@ -65,12 +65,12 @@ public class GenerateAssertionDto(
         if (!string.IsNullOrWhiteSpace(expectationExpression)) return expectationExpression!;
 
         string strippedMethodName = methodName.Replace("Is", "");
-        string a = _vowels.Contains(strippedMethodName[0]) ? "an" : "a";
+        string a = _vowels.Contains(strippedMethodName.ToLowerInvariant()[0]) ? "an" : "a";
 
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return assertionType switch {
-            AssertionType.Is => $"\"to be {a} {strippedMethodName}\"",
-            AssertionType.IsNot => $"\"to not be {a} {strippedMethodName}\"",
+            AssertionType.Is => $"\"to be {a} {strippedMethodName.ToSpaceSeperated()}\"",
+            AssertionType.IsNot => $"\"to not be {a} {strippedMethodName.ToSpaceSeperated()}\"",
             _ => throw new ArgumentOutOfRangeException(nameof(assertionType), assertionType, null),
         };
     }
@@ -190,40 +190,28 @@ public class GenerateAssertionDto(
         if (_memberSymbol == null) throw new InvalidOperationException("TryVerify must be called before GetActualCheck");
         
         // ReSharper disable once ConvertSwitchStatementToSwitchExpression
-        switch (_memberSymbol, assertionType, typeArg.SpecialType) {
-            case (IMethodSymbol, AssertionType.Is, SpecialType.System_Char):
-            case (IMethodSymbol, AssertionType.Is, SpecialType.System_String):
-            case (IMethodSymbol, AssertionType.Is, SpecialType.System_Boolean):
-            case (IMethodSymbol, AssertionType.Is, SpecialType.System_Int32):
-            case (IMethodSymbol, AssertionType.Is, SpecialType.System_Double):
-            case (IMethodSymbol, AssertionType.Is, SpecialType.System_Single):
-            case (IMethodSymbol, AssertionType.Is, SpecialType.System_Byte): {
-                return $"{GetTypeName()}.{methodName}(value)";
+        switch (_memberSymbol, assertionType) {
+            case (IMethodSymbol { IsStatic: true }, AssertionType.Is) : {
+                return $"{GetTypeName()}.{methodName}(value)"; 
             }
 
-            case (IMethodSymbol, AssertionType.Is, _): {
+            case (IMethodSymbol, AssertionType.Is): {
                 return $"value.{methodName}()";
             }
             
-            case (IPropertySymbol, AssertionType.Is, _): {
+            case (IPropertySymbol, AssertionType.Is): {
                 return $"value.{methodName}";
             }
 
-            case (IMethodSymbol, AssertionType.IsNot, SpecialType.System_Char):
-            case (IMethodSymbol, AssertionType.IsNot, SpecialType.System_String):
-            case (IMethodSymbol, AssertionType.IsNot, SpecialType.System_Boolean):
-            case (IMethodSymbol, AssertionType.IsNot, SpecialType.System_Int32):
-            case (IMethodSymbol, AssertionType.IsNot, SpecialType.System_Double):
-            case (IMethodSymbol, AssertionType.IsNot, SpecialType.System_Single):
-            case (IMethodSymbol, AssertionType.IsNot, SpecialType.System_Byte): {
+            case (IMethodSymbol { IsStatic: true }, AssertionType.IsNot) : {
                 return $"!{GetTypeName()}.{methodName}(value)";
             }
 
-            case (IMethodSymbol, AssertionType.IsNot, _): {
+            case (IMethodSymbol, AssertionType.IsNot): {
                 return $"!value.{methodName}()";
             }
             
-            case (IPropertySymbol, AssertionType.IsNot, _): {
+            case (IPropertySymbol, AssertionType.IsNot): {
                 return $"!value.{methodName}";
             }
 
