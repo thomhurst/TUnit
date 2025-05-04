@@ -2,14 +2,9 @@
 
     <PropertyGroup>
         <EnablePolyfill>false</EnablePolyfill>
-        <IsLibraryTestProject>true</IsLibraryTestProject>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-
-        <IsPackable>false</IsPackable>
-
-        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     </PropertyGroup>
+
+    <Import Project="..\TestProject.props" />
 
     <ItemGroup>
         <PackageReference Include="AutoFixture" />
@@ -18,5 +13,7 @@
     <ItemGroup>
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
+
+    <Import Project="..\TestProject.targets" />
 
 </Project>
