@@ -55,7 +55,7 @@ public class GenerateAssertionDto(
 
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return assertionType switch {
-            AssertionType.Is => $"(s, _, _) => \"'{{s}}' was not {a} {strippedMethodName}\"",
+            AssertionType.Is => $"(s, _, _) => $\"'{{s}}' was not {a} {strippedMethodName}\"",
             AssertionType.IsNot => $"(s, _, _) => $\"'{{s}}' was {a} {strippedMethodName}\"",
             _ => throw new ArgumentOutOfRangeException(nameof(assertionType), assertionType, null),
         };
