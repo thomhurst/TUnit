@@ -9,7 +9,8 @@ using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
-public static class StringIsExtensions
+[GenerateAssertion<string>(AssertionType.Is, nameof(string.IsNormalized))]
+public static partial class StringIsExtensions
 {
     public static StringEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
