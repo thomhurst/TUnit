@@ -34,12 +34,10 @@ public class Tests
         
         // Start the test host and accept the connection from the test host
         var cliProcess = Cli.Wrap("dotnet")
-            .WithWorkingDirectory(@"C:\git\TUnit\TUnit.TestProject")
+            .WithWorkingDirectory(Sourcy.DotNet.Projects.TUnit_TestProject.DirectoryName!)
             .WithArguments([
                 "run",
                 "-f", "net8.0",
-                // "-c", "Debug",
-                // "-p:LaunchDebugger=true",
                 "--server", 
                 "--client-port",
                 ((IPEndPoint)listener.LocalEndpoint).Port.ToString()
