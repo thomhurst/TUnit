@@ -26,7 +26,7 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                 (Compilation Compilation, ImmutableArray<GenerateAssertionDto> DtoArray) box) => {
                 Compilation compilation = box.Compilation;
                 
-                ImmutableArray<GenerateAssertionDto> dtoArray = box.DtoArray;
+                var dtoArray = box.DtoArray;
                 var builder = new GeneratorStringBuilder();
 
                 foreach (GenerateAssertionDto dto in dtoArray) {
@@ -38,49 +38,51 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                             "TUnit.Assertions.AssertionBuilders",
                             "TUnit.Assertions.AssertionBuilders.Wrappers"
                         )
-                        .AppendNamespace(dto.Namespace);
+                        .AppendNamespace(dto.Namespace)
+                        .AppendLine();
 
                     builder.AppendLine($"public static partial class {dto.ClassName}")
-                        .AppendAutoClosedScope(b => {
+                        .AppendAutoClosedScope(scopeBuilder => {
                             // Generate Is assertions
                             foreach (AttributeData isAssertion in dto.IsAssertions) {
                                 AssertionMethodDto? methodDto = AssertionMethodDto.FromIsAssertion(dto, isAssertion);
                                 if (methodDto is null) continue;
 
-                                b.AppendLine($$"""
+                                scopeBuilder.AppendBody(
+                                    $$"""
                                     public static InvokableValueAssertionBuilder<{{methodDto.TypeName}}> {{methodDto.MethodName}}(this IValueSource<{{methodDto.TypeName}}> valueSource)
                                     {
-                                       return valueSource.RegisterAssertion(new FuncValueAssertCondition<{{methodDto.TypeName}}, int>(0,
-                                           (value, _, self) =>
-                                           {
-                                               {{methodDto.NullCheck}}
-                                               return {{methodDto.TypeName}}.{{methodDto.MethodName}}(value);
-                                           },
-                                           (s, _, _) => $"{{methodDto.ActualMessage}}",
-                                           $"{{methodDto.ExpectedMessage}}")
-                                           , []
-                                       ); 
+                                     return valueSource.RegisterAssertion(new FuncValueAssertCondition<{{methodDto.TypeName}}, int>(0,
+                                         (value, _, self) =>
+                                         {
+                                             {{methodDto.NullCheck}}
+                                             return {{methodDto.TypeName}}.{{methodDto.MethodName}}(value);
+                                         },
+                                         (s, _, _) => $"{{methodDto.ActualMessage}}",
+                                         $"{{methodDto.ExpectedMessage}}")
+                                         , []
+                                     ); 
                                     }
 
-                                    """);
+                                    """)
+                                    .AppendLine();
                             }
 
                             // Generate IsNot assertions
                             foreach (AttributeData isNotAssertion in dto.IsNotAssertions) {
-                                string? methodName = isNotAssertion.ConstructorArguments[0].Value?.ToString();
+                                var methodName = isNotAssertion.ConstructorArguments[0].Value?.ToString();
                                 if (string.IsNullOrEmpty(methodName)) continue;
 
-                                b.AppendLine($"        public void {methodName}()");
-                                b.AppendLine("        {");
+                                scopeBuilder.AppendLine($"        public void {methodName}()");
+                                scopeBuilder.AppendLine("        {");
                                 // TODO Assertion Logic
-                                b.AppendLine("        }");
+                                scopeBuilder.AppendLine("        }");
                             }
                         });
 
 
                     // spc.AddSource($"GenerateAssertionsGenerator.{dto.Namespace}.{dto.ClassName}.g.cs", builder.ToString());
-                    spc.AddSource($"{dto.Namespace}.{dto.ClassName}.g.cs", builder.ToString());
-                    builder.Clear();
+                    spc.AddSource($"{dto.Namespace}.{dto.ClassName}.g.cs", builder.ToStringAndClear());
                 }
             });
     }
