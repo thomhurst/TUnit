@@ -31,7 +31,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             throw new InvalidOperationException("Reflection tests are not supported with AOT or trimming enabled.");
         }
 #endif
-        var allTypes = GetTypesByReflection();
+        var allTypes = ReflectionTypeScanner.GetTypes();
         
         var testMethods = allTypes
             .SelectMany(x => x.GetMethods())
@@ -328,23 +328,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
     {
         return allTypes
             .Where(type => type is { IsClass: true, IsAbstract: false } && type.IsAssignableTo(baseType))
-            .ToArray();
-    }
-
-    private static Type[] GetTypesByReflection()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(assembly =>
-            {
-                try
-                {
-                    return assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)
-                {
-                    return e.Types.OfType<Type>().ToArray();
-                }
-            })
             .ToArray();
     }
 }

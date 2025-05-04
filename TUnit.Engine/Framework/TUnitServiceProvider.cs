@@ -31,7 +31,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitFrameworkLogger Logger { get; }
     public TUnitMessageBus TUnitMessageBus { get; }
 
-    public HooksCollector HooksCollector { get; set; }
+    public HooksCollectorBase HooksCollector { get; set; }
     public TUnitInitializer Initializer { get; }
     public StandardOutConsoleInterceptor StandardOutConsoleInterceptor { get; }
     public StandardErrorConsoleInterceptor StandardErrorConsoleInterceptor { get; }
@@ -80,16 +80,26 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var instanceTracker = Register(new InstanceTracker());
         
-        HooksCollector = Register(new HooksCollector(context.Request.Session.SessionUid.Value));
+        var isReflectionScannerEnabled = IsReflectionScannerEnabled(Logger);
+
+        HooksCollector = Register<HooksCollectorBase>
+        (
+            isReflectionScannerEnabled
+                ? new ReflectionHooksCollector(context.Request.Session.SessionUid.Value)
+                : new SourceGeneratedHooksCollector(context.Request.Session.SessionUid.Value)
+        );
 
         var dependencyCollector = new DependencyCollector();
         
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
-        var testsConstructor = Register<BaseTestsConstructor>(
-            IsReflectionScannerEnabled(Logger)
+
+        var testsConstructor = Register<BaseTestsConstructor>
+        (
+            isReflectionScannerEnabled
                 ? new ReflectionTestsConstructor(extension, dependencyCollector, this)
                 : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, this)
         );
+        
         var testFilterService = Register(new TestFilterService(LoggerFactory));
         
         TestGrouper = Register(new TestGrouper());

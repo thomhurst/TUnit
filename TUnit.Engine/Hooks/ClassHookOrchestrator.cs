@@ -10,7 +10,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector, TUnitFrameworkLogger logger)
+internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollectorBase hooksCollector, TUnitFrameworkLogger logger)
 {
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classHookContexts = new();
     

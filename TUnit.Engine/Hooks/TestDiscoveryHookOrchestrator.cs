@@ -7,7 +7,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, TUnitFrameworkLogger logger, string? stringFilter)
+internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFrameworkLogger logger, string? stringFilter)
 {
     private BeforeTestDiscoveryContext? _beforeContext;
     private TestDiscoveryContext? _afterContext;

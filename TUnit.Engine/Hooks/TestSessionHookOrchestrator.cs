@@ -8,7 +8,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, AssemblyHookOrchestrator assemblyHookOrchestrator, TUnitFrameworkLogger logger, string? stringFilter)
+internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector, AssemblyHookOrchestrator assemblyHookOrchestrator, TUnitFrameworkLogger logger, string? stringFilter)
 {
     private TestSessionContext? _context;
     

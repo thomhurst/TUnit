@@ -10,7 +10,7 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-internal class TestHookOrchestrator(HooksCollector hooksCollector, TUnitFrameworkLogger logger)
+internal class TestHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFrameworkLogger logger)
 {
     public async Task<ExecutionContext?> ExecuteBeforeHooks(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {

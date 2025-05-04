@@ -11,7 +11,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector, TUnitFrameworkLogger logger)
+internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollectorBase hooksCollector, TUnitFrameworkLogger logger)
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyHookContexts = new();
 
