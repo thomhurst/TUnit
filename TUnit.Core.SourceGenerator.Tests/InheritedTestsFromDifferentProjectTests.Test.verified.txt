@@ -417,7 +417,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.BaseTest()),
 					TestFilePath = @"",
-					TestLineNumber = 7,
+					TestLineNumber = 5,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -433,7 +433,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 					MethodName = $"BaseTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedTestsFromDifferentProjectTests.BaseTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 7,
+					TestLineNumber = 5,
 				});
 			}
 			return nodes;
