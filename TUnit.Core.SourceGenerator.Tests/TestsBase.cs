@@ -1,12 +1,12 @@
 using System.Collections.Immutable;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Testing;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal partial class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
+internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
 {
     protected TestsBase()
     {
@@ -113,7 +113,15 @@ internal partial class TestsBase<TGenerator> where TGenerator : IIncrementalGene
 
         await assertions(generatedFiles);
 
-        var verifyTask = Verify(generatedFiles);
+        var verifyTask = Verify(generatedFiles)
+            .OnVerifyMismatch(async (pair, message, verify) =>
+            {
+                var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
+                var verified = await FilePolyfill.ReadAllTextAsync(pair.VerifiedPath);
+                
+                // Better diff message since original one is too large
+                await Assert.That(Scrub(received)).IsEqualTo(Scrub(verified));
+            });
 
         if (runTestOptions.VerifyConfigurator != null)
         {
@@ -136,5 +144,15 @@ internal partial class TestsBase<TGenerator> where TGenerator : IIncrementalGene
         }
 
         return false;
+    }
+    
+    private StringBuilder Scrub(StringBuilder text)
+    {
+        return text.Replace("\r\n", "\n");
+    }
+    
+    private string Scrub(string text)
+    {
+        return Scrub(new StringBuilder(text)).ToString();
     }
 }
