@@ -159,6 +159,11 @@ namespace TUnit.Engine.Services
         public LogLevelProvider(Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions) { }
         public TUnit.Core.Enums.LogLevel LogLevel { get; }
     }
+    public class ReflectionTypeScanner
+    {
+        public ReflectionTypeScanner() { }
+        public static System.Type[] GetTypes() { }
+    }
     public static class TUnitRunner
     {
         public static System.Threading.Tasks.Task<int> RunTests(params string[] args) { }

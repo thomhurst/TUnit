@@ -29,18 +29,6 @@ public static class ClassHooksWriter
         sourceBuilder.WriteLine($"Order = {model.Order},");
         sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
         sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
-       
-        sourceBuilder.WriteTabs();
-        sourceBuilder.Write("MethodAttributes = ");
-        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.GetAttributes().ExcludingSystemAttributes());
-        
-        sourceBuilder.WriteTabs();
-        sourceBuilder.Write("ClassAttributes = ");
-        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes());
-        
-        sourceBuilder.WriteTabs();
-        sourceBuilder.Write("AssemblyAttributes = ");
-        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
 
         sourceBuilder.WriteLine("},");
     }

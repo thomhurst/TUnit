@@ -24,10 +24,10 @@ public abstract record StaticHookMethod
     public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
     public Type ClassType => MethodInfo.Class.Type;
     public Assembly Assembly => ClassType.Assembly;
-    
-    public required Attribute[] MethodAttributes { get; init; }
-    public required Attribute[] ClassAttributes { get; init; }
-    public required Attribute[] AssemblyAttributes { get; init; }
+
+    public Attribute[] MethodAttributes => MethodInfo.Attributes;
+    public Attribute[] ClassAttributes => MethodInfo.Class.Attributes;
+    public Attribute[] AssemblyAttributes => MethodInfo.Class.Assembly.Attributes;
 
     [field: AllowNull, MaybeNull]
     public IEnumerable<Attribute> Attributes => field ??=
@@ -35,6 +35,7 @@ public abstract record StaticHookMethod
 
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 
+    // TODO?
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
     
     public required IHookExecutor HookExecutor { get; init; }

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -46,6 +47,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public AssemblyHookOrchestrator AssemblyHookOrchestrator { get; }
     public EngineCancellationToken EngineCancellationToken { get; }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
         IMessageBus messageBus,

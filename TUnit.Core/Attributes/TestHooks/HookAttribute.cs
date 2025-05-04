@@ -2,10 +2,9 @@
 
 public class HookAttribute : TUnitAttribute
 {
-    public HookType HookType
-    {
-        get;
-    }
+    public HookType HookType { get; }
+    public string File { get; }
+    public int Line { get; }
 
     internal HookAttribute(HookType hookType, string file, int line)
     {
@@ -15,6 +14,8 @@ public class HookAttribute : TUnitAttribute
         }
         
         HookType = hookType;
+        File = file;
+        Line = line;
     }   
     
     public int Order { get; init; }

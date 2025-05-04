@@ -28,7 +28,7 @@ internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector, As
             ExecutionContextHelper.RestoreContext(testSessionContext.ExecutionContext);
         }
         
-        // After Discovery and Before test session hooks are run, more chance of references assemblies
+        // After Discovery and Before test session hooks are run, more chance of referenced assemblies
         // being loaded into the AppDomain, so now we collect the test hooks which should pick up loaded libraries too
         hooksCollector.CollectHooks();
 
