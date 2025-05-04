@@ -19,7 +19,7 @@
     <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\$(TargetFramework)\TUnit.TestProject.Library.dll">
+    <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\$(LibraryTargetFramework)\TUnit.TestProject.Library.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
