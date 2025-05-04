@@ -108,14 +108,6 @@ internal class SingleTestExecutor(
                 await logger.LogInformationAsync($"Skipping {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}...");
                 
                 testContext.SetResult(skipTestException);
-
-                await messageBus.Skipped(testContext, skipTestException.Reason);
-            }
-            catch (Exception testRunCanceledException) when (IsCancelled(testRunCanceledException))
-            {
-                testContext.SetResult(testRunCanceledException);
-
-                await messageBus.Cancelled(testContext, start.Value);
             }
             catch (Exception e)
             {
@@ -138,6 +130,7 @@ internal class SingleTestExecutor(
             {
                 Status.Passed => messageBus.Passed(test.TestContext, start.GetValueOrDefault()),
                 Status.Failed => messageBus.Failed(test.TestContext, result.Exception!, start.GetValueOrDefault()),
+                Status.Cancelled => messageBus.Cancelled(test.TestContext, start.GetValueOrDefault()),
                 _ => default,
             };
 

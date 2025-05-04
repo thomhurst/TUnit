@@ -93,6 +93,8 @@ public static class TestContextExtensions
             null => Status.Passed,
             SkipTestException => Status.Skipped,
             TestRunCanceledException => Status.Cancelled,
+            TaskCanceledException or OperationCanceledException 
+                when testContext.GetService<EngineCancellationToken>().Token.IsCancellationRequested => Status.Cancelled,
             _ => Status.Failed,
         };
 
