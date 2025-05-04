@@ -1,4 +1,6 @@
-﻿using TUnit.Core;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
 
@@ -6,8 +8,17 @@ namespace TUnit.Engine.Services;
 
 internal class DependencyCollector
 {
+    private ConcurrentDictionary<TestDetailsEqualityWrapper, Dependency[]> _dependenciesCache = new();
+    
     public void ResolveDependencies(DiscoveredTest[] discoveredTests, CancellationToken cancellationToken)
     {
+        // TODO: Disable for reflection? Seems to hang :(
+
+        if (1.ToString() == "1")
+        {
+            return;
+        }
+
         foreach (var discoveredTest in discoveredTests)
         {
             discoveredTest.Dependencies = GetDependencies(discoveredTest, discoveredTests, cancellationToken);
@@ -19,7 +30,14 @@ internal class DependencyCollector
     {
         try
         {
-            return GetDependencies(test, [], [], allTests, cancellationToken).ToArray();
+            return _dependenciesCache.GetOrAdd(new TestDetailsEqualityWrapper(test.TestDetails), _ =>
+            {
+                var dependencies = GetDependencies(test, [], [], allTests, cancellationToken).ToArray();
+
+                AddRecursively(dependencies);
+                
+                return dependencies;
+            });
         }
         catch (Exception e)
         {
@@ -29,12 +47,24 @@ internal class DependencyCollector
         return [];
     }
 
+    private void AddRecursively(Dependency[] dependencies)
+    {
+        foreach (var dependency in dependencies)
+        {
+            _dependenciesCache.TryAdd(new TestDetailsEqualityWrapper(dependency.TestDetails), dependency.Test.Dependencies);
+            
+            AddRecursively(dependency.Test.Dependencies);
+        }
+    }
+
     private IEnumerable<Dependency> GetDependencies(DiscoveredTest test,
-        List<DiscoveredTest> currentChain, HashSet<DiscoveredTest> visited, DiscoveredTest[] allTests, CancellationToken cancellationToken)
+        List<TestDetailsEqualityWrapper> currentChain, HashSet<TestDetailsEqualityWrapper> visited, DiscoveredTest[] allTests, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        
+        var testDetailsEqualityWrapper = new TestDetailsEqualityWrapper(test.TestDetails);
 
-        if (currentChain.Any(x => x.TestDetails.IsSameTest(test.TestDetails)))
+        if (currentChain.Any(x => new TestDetailsEqualityWrapper(x.TestDetails) == testDetailsEqualityWrapper))
         {
             var chain = currentChain
                 .SkipWhile(x => !x.TestDetails.IsSameTest(test.TestDetails))
@@ -44,12 +74,12 @@ internal class DependencyCollector
             throw new DependencyConflictException(chain);
         }
 
-        if (!visited.Add(test))
+        if (!visited.Add(testDetailsEqualityWrapper))
         {
             yield break;
         }
 
-        currentChain.Add(test);
+        currentChain.Add(testDetailsEqualityWrapper);
         
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
@@ -66,7 +96,7 @@ internal class DependencyCollector
             }
         }
         
-        currentChain.Remove(test);
+        currentChain.Remove(testDetailsEqualityWrapper);
     }
 
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
@@ -98,5 +128,51 @@ internal class DependencyCollector
         }
 
         return foundTests;
+    }
+
+    private class TestDetailsEqualityWrapper(TestDetails testDetails)
+    {
+        public TestDetails TestDetails
+        {
+            get;
+        } = testDetails;
+        
+
+        protected bool Equals(TestDetailsEqualityWrapper other)
+        {
+            return TestDetails.IsSameTest(other.TestDetails);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null)
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+            return Equals((TestDetailsEqualityWrapper)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return TestDetails.GetHashCode();
+        }
+
+        public static bool operator ==(TestDetailsEqualityWrapper? left, TestDetailsEqualityWrapper? right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(TestDetailsEqualityWrapper? left, TestDetailsEqualityWrapper? right)
+        {
+            return !Equals(left, right);
+        }
     }
 }

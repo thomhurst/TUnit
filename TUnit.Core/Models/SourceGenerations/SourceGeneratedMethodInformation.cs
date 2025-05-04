@@ -35,7 +35,7 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
             }
         };
 
-    public required SourceGeneratedParameterInformation[] Parameters { get; init; }
+    public required EqualityList<SourceGeneratedParameterInformation> Parameters { get; init; }
 
     public required int GenericTypeCount { get; init; }
 

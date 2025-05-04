@@ -6,6 +6,7 @@ using TUnit.Core.Executors;
 using TUnit.Core.Helpers;
 using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -22,7 +23,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         }
 #endif
         
-        foreach (var type in ReflectionTypeScanner.GetTypes())
+        foreach (var type in ReflectionScanner.GetTypes())
         {
             foreach (var methodInfo in type.GetMethods())
             {
@@ -39,7 +40,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                             HookExecutor = GetHookExecutor(methodInfo),
                             FilePath = hookAttribute.File,
                             LineNumber = hookAttribute.Line,
-                            Body = (context, token) => (ValueTask) methodInfo.Invoke(type, [context, token])!,
+                            Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
                         });
                     }
                     else
@@ -51,7 +52,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                             HookExecutor = GetHookExecutor(methodInfo),
                             FilePath = hookAttribute.File,
                             LineNumber = hookAttribute.Line,
-                            Body = (context, token) => (ValueTask) methodInfo.Invoke(type, [context, token])!,
+                            Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
                         });
                     }
                 }
@@ -61,11 +62,11 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
 
     public override void CollectionTestSessionHooks()
     {
-        foreach (var type in ReflectionTypeScanner.GetTypes())
+        foreach (var type in ReflectionScanner.GetTypes())
         {
             foreach (var methodInfo in type.GetMethods())
             {
-                if (HasHookType(methodInfo, HookType.TestDiscovery, out var hookAttribute))
+                if (HasHookType(methodInfo, HookType.TestSession, out var hookAttribute))
                 {
                     var sourceGeneratedMethodInformation = SourceModelHelpers.BuildTestMethod(type, methodInfo, [], methodInfo.Name);
 
@@ -78,7 +79,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                             HookExecutor = GetHookExecutor(methodInfo),
                             FilePath = hookAttribute.File,
                             LineNumber = hookAttribute.Line,
-                            Body = (context, token) => (ValueTask) methodInfo.Invoke(type, [context, token])!,
+                            Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
                         });
                     }
                     else
@@ -90,7 +91,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                             HookExecutor = GetHookExecutor(methodInfo),
                             FilePath = hookAttribute.File,
                             LineNumber = hookAttribute.Line,
-                            Body = (context, token) => (ValueTask) methodInfo.Invoke(type, [context, token])!,
+                            Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
                         });
                     }
                 }

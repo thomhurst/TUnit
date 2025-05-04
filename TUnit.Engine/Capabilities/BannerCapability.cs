@@ -31,8 +31,22 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
                
                {GetRuntimeDetails()}
                
+               {GetMode()}
             """
         );
+    }
+
+    private string GetMode()
+    {
+        if (commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner))
+        {
+            return """
+                   Finding tests via Reflection Scanning...
+
+                   """;
+        }
+
+        return string.Empty;
     }
 
     private string GetRuntimeDetails()
