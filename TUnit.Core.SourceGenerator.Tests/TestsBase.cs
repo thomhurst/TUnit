@@ -113,8 +113,15 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
 
         await assertions(generatedFiles);
 
-        var verifyTask = Verify(generatedFiles)
-            .OnVerifyMismatch(async (pair, message, verify) =>
+        var verifyTask = Verify(generatedFiles);
+
+        if (runTestOptions.VerifyConfigurator != null)
+        {
+            verifyTask = runTestOptions.VerifyConfigurator(verifyTask);
+        }
+        else
+        {
+            verifyTask = verifyTask.OnVerifyMismatch(async (pair, message, verify) =>
             {
                 var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
                 var verified = await FilePolyfill.ReadAllTextAsync(pair.VerifiedPath);
@@ -122,10 +129,6 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
                 // Better diff message since original one is too large
                 await Assert.That(Scrub(received)).IsEqualTo(Scrub(verified));
             });
-
-        if (runTestOptions.VerifyConfigurator != null)
-        {
-            verifyTask = runTestOptions.VerifyConfigurator(verifyTask);
         }
 
         await verifyTask;

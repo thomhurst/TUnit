@@ -17,9 +17,9 @@ internal class AssemblyLoaderTests : TestsBase<AssemblyLoaderGenerator>
                 return verify.UniqueForTargetFrameworkAndVersion()
                     .ScrubLinesWithReplace(line =>
                     {
-                        if (line.Contains("public static class AssemblyLoader"))
+                        if (line.Contains("file static class AssemblyLoader"))
                         {
-                            return "public static class AssemblyLoader_Guid";
+                            return "file static class AssemblyLoader_Guid";
                         }
 
                         return line;
