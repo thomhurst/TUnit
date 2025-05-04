@@ -69,12 +69,6 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 5,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -245,12 +239,6 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 20,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -421,12 +409,6 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 35,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -597,12 +579,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 50,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -692,12 +668,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 56,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -787,12 +757,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 62,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -887,12 +851,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 68,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}

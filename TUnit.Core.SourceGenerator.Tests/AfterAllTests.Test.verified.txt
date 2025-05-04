@@ -75,12 +75,6 @@ file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Order = 0,
 					FilePath = @"",
 					LineNumber = 5,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
-					],
-					ClassAttributes = [],
-					AssemblyAttributes = [],
 				},
 			];
 		}
@@ -251,12 +245,6 @@ file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Order = 0,
 					FilePath = @"",
 					LineNumber = 20,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
-					],
-					ClassAttributes = [],
-					AssemblyAttributes = [],
 				},
 			];
 		}
@@ -427,12 +415,6 @@ file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Order = 0,
 					FilePath = @"",
 					LineNumber = 35,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
-					],
-					ClassAttributes = [],
-					AssemblyAttributes = [],
 				},
 			];
 		}
@@ -603,12 +585,6 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 					Order = 0,
 					FilePath = @"",
 					LineNumber = 50,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
-					],
-					ClassAttributes = [],
-					AssemblyAttributes = [],
 				},
 			];
 		}
@@ -698,12 +674,6 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 					Order = 0,
 					FilePath = @"",
 					LineNumber = 56,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
-					],
-					ClassAttributes = [],
-					AssemblyAttributes = [],
 				},
 			];
 		}
@@ -793,12 +763,6 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 					Order = 0,
 					FilePath = @"",
 					LineNumber = 62,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
-					],
-					ClassAttributes = [],
-					AssemblyAttributes = [],
 				},
 			];
 		}
@@ -893,12 +857,6 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 					Order = 0,
 					FilePath = @"",
 					LineNumber = 68,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Class)
-					],
-					ClassAttributes = [],
-					AssemblyAttributes = [],
 				},
 			];
 		}
