@@ -53,7 +53,7 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                                 
                                 string typeName = assertionDto.GetTypeName();
                                 
-                                scopeBuilder.AppendBodyIndented(
+                                scopeBuilder.AppendBody(
                                     $$"""
                                     public static InvokableValueAssertionBuilder<{{typeName}}> {{assertionDto.GetMethodName()}}(this IValueSource<{{typeName}}> valueSource)
                                     {
