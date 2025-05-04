@@ -6,27 +6,29 @@ using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
 [NotInParallel("DotNetTests")]
-public class RunPublicAPITestsModule : Module<CommandResult>
+public class RunPublicAPITestsModule : TestBaseModule
 {
-    protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.PublicAPI.csproj").AssertExists();
         
-        return await context.DotNet().Run(new DotNetRunOptions
+        return Task.FromResult(new DotNetRunOptions
         {
             Project = project,
             NoBuild = true,
             Configuration = Configuration.Release,
-            Framework = Environment.GetEnvironmentVariable("NET_VERSION"),
+            Framework = framework,
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
                 ["GITHUB_ACTIONS"] = "false",
-            }
-        }, cancellationToken);
+            },
+            Arguments = ["--fail-fast"]
+        });
     }
 }

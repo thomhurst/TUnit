@@ -14,7 +14,7 @@ public abstract class InvokableTestBase(TestMode testMode)
         yield return TestMode.SourceGenerated;
         yield return TestMode.Reflection;
         
-        if (!EnvironmentVariables.IsNet472)
+        if (!EnvironmentVariables.IsNetFramework)
         {
             yield return TestMode.AOT;
             yield return TestMode.SingleFileApplication;
@@ -23,7 +23,7 @@ public abstract class InvokableTestBase(TestMode testMode)
     
     private static readonly string GetEnvironmentVariable = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net9.0";
 
-    public static bool IsNetFramework => GetEnvironmentVariable == "net472";
+    public static bool IsNetFramework => GetEnvironmentVariable.StartsWith("net4");
     
     protected Task RunTestsWithFilter(string filter,
         List<Action<TestRun>> assertions,
