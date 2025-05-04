@@ -6,6 +6,7 @@ namespace TUnit.Assertions.Assertions.Chars;
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
+#if NET
 [GenerateIsAssertion<char>(nameof(char.IsAscii))]
 [GenerateIsAssertion<char>(nameof(char.IsAsciiDigit))]
 [GenerateIsAssertion<char>(nameof(char.IsAsciiLetterLower))]
@@ -14,6 +15,7 @@ namespace TUnit.Assertions.Assertions.Chars;
 [GenerateIsAssertion<char>(nameof(char.IsAsciiHexDigit))]
 [GenerateIsAssertion<char>(nameof(char.IsAsciiHexDigitUpper))]
 [GenerateIsAssertion<char>(nameof(char.IsAsciiHexDigitLower))]
+#endif
 [GenerateIsAssertion<char>(nameof(char.IsDigit))]
 // [GenerateIsAssertion<char>(nameof(char.IsBetween))]
 [GenerateIsAssertion<char>(nameof(char.IsLetter))]
