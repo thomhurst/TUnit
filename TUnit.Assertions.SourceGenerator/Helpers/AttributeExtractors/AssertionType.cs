@@ -1,14 +1,13 @@
 ﻿// ---------------------------------------------------------------------------------------------------------------------
 // Imports
 // ---------------------------------------------------------------------------------------------------------------------
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
-// ReSharper disable once UnusedTypeParameter
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class GenerateIsNotAssertionAttribute<TBase>(string methodName) : Attribute {
-    public string MethodName { get; } = methodName;
-
+public enum AssertionType {
+    Undefined,
+    Is,
+    IsNot
 }

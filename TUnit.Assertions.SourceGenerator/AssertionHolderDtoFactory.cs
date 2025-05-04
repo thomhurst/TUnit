@@ -3,40 +3,30 @@
 // ---------------------------------------------------------------------------------------------------------------------
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
+using TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 
 namespace TUnit.Assertions.SourceGenerator;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
-public static class GenerateAssertionDtoFactory {
-    public const string GenerateIsAssertionAttribute = "TUnit.Assertions.GenerateIsAssertionAttribute";
+public static class AssertionHolderDtoFactory {
     public const string GenerateIsNotAssertionAttribute = "TUnit.Assertions.GenerateIsNotAssertionAttribute";
     
-    public static GenerateAssertionDto? Create(GeneratorSyntaxContext context, CancellationToken ct) {
+    public static AssertionHolderDto? Create(GeneratorSyntaxContext context, CancellationToken ct) {
         var classNode = (ClassDeclarationSyntax)context.Node;
         SemanticModel semanticModel = context.SemanticModel;
                 
         // Get the symbol for detailed type information
         ISymbol? classSymbol = semanticModel.GetDeclaredSymbol(classNode);
-        if (classSymbol == null) return null;
+        if (classSymbol is not INamedTypeSymbol symbol) return null;
 
         // Look for our attributes
-        ImmutableArray<AttributeData> attributes = classSymbol.GetAttributes();
-                    
-        var isAssertions = attributes
-            .Where(attr => attr.AttributeClass?.ToDisplayString().Contains(GenerateIsAssertionAttribute) == true)
-            .ToImmutableArray();
+        var generateAssertions = GenerateAssertionExtractor.Extract(context, symbol, ct);
         
-        var isNotAssertions = attributes
-            .Where(attr => attr.AttributeClass?.ToDisplayString().Contains(GenerateIsNotAssertionAttribute) == true)
-            .ToImmutableArray();
-        
-        return new GenerateAssertionDto(
-            classSymbol,
-            isAssertions,
-            isNotAssertions
+        return new AssertionHolderDto(
+            symbol,
+            generateAssertions
         );
     }
 }
