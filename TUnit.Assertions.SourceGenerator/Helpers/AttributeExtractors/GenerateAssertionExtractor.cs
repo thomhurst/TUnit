@@ -44,6 +44,7 @@ public static class GenerateAssertionExtractor {
                 expectationExpression = attribute.ConstructorArguments[3].Value as string;
             
             assertions.Add(new GenerateAssertionDto(
+                attributeLocation: attribute?.ApplicationSyntaxReference!.GetSyntax(ct).GetLocation(),
                 typeArg,
                 type,
                 methodName!,

@@ -11,6 +11,7 @@ namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 // Code
 // ---------------------------------------------------------------------------------------------------------------------
 public class GenerateAssertionDto(
+    Location? attributeLocation,
     ITypeSymbol typeArg,
     AssertionType assertionType,
     string methodName,
@@ -79,15 +80,15 @@ public class GenerateAssertionDto(
         string typeName = GetTypeName();
 
         return $$"""
-                 if (value is null)
-                 {
-                     self.FailWithMessage("Actual {{typeName}} is null");
-                     return false;
-                 }
-                 """;
+                    if (value is null)
+                    {
+                        self.FailWithMessage("Actual {{typeName}} is null");
+                        return false;
+                    }
+        """;
     }
 
-    public bool TryVerify(out ImmutableArray<Diagnostic> diagnostics) {
+    public bool TryVerifyOrGetDiagnostics(out ImmutableArray<Diagnostic> diagnostics) {
         diagnostics = ImmutableArray<Diagnostic>.Empty;
         
         var members = typeArg.GetMembers(methodName);
@@ -98,13 +99,13 @@ public class GenerateAssertionDto(
             case null: {
                 diagnosticsBuilder.Add(Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        "TESTING-001",
+                        "TESTING001",
                         "Member not found",
                         "Could not find member '{0}' in type '{1}'",
                         "TUnit",
                         DiagnosticSeverity.Error,
                         true),
-                    Location.None,
+                    attributeLocation ?? Location.None,
                     methodName, typeArg.Name)
                 );
                 break;
@@ -112,56 +113,65 @@ public class GenerateAssertionDto(
                 
 
             // Check if it's a property
-            case IPropertySymbol propertySymbol when propertySymbol.Type.SpecialType != SpecialType.System_Boolean: {
+            case IPropertySymbol { Type.SpecialType: not SpecialType.System_Boolean } propertySymbol: {
                 diagnosticsBuilder.Add(Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        "TUNIT002",
+                        "TESTING002",
                         "Invalid property return type",
                         "Property '{0}' must return bool, but returns {1}",
                         "TUnit",
                         DiagnosticSeverity.Error,
                         true),
-                    Location.None,
+                    attributeLocation ?? Location.None,
                     methodName, propertySymbol.Type));
                 break;
             }
             // Check if it's a method
-            case IMethodSymbol methodSymbol when methodSymbol.ReturnType.SpecialType != SpecialType.System_Boolean: {
+            case IMethodSymbol { ReturnType.SpecialType: not SpecialType.System_Boolean } methodSymbol: {
                 diagnosticsBuilder.Add(Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        "TUNIT003",
+                        "TESTING003",
                         "Invalid method return type",
                         "Method '{0}' must return bool, but returns {1}",
                         "TUnit",
                         DiagnosticSeverity.Error,
                         true),
-                    Location.None,
+                    attributeLocation ?? Location.None,
                     methodName, methodSymbol.ReturnType));
                 break;
             }
-            case IMethodSymbol methodSymbol when methodSymbol.Parameters.Length > 0: {
+            case IMethodSymbol methodSymbol when methodSymbol.Parameters.Length > (methodSymbol.IsExtensionMethod ? 1 : 0)
+                && typeArg.SpecialType is not (
+                    SpecialType.System_Char
+                    or SpecialType.System_String
+                    or SpecialType.System_Boolean
+                    or SpecialType.System_Int32
+                    or SpecialType.System_Double
+                    or SpecialType.System_Single
+                    or SpecialType.System_Byte
+                ): {
                 diagnosticsBuilder.Add(Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        "TUNIT004",
+                        "TESTING004",
                         "Invalid method parameters",
                         "Method '{0}' must have no parameters",
                         "TUnit",
                         DiagnosticSeverity.Error,
                         true),
-                    Location.None,
+                    attributeLocation ?? Location.None,
                     methodName));
                 break;
             }
             case not (IPropertySymbol or IMethodSymbol): {
                 diagnosticsBuilder.Add(Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        "TUNIT005",
+                        "TESTING005",
                         "Invalid member type",
                         "Member '{0}' must be either a property or a method",
                         "TUnit",
                         DiagnosticSeverity.Error,
                         true),
-                    Location.None,
+                    attributeLocation ?? Location.None,
                     methodName));
                 break;
             }

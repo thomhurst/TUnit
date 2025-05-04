@@ -44,7 +44,7 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
                     builder.AppendLine($"public static partial class {holderDto.ClassName}")
                         .AppendAutoClosedScope(scopeBuilder => {
                             foreach (GenerateAssertionDto assertionDto in holderDto.GenerateAssertions) {
-                                if (!assertionDto.TryVerify(out var diagnostics)) {
+                                if (!assertionDto.TryVerifyOrGetDiagnostics(out var diagnostics)) {
                                     foreach (Diagnostic diagnostic in diagnostics) {
                                         spc.ReportDiagnostic(diagnostic);
                                     }
