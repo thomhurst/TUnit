@@ -17,18 +17,4 @@
         <IsTestProject>true</IsTestProject>
 
     </PropertyGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
-        <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
-        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
-
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Assertions.Analyzers.CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    </ItemGroup>
 </Project>

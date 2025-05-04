@@ -1,6 +1,22 @@
 <Project>
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Core\TUnit.Core.targets" />
 
+    <ItemGroup>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Core\TUnit.Core.csproj" />
+
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)TUnit.Analyzers\TUnit.Analyzers.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
     <ItemGroup Condition="'$(ImportTUnitGlobalUsings)' == 'true'">
         <Using Include="TUnit.Core.HookType" Static="True" />
         <Using Include="TUnit.Core" />

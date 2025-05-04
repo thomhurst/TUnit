@@ -19,20 +19,4 @@
 
         <ImportTUnitGlobalUsings>true</ImportTUnitGlobalUsings>
     </PropertyGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
-        
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Analyzers\TUnit.Analyzers.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    </ItemGroup>
 </Project>
