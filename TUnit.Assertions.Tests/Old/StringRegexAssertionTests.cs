@@ -43,10 +43,10 @@ public partial class StringRegexAssertionTests
     #region Matches Throws
     [Test]
     #if NET
-    [TestCase(typeof(RegexParseException), @"[", null!)] // invalid regex
+    [Arguments(typeof(RegexParseException), @"[", null!)] // invalid regex
     #endif 
-    [TestCase(typeof(ArgumentNullException), @"^\d+$", null)]
-    [TestCase(typeof(TUnitAssertionException), @"^\d+$", "Hello123World")]
+    [Arguments(typeof(ArgumentNullException), @"^\d+$", null)]
+    [Arguments(typeof(TUnitAssertionException), @"^\d+$", "Hello123World")]
     public void Matches_WithInvalidPattern_StringPattern_Throws(Type exceptionType, string pattern, string? text) 
     {
         AsyncTestDelegate action = async () => await TUnitAssert.That(text).Matches(pattern);
@@ -69,8 +69,8 @@ public partial class StringRegexAssertionTests
     }
     
     [Test]
-    [TestCase(typeof(ArgumentNullException), null)]
-    [TestCase(typeof(TUnitAssertionException), "Hello123World")]
+    [Arguments(typeof(ArgumentNullException), null)]
+    [Arguments(typeof(TUnitAssertionException), "Hello123World")]
     public void Matches_WithInvalidPattern_RegexPattern_Throws(Type exceptionType, string? text) 
     {
         var pattern = new Regex(@"^\d+$");
@@ -99,8 +99,8 @@ public partial class StringRegexAssertionTests
     private static partial Regex Matches_FindNumberRegex();
     
     [Test]
-    [TestCase(typeof(ArgumentNullException), null)]
-    [TestCase(typeof(TUnitAssertionException), "Hello123World")]
+    [Arguments(typeof(ArgumentNullException), null)]
+    [Arguments(typeof(TUnitAssertionException), "Hello123World")]
     public void Matches_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
     {
         Regex regex = Matches_FindNumberRegex();
@@ -126,8 +126,8 @@ public partial class StringRegexAssertionTests
     #endif
     
     [Test]
-    [TestCase(typeof(RegexMatchTimeoutException), "(a+)+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
-    [TestCase(typeof(RegexMatchTimeoutException), @"^(([a-z])+.)+[A-Z]([a-z])+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
+    [Arguments(typeof(RegexMatchTimeoutException), "(a+)+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
+    [Arguments(typeof(RegexMatchTimeoutException), @"^(([a-z])+.)+[A-Z]([a-z])+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
     public void Matches_WithTimeoutPattern_Throws(Type exceptionType, string pattern, string text)
     {
         // Create regex with a short timeout
@@ -182,10 +182,10 @@ public partial class StringRegexAssertionTests
     #region DoesNotMatch Throws
     [Test]
     #if NET
-    [TestCase(typeof(RegexParseException), @"[", null!)] // invalid regex
+    [Arguments(typeof(RegexParseException), @"[", null!)] // invalid regex
     #endif 
-    [TestCase(typeof(ArgumentNullException), @"^\d+$", null)]
-    [TestCase(typeof(TUnitAssertionException), @"^\d+$", "123")]
+    [Arguments(typeof(ArgumentNullException), @"^\d+$", null)]
+    [Arguments(typeof(TUnitAssertionException), @"^\d+$", "123")]
     public void DoesNotMatch_WithInvalidPattern_StringPattern_Throws(Type exceptionType, string pattern, string? text) 
     {
         AsyncTestDelegate action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
@@ -208,8 +208,8 @@ public partial class StringRegexAssertionTests
     }
 
     [Test]
-    [TestCase(typeof(ArgumentNullException), null)]
-    [TestCase(typeof(TUnitAssertionException), "123")]
+    [Arguments(typeof(ArgumentNullException), null)]
+    [Arguments(typeof(TUnitAssertionException), "123")]
     public void DoesNotMatch_WithInvalidPattern_RegexPattern_Throws(Type exceptionType, string? text) 
     {
         var pattern = new Regex(@"^\d+$");
@@ -238,8 +238,8 @@ public partial class StringRegexAssertionTests
     private static partial Regex FindNumberRegex();
 
     [Test]
-    [TestCase(typeof(ArgumentNullException), null)]
-    [TestCase(typeof(TUnitAssertionException), "123")]
+    [Arguments(typeof(ArgumentNullException), null)]
+    [Arguments(typeof(TUnitAssertionException), "123")]
     public void DoesNotMatch_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
     {
         Regex regex = FindNumberRegex();
@@ -265,8 +265,8 @@ public partial class StringRegexAssertionTests
     #endif
     
     [Test]
-    [TestCase(typeof(RegexMatchTimeoutException), "(a+)+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
-    [TestCase(typeof(RegexMatchTimeoutException), @"^(([a-z])+.)+[A-Z]([a-z])+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
+    [Arguments(typeof(RegexMatchTimeoutException), "(a+)+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
+    [Arguments(typeof(RegexMatchTimeoutException), @"^(([a-z])+.)+[A-Z]([a-z])+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
     public void DoesNotMatch_WithTimeoutPattern_Throws(Type exceptionType, string pattern, string text)
     {
         // Create regex with a short timeout
