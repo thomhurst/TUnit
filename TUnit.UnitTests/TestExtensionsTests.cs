@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AutoFixture;
+using TUnit.Assertions.Extensions;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TestContext = TUnit.Core.TestContext;
@@ -12,7 +13,7 @@ public class TestExtensionsTests
     private readonly Fixture _fixture = new();
 
     [Test]
-    public void TopLevelClass()
+    public async Task TopLevelClass()
     {
         var testDetails = _fixture.Build<TestDetails<TestExtensionsTests>>()
             .With(x => x.DynamicAttributes, [])
@@ -47,11 +48,11 @@ public class TestExtensionsTests
 
         var name = context.GetClassTypeName();
         
-        Assert.That(name, Is.EqualTo("TestExtensionsTests"));
+        await Assert.That(name).IsEqualTo("TestExtensionsTests");
     }
 
     [Test]
-    public void NestedClass()
+    public async Task NestedClass()
     {
         var testDetails = _fixture.Build<TestDetails<InnerClass>>()
             .With(x => x.DynamicAttributes, [])
@@ -85,7 +86,7 @@ public class TestExtensionsTests
 
         var name = context.GetClassTypeName();
         
-        Assert.That(name, Is.EqualTo("TestExtensionsTests+InnerClass"));
+        await Assert.That(name).IsEqualTo("TestExtensionsTests+InnerClass");
     }
 
     private TestContext CreateTestContext<

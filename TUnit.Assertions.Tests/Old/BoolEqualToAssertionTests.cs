@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+﻿namespace TUnit.Assertions.Tests.Old;
 
 public class BoolEqualToAssertionTests
 {
@@ -23,20 +21,20 @@ public class BoolEqualToAssertionTests
     }
     
     [Test]
-    public void EqualsTo_Failure()
+    public async Task EqualsTo_Failure()
     {
         var value1 = true;
         var value2 = false;
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
     }
     
     [Test]
-    public void EqualsTo_Failure2()
+    public async Task EqualsTo_Failure2()
     {
         bool? value1 = null;
         var value2 = true;
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
     }
 }

@@ -1,6 +1,4 @@
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 
 public class MemberTests
@@ -19,7 +17,7 @@ public class MemberTests
     }
     
     [Test]
-    public void Number_Falsey()
+    public async Task Number_Falsey()
     {
         var myClass = new MyClass
         {
@@ -28,8 +26,8 @@ public class MemberTests
             Flag = false
         };
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
-        NUnitAssert.That(exception, Has.Message.EqualTo(
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
+        await TUnitAssert.That(exception).HasMessageEqualTo(
             """
             Expected myClass MyClass.Number to be equal to 1
             
@@ -37,11 +35,11 @@ public class MemberTests
             
             at Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
             """
-            ));
+            );
     }
     
     [Test]
-    public void Number_Nested_Falsey()
+    public async Task Number_Nested_Falsey()
     {
         var myClass = new MyClass
         {
@@ -50,8 +48,8 @@ public class MemberTests
             Flag = false
         };
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1));
-        NUnitAssert.That(exception, Has.Message.EqualTo(
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1));
+        await TUnitAssert.That(exception).HasMessageEqualTo(
             """
             Expected myClass MyClass.Number to be equal to 1
             
@@ -59,16 +57,16 @@ public class MemberTests
             
             at Assert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1)
             """
-        ));
+        );
     }
     
     [Test]
-    public void Number_Null()
+    public async Task Number_Null()
     {
         MyClass myClass = null!;
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
-        NUnitAssert.That(exception, Has.Message.EqualTo(
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
+        await TUnitAssert.That(exception).HasMessageEqualTo(
             """
             Expected myClass MyClass.Number to be equal to 1
             
@@ -76,7 +74,7 @@ public class MemberTests
             
             at Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
             """
-        ));
+        );
     }
 
     private class MyClass

@@ -1,22 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\TUnit.Core\TUnit.Core.props" />
-    <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
-    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
+  <Import Project="..\TestProject.props" />
     
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <IsLibraryTestProject>true</IsLibraryTestProject>
-        <IsPackable>false</IsPackable>
-        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
-        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
         <Configuration>Release</Configuration>
-        <RuntimeIdentifier Condition="'$(TargetFramework)' == 'net472'">win-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,8 +15,6 @@
       <ProjectReference Include="..\TUnit.Playwright\TUnit.Playwright.csproj" />
     </ItemGroup>
 
-    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
-    <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
-    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
+    <Import Project="..\TestProject.targets" />
 
 </Project>

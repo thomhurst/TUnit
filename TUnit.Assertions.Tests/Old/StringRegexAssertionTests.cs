@@ -1,7 +1,6 @@
 ﻿using System.Text.RegularExpressions;
-using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 public partial class StringRegexAssertionTests 
 {
@@ -47,17 +46,17 @@ public partial class StringRegexAssertionTests
     #endif 
     [Arguments(typeof(ArgumentNullException), @"^\d+$", null)]
     [Arguments(typeof(TUnitAssertionException), @"^\d+$", "Hello123World")]
-    public void Matches_WithInvalidPattern_StringPattern_Throws(Type exceptionType, string pattern, string? text) 
+    public async Task Matches_WithInvalidPattern_StringPattern_Throws(Type exceptionType, string pattern, string? text) 
     {
-        AsyncTestDelegate action = async () => await TUnitAssert.That(text).Matches(pattern);
+        Func<Task> action = async () => await TUnitAssert.That(text).Matches(pattern);
 
-        Exception? exception = NUnitAssert.ThrowsAsync(exceptionType,action);
+        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType,action);
         if (exceptionType != typeof(TUnitAssertionException)) 
         {
             return;
         }
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text match pattern
 
@@ -65,25 +64,25 @@ public partial class StringRegexAssertionTests
 
              at Assert.That(text).Matches(pattern)
              """
-        ));
+        );
     }
     
     [Test]
     [Arguments(typeof(ArgumentNullException), null)]
     [Arguments(typeof(TUnitAssertionException), "Hello123World")]
-    public void Matches_WithInvalidPattern_RegexPattern_Throws(Type exceptionType, string? text) 
+    public async Task Matches_WithInvalidPattern_RegexPattern_Throws(Type exceptionType, string? text) 
     {
         var pattern = new Regex(@"^\d+$");
         
-        AsyncTestDelegate action = async () => await TUnitAssert.That(text).Matches(pattern); 
+        Func<Task> action = async () => await TUnitAssert.That(text).Matches(pattern); 
 
-        var exception = NUnitAssert.ThrowsAsync(exceptionType, action);
+        var exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException)) 
         {
             return;
         }
 
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text match pattern
 
@@ -91,7 +90,7 @@ public partial class StringRegexAssertionTests
 
              at Assert.That(text).Matches(pattern)
              """
-        ));
+        );
     }
     
     #if NET // Needed because NetFramework doesn't support partial methods
@@ -101,19 +100,19 @@ public partial class StringRegexAssertionTests
     [Test]
     [Arguments(typeof(ArgumentNullException), null)]
     [Arguments(typeof(TUnitAssertionException), "Hello123World")]
-    public void Matches_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
+    public async Task Matches_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
     {
         Regex regex = Matches_FindNumberRegex();
         
-        AsyncTestDelegate action = async () => await TUnitAssert.That(text).Matches(regex);
+        Func<Task> action = async () => await TUnitAssert.That(text).Matches(regex);
 
-        Exception? exception = NUnitAssert.ThrowsAsync(exceptionType, action);
+        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException)) 
         {
             return;
         }
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text match regex
              
@@ -121,14 +120,14 @@ public partial class StringRegexAssertionTests
              
              at Assert.That(text).Matches(regex)
              """
-        ));
+        );
     }
     #endif
     
     [Test]
     [Arguments(typeof(RegexMatchTimeoutException), "(a+)+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
     [Arguments(typeof(RegexMatchTimeoutException), @"^(([a-z])+.)+[A-Z]([a-z])+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
-    public void Matches_WithTimeoutPattern_Throws(Type exceptionType, string pattern, string text)
+    public async Task Matches_WithTimeoutPattern_Throws(Type exceptionType, string pattern, string text)
     {
         // Create regex with a short timeout
         #if NET8_0_OR_GREATER
@@ -138,10 +137,10 @@ public partial class StringRegexAssertionTests
         #endif
         var regex = new Regex(pattern, RegexOptions.None, timeout);
     
-        AsyncTestDelegate action = async () => await TUnitAssert.That(text).Matches(regex);
+        Func<Task> action = async () => await TUnitAssert.That(text).Matches(regex);
 
-        var exception = NUnitAssert.ThrowsAsync<RegexMatchTimeoutException>(action);
-        NUnitAssert.That(exception!.Pattern, Is.EqualTo(pattern));
+        var exception = await TUnitAssert.ThrowsAsync<RegexMatchTimeoutException>(action);
+        await TUnitAssert.That(exception!.Pattern).IsEqualTo(pattern);
     }
     #endregion
     
@@ -186,17 +185,17 @@ public partial class StringRegexAssertionTests
     #endif 
     [Arguments(typeof(ArgumentNullException), @"^\d+$", null)]
     [Arguments(typeof(TUnitAssertionException), @"^\d+$", "123")]
-    public void DoesNotMatch_WithInvalidPattern_StringPattern_Throws(Type exceptionType, string pattern, string? text) 
+    public async Task DoesNotMatch_WithInvalidPattern_StringPattern_Throws(Type exceptionType, string pattern, string? text) 
     {
-        AsyncTestDelegate action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
+        Func<Task> action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
 
-        Exception? exception = NUnitAssert.ThrowsAsync(exceptionType, action);
+        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException)) 
         {
             return;
         }
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text to not match with pattern
              
@@ -204,25 +203,25 @@ public partial class StringRegexAssertionTests
              
              at Assert.That(text).DoesNotMatch(pattern)
              """
-        ));
+        );
     }
 
     [Test]
     [Arguments(typeof(ArgumentNullException), null)]
     [Arguments(typeof(TUnitAssertionException), "123")]
-    public void DoesNotMatch_WithInvalidPattern_RegexPattern_Throws(Type exceptionType, string? text) 
+    public async Task DoesNotMatch_WithInvalidPattern_RegexPattern_Throws(Type exceptionType, string? text) 
     {
         var pattern = new Regex(@"^\d+$");
         
-        AsyncTestDelegate action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
+        Func<Task> action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
 
-        Exception? exception = NUnitAssert.ThrowsAsync(exceptionType, action);
+        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException)) 
         {
             return;
         }
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text to not match with pattern
              
@@ -230,7 +229,7 @@ public partial class StringRegexAssertionTests
              
              at Assert.That(text).DoesNotMatch(pattern)
              """
-        ));
+        );
     }
 
     #if NET // Needed because NetFramework doesn't support partial methods
@@ -240,19 +239,19 @@ public partial class StringRegexAssertionTests
     [Test]
     [Arguments(typeof(ArgumentNullException), null)]
     [Arguments(typeof(TUnitAssertionException), "123")]
-    public void DoesNotMatch_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
+    public async Task DoesNotMatch_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
     {
         Regex regex = FindNumberRegex();
         
-        AsyncTestDelegate action = async () => await TUnitAssert.That(text).DoesNotMatch(regex);
+        Func<Task> action = async () => await TUnitAssert.That(text).DoesNotMatch(regex);
 
-        Exception? exception = NUnitAssert.ThrowsAsync(exceptionType, action);
+        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException)) 
         {
             return;
         }
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text to not match with regex
              
@@ -260,14 +259,14 @@ public partial class StringRegexAssertionTests
              
              at Assert.That(text).DoesNotMatch(regex)
              """
-        ));
+        );
     }
     #endif
     
     [Test]
     [Arguments(typeof(RegexMatchTimeoutException), "(a+)+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
     [Arguments(typeof(RegexMatchTimeoutException), @"^(([a-z])+.)+[A-Z]([a-z])+$", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!")]
-    public void DoesNotMatch_WithTimeoutPattern_Throws(Type exceptionType, string pattern, string text)
+    public async Task DoesNotMatch_WithTimeoutPattern_Throws(Type exceptionType, string pattern, string text)
     {
         // Create regex with a short timeout
         #if NET8_0_OR_GREATER
@@ -277,10 +276,10 @@ public partial class StringRegexAssertionTests
         #endif
         var regex = new Regex(pattern, RegexOptions.None, timeout);
     
-        AsyncTestDelegate action = async () => await TUnitAssert.That(text).DoesNotMatch(regex);
+        Func<Task> action = async () => await TUnitAssert.That(text).DoesNotMatch(regex);
 
-        var exception = NUnitAssert.ThrowsAsync<RegexMatchTimeoutException>(action);
-        NUnitAssert.That(exception!.Pattern, Is.EqualTo(pattern));
+        var exception = await TUnitAssert.ThrowsAsync<RegexMatchTimeoutException>(action);
+        await TUnitAssert.That(exception!.Pattern).IsEqualTo(pattern);
     }
     #endregion
 }

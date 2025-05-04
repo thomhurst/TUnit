@@ -1,6 +1,4 @@
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 public class StringEqualsAssertionTests
 {
@@ -54,61 +52,61 @@ public class StringEqualsAssertionTests
     }
     
     [Test]
-    public void Equals_Failure()
+    public async Task Equals_Failure()
     {
         var value1 = "Foo";
         var value2 = "Bar";
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
     }
     
     [Test]
-    public void Equals_Trimmed1_Failure()
+    public async Task Equals_Trimmed1_Failure()
     {
         var value1 = "Foo";
         var value2 = "Foo! ";
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithTrimming());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithTrimming());
     }
     
     [Test]
-    public void Equals_Trimmed2_Failure()
+    public async Task Equals_Trimmed2_Failure()
     {
         var value1 = "Foo! ";
         var value2 = "Foo";
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithTrimming());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithTrimming());
     }
     
     [Test]
-    public void IgnoringWhitespace_Failure()
+    public async Task IgnoringWhitespace_Failure()
     {
         var value1 = "       F    o    o    !";
         var value2 = "Foo";
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).IgnoringWhitespace());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).IgnoringWhitespace());
     }
     
     [Test]
-    public void Equals_NullAndEmptyEquality_Failure()
+    public async Task Equals_NullAndEmptyEquality_Failure()
     {
         var value1 = "1";
         string? value2 = null;
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithNullAndEmptyEquality());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithNullAndEmptyEquality());
     }
     
     [Test]
-    public void Equals_NullAndEmptyEquality2_Failure()
+    public async Task Equals_NullAndEmptyEquality2_Failure()
     {
         string? value1 = null;
         var value2 = "1";
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithNullAndEmptyEquality());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithNullAndEmptyEquality());
     }
     
     [Test]
-    public void Equals_Failure_Long_Message()
+    public async Task Equals_Failure_Long_Message()
     {
         var value1 = """
                      Lorem ipsum dolor sit amet diam duo amet sea rebum. 
@@ -152,8 +150,8 @@ public class StringEqualsAssertionTests
                      Volutpat vero est ea clita clita magna dolor nulla ipsum aliquyam nonumy.
                      """.ReplaceLineEndings(" ");
         
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
-        NUnitAssert.That(exception!.Message, Is.EqualTo("""
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
+        await TUnitAssert.That(exception!.Message).IsEqualTo("""
                                                         Expected value1 to be equal to "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…
                                                         
                                                         but found "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se… which differs at index 556:
@@ -163,6 +161,6 @@ public class StringEqualsAssertionTests
                                                                                     ↑
                                                         
                                                         at Assert.That(value1).IsEqualTo(value2)
-                                                        """));
+                                                        """);
     }
 }

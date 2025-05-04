@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+﻿namespace TUnit.Assertions.Tests.Old;
 
 public class DecimalEqualsToAssertionTests
 {
@@ -14,12 +12,12 @@ public class DecimalEqualsToAssertionTests
     }
     
     [Test]
-    public void Decimal_EqualsTo_Failure()
+    public async Task Decimal_EqualsTo_Failure()
     {
         var double1 = 1.0001m;
         var double2 = 1.0002m;
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2));
     }
     
 #if NET
@@ -33,12 +31,12 @@ public class DecimalEqualsToAssertionTests
     }
     
     [Test]
-    public void Decimal_EqualsTo__With_Tolerance_Failure()
+    public async Task Decimal_EqualsTo__With_Tolerance_Failure()
     {
         var double1 = 1.0001d;
         var double2 = 1.0003d;
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2).Within(0.0001));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2).Within(0.0001));
     }
 #endif
 }

@@ -7,25 +7,12 @@
         <Nullable>enable</Nullable>
 
         <IsPackable>false</IsPackable>
-        <IsTestProject>true</IsTestProject>
 
-        <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
-        <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
-        <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
-        <TUnitImplicitUsings>false</TUnitImplicitUsings>
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="AutoFixture" />
-        <PackageReference Include="coverlet.collector"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
-        <PackageReference Include="NUnit"/>
-        <PackageReference Include="NUnit.Analyzers"/>
-        <PackageReference Include="NUnit3TestAdapter"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Using Include="NUnit.Framework"/>
     </ItemGroup>
 
     <ItemGroup>

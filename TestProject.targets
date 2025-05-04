@@ -1,0 +1,5 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Core\TUnit.Core.targets" />
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Engine\TUnit.Engine.targets" />
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions\TUnit.Assertions.targets" />
+</Project>

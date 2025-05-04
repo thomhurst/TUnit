@@ -17,12 +17,12 @@ public class DateOnlyEqualToAssertionTests
     }
     
     [Test]
-    public void EqualsTo_Failure()
+    public async Task EqualsTo_Failure()
     {
         var value1 = TestDate.AddDays(1);
         var value2 = TestDate.AddDays(2);
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
     }
     
     [Test]
@@ -35,12 +35,12 @@ public class DateOnlyEqualToAssertionTests
     }
     
     [Test]
-    public void EqualsTo__With_Tolerance_Failure()
+    public async Task EqualsTo__With_Tolerance_Failure()
     {
         var value1 = TestDate.AddDays(1);
         var value2 = TestDate.AddDays(3);
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithinDays(1));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithinDays(1));
     }
 }
 #endif

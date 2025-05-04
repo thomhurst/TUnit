@@ -1,6 +1,4 @@
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 
 public class ZeroAssertionTests
@@ -27,23 +25,23 @@ public class ZeroAssertionTests
     }
     
     [Test]
-    public void Int_Bad()
+    public async Task Int_Bad()
     {
         int zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That<long>(zero).IsEqualTo(0));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That<long>(zero).IsEqualTo(0));
     }
     
     [Test]
-    public void Long_Bad()
+    public async Task Long_Bad()
     {
         long zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That(zero).IsNotEqualTo(1));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That(zero).IsNotEqualTo(1));
     }
     
     [Test]
-    public void Short_Bad()
+    public async Task Short_Bad()
     {
         short zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That<long>(zero).IsEqualTo(0));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That<long>(zero).IsEqualTo(0));
     }
 }

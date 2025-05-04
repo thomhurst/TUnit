@@ -1,22 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\TUnit.Core\TUnit.Core.props" />
-    <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
-    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
+    <Import Project="..\TestProject.props" />
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
         <RootNamespace>TUnit.TestProject.VB.NET</RootNamespace>
-        <TargetFramework>net8.0</TargetFramework>
-        <IsPackable>false</IsPackable>
     </PropertyGroup>
     
     <ItemGroup>
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 
-    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
-    <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
-    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
+    <Import Project="..\TestProject.targets" />
     
 </Project>

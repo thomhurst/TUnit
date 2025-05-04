@@ -2,6 +2,9 @@ using System.Net;
 using System.Net.Sockets;
 using CliWrap;
 using StreamJsonRpc;
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Core;
 using TUnit.RpcTests.Clients;
 using TUnit.RpcTests.Models;
 
@@ -9,7 +12,7 @@ namespace TUnit.RpcTests;
 
 public class Tests
 {
-    [CancelAfter(300_000)]
+    [Timeout(300_000)]
     [Retry(3)]
     [Test]
     public async Task TestAsync(CancellationToken cancellationToken)
@@ -90,15 +93,15 @@ public class Tests
         var failed = finished.Where(x => x.Node.ExecutionState == "failed").ToList();
         var skipped = finished.Where(x => x.Node.ExecutionState == "skipped").ToList();
 
-        Assert.Multiple(() =>
+        using (Assert.Multiple())
         {
-            Assert.That(originalDiscovered, Has.Count.GreaterThanOrEqualTo(1185));
-            Assert.That(newDiscovered, Has.Count.Zero);
-            Assert.That(finished, Has.Count.GreaterThanOrEqualTo(1186));
-            Assert.That(passed, Has.Count.GreaterThanOrEqualTo(929));
-            Assert.That(failed, Has.Count.GreaterThanOrEqualTo(88));
-            Assert.That(skipped, Has.Count.GreaterThanOrEqualTo(7));
-        });
+            await Assert.That(originalDiscovered).HasCount().GreaterThanOrEqualTo(1185);
+            await Assert.That(newDiscovered).HasCount().EqualToZero();
+            await Assert.That(finished).HasCount().GreaterThanOrEqualTo(1186);
+            await Assert.That(passed).HasCount().GreaterThanOrEqualTo(929);
+            await Assert.That(failed).HasCount().GreaterThanOrEqualTo(88);
+            await Assert.That(skipped).HasCount().GreaterThanOrEqualTo(7);
+        }
 
         await client.ExitAsync();
     }

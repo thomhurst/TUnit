@@ -1,7 +1,6 @@
 ﻿using TUnit.Assertions.Enums;
-using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 public class EquivalentAssertionTests
 {
@@ -120,15 +119,15 @@ public class EquivalentAssertionTests
     }
     
     [Test]
-    public void Different_Enumerables__Thrown_When_Non_Matching_Order()
+    public async Task Different_Enumerables__Thrown_When_Non_Matching_Order()
     {
         List<int> list = [1, 2, 3, 4, 5];
         
         int[] array = [1, 5, 2, 3, 4];
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching));
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching));
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             """
             Expected array to be equivalent to [1, 2, 3, 4, 5]
             
@@ -136,30 +135,31 @@ public class EquivalentAssertionTests
             
             at Assert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching)
             """
-        ));    }
-    
-    [Test]
-    public void Different_Enumerables__Thrown_When_Non_Matching_Order2()
-    {
-        List<int> list = [1, 2, 3, 4, 5];
-        
-        int[] array = [1, 5, 2, 3, 4];
-
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching));
-        
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
-            """
-            Expected array to be equivalent to [1, 2, 3, 4, 5]
-            
-            but it is [1, 5, 2, 3, 4]
-            
-            at Assert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching)
-            """
-        ));
+        );    
     }
     
     [Test]
-    public void Different_Mismatched_Objects_Still_Are_Not_Equivalent()
+    public async Task Different_Enumerables__Thrown_When_Non_Matching_Order2()
+    {
+        List<int> list = [1, 2, 3, 4, 5];
+        
+        int[] array = [1, 5, 2, 3, 4];
+
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching));
+        
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
+            """
+            Expected array to be equivalent to [1, 2, 3, 4, 5]
+            
+            but it is [1, 5, 2, 3, 4]
+            
+            at Assert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching)
+            """
+        );
+    }
+    
+    [Test]
+    public async Task Different_Mismatched_Objects_Still_Are_Not_Equivalent()
     {
         var result1 = new MyClass
         {
@@ -168,9 +168,9 @@ public class EquivalentAssertionTests
         
         var result2 = new { Value = "Foo1" };
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(result1).IsEquivalentTo(result2));
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(result1).IsEquivalentTo(result2));
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             """
             Expected result1 to be equivalent to result2
             
@@ -180,11 +180,11 @@ public class EquivalentAssertionTests
             
             at Assert.That(result1).IsEquivalentTo(result2)
             """
-        ));
+        );
     }
     
     [Test]
-    public void Mismatched_Objects_Are_Not_Equivalent()
+    public async Task Mismatched_Objects_Are_Not_Equivalent()
     {
         var object1 = new MyClass();
         var object2 = new MyClass
@@ -192,9 +192,9 @@ public class EquivalentAssertionTests
             Value = "Foo"
         };
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(object1).IsEquivalentTo(object2));
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(object1).IsEquivalentTo(object2));
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             """
             Expected object1 to be equivalent to object2
             
@@ -204,11 +204,11 @@ public class EquivalentAssertionTests
             
             at Assert.That(object1).IsEquivalentTo(object2)
             """
-            ));
+            );
     }
     
     [Test]
-    public void Objects_With_Nested_Mismatch_Are_Not_Equivalent()
+    public async Task Objects_With_Nested_Mismatch_Are_Not_Equivalent()
     {
         var object1 = new MyClass
         {
@@ -232,9 +232,9 @@ public class EquivalentAssertionTests
             }
         };
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(object1).IsEquivalentTo(object2));
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(object1).IsEquivalentTo(object2));
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             """
             Expected object1 to be equivalent to object2
             
@@ -244,7 +244,7 @@ public class EquivalentAssertionTests
             
             at Assert.That(object1).IsEquivalentTo(object2)
             """
-        ));
+        );
     }
     
     [Test]
@@ -338,7 +338,7 @@ public class EquivalentAssertionTests
     }
     
     [Test]
-    public void Objects_With_Nested_Enumerable_Mismatch_Are_Not_Equivalent()
+    public async Task Objects_With_Nested_Enumerable_Mismatch_Are_Not_Equivalent()
     {
         var object1 = new MyClass
         {
@@ -368,9 +368,9 @@ public class EquivalentAssertionTests
             }
         };
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(object1).IsEquivalentTo(object2));
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(object1).IsEquivalentTo(object2));
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             """
             Expected object1 to be equivalent to object2
             
@@ -380,7 +380,7 @@ public class EquivalentAssertionTests
             
             at Assert.That(object1).IsEquivalentTo(object2)
             """
-        ));
+        );
     }
     
     [Test]
@@ -485,7 +485,7 @@ public class EquivalentAssertionTests
     }
     
     [Test]
-    public void Objects_With_Partial_Properties_Match_With_Full_Equivalency_Are_Not_Equivalent()
+    public async Task Objects_With_Partial_Properties_Match_With_Full_Equivalency_Are_Not_Equivalent()
     {
         var object1 = new MyClass
         {
@@ -501,11 +501,11 @@ public class EquivalentAssertionTests
         };
         
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.That(object1)
                                          .IsEquivalentTo(object2));
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
                              """
                              Expected object1 to be equivalent to object2
 
@@ -515,7 +515,7 @@ public class EquivalentAssertionTests
 
                              at Assert.That(object1).IsEquivalentTo(object2)
                              """
-                         ));
+                         );
     }
     
     [Test]
@@ -561,7 +561,7 @@ public class EquivalentAssertionTests
     }
     
     [Test]
-    public void Objects_With_Mismatch_With_Partial_Equivalency_Kind_Are_Not_Equivalent()
+    public async Task Objects_With_Mismatch_With_Partial_Equivalency_Kind_Are_Not_Equivalent()
     {
         var object1 = new MyClass
         {
@@ -580,12 +580,12 @@ public class EquivalentAssertionTests
             }
         };
         
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.That(object1)
                                          .IsEquivalentTo(object2)
                                          .WithPartialEquivalency());
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
                              """
                              Expected object1 to be equivalent to object2
 
@@ -595,7 +595,7 @@ public class EquivalentAssertionTests
 
                              at Assert.That(object1).IsEquivalentTo(object2)
                              """
-                         ));
+                         );
     }
 
     [Test]
@@ -624,7 +624,7 @@ public class EquivalentAssertionTests
     }
     
     [Test]
-    public void Object_With_Partial_Fields_Match_With_Full_Equivalency_Are_Not_Equivalent()
+    public async Task Object_With_Partial_Fields_Match_With_Full_Equivalency_Are_Not_Equivalent()
     {
         var object1 = new MyClassWithMultipleFields
         {
@@ -637,11 +637,11 @@ public class EquivalentAssertionTests
         };
         
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.That(object1)
                 .IsEquivalentTo(object2));
         
-        NUnitAssert.That(exception!.Message, Is.EqualTo(
+        await TUnitAssert.That(exception!.Message).IsEqualTo(
             """
             Expected object1 to be equivalent to object2
 
@@ -651,7 +651,7 @@ public class EquivalentAssertionTests
 
             at Assert.That(object1).IsEquivalentTo(object2)
             """
-        ));
+        );
     }
 
     [Test]

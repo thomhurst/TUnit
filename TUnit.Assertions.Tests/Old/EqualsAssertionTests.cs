@@ -1,6 +1,6 @@
-using TUnit.Assertions.Extensions;
+using TUnit.Assertions.AssertConditions.Throws;
 
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 public class EqualsAssertionTests
 {
@@ -8,11 +8,12 @@ public class EqualsAssertionTests
     public async Task Assertion_Message_Has_Correct_Expression()
     {
         var one = "1";
-        
-        await NUnitAssert.ThatAsync(async () =>
-                await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsTypeOf(typeof(string)),
-            Throws.Exception.Message.Contain("Assert.That(one).IsEqualTo(\"2\", StringComparison.Ordinal).And.IsNotEqualTo(\"1\", StringComparison.Ord...")
-        );
+
+        await TUnitAssert.That(async () =>
+                await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsTypeOf(typeof(string))
+            ).ThrowsException()
+            .And
+            .HasMessageContaining("Assert.That(one).IsEqualTo(\"2\", StringComparison.Ordinal).And.IsNotEqualTo(\"1\", StringComparison.Ord...");
     }
     
     [Test]
@@ -30,23 +31,23 @@ public class EqualsAssertionTests
     }
     
     [Test]
-    public void Int_Bad()
+    public async Task Int_Bad()
     {
         int zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
     }
     
     [Test]
-    public void Long_Bad()
+    public async Task Long_Bad()
     {
         long zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(zero).IsEqualTo(0));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(zero).IsEqualTo(0));
     }
     
     [Test]
-    public void Short_Bad()
+    public async Task Short_Bad()
     {
         short zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
     }
 }

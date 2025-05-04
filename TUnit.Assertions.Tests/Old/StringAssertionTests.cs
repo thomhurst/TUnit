@@ -1,91 +1,89 @@
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 
 public class StringAssertionTests
 {
     [Test]
-    public void NullOrEmpty_String()
+    public async Task NullOrEmpty_String()
     {
         var str = "Hello";
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNullOrEmpty());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNullOrEmpty());
     }
     
     [Test]
-    public void NullOrEmpty_Whitespace()
+    public async Task NullOrEmpty_Whitespace()
     {
         var str = " ";
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNullOrEmpty());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNullOrEmpty());
     }
     
     [Test]
-    public void NullOrEmpty_Null()
+    public async Task NullOrEmpty_Null()
     {
         string? str = null;
-        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).IsNullOrEmpty());
+        await TUnitAssert.That(str).IsNullOrEmpty();
     }
     
     [Test]
-    public void NullOrEmpty_Empty()
+    public async Task NullOrEmpty_Empty()
     {
         var str = "";
-        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).IsNullOrEmpty());
+        await TUnitAssert.That(str).IsNullOrEmpty();
     }
     
     [Test]
-    public void NullOrWhitespace_String()
+    public async Task NullOrWhitespace_String()
     {
         var str = "Hello";
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNullOrWhitespace());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNullOrWhitespace());
     }
     
     [Test]
-    public void NullOrWhitespace_Whitespace()
+    public async Task NullOrWhitespace_Whitespace()
     {
         var str = " ";
-        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).IsNullOrWhitespace());
+        await TUnitAssert.That(str).IsNullOrWhitespace();
     }
     
     [Test]
-    public void NullOrWhitespace_Null()
+    public async Task NullOrWhitespace_Null()
     {
         string? str = null;
-        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).IsNullOrWhitespace());
+        await TUnitAssert.That(str).IsNullOrWhitespace();
     }
     
     [Test]
-    public void NullOrWhitespace_Empty()
+    public async Task NullOrWhitespace_Empty()
     {
         var str = "";
-        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).IsNullOrWhitespace());
+        await TUnitAssert.That(str).IsNullOrWhitespace();
     }
     
     [Test]
-    public void Null_String()
+    public async Task Null_String()
     {
         var str = "Hello";
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNull());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNull());
     }
     
     [Test]
-    public void Null_Whitespace()
+    public async Task Null_Whitespace()
     {
         var str = " ";
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNull());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNull());
     }
     
     [Test]
-    public void Null_Null()
+    public async Task Null_Null()
     {
         string? str = null;
-        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).IsNull());
+        await TUnitAssert.That(str).IsNull();
     }
     
     [Test]
-    public void Null_Empty()
+    public async Task Null_Empty()
     {
         var str = "";
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNull());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNull());
     }
 }

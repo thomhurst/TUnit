@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 public class InnerExceptionThrower
 {

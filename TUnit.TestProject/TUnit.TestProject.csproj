@@ -1,26 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\TUnit.Core\TUnit.Core.props" />
-  <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
-  <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
-  
-  <PropertyGroup>
-    <IsLibraryTestProject>true</IsLibraryTestProject>
-    <IsPackable>false</IsPackable>
-    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
-    <OutputType>Exe</OutputType>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
-  </PropertyGroup>
+  <Import Project="..\TestProject.props" />
 
   <PropertyGroup>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
     <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
@@ -36,11 +23,6 @@
 
   <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   
   <ItemGroup>
@@ -96,8 +78,6 @@
 <!--      </ItemGroup>-->
     
 
-  <Import Project="..\TUnit.Core\TUnit.Core.targets" />
-  <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
-  <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
+<Import Project="..\TestProject.targets" />
 
 </Project>

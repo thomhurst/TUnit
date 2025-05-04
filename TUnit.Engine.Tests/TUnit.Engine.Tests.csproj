@@ -1,16 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\TUnit.Core\TUnit.Core.props" />
-    <Import Project="..\TUnit.Engine\TUnit.Engine.props" />
-    <Import Project="..\TUnit.Assertions\TUnit.Assertions.props" />
-    
+    <Import Project="..\TestProject.props" />
+
     <PropertyGroup>
-        <IsPackable>false</IsPackable>
-        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
-        <OutputType>Exe</OutputType>
-        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+        <TargetFrameworks>net9.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,8 +21,6 @@
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 
-    <Import Project="..\TUnit.Core\TUnit.Core.targets" />
-    <Import Project="..\TUnit.Engine\TUnit.Engine.targets" />
-    <Import Project="..\TUnit.Assertions\TUnit.Assertions.targets" />
+    <Import Project="..\TestProject.targets" />
 
 </Project>

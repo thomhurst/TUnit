@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.SingleTUnitAttributeAnalyzer>;
+﻿using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.SingleTUnitAttributeAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 

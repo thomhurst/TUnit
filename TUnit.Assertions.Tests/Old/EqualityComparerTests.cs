@@ -1,8 +1,6 @@
 ﻿#pragma warning disable
 
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 public class EqualityComparerTests
 {

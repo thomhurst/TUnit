@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+﻿namespace TUnit.Assertions.Tests.Old;
 
 public class IntegerEqualsToAssertionTests
 {
@@ -14,12 +12,12 @@ public class IntegerEqualsToAssertionTests
     }
     
     [Test]
-    public void Integer_EqualsTo_Failure()
+    public async Task Integer_EqualsTo_Failure()
     {
         var value1 = 1;
         var value2 = 2;
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
     }
     
 #if NET
@@ -33,12 +31,12 @@ public class IntegerEqualsToAssertionTests
     }
     
     [Test]
-    public void Integer_EqualsTo__With_Tolerance_Failure()
+    public async Task Integer_EqualsTo__With_Tolerance_Failure()
     {
         var value1 = 1;
         var value2 = 3;
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).Within(1));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).Within(1));
     }
 #endif
 }

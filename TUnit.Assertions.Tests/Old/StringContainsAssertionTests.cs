@@ -1,6 +1,4 @@
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+namespace TUnit.Assertions.Tests.Old;
 
 public class StringContainsAssertionTests
 {
@@ -37,30 +35,30 @@ public class StringContainsAssertionTests
     }
     
     [Test]
-    public void Contains_Failure()
+    public async Task Contains_Failure()
     {
         var value1 = "Foo";
         var value2 = "Bar";
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).Contains(value2));
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).Contains(value2));
     }
     
     [Test]
-    public void Contains_Trimmed_Failure()
+    public async Task Contains_Trimmed_Failure()
     {
         var value1 = "Foo";
         var value2 = "Foo! ";
         
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).Contains(value2).WithTrimming());
-        NUnitAssert.That(exception!.Message, Does.EndWith("Assert.That(value1).Contains(value2, StringComparison.Ordinal).WithTrimming()"));
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).Contains(value2).WithTrimming());
+        await TUnitAssert.That(exception!.Message).EndsWith("Assert.That(value1).Contains(value2, StringComparison.Ordinal).WithTrimming()");
     }
     
     [Test]
-    public void IgnoringWhitespace_Failure()
+    public async Task IgnoringWhitespace_Failure()
     {
         var value1 = "       F    o    o    ";
         var value2 = "Foo!";
         
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).Contains(value2).IgnoringWhitespace());
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).Contains(value2).IgnoringWhitespace());
     }
 }
