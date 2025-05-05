@@ -12,7 +12,7 @@ public abstract record SourceGeneratedMemberInformation
 
     public required string Name { get; init; }
 
-    public required EqualityList<Attribute> Attributes { get; init; }
+    public required Attribute[] Attributes { get; init; }
     
     protected virtual bool PrintMembers(StringBuilder stringBuilder)
     {

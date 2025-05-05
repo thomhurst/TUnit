@@ -28,6 +28,10 @@ namespace TUnit.Engine.Extensions
         public static TUnit.Engine.Json.TestResultJson ToJsonModel(this TUnit.Core.TestResult result) { }
         public static TUnit.Engine.Json.TestSessionJson ToJsonModel(this TUnit.Core.TestSessionContext context) { }
     }
+    public static class TestApplicationBuilderExtensions
+    {
+        public static void AddTUnit(this Microsoft.Testing.Platform.Builder.ITestApplicationBuilder testApplicationBuilder) { }
+    }
     public static class TestContextExtensions
     {
         public static System.Threading.Tasks.Task ReregisterTestWithArguments(this TUnit.Core.TestContext testContext, object?[]? methodArguments, System.Collections.Generic.Dictionary<string, object?>? objectBag = null) { }
@@ -159,9 +163,9 @@ namespace TUnit.Engine.Services
         public LogLevelProvider(Microsoft.Testing.Platform.CommandLine.ICommandLineOptions commandLineOptions) { }
         public TUnit.Core.Enums.LogLevel LogLevel { get; }
     }
-    public class ReflectionTypeScanner
+    public class ReflectionScanner
     {
-        public ReflectionTypeScanner() { }
+        public ReflectionScanner() { }
         public static System.Type[] GetTypes() { }
     }
     public static class TUnitRunner

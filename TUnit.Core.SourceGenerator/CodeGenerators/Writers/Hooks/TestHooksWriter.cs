@@ -58,18 +58,6 @@ public class TestHooksWriter : BaseHookWriter
         sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
         sourceBuilder.WriteLine($"Order = {model.Order},");
         
-        sourceBuilder.WriteTabs();
-        sourceBuilder.Write("MethodAttributes = ");
-        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.GetAttributes().ExcludingSystemAttributes());
-        
-        sourceBuilder.WriteTabs();
-        sourceBuilder.Write("ClassAttributes = ");
-        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes());
-        
-        sourceBuilder.WriteTabs();
-        sourceBuilder.WriteLine("AssemblyAttributes = ");
-        AttributeWriter.WriteAttributes(sourceBuilder, model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes());
-        
         sourceBuilder.WriteLine("},");
     }
 

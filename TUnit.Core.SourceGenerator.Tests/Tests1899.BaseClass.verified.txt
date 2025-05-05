@@ -68,13 +68,6 @@ file partial class Hooks_BaseClass : global::TUnit.Core.Interfaces.SourceGenerat
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod("Setup", []).Invoke(classInstance, [])),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 			];
 		}

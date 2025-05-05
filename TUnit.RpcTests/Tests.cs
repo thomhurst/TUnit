@@ -42,10 +42,10 @@ public class Tests
                 "--client-port",
                 ((IPEndPoint)listener.LocalEndpoint).Port.ToString()
             ])
-            .WithStandardOutputPipe(outputPipe)
-            .WithStandardErrorPipe(outputPipe)
+            .WithStandardOutputPipe(PipeTarget.Merge(outputPipe, PipeTarget.ToDelegate(Console.WriteLine)))
+            .WithStandardErrorPipe(PipeTarget.Merge(outputPipe, PipeTarget.ToDelegate(Console.WriteLine)))
             .ExecuteAsync(cancellationToken: cancellationToken);
-
+        
         var tcpClientTask = listener.AcceptTcpClientAsync(cancellationToken).AsTask();
         
         // Will throw if either the server fails or the TCP call fails

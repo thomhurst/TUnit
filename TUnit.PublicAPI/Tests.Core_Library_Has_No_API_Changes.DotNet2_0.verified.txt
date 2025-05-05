@@ -1222,13 +1222,13 @@ namespace TUnit.Core.Hooks
     {
         public InstanceHookMethod() { }
         public System.Reflection.Assembly Assembly { get; }
-        public required System.Attribute[] AssemblyAttributes { get; init; }
+        public System.Attribute[] AssemblyAttributes { get; }
         public System.Collections.Generic.IEnumerable<System.Attribute> Attributes { get; }
         public System.Func<object, TUnit.Core.TestContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>? Body { get; init; }
-        public required System.Attribute[] ClassAttributes { get; init; }
+        public System.Attribute[] ClassAttributes { get; }
         public required System.Type ClassType { get; init; }
         public required TUnit.Core.Interfaces.IHookExecutor HookExecutor { get; init; }
-        public required System.Attribute[] MethodAttributes { get; init; }
+        public System.Attribute[] MethodAttributes { get; }
         public required TUnit.Core.SourceGeneratedMethodInformation MethodInfo { get; init; }
         public string Name { get; }
         public required int Order { get; init; }

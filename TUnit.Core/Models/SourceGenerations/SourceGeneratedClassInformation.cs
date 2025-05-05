@@ -30,7 +30,7 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
 
     public required string? Namespace { get; init;}
     public required SourceGeneratedAssemblyInformation Assembly { get; init; }
-    public required EqualityList<SourceGeneratedParameterInformation> Parameters { get; init; }
+    public required SourceGeneratedParameterInformation[] Parameters { get; init; }
     
-    public required EqualityList<SourceGeneratedPropertyInformation> Properties { get; init; }
+    public required SourceGeneratedPropertyInformation[] Properties { get; init; }
 }
