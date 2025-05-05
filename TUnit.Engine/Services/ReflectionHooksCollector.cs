@@ -25,7 +25,8 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         
         foreach (var type in ReflectionScanner.GetTypes())
         {
-            foreach (var methodInfo in type.GetMethods())
+            foreach (var methodInfo in type.GetMethods()
+                         .Where(x => !x.IsAbstract))
             {
                 if (HasHookType(methodInfo, HookType.TestDiscovery, out var hookAttribute))
                 {
@@ -64,7 +65,8 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
     {
         foreach (var type in ReflectionScanner.GetTypes())
         {
-            foreach (var methodInfo in type.GetMethods())
+            foreach (var methodInfo in type.GetMethods()
+                         .Where(x => !x.IsAbstract))
             {
                 if (HasHookType(methodInfo, HookType.TestSession, out var hookAttribute))
                 {
@@ -103,7 +105,8 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
     {
         foreach (var type in ReflectionScanner.GetTypes())
         {
-            foreach (var methodInfo in type.GetMethods())
+            foreach (var methodInfo in type.GetMethods()
+                         .Where(x => !x.IsAbstract))
             {
                 var sourceGeneratedMethodInformation = SourceModelHelpers.BuildTestMethod(type, methodInfo, [], methodInfo.Name);
 

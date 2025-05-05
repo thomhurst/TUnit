@@ -35,6 +35,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         
         var testMethods = allTypes
             .SelectMany(x => x.GetMethods())
+            .Where(x => !x.IsAbstract)
             .Where(x => x.GetCustomAttributes<TestAttribute>().Any())
             .ToArray();
         
