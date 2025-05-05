@@ -101,7 +101,188 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
 
     public override void CollectHooks()
     {
-        // TODO: Implement this method
+        foreach (var type in ReflectionScanner.GetTypes())
+        {
+            foreach (var methodInfo in type.GetMethods())
+            {
+                var sourceGeneratedMethodInformation = SourceModelHelpers.BuildTestMethod(type, methodInfo, [], methodInfo.Name);
+
+                if (HasHookType(methodInfo, HookType.Assembly, out var assemblyHookAttribute))
+                {
+                    RegisterAssemblyHook(assemblyHookAttribute, sourceGeneratedMethodInformation, methodInfo);
+                }
+                
+                if (HasHookType(methodInfo, HookType.Class, out var classHookAttribute))
+                {
+                    RegisterClassHook(classHookAttribute, sourceGeneratedMethodInformation, methodInfo);
+                }
+                
+                if (HasHookType(methodInfo, HookType.Test, out var testHookAttribute))
+                {
+                    RegisterTestHook(testHookAttribute, sourceGeneratedMethodInformation, methodInfo);
+                }
+            }
+        }
+    }
+
+    private void RegisterAssemblyHook(HookAttribute hookAttribute, SourceGeneratedMethodInformation sourceGeneratedMethodInformation, MethodInfo methodInfo)
+    {
+        var assembly = sourceGeneratedMethodInformation.Class.Type.Assembly;
+        
+        if (hookAttribute is BeforeAttribute)
+        {
+            BeforeAssemblyHooks.GetOrAdd(assembly, _ => []).Add(new BeforeAssemblyHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+        else if (hookAttribute is AfterAttribute)
+        {
+            AfterAssemblyHooks.GetOrAdd(assembly, _ => []).Add(new AfterAssemblyHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+        else if (hookAttribute is BeforeEveryAttribute)
+        {
+            BeforeEveryAssemblyHooks.Add(new BeforeAssemblyHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+        else
+        {
+            AfterEveryAssemblyHooks.Add(new AfterAssemblyHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+    }
+
+    private void RegisterClassHook(HookAttribute hookAttribute, SourceGeneratedMethodInformation sourceGeneratedMethodInformation, MethodInfo methodInfo)
+    {
+        var type = sourceGeneratedMethodInformation.Class.Type;
+        
+        if (hookAttribute is BeforeAttribute)
+        {
+            BeforeClassHooks.GetOrAdd(type, _ => []).Add(new BeforeClassHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+        else if (hookAttribute is AfterAttribute)
+        {
+            AfterClassHooks.GetOrAdd(type, _ => []).Add(new AfterClassHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+        else if (hookAttribute is BeforeEveryAttribute)
+        {
+            BeforeEveryClassHooks.Add(new BeforeClassHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+        else
+        {
+            AfterEveryClassHooks.Add(new AfterClassHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+    }
+
+    private void RegisterTestHook(HookAttribute hookAttribute, SourceGeneratedMethodInformation sourceGeneratedMethodInformation, MethodInfo methodInfo)
+    {
+        var type = sourceGeneratedMethodInformation.Class.Type;
+        
+        if (hookAttribute is BeforeAttribute)
+        {
+            BeforeTestHooks.GetOrAdd(type, _ => []).Add(new InstanceHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                ClassType = type,
+                Body = (instance, context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeInstanceHook(instance, context, token)),
+            });
+        }
+        else if (hookAttribute is AfterAttribute)
+        {
+            AfterTestHooks.GetOrAdd(type, _ => []).Add(new InstanceHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                ClassType = type,
+                Body = (instance, context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeInstanceHook(instance, context, token)),
+            });
+        }
+        else if (hookAttribute is BeforeEveryAttribute)
+        {
+            BeforeEveryTestHooks.Add(new BeforeTestHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
+        else
+        {
+            AfterEveryTestHooks.Add(new AfterTestHookMethod
+            {
+                MethodInfo = sourceGeneratedMethodInformation,
+                Order = 0,
+                HookExecutor = GetHookExecutor(methodInfo),
+                FilePath = hookAttribute.File,
+                LineNumber = hookAttribute.Line,
+                Body = (context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeStaticHook(context, token)),
+            });
+        }
     }
 
     private bool HasHookType(MethodInfo methodInfo, HookType hookType, [NotNullWhen(true)] out HookAttribute? hookAttribute)
