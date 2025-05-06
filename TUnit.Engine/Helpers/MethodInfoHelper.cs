@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.ExceptionServices;
 using TUnit.Core;
 
 namespace TUnit.Engine.Helpers;
@@ -22,7 +23,19 @@ internal static class MethodInfoHelper
             }
         }
 
-        return methodInfo.Invoke(null, args.ToArray());
+        try
+        {
+            return methodInfo.Invoke(null, args.ToArray());
+        }
+        catch (TargetInvocationException targetInvocationException)
+        {
+            if (targetInvocationException.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture(targetInvocationException.InnerException).Throw();
+            }
+
+            throw;
+        }
     }
     
     public static object? InvokeInstanceHook(this MethodInfo methodInfo, object instance, TestContext context, CancellationToken cancellationToken)
@@ -42,6 +55,18 @@ internal static class MethodInfoHelper
             }
         }
 
-        return methodInfo.Invoke(instance, args.ToArray());
+        try
+        {
+            return methodInfo.Invoke(instance, args.ToArray());
+        }
+        catch (TargetInvocationException targetInvocationException)
+        {
+            if (targetInvocationException.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture(targetInvocationException.InnerException).Throw();
+            }
+
+            throw;
+        }
     }
 }
