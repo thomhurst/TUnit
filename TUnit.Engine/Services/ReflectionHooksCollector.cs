@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Executors;
 using TUnit.Core.Helpers;
 using TUnit.Core.Hooks;
@@ -108,21 +109,32 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             foreach (var methodInfo in type.GetMethods()
                          .Where(x => !x.IsAbstract))
             {
-                var sourceGeneratedMethodInformation = SourceModelHelpers.BuildTestMethod(type, methodInfo, [], methodInfo.Name);
+                try
+                {
+                    var sourceGeneratedMethodInformation = SourceModelHelpers.BuildTestMethod(type, methodInfo, [], methodInfo.Name);
 
-                if (HasHookType(methodInfo, HookType.Assembly, out var assemblyHookAttribute))
-                {
-                    RegisterAssemblyHook(assemblyHookAttribute, sourceGeneratedMethodInformation, methodInfo);
-                }
+                    if (HasHookType(methodInfo, HookType.Assembly, out var assemblyHookAttribute))
+                    {
+                        RegisterAssemblyHook(assemblyHookAttribute, sourceGeneratedMethodInformation, methodInfo);
+                    }
                 
-                if (HasHookType(methodInfo, HookType.Class, out var classHookAttribute))
-                {
-                    RegisterClassHook(classHookAttribute, sourceGeneratedMethodInformation, methodInfo);
-                }
+                    if (HasHookType(methodInfo, HookType.Class, out var classHookAttribute))
+                    {
+                        RegisterClassHook(classHookAttribute, sourceGeneratedMethodInformation, methodInfo);
+                    }
                 
-                if (HasHookType(methodInfo, HookType.Test, out var testHookAttribute))
+                    if (HasHookType(methodInfo, HookType.Test, out var testHookAttribute))
+                    {
+                        RegisterTestHook(testHookAttribute, sourceGeneratedMethodInformation, methodInfo);
+                    }
+                }
+                catch (Exception e)
                 {
-                    RegisterTestHook(testHookAttribute, sourceGeneratedMethodInformation, methodInfo);
+                    throw new TUnitException($"""
+                                               Error collecting hooks for method {methodInfo.Name} in type {type.FullName}
+                                               Line: {methodInfo.GetCustomAttribute<HookAttribute>()?.Line}
+                                               File: {methodInfo.GetCustomAttribute<HookAttribute>()?.File}
+                                               """, e);
                 }
             }
         }
