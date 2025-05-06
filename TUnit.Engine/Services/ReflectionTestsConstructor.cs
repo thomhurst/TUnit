@@ -60,9 +60,11 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 {
                     foreach (var typeDataAttribute in GetDataAttributes(type))
                     {
+                        var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
+                            
                         foreach (var testDataAttribute in GetDataAttributes(testMethod))
                         {
-                            foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, null, null))
+                            foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, null, null, testInformation))
                             {
                                 BuildTests(typeDataAttribute, type, classInstanceArguments, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute);
                             }
@@ -90,9 +92,11 @@ internal class ReflectionTestsConstructor(IExtension extension,
     {
         try
         {
-            var instance = CreateInstance(typeDataAttribute, type, classInstanceArguments, out var exception);
+            var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
+            
+            var instance = CreateInstance(typeDataAttribute, type, classInstanceArguments, testInformation, out var exception);
 
-            foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, instance, classInstanceArguments))
+            foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, instance, classInstanceArguments, testInformation))
             {
                 testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
                 {
@@ -124,7 +128,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
     }
 
-    private static object? CreateInstance(IDataAttribute typeDataAttribute, Type type, object?[] classInstanceArguments, out Exception? exception)
+    private static object? CreateInstance(IDataAttribute typeDataAttribute, Type type, object?[] classInstanceArguments, SourceGeneratedMethodInformation testInformation,
+        out Exception? exception)
     {
         exception = null;
         
@@ -134,8 +139,10 @@ internal class ReflectionTestsConstructor(IExtension extension,
             {
                 return CreateByClassConstructor(type, classConstructorAttribute);
             }
-        
-            return Activator.CreateInstance(type, classInstanceArguments);
+
+            var args = classInstanceArguments.Select((x, i) => CastHelper.Cast(testInformation.Class.Parameters[i].Type, x)).ToArray();
+            
+            return Activator.CreateInstance(type, args);
         }
         catch (TargetInvocationException targetInvocationException)
         {
@@ -172,12 +179,12 @@ internal class ReflectionTestsConstructor(IExtension extension,
         return instance!;
     }
 
-    private static IEnumerable<object?[]> 
-        GetArguments([DynamicallyAccessedMembers(
+    private static IEnumerable<object?[]> GetArguments([DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
             | DynamicallyAccessedMemberTypes.NonPublicMethods)]
-        Type type, MethodInfo method, IDataAttribute testDataAttribute, DataGeneratorType dataGeneratorType, object? instance, object?[]? classInstanceArguments)
+        Type type, MethodInfo method, IDataAttribute testDataAttribute, DataGeneratorType dataGeneratorType, object? instance, object?[]? classInstanceArguments,
+        SourceGeneratedMethodInformation testInformation)
     {
         if (testDataAttribute is IDataSourceGeneratorAttribute dataSourceGeneratorAttribute)
         {
@@ -189,7 +196,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 new DataGeneratorMetadata
                 {
                     Type = dataGeneratorType,
-                    TestInformation = SourceModelHelpers.BuildTestMethod(type, method, [], method.Name), // TODO
+                    TestInformation = testInformation,
                     ClassInstanceArguments = classInstanceArguments,
                     MembersToGenerate = parameters.Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
                     {

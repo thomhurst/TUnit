@@ -47,6 +47,48 @@ public static class CastHelper
         
         return (T?) conversionMethod.Invoke(null, [value]);
     }
+    
+    [UnconditionalSuppressMessage("", "IL2072")]
+    public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+        
+        if (value.GetType() == type)
+        {
+            return value;
+        }
+        
+        if (value is not string 
+            && value is IEnumerable enumerable 
+            && !typeof(IEnumerable).IsAssignableFrom(type))
+        {
+            value = enumerable.Cast<object>().ElementAtOrDefault(0);
+        }
+
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+        if (value!.GetType().IsAssignableTo(underlyingType))
+        {
+            return value;
+        }
+        
+        if (underlyingType.IsEnum)
+        {
+            return Enum.ToObject(underlyingType, value);
+        }
+
+        var conversionMethod = GetConversionMethod(value.GetType(), underlyingType);
+
+        if (conversionMethod is null)
+        {
+            return Convert.ChangeType(value, underlyingType);
+        }
+        
+        return conversionMethod.Invoke(null, [value]);
+    }
 
     private static MethodInfo? GetConversionMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType)
     {
