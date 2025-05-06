@@ -54,7 +54,7 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.5.2" />
-    <PackageVersion Include="Polyfill" Version="7.29.0" />
+    <PackageVersion Include="Polyfill" Version="7.30.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="0.7.6" />
