@@ -1123,6 +1123,7 @@ namespace TUnit.Core.Helpers
 {
     public static class CastHelper
     {
+        public static object? Cast(System.Type type, object? value) { }
         public static T? Cast<T>(object? value) { }
     }
     [System.Diagnostics.DebuggerDisplay("Count = {CurrentCount}")]

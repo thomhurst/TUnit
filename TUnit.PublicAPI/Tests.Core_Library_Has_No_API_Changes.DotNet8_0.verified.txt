@@ -1148,6 +1148,8 @@ namespace TUnit.Core.Helpers
     public static class CastHelper
     {
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("", "IL2072")]
+        public static object? Cast([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] System.Type type, object? value) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("", "IL2072")]
         public static T? Cast<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]  T>(object? value) { }
     }
     [System.Diagnostics.DebuggerDisplay("Count = {CurrentCount}")]
