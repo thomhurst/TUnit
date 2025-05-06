@@ -27,7 +27,8 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         foreach (var type in ReflectionScanner.GetTypes())
         {
             foreach (var methodInfo in type.GetMethods()
-                         .Where(x => !x.IsAbstract))
+                         .Where(x => !x.IsAbstract)
+                         .Where(IsHook))
             {
                 if (HasHookType(methodInfo, HookType.TestDiscovery, out var hookAttribute))
                 {
@@ -67,7 +68,8 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         foreach (var type in ReflectionScanner.GetTypes())
         {
             foreach (var methodInfo in type.GetMethods()
-                         .Where(x => !x.IsAbstract))
+                         .Where(x => !x.IsAbstract)
+                         .Where(IsHook))
             {
                 if (HasHookType(methodInfo, HookType.TestSession, out var hookAttribute))
                 {
@@ -107,7 +109,8 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         foreach (var type in ReflectionScanner.GetTypes())
         {
             foreach (var methodInfo in type.GetMethods()
-                         .Where(x => !x.IsAbstract))
+                         .Where(x => !x.IsAbstract)
+                         .Where(IsHook))
             {
                 try
                 {
@@ -330,5 +333,19 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         }
 
         return DefaultExecutor.Instance;
+    }
+
+    private bool IsHook(MethodInfo arg)
+    {
+        try
+        {
+            return arg.GetCustomAttributes()
+                .OfType<HookAttribute>()
+                .Any();
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

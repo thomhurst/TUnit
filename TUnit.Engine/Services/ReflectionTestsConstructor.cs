@@ -35,8 +35,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
         
         var testMethods = allTypes
             .SelectMany(x => x.GetMethods())
+            .Where(IsTest)
             .Where(x => !x.IsAbstract)
-            .Where(x => x.GetCustomAttributes<TestAttribute>().Any())
             .ToArray();
         
         return Build(testMethods, allTypes)
@@ -325,10 +325,24 @@ internal class ReflectionTestsConstructor(IExtension extension,
         return dataAttributes;
     }
 
-    public static Type[] GetDerivedTypes(Type[] allTypes, Type baseType)
+    private static Type[] GetDerivedTypes(Type[] allTypes, Type baseType)
     {
         return allTypes
             .Where(type => type is { IsClass: true, IsAbstract: false } && type.IsAssignableTo(baseType))
             .ToArray();
+    }
+    
+    private bool IsTest(MethodInfo arg)
+    {
+        try
+        {
+            return arg.GetCustomAttributes()
+                .OfType<TestAttribute>()
+                .Any();
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
