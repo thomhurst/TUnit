@@ -44,7 +44,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             .ToArray();
     }
 
-    private static IEnumerable<DynamicTest> Build(MethodInfo[] testMethods, Type[] allTypes)
+    private static IEnumerable<DynamicTest> Build(MethodInfo[] testMethods, IReadOnlyCollection<Type> allTypes)
     {
         var testsBuilderDynamicTests = new List<DynamicTest>();
         
@@ -332,7 +332,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         return dataAttributes;
     }
 
-    private static Type[] GetDerivedTypes(Type[] allTypes, Type baseType)
+    private static Type[] GetDerivedTypes(IEnumerable<Type> allTypes, Type baseType)
     {
         return allTypes
             .Where(type => type is { IsClass: true, IsAbstract: false } && type.IsAssignableTo(baseType))
