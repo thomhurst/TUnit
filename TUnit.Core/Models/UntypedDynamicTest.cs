@@ -69,9 +69,4 @@ public record UntypedDynamicTest : DynamicTest
         
         return $"{typeAndTestName}_{count}";
     }
-
-    public void Deconstruct(out MethodInfo TestBody)
-    {
-        TestBody = this.TestBody;
-    }
 }

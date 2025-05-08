@@ -943,7 +943,6 @@ namespace TUnit.Core
         public override System.Type TestClassType { get; }
         public override string TestId { get; }
         public override System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas() { }
-        public void Deconstruct(out System.Reflection.MethodInfo TestBody) { }
     }
     public class UntypedFailedDynamicTest : System.IEquatable<TUnit.Core.UntypedFailedDynamicTest>
     {
