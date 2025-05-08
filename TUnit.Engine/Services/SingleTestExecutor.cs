@@ -320,7 +320,7 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterClassHooks)
         {
-            await logger.LogDebugAsync("Executing [After(Class)] hook");
+            await logger.LogDebugAsync($"Executing [After(Class)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}");
 
             await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
         }
@@ -334,7 +334,7 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterAssemblyHooks)
         {
-            await logger.LogDebugAsync("Executing [After(Assembly)] hook");
+            await logger.LogDebugAsync($"Executing [After(Assembly)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}");
 
             await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
         }

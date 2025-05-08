@@ -21,7 +21,7 @@ internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector, As
 
         foreach (var beforeSessionHook in beforeSessionHooks)
         {
-            await logger.LogDebugAsync("Executing [Before(TestSession)] hook");
+            await logger.LogDebugAsync($"Executing [Before(TestSession)] hook: {beforeSessionHook.ClassType.Name}.{beforeSessionHook.Name}");
 
             await beforeSessionHook.ExecuteAsync(testSessionContext, executeRequestContext.CancellationToken);
             

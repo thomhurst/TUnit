@@ -59,7 +59,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
         foreach (var executableHook in afterHooks)
         {
             {
-                await logger.LogDebugAsync("Executing [After(Test)] hook");
+                await logger.LogDebugAsync($"Executing [After(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}");
 
                 await Timings.Record($"After(Test): {executableHook.Name}", testContext, () =>
                     executableHook.ExecuteAsync(testContext, CancellationToken.None)

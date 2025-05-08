@@ -66,7 +66,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
             foreach (var beforeHook in beforeClassHooks)
             {
                 {
-                    await logger.LogDebugAsync("Executing [Before(Class)] hook");
+                    await logger.LogDebugAsync($"Executing [Before(Class)] hook: {beforeHook.ClassType.Name}.{beforeHook.Name}");
 
                     await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
                     

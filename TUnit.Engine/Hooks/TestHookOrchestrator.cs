@@ -20,7 +20,7 @@ internal class TestHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFram
 
         foreach (var executableHook in beforeHooks)
         {
-            await logger.LogDebugAsync("Executing [Before(Test)] hook");
+            await logger.LogDebugAsync($"Executing [Before(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}");
 
             await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
                 executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken)

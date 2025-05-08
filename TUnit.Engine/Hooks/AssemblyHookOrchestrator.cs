@@ -41,7 +41,7 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
 
             foreach (var beforeHook in beforeAssemblyHooks)
             {
-                await logger.LogDebugAsync("Executing [Before(Assembly)] hook");
+                await logger.LogDebugAsync($"Executing [Before(Assembly)] hook: {beforeHook.ClassType.Name}.{beforeHook.Name}");
 
                 await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
                 
