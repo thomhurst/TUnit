@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
@@ -35,5 +36,14 @@ public class DictionaryAssertionTests
         };
         
         await TUnitAssert.That(dictionary).ContainsKey("blah", StringComparer.InvariantCultureIgnoreCase);
+    }
+    
+    [Test]
+    public async Task Immutable_Dictionary_Does_Not_Contain_Key()
+    {
+        await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
+            await TUnitAssert.That(ImmutableDictionary<string, int>.Empty.Add("Hello", 1))
+                .IsEquivalentTo(ImmutableDictionary<string, int>.Empty.Add("Hello2", 1))
+        );
     }
 }
