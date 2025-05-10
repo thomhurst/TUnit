@@ -458,10 +458,12 @@ internal class SingleTestExecutor(
 
     private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)
     {
+        var dependencies = CollectDependencyChain(test).ToArray();
+        
         // Reverse so most nested dependencies resolve first
-        for (var index = test.Dependencies.Length - 1; index >= 0; index--)
+        for (var index = dependencies.Length - 1; index >= 0; index--)
         {
-            var dependency = test.Dependencies[index];
+            var dependency = dependencies[index];
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, true);
@@ -475,6 +477,22 @@ internal class SingleTestExecutor(
             {
                 throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}",
                     e);
+            }
+        }
+    }
+
+    private static IEnumerable<Dependency> CollectDependencyChain(DiscoveredTest test)
+    {
+        foreach (var testDependency in test.Dependencies)
+        {
+            yield return testDependency;
+        }
+
+        foreach (var testDependency in test.Dependencies)
+        {
+            foreach (var dependency in CollectDependencyChain(testDependency.Test))
+            {
+                yield return dependency;
             }
         }
     }
