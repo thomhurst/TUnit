@@ -28,12 +28,12 @@ internal class StandardOutConsoleInterceptor : ConsoleInterceptor
         Console.SetOut(this);
     }
 
-    private protected override TextWriter GetOriginalOut()
+    protected private override TextWriter GetOriginalOut()
     {
         return DefaultOut;
     }
 
-    private protected override void ResetDefault()
+    protected private override void ResetDefault()
     {
         Console.SetOut(DefaultOut);
     }
