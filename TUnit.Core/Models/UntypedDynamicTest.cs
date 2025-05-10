@@ -50,7 +50,7 @@ public record UntypedDynamicTest : DynamicTest
             RepeatLimit = Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0,
             TestBuilderContext = new TestBuilderContext(),
             TestClassArguments = TestClassArguments ?? [],
-            TestClassProperties = Properties?.Values.ToArray() ?? [],
+            TestClassProperties = Properties ?? [],
             TestFilePath = TestFilePath,
             TestLineNumber = TestLineNumber,
             TestMethodArguments = TestMethodArguments,

@@ -9,16 +9,24 @@ namespace TUnit.Core.Helpers;
 internal static class InstanceHelper
 {
     public static object CreateInstance([DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors 
-        | DynamicallyAccessedMemberTypes.PublicMethods)] Type type, params object?[]? args)
+            DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type type, object?[]? args, IDictionary<string, object?>? testClassProperties)
     {
         try
         {
             var parameters = type.GetConstructors().First(x => !x.IsStatic).GetParameters();
 
             var castedArgs = args?.Select((a, index) => CastHelper.Cast(parameters[index].ParameterType, a)).ToArray();
+
+            var instance = Activator.CreateInstance(type, castedArgs)!;
             
-            return Activator.CreateInstance(type, castedArgs)!;
+            foreach (var (propertyName, value) in testClassProperties ?? new Dictionary<string, object?>())
+            {
+                type.GetProperty(propertyName)!.SetValue(instance, value);
+            }
+            
+            return instance;
         }
         catch (TargetInvocationException targetInvocationException)
         {

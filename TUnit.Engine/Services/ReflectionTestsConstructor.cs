@@ -64,7 +64,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                             
                         foreach (var testDataAttribute in GetDataAttributes(testMethod))
                         {
-                            foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, () => [], testInformation))
+                            foreach (var classInstanceArguments in GetArguments(type, testMethod, null, typeDataAttribute, DataGeneratorType.ClassParameters, () => [], testInformation))
                             {
                                 BuildTests(typeDataAttribute, type, classInstanceArguments, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute);
                             }
@@ -94,8 +94,11 @@ internal class ReflectionTestsConstructor(IExtension extension,
         {
             var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
             
-            foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, classInstanceArguments, testInformation))
+            foreach (var testArguments in GetArguments(type, testMethod, null, testDataAttribute, DataGeneratorType.TestParameters, classInstanceArguments, testInformation))
             {
+                var propertyArgs = GetPropertyArgs(type, classInstanceArguments, testInformation)
+                    .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
+
                 testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
                 {
                     TestMethodArguments = testArguments(),
@@ -109,6 +112,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     TestClassArguments = classInstanceArguments(),
                     TestFilePath = testAttribute.File,
                     TestLineNumber = testAttribute.Line,
+                    Properties = propertyArgs
                 });
             }
         }
@@ -122,6 +126,20 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 Exception = e,
                 TestClassType = type,
             });
+        }
+    }
+
+    private static IEnumerable<(PropertyInfo PropertyInfo, Func<object?[]> Args)> GetPropertyArgs(Type type, Func<object?[]> classInstanceArguments, SourceGeneratedMethodInformation testInformation)
+    {
+        var properties = type.GetProperties()
+            .Where(p => p.GetCustomAttributes().OfType<IDataAttribute>().Any())
+            .ToArray();
+
+        foreach (var propertyInfo in properties)
+        {
+            var dataAttributes = GetDataAttributes(propertyInfo)[0];
+            var args = GetArguments(type, null, propertyInfo, dataAttributes, DataGeneratorType.Property, classInstanceArguments, testInformation).ToArray();
+            yield return (propertyInfo, args[0]);
         }
     }
 
@@ -139,7 +157,10 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             var args = classInstanceArguments.Select((x, i) => CastHelper.Cast(testInformation.Class.Parameters[i].Type, x)).ToArray();
             
-            return InstanceHelper.CreateInstance(type, args);
+            var propertyArgs = GetPropertyArgs(type, () => args, testInformation)
+                .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
+
+            return InstanceHelper.CreateInstance(type, args, propertyArgs);
         }
         catch (Exception e)
         {
@@ -169,29 +190,53 @@ internal class ReflectionTestsConstructor(IExtension extension,
             DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
             | DynamicallyAccessedMemberTypes.NonPublicMethods)]
-        Type type, MethodInfo method, IDataAttribute testDataAttribute, DataGeneratorType dataGeneratorType, Func<object?[]> classInstanceArguments,
+        Type type, MethodInfo? method, PropertyInfo? propertyInfo, IDataAttribute testDataAttribute, DataGeneratorType dataGeneratorType, Func<object?[]> classInstanceArguments,
         SourceGeneratedMethodInformation testInformation)
     {
         if (testDataAttribute is IDataSourceGeneratorAttribute dataSourceGeneratorAttribute)
         {
-            var parameters = dataGeneratorType == DataGeneratorType.TestParameters
-                ? method.GetParameters()
-                : type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?.GetParameters() ?? [];
+            var memberAttributes = dataGeneratorType switch
+            {
+                DataGeneratorType.TestParameters => method!.GetParameters().SelectMany(x => x.GetCustomAttributes()),
+                DataGeneratorType.Property => [],
+                _ => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?.GetParameters().SelectMany(x => x.GetCustomAttributes()) ?? []
+            };
             
-            var needsInstance = method.GetParameters().SelectMany(x => x.GetCustomAttributes())
-                .Any(x => x is IAccessesInstanceData);
-            
+            var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
+
             var invoke = dataSourceGeneratorAttribute.GetType().GetMethod("GenerateDataSources")!.Invoke(testDataAttribute, [
                 new DataGeneratorMetadata
                 {
                     Type = dataGeneratorType,
                     TestInformation = testInformation,
                     ClassInstanceArguments = needsInstance ? classInstanceArguments() : null,
-                    MembersToGenerate = parameters.Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
+                    MembersToGenerate = dataGeneratorType switch
                     {
-                        Name = x.Name!,
-                        Attributes = x.GetCustomAttributes().ToArray(),
-                    }).ToArray<SourceGeneratedMemberInformation>(),
+                        DataGeneratorType.TestParameters => method!.GetParameters()
+                            .Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
+                            {
+                                Name = x.Name!,
+                                Attributes = x.GetCustomAttributes().ToArray(),
+                            }).ToArray<SourceGeneratedMemberInformation>(),
+                        DataGeneratorType.ClassParameters => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?
+                            .GetParameters()
+                            .Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
+                            {
+                                Name = x.Name!,
+                                Attributes = x.GetCustomAttributes().ToArray(),
+                            }).ToArray<SourceGeneratedMemberInformation>() ?? [],
+                        DataGeneratorType.Property =>
+                        [
+                            new SourceGeneratedPropertyInformation
+                            {
+                                Name = propertyInfo!.Name,
+                                Attributes = propertyInfo.GetCustomAttributes().ToArray(),
+                                Type = propertyInfo.PropertyType,
+                                IsStatic = propertyInfo.GetMethod?.IsStatic ?? false
+                            }
+                        ],
+                        _ => throw new ArgumentOutOfRangeException(nameof(dataGeneratorType), dataGeneratorType, null)
+                    },
                     TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
                     TestClassInstance = needsInstance ? CreateInstance(testDataAttribute, type, classInstanceArguments(), testInformation, out _) : null,
                     TestSessionId = string.Empty,

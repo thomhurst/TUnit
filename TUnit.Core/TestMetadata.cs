@@ -119,7 +119,7 @@ public abstract record TestMetadata
     /// <summary>
     /// Gets or sets the properties for the test class.
     /// </summary>
-    public required object?[] TestClassProperties { get; init; }
+    public required IDictionary<string, object?> TestClassProperties { get; init; }
     
     public Attribute[] DynamicAttributes { get; init; } = [];
     

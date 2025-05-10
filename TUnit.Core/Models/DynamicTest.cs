@@ -161,7 +161,7 @@ public record DynamicTest<
                 TestMethod = BuildTestMethod(TestBody),
                 ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
                         typeof(TClass),
-                        TestClassArguments)!,
+                        TestClassArguments, Properties),
                     TestSessionContext.Current?.Id ?? "Unknown",
                     new TestBuilderContext()),
                 TestMethodFactory = (@class, token) =>
@@ -175,7 +175,7 @@ public record DynamicTest<
 
                     return AsyncConvert.ConvertObject(TestBody.Invoke(@class, arguments));
                 },
-                TestClassProperties = Properties?.Select(x => x.Value).ToArray() ?? [],
+                TestClassProperties = Properties ?? [],
                 TestBuilderContext = new TestBuilderContext(),
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,

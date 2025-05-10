@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Services;
@@ -40,7 +41,9 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
 
     private EngineMode GetMode()
     {
-        if (commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner))
+        if (commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner)
+            || Assembly.GetEntryAssembly()?.GetCustomAttributes<AssemblyMetadataAttribute>()
+                .Any(x => x is { Key: "TUnitReflectionScanner", Value: "true" }) is true)
         {
             return EngineMode.Reflection;
         }

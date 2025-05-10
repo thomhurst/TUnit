@@ -27,7 +27,7 @@ public record FailedTestMetadata<[DynamicallyAccessedMembers(
             TestMethodFactory = (_, _) => default,
             TestBuilderContext = new TestBuilderContext(),
             TestClassArguments = [],
-            TestClassProperties = [],
+            TestClassProperties = new Dictionary<string, object?>(),
             TestFilePath = failedTestMetadata.TestFilePath,
             TestLineNumber = failedTestMetadata.TestLineNumber,
             TestMethodArguments = [],
