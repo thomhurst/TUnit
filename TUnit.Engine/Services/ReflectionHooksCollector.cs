@@ -15,6 +15,13 @@ namespace TUnit.Engine.Services;
 [SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(sessionId)
 {
+    private static BindingFlags BindingFlags => 
+        BindingFlags.Public 
+        | BindingFlags.NonPublic 
+        | BindingFlags.Instance 
+        | BindingFlags.Static
+        | BindingFlags.DeclaredOnly;
+    
     public override void CollectDiscoveryHooks()
     {
 #if NET
@@ -26,7 +33,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         
         foreach (var type in ReflectionScanner.GetTypes())
         {
-            foreach (var methodInfo in type.GetMethods()
+            foreach (var methodInfo in type.GetMethods(BindingFlags)
                          .Where(x => !x.IsAbstract)
                          .Where(IsHook))
             {
@@ -67,7 +74,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
     {
         foreach (var type in ReflectionScanner.GetTypes())
         {
-            foreach (var methodInfo in type.GetMethods()
+            foreach (var methodInfo in type.GetMethods(BindingFlags)
                          .Where(x => !x.IsAbstract)
                          .Where(IsHook))
             {
@@ -108,7 +115,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
     {
         foreach (var type in ReflectionScanner.GetTypes())
         {
-            foreach (var methodInfo in type.GetMethods()
+            foreach (var methodInfo in type.GetMethods(BindingFlags)
                          .Where(x => !x.IsAbstract)
                          .Where(IsHook))
             {
