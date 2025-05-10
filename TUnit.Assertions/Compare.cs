@@ -91,6 +91,32 @@ public static class Compare
 
             foreach (var key in keys)
             {
+                if (!actualDictionary.Contains(key))
+                {
+                    yield return new ComparisonFailure
+                    {
+                        Type = MemberType.DictionaryItem,
+                        Actual = $"No entry with key: {key}",
+                        Expected = $"[{key}] = {expectedDictionary[key]}",
+                        NestedMemberNames = [..memberNames, $"[{key}]"]
+                    };
+
+                    yield break;
+                }
+                
+                if (!expectedDictionary.Contains(key))
+                {
+                    yield return new ComparisonFailure
+                    {
+                        Type = MemberType.DictionaryItem,
+                        Actual = $"[{key}] = {actualDictionary[key]}",
+                        Expected = $"No entry with key: {key}",
+                        NestedMemberNames = [..memberNames, $"[{key}]"]
+                    };
+
+                    yield break;
+                }
+                
                 var actualObject = actualDictionary[key];
                 var expectedObject = expectedDictionary[key];
 
