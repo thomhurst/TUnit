@@ -191,10 +191,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     
     private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions, TUnitFrameworkLogger logger)
     {
+#if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
         {
             return false;
         }
+#endif
         
         var isReflectionScannerEnabled = IsReflectionScannerEnabledByCommandLine(commandLineOptions)
             || IsReflectionScannerEnabledByMsBuild();
