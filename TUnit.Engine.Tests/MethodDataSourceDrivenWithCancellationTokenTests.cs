@@ -1,8 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public class MethodDataSourceDrivenWithCancellationTokenTests : InvokableTestBase
+public class MethodDataSourceDrivenWithCancellationTokenTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

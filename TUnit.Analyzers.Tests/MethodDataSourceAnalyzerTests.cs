@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.TestDataAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
@@ -266,8 +265,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
-    [TestCase(true)]
-    [TestCase(false)]
+    [Arguments(true)]
+    [Arguments(false)]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Matching_Tuple(bool includeTimeoutToken)
     {
         await Verifier.VerifyAnalyzerAsync(
@@ -295,8 +294,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
-    [TestCase(true)]
-    [TestCase(false)]
+    [Arguments(true)]
+    [Arguments(false)]
     public async Task Method_Data_Source_Is_Flagged_When_Tuple_Count_Mismatch(bool includeTimeoutToken)
     {
         await Verifier.VerifyAnalyzerAsync(
@@ -328,8 +327,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
-    [TestCase(true)]
-    [TestCase(false)]
+    [Arguments(true)]
+    [Arguments(false)]
     public async Task Method_Data_Source_Is_Flagged_When_Non_Matching_Tuple(bool includeTimeoutToken)
     {
         await Verifier.VerifyAnalyzerAsync(

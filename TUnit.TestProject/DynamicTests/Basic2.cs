@@ -58,7 +58,7 @@ public class StateMachine
             "queued" => "starting",
             "starting" => "running",
             "running" => "completed",
-            "" => "not_started"
+            _ => "not_started"
         };
     }
 }

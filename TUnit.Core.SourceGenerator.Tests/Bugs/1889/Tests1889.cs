@@ -14,6 +14,7 @@ internal class Tests1889 : TestsBase<TestsGenerator>
         new RunTestOptions
         {
             VerifyConfigurator = settingsTask => settingsTask.ScrubLinesContaining("TestFilePath = ")
+                .UniqueForTargetFrameworkAndVersion()
         },
         async generatedFiles =>
         {

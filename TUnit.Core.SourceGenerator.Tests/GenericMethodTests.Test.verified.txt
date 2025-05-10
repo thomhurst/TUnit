@@ -121,7 +121,9 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -245,7 +247,9 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,

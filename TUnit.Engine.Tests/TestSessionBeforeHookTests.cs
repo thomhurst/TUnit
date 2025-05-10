@@ -1,9 +1,10 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 using TUnit.Engine.Tests.Extensions;
 
 namespace TUnit.Engine.Tests;
 
-public class TestSessionBeforeHookTests : InvokableTestBase
+public class TestSessionBeforeHookTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

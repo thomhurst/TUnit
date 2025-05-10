@@ -1,8 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsLibraryPackage>true</IsLibraryPackage>
-  </PropertyGroup>
+  <Import Project="..\Library.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\TUnit\TUnit.csproj" />

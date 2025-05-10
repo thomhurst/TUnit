@@ -9,21 +9,14 @@ public static class CastHelper
     [UnconditionalSuppressMessage("", "IL2072")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
     {
-        if (value is T successfulCast)
-        {
-            return successfulCast;
-        }
-        
-        if (value is not string 
-            && value is IEnumerable enumerable 
-            && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
-        {
-            value = enumerable.Cast<object>().ElementAtOrDefault(0);
-        }
-        
         if (value is null)
         {
             return default;
+        }
+        
+        if (value is T successfulCast)
+        {
+            return successfulCast;
         }
 
         var underlyingType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
@@ -33,19 +26,78 @@ public static class CastHelper
             return (T)value;
         }
         
+        if (value is not string 
+            && value is IEnumerable enumerable 
+            && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+        {
+            value = enumerable.Cast<object>().ElementAtOrDefault(0);
+        }
+        
         if (underlyingType.IsEnum)
         {
-            return (T?) Enum.ToObject(underlyingType, value);
+            return (T?) Enum.ToObject(underlyingType, value!);
         }
 
-        var conversionMethod = GetConversionMethod(value.GetType(), underlyingType);
+        var conversionMethod = GetConversionMethod(value!.GetType(), underlyingType);
 
-        if (conversionMethod is null)
+        if (conversionMethod is null && value is IConvertible)
         {
             return (T?) Convert.ChangeType(value, underlyingType);
         }
         
-        return (T?) conversionMethod.Invoke(null, [value]);
+        if (conversionMethod is null)
+        {
+            return (T?) value;
+        }
+        
+        return (T?) conversionMethod!.Invoke(null, [value]);
+    }
+    
+    [UnconditionalSuppressMessage("", "IL2072")]
+    public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+        
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+        if (value.GetType().IsAssignableTo(underlyingType))
+        {
+            return value;
+        }
+
+        if (type.IsGenericParameter)
+        {
+            return value;
+        }
+        
+        if (value is not string 
+            && value is IEnumerable enumerable 
+            && !typeof(IEnumerable).IsAssignableFrom(type))
+        {
+            value = enumerable.Cast<object>().ElementAtOrDefault(0);
+        }
+        
+        if (underlyingType.IsEnum)
+        {
+            return Enum.ToObject(underlyingType, value!);
+        }
+
+        var conversionMethod = GetConversionMethod(value!.GetType(), underlyingType);
+
+        if (conversionMethod is null && value is IConvertible)
+        {
+            return Convert.ChangeType(value, underlyingType);
+        }
+
+        if (conversionMethod is null)
+        {
+            return value;
+        }
+        
+        return conversionMethod!.Invoke(null, [value]);
     }
 
     private static MethodInfo? GetConversionMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType)

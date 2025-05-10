@@ -1,4 +1,6 @@
-﻿namespace TUnit.UnitTests;
+﻿using VerifyTUnit;
+
+namespace TUnit.Core.SourceGenerator.Tests;
 
 public class VerifyChecksTests
 {

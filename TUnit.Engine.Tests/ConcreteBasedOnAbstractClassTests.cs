@@ -1,8 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public class ConcreteBasedOnAbstractClassTests : InvokableTestBase
+public class ConcreteBasedOnAbstractClassTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

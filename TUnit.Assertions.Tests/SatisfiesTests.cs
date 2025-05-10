@@ -190,21 +190,14 @@ public class SatisfiesTests
             ).Throws<AssertionException>()
             .WithMessageMatching(
                 """
-                *Expected model => model.Nested to satisfy assert =>
-                                        assert.Satisfies(model => model?.Nested, innerAssert =>
-                                            innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
-                                                innerAssert2.IsEqualTo("Baz")!
-                                            )
-                                        )
-                
-                but found "Blah" which differs at index 1:
+                *but found "Blah" which differs at index 1:
                      ↓
                    "Blah"
                    "Baz"
                      ↑
                 
                 at Assert.That(myModel).Satisfies(model => model.Nested, assert =>
-                                        assert.Sati...*
+                                        assert.Sat*
                 """
                 );
     }

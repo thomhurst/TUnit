@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.DependsOnNotInParallelConflictAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;

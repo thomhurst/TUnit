@@ -1,0 +1,20 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)TestLibrary.props" />
+
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Engine\TUnit.Engine.props" />
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions\TUnit.Assertions.props" />
+
+    <PropertyGroup>
+        <TargetFrameworks>net472;net8.0;net9.0</TargetFrameworks>
+
+        <OutputType>Exe</OutputType>
+
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+
+        <IsTestProject>true</IsTestProject>
+
+    </PropertyGroup>
+</Project>

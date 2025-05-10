@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitAttributesAnalyzer>;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitAttributesAnalyzer, TUnit.Analyzers.CodeFixers.XUnitAttributesCodeFixProvider>;
 
@@ -6,10 +5,11 @@ namespace TUnit.Analyzers.Tests;
 
 public class XUnitAttributesAnalyzerTests
 {
-    [TestCase("Fact")]
-    [TestCase("Theory")]
-    [TestCase("Xunit.Fact")]
-    [TestCase("Xunit.Theory")]
+    [Arguments("Fact")]
+    [Arguments("Theory")]
+    [Arguments("Xunit.Fact")]
+    [Arguments("Xunit.Theory")]
+    [Test]
     public async Task Test_Attribute_Flagged(string attributeName)
     {
         await Verifier
@@ -29,19 +29,19 @@ public class XUnitAttributesAnalyzerTests
             );
     }
     
-    [TestCase("Fact", "Test")]
-    [TestCase("Theory", "Test")]
-    [TestCase("InlineData", "Arguments")]
-    [TestCase("Trait(\"Key\", \"Value\")", "Property(\"Key\", \"Value\")")]
-    [TestCase("MemberData(\"SomeMethod\")", "MethodDataSource(\"SomeMethod\")")]
-    [TestCase("ClassData(typeof(MyClass))", "MethodDataSource(typeof(MyClass), \"GetEnumerator\")")]
-    [TestCase("Xunit.Fact", "Test")]
-    [TestCase("Xunit.Theory", "Test")]
-    [TestCase("Xunit.InlineData", "Arguments")]
-    [TestCase("Xunit.Trait(\"Key\", \"Value\")", "Property(\"Key\", \"Value\")")]
-    [TestCase("Xunit.MemberData(\"SomeMethod\")", "MethodDataSource(\"SomeMethod\")")]
-    [TestCase("Xunit.ClassData(typeof(MyClass))", "MethodDataSource(typeof(MyClass), \"GetEnumerator\")")]
-
+    [Arguments("Fact", "Test")]
+    [Arguments("Theory", "Test")]
+    [Arguments("InlineData", "Arguments")]
+    [Arguments("Trait(\"Key\", \"Value\")", "Property(\"Key\", \"Value\")")]
+    [Arguments("MemberData(\"SomeMethod\")", "MethodDataSource(\"SomeMethod\")")]
+    [Arguments("ClassData(typeof(MyClass))", "MethodDataSource(typeof(MyClass), \"GetEnumerator\")")]
+    [Arguments("Xunit.Fact", "Test")]
+    [Arguments("Xunit.Theory", "Test")]
+    [Arguments("Xunit.InlineData", "Arguments")]
+    [Arguments("Xunit.Trait(\"Key\", \"Value\")", "Property(\"Key\", \"Value\")")]
+    [Arguments("Xunit.MemberData(\"SomeMethod\")", "MethodDataSource(\"SomeMethod\")")]
+    [Arguments("Xunit.ClassData(typeof(MyClass))", "MethodDataSource(typeof(MyClass), \"GetEnumerator\")")]
+    [Test]
     public async Task Test_Attributes_Can_Be_Fixed(string attribute, string expected)
     {
         await CodeFixer
@@ -74,10 +74,11 @@ public class XUnitAttributesAnalyzerTests
             );
     }
     
-    [TestCase("Fact")]
-    [TestCase("Theory")]
-    [TestCase("Xunit.Fact")]
-    [TestCase("Xunit.Theory")]
+    [Test]
+    [Arguments("Fact")]
+    [Arguments("Theory")]
+    [Arguments("Xunit.Fact")]
+    [Arguments("Xunit.Theory")]
     public async Task Skipped_Test_Attributes_Can_Be_Fixed(string attribute)
     {
         await CodeFixer
@@ -266,8 +267,9 @@ public class XUnitAttributesAnalyzerTests
             );
     }
 
-    [TestCase("AssemblyFixture(typeof(Exception))", "ClassDataSource<Exception>(Shared = SharedType.PerAssembly)")]
-    [Ignore("TODO")]
+    [Test]
+    [Arguments("AssemblyFixture(typeof(Exception))", "ClassDataSource<Exception>(Shared = SharedType.PerAssembly)")]
+    [Skip("TODO")]
     public async Task Assembly_Attributes_Can_Be_Fixed(string attribute, string expected)
     {
         await CodeFixer

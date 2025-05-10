@@ -8,7 +8,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, AssemblyHookOrchestrator assemblyHookOrchestrator, TUnitFrameworkLogger logger, string? stringFilter)
+internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector, AssemblyHookOrchestrator assemblyHookOrchestrator, TUnitFrameworkLogger logger, string? stringFilter)
 {
     private TestSessionContext? _context;
     
@@ -21,14 +21,14 @@ internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, Assemb
 
         foreach (var beforeSessionHook in beforeSessionHooks)
         {
-            await logger.LogDebugAsync("Executing [Before(TestSession)] hook");
+            await logger.LogDebugAsync($"Executing [Before(TestSession)] hook: {beforeSessionHook.ClassType.Name}.{beforeSessionHook.Name}");
 
             await beforeSessionHook.ExecuteAsync(testSessionContext, executeRequestContext.CancellationToken);
             
             ExecutionContextHelper.RestoreContext(testSessionContext.ExecutionContext);
         }
         
-        // After Discovery and Before test session hooks are run, more chance of references assemblies
+        // After Discovery and Before test session hooks are run, more chance of referenced assemblies
         // being loaded into the AppDomain, so now we collect the test hooks which should pick up loaded libraries too
         hooksCollector.CollectHooks();
 

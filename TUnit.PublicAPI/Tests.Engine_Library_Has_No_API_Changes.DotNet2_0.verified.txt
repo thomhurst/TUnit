@@ -9,6 +9,14 @@ namespace TUnit.Engine.Capabilities
         public System.Threading.Tasks.Task StopTestExecutionAsync(System.Threading.CancellationToken cancellationToken) { }
     }
 }
+namespace TUnit.Engine.Enums
+{
+    public enum EngineMode
+    {
+        SourceGenerated = 0,
+        Reflection = 1,
+    }
+}
 namespace TUnit.Engine.Exceptions
 {
     public class TestFailedException : TUnit.Core.Exceptions.TUnitException
@@ -27,6 +35,10 @@ namespace TUnit.Engine.Extensions
         public static TUnit.Engine.Json.TestJson ToJsonModel(this TUnit.Core.TestContext context) { }
         public static TUnit.Engine.Json.TestResultJson ToJsonModel(this TUnit.Core.TestResult result) { }
         public static TUnit.Engine.Json.TestSessionJson ToJsonModel(this TUnit.Core.TestSessionContext context) { }
+    }
+    public static class TestApplicationBuilderExtensions
+    {
+        public static void AddTUnit(this Microsoft.Testing.Platform.Builder.ITestApplicationBuilder testApplicationBuilder) { }
     }
     public static class TestContextExtensions
     {

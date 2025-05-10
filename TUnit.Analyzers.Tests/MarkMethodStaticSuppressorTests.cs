@@ -1,7 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#if NET8_0_OR_GREATER
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeQuality.Analyzers.QualityGuidelines;
-using NUnit.Framework;
 
 namespace TUnit.Analyzers.Tests;
 
@@ -9,9 +9,10 @@ public class MarkMethodStaticSuppressorTests
 {
     private static readonly DiagnosticResult CA1822 = new("CA1822", DiagnosticSeverity.Info);
     
-    [TestCase("Test")]
-    [TestCase("Before(Test)")]
-    [TestCase("After(Test)")]
+    [Test]
+    [Arguments("Test")]
+    [Arguments("Before(Test)")]
+    [Arguments("After(Test)")]
     public async Task WarningsInTUnitAreSuppressed(string attribute) =>
         await AnalyzerTestHelpers
             .CreateSuppressorTest<MarkMethodStaticSuppressor>(
@@ -51,3 +52,4 @@ public class MarkMethodStaticSuppressorTests
             .WithExpectedDiagnosticsResults(CA1822.WithLocation(0).WithIsSuppressed(false))
             .RunAsync();
 }
+#endif

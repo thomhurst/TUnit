@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject.Library;
+﻿namespace TUnit.TestProject.Library;
 
 public abstract class BaseTests
 {

@@ -36,8 +36,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -148,7 +147,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -216,8 +217,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -345,7 +345,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -413,8 +415,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -519,7 +520,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum,TUnit.TestProject.TestEnum?):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -587,8 +590,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -676,7 +678,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -744,8 +748,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -839,7 +842,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool?):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -907,8 +912,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1002,7 +1006,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -1070,8 +1076,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1171,7 +1176,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
 								TestClassArguments = [],
 								TestMethodArguments = [methodArg, methodArg1],
-								TestClassProperties = [],
+								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+								{
+								},
 								CurrentRepeatAttempt = 0,
 								RepeatLimit = 0,
 								ResettableClassFactory = resettableClassFactory,
@@ -1239,8 +1246,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1317,7 +1323,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method1(int):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -1385,8 +1393,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1463,7 +1470,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method2(int):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -1531,8 +1540,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1609,7 +1617,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method3(int):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -1677,8 +1687,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute()
+					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
 				[
@@ -1755,7 +1764,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method4(int):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -1824,7 +1835,6 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				Attributes = 
 				[
 					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute(),
 					new global::TUnit.Core.MatrixExclusionAttribute(1, 1),
 					new global::TUnit.Core.MatrixExclusionAttribute(2, 2),
 					new global::TUnit.Core.MatrixExclusionAttribute(3, 3)
@@ -1921,7 +1931,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Exclusion(int,int):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,

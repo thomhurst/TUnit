@@ -93,7 +93,9 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 									TestId = $"TUnit.TestProject.AttributeTests.MyTest:0",
 									TestClassArguments = [],
 									TestMethodArguments = [],
-									TestClassProperties = [],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,

@@ -3,7 +3,7 @@ namespace TUnit.Core;
 public class TestSessionContext : Context
 {
     private static readonly AsyncLocal<TestSessionContext?> Contexts = new();
-    public new static TestSessionContext? Current
+    public static new TestSessionContext? Current
     {
         get => Contexts.Value;
         internal set => Contexts.Value = value;

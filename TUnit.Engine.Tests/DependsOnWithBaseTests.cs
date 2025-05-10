@@ -1,8 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public class DependsOnWithBaseTests : InvokableTestBase
+public class DependsOnWithBaseTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     public async Task Test()
     {

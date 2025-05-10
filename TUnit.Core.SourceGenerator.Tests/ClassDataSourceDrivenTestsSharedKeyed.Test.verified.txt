@@ -110,7 +110,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class(SomeAsyncDisposableClass):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArgGeneratedData],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -252,7 +254,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic(SomeAsyncDisposableClass):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArgGeneratedData],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,

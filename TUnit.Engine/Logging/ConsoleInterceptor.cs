@@ -12,9 +12,9 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     protected abstract TextWriter? RedirectedOut { get; }
     
-    private protected abstract TextWriter GetOriginalOut();
+    protected private abstract TextWriter GetOriginalOut();
     
-    private protected abstract void ResetDefault();
+    protected private abstract void ResetDefault();
 
 #if NET
     public override ValueTask DisposeAsync()

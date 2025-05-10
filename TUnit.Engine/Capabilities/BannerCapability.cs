@@ -1,8 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Enums;
 
 namespace TUnit.Engine.Capabilities;
 
@@ -31,15 +33,29 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
                
                {GetRuntimeDetails()}
                
+               Engine Mode: {GetMode()}
+               
             """
         );
+    }
+
+    private EngineMode GetMode()
+    {
+        if (commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner)
+            || Assembly.GetEntryAssembly()?.GetCustomAttributes<AssemblyMetadataAttribute>()
+                .Any(x => x is { Key: "TUnitReflectionScanner", Value: "true" }) is true)
+        {
+            return EngineMode.Reflection;
+        }
+
+        return EngineMode.SourceGenerated;
     }
 
     private string GetRuntimeDetails()
     {
         List<string> segments =
         [
-            $"TUnit v{typeof(BannerCapability).Assembly.GetName().Version!.ToString()}",
+            $"TUnit v{typeof(BannerCapability).Assembly.GetName().Version!}",
             GetApplicationMemorySize(),
             RuntimeInformation.OSDescription,
 #if NET

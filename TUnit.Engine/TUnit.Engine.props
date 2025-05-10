@@ -12,6 +12,13 @@
         <GenerateProgramFile>false</GenerateProgramFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <IsVBProject Condition="'$(MSBuildProjectFile)' != '' and '$(MSBuildProjectFile.EndsWith(.vbproj))'">true</IsVBProject>
+        <IsFSharpProject Condition="'$(MSBuildProjectFile)' != '' and '$(MSBuildProjectFile.EndsWith(.fsproj))'">true</IsFSharpProject>
+        <TUnitReflectionScanner Condition="'$(IsVBProject)' == 'true' or '$(IsFSharpProject)' == 'true'">true</TUnitReflectionScanner>
+    </PropertyGroup>
+
     <ItemGroup>
         <!--
           !!! IMPORTANT !!!

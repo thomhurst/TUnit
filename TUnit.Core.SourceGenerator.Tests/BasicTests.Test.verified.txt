@@ -72,7 +72,9 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					TestId = $"TUnit.TestProject.BasicTests.SynchronousTest:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -175,7 +177,9 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					TestId = $"TUnit.TestProject.BasicTests.AsynchronousTest:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -278,7 +282,9 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					TestId = $"TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,

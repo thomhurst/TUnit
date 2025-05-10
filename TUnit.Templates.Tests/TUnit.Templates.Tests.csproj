@@ -1,21 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  
+  <Import Project="..\TestProject.props" />
+  
   <PropertyGroup>
     <TargetFrameworks>net9.0</TargetFrameworks>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Templates\TUnit.Templates.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" />
-    <PackageReference Include="NUnit" />
-    <PackageReference Include="NUnit.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="NUnit3TestAdapter" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,4 +18,6 @@
     <Compile Remove="Snapshots\**" />
     <None Include="Snapshots\**" />
   </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
 </Project>

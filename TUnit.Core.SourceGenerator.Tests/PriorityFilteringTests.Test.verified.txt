@@ -73,7 +73,9 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_1:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -177,7 +179,9 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_2:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -281,7 +285,9 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.High_3:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -385,7 +391,9 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_1:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -489,7 +497,9 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_2:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -593,7 +603,9 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					TestId = $"TUnit.TestProject.PriorityFilteringTests.Low_1:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,

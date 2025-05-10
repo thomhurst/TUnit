@@ -68,13 +68,6 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod("Setup", []).Invoke(classInstance, [])),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 				new global::TUnit.Core.Hooks.InstanceHookMethod
 				{
@@ -131,13 +124,6 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>)classInstance).Setup()),
 						HookExecutor = DefaultExecutor.Instance,
 						Order = 0,
-						MethodAttributes = 
-						[
-							new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-						],
-						ClassAttributes = [],
-												AssemblyAttributes = 
-[],
 					},
 				];
 			}

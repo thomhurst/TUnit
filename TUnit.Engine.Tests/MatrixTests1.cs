@@ -1,8 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public class MatrixTests1 : InvokableTestBase
+public class MatrixTests1(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

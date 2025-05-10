@@ -5,7 +5,7 @@ namespace TUnit.Core;
 public class AssemblyHookContext : Context
 {
     private static readonly AsyncLocal<AssemblyHookContext?> Contexts = new();
-    public new static AssemblyHookContext? Current
+    public static new AssemblyHookContext? Current
     {
         get => Contexts.Value;
         internal set => Contexts.Value = value;

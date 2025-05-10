@@ -7,7 +7,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, TUnitFrameworkLogger logger, string? stringFilter)
+internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFrameworkLogger logger, string? stringFilter)
 {
     private BeforeTestDiscoveryContext? _beforeContext;
     private TestDiscoveryContext? _afterContext;
@@ -23,7 +23,7 @@ internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, TUni
         
         foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
         {
-            await logger.LogDebugAsync("Executing [Before(TestDiscovery)] hook");
+            await logger.LogDebugAsync($"Executing [Before(TestDiscovery)] hook: {beforeDiscoveryHook.ClassType.Name}.{beforeDiscoveryHook.Name}");
 
             await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
             

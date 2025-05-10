@@ -106,7 +106,7 @@ namespace TUnit.Core
         public int Order { get; }
         public void OnTestDiscovery(TUnit.Core.DiscoveredTestContext discoveredTestContext) { }
     }
-    public abstract class ClassConstructorAttribute : TUnit.Core.TestDataAttribute
+    public abstract class ClassConstructorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.IDataAttribute
     {
         public abstract System.Type ClassConstructorType { get; }
     }
@@ -324,8 +324,14 @@ namespace TUnit.Core
         public required object?[] TestMethodArguments { get; init; }
         public string? TestName { get; init; }
         public abstract System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas();
+        protected TUnit.Core.SourceGeneratedMethodInformation BuildTestMethod(System.Reflection.MethodInfo methodInfo) { }
+        protected TUnit.Core.SourceGeneratedAssemblyInformation GenerateAssembly() { }
+        protected TUnit.Core.SourceGeneratedClassInformation GenerateClass() { }
+        protected TUnit.Core.SourceGeneratedParameterInformation GenerateParameter(System.Reflection.ParameterInfo parameter) { }
         public System.Attribute[] GetAttributes() { }
+        protected TUnit.Core.SourceGeneratedParameterInformation[] GetParameters(System.Reflection.ParameterInfo[] parameters) { }
         public static T Argument<T>() { }
+        protected static TUnit.Core.SourceGeneratedPropertyInformation GenerateProperty(System.Collections.Generic.KeyValuePair<string, object?> property) { }
     }
     public class DynamicTestBuilderAttribute : TUnit.Core.BaseTestAttribute
     {
@@ -422,6 +428,9 @@ namespace TUnit.Core
     }
     public class HookAttribute : TUnit.Core.TUnitAttribute
     {
+        public string File { get; }
+        public TUnit.Core.HookType HookType { get; }
+        public int Line { get; }
         public int Order { get; init; }
     }
     public enum HookType
@@ -809,7 +818,7 @@ namespace TUnit.Core
         public System.Attribute[] TestAttributes { get; }
         public TUnit.Core.SourceGeneratedClassInformation TestClass { get; }
         public required object?[] TestClassArguments { get; init; }
-        public required object?[] TestClassInjectedPropertyArguments { get; init; }
+        public required System.Collections.Generic.IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; }
         public System.Type[] TestClassParameterTypes { get; }
         public required string TestFilePath { get; init; }
         public required string TestId { get; init; }
@@ -845,7 +854,8 @@ namespace TUnit.Core
         public required int RepeatLimit { get; init; }
         public required TUnit.Core.TestBuilderContext TestBuilderContext { get; init; }
         public required object?[] TestClassArguments { get; init; }
-        public required object?[] TestClassProperties { get; init; }
+        public required System.Collections.Generic.IDictionary<string, object?> TestClassProperties { get; init; }
+        public abstract System.Type TestClassType { get; }
         public required string TestFilePath { get; init; }
         public required string TestId { get; init; }
         public required int TestLineNumber { get; init; }
@@ -859,6 +869,7 @@ namespace TUnit.Core
     {
         public TestMetadata() { }
         public required TUnit.Core.ResettableLazy<TClassType> ResettableClassFactory { get; init; }
+        public override System.Type TestClassType { get; }
         public required System.Func<TClassType, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> TestMethodFactory { get; init; }
         public override TUnit.Core.TestDetails BuildTestDetails() { }
         public override TUnit.Core.TestMetadata CloneWithNewMethodFactory(System.Func<object, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> testMethodFactory) { }
@@ -904,6 +915,38 @@ namespace TUnit.Core
         public System.DateTimeOffset End { get; init; }
         public System.DateTimeOffset Start { get; init; }
         public string StepName { get; init; }
+    }
+    public class UntypedDynamicTest : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.UntypedDynamicTest>
+    {
+        public UntypedDynamicTest(System.Reflection.MethodInfo testBody) { }
+        public UntypedDynamicTest(System.Type testClassType, System.Reflection.MethodInfo testBody) { }
+        public TUnit.Core.TestBuilderContext TestBuilderContext { get; set; }
+        public override System.Type TestClassType { get; }
+        public override string TestId { get; }
+        public override System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas() { }
+    }
+    public class UntypedFailedDynamicTest : System.IEquatable<TUnit.Core.UntypedFailedDynamicTest>
+    {
+        public UntypedFailedDynamicTest() { }
+        public required System.Exception Exception { get; init; }
+        public required string MethodName { get; init; }
+        public required System.Type TestClassType { get; init; }
+        public required string TestFilePath { get; init; }
+        public required int TestLineNumber { get; init; }
+        public static TUnit.Core.DynamicTest op_Implicit(TUnit.Core.UntypedFailedDynamicTest failedTestMetadata) { }
+    }
+    public class UntypedTestDetails : TUnit.Core.TestDetails, System.IEquatable<TUnit.Core.UntypedTestDetails>
+    {
+        public UntypedTestDetails(TUnit.Core.ResettableLazy<object> ResettableLazy) { }
+        public override object ClassInstance { get; }
+        public TUnit.Core.ResettableLazy<object> ResettableLazy { get; init; }
+    }
+    public class UntypedTestMetadata : TUnit.Core.TestMetadata, System.IEquatable<TUnit.Core.UntypedTestMetadata>
+    {
+        public UntypedTestMetadata(System.Type TestClassType) { }
+        public override System.Type TestClassType { get; }
+        public override TUnit.Core.TestDetails BuildTestDetails() { }
+        public override TUnit.Core.TestMetadata CloneWithNewMethodFactory(System.Func<object, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> testMethodFactory) { }
     }
 }
 namespace TUnit.Core.Data
@@ -1080,6 +1123,7 @@ namespace TUnit.Core.Helpers
 {
     public static class CastHelper
     {
+        public static object? Cast(System.Type type, object? value) { }
         public static T? Cast<T>(object? value) { }
     }
     [System.Diagnostics.DebuggerDisplay("Count = {CurrentCount}")]
@@ -1179,13 +1223,13 @@ namespace TUnit.Core.Hooks
     {
         public InstanceHookMethod() { }
         public System.Reflection.Assembly Assembly { get; }
-        public required System.Attribute[] AssemblyAttributes { get; init; }
+        public System.Attribute[] AssemblyAttributes { get; }
         public System.Collections.Generic.IEnumerable<System.Attribute> Attributes { get; }
         public System.Func<object, TUnit.Core.TestContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>? Body { get; init; }
-        public required System.Attribute[] ClassAttributes { get; init; }
+        public System.Attribute[] ClassAttributes { get; }
         public required System.Type ClassType { get; init; }
         public required TUnit.Core.Interfaces.IHookExecutor HookExecutor { get; init; }
-        public required System.Attribute[] MethodAttributes { get; init; }
+        public System.Attribute[] MethodAttributes { get; }
         public required TUnit.Core.SourceGeneratedMethodInformation MethodInfo { get; init; }
         public string Name { get; }
         public required int Order { get; init; }
@@ -1216,14 +1260,14 @@ namespace TUnit.Core.Hooks
     {
         protected StaticHookMethod() { }
         public System.Reflection.Assembly Assembly { get; }
-        public required System.Attribute[] AssemblyAttributes { get; init; }
+        public System.Attribute[] AssemblyAttributes { get; }
         public System.Collections.Generic.IEnumerable<System.Attribute> Attributes { get; }
-        public required System.Attribute[] ClassAttributes { get; init; }
+        public System.Attribute[] ClassAttributes { get; }
         public System.Type ClassType { get; }
         public required string FilePath { get; init; }
         public required TUnit.Core.Interfaces.IHookExecutor HookExecutor { get; init; }
         public required int LineNumber { get; init; }
-        public required System.Attribute[] MethodAttributes { get; init; }
+        public System.Attribute[] MethodAttributes { get; }
         public required TUnit.Core.SourceGeneratedMethodInformation MethodInfo { get; init; }
         public string Name { get; }
         public required int Order { get; init; }

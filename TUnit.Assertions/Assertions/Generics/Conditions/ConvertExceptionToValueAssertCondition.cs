@@ -12,7 +12,7 @@ public class ConvertExceptionToValueAssertCondition<TException> : BaseAssertCond
     
     public TException? ConvertedExceptionValue { get; private set; }
 
-    protected sealed override ValueTask<AssertionResult> GetResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    protected override sealed ValueTask<AssertionResult> GetResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
     {
         if (exception is null)
         {

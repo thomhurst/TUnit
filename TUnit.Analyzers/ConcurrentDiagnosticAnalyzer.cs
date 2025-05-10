@@ -4,7 +4,7 @@ namespace TUnit.Analyzers;
 
 public abstract class ConcurrentDiagnosticAnalyzer : DiagnosticAnalyzer
 {
-    public sealed override void Initialize(AnalysisContext context)
+    public override sealed void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();

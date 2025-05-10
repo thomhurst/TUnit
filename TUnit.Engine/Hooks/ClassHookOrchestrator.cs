@@ -10,7 +10,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector, TUnitFrameworkLogger logger)
+internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollectorBase hooksCollector, TUnitFrameworkLogger logger)
 {
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classHookContexts = new();
     
@@ -66,7 +66,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
             foreach (var beforeHook in beforeClassHooks)
             {
                 {
-                    await logger.LogDebugAsync("Executing [Before(Class)] hook");
+                    await logger.LogDebugAsync($"Executing [Before(Class)] hook: {beforeHook.ClassType.Name}.{beforeHook.Name}");
 
                     await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
                     

@@ -1,8 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public class MEDITest : InvokableTestBase
+public class MEDITest(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

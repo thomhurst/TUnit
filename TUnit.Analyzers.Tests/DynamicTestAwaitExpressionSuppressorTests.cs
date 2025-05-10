@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
-using NUnit.Framework;
 
 namespace TUnit.Analyzers.Tests;
 

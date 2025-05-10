@@ -6,6 +6,8 @@ public class SkipNetFrameworkAttribute(string reason) : SkipAttribute(reason)
 
     public override Task<bool> ShouldSkip(BeforeTestContext context)
     {
-        return Task.FromResult(NetVersion == "net472");
+        var isNetFramework = NetVersion.StartsWith("net4");
+        
+        return Task.FromResult(isNetFramework);
     }
 }

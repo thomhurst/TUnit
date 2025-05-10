@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.PsvmAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
@@ -6,11 +5,11 @@ namespace TUnit.Analyzers.Tests;
 public class PsvmAnalyzerTests
 {
     [Test]
-    [Combinatorial]
+    [MatrixDataSource]
     public async Task Main_Method_Raises_Error(
-        [Values("", "public", "private", "internal", "protected")] string accessibility,
-        [Values("void", "int", "Task", "Task<int>")] string returnType,
-        [Values("", "string[] args")] string parameters
+        [Matrix("", "public", "private", "internal", "protected")] string accessibility,
+        [Matrix("void", "int", "Task", "Task<int>")] string returnType,
+        [Matrix("", "string[] args")] string parameters
         )
     {
         await Verifier.VerifyAnalyzerAsync(

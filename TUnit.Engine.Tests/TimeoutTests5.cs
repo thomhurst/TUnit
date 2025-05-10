@@ -1,8 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public class TimeoutTests5 : InvokableTestBase
+public class TimeoutTests5(TestMode testMode) : InvokableTestBase(testMode)
 {
     public async Task Test()
     {

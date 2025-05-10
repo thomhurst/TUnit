@@ -6,7 +6,7 @@ public abstract class ConvertToAssertCondition<TFromType, TToType> : BaseAssertC
     
     public TToType? ConvertedValue { get; private set; }
 
-    protected sealed override async ValueTask<AssertionResult> GetResult(TFromType? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    protected override sealed async ValueTask<AssertionResult> GetResult(TFromType? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
     {
         var (result, convertedValue) = await ConvertValue(actualValue);
         

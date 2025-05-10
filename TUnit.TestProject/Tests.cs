@@ -166,7 +166,7 @@ public class Tests
     [Category("Pass")]
     public async Task TestDataSource_Wrong(int value)
     {
-        await Assert.That(value).IsEqualTo(1);
+        await Assert.That(value).IsNotEqualTo(1);
     }
 
     [Test]

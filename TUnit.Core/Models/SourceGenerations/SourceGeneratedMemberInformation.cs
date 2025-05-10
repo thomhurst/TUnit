@@ -1,9 +1,13 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace TUnit.Core;
 
 public abstract record SourceGeneratedMemberInformation
 {
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)]
     public abstract Type Type { get; init; }
 
     public required string Name { get; init; }
@@ -32,7 +36,7 @@ public abstract record SourceGeneratedMemberInformation
 
         return Type == other.Type && Name == other.Name;
     }
-
+    
     public override int GetHashCode()
     {
         unchecked

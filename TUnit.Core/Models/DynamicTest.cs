@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
+[RequiresDynamicCode("Reflection")]
+[RequiresUnreferencedCode("Reflection")]
 public abstract record DynamicTest
 {
     public abstract string TestId { get; }
@@ -14,6 +17,7 @@ public abstract record DynamicTest
     
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
                                 | DynamicallyAccessedMemberTypes.PublicMethods 
+                                | DynamicallyAccessedMemberTypes.NonPublicMethods
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public abstract Type TestClassType { get; }
     
@@ -43,8 +47,76 @@ public abstract record DynamicTest
     }
     
     public static T Argument<T>() => default!;
+    
+    protected SourceGeneratedMethodInformation BuildTestMethod(MethodInfo methodInfo)
+    {
+        return new SourceGeneratedMethodInformation
+        {
+            Attributes = methodInfo.GetCustomAttributes().ToArray(),
+            Class = GenerateClass(),
+            Name = TestName ?? methodInfo.Name,
+            GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
+            Parameters = GetParameters(methodInfo.GetParameters()),
+            Type = TestClassType,
+            ReflectionInformation = methodInfo,
+            ReturnType = methodInfo.ReturnType
+        };
+    }
+
+    protected SourceGeneratedClassInformation GenerateClass()
+    {
+        return new SourceGeneratedClassInformation
+        {
+            Assembly = GenerateAssembly(),
+            Attributes = TestClassType.GetCustomAttributes().ToArray(),
+            Name = TestClassType.Name,
+            Namespace = TestClassType.Namespace,
+            Parameters = GetParameters(TestClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
+            Properties = Properties?.Select(GenerateProperty).ToArray() ?? [],
+            Type = TestClassType
+        };
+    }
+
+    protected SourceGeneratedAssemblyInformation GenerateAssembly()
+    {
+        return new SourceGeneratedAssemblyInformation
+        {
+            Attributes = TestClassType.Assembly.GetCustomAttributes().ToArray(),
+            Name = TestClassType.Assembly.GetName().Name ??
+                   TestClassType.Assembly.GetName().FullName,
+        };
+    }
+
+    protected static SourceGeneratedPropertyInformation GenerateProperty(KeyValuePair<string, object?> property)
+    {
+        return new SourceGeneratedPropertyInformation
+        {
+            Attributes = [], // TODO?
+            Name = property.Key,
+#pragma warning disable IL2072
+            Type = property.Value?.GetType() ?? typeof(object),
+#pragma warning restore IL2072
+            IsStatic = false, // TODO?
+        };
+    }
+
+    protected SourceGeneratedParameterInformation[] GetParameters(ParameterInfo[] parameters)
+    {
+        return parameters.Select(GenerateParameter).ToArray();
+    }
+
+    protected SourceGeneratedParameterInformation GenerateParameter(ParameterInfo parameter)
+    {
+        return new SourceGeneratedParameterInformation(parameter.ParameterType)
+        {
+            Attributes = parameter.GetCustomAttributes().ToArray(),
+            Name = parameter.Name ?? string.Empty,
+        };
+    }
 }
 
+[RequiresDynamicCode("Reflection")]
+[RequiresUnreferencedCode("Reflection")]
 public record DynamicTest<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
                                 | DynamicallyAccessedMemberTypes.PublicMethods
@@ -67,6 +139,7 @@ public record DynamicTest<
     
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
                                 | DynamicallyAccessedMemberTypes.PublicMethods 
+                                | DynamicallyAccessedMemberTypes.NonPublicMethods
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType { get; } = typeof(TClass);
     
@@ -88,9 +161,9 @@ public record DynamicTest<
                 CurrentRepeatAttempt = i,
                 RepeatLimit = repeatLimit,
                 TestMethod = BuildTestMethod(TestBody),
-                ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)Activator.CreateInstance(
+                ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
                         typeof(TClass),
-                        TestClassArguments)!,
+                        TestClassArguments, Properties),
                     TestSessionContext.Current?.Id ?? "Unknown",
                     new TestBuilderContext()),
                 TestMethodFactory = (@class, token) =>
@@ -104,77 +177,13 @@ public record DynamicTest<
 
                     return AsyncConvert.ConvertObject(TestBody.Invoke(@class, arguments));
                 },
-                TestClassProperties = Properties?.Select(x => x.Value).ToArray() ?? [],
+                TestClassProperties = Properties ?? [],
                 TestBuilderContext = new TestBuilderContext(),
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 DynamicAttributes = Attributes,
             };
         }
-    }
-
-    private SourceGeneratedMethodInformation BuildTestMethod(MethodInfo methodInfo)
-    {
-        return new SourceGeneratedMethodInformation
-        {
-            Attributes = methodInfo.GetCustomAttributes().ToArray(),
-            Class = GenerateClass(),
-            Name = TestName ?? methodInfo.Name,
-            GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
-            Parameters = GetParameters(methodInfo.GetParameters()),
-            Type = methodInfo.DeclaringType ?? typeof(TClass),
-            ReflectionInformation = methodInfo,
-            ReturnType = methodInfo.ReturnType
-        };
-    }
-
-    private SourceGeneratedClassInformation GenerateClass()
-    {
-        return new SourceGeneratedClassInformation
-        {
-            Assembly = GenerateAssembly(),
-            Attributes = TestClassType.GetCustomAttributes().ToArray(),
-            Name = TestClassType.Name,
-            Namespace = TestClassType.Namespace,
-            Parameters = GetParameters(TestClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
-            Properties = Properties?.Select(GenerateProperty).ToArray() ?? [],
-            Type = TestClassType
-        };
-    }
-
-    private SourceGeneratedAssemblyInformation GenerateAssembly()
-    {
-        return new SourceGeneratedAssemblyInformation
-        {
-            Attributes = TestClassType.Assembly.GetCustomAttributes().ToArray(),
-            Name = TestClassType.Assembly.GetName().Name ??
-                   TestClassType.Assembly.GetName().FullName,
-        };
-    }
-
-    private static SourceGeneratedPropertyInformation GenerateProperty(KeyValuePair<string, object?> property)
-    {
-        return new SourceGeneratedPropertyInformation
-        {
-            Attributes = [], // TODO?
-            Name = property.Key,
-            Type = property.Value?.GetType() ?? typeof(object),
-            IsStatic = false, // TODO?
-        };
-    }
-
-    private SourceGeneratedParameterInformation[] GetParameters(ParameterInfo[] parameters)
-    {
-        return parameters.Select(GenerateParameter).ToArray();
-    }
-
-    private SourceGeneratedParameterInformation GenerateParameter(ParameterInfo parameter)
-    {
-        return new SourceGeneratedParameterInformation(parameter.ParameterType)
-        {
-            Attributes = parameter.GetCustomAttributes().ToArray(),
-            Name = parameter.Name ?? string.Empty,
-        };
     }
 
     private MethodInfo GetMethodInfo(Expression<Action<TClass>> expression)

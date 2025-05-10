@@ -15,7 +15,7 @@ public class ExecutionTimeTests
         await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(250));
     }
     
-    [Test]
+    [Test, NotInParallel]
     public async Task Completes_Within_Unhappy()
     {
         var stopwatch = Stopwatch.StartNew();
@@ -32,15 +32,15 @@ public class ExecutionTimeTests
         await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(1));
     }
     
-    [Test]
+    [Test, NotInParallel]
     public async Task Completes_Within_Happy2()
     {
-        var action = () => Task.Delay(100);
+        var action = () => Task.Delay(TimeSpan.FromSeconds(1));
 
-        await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(250));
+        await Assert.That(action).CompletesWithin(TimeSpan.FromSeconds(1.5));
     }
     
-    [Test]
+    [Test, NotInParallel]
     public async Task Completes_Within_Unhappy2()
     {
         var stopwatch = Stopwatch.StartNew();

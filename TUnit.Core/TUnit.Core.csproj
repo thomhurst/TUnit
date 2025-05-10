@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <IsLibraryPackage>true</IsLibraryPackage>
-        <LangVersion>preview</LangVersion>
-    </PropertyGroup>
+    <Import Project="..\Library.props" />
 
     <ItemGroup>
         <InternalsVisibleTo Include="TUnit.Engine" />

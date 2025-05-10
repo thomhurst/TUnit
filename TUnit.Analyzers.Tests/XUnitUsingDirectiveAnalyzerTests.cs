@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitUsingDirectiveAnalyzer>;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitUsingDirectiveAnalyzer, TUnit.Analyzers.CodeFixers.XUnitUsingDirectiveCodeFixProvider>;
 

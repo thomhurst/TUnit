@@ -1,8 +1,28 @@
-﻿using Testcontainers.PostgreSql;
+﻿using Microsoft.Testing.Platform.MSBuild;
+using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
+using TUnit.Engine.Extensions;
 using Xunit;
 
 namespace Playground;
+
+public static class Program
+{
+#pragma warning disable TUnit0034
+    public static async Task<int> Main(string[] args)
+#pragma warning restore TUnit0034
+    {
+        var builder = await Microsoft.Testing.Platform.Builder.TestApplication.CreateBuilderAsync(args);
+        
+        builder.AddSelfRegisteredExtensions(args);
+        builder.AddMSBuild();
+        builder.AddTUnit();
+
+        using var app = await builder.BuildAsync();
+        
+        return await app.RunAsync();
+    }
+}
 
 public class Tests
 {
@@ -11,7 +31,7 @@ public class Tests
     {
         var one = "1";
         
-        Assert.Equal("1", one);
+        Xunit.Assert.Equal("1", one);
     }
 }
 

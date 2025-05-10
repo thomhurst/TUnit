@@ -1,15 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <EnablePolyfill>false</EnablePolyfill>
-    <IsLibraryPackage>true</IsLibraryPackage>
-    <IsTestProject>false</IsTestProject>
-    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
-    <LangVersion>preview</LangVersion>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(LaunchDebugger)' != ''">
-    <DefineConstants>LAUNCH_DEBUGGER</DefineConstants>
-  </PropertyGroup>
+
+  <Import Project="..\Library.props" />
 
   <ItemGroup>
     <PackageReference Include="EnumerableAsyncProcessor" />

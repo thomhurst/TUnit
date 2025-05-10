@@ -4,24 +4,26 @@ using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
 [NotInParallel("DotNetTests")]
-public class RunPlaywrightTestsModule : Module<CommandResult>
+public class RunPlaywrightTestsModule : TestBaseModule
 {
-    protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken)
     {
         var project = Sourcy.DotNet.Projects.TUnit_Templates__content__TUnit_Playwright__TestProject;
         
-        return await context.DotNet().Test(new DotNetTestOptions(project.FullName)
+        return Task.FromResult(new DotNetRunOptions
         {
+            Project = project.FullName,
             NoBuild = true,
             Configuration = Configuration.Release,
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
             }
-        }, cancellationToken);
+        });
     }
 }

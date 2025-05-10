@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Verifier = TUnit.Assertions.Analyzers.CodeFixers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Assertions.Analyzers.XUnitAssertionAnalyzer, TUnit.Assertions.Analyzers.CodeFixers.XUnitAssertionCodeFixProvider>;
 #pragma warning disable CS0162 // Unreachable code detected
 

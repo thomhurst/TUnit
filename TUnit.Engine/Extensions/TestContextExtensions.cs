@@ -62,7 +62,7 @@ public static class TestContextExtensions
                 TestBuilderContext = testBuilderContext
             };
         
-        var newTest = testContext.GetService<TestsConstructor>().ConstructTest(newTestMetaData);
+        var newTest = testContext.GetService<BaseTestsConstructor>().ConstructTest(newTestMetaData);
         
         var startTime = DateTimeOffset.UtcNow;
 
@@ -93,6 +93,8 @@ public static class TestContextExtensions
             null => Status.Passed,
             SkipTestException => Status.Skipped,
             TestRunCanceledException => Status.Cancelled,
+            TaskCanceledException or OperationCanceledException 
+                when testContext.GetService<EngineCancellationToken>().Token.IsCancellationRequested => Status.Cancelled,
             _ => Status.Failed,
         };
 

@@ -10,7 +10,7 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-internal class TestHookOrchestrator(HooksCollector hooksCollector, TUnitFrameworkLogger logger)
+internal class TestHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFrameworkLogger logger)
 {
     public async Task<ExecutionContext?> ExecuteBeforeHooks(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector, TUnitFramewor
 
         foreach (var executableHook in beforeHooks)
         {
-            await logger.LogDebugAsync("Executing [Before(Test)] hook");
+            await logger.LogDebugAsync($"Executing [Before(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}");
 
             await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
                 executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken)
