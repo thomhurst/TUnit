@@ -5,6 +5,7 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
+[RequiresUnreferencedCode("Reflection")]
 public record UntypedDynamicTest : DynamicTest 
 {
     public UntypedDynamicTest(MethodInfo testBody) : this(testBody.ReflectedType ?? testBody.DeclaringType!, testBody)

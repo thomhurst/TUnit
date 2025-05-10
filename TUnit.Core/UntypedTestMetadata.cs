@@ -1,23 +1,22 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
-public record UntypedTestMetadata : TestMetadata
+[RequiresUnreferencedCode("Reflection")]
+public record UntypedTestMetadata(
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    Type TestClassType)
+    : TestMetadata
 {
-    public UntypedTestMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClassType)
-    {
-        TestClassType = testClassType;
-
-        ResettableLazy = new ResettableLazy<object>(() => Activator.CreateInstance(TestClassType, TestClassArguments)!, string.Empty, new TestBuilderContext());
-    }
-    
-    private ResettableLazy<object> ResettableLazy { get; }
+    [field: AllowNull, MaybeNull]
+    private ResettableLazy<object> ResettableLazy => field ??= new ResettableLazy<object>(() => InstanceHelper.CreateInstance(TestClassType, TestClassArguments), string.Empty, new TestBuilderContext());
     
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     public override Type TestClassType
     {
         get;
-    }
+    } = TestClassType;
 
     public override TestDetails BuildTestDetails()
     {

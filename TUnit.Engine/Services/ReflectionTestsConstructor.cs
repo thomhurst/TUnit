@@ -64,7 +64,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                             
                         foreach (var testDataAttribute in GetDataAttributes(testMethod))
                         {
-                            foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, null, null, testInformation))
+                            foreach (var classInstanceArguments in GetArguments(type, testMethod, typeDataAttribute, DataGeneratorType.ClassParameters, null, testInformation))
                             {
                                 BuildTests(typeDataAttribute, type, classInstanceArguments, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute);
                             }
@@ -94,9 +94,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         {
             var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
             
-            var instance = CreateInstance(typeDataAttribute, type, classInstanceArguments, testInformation, out var exception);
-
-            foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, instance, classInstanceArguments, testInformation))
+            foreach (var testArguments in GetArguments(type, testMethod, testDataAttribute, DataGeneratorType.TestParameters, classInstanceArguments, testInformation))
             {
                 testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
                 {
@@ -111,7 +109,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     TestClassArguments = classInstanceArguments,
                     TestFilePath = testAttribute.File,
                     TestLineNumber = testAttribute.Line,
-                    Exception = exception,
                 });
             }
         }
@@ -142,18 +139,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             var args = classInstanceArguments.Select((x, i) => CastHelper.Cast(testInformation.Class.Parameters[i].Type, x)).ToArray();
             
-            return Activator.CreateInstance(type, args);
-        }
-        catch (TargetInvocationException targetInvocationException)
-        {
-            if (targetInvocationException.InnerException != null)
-            {
-                exception = targetInvocationException.InnerException;
-                return null;
-            }
-
-            exception = targetInvocationException;
-            return null;
+            return InstanceHelper.CreateInstance(type, args);
         }
         catch (Exception e)
         {
@@ -183,7 +169,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
             | DynamicallyAccessedMemberTypes.NonPublicMethods)]
-        Type type, MethodInfo method, IDataAttribute testDataAttribute, DataGeneratorType dataGeneratorType, object? instance, object?[]? classInstanceArguments,
+        Type type, MethodInfo method, IDataAttribute testDataAttribute, DataGeneratorType dataGeneratorType, object?[]? classInstanceArguments,
         SourceGeneratedMethodInformation testInformation)
     {
         if (testDataAttribute is IDataSourceGeneratorAttribute dataSourceGeneratorAttribute)
@@ -204,13 +190,13 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         Attributes = x.GetCustomAttributes().ToArray(),
                     }).ToArray<SourceGeneratedMemberInformation>(),
                     TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
-                    TestClassInstance = instance,
+                    TestClassInstance = null,
                     TestSessionId = string.Empty,
                 }
             ]) as IEnumerable;
 
             var funcEnumerable = invoke?.Cast<object>().ToArray() ?? []!;
-
+            
             if (funcEnumerable.Length == 0)
             {
                 yield return [];
@@ -219,15 +205,21 @@ internal class ReflectionTestsConstructor(IExtension extension,
             
             foreach (var func in funcEnumerable)
             {
-                var funcResult = func.GetType().GetMethod("Invoke")!.Invoke(func, []);
+                var funcResult = FuncHelper.InvokeFunc(func);
                 
                 if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var objectArray2))
                 {
                     yield return objectArray2;
-                    yield break;
+                    continue;
                 }
 
-                yield return funcResult as object?[] ?? [funcResult];
+                if (funcResult is object?[] objectArray)
+                {
+                    yield return objectArray;
+                    continue;
+                }
+
+                yield return [funcResult];
             }
         }
         else if (testDataAttribute is ArgumentsAttribute argumentsAttribute)
@@ -236,9 +228,9 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (testDataAttribute is InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute)
         {
-            var methodDataSourceType = instanceMethodDataSourceAttribute.ClassProvidingDataSource 
-                ?? instance?.GetType()
-                ?? type;
+            var instance = CreateInstance(testDataAttribute, type, classInstanceArguments ?? [null], testInformation, out var exception);
+            
+            var methodDataSourceType = instanceMethodDataSourceAttribute.ClassProvidingDataSource ?? type;
 
             var result = methodDataSourceType.GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []);
 
@@ -253,16 +245,17 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var funcObjectArray))
                     {
                         yield return funcObjectArray;
-                        yield break;
+                        continue;
                     }
 
                     yield return funcResult as object?[] ?? [funcResult];
+                    continue;
                 }
                 
                 if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
                 {
                     yield return objectArray;
-                    yield break;
+                    continue;
                 }
 
                 yield return
@@ -273,11 +266,9 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (testDataAttribute is MethodDataSourceAttribute methodDataSourceAttribute)
         {
-            var methodDataSourceType = methodDataSourceAttribute.ClassProvidingDataSource 
-                ?? instance?.GetType()
-                ?? type;
+            var methodDataSourceType = methodDataSourceAttribute.ClassProvidingDataSource ?? type;
             
-            var result = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []) ?? Array.Empty<object>();
+            var result = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(null, []) ?? Array.Empty<object>();
 
             var enumerableResult = result is IEnumerable enumerable
                 ? enumerable.Cast<object?>().ToArray()
@@ -290,16 +281,17 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var funcObjectArray))
                     {
                         yield return funcObjectArray;
-                        yield break;
+                        continue;
                     }
 
                     yield return funcResult as object?[] ?? [funcResult];
+                    continue;
                 }
                 
                 if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
                 {
                     yield return objectArray;
-                    yield break;
+                    continue;
                 }
 
                 yield return

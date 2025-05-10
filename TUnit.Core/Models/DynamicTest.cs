@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
+[RequiresUnreferencedCode("Reflection")]
 public abstract record DynamicTest
 {
     public abstract string TestId { get; }
@@ -112,6 +114,7 @@ public abstract record DynamicTest
     }
 }
 
+[RequiresUnreferencedCode("Reflection")]
 public record DynamicTest<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
                                 | DynamicallyAccessedMemberTypes.PublicMethods
@@ -156,7 +159,7 @@ public record DynamicTest<
                 CurrentRepeatAttempt = i,
                 RepeatLimit = repeatLimit,
                 TestMethod = BuildTestMethod(TestBody),
-                ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)Activator.CreateInstance(
+                ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
                         typeof(TClass),
                         TestClassArguments)!,
                     TestSessionContext.Current?.Id ?? "Unknown",

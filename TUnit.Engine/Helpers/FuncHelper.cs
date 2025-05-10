@@ -16,4 +16,9 @@ internal class FuncHelper
         result = null;
         return false;
     }
+    
+    public static object? InvokeFunc(object func)
+    {
+        return func.GetType().GetMethod("Invoke")!.Invoke(func, []);
+    }
 }
