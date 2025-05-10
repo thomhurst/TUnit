@@ -16,6 +16,43 @@ internal class DependencyCollector
         {
             discoveredTest.Dependencies = GetDependencies(discoveredTest, discoveredTests, cancellationToken);
         }
+
+        ValidateDependencyChains(discoveredTests, cancellationToken);
+    }
+
+    private void ValidateDependencyChains(DiscoveredTest[] discoveredTests, CancellationToken cancellationToken)
+    {
+        foreach (var discoveredTest in discoveredTests)
+        {
+            try
+            {
+                ValidateDependencyChain(discoveredTest, [], cancellationToken);
+            }
+            catch (Exception e)
+            {
+                discoveredTest.TestContext.SetResult(e);
+            }
+        }
+    }
+
+    private void ValidateDependencyChain(DiscoveredTest discoveredTest, HashSet<TestDetailsEqualityWrapper> visited, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!visited.Add(new TestDetailsEqualityWrapper(discoveredTest.TestDetails)))
+        {
+            throw new DependencyConflictException([discoveredTest.TestDetails, discoveredTest.TestDetails]);
+        }
+
+        foreach (var dependency in discoveredTest.Dependencies)
+        {
+            if (dependency.TestDetails.IsSameTest(discoveredTest.TestDetails))
+            {
+                throw new DependencyConflictException([dependency.TestDetails, discoveredTest.TestDetails]);
+            }
+
+            ValidateDependencyChain(dependency.Test, visited, cancellationToken);
+        }
     }
 
     private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests,
@@ -24,13 +61,8 @@ internal class DependencyCollector
         try
         {
             return _dependenciesCache.GetOrAdd(new TestDetailsEqualityWrapper(test.TestDetails), _ =>
-            {
-                var dependencies = GetDependencies(test, [], [], allTests, cancellationToken).ToArray();
-
-                AddRecursively(dependencies);
-                
-                return dependencies;
-            });
+                GetDependenciesEnumerable(test, allTests, cancellationToken).ToArray()
+            );
         }
         catch (Exception e)
         {
@@ -40,56 +72,22 @@ internal class DependencyCollector
         return [];
     }
 
-    private void AddRecursively(Dependency[] dependencies)
-    {
-        foreach (var dependency in dependencies)
-        {
-            _dependenciesCache.TryAdd(new TestDetailsEqualityWrapper(dependency.TestDetails), dependency.Test.Dependencies);
-            
-            AddRecursively(dependency.Test.Dependencies);
-        }
-    }
-
-    private IEnumerable<Dependency> GetDependencies(DiscoveredTest test,
-        List<TestDetailsEqualityWrapper> currentChain, HashSet<TestDetailsEqualityWrapper> visited, DiscoveredTest[] allTests, CancellationToken cancellationToken)
+    private IEnumerable<Dependency> GetDependenciesEnumerable(DiscoveredTest test, DiscoveredTest[] allTests, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         
-        var testDetailsEqualityWrapper = new TestDetailsEqualityWrapper(test.TestDetails);
-
-        if (currentChain.Any(x => new TestDetailsEqualityWrapper(x.TestDetails) == testDetailsEqualityWrapper))
-        {
-            var chain = currentChain
-                .SkipWhile(x => !x.TestDetails.IsSameTest(test.TestDetails))
-                .Select(x => x.TestDetails)
-                .Append(test.TestDetails);
-
-            throw new DependencyConflictException(chain);
-        }
-
-        if (!visited.Add(testDetailsEqualityWrapper))
-        {
-            yield break;
-        }
-
-        currentChain.Add(testDetailsEqualityWrapper);
-        
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
-            var dependencies = GetDependencies(test, dependsOnAttribute, allTests);
-
-            foreach (var dependency in dependencies)
+            foreach (var dependency in GetDependencies(test, dependsOnAttribute, allTests))
             {
-                yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
-
-                foreach (var nestedDependency in GetDependencies(dependency, [..currentChain], visited, allTests, cancellationToken))
+                if (dependency.TestDetails.IsSameTest(test.TestDetails))
                 {
-                    yield return nestedDependency;
+                    throw new DependencyConflictException([dependency.TestDetails, test.TestDetails]);
                 }
+                
+                yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
             }
         }
-        
-        currentChain.Remove(testDetailsEqualityWrapper);
     }
 
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
@@ -142,14 +140,17 @@ internal class DependencyCollector
             {
                 return false;
             }
+            
             if (ReferenceEquals(this, obj))
             {
                 return true;
             }
+            
             if (obj.GetType() != GetType())
             {
                 return false;
             }
+            
             return Equals((TestDetailsEqualityWrapper)obj);
         }
 
