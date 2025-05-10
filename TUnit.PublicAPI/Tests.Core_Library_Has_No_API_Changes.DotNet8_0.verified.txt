@@ -313,6 +313,7 @@ namespace TUnit.Core
         protected abstract string FormatDisplayName(TUnit.Core.TestContext testContext);
         public void OnTestDiscovery(TUnit.Core.DiscoveredTestContext discoveredTestContext) { }
     }
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection")]
     public abstract class DynamicTest : System.IEquatable<TUnit.Core.DynamicTest>
     {
@@ -350,6 +351,7 @@ namespace TUnit.Core
         public System.Threading.Tasks.Task AddTestAtRuntime<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]  TClass>(TUnit.Core.TestContext testContext, TUnit.Core.DynamicTest<TClass> dynamicTest)
             where TClass :  class { }
     }
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection")]
     public class DynamicTest<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]  TClass> : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.DynamicTest<TClass>>
         where TClass :  class
@@ -381,6 +383,7 @@ namespace TUnit.Core
         public ExplicitAttribute([System.Runtime.CompilerServices.CallerFilePath] string callerFile = "", [System.Runtime.CompilerServices.CallerMemberName] string callerMemberName = "") { }
         public string For { get; }
     }
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection")]
     public class FailedDynamicTest<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]  TClassType> : System.IEquatable<TUnit.Core.FailedDynamicTest<TClassType>>
         where TClassType :  class
@@ -938,6 +941,7 @@ namespace TUnit.Core
         public System.DateTimeOffset Start { get; init; }
         public string StepName { get; init; }
     }
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection")]
     public class UntypedDynamicTest : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.UntypedDynamicTest>
     {
@@ -949,6 +953,7 @@ namespace TUnit.Core
         public override string TestId { get; }
         public override System.Collections.Generic.IEnumerable<TUnit.Core.TestMetadata> BuildTestMetadatas() { }
     }
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection")]
     public class UntypedFailedDynamicTest : System.IEquatable<TUnit.Core.UntypedFailedDynamicTest>
     {
@@ -967,6 +972,7 @@ namespace TUnit.Core
         public override object ClassInstance { get; }
         public TUnit.Core.ResettableLazy<object> ResettableLazy { get; init; }
     }
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection")]
     public class UntypedTestMetadata : TUnit.Core.TestMetadata, System.IEquatable<TUnit.Core.UntypedTestMetadata>
     {
