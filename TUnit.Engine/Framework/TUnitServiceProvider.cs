@@ -200,15 +200,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 #endif
         
-        var isReflectionScannerEnabled = IsReflectionScannerEnabledByCommandLine(commandLineOptions)
+        return IsReflectionScannerEnabledByCommandLine(commandLineOptions)
             || IsReflectionScannerEnabledByMsBuild();
-        
-        if (isReflectionScannerEnabled)
-        {
-            logger.LogInformation("TUnit is in ReflectionScanner mode as opposed to SourceGenerated mode.");
-        }
-        
-        return isReflectionScannerEnabled;
     }
 
     private static bool IsReflectionScannerEnabledByCommandLine(ICommandLineOptions commandLineOptions)
