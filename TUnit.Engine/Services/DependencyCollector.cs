@@ -12,13 +12,6 @@ internal class DependencyCollector
     
     public void ResolveDependencies(DiscoveredTest[] discoveredTests, CancellationToken cancellationToken)
     {
-        // TODO: Disable for reflection? Seems to hang :(
-
-        if (1.ToString() == "1")
-        {
-            return;
-        }
-
         foreach (var discoveredTest in discoveredTests)
         {
             discoveredTest.Dependencies = GetDependencies(discoveredTest, discoveredTests, cancellationToken);
