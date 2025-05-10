@@ -178,19 +178,22 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 ? method.GetParameters()
                 : type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?.GetParameters() ?? [];
             
+            var needsInstance = method.GetParameters().SelectMany(x => x.GetCustomAttributes())
+                .Any(x => x is IAccessesInstanceData);
+            
             var invoke = dataSourceGeneratorAttribute.GetType().GetMethod("GenerateDataSources")!.Invoke(testDataAttribute, [
                 new DataGeneratorMetadata
                 {
                     Type = dataGeneratorType,
                     TestInformation = testInformation,
-                    ClassInstanceArguments = null,
+                    ClassInstanceArguments = needsInstance ? classInstanceArguments() : null,
                     MembersToGenerate = parameters.Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
                     {
                         Name = x.Name!,
                         Attributes = x.GetCustomAttributes().ToArray(),
                     }).ToArray<SourceGeneratedMemberInformation>(),
                     TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
-                    TestClassInstance = null,
+                    TestClassInstance = needsInstance ? CreateInstance(testDataAttribute, type, classInstanceArguments(), testInformation, out _) : null,
                     TestSessionId = string.Empty,
                 }
             ]) as IEnumerable;
@@ -258,10 +261,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         return objectArray;
                     }
 
-                    return
-                    [
-                        methodResult
-                    ];
+                    return [methodResult];
                 };
             }
         }
@@ -294,10 +294,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         return objectArray;
                     }
 
-                    return
-                    [
-                        methodResult
-                    ];
+                    return [methodResult];
                 };
             }
         }

@@ -21,6 +21,7 @@ public static class ReflectionScanner
                     return e.Types.OfType<Type>();
                 }
             })
+            .Where(x => x.FullName?.Contains("1821") is true)
             .ToHashSet();
     }
 }
