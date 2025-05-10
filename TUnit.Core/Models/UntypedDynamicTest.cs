@@ -39,6 +39,12 @@ public record UntypedDynamicTest : DynamicTest
     {
         get;
     }
+    
+    public TestBuilderContext TestBuilderContext
+    {
+        get;
+        set;
+    } = new();
 
     public override IEnumerable<TestMetadata> BuildTestMetadatas()
     {
@@ -48,7 +54,7 @@ public record UntypedDynamicTest : DynamicTest
             TestMethod = BuildTestMethod(TestBody),
             CurrentRepeatAttempt = 0,
             RepeatLimit = Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0,
-            TestBuilderContext = new TestBuilderContext(),
+            TestBuilderContext = TestBuilderContext,
             TestClassArguments = TestClassArguments ?? [],
             TestClassProperties = Properties ?? [],
             TestFilePath = TestFilePath,
