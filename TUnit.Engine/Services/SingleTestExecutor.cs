@@ -113,7 +113,7 @@ internal class SingleTestExecutor(
             }
             catch (Exception e)
             {
-                await logger.LogDebugAsync($"Error in test: {e}");
+                await logger.LogDebugAsync($"Error in test {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}: {e}");
                 testContext.SetResult(e);
                 throw;
             }
