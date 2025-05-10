@@ -89,7 +89,9 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -179,7 +181,9 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -269,7 +273,9 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(string):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,

@@ -140,7 +140,9 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 						TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,

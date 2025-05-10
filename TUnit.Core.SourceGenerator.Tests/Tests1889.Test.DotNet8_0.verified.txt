@@ -80,7 +80,9 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					TestId = $"TUnit.TestProject.Bugs._1889.DerivedTest.Test1:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -193,7 +195,9 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1889.DerivedTest.Test2(bool):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -281,7 +285,9 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1889.DerivedTest.Test3(bool):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -368,7 +374,9 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 								TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1889.DerivedTest.Test3(bool):0",
 								TestClassArguments = [],
 								TestMethodArguments = [methodArg],
-								TestClassProperties = [],
+								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+								{
+								},
 								CurrentRepeatAttempt = 0,
 								RepeatLimit = 0,
 								ResettableClassFactory = resettableClassFactory,

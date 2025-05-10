@@ -82,7 +82,9 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests.SomeTest(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,

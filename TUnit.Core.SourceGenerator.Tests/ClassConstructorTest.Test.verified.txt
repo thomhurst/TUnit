@@ -89,7 +89,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,

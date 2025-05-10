@@ -27,7 +27,6 @@
   
   <ItemGroup>
     <PackageReference Include="AutoFixture" />
-    <PackageReference Include="Confluent.SchemaRegistry.Serdes.Protobuf" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
@@ -40,7 +39,6 @@
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Polly" />
     <PackageReference Include="Vogen" />
-    <PackageReference Include="WireMock.Net" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />

@@ -82,7 +82,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Params(string[]):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -195,7 +197,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.NonParams(string[]):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -308,7 +312,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable(System.Collections.Generic.IEnumerable<string>):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -421,7 +427,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Enumerable(System.Collections.Generic.IEnumerable<string>):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -540,7 +548,9 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params(int,System.Collections.Generic.IEnumerable<string>):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,

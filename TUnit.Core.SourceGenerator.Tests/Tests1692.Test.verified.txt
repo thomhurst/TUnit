@@ -87,7 +87,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1692.Tests.NullTest(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -176,7 +178,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1692.Tests.NullTest(string):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,

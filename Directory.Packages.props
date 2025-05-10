@@ -8,7 +8,6 @@
   <ItemGroup>
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
-    <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Protobuf" Version="2.10.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="CliWrap" Version="3.8.2" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="2.1.0" />
@@ -75,7 +74,6 @@
     <PackageVersion Include="TUnit.Assertions" Version="0.19.140" />
     <PackageVersion Include="Verify.TUnit" Version="30.0.0" />
     <PackageVersion Include="Vogen" Version="7.0.3" />
-    <PackageVersion Include="WireMock.Net" Version="1.8.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.0" />

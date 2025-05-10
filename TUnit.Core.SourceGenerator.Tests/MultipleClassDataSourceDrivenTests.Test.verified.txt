@@ -155,7 +155,9 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
 							TestClassArguments = [classArg, classArg1, classArg2, classArg3, classArg4],
 							TestMethodArguments = [],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -342,7 +344,9 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
 							TestClassArguments = [classArg, classArg1, classArg2, classArg3, classArg4],
 							TestMethodArguments = [],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,

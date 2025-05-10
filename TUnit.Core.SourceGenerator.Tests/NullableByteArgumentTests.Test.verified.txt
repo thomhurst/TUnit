@@ -87,7 +87,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -176,7 +178,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -300,7 +304,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -395,7 +401,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,

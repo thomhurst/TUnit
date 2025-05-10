@@ -89,7 +89,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.DataSource_Method(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -179,7 +181,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.DataDrivenTests.DataSource_Method(int):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -269,7 +273,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.DataDrivenTests.DataSource_Method(int):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -395,7 +401,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.DataSource_Method(int,string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -491,7 +499,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.DataDrivenTests.DataSource_Method(int,string):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -587,7 +597,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.DataDrivenTests.DataSource_Method(int,string):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg, methodArg1],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -707,7 +719,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.EnumValue(TUnit.TestProject.TestEnum):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -797,7 +811,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.DataDrivenTests.EnumValue(TUnit.TestProject.TestEnum):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -887,7 +903,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.DataDrivenTests.EnumValue(TUnit.TestProject.TestEnum):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -1000,7 +1018,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.NullValue(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -1113,7 +1133,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.EmptyString(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -1226,7 +1248,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.NonEmptyString(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -1346,7 +1370,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.BooleanString(bool?):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -1436,7 +1462,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.DataDrivenTests.BooleanString(bool?):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -1526,7 +1554,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.DataDrivenTests.BooleanString(bool?):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -1639,7 +1669,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.Type(System.Type):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -1752,7 +1784,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.IntegerArray(int[]):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -1865,7 +1899,9 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.IntMaxValue(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,

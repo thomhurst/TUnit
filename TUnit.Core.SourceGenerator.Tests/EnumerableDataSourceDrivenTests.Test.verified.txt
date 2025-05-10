@@ -84,7 +84,9 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method(int):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodData],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -200,7 +202,9 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method2(int):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodData],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -316,7 +320,9 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_WithBaseReturn(TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodData],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,

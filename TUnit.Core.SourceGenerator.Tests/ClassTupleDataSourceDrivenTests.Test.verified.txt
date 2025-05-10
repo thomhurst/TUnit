@@ -178,7 +178,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 					TestClassArguments = [classArg, classArg1, classArg2],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2],
-					TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+						["Property1"] = propertyArg,
+						["Property2"] = propertyArg1,
+						["Property3"] = propertyArg2,
+						["Property4"] = propertyArg3,
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -356,7 +362,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
-						TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+							["Property1"] = propertyArg,
+							["Property2"] = propertyArg1,
+							["Property3"] = propertyArg2,
+							["Property4"] = propertyArg3,
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -534,7 +546,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 							TestClassArguments = [classArg, classArg1, classArg2],
 							TestMethodArguments = [methodArg, methodArg1, methodArg2],
-							TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+								["Property1"] = propertyArg,
+								["Property2"] = propertyArg1,
+								["Property3"] = propertyArg2,
+								["Property4"] = propertyArg3,
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -712,7 +730,13 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 								TestClassArguments = [classArg, classArg1, classArg2],
 								TestMethodArguments = [methodArg, methodArg1, methodArg2],
-								TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3],
+								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+								{
+									["Property1"] = propertyArg,
+									["Property2"] = propertyArg1,
+									["Property3"] = propertyArg2,
+									["Property4"] = propertyArg3,
+								},
 								CurrentRepeatAttempt = 0,
 								RepeatLimit = 0,
 								ResettableClassFactory = resettableClassFactory,

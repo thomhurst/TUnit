@@ -838,7 +838,7 @@ namespace TUnit.Core
         public System.Attribute[] TestAttributes { get; }
         public TUnit.Core.SourceGeneratedClassInformation TestClass { get; }
         public required object?[] TestClassArguments { get; init; }
-        public required object?[] TestClassInjectedPropertyArguments { get; init; }
+        public required System.Collections.Generic.IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; }
         public System.Type[] TestClassParameterTypes { get; }
         public required string TestFilePath { get; init; }
         public required string TestId { get; init; }
@@ -874,7 +874,7 @@ namespace TUnit.Core
         public required int RepeatLimit { get; init; }
         public required TUnit.Core.TestBuilderContext TestBuilderContext { get; init; }
         public required object?[] TestClassArguments { get; init; }
-        public required object?[] TestClassProperties { get; init; }
+        public required System.Collections.Generic.IDictionary<string, object?> TestClassProperties { get; init; }
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
         public abstract System.Type TestClassType { get; }
         public required string TestFilePath { get; init; }
@@ -943,6 +943,7 @@ namespace TUnit.Core
     {
         public UntypedDynamicTest(System.Reflection.MethodInfo testBody) { }
         public UntypedDynamicTest(System.Type testClassType, System.Reflection.MethodInfo testBody) { }
+        public TUnit.Core.TestBuilderContext TestBuilderContext { get; set; }
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties)]
         public override System.Type TestClassType { get; }
         public override string TestId { get; }

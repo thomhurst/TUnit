@@ -277,7 +277,15 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
 									TestClassArguments = [],
 									TestMethodArguments = [],
-									TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3, propertyArg4, propertyArg5],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+										["Property1"] = propertyArg,
+										["Property2"] = propertyArg1,
+										["Property3"] = propertyArg2,
+										["Property4"] = propertyArg3,
+										["Property5"] = propertyArg4,
+										["Property6"] = propertyArg5,
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,
@@ -519,7 +527,15 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 									TestId = $"TUnit.TestProject.InheritedPropertySetterTests.Test:0",
 									TestClassArguments = [],
 									TestMethodArguments = [],
-									TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3, propertyArg4, propertyArg5],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+										["Property1"] = propertyArg,
+										["Property2"] = propertyArg1,
+										["Property3"] = propertyArg2,
+										["Property4"] = propertyArg3,
+										["Property5"] = propertyArg4,
+										["Property6"] = propertyArg5,
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,

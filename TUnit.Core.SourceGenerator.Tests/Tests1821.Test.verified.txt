@@ -119,7 +119,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
 							TestClassArguments = [classArgGeneratedData],
 							TestMethodArguments = [methodData],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -300,7 +302,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
 							TestClassArguments = [classArgGeneratedData],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
