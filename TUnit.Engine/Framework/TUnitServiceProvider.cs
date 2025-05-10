@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -190,6 +191,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     
     private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions, TUnitFrameworkLogger logger)
     {
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            return false;
+        }
+        
         var isReflectionScannerEnabled = IsReflectionScannerEnabledByCommandLine(commandLineOptions)
             || IsReflectionScannerEnabledByMsBuild();
         
