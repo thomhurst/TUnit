@@ -942,7 +942,7 @@ namespace TUnit.Core
     }
     public class UntypedTestMetadata : TUnit.Core.TestMetadata, System.IEquatable<TUnit.Core.UntypedTestMetadata>
     {
-        public UntypedTestMetadata(System.Type testClassType) { }
+        public UntypedTestMetadata(System.Type TestClassType) { }
         public override System.Type TestClassType { get; }
         public override TUnit.Core.TestDetails BuildTestDetails() { }
         public override TUnit.Core.TestMetadata CloneWithNewMethodFactory(System.Func<object, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> testMethodFactory) { }

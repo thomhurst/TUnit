@@ -10,6 +10,14 @@ namespace TUnit.Engine.Capabilities
         public System.Threading.Tasks.Task StopTestExecutionAsync(System.Threading.CancellationToken cancellationToken) { }
     }
 }
+namespace TUnit.Engine.Enums
+{
+    public enum EngineMode
+    {
+        SourceGenerated = 0,
+        Reflection = 1,
+    }
+}
 namespace TUnit.Engine.Exceptions
 {
     public class TestFailedException : TUnit.Core.Exceptions.TUnitException
