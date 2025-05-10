@@ -41,14 +41,14 @@ internal class DependencyCollector
 
         if (!visited.Add(new TestDetailsEqualityWrapper(discoveredTest.TestDetails)))
         {
-            throw new DependencyConflictException([discoveredTest.TestDetails, discoveredTest.TestDetails]);
+            throw new DependencyConflictException([..visited.Select(x => x.TestDetails), discoveredTest.TestDetails]);
         }
 
         foreach (var dependency in discoveredTest.Dependencies)
         {
             if (dependency.TestDetails.IsSameTest(discoveredTest.TestDetails))
             {
-                throw new DependencyConflictException([dependency.TestDetails, discoveredTest.TestDetails]);
+                throw new DependencyConflictException([..visited.Select(x => x.TestDetails), discoveredTest.TestDetails]);
             }
 
             ValidateDependencyChain(dependency.Test, visited, cancellationToken);
