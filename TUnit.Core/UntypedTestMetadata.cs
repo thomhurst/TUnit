@@ -3,6 +3,7 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
+[RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
 public record UntypedTestMetadata(
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]

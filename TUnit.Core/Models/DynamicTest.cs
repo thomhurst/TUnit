@@ -5,6 +5,7 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
+[RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
 public abstract record DynamicTest
 {
@@ -114,6 +115,7 @@ public abstract record DynamicTest
     }
 }
 
+[RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
 public record DynamicTest<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 

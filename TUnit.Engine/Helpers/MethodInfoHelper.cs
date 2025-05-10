@@ -57,6 +57,18 @@ internal static class MethodInfoHelper
 
         try
         {
+            if (instance.GetType().GenericTypeArguments.Length != 0)
+            {
+#pragma warning disable IL2075
+                return instance.GetType()
+                    .GetMembers()
+#pragma warning restore IL2075
+                    .OfType<MethodInfo>()
+                    .First(x => x.Name == methodInfo.Name 
+                        && x.GetParameters().Length == methodInfo.GetParameters().Length)
+                    .Invoke(instance, args.ToArray());
+            }
+            
             return methodInfo.Invoke(instance, args.ToArray());
         }
         catch (TargetInvocationException targetInvocationException)

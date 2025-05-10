@@ -5,6 +5,7 @@ using TUnit.Core.Exceptions;
 
 namespace TUnit.Core.Helpers;
 
+[RequiresDynamicCode("Calls System.Type.MakeGenericType(params Type[])")]
 [RequiresUnreferencedCode("Reflection")]
 internal static class InstanceHelper
 {
@@ -19,6 +20,16 @@ internal static class InstanceHelper
 
             var castedArgs = args?.Select((a, index) => CastHelper.Cast(parameters[index].ParameterType, a)).ToArray();
 
+            if (type.ContainsGenericParameters)
+            {
+                var substitutedTypes = type.GetGenericArguments()
+                    .Select(pc => parameters.Select(p => p.ParameterType).ToList().FindIndex(pt => pt == pc))
+                    .Select(i => castedArgs![i]!.GetType())
+                    .ToArray();
+                
+                type = type.MakeGenericType(substitutedTypes);
+            }
+            
             var instance = Activator.CreateInstance(type, castedArgs)!;
             
             foreach (var (propertyName, value) in testClassProperties ?? new Dictionary<string, object?>())

@@ -101,7 +101,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testsConstructor = Register<BaseTestsConstructor>
         (
             isReflectionScannerEnabled
+#pragma warning disable IL3050
                 ? new ReflectionTestsConstructor(extension, dependencyCollector, this)
+#pragma warning restore IL3050
                 : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, this)
         );
         

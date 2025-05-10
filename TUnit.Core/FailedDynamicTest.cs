@@ -2,6 +2,7 @@
 
 namespace TUnit.Core;
 
+[RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
 public record FailedDynamicTest<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 

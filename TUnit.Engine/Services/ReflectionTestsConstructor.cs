@@ -12,13 +12,8 @@ using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
-[SuppressMessage("Trimming", "IL2026")]
-[SuppressMessage("Trimming", "IL2070")]
-[SuppressMessage("Trimming", "IL2067")]
-[SuppressMessage("Trimming", "IL2071")]
-[SuppressMessage("Trimming", "IL2072")]
-[SuppressMessage("Trimming", "IL2075")]
-[SuppressMessage("AOT", "IL3050")]
+[RequiresUnreferencedCode("Reflection")]
+[RequiresDynamicCode("Reflection")]
 internal class ReflectionTestsConstructor(IExtension extension, 
     DependencyCollector dependencyCollector, 
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, serviceProvider)
@@ -103,6 +98,23 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 var propertyArgs = GetPropertyArgs(type, classInstanceArguments, testInformation, testBuilderContextAccessor)
                     .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
 
+                var testClassArguments = classInstanceArguments();
+                
+                if (type.ContainsGenericParameters)
+                {
+                    var substitutedTypes = type.GetGenericArguments()
+                        .Select(pc => testInformation.Class.Parameters.Select(p => p.Type).ToList().FindIndex(pt => pt == pc))
+                        .Select(i => testClassArguments![i]!.GetType())
+                        .ToArray();
+                
+                    type = type.MakeGenericType(substitutedTypes);
+                    
+                    testMethod = type.GetMembers()
+                        .OfType<MethodInfo>()
+                        .First(x => x.Name == testMethod.Name 
+                            && x.GetParameters().Length == testMethod.GetParameters().Length);
+                }
+
                 testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
                 {
                     TestBuilderContext = testBuilderContextAccessor.Current,
@@ -114,7 +126,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         ..type.Assembly.GetCustomAttributes()
                     ],
                     TestName = testMethod.Name,
-                    TestClassArguments = classInstanceArguments(),
+                    TestClassArguments = testClassArguments,
                     TestFilePath = testAttribute.File,
                     TestLineNumber = testAttribute.Line,
                     Properties = propertyArgs
