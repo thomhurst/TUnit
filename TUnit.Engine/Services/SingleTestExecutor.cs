@@ -33,9 +33,9 @@ internal class SingleTestExecutor(
     : IDataProducer
 {
     private static readonly Lock Lock = new();
-    private static readonly SemaphoreSlim _assemblyEventsLock = new(1, 1);
-    private static readonly SemaphoreSlim _classEventsLock = new(1, 1);
-    private static readonly SemaphoreSlim _sessionEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim AssemblyEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim ClassEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim SessionEventsLock = new(1, 1);
     
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         bool isStartedAsDependencyForAnotherTest)
@@ -174,7 +174,7 @@ internal class SingleTestExecutor(
         
         if (!testSessionContext.FirstTestStarted)
         {
-            await _sessionEventsLock.WaitAsync();
+            await SessionEventsLock.WaitAsync();
             try
             {
                 if (!testSessionContext.FirstTestStarted)
@@ -192,7 +192,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                _sessionEventsLock.Release();
+                SessionEventsLock.Release();
             }
         }
         
@@ -205,7 +205,7 @@ internal class SingleTestExecutor(
 
         if (!assemblyHookContext.FirstTestStarted)
         {
-            await _assemblyEventsLock.WaitAsync();
+            await AssemblyEventsLock.WaitAsync();
             try
             {
                 if (!assemblyHookContext.FirstTestStarted)
@@ -223,7 +223,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                _assemblyEventsLock.Release();
+                AssemblyEventsLock.Release();
             }
         }
 
@@ -236,7 +236,7 @@ internal class SingleTestExecutor(
 
         if (!classHookContext.FirstTestStarted)
         {
-            await _classEventsLock.WaitAsync();
+            await ClassEventsLock.WaitAsync();
             try
             {
                 if (!classHookContext.FirstTestStarted)
@@ -254,7 +254,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                _classEventsLock.Release();
+                ClassEventsLock.Release();
             }
         }
         
