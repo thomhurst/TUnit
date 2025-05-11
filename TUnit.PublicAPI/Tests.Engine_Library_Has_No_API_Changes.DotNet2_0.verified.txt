@@ -19,10 +19,21 @@ namespace TUnit.Engine.Enums
 }
 namespace TUnit.Engine.Exceptions
 {
-    public class TestFailedException : TUnit.Core.Exceptions.TUnitException
+    public class HookFailedException : TUnit.Engine.Exceptions.TUnitFailedException
+    {
+        public HookFailedException(System.Exception exception) { }
+        public HookFailedException(string? message, System.Exception? innerException) { }
+    }
+    public abstract class TUnitFailedException : TUnit.Core.Exceptions.TUnitException
+    {
+        protected TUnitFailedException(System.Exception exception) { }
+        protected TUnitFailedException(string? message, System.Exception? innerException) { }
+        public override string StackTrace { get; }
+    }
+    public class TestFailedException : TUnit.Engine.Exceptions.TUnitFailedException
     {
         public TestFailedException(System.Exception exception) { }
-        public override string StackTrace { get; }
+        public TestFailedException(string? message, System.Exception? innerException) { }
     }
 }
 namespace TUnit.Engine.Extensions
