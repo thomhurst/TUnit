@@ -30,7 +30,7 @@ internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector, As
             }
             catch (Exception e)
             {
-                throw new HookFailedException($"Error executing [Before(TestSession)] hook: {beforeSessionHook.MethodInfo.Class.Name}.{beforeSessionHook.Name}", e);
+                throw new HookFailedException($"Error executing [Before(TestSession)] hook: {beforeSessionHook.MethodInfo.Type.FullName}.{beforeSessionHook.Name}", e);
             }
             
             ExecutionContextHelper.RestoreContext(testSessionContext.ExecutionContext);

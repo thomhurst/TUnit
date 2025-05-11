@@ -32,7 +32,7 @@ internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector, 
             }
             catch (Exception e)
             {
-                throw new HookFailedException($"Error executing [Before(TestDiscovery)] hook: {beforeDiscoveryHook.MethodInfo.Class.Name}.{beforeDiscoveryHook.Name}", e);
+                throw new HookFailedException($"Error executing [Before(TestDiscovery)] hook: {beforeDiscoveryHook.MethodInfo.Type.FullName}.{beforeDiscoveryHook.Name}", e);
             }
             
             ExecutionContextHelper.RestoreContext(beforeContext.ExecutionContext);

@@ -21,7 +21,7 @@ internal class TestHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFram
 
         foreach (var executableHook in beforeHooks)
         {
-            await logger.LogDebugAsync($"Executing [Before(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}");
+            await logger.LogDebugAsync($"Executing [Before(Test)] hook: {executableHook.MethodInfo.Type.FullName}.{executableHook.Name}");
 
             await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
             {
@@ -31,7 +31,7 @@ internal class TestHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFram
                 }
                 catch (Exception e)
                 {
-                    throw new HookFailedException($"Error executing [Before(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}", e);
+                    throw new HookFailedException($"Error executing [Before(Test)] hook: {executableHook.MethodInfo.Type.FullName}.{executableHook.Name}", e);
                 }
             });
             

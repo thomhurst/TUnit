@@ -75,7 +75,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
                     }
                     catch (Exception e)
                     {
-                        throw new HookFailedException($"Error executing [Before(Class)] hook: {beforeHook.MethodInfo.Class.Name}.{beforeHook.Name}", e);
+                        throw new HookFailedException($"Error executing [Before(Class)] hook: {beforeHook.MethodInfo.Type.FullName}.{beforeHook.Name}", e);
                     }
                     
                     ExecutionContextHelper.RestoreContext(classHookContext.ExecutionContext);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.Extensions;
+﻿using System.Runtime.Versioning;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
@@ -6,6 +7,7 @@ using LogLevel = TUnit.Core.Logging.LogLevel;
 
 namespace TUnit.Engine.Logging;
 
+[UnsupportedOSPlatform("browser")]
 internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger)
     : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
 {

@@ -321,7 +321,7 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterClassHooks)
         {
-            await logger.LogDebugAsync($"Executing [After(Class)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}");
+            await logger.LogDebugAsync($"Executing [After(Class)] hook: {afterHook.MethodInfo.Type.FullName}.{afterHook.Name}");
 
             await RunHelpers.RunValueTaskSafelyAsync(() =>
             {
@@ -331,7 +331,7 @@ internal class SingleTestExecutor(
                 }
                 catch (Exception e)
                 {
-                    throw new HookFailedException($"Error executing [After(Class)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}", e);
+                    throw new HookFailedException($"Error executing [After(Class)] hook: {afterHook.MethodInfo.Type.FullName}.{afterHook.Name}", e);
                 }
             }, cleanUpExceptions);
         }
@@ -345,7 +345,7 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterAssemblyHooks)
         {
-            await logger.LogDebugAsync($"Executing [After(Assembly)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}");
+            await logger.LogDebugAsync($"Executing [After(Assembly)] hook: {afterHook.MethodInfo.Type.FullName}.{afterHook.Name}");
 
             await RunHelpers.RunValueTaskSafelyAsync(() =>
             {
@@ -355,7 +355,7 @@ internal class SingleTestExecutor(
                 }
                 catch (Exception e)
                 {
-                    throw new HookFailedException($"Error executing [After(Assembly)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}", e);
+                    throw new HookFailedException($"Error executing [After(Assembly)] hook: {afterHook.MethodInfo.Type.FullName}.{afterHook.Name}", e);
                 }
             }, cleanUpExceptions);
         }

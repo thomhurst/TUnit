@@ -118,7 +118,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 }
                 catch (Exception e)
                 {
-                    throw new HookFailedException($"Error executing [Before(Test)] hook: {afterDiscoveryHook.MethodInfo.Class.Name}.{afterDiscoveryHook.Name}", e);
+                    throw new HookFailedException($"Error executing [Before(Test)] hook: {afterDiscoveryHook.MethodInfo.Type.FullName}.{afterDiscoveryHook.Name}", e);
                 }
             }
             
@@ -165,7 +165,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                         }
                         catch (Exception e)
                         {
-                            throw new HookFailedException($"Error executing [After(TestSession)] hook: {afterSessionHook.MethodInfo.Class.Name}.{afterSessionHook.Name}", e);
+                            throw new HookFailedException($"Error executing [After(TestSession)] hook: {afterSessionHook.MethodInfo.Type.FullName}.{afterSessionHook.Name}", e);
                         }
                     }
                     

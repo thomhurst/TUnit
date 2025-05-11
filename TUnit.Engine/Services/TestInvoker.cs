@@ -60,7 +60,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
         foreach (var executableHook in afterHooks)
         {
             {
-                await logger.LogDebugAsync($"Executing [After(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}");
+                await logger.LogDebugAsync($"Executing [After(Test)] hook: {executableHook.MethodInfo.Type.FullName}.{executableHook.Name}");
 
                 await Timings.Record($"After(Test): {executableHook.Name}", testContext, () =>
                 {
@@ -70,7 +70,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
                     }
                     catch (Exception e)
                     {
-                        throw new HookFailedException($"Error executing [After(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}", e);
+                        throw new HookFailedException($"Error executing [After(Test)] hook: {executableHook.MethodInfo.Type.FullName}.{executableHook.Name}", e);
                     }
                 });
             }
