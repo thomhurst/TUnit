@@ -1,7 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
+[DebuggerDisplay("{Type} {Name})")]
 public record SourceGeneratedPropertyInformation : SourceGeneratedMemberInformation
 {
     [DynamicallyAccessedMembers(

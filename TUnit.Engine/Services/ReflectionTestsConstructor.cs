@@ -47,40 +47,35 @@ internal class ReflectionTestsConstructor(IExtension extension,
         {
             var testAttribute = testMethod.GetCustomAttribute<TestAttribute>()!;
 
-            var types = GetDerivedTypes(allTypes, testMethod.DeclaringType!);
-
-            foreach (var type in types)
+            var type = testMethod.ReflectedType ?? testMethod.DeclaringType!;
+            
+            try
             {
-                try
+                foreach (var typeDataAttribute in GetDataAttributes(type))
                 {
-                    foreach (var typeDataAttribute in GetDataAttributes(type))
+                    var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
+                            
+                    foreach (var testDataAttribute in GetDataAttributes(testMethod))
                     {
-                        var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
+                        var testBuilderContextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
                             
-                        foreach (var testDataAttribute in GetDataAttributes(testMethod))
+                        foreach (var classInstanceArguments in GetArguments(type, testMethod, null, typeDataAttribute, DataGeneratorType.ClassParameters, () => [], testInformation, testBuilderContextAccessor))
                         {
-                            var testBuilderContextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
-                            
-                            foreach (var classInstanceArguments in GetArguments(type, testMethod, null, typeDataAttribute, DataGeneratorType.ClassParameters, () => [], testInformation, testBuilderContextAccessor))
-                            {
-                                BuildTests(type, classInstanceArguments, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute, testBuilderContextAccessor);
-
-                                testBuilderContextAccessor.Current = new TestBuilderContext();
-                            }
+                            BuildTests(type, classInstanceArguments, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute, testBuilderContextAccessor);
                         }
                     }
                 }
-                catch (Exception e)
+            }
+            catch (Exception e)
+            {
+                testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest
                 {
-                    testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest
-                    {
-                        MethodName = testMethod.Name,
-                        TestFilePath = testAttribute.File,
-                        TestLineNumber = testAttribute.Line,
-                        Exception = e,
-                        TestClassType = type,
-                    });
-                }
+                    MethodName = testMethod.Name,
+                    TestFilePath = testAttribute.File,
+                    TestLineNumber = testAttribute.Line,
+                    Exception = e,
+                    TestClassType = type,
+                });
             }
         }
         return testsBuilderDynamicTests;

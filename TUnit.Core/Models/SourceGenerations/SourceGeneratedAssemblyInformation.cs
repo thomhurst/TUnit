@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace TUnit.Core;
 
+[DebuggerDisplay("{Name})")]
 public record SourceGeneratedAssemblyInformation
 {
     private static readonly ConcurrentDictionary<string, SourceGeneratedAssemblyInformation> Cache = [];

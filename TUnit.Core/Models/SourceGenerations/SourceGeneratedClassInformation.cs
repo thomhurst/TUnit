@@ -1,8 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
+[DebuggerDisplay("{Type})")]
 public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
 {
     private static readonly ConcurrentDictionary<string, SourceGeneratedClassInformation> Cache = [];

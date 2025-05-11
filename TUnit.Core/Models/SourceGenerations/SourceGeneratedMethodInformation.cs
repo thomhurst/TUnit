@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -6,6 +7,7 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
+[DebuggerDisplay("{Type}.{Name}")]
 public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
     internal static SourceGeneratedMethodInformation Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
