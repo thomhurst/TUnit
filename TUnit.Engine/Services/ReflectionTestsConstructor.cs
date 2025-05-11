@@ -200,7 +200,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             var propertyArgs = GetPropertyArgs(type, () => args, testInformation, testBuilderContextAccessor)
                 .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
 
-            return InstanceHelper.CreateInstance(type, args, propertyArgs);
+            return InstanceHelper.CreateInstance(testInformation.Class, args, propertyArgs, testBuilderContextAccessor.Current);
         }
         catch (Exception e)
         {

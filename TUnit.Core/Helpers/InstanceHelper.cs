@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Helpers;
 
@@ -9,13 +10,22 @@ namespace TUnit.Core.Helpers;
 [RequiresUnreferencedCode("Reflection")]
 internal static class InstanceHelper
 {
-    public static object CreateInstance([DynamicallyAccessedMembers(
-            DynamicallyAccessedMemberTypes.PublicConstructors
-            | DynamicallyAccessedMemberTypes.PublicMethods)]
-        Type type, object?[]? args, IDictionary<string, object?>? testClassProperties)
+    public static object CreateInstance(SourceGeneratedClassInformation classInformation, object?[]? args, IDictionary<string, object?>? testClassProperties, TestBuilderContext testBuilderContext)
     {
         try
         {
+            if (classInformation.Attributes.OfType<ClassConstructorAttribute>().FirstOrDefault() is { } classConstructorAttribute)
+            {
+                var classConstructor = (IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
+                
+                return classConstructor.Create(classInformation.Type, new ClassConstructorMetadata
+                {
+                    TestBuilderContext = testBuilderContext,
+                    TestSessionId = TestSessionContext.Current?.Id ?? string.Empty
+                });
+            }
+            var type = classInformation.Type;
+            
             var parameters = type.GetConstructors().First(x => !x.IsStatic).GetParameters();
 
             var castedArgs = args?.Select((a, index) => CastHelper.Cast(parameters[index].ParameterType, a)).ToArray();
@@ -46,7 +56,7 @@ internal static class InstanceHelper
         }
         catch (MissingMethodException e)
         {
-            throw new TUnitException("Cannot create instance of type " + type.FullName, e);
+            throw new TUnitException("Cannot create instance of type " + classInformation.Type.FullName, e);
         }
     }
 }

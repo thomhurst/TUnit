@@ -153,6 +153,10 @@ public record DynamicTest<
 
         for (var i = 0; i < repeatLimit + 1; i++)
         {
+            var testBuilderContext = new TestBuilderContext();
+
+            var sourceGeneratedMethodInformation = BuildTestMethod(TestBody);
+            
             yield return new TestMetadata<TClass>
             {
                 TestId = $"{TestId}-{i}",
@@ -160,12 +164,12 @@ public record DynamicTest<
                 TestMethodArguments = TestMethodArguments,
                 CurrentRepeatAttempt = i,
                 RepeatLimit = repeatLimit,
-                TestMethod = BuildTestMethod(TestBody),
+                TestMethod = sourceGeneratedMethodInformation,
                 ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
-                        typeof(TClass),
-                        TestClassArguments, Properties),
+                        sourceGeneratedMethodInformation.Class,
+                        TestClassArguments, Properties, testBuilderContext),
                     TestSessionContext.Current?.Id ?? "Unknown",
-                    new TestBuilderContext()),
+                    testBuilderContext),
                 TestMethodFactory = (@class, token) =>
                 {
                     var arguments = TestMethodArguments;
@@ -178,7 +182,7 @@ public record DynamicTest<
                     return AsyncConvert.ConvertObject(TestBody.Invoke(@class, arguments));
                 },
                 TestClassProperties = Properties ?? [],
-                TestBuilderContext = new TestBuilderContext(),
+                TestBuilderContext = testBuilderContext,
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 DynamicAttributes = Attributes,

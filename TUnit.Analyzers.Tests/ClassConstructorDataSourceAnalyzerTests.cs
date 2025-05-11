@@ -30,7 +30,7 @@ public class ClassConstructorDataSourceAnalyzerTests
 
                 public class MyClassConstructor : IClassConstructor
                 {
-                    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(ClassConstructorMetadata classConstructorMetadata) where T : class
+                    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
                     {
                         return (T)Activator.CreateInstance(typeof(T), 1)!;
                     }
@@ -66,7 +66,7 @@ public class ClassConstructorDataSourceAnalyzerTests
 
                 public class MyClassConstructor : IClassConstructor
                 {
-                    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(ClassConstructorMetadata classConstructorMetadata) where T : class
+                    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
                     {
                         return (T)Activator.CreateInstance(typeof(T), 1)!;
                     }
