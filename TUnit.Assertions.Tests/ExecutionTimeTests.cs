@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Tests;
 
 public class ExecutionTimeTests
 {
-    [Test]
+    [Test, NotInParallel]
     public async Task Completes_Within_Happy()
     {
         var action = () => Thread.Sleep(100);
