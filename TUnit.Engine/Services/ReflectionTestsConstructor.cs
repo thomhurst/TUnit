@@ -100,12 +100,15 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
 
                     var testClassArguments = classInstanceArguments();
-
+                    var testMethodArguments = testArguments();
+                    
                     if (type.ContainsGenericParameters)
                     {
+                        var classParametersTypes = testInformation.Class.Parameters.Select(p => p.Type).ToList();
+                        
                         var substitutedTypes = type.GetGenericArguments()
-                            .Select(pc => testInformation.Class.Parameters.Select(p => p.Type).ToList().FindIndex(pt => pt == pc))
-                            .Select(i => testClassArguments![i]!.GetType())
+                            .Select(pc => classParametersTypes.FindIndex(pt => pt == pc))
+                            .Select(i => testClassArguments[i]!.GetType())
                             .ToArray();
 
                         type = type.MakeGenericType(substitutedTypes);
@@ -116,10 +119,22 @@ internal class ReflectionTestsConstructor(IExtension extension,
                                 && x.GetParameters().Length == testMethod.GetParameters().Length);
                     }
 
+                    if (testMethod.ContainsGenericParameters)
+                    {
+                        var testParametersTypes = testInformation.Parameters.Select(p => p.Type).ToList();
+                        
+                        var substitutedTypes = testMethod.GetGenericArguments()
+                            .Select(pc => testParametersTypes.FindIndex(pt => pt == pc))
+                            .Select(i => testMethodArguments[i]!.GetType())
+                            .ToArray();
+                        
+                        testMethod = testMethod.MakeGenericMethod(substitutedTypes);
+                    }
+
                     testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
                     {
                         TestBuilderContext = testBuilderContextAccessor.Current,
-                        TestMethodArguments = testArguments(),
+                        TestMethodArguments = testMethodArguments,
                         Attributes =
                         [
                             ..testMethod.GetCustomAttributes(),
