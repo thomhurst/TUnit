@@ -7,11 +7,10 @@ using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
-using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrameworkLogger logger, Disposer disposer)
+internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer disposer)
 {
     private readonly SemaphoreSlim _consoleStandardOutLock = new(1, 1);
 
@@ -21,8 +20,6 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
         {
             foreach (var onInitializeObject in discoveredTest.TestContext.GetOnInitializeObjects())
             {
-                await logger.LogDebugAsync($"Initializing IAsyncInitializer: {onInitializeObject.GetType().Name}...");
-
                 await onInitializeObject.InitializeAsync();
             }
 
@@ -30,13 +27,9 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
             
             foreach (var testStartEventsObject in discoveredTest.TestContext.GetTestStartEventObjects())
             {
-                await logger.LogDebugAsync($"Executing ITestStartEventReceiver: {testStartEventsObject.GetType().Name}");
-
                 await testStartEventsObject.OnTestStart(new BeforeTestContext(discoveredTest));
             }
-
-            await logger.LogDebugAsync("Executing test body");
-
+            
             await Timings.Record("Test Body", discoveredTest.TestContext,
                 () => discoveredTest.ExecuteTest(cancellationToken));
             
@@ -74,16 +67,12 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
         
         foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
         {
-            await logger.LogDebugAsync($"Executing ITestEndEventReceiver: {testEndEventsObject.GetType().Name}");
-
             await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
                 cleanUpExceptions);
         }
         
         foreach (var disposableObject in testContext.GetOnDisposeObjects())
         {
-            await logger.LogDebugAsync($"Disposing: {disposableObject.GetType().Name}");
-
             await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(disposableObject),
                 cleanUpExceptions);
         }
@@ -92,7 +81,6 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
 
         try
         {
-            await logger.LogDebugAsync("Disposing test context");
             await disposer.DisposeAsync(testContext);
         }
         finally

@@ -286,8 +286,6 @@ internal class SingleTestExecutor(
             {
                 foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
                 {
-                    await logger.LogDebugAsync("Executing ITestSkippedEventReceivers");
-
                     await RunHelpers.RunValueTaskSafelyAsync(() => testSkippedEventReceiver.OnTestSkipped(testContext),
                         cleanUpExceptions);
                 }
@@ -364,8 +362,6 @@ internal class SingleTestExecutor(
 
             foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
             {
-                await logger.LogDebugAsync("Executing ILastTestInTestSessionEventReceivers");
-
                 await RunHelpers.RunValueTaskSafelyAsync(
                     () => testEndEventsObject.OnLastTestInTestSession(testSessionContext, testContext),
                     cleanUpExceptions);
