@@ -69,9 +69,9 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.4.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="Verify.NUnit" Version="29.5.0" />
-    <PackageVersion Include="TUnit" Version="0.19.140" />
-    <PackageVersion Include="TUnit.Core" Version="0.19.140" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.19.140" />
+    <PackageVersion Include="TUnit" Version="0.19.143" />
+    <PackageVersion Include="TUnit.Core" Version="0.19.143" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.19.143" />
     <PackageVersion Include="Verify.TUnit" Version="30.0.0" />
     <PackageVersion Include="Vogen" Version="7.0.3" />
     <PackageVersion Include="xunit" Version="2.9.3" />
