@@ -672,6 +672,7 @@ namespace TUnit.Core
         public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
         public virtual System.Threading.Tasks.Task<bool> ShouldSkip(TUnit.Core.BeforeTestContext context) { }
     }
+    [System.Diagnostics.DebuggerDisplay("{Name})")]
     public class SourceGeneratedAssemblyInformation : System.IEquatable<TUnit.Core.SourceGeneratedAssemblyInformation>
     {
         public SourceGeneratedAssemblyInformation() { }
@@ -681,6 +682,7 @@ namespace TUnit.Core
         public override int GetHashCode() { }
         public static TUnit.Core.SourceGeneratedAssemblyInformation GetOrAdd(string name, System.Func<TUnit.Core.SourceGeneratedAssemblyInformation> factory) { }
     }
+    [System.Diagnostics.DebuggerDisplay("{Type})")]
     public class SourceGeneratedClassInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedClassInformation>
     {
         public SourceGeneratedClassInformation() { }
@@ -705,6 +707,7 @@ namespace TUnit.Core
         public override int GetHashCode() { }
         protected virtual bool PrintMembers(System.Text.StringBuilder stringBuilder) { }
     }
+    [System.Diagnostics.DebuggerDisplay("{Type}.{Name}")]
     public class SourceGeneratedMethodInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedMethodInformation>
     {
         public SourceGeneratedMethodInformation() { }
@@ -720,15 +723,18 @@ namespace TUnit.Core
         public override int GetHashCode() { }
         protected override bool PrintMembers(System.Text.StringBuilder stringBuilder) { }
     }
+    [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
     public class SourceGeneratedParameterInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation>
     {
         public SourceGeneratedParameterInformation(System.Type Type) { }
         public override System.Type Type { get; init; }
     }
+    [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
     public class SourceGeneratedParameterInformation<T> : TUnit.Core.SourceGeneratedParameterInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation<T>>
     {
         public SourceGeneratedParameterInformation() { }
     }
+    [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
     public class SourceGeneratedPropertyInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedPropertyInformation>
     {
         public SourceGeneratedPropertyInformation() { }
