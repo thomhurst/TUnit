@@ -136,6 +136,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         TestLineNumber = testAttribute.Line,
                         Properties = propertyArgs
                     });
+
+                    testBuilderContextAccessor.Current = new TestBuilderContext();
                 }
             }
         }
@@ -149,6 +151,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 Exception = e,
                 TestClassType = type,
             });
+            
+            testBuilderContextAccessor.Current = new TestBuilderContext();
         }
     }
 
