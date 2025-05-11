@@ -92,45 +92,51 @@ internal class ReflectionTestsConstructor(IExtension extension,
         try
         {
             var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
-            
-            foreach (var testArguments in GetArguments(type, testMethod, null, testDataAttribute, DataGeneratorType.TestParameters, classInstanceArguments, testInformation, testBuilderContextAccessor))
+
+            var repeatCount = testInformation.Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
+
+            for (var index = 0; index < repeatCount + 1; index++)
             {
-                var propertyArgs = GetPropertyArgs(type, classInstanceArguments, testInformation, testBuilderContextAccessor)
-                    .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
-
-                var testClassArguments = classInstanceArguments();
-                
-                if (type.ContainsGenericParameters)
+                foreach (var testArguments in GetArguments(type, testMethod, null, testDataAttribute, DataGeneratorType.TestParameters, classInstanceArguments, testInformation,
+                             testBuilderContextAccessor))
                 {
-                    var substitutedTypes = type.GetGenericArguments()
-                        .Select(pc => testInformation.Class.Parameters.Select(p => p.Type).ToList().FindIndex(pt => pt == pc))
-                        .Select(i => testClassArguments![i]!.GetType())
-                        .ToArray();
-                
-                    type = type.MakeGenericType(substitutedTypes);
-                    
-                    testMethod = type.GetMembers()
-                        .OfType<MethodInfo>()
-                        .First(x => x.Name == testMethod.Name 
-                            && x.GetParameters().Length == testMethod.GetParameters().Length);
+                    var propertyArgs = GetPropertyArgs(type, classInstanceArguments, testInformation, testBuilderContextAccessor)
+                        .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
+
+                    var testClassArguments = classInstanceArguments();
+
+                    if (type.ContainsGenericParameters)
+                    {
+                        var substitutedTypes = type.GetGenericArguments()
+                            .Select(pc => testInformation.Class.Parameters.Select(p => p.Type).ToList().FindIndex(pt => pt == pc))
+                            .Select(i => testClassArguments![i]!.GetType())
+                            .ToArray();
+
+                        type = type.MakeGenericType(substitutedTypes);
+
+                        testMethod = type.GetMembers()
+                            .OfType<MethodInfo>()
+                            .First(x => x.Name == testMethod.Name
+                                && x.GetParameters().Length == testMethod.GetParameters().Length);
+                    }
+
+                    testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
+                    {
+                        TestBuilderContext = testBuilderContextAccessor.Current,
+                        TestMethodArguments = testArguments(),
+                        Attributes =
+                        [
+                            ..testMethod.GetCustomAttributes(),
+                            ..type.GetCustomAttributes(),
+                            ..type.Assembly.GetCustomAttributes()
+                        ],
+                        TestName = testMethod.Name,
+                        TestClassArguments = testClassArguments,
+                        TestFilePath = testAttribute.File,
+                        TestLineNumber = testAttribute.Line,
+                        Properties = propertyArgs
+                    });
                 }
-
-                testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
-                {
-                    TestBuilderContext = testBuilderContextAccessor.Current,
-                    TestMethodArguments = testArguments(),
-                    Attributes =
-                    [
-                        ..testMethod.GetCustomAttributes(),
-                        ..type.GetCustomAttributes(),
-                        ..type.Assembly.GetCustomAttributes()
-                    ],
-                    TestName = testMethod.Name,
-                    TestClassArguments = testClassArguments,
-                    TestFilePath = testAttribute.File,
-                    TestLineNumber = testAttribute.Line,
-                    Properties = propertyArgs
-                });
             }
         }
         catch (Exception e)
