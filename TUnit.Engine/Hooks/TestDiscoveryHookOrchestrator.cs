@@ -1,6 +1,7 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
@@ -25,7 +26,14 @@ internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector, 
         {
             await logger.LogDebugAsync($"Executing [Before(TestDiscovery)] hook: {beforeDiscoveryHook.ClassType.Name}.{beforeDiscoveryHook.Name}");
 
-            await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
+            try
+            {
+                await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
+            }
+            catch (Exception e)
+            {
+                throw new HookFailedException($"Error executing [Before(TestDiscovery)] hook: {beforeDiscoveryHook.MethodInfo.Class.Name}.{beforeDiscoveryHook.Name}", e);
+            }
             
             ExecutionContextHelper.RestoreContext(beforeContext.ExecutionContext);
         }

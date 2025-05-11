@@ -9,6 +9,7 @@ using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Logging;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
@@ -322,7 +323,17 @@ internal class SingleTestExecutor(
         {
             await logger.LogDebugAsync($"Executing [After(Class)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}");
 
-            await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
+            await RunHelpers.RunValueTaskSafelyAsync(() =>
+            {
+                try
+                {
+                    return afterHook.ExecuteAsync(classHookContext, CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [After(Class)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}", e);
+                }
+            }, cleanUpExceptions);
         }
                 
         ClassHookContext.Current = null;
@@ -336,7 +347,17 @@ internal class SingleTestExecutor(
         {
             await logger.LogDebugAsync($"Executing [After(Assembly)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}");
 
-            await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
+            await RunHelpers.RunValueTaskSafelyAsync(() =>
+            {
+                try
+                {
+                    return afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [After(Assembly)] hook: {afterHook.MethodInfo.Class.Name}.{afterHook.Name}", e);
+                }
+            }, cleanUpExceptions);
         }
                 
         AssemblyHookContext.Current = null;

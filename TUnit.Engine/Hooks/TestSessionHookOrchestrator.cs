@@ -2,6 +2,7 @@
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
@@ -23,7 +24,14 @@ internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector, As
         {
             await logger.LogDebugAsync($"Executing [Before(TestSession)] hook: {beforeSessionHook.ClassType.Name}.{beforeSessionHook.Name}");
 
-            await beforeSessionHook.ExecuteAsync(testSessionContext, executeRequestContext.CancellationToken);
+            try
+            {
+                await beforeSessionHook.ExecuteAsync(testSessionContext, executeRequestContext.CancellationToken);
+            }
+            catch (Exception e)
+            {
+                throw new HookFailedException($"Error executing [Before(TestSession)] hook: {beforeSessionHook.MethodInfo.Class.Name}.{beforeSessionHook.Name}", e);
+            }
             
             ExecutionContextHelper.RestoreContext(testSessionContext.ExecutionContext);
         }

@@ -3,6 +3,7 @@ using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
@@ -62,8 +63,16 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrame
                 await logger.LogDebugAsync($"Executing [After(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}");
 
                 await Timings.Record($"After(Test): {executableHook.Name}", testContext, () =>
-                    executableHook.ExecuteAsync(testContext, CancellationToken.None)
-                );
+                {
+                    try
+                    {
+                        return executableHook.ExecuteAsync(testContext, CancellationToken.None);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new HookFailedException($"Error executing [After(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}", e);
+                    }
+                });
             }
         }
         

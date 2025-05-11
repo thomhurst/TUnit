@@ -1,6 +1,7 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
@@ -23,8 +24,16 @@ internal class TestHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFram
             await logger.LogDebugAsync($"Executing [Before(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}");
 
             await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
-                executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken)
-            );
+            {
+                try
+                {
+                    return executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [Before(Test)] hook: {executableHook.MethodInfo.Class.Name}.{executableHook.Name}", e);
+                }
+            });
             
             ExecutionContextHelper.RestoreContext(discoveredTest.TestContext.ExecutionContext);
         }

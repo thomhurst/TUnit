@@ -5,6 +5,7 @@ using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
@@ -43,7 +44,14 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
             {
                 await logger.LogDebugAsync($"Executing [Before(Assembly)] hook: {beforeHook.ClassType.Name}.{beforeHook.Name}");
 
-                await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                try
+                {
+                    await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [Before(Assembly)] hook: {beforeHook.MethodInfo.Class.Name}.{beforeHook.Name}", e);
+                }
                 
                 ExecutionContextHelper.RestoreContext(assemblyHookContext.ExecutionContext);
             }

@@ -10,6 +10,7 @@ using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 #pragma warning disable TPEXP
@@ -111,7 +112,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             {
                 await logger.LogDebugAsync($"Executing [After(TestDiscovery)] hook: {afterDiscoveryHook.ClassType.Name}.{afterDiscoveryHook.Name}");
 
-                await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
+                try
+                {
+                    await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [Before(Test)] hook: {afterDiscoveryHook.MethodInfo.Class.Name}.{afterDiscoveryHook.Name}", e);
+                }
             }
             
             var filteredTests = await serviceProvider.TestDiscoverer
@@ -151,7 +159,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     {
                         await logger.LogDebugAsync($"Executing [After(TestSession)] hook: {afterSessionHook.ClassType.Name}.{afterSessionHook.Name}");
 
-                        await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
+                        try
+                        {
+                            await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new HookFailedException($"Error executing [After(TestSession)] hook: {afterSessionHook.MethodInfo.Class.Name}.{afterSessionHook.Name}", e);
+                        }
                     }
                     
                     foreach (var artifact in testSessionContext.Artifacts)
