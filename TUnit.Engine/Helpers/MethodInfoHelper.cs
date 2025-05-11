@@ -57,7 +57,7 @@ internal static class MethodInfoHelper
 
         try
         {
-            if (instance.GetType().GenericTypeArguments.Length != 0)
+            if (methodInfo.DeclaringType!.ContainsGenericParameters)
             {
 #pragma warning disable IL2075
                 return instance.GetType()
