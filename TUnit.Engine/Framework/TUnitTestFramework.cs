@@ -110,8 +110,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
             foreach (var afterDiscoveryHook in afterDiscoveryHooks)
             {
-                await logger.LogDebugAsync($"Executing [After(TestDiscovery)] hook: {afterDiscoveryHook.ClassType.Name}.{afterDiscoveryHook.Name}");
-
                 try
                 {
                     await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
@@ -157,8 +155,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     foreach (var afterSessionHook in afterSessionHooks)
                     {
-                        await logger.LogDebugAsync($"Executing [After(TestSession)] hook: {afterSessionHook.ClassType.Name}.{afterSessionHook.Name}");
-
                         try
                         {
                             await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);

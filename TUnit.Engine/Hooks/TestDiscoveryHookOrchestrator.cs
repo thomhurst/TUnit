@@ -24,8 +24,6 @@ internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector, 
         
         foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
         {
-            await logger.LogDebugAsync($"Executing [Before(TestDiscovery)] hook: {beforeDiscoveryHook.ClassType.Name}.{beforeDiscoveryHook.Name}");
-
             try
             {
                 await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
