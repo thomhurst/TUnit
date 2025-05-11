@@ -29,6 +29,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         var allTypes = ReflectionScanner.GetTypes();
         
         var testMethods = allTypes
+            .Where(x => x is { IsClass: true, IsAbstract: false })
             .SelectMany(x => x.GetMethods())
             .Where(IsTest)
             .Where(x => !x.IsAbstract)
