@@ -1,16 +1,18 @@
-﻿using System.Runtime.Versioning;
+﻿using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
+using TUnit.Engine.CommandLineProviders;
 using LogLevel = TUnit.Core.Logging.LogLevel;
 
 namespace TUnit.Engine.Logging;
 
-[UnsupportedOSPlatform("browser")]
-internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger)
+internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, ICommandLineOptions commandLineOptions)
     : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
 {
+    private readonly bool _hideTestOutput = commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput);
+    
     private readonly MTPLoggerAdapter _adapter = new(logger);
     
     public Task<bool> IsEnabledAsync()
@@ -80,6 +82,6 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return logger.IsEnabled(MTPLoggerAdapter.Map(logLevel));
+        return !_hideTestOutput && logger.IsEnabled(MTPLoggerAdapter.Map(logLevel));
     }
 }
