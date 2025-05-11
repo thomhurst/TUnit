@@ -32,7 +32,7 @@ public class ClassConstructorDataSourceAnalyzerTests
                 {
                     public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
                     {
-                        return (T)Activator.CreateInstance(typeof(T), 1)!;
+                        return Activator.CreateInstance(type, 1)!;
                     }
                 }
                 """
@@ -68,7 +68,7 @@ public class ClassConstructorDataSourceAnalyzerTests
                 {
                     public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
                     {
-                        return (T)Activator.CreateInstance(typeof(T), 1)!;
+                        return Activator.CreateInstance(type, 1)!;
                     }
                 }
                 """
