@@ -62,7 +62,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
 
-        Logger = Register(new TUnitFrameworkLogger(extension, OutputDevice, LoggerFactory.CreateLogger<TUnitFrameworkLogger>()));
+        Logger = Register(new TUnitFrameworkLogger(extension, OutputDevice, LoggerFactory.CreateLogger<TUnitFrameworkLogger>(), CommandLineOptions));
         
         Initializer = Register(new TUnitInitializer(CommandLineOptions));
         
