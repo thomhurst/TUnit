@@ -3,7 +3,6 @@ using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
-using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
@@ -11,7 +10,7 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-internal class TestHookOrchestrator(HooksCollectorBase hooksCollector, TUnitFrameworkLogger logger)
+internal class TestHookOrchestrator(HooksCollectorBase hooksCollector)
 {
     public async Task<ExecutionContext?> ExecuteBeforeHooks(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {

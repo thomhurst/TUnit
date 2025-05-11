@@ -4,12 +4,11 @@ using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
-using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector, AssemblyHookOrchestrator assemblyHookOrchestrator, TUnitFrameworkLogger logger, string? stringFilter)
+internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector, AssemblyHookOrchestrator assemblyHookOrchestrator, string? stringFilter)
 {
     private TestSessionContext? _context;
     
