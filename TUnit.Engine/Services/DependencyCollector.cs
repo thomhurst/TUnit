@@ -8,55 +8,12 @@ namespace TUnit.Engine.Services;
 
 internal class DependencyCollector
 {
-    private readonly ConcurrentDictionary<TestDetailsEqualityWrapper, Dependency[]> _dependenciesCache = new();
-    
     public void ResolveDependencies(DiscoveredTest[] discoveredTests, CancellationToken cancellationToken)
     {
         foreach (var discoveredTest in discoveredTests)
         {
             discoveredTest.Dependencies = GetDependencies(discoveredTest, discoveredTests, cancellationToken);
         }
-
-        ValidateDependencyChains(discoveredTests, cancellationToken);
-    }
-
-    private void ValidateDependencyChains(DiscoveredTest[] discoveredTests, CancellationToken cancellationToken)
-    {
-        foreach (var discoveredTest in discoveredTests)
-        {
-            try
-            {
-                ValidateDependencyChain(discoveredTest, [], cancellationToken);
-            }
-            catch (Exception e)
-            {
-                discoveredTest.TestContext.SetResult(e);
-            }
-        }
-    }
-
-    private void ValidateDependencyChain(DiscoveredTest discoveredTest, HashSet<TestDetailsEqualityWrapper> visited, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var testDetailsEqualityWrapper = new TestDetailsEqualityWrapper(discoveredTest.TestDetails);
-        
-        if (!visited.Add(testDetailsEqualityWrapper))
-        {
-            throw new DependencyConflictException([..visited.Select(x => x.TestDetails), discoveredTest.TestDetails]);
-        }
-
-        foreach (var dependency in discoveredTest.Dependencies)
-        {
-            if (dependency.TestDetails.IsSameTest(discoveredTest.TestDetails))
-            {
-                throw new DependencyConflictException([..visited.Select(x => x.TestDetails), discoveredTest.TestDetails]);
-            }
-
-            ValidateDependencyChain(dependency.Test, visited, cancellationToken);
-        }
-        
-        visited.Remove(testDetailsEqualityWrapper);
     }
 
     private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests,
@@ -64,9 +21,7 @@ internal class DependencyCollector
     {
         try
         {
-            return _dependenciesCache.GetOrAdd(new TestDetailsEqualityWrapper(test.TestDetails), _ =>
-                GetDependenciesEnumerable(test, allTests, cancellationToken).ToArray()
-            );
+           return CollectDependencies(test, allTests, [], cancellationToken).ToArray();
         }
         catch (Exception e)
         {
@@ -76,7 +31,7 @@ internal class DependencyCollector
         return [];
     }
 
-    private IEnumerable<Dependency> GetDependenciesEnumerable(DiscoveredTest test, DiscoveredTest[] allTests, CancellationToken cancellationToken)
+    private IEnumerable<Dependency> CollectDependencies(DiscoveredTest test, DiscoveredTest[] allTests, HashSet<TestDetailsEqualityWrapper> visited, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         
@@ -84,12 +39,21 @@ internal class DependencyCollector
         {
             foreach (var dependency in GetDependencies(test, dependsOnAttribute, allTests))
             {
-                if (dependency.TestDetails.IsSameTest(test.TestDetails))
+                var testDetailsEqualityWrapper = new TestDetailsEqualityWrapper(dependency.TestDetails);
+                
+                if (!visited.Add(testDetailsEqualityWrapper))
                 {
-                    throw new DependencyConflictException([dependency.TestDetails, test.TestDetails]);
+                    throw new DependencyConflictException([..visited.Select(x => x.TestDetails), dependency.TestDetails]);
                 }
                 
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
+
+                foreach (var nestedDependency in CollectDependencies(dependency, allTests, visited, cancellationToken))
+                {
+                    yield return nestedDependency;
+                }
+                
+                visited.Remove(testDetailsEqualityWrapper);
             }
         }
     }
@@ -125,6 +89,7 @@ internal class DependencyCollector
         return foundTests;
     }
 
+    [DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
     private class TestDetailsEqualityWrapper(TestDetails testDetails)
     {
         public TestDetails TestDetails
