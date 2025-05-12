@@ -6,6 +6,11 @@
   <Import Project="..\Library.props" />
 
   <ItemGroup>
+    <InternalsVisibleTo Include="TUnit.Engine" />
+    <InternalsVisibleTo Include="TUnit.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EnumerableAsyncProcessor" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Platform" />
@@ -15,7 +20,7 @@
       <Pack>true</Pack>
       <PackagePath>$(BuildTransitivePath)</PackagePath>
     </TfmSpecificPackageFile>
-    
+
     <None Include="TUnit.Engine.props">
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>

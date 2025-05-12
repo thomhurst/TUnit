@@ -31,7 +31,7 @@ internal class DependencyCollector
         return [];
     }
 
-    private IEnumerable<Dependency> CollectDependencies(
+    internal IEnumerable<Dependency> CollectDependencies(
         DiscoveredTest test, 
         DiscoveredTest[] allTests, 
         HashSet<TestDetailsEqualityWrapper> visited, 
@@ -101,7 +101,7 @@ internal class DependencyCollector
     }
 
     [DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
-    private class TestDetailsEqualityWrapper(TestDetails testDetails)
+    internal class TestDetailsEqualityWrapper(TestDetails testDetails)
     {
         public TestDetails TestDetails
         {

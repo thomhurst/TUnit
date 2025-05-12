@@ -1,0 +1,154 @@
+﻿using NSubstitute;
+using TUnit.Core.Exceptions;
+using TUnit.Engine.Services;
+using TUnit.UnitTests.Extensions;
+
+namespace TUnit.UnitTests.Services;
+
+public class DependencyCollectorTests
+{
+    [Test]
+    public void CollectDependencies_ShouldThrowDependencyConflictException_WhenCircularDependencyExists()
+    {
+        // Arrange
+        var testA = CreateTest("TestA");
+        var testB = CreateTest("TestB", dependsOn: testA);
+        
+        typeof(TestDetails).GetProperty(nameof(TestDetails.Attributes))!
+            .GetBackingField()!
+            .SetValue(testA.TestDetails, new Attribute[] { new DependsOnAttribute(testB.TestDetails.TestName) });
+
+        var collector = new DependencyCollector();
+        var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var cancellationToken = CancellationToken.None;
+
+        // Act & Assert
+        Assert.Throws<DependencyConflictException>(() =>
+        {
+            _ = collector.CollectDependencies(testA, [testA, testB], visited, currentChain, cancellationToken).ToArray();
+        });
+    }
+
+    [Test]
+    public async Task CollectDependencies_ShouldResolveDependenciesCorrectly_WhenNoConflictsExist()
+    {
+        // Arrange
+        var testA = CreateTest("TestA");
+        var testB = CreateTest("TestB", dependsOn: testA);
+
+        var collector = new DependencyCollector();
+        var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var cancellationToken = CancellationToken.None;
+
+        // Act
+        var dependencies = collector.CollectDependencies(testB, [testA, testB], visited, currentChain, cancellationToken).ToList();
+
+        // Assert
+        await Assert.That(dependencies).HasSingleItem();
+        await Assert.That(dependencies[0].Test).IsEqualTo(testA);
+    }
+
+    [Test]
+    public async Task CollectDependencies_ShouldHandleNestedDependenciesCorrectly()
+    {
+        // Arrange
+        var testA = CreateTest("TestA");
+        var testB = CreateTest("TestB", dependsOn: testA);
+        var testC = CreateTest("TestC", dependsOn: testB);
+
+        var collector = new DependencyCollector();
+        var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var cancellationToken = CancellationToken.None;
+
+        // Act
+        var dependencies = collector.CollectDependencies(testC, [testA, testB, testC], visited, currentChain, cancellationToken).ToList();
+
+        // Assert
+        await Assert.That(dependencies).HasCount().EqualTo(2);
+        await Assert.That(dependencies).Contains(d => d.Test == testA);
+        await Assert.That(dependencies).Contains(d => d.Test == testB);
+    }
+
+    private DiscoveredTest CreateTest(string name, DiscoveredTest? dependsOn = null)
+    {
+        var resettableLazy = new ResettableLazy<DependencyCollectorTests>(() => new DependencyCollectorTests(), string.Empty, new TestBuilderContext());
+
+        var testDetails = new TestDetails<DependencyCollectorTests>
+        {
+            TestName = name,
+            TestId = Guid.NewGuid()
+                .ToString("N"),
+            TestMethodArguments =
+            [
+            ],
+            TestClassArguments = [],
+            TestClassInjectedPropertyArguments = new Dictionary<string, object?>(),
+            TestMethod = new SourceGeneratedMethodInformation
+            {
+                Attributes = dependsOn != null
+                    ?
+                    [
+                        new DependsOnAttribute(dependsOn.TestDetails.TestName)
+                    ]
+                    : [],
+                Class = new SourceGeneratedClassInformation
+                {
+                    Type = typeof(DependencyCollectorTests),
+                    Namespace = null,
+                    Assembly = new SourceGeneratedAssemblyInformation
+                    {
+                        Name = typeof(DependencyCollectorTests).Assembly.GetName().Name!,
+                        Attributes =
+                        [
+                        ]
+                    },
+                    Parameters = [],
+                    Properties = [],
+                    Name = nameof(DependencyCollectorTests),
+                    Attributes = []
+                },
+                Parameters =
+                [
+                ],
+                GenericTypeCount = 0,
+                ReturnType = typeof(Task),
+                Type = typeof(DependencyCollectorTests),
+                Name = name,
+            },
+            CurrentRepeatAttempt = 0,
+            RepeatLimit = 0,
+            DataAttributes =
+            [
+            ],
+            ReturnType = typeof(Task),
+            TestFilePath = string.Empty,
+            TestLineNumber = 0,
+            LazyClassInstance = resettableLazy,
+        };
+
+        return new DiscoveredTest<DependencyCollectorTests>(resettableLazy)
+        {
+            TestContext = new TestContext(Substitute.For<IServiceProvider>(),
+                testDetails,
+                new TestMetadata<DependencyCollectorTests>
+                {
+                    ResettableClassFactory = null!,
+                    TestMethodFactory = null!,
+                    TestId = null!,
+                    TestMethod = null!,
+                    RepeatLimit = 0,
+                    CurrentRepeatAttempt = 0,
+                    TestFilePath = null!,
+                    TestLineNumber = 0,
+                    TestClassArguments = [],
+                    TestMethodArguments = [],
+                    TestClassProperties = new Dictionary<string, object?>(),
+                    TestBuilderContext = new TestBuilderContext()
+                }),
+            TestBody = (_, _) => default(ValueTask),
+        };
+    }
+}

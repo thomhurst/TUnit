@@ -2,16 +2,25 @@
 
     <PropertyGroup>
         <EnablePolyfill>false</EnablePolyfill>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\strongname.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <Import Project="..\TestProject.props" />
 
     <ItemGroup>
         <PackageReference Include="AutoFixture" />
+        <PackageReference Include="NSubstitute" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\strongname.snk">
+        <Link>strongname.snk</Link>
+      </None>
     </ItemGroup>
 
     <Import Project="..\TestProject.targets" />

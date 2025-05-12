@@ -4,6 +4,7 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="TUnit.Engine" />
+        <InternalsVisibleTo Include="TUnit.UnitTests" />
     </ItemGroup>
 
     <ItemGroup>
