@@ -31,23 +31,27 @@ internal class DependencyCollector
         return [];
     }
 
-    private IEnumerable<Dependency> CollectDependencies(DiscoveredTest test, DiscoveredTest[] allTests, HashSet<TestDetailsEqualityWrapper> visited, Stack<TestDetailsEqualityWrapper> currentChain, CancellationToken cancellationToken)
+    private IEnumerable<Dependency> CollectDependencies(
+        DiscoveredTest test, 
+        DiscoveredTest[] allTests, 
+        HashSet<TestDetailsEqualityWrapper> visited, 
+        HashSet<TestDetailsEqualityWrapper> currentChain, 
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         var testDetails = new TestDetailsEqualityWrapper(test.TestDetails);
 
-        if (currentChain.Contains(testDetails))
+        if (!currentChain.Add(testDetails))
         {
             throw new DependencyConflictException(currentChain.Select(x => x.TestDetails).Append(testDetails.TestDetails).ToArray());
         }
-        
+
         if (!visited.Add(testDetails))
         {
+            currentChain.Remove(testDetails);
             yield break;
         }
-        
-        currentChain.Push(testDetails);
 
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
@@ -62,7 +66,7 @@ internal class DependencyCollector
             }
         }
 
-        currentChain.Pop();
+        currentChain.Remove(testDetails);
     }
     
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
