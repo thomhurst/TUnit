@@ -54,7 +54,7 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.5.2" />
-    <PackageVersion Include="Polyfill" Version="7.30.0" />
+    <PackageVersion Include="Polyfill" Version="7.31.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.18" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
@@ -72,7 +72,7 @@
     <PackageVersion Include="TUnit" Version="0.19.143" />
     <PackageVersion Include="TUnit.Core" Version="0.19.143" />
     <PackageVersion Include="TUnit.Assertions" Version="0.19.143" />
-    <PackageVersion Include="Verify.TUnit" Version="30.0.0" />
+    <PackageVersion Include="Verify.TUnit" Version="30.1.0" />
     <PackageVersion Include="Vogen" Version="7.0.3" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
