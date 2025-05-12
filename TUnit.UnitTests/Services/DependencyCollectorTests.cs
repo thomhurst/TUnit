@@ -12,15 +12,15 @@ public class DependencyCollectorTests
     {
         // Arrange
         var testA = CreateTest("TestA");
-        var testB = CreateTest("TestB", dependsOn: testA);
+        var testB = CreateTest("TestB", "TestA");
         
         typeof(TestDetails).GetProperty(nameof(TestDetails.Attributes))!
             .GetBackingField()!
             .SetValue(testA.TestDetails, new Attribute[] { new DependsOnAttribute(testB.TestDetails.TestName) });
 
         var collector = new DependencyCollector();
-        var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
-        var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var visited = new HashSet<TestDetails>([testA.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
+        var currentChain = new HashSet<TestDetails>([testA.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
         var cancellationToken = CancellationToken.None;
 
         // Act & Assert
@@ -35,11 +35,11 @@ public class DependencyCollectorTests
     {
         // Arrange
         var testA = CreateTest("TestA");
-        var testB = CreateTest("TestB", dependsOn: testA);
+        var testB = CreateTest("TestB", "TestA");
 
         var collector = new DependencyCollector();
-        var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
-        var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var visited = new HashSet<TestDetails>([testB.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
+        var currentChain = new HashSet<TestDetails>([testB.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
         var cancellationToken = CancellationToken.None;
 
         // Act
@@ -55,12 +55,12 @@ public class DependencyCollectorTests
     {
         // Arrange
         var testA = CreateTest("TestA");
-        var testB = CreateTest("TestB", dependsOn: testA);
-        var testC = CreateTest("TestC", dependsOn: testB);
+        var testB = CreateTest("TestB", "TestA");
+        var testC = CreateTest("TestC", "TestB");   
 
         var collector = new DependencyCollector();
-        var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
-        var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+        var visited = new HashSet<TestDetails>([testC.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
+        var currentChain = new HashSet<TestDetails>([testC.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
         var cancellationToken = CancellationToken.None;
 
         // Act
@@ -77,13 +77,13 @@ public async Task CollectDependencies_ShouldResolveComplexNestedDependenciesCorr
 {
     // Arrange
     var testA = CreateTest("TestA");
-    var testB = CreateTest("TestB", dependsOn: testA);
-    var testC = CreateTest("TestC", dependsOn: testB);
-    var testD = CreateTest("TestD", dependsOn: testC);
+    var testB = CreateTest("TestB", "TestA");
+    var testC = CreateTest("TestC", "TestB");
+    var testD = CreateTest("TestD", "TestC");
 
     var collector = new DependencyCollector();
-    var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
-    var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+    var visited = new HashSet<TestDetails>([testD.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
+    var currentChain = new HashSet<TestDetails>([testD.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
     var cancellationToken = CancellationToken.None;
 
     // Act
@@ -101,17 +101,17 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
 {
     // Arrange
     var testA = CreateTest("TestA");
-    var testB = CreateTest("TestB", dependsOn: testA);
-    var testC = CreateTest("TestC", dependsOn: testB);
-    var testD = CreateTest("TestD", dependsOn: testC);
+    var testB = CreateTest("TestB", "TestA");
+    var testC = CreateTest("TestC", "TestB");
+    var testD = CreateTest("TestD", "TestC");
 
     typeof(TestDetails).GetProperty(nameof(TestDetails.Attributes))!
         .GetBackingField()!
         .SetValue(testA.TestDetails, new Attribute[] { new DependsOnAttribute(testD.TestDetails.TestName) });
 
     var collector = new DependencyCollector();
-    var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
-    var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+    var visited = new HashSet<TestDetails>([testD.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
+    var currentChain = new HashSet<TestDetails>([testD.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
     var cancellationToken = CancellationToken.None;
 
     // Act & Assert
@@ -121,7 +121,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
     });
 }
 
-    private DiscoveredTest CreateTest(string name, DiscoveredTest? dependsOn = null)
+    private DiscoveredTest CreateTest(string name, string? dependsOn = null)
     {
         var resettableLazy = new ResettableLazy<DependencyCollectorTests>(() => new DependencyCollectorTests(), string.Empty, new TestBuilderContext());
 
@@ -140,7 +140,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                 Attributes = dependsOn != null
                     ?
                     [
-                        new DependsOnAttribute(dependsOn.TestDetails.TestName)
+                        new DependsOnAttribute(dependsOn)
                     ]
                     : [],
                 Class = new SourceGeneratedClassInformation

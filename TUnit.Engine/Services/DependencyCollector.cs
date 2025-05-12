@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
@@ -21,9 +20,7 @@ internal class DependencyCollector
     {
         try
         {
-            var testDetails = new TestDetailsEqualityWrapper(test.TestDetails);
-            
-            return CollectDependencies(test, allTests, [testDetails], [testDetails], cancellationToken).ToArray();
+            return CollectDependencies(test, allTests, new HashSet<TestDetails>([test.TestDetails], new TestDetailsEqualityComparer()), new HashSet<TestDetails>([test.TestDetails], new TestDetailsEqualityComparer()), cancellationToken).ToArray();
         }
         catch (Exception e)
         {
@@ -36,8 +33,8 @@ internal class DependencyCollector
     internal IEnumerable<Dependency> CollectDependencies(
         DiscoveredTest test, 
         DiscoveredTest[] allTests, 
-        HashSet<TestDetailsEqualityWrapper> visited, 
-        HashSet<TestDetailsEqualityWrapper> currentChain, 
+        HashSet<TestDetails> visited, 
+        HashSet<TestDetails> currentChain, 
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -46,16 +43,14 @@ internal class DependencyCollector
         {
             foreach (var dependency in GetDependencies(test, dependsOnAttribute, allTests))
             {
-                var testDetails = new TestDetailsEqualityWrapper(dependency.TestDetails);
-
-                if (!currentChain.Add(testDetails))
+                if (!currentChain.Add(dependency.TestDetails))
                 {
-                    throw new DependencyConflictException(currentChain.Select(x => x.TestDetails).Append(testDetails.TestDetails).ToArray());
+                    throw new DependencyConflictException(currentChain.Select(x => x).Append(dependency.TestDetails).ToArray());
                 }
 
-                if (!visited.Add(testDetails))
+                if (!visited.Add(dependency.TestDetails))
                 {
-                    currentChain.Remove(testDetails);
+                    currentChain.Remove(dependency.TestDetails);
                     continue;
                 }
                 
@@ -66,7 +61,7 @@ internal class DependencyCollector
                     yield return nestedDependency;
                 }
                 
-                currentChain.Remove(testDetails);
+                currentChain.Remove(dependency.TestDetails);
             }
         }
     }
@@ -103,52 +98,36 @@ internal class DependencyCollector
     }
 
     [DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
-    internal class TestDetailsEqualityWrapper(TestDetails testDetails)
+    internal class TestDetailsEqualityComparer : IEqualityComparer<TestDetails>
     {
-        public TestDetails TestDetails
+        public bool Equals(TestDetails? x, TestDetails? y)
         {
-            get;
-        } = testDetails;
-        
-
-        protected bool Equals(TestDetailsEqualityWrapper other)
-        {
-            return TestDetails.IsSameTest(other.TestDetails);
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (obj is null)
-            {
-                return false;
-            }
-            
-            if (ReferenceEquals(this, obj))
+            if (ReferenceEquals(x, y))
             {
                 return true;
             }
             
-            if (obj.GetType() != GetType())
+            if (x is null)
             {
                 return false;
             }
             
-            return Equals((TestDetailsEqualityWrapper)obj);
+            if (y is null)
+            {
+                return false;
+            }
+            
+            if (x.GetType() != y.GetType())
+            {
+                return false;
+            }
+            
+            return x.IsSameTest(y);
         }
 
-        public override int GetHashCode()
+        public int GetHashCode(TestDetails obj)
         {
-            return TestDetails.GetHashCode();
-        }
-
-        public static bool operator ==(TestDetailsEqualityWrapper? left, TestDetailsEqualityWrapper? right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(TestDetailsEqualityWrapper? left, TestDetailsEqualityWrapper? right)
-        {
-            return !Equals(left, right);
+            return obj.TestName.GetHashCode();
         }
     }
 }
