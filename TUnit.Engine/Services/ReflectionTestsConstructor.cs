@@ -416,13 +416,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
         return dataAttributes;
     }
 
-    private static Type[] GetDerivedTypes(IEnumerable<Type> allTypes, Type baseType)
-    {
-        return allTypes
-            .Where(type => type is { IsClass: true, IsAbstract: false } && type.IsAssignableTo(baseType))
-            .ToArray();
-    }
-    
     private bool IsTest(MethodInfo arg)
     {
         try

@@ -55,10 +55,7 @@ public static class TestContextExtensions
     {
         var testDetails = testContext.TestDetails;
         
-        var classTypeName = testDetails.TestClass.Type.FullName?
-                                .Split(ClassTypeNameSplitter, StringSplitOptions.RemoveEmptyEntries)
-                                .LastOrDefault()
-                            ?? testDetails.TestClass.Type.Name;
+        var classTypeName = testDetails.TestClass.Name;
         
         if (testDetails.TestClassArguments.Length == 0)
         {

@@ -46,7 +46,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                         BeforeTestDiscoveryHooks.Add(new BeforeTestDiscoveryHookMethod
                         {
                             MethodInfo = sourceGeneratedMethodInformation,
-                            Order = 0,
+                            Order = hookAttribute.Order,
                             HookExecutor = GetHookExecutor(methodInfo),
                             FilePath = hookAttribute.File,
                             LineNumber = hookAttribute.Line,
@@ -58,7 +58,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                         AfterTestDiscoveryHooks.Add(new AfterTestDiscoveryHookMethod
                         {
                             MethodInfo = sourceGeneratedMethodInformation,
-                            Order = 0,
+                            Order = hookAttribute.Order,
                             HookExecutor = GetHookExecutor(methodInfo),
                             FilePath = hookAttribute.File,
                             LineNumber = hookAttribute.Line,
@@ -87,7 +87,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                         BeforeTestSessionHooks.Add(new BeforeTestSessionHookMethod
                         {
                             MethodInfo = sourceGeneratedMethodInformation,
-                            Order = 0,
+                            Order = hookAttribute.Order,
                             HookExecutor = GetHookExecutor(methodInfo),
                             FilePath = hookAttribute.File,
                             LineNumber = hookAttribute.Line,
@@ -99,7 +99,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                         AfterTestSessionHooks.Add(new AfterTestSessionHookMethod
                         {
                             MethodInfo = sourceGeneratedMethodInformation,
-                            Order = 0,
+                            Order = hookAttribute.Order,
                             HookExecutor = GetHookExecutor(methodInfo),
                             FilePath = hookAttribute.File,
                             LineNumber = hookAttribute.Line,
@@ -159,7 +159,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             BeforeAssemblyHooks.GetOrAdd(assembly, _ => []).Add(new BeforeAssemblyHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -171,7 +171,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             AfterAssemblyHooks.GetOrAdd(assembly, _ => []).Add(new AfterAssemblyHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -183,7 +183,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             BeforeEveryAssemblyHooks.Add(new BeforeAssemblyHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -195,7 +195,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             AfterEveryAssemblyHooks.Add(new AfterAssemblyHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -213,7 +213,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             BeforeClassHooks.GetOrAdd(type, _ => []).Add(new BeforeClassHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -225,7 +225,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             AfterClassHooks.GetOrAdd(type, _ => []).Add(new AfterClassHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -237,7 +237,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             BeforeEveryClassHooks.Add(new BeforeClassHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -249,7 +249,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             AfterEveryClassHooks.Add(new AfterClassHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -267,7 +267,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             BeforeTestHooks.GetOrAdd(type, _ => []).Add(new InstanceHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 ClassType = type,
                 Body = (instance, context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeInstanceHook(instance, context, token)),
@@ -278,7 +278,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             AfterTestHooks.GetOrAdd(type, _ => []).Add(new InstanceHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 ClassType = type,
                 Body = (instance, context, token) => AsyncConvert.ConvertObject(methodInfo.InvokeInstanceHook(instance, context, token)),
@@ -289,7 +289,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             BeforeEveryTestHooks.Add(new BeforeTestHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,
@@ -301,7 +301,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             AfterEveryTestHooks.Add(new AfterTestHookMethod
             {
                 MethodInfo = sourceGeneratedMethodInformation,
-                Order = 0,
+                Order = hookAttribute.Order,
                 HookExecutor = GetHookExecutor(methodInfo),
                 FilePath = hookAttribute.File,
                 LineNumber = hookAttribute.Line,

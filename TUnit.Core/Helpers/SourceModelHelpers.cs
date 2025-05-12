@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Extensions;
 
 namespace TUnit.Core.Helpers;
 
@@ -32,7 +33,7 @@ internal class SourceModelHelpers
         {
             Assembly = GenerateAssembly(testClassType),
             Attributes = testClassType.GetCustomAttributes().ToArray(),
-            Name = testClassType.Name,
+            Name = testClassType.GetFormattedName(),
             Namespace = testClassType.Namespace,
             Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
             Properties = properties?.Select(GenerateProperty).ToArray() ?? [],
