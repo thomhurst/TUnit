@@ -36,6 +36,26 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
         foreach (var type in allTypes.Where(x => x is { IsClass: true, IsAbstract: false }))
         {
+            foreach (var propertyInfo in type.GetProperties().Where(x => x.GetMethod?.IsStatic is true))
+            {
+                if (propertyInfo.GetCustomAttributes().OfType<IDataAttribute>().FirstOrDefault() is {} dataAttribute)
+                {
+                    foreach (var argument in GetArguments(type, null, propertyInfo, dataAttribute, DataGeneratorType.Property, () => [], SourceModelHelpers.BuildTestMethod(type, propertyInfo.GetMethod!, [], null), new TestBuilderContextAccessor(new TestBuilderContext())).Take(1))
+                    {
+                        var value = argument()[0];
+                        
+                        propertyInfo.SetValue(null, value);
+                        
+                        // TODO:
+                        // Make async
+                        if (value is IAsyncInitializer asyncInitializer)
+                        {
+                            asyncInitializer.InitializeAsync().GetAwaiter().GetResult();
+                        }
+                    }
+                }
+            }
+            
             var testMethods = type.GetMethods()
                 .Where(x => !x.IsAbstract && IsTest(x))
                 .ToArray();
