@@ -28,7 +28,17 @@ internal static class InstanceHelper
             
             var parameters = type.GetConstructors().First(x => !x.IsStatic).GetParameters();
 
-            var castedArgs = args?.Select((a, index) => CastHelper.Cast(parameters[index].ParameterType, a)).ToArray();
+            var castedArgs = args?.Select((a, index) =>
+            {
+                var parameterType = parameters.ElementAtOrDefault(index)?.ParameterType;
+
+                if (parameterType is null)
+                {
+                    return a;
+                }
+                
+                return CastHelper.Cast(parameterType, a);
+            }).ToArray();
 
             if (type.ContainsGenericParameters)
             {

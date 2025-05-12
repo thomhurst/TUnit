@@ -21,7 +21,9 @@ internal class DependencyCollector
     {
         try
         {
-           return CollectDependencies(test, allTests, [], [], cancellationToken).ToArray();
+            var testDetails = new TestDetailsEqualityWrapper(test.TestDetails);
+            
+            return CollectDependencies(test, allTests, [testDetails], [testDetails], cancellationToken).ToArray();
         }
         catch (Exception e)
         {
@@ -40,33 +42,33 @@ internal class DependencyCollector
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var testDetails = new TestDetailsEqualityWrapper(test.TestDetails);
-
-        if (!currentChain.Add(testDetails))
-        {
-            throw new DependencyConflictException(currentChain.Select(x => x.TestDetails).Append(testDetails.TestDetails).ToArray());
-        }
-
-        if (!visited.Add(testDetails))
-        {
-            currentChain.Remove(testDetails);
-            yield break;
-        }
-
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
             foreach (var dependency in GetDependencies(test, dependsOnAttribute, allTests))
             {
+                var testDetails = new TestDetailsEqualityWrapper(dependency.TestDetails);
+
+                if (!currentChain.Add(testDetails))
+                {
+                    throw new DependencyConflictException(currentChain.Select(x => x.TestDetails).Append(testDetails.TestDetails).ToArray());
+                }
+
+                if (!visited.Add(testDetails))
+                {
+                    currentChain.Remove(testDetails);
+                    continue;
+                }
+                
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
                 foreach (var nestedDependency in CollectDependencies(dependency, allTests, visited, currentChain, cancellationToken))
                 {
                     yield return nestedDependency;
                 }
+                
+                currentChain.Remove(testDetails);
             }
         }
-
-        currentChain.Remove(testDetails);
     }
     
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
