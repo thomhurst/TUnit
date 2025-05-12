@@ -71,6 +71,55 @@ public class DependencyCollectorTests
         await Assert.That(dependencies).Contains(d => d.Test == testA);
         await Assert.That(dependencies).Contains(d => d.Test == testB);
     }
+    
+    [Test]
+public async Task CollectDependencies_ShouldResolveComplexNestedDependenciesCorrectly_WhenNoConflictsExist()
+{
+    // Arrange
+    var testA = CreateTest("TestA");
+    var testB = CreateTest("TestB", dependsOn: testA);
+    var testC = CreateTest("TestC", dependsOn: testB);
+    var testD = CreateTest("TestD", dependsOn: testC);
+
+    var collector = new DependencyCollector();
+    var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+    var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+    var cancellationToken = CancellationToken.None;
+
+    // Act
+    var dependencies = collector.CollectDependencies(testD, [testA, testB, testC, testD], visited, currentChain, cancellationToken).ToList();
+
+    // Assert
+    await Assert.That(dependencies).HasCount().EqualTo(3);
+    await Assert.That(dependencies).Contains(d => d.Test == testA);
+    await Assert.That(dependencies).Contains(d => d.Test == testB);
+    await Assert.That(dependencies).Contains(d => d.Test == testC);
+}
+
+[Test]
+public void CollectDependencies_ShouldThrowDependencyConflictException_ForComplexNestedGraphWithConflict()
+{
+    // Arrange
+    var testA = CreateTest("TestA");
+    var testB = CreateTest("TestB", dependsOn: testA);
+    var testC = CreateTest("TestC", dependsOn: testB);
+    var testD = CreateTest("TestD", dependsOn: testC);
+
+    typeof(TestDetails).GetProperty(nameof(TestDetails.Attributes))!
+        .GetBackingField()!
+        .SetValue(testA.TestDetails, new Attribute[] { new DependsOnAttribute(testD.TestDetails.TestName) });
+
+    var collector = new DependencyCollector();
+    var visited = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+    var currentChain = new HashSet<DependencyCollector.TestDetailsEqualityWrapper>();
+    var cancellationToken = CancellationToken.None;
+
+    // Act & Assert
+    Assert.Throws<DependencyConflictException>(() =>
+    {
+        _ = collector.CollectDependencies(testD, [testA, testB, testC, testD], visited, currentChain, cancellationToken).ToArray();
+    });
+}
 
     private DiscoveredTest CreateTest(string name, DiscoveredTest? dependsOn = null)
     {
