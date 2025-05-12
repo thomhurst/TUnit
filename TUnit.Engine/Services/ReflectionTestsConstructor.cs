@@ -26,29 +26,35 @@ internal class ReflectionTestsConstructor(IExtension extension,
             throw new InvalidOperationException("Reflection tests are not supported with AOT or trimming enabled.");
         }
 #endif
-        var allTypes = ReflectionScanner.GetTypes();
         
-        var testMethods = allTypes
-            .Where(x => x is { IsClass: true, IsAbstract: false })
-            .SelectMany(x => x.GetMethods())
-            .Where(IsTest)
-            .Where(x => !x.IsAbstract)
-            .ToArray();
-        
-        return Build(testMethods, allTypes)
-            .SelectMany(ConstructTests)
-            .ToArray();
+        return DiscoverTestsInternal().ToArray();
     }
 
-    private static IEnumerable<DynamicTest> Build(MethodInfo[] testMethods, IReadOnlyCollection<Type> allTypes)
+    private IEnumerable<DiscoveredTest> DiscoverTestsInternal()
+    {
+        var allTypes = ReflectionScanner.GetTypes();
+
+        foreach (var type in allTypes.Where(x => x is { IsClass: true, IsAbstract: false }))
+        {
+            var testMethods = type.GetMethods()
+                .Where(x => !x.IsAbstract && IsTest(x))
+                .ToArray();
+
+            foreach (var discoveredTest in Build(type, testMethods, allTypes)
+                         .SelectMany(ConstructTests))
+            {
+                yield return discoveredTest;
+            }
+        }
+    }
+
+    private static IEnumerable<DynamicTest> Build(Type type, MethodInfo[] testMethods, IReadOnlyCollection<Type> allTypes)
     {
         var testsBuilderDynamicTests = new List<DynamicTest>();
         
         foreach (var testMethod in testMethods)
         {
             var testAttribute = testMethod.GetCustomAttribute<TestAttribute>()!;
-
-            var type = testMethod.ReflectedType ?? testMethod.DeclaringType!;
             
             try
             {
