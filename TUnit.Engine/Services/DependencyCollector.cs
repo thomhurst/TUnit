@@ -21,7 +21,7 @@ internal class DependencyCollector
     {
         try
         {
-           return CollectDependencies(test, allTests, [], cancellationToken).ToArray();
+           return CollectDependencies(test, allTests, [], [], cancellationToken).ToArray();
         }
         catch (Exception e)
         {
@@ -31,29 +31,34 @@ internal class DependencyCollector
         return [];
     }
 
-    private IEnumerable<Dependency> CollectDependencies(DiscoveredTest test, DiscoveredTest[] allTests, HashSet<TestDetailsEqualityWrapper> visited, CancellationToken cancellationToken)
+    private IEnumerable<Dependency> CollectDependencies(DiscoveredTest test, DiscoveredTest[] allTests, HashSet<TestDetailsEqualityWrapper> visited, Stack<TestDetailsEqualityWrapper> currentChain, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        
+
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
             foreach (var dependency in GetDependencies(test, dependsOnAttribute, allTests))
             {
                 var testDetailsEqualityWrapper = new TestDetailsEqualityWrapper(dependency.TestDetails);
-                
-                if (!visited.Add(testDetailsEqualityWrapper))
-                {
-                    throw new DependencyConflictException([..visited.Select(x => x.TestDetails), dependency.TestDetails]);
-                }
-                
-                yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in CollectDependencies(dependency, allTests, visited, cancellationToken))
+                if (currentChain.Contains(testDetailsEqualityWrapper))
                 {
-                    yield return nestedDependency;
+                    throw new DependencyConflictException(currentChain.Select(x => x.TestDetails).Append(dependency.TestDetails).ToArray());
                 }
-                
-                visited.Remove(testDetailsEqualityWrapper);
+
+                if (visited.Add(testDetailsEqualityWrapper))
+                {
+                    currentChain.Push(testDetailsEqualityWrapper);
+
+                    yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
+
+                    foreach (var nestedDependency in CollectDependencies(dependency, allTests, visited, currentChain, cancellationToken))
+                    {
+                        yield return nestedDependency;
+                    }
+
+                    currentChain.Pop();
+                }
             }
         }
     }
