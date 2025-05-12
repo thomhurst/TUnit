@@ -16,8 +16,8 @@ public class ConflictingDependsOnTests(TestMode testMode) : InvokableTestBase(te
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(2),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0),
-                result => result.Results.First(x => x.TestName == "Test1").Output?.ErrorInfo?.Message.ShouldContain("DependsOn Conflict: Test1 > Test2 > Test1"),
-                result => result.Results.First(x => x.TestName == "Test2").Output?.ErrorInfo?.Message.ShouldContain("DependsOn Conflict: Test2 > Test1 > Test2"),
+                result => result.Results.First(x => x.TestName == "Test1").Output?.ErrorInfo?.Message.ShouldContain("DependsOn Conflict: ConflictingDependsOnTests.Test1 > ConflictingDependsOnTests.Test2 > ConflictingDependsOnTests.Test1"),
+                result => result.Results.First(x => x.TestName == "Test2").Output?.ErrorInfo?.Message.ShouldContain("DependsOn Conflict: ConflictingDependsOnTests.Test2 > ConflictingDependsOnTests.Test1 > ConflictingDependsOnTests.Test2"),
 
             ]);
     }
