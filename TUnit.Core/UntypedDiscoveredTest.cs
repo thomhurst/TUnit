@@ -11,6 +11,8 @@ internal record UntypedDiscoveredTest(ResettableLazy<object> ResettableLazy) : D
 {
     public override async ValueTask ExecuteTest(CancellationToken cancellationToken)
     {
+        TestContext.CancellationToken = cancellationToken;
+        
         var arguments = TestDetails.TestMethodArguments.ToList();
         
         if (TestDetails.TestMethod.Parameters.Any(x => x.Type == typeof(CancellationToken)))
@@ -20,7 +22,10 @@ internal record UntypedDiscoveredTest(ResettableLazy<object> ResettableLazy) : D
 
         try
         {
-            await AsyncConvert.ConvertObject(TestDetails.TestMethod.ReflectionInformation.Invoke(ResettableLazy.Value, arguments.Select((x, i) => CastHelper.Cast(TestDetails.TestMethod.Parameters[i].Type, x)).ToArray()));
+            await TestExecutor.ExecuteTest(TestContext, () =>
+            {
+                return AsyncConvert.ConvertObject(TestDetails.TestMethod.ReflectionInformation.Invoke(ResettableLazy.Value, arguments.Select((x, i) => CastHelper.Cast(TestDetails.TestMethod.Parameters[i].Type, x)).ToArray()));
+            });
         }
         catch (TargetInvocationException targetInvocationException)
         {
