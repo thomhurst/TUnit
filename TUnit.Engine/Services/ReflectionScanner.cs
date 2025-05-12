@@ -21,7 +21,6 @@ internal static class ReflectionScanner
                     return e.Types.OfType<Type>();
                 }
             })
-            .Where(x => x.FullName?.Contains("TUnit.TestProject.ComplexDependsOn.") == true)
             .ToHashSet();
     }
 }
