@@ -332,7 +332,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             var result = methodDataSourceType.GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []);
 
-            var enumerableResult = result is IEnumerable enumerable
+            var enumerableResult = result is not string and IEnumerable enumerable
                 ? enumerable.Cast<object?>().ToArray()
                 : [result];
 
@@ -365,7 +365,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             
             var result = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(null, []) ?? Array.Empty<object>();
 
-            var enumerableResult = result is IEnumerable enumerable
+            var enumerableResult = result is not string and IEnumerable enumerable
                 ? enumerable.Cast<object?>().ToArray()
                 : [result];
 
