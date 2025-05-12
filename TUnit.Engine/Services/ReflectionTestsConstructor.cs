@@ -40,7 +40,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 .Where(x => !x.IsAbstract && IsTest(x))
                 .ToArray();
 
-            foreach (var discoveredTest in Build(type, testMethods, allTypes)
+            foreach (var discoveredTest in Build(type, testMethods)
                          .SelectMany(ConstructTests))
             {
                 yield return discoveredTest;
@@ -48,7 +48,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
     }
 
-    private static IEnumerable<DynamicTest> Build(Type type, MethodInfo[] testMethods, IReadOnlyCollection<Type> allTypes)
+    private static IEnumerable<DynamicTest> Build(Type type, MethodInfo[] testMethods)
     {
         var testsBuilderDynamicTests = new List<DynamicTest>();
         

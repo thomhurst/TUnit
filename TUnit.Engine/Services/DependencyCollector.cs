@@ -8,7 +8,7 @@ namespace TUnit.Engine.Services;
 
 internal class DependencyCollector
 {
-    private ConcurrentDictionary<TestDetailsEqualityWrapper, Dependency[]> _dependenciesCache = new();
+    private readonly ConcurrentDictionary<TestDetailsEqualityWrapper, Dependency[]> _dependenciesCache = new();
     
     public void ResolveDependencies(DiscoveredTest[] discoveredTests, CancellationToken cancellationToken)
     {
@@ -39,7 +39,9 @@ internal class DependencyCollector
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (!visited.Add(new TestDetailsEqualityWrapper(discoveredTest.TestDetails)))
+        var testDetailsEqualityWrapper = new TestDetailsEqualityWrapper(discoveredTest.TestDetails);
+        
+        if (!visited.Add(testDetailsEqualityWrapper))
         {
             throw new DependencyConflictException([..visited.Select(x => x.TestDetails), discoveredTest.TestDetails]);
         }
@@ -53,6 +55,8 @@ internal class DependencyCollector
 
             ValidateDependencyChain(dependency.Test, visited, cancellationToken);
         }
+        
+        visited.Remove(testDetailsEqualityWrapper);
     }
 
     private Dependency[] GetDependencies(DiscoveredTest test, DiscoveredTest[] allTests,
