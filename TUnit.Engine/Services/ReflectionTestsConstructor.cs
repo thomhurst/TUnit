@@ -95,7 +95,14 @@ internal class ReflectionTestsConstructor(IExtension extension,
         {
             var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
 
-            var repeatCount = testInformation.Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
+            Attribute[] allAttributes =
+            [
+                ..testMethod.GetCustomAttributes(),
+                ..type.GetCustomAttributes(),
+                ..type.Assembly.GetCustomAttributes()
+            ];
+            
+            var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
             for (var index = 0; index < repeatCount + 1; index++)
             {
@@ -141,12 +148,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     {
                         TestBuilderContext = testBuilderContextAccessor.Current,
                         TestMethodArguments = testMethodArguments,
-                        Attributes =
-                        [
-                            ..testMethod.GetCustomAttributes(),
-                            ..type.GetCustomAttributes(),
-                            ..type.Assembly.GetCustomAttributes()
-                        ],
+                        Attributes = allAttributes,
                         TestName = testMethod.Name,
                         TestClassArguments = testClassArguments,
                         TestFilePath = testAttribute.File,
