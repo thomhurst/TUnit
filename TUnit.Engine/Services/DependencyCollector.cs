@@ -35,34 +35,36 @@ internal class DependencyCollector
     {
         cancellationToken.ThrowIfCancellationRequested();
 
+        var testDetails = new TestDetailsEqualityWrapper(test.TestDetails);
+
+        if (currentChain.Contains(testDetails))
+        {
+            throw new DependencyConflictException(currentChain.Select(x => x.TestDetails).Append(testDetails.TestDetails).ToArray());
+        }
+        
+        if (!visited.Add(testDetails))
+        {
+            yield break;
+        }
+        
+        currentChain.Push(testDetails);
+
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
             foreach (var dependency in GetDependencies(test, dependsOnAttribute, allTests))
             {
-                var testDetailsEqualityWrapper = new TestDetailsEqualityWrapper(dependency.TestDetails);
+                yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                if (currentChain.Contains(testDetailsEqualityWrapper))
+                foreach (var nestedDependency in CollectDependencies(dependency, allTests, visited, currentChain, cancellationToken))
                 {
-                    throw new DependencyConflictException(currentChain.Select(x => x.TestDetails).Append(dependency.TestDetails).ToArray());
-                }
-
-                if (visited.Add(testDetailsEqualityWrapper))
-                {
-                    currentChain.Push(testDetailsEqualityWrapper);
-
-                    yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
-
-                    foreach (var nestedDependency in CollectDependencies(dependency, allTests, visited, currentChain, cancellationToken))
-                    {
-                        yield return nestedDependency;
-                    }
-
-                    currentChain.Pop();
+                    yield return nestedDependency;
                 }
             }
         }
-    }
 
+        currentChain.Pop();
+    }
+    
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
     {
         var testsForClass = allTests.Where(x => x.TestDetails.TestClass.Type == (dependsOnAttribute.TestClass ?? test.TestDetails.TestClass.Type));
