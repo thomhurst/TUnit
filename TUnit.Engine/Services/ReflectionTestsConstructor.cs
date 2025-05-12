@@ -286,19 +286,13 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         ],
                         _ => throw new ArgumentOutOfRangeException(nameof(dataGeneratorType), dataGeneratorType, null)
                     },
-                    TestBuilderContext = new TestBuilderContextAccessor(testBuilderContextAccessor.Current),
+                    TestBuilderContext = testBuilderContextAccessor,
                     TestClassInstance = needsInstance ? CreateInstance(testDataAttribute, type, classInstanceArguments(), testInformation, testBuilderContextAccessor, out _) : null,
                     TestSessionId = string.Empty,
                 }
             ]) as IEnumerable;
 
-            var funcEnumerable = invoke?.Cast<object>().ToArray() ?? []!;
-            
-            if (funcEnumerable.Length == 0)
-            {
-                yield return () => [];
-                yield break;
-            }
+            var funcEnumerable = invoke?.Cast<object>() ?? [];
             
             foreach (var func in funcEnumerable)
             {
@@ -318,6 +312,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
                     return [funcResult];
                 };
+                
+                testBuilderContextAccessor.Current = new TestBuilderContext();
             }
         }
         else if (testDataAttribute is ArgumentsAttribute argumentsAttribute)
