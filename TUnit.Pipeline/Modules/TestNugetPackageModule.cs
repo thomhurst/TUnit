@@ -13,9 +13,24 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+public class TestNugetPackageModule : AbstractTestNugetPackageModule
+{
+    public override string ProjectName => "TUnit.NugetTester.csproj";
+}
+
+public class TestFSharpNugetPackageModule : AbstractTestNugetPackageModule
+{
+    public override string ProjectName => "TUnit.NugetTester.FSharp.csproj";
+}
+
+public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
+{
+    public override string ProjectName => "TUnit.NugetTester.VB.csproj";
+}
+
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]
-public class TestNugetPackageModule : TestBaseModule
+public abstract class AbstractTestNugetPackageModule : TestBaseModule
 {
     protected override IEnumerable<string> TestableFrameworks
     {
@@ -44,7 +59,7 @@ public class TestNugetPackageModule : TestBaseModule
         var project = context.Git()
             .RootDirectory
             .AssertExists()
-            .FindFile(x => x.Name == "TUnit.NugetTester.csproj")
+            .FindFile(x => x.Name == ProjectName)
             .AssertExists();
 
         return new DotNetRunOptions
@@ -57,4 +72,6 @@ public class TestNugetPackageModule : TestBaseModule
             ]
         };
     }
+
+    public abstract string ProjectName { get; }
 }

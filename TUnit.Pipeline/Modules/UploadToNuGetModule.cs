@@ -15,6 +15,8 @@ namespace TUnit.Pipeline.Modules;
 [RunOnLinuxOnly]
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
+[DependsOn<TestFSharpNugetPackageModule>]
+[DependsOn<TestVBNugetPackageModule>]
 public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<CommandResult[]>
 {
     protected override Task<SkipDecision> ShouldSkip(IPipelineContext context)

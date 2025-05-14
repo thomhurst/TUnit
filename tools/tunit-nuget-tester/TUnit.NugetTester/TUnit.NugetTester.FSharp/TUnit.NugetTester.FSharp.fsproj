@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net7.0;net8.0;net9.0;net462;net472;net481</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <IsLibraryTestProject>true</IsLibraryTestProject>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <OutputType>exe</OutputType>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Compile Include="Program.fs"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="TUnit">
+            <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
+        </PackageReference>
+        <PackageReference Include="Polyfill" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.NugetTester.Library\TUnit.NugetTester.Library.csproj" />
+    </ItemGroup>
+    
+</Project>

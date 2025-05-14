@@ -17,6 +17,8 @@ namespace TUnit.Pipeline.Modules;
 [RunOnLinuxOnly]
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
+[DependsOn<TestFSharpNugetPackageModule>]
+[DependsOn<TestVBNugetPackageModule>]
 [DependsOn<GenerateReadMeModule>(IgnoreIfNotRegistered = true)]
 [SkipIfDependabot]
 [ModuleCategory("ReadMe")]
