@@ -748,6 +748,7 @@ namespace TUnit.Core
     public class SourceRegistrar
     {
         public SourceRegistrar() { }
+        public static bool IsEnabled { get; set; }
         public static void Register(TUnit.Core.Interfaces.SourceGenerator.ITestSource testSource) { }
         public static void RegisterAssembly(System.Func<System.Reflection.Assembly> assemblyLoader) { }
         public static void RegisterAssemblyHookSource(TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource testSource) { }
