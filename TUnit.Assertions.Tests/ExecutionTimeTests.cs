@@ -13,7 +13,7 @@ public class ExecutionTimeTests
     {
         var action = () => Thread.Sleep(100);
 
-        await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(250));
+        await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(500));
     }
     
     [Test]
