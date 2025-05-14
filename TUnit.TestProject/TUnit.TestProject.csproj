@@ -75,10 +75,6 @@
 <!--          <Compile Remove="SourceGeneratedViewer\**" />-->
 <!--          <None Include="SourceGeneratedViewer\**" />-->
 <!--      </ItemGroup>-->
-  
-  <PropertyGroup>
-    <TUnitReflectionScanner>true</TUnitReflectionScanner>
-  </PropertyGroup>
 
 <Import Project="..\TestProject.targets" />
 
