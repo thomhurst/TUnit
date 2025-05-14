@@ -42,6 +42,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 						Parameters = [],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -118,6 +119,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{

@@ -49,6 +49,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -164,6 +165,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -279,6 +281,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -394,6 +397,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -509,6 +513,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -624,6 +629,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

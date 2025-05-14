@@ -41,6 +41,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -157,6 +158,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -274,6 +276,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -383,6 +386,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

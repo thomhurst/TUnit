@@ -48,6 +48,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -188,6 +189,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -328,6 +330,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -473,6 +476,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -631,6 +635,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -800,6 +805,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -980,6 +986,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

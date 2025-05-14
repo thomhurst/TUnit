@@ -79,6 +79,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.GenericMethodTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -205,6 +206,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.GenericMethodTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{

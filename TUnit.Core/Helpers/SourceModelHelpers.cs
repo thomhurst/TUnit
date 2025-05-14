@@ -4,6 +4,7 @@ using TUnit.Core.Extensions;
 
 namespace TUnit.Core.Helpers;
 
+[SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 internal class SourceModelHelpers
 {
     public static SourceGeneratedMethodInformation BuildTestMethod([DynamicallyAccessedMembers(
@@ -24,13 +25,28 @@ internal class SourceModelHelpers
         };
     }
 
-    public static SourceGeneratedClassInformation GenerateClass([DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors
+    public static SourceGeneratedClassInformation? GetParent(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type)
+    {
+        if (type.DeclaringType is null)
+        {
+            return null;
+        }
+        
+        return GenerateClass(type.DeclaringType, []);
+    }
+
+    public static SourceGeneratedClassInformation GenerateClass(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType, Dictionary<string, object?>? properties)
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType, 
+        Dictionary<string, object?>? properties)
     {
         return new SourceGeneratedClassInformation
         {
+            Parent = GetParent(testClassType),
             Assembly = GenerateAssembly(testClassType),
             Attributes = testClassType.GetCustomAttributes().ToArray(),
             Name = testClassType.GetFormattedName(),

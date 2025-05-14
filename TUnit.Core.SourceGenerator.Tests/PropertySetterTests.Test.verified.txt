@@ -41,6 +41,7 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PropertySetterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PropertySetterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

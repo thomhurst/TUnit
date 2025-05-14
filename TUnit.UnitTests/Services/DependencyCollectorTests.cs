@@ -1,5 +1,6 @@
 ﻿using NSubstitute;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Helpers;
 using TUnit.Engine.Services;
 using TUnit.UnitTests.Extensions;
 
@@ -145,6 +146,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                     : [],
                 Class = new SourceGeneratedClassInformation
                 {
+                    Parent = SourceModelHelpers.GetParent(typeof(DependencyCollectorTests)),
                     Type = typeof(DependencyCollectorTests),
                     Namespace = null,
                     Assembly = new SourceGeneratedAssemblyInformation

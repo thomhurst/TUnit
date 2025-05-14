@@ -673,6 +673,7 @@ namespace TUnit.Core
         public required TUnit.Core.SourceGeneratedAssemblyInformation Assembly { get; init; }
         public required string? Namespace { get; init; }
         public required TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
+        public required TUnit.Core.SourceGeneratedClassInformation? Parent { get; init; }
         public required TUnit.Core.SourceGeneratedPropertyInformation[] Properties { get; init; }
         public override required System.Type Type { get; init; }
         public virtual bool Equals(TUnit.Core.SourceGeneratedClassInformation? other) { }

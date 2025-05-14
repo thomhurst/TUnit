@@ -67,6 +67,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -169,6 +170,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -271,6 +273,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -377,6 +380,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{
@@ -483,6 +487,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -589,6 +594,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 									{
+										Parent = null,
 										Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 										{

@@ -49,6 +49,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -167,6 +168,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -285,6 +287,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

@@ -49,6 +49,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -164,6 +165,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -279,6 +281,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -394,6 +397,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -514,6 +518,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

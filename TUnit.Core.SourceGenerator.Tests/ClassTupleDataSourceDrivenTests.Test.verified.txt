@@ -66,6 +66,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -250,6 +251,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -434,6 +436,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -618,6 +621,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{

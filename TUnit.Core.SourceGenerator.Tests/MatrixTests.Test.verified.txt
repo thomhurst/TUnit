@@ -67,6 +67,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -256,6 +257,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -443,6 +445,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -610,6 +613,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -771,6 +775,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -935,6 +940,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1102,6 +1108,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.MatrixTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -1261,6 +1268,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1408,6 +1416,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1555,6 +1564,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1702,6 +1712,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1860,6 +1871,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

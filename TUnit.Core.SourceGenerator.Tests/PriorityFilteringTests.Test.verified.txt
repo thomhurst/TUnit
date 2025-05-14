@@ -42,6 +42,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -148,6 +149,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -254,6 +256,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -360,6 +363,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -466,6 +470,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -572,6 +577,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

@@ -51,6 +51,7 @@ file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base1", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -134,6 +135,7 @@ file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base1", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -214,6 +216,7 @@ file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -297,6 +300,7 @@ file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -377,6 +381,7 @@ file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base3", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -460,6 +465,7 @@ file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base3", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -540,6 +546,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -629,6 +636,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -718,6 +726,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -812,6 +821,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -895,6 +905,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -984,6 +995,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -1072,6 +1084,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -1166,6 +1179,7 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeAllTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{

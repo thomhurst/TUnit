@@ -41,6 +41,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BasicTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BasicTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -146,6 +147,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BasicTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BasicTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -251,6 +253,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BasicTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BasicTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

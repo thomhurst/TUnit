@@ -54,6 +54,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -145,6 +146,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -270,6 +272,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -367,6 +370,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{

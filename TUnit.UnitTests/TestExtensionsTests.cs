@@ -4,6 +4,7 @@ using AutoFixture;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
 using TUnit.Core.Extensions;
+using TUnit.Core.Helpers;
 using TestContext = TUnit.Core.TestContext;
 
 namespace TUnit.UnitTests;
@@ -35,6 +36,7 @@ public class TestExtensionsTests
                     Parameters = [],
                     Properties = [],
                     Type = typeof(TestExtensionsTests),
+                    Parent = null,
                 },
                 Name = "DummyMethod",
                 Parameters = [],
@@ -63,6 +65,7 @@ public class TestExtensionsTests
                 Attributes = [],
                 Class = new SourceGeneratedClassInformation
                 {
+                    Parent = SourceModelHelpers.GetParent(typeof(InnerClass)),
                     Name = "InnerClass",
                     Namespace = "TUnit.UnitTests",
                     Assembly = new SourceGeneratedAssemblyInformation
@@ -114,6 +117,7 @@ public class TestExtensionsTests
                 Attributes = [],
                 Class = new SourceGeneratedClassInformation
                 {
+                    Parent = SourceModelHelpers.GetParent(typeof(TestExtensionsTests)),
                     Name = "TestExtensionsTests",
                     Namespace = "TUnit.UnitTests",
                     Assembly = new SourceGeneratedAssemblyInformation

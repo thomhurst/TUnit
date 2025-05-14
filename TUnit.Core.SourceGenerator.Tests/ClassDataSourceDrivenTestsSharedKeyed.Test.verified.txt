@@ -48,6 +48,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -192,6 +193,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

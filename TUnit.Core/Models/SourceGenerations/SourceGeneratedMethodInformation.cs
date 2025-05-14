@@ -23,6 +23,7 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
             GenericTypeCount = 0,
             Class = new SourceGeneratedClassInformation
             {
+                Parent = null,
                 Assembly = new SourceGeneratedAssemblyInformation
                 {
                     Attributes = [],

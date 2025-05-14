@@ -41,6 +41,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.MyTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

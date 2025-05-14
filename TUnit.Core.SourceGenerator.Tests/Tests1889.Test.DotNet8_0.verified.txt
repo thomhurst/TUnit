@@ -46,6 +46,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -133,6 +134,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -249,6 +251,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -338,6 +341,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{

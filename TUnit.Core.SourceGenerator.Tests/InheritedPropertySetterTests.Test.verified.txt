@@ -41,6 +41,7 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PropertySetterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PropertySetterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -357,6 +358,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

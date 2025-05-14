@@ -64,6 +64,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -172,6 +173,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{

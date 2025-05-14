@@ -42,6 +42,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -157,6 +158,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -295,6 +297,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -408,6 +411,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -535,6 +539,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -657,6 +662,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -800,6 +806,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -915,6 +922,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1030,6 +1038,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

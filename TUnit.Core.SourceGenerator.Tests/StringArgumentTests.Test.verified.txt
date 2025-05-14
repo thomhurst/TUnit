@@ -70,6 +70,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -171,6 +172,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -272,6 +274,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -373,6 +376,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{
@@ -474,6 +478,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -575,6 +580,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 									{
+										Parent = null,
 										Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 										{
@@ -676,6 +682,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 										{
+											Parent = null,
 											Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 											{
@@ -777,6 +784,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 											{
+												Parent = null,
 												Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 												{
@@ -912,6 +920,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1009,6 +1018,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -1106,6 +1116,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -1203,6 +1214,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{
@@ -1300,6 +1312,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -1397,6 +1410,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 									{
+										Parent = null,
 										Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 										{
@@ -1494,6 +1508,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 										{
+											Parent = null,
 											Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 											{
@@ -1591,6 +1606,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 											{
+												Parent = null,
 												Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 												{

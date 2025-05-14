@@ -52,6 +52,7 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.BaseTests<>", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<>),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -85,6 +86,7 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 						Parameters = [],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{

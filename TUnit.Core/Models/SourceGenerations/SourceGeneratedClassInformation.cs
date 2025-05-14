@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -35,4 +36,5 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
     public required SourceGeneratedParameterInformation[] Parameters { get; init; }
     
     public required SourceGeneratedPropertyInformation[] Properties { get; init; }
+    public required SourceGeneratedClassInformation? Parent { get; init; }
 }

@@ -49,6 +49,7 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantsInInterpolatedStringsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{

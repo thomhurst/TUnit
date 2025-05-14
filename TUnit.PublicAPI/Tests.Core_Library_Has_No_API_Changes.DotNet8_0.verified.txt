@@ -690,6 +690,7 @@ namespace TUnit.Core
         public required TUnit.Core.SourceGeneratedAssemblyInformation Assembly { get; init; }
         public required string? Namespace { get; init; }
         public required TUnit.Core.SourceGeneratedParameterInformation[] Parameters { get; init; }
+        public required TUnit.Core.SourceGeneratedClassInformation? Parent { get; init; }
         public required TUnit.Core.SourceGeneratedPropertyInformation[] Properties { get; init; }
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]
         public override required System.Type Type { get; init; }

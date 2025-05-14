@@ -56,6 +56,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -148,6 +149,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -240,6 +242,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -362,6 +365,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -454,6 +458,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -546,6 +551,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{

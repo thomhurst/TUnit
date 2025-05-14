@@ -48,6 +48,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -174,6 +175,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -299,6 +301,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -430,6 +433,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -563,6 +567,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -698,6 +703,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
