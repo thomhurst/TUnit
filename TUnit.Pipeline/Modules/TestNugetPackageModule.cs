@@ -5,6 +5,7 @@ using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
+using Polly.Retry;
 using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
@@ -28,6 +29,8 @@ public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
 [DependsOn<CopyToLocalNuGetModule>]
 public abstract class AbstractTestNugetPackageModule : TestBaseModule
 {
+    protected override AsyncRetryPolicy<IReadOnlyList<CommandResult>?> RetryPolicy
+        => CreateRetryPolicy(3);
     protected override IEnumerable<string> TestableFrameworks
     {
         get
