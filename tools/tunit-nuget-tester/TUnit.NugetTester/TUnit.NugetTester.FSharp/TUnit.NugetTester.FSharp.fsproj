@@ -18,6 +18,7 @@
             <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
         </PackageReference>
         <PackageReference Include="Polyfill" />
+        <PackageReference Include="FSharp.Core" />
     </ItemGroup>
 
     <ItemGroup>
