@@ -12,7 +12,7 @@ public class Tests
     [Category("Pass")]
     public async Task ConsoleOutput()
     {
-        Console.WriteLine("Blah!");
+        Console.WriteLine(@"Blah!");
 
         await Assert.That(TestContext.Current?.GetStandardOutput()).IsEqualTo("Blah!", StringComparison.Ordinal);
     }

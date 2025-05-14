@@ -9,28 +9,28 @@ public class InjectedClassDataSourceWithAsyncInitializerTests(InjectedClassDataS
     [Before(Test)]
     public Task BeforeTest()
     {
-        Console.WriteLine("BeforeTest");
+        Console.WriteLine(@"BeforeTest");
         return Task.CompletedTask;
     }
 
     [Test]
     public Task Test1()
     {
-        Console.WriteLine("Test");
+        Console.WriteLine(@"Test");
         return Task.CompletedTask;
     }
 
     [Test]
     public Task Test2()
     {
-        Console.WriteLine("Test");
+        Console.WriteLine(@"Test");
         return Task.CompletedTask;
     }
 
     [Test]
     public Task Test3()
     {
-        Console.WriteLine("Test");
+        Console.WriteLine(@"Test");
         return Task.CompletedTask;
     }
 
@@ -38,7 +38,7 @@ public class InjectedClassDataSourceWithAsyncInitializerTests(InjectedClassDataS
     {
         public Task InitializeAsync()
         {
-            Console.WriteLine("IAsyncInitializer.InitializeAsync");
+            Console.WriteLine(@"IAsyncInitializer.InitializeAsync");
             return Task.CompletedTask;
         }
     }

@@ -39,7 +39,7 @@ public class PropertySetterTests
     {
         if (IsMatchingTestFilter())
         {
-            await PrintMessage("Before Test Session");
+            Console.WriteLine(@"Before Test Session");
 
             await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
         }
@@ -50,7 +50,7 @@ public class PropertySetterTests
     {
         if (IsMatchingTestFilter())
         {
-            await PrintMessage("Before Assembly");
+            Console.WriteLine(@"Before Assembly");
 
             await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
         }
@@ -61,7 +61,7 @@ public class PropertySetterTests
     {
         if (IsMatchingTestFilter())
         {
-            await PrintMessage("Before Class");
+            Console.WriteLine(@"Before Class");
 
             await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
         }
@@ -70,76 +70,61 @@ public class PropertySetterTests
     [Test]
     public async Task Test()
     {
-        await PrintMessage("Running Test");
+        Console.WriteLine(@"Running Test");
 
-        await PrintMessage(StaticProperty.ToString());
+        Console.WriteLine(StaticProperty.ToString());
         await Assert.That(StaticProperty).IsNotNull();
         await Assert.That(StaticProperty.IsInitialized).IsTrue();
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+        
+        await Assert.That(Property3.IsInitialized).IsTrue();
+        await Assert.That(Property4.IsInitialized).IsTrue();
+        await Assert.That(Property5.IsInitialized).IsTrue();
+        await Assert.That(Property6.IsInitialized).IsTrue();
     }
 
     public class InnerModel : IAsyncInitializer, IAsyncDisposable
     {
-        public async Task InitializeAsync()
+        public Task InitializeAsync()
         {
-            await PrintMessage("Initializing Property");
+            Console.WriteLine(@"Initializing Property");
             IsInitialized = true;
             Foo = "Bar";
+            return Task.CompletedTask;
         }
 
         public bool IsInitialized { get; private set; }
         public string? Foo { get; private set; }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
-            await PrintMessage("Disposing Property");
+            Console.WriteLine(@"Disposing Property");
 
-            if (IsMatchingTestFilter())
-            {
-                await FilePolyfill.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
-            }
+            return default;
         }
     }
 
     public record StaticInnerModel : IAsyncInitializer, IAsyncDisposable
     {
-        public async Task InitializeAsync()
+        public Task InitializeAsync()
         {
-            await PrintMessage("Initializing Static Property");
+            Console.WriteLine(@"Initializing Static Property");
             IsInitialized = true;
             Foo = "Bar";
+            return Task.CompletedTask;
         }
 
         public bool IsInitialized { get; private set; }
         public string? Foo { get; private set; }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
-            await PrintMessage("Disposing Static Property");
-
-            if (IsMatchingTestFilter())
-            {
-                await FilePolyfill.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
-            }
+            Console.WriteLine(@"Disposing Static Property");
+            return default;
         }
     }
 
     public static string MethodData() => "2";
-
-    private static async Task PrintMessage(string message)
-    {
-        if (GlobalContext.Current.TestFilter is "/*/*/PropertySetterTests/*")
-        {
-            Console.WriteLine(message);
-            await FilePolyfill.AppendAllLinesAsync($"PropertySetterTests_CapturedOutput.txt", [message]);
-        }
-
-        if (GlobalContext.Current.TestFilter is "/*/*/InheritedPropertySetterTests/*")
-        {
-            Console.WriteLine(message);
-            await FilePolyfill.AppendAllLinesAsync("InheritedPropertySetterTests_CapturedOutput.txt", [message]);
-        }
-    }
 
     private static bool IsMatchingTestFilter()
     {
