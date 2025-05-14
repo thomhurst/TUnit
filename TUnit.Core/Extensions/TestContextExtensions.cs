@@ -57,6 +57,13 @@ public static class TestContextExtensions
         
         var classTypeName = testDetails.TestClass.Name;
         
+        var parent = testDetails.TestClass.Parent;
+        while(parent is not null)
+        {
+            classTypeName = $"{parent.Name}+{classTypeName}";
+            parent = parent.Parent;
+        }
+        
         if (testDetails.TestClassArguments.Length == 0)
         {
             return classTypeName;
