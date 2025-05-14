@@ -1,14 +1,10 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using EnumerableAsyncProcessor.Extensions;
+﻿using System.Runtime.InteropServices;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
-using ModularPipelines.Modules;
 using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
@@ -20,12 +16,12 @@ public class TestNugetPackageModule : AbstractTestNugetPackageModule
 
 public class TestFSharpNugetPackageModule : AbstractTestNugetPackageModule
 {
-    public override string ProjectName => "TUnit.NugetTester.FSharp.csproj";
+    public override string ProjectName => "TUnit.NugetTester.FSharp.fsproj";
 }
 
 public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
 {
-    public override string ProjectName => "TUnit.NugetTester.VB.csproj";
+    public override string ProjectName => "TUnit.NugetTester.VB.vbproj";
 }
 
 [DependsOn<GenerateVersionModule>]
