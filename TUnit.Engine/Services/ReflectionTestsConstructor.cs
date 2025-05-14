@@ -360,8 +360,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
                     return [funcResult];
                 };
-                
-                testBuilderContextAccessor.Current = new TestBuilderContext();
             }
         }
         else if (testDataAttribute is ArgumentsAttribute argumentsAttribute)
