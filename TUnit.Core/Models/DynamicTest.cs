@@ -67,7 +67,7 @@ public abstract record DynamicTest
     {
         return new SourceGeneratedClassInformation
         {
-            Parent = SourceModelHelpers.GetParent(TestClassType),
+            Parent = ReflectionToSourceModelHelpers.GetParent(TestClassType),
             Assembly = GenerateAssembly(),
             Attributes = TestClassType.GetCustomAttributes().ToArray(),
             Name = TestClassType.Name,

@@ -12,7 +12,9 @@ using TUnit.Engine.Helpers;
 namespace TUnit.Engine.Services;
 
 [SuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[SuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
 [SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[SuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
 internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(sessionId)
 {
     private static BindingFlags BindingFlags => 
@@ -39,7 +41,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             {
                 if (HasHookType(methodInfo, HookType.TestDiscovery, out var hookAttribute))
                 {
-                    var sourceGeneratedMethodInformation = SourceModelHelpers.BuildTestMethod(type, methodInfo, [], methodInfo.Name);
+                    var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
 
                     if (hookAttribute is BeforeAttribute or BeforeEveryAttribute)
                     {
@@ -80,7 +82,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             {
                 if (HasHookType(methodInfo, HookType.TestSession, out var hookAttribute))
                 {
-                    var sourceGeneratedMethodInformation = SourceModelHelpers.BuildTestMethod(type, methodInfo, [], methodInfo.Name);
+                    var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
 
                     if (hookAttribute is BeforeAttribute or BeforeEveryAttribute)
                     {
@@ -121,7 +123,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
             {
                 try
                 {
-                    var sourceGeneratedMethodInformation = SourceModelHelpers.BuildTestMethod(type, methodInfo, [], methodInfo.Name);
+                    var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
 
                     if (HasHookType(methodInfo, HookType.Assembly, out var assemblyHookAttribute))
                     {

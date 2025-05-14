@@ -146,7 +146,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                     : [],
                 Class = new SourceGeneratedClassInformation
                 {
-                    Parent = SourceModelHelpers.GetParent(typeof(DependencyCollectorTests)),
+                    Parent = ReflectionToSourceModelHelpers.GetParent(typeof(DependencyCollectorTests)),
                     Type = typeof(DependencyCollectorTests),
                     Namespace = null,
                     Assembly = new SourceGeneratedAssemblyInformation

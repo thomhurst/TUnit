@@ -13,8 +13,15 @@ using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
-[RequiresUnreferencedCode("Reflection")]
-[RequiresDynamicCode("Reflection")]
+[SuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[SuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
+[SuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+[SuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
+[SuppressMessage("Trimming", "IL2070:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
+[SuppressMessage("Trimming", "IL2055:Either the type on which the MakeGenericType is called can\'t be statically determined, or the type parameters to be used for generic arguments can\'t be statically determined.")]
+[SuppressMessage("Trimming", "IL2060:MakeGenericMethod call does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[SuppressMessage("Trimming", "IL2111:Reflection")]
 internal class ReflectionTestsConstructor(IExtension extension, 
     DependencyCollector dependencyCollector, 
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, serviceProvider)
@@ -44,7 +51,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             {
                 if (propertyInfo.GetCustomAttributes().OfType<IDataAttribute>().FirstOrDefault() is {} dataAttribute)
                 {
-                    foreach (var argument in GetArguments(type, null, propertyInfo, dataAttribute, DataGeneratorType.Property, () => [], SourceModelHelpers.BuildTestMethod(type, propertyInfo.GetMethod!, [], null), new TestBuilderContextAccessor(new TestBuilderContext())).Take(1))
+                    foreach (var argument in GetArguments(type, null, propertyInfo, dataAttribute, DataGeneratorType.Property, () => [], ReflectionToSourceModelHelpers.BuildTestMethod(type, propertyInfo.GetMethod!, null), new TestBuilderContextAccessor(new TestBuilderContext())).Take(1))
                     {
                         var value = argument()[0];
                         
@@ -108,7 +115,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             {
                 foreach (var typeDataAttribute in GetDataAttributes(type))
                 {
-                    var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
+                    var testInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, testMethod, testMethod.Name);
                             
                     foreach (var testDataAttribute in GetDataAttributes(testMethod))
                     {
@@ -141,7 +148,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
     {
         try
         {
-            var testInformation = SourceModelHelpers.BuildTestMethod(type, testMethod, [], testMethod.Name);
+            var testInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, testMethod, testMethod.Name);
 
             Attribute[] allAttributes =
             [

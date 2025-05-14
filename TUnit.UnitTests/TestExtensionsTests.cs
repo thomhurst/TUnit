@@ -65,7 +65,7 @@ public class TestExtensionsTests
                 Attributes = [],
                 Class = new SourceGeneratedClassInformation
                 {
-                    Parent = SourceModelHelpers.GetParent(typeof(InnerClass)),
+                    Parent = ReflectionToSourceModelHelpers.GetParent(typeof(InnerClass)),
                     Name = "InnerClass",
                     Namespace = "TUnit.UnitTests",
                     Assembly = new SourceGeneratedAssemblyInformation
@@ -117,7 +117,7 @@ public class TestExtensionsTests
                 Attributes = [],
                 Class = new SourceGeneratedClassInformation
                 {
-                    Parent = SourceModelHelpers.GetParent(typeof(TestExtensionsTests)),
+                    Parent = ReflectionToSourceModelHelpers.GetParent(typeof(TestExtensionsTests)),
                     Name = "TestExtensionsTests",
                     Namespace = "TUnit.UnitTests",
                     Assembly = new SourceGeneratedAssemblyInformation

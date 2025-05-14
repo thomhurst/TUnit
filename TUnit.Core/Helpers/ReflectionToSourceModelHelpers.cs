@@ -4,18 +4,19 @@ using TUnit.Core.Extensions;
 
 namespace TUnit.Core.Helpers;
 
-[SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-internal class SourceModelHelpers
+[RequiresDynamicCode("Reflection")]
+[RequiresUnreferencedCode("Reflection")]
+internal class ReflectionToSourceModelHelpers
 {
     public static SourceGeneratedMethodInformation BuildTestMethod([DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType, MethodInfo methodInfo, Dictionary<string, object?> properties, string? testName)
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType, MethodInfo methodInfo, string? testName)
     {
         return new SourceGeneratedMethodInformation
         {
             Attributes = methodInfo.GetCustomAttributes().ToArray(),
-            Class = GenerateClass(testClassType, properties),
+            Class = GenerateClass(testClassType),
             Name = testName ?? methodInfo.Name,
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
             Parameters = GetParameters(methodInfo.GetParameters()),
@@ -35,14 +36,13 @@ internal class SourceModelHelpers
             return null;
         }
         
-        return GenerateClass(type.DeclaringType, []);
+        return GenerateClass(type.DeclaringType);
     }
 
     public static SourceGeneratedClassInformation GenerateClass(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType, 
-        Dictionary<string, object?>? properties)
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType)
     {
         return new SourceGeneratedClassInformation
         {
@@ -52,7 +52,7 @@ internal class SourceModelHelpers
             Name = testClassType.GetFormattedName(),
             Namespace = testClassType.Namespace,
             Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
-            Properties = properties?.Select(GenerateProperty).ToArray() ?? [],
+            Properties = testClassType.GetProperties().Select(GenerateProperty).ToArray(),
             Type = testClassType
         };
     }
@@ -67,16 +67,15 @@ internal class SourceModelHelpers
         };
     }
 
-    public static SourceGeneratedPropertyInformation GenerateProperty(KeyValuePair<string, object?> property)
+    public static SourceGeneratedPropertyInformation GenerateProperty(PropertyInfo property)
     {
         return new SourceGeneratedPropertyInformation
         {
-            Attributes = [], // TODO?
-            Name = property.Key,
-#pragma warning disable IL2072
-            Type = property.Value?.GetType() ?? typeof(object),
-#pragma warning restore IL2072
-            IsStatic = false, // TODO?
+            Attributes = property.GetCustomAttributes().ToArray(),
+            Name = property.Name,
+            Type = property.PropertyType,
+            IsStatic = property.GetMethod?.IsStatic is true 
+                || property.SetMethod?.IsStatic is true,
         };
     }
 
