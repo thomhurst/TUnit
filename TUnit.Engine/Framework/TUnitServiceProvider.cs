@@ -85,7 +85,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var instanceTracker = Register(new InstanceTracker());
         
-        var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions, Logger);
+        var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions);
 
         HooksCollector = Register<HooksCollectorBase>
         (
@@ -191,7 +191,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         return capability;
     }
     
-    private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions, TUnitFrameworkLogger logger)
+    private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions)
     {
 #if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
@@ -199,20 +199,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             return false;
         }
 #endif
-        
+
         return IsReflectionScannerEnabledByCommandLine(commandLineOptions)
-            || IsReflectionScannerEnabledByMsBuild();
+            || !SourceRegistrar.IsEnabled;
     }
 
     private static bool IsReflectionScannerEnabledByCommandLine(ICommandLineOptions commandLineOptions)
     {
         return commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner);
-    }
-    
-    private static bool IsReflectionScannerEnabledByMsBuild()
-    {
-        return Assembly.GetEntryAssembly()?.GetCustomAttributes<AssemblyMetadataAttribute>()
-            .Any(x => x is { Key: "TUnitReflectionScanner", Value: "true" })
-            ?? false;
     }
 }
