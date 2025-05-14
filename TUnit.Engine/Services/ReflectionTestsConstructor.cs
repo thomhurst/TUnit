@@ -412,7 +412,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         {
             var methodDataSourceType = methodDataSourceAttribute.ClassProvidingDataSource ?? type;
             
-            var result = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(null, []) ?? Array.Empty<object>();
+            var result = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy)!.Invoke(null, []) ?? Array.Empty<object>();
 
             var enumerableResult = result is not string and IEnumerable enumerable
                 ? enumerable.Cast<object?>().ToArray()
