@@ -9,6 +9,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Helpers;
+#pragma warning disable TUnitWIP0001
 
 namespace TUnit.Engine.Services;
 
@@ -27,16 +28,19 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
 #endif
         
-        return DiscoverTestsInternal().ToArray();
+        var allTypes = ReflectionScanner.GetTypes();
+        
+        return DiscoverTestsInternal(allTypes)
+            .Concat(DiscoverDynamicTests(allTypes))
+            .SelectMany(ConstructTests)
+            .ToArray();
     }
 
-    private IEnumerable<DiscoveredTest> DiscoverTestsInternal()
+    private IEnumerable<DynamicTest> DiscoverTestsInternal(HashSet<Type> allTypes)
     {
-        var allTypes = ReflectionScanner.GetTypes();
-
         foreach (var type in allTypes.Where(x => x is { IsClass: true, IsAbstract: false }))
         {
-            foreach (var propertyInfo in type.GetProperties().Where(x => x.GetMethod?.IsStatic is true))
+            foreach (var propertyInfo in type.GetProperties(BindingFlags.Static | BindingFlags.Public))
             {
                 if (propertyInfo.GetCustomAttributes().OfType<IDataAttribute>().FirstOrDefault() is {} dataAttribute)
                 {
@@ -60,10 +64,34 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 .Where(x => !x.IsAbstract && IsTest(x))
                 .ToArray();
 
-            foreach (var discoveredTest in Build(type, testMethods)
-                         .SelectMany(ConstructTests))
+            foreach (var dynamicTest in Build(type, testMethods))
             {
-                yield return discoveredTest;
+                yield return dynamicTest;
+            }
+        }
+    }
+
+    private IEnumerable<DynamicTest> DiscoverDynamicTests(HashSet<Type> allTypes)
+    {
+        foreach (var type in allTypes)
+        {
+            foreach (var methodInfo in type.GetMethods())
+            {
+                if (methodInfo.GetCustomAttributes<DynamicTestBuilderAttribute>().FirstOrDefault() is not { } dynamicTestBuilderAttribute)
+                {
+                    continue;
+                }
+
+                var context = new DynamicTestBuilderContext(dynamicTestBuilderAttribute.File, dynamicTestBuilderAttribute.Line);
+                
+                var instance = Activator.CreateInstance(type)!;
+                
+                methodInfo.Invoke(instance, [context]);
+                
+                foreach (var contextTest in context.Tests)
+                {
+                    yield return contextTest;
+                }
             }
         }
     }
@@ -109,7 +137,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
     }
 
     private static void BuildTests(Type type, Func<object?[]> classInstanceArguments, MethodInfo testMethod, IDataAttribute testDataAttribute,
-        List<DynamicTest> testsBuilderDynamicTests, TestAttribute testAttribute, TestBuilderContextAccessor testBuilderContextAccessor)
+        List<DynamicTest> testsBuilderDynamicTests, BaseTestAttribute testAttribute, TestBuilderContextAccessor testBuilderContextAccessor)
     {
         try
         {

@@ -10,6 +10,7 @@ internal static class ReflectionScanner
     public static HashSet<Type> GetTypes()
     {
         return AppDomain.CurrentDomain.GetAssemblies()
+            .Where(x => x.GetReferencedAssemblies().Select(ra => ra.Name).Contains("TUnit.Core"))
             .SelectMany(assembly =>
             {
                 try
