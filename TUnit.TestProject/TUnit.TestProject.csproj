@@ -1,21 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <IsLibraryTestProject>true</IsLibraryTestProject>
-    <IsPackable>false</IsPackable>
-    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
-    <OutputType>Exe</OutputType>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
-  </PropertyGroup>
+
+  <Import Project="..\TestProject.props" />
 
   <PropertyGroup>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
     <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
@@ -34,25 +26,19 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
-  
-  <ItemGroup>
     <PackageReference Include="AutoFixture" />
-    <PackageReference Include="Confluent.SchemaRegistry.Serdes.Protobuf" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="OneOf" />
     <PackageReference Include="OneOf.SourceGenerator" />
+    <PackageReference Include="RandomDataGenerator.Net" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Polly" />
     <PackageReference Include="Vogen" />
-    <PackageReference Include="WireMock.Net" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
@@ -70,10 +56,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Test.cs" />
-    <Compile Remove="HookCallCounts\Test\One.cs" />
-  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
   </ItemGroup>
@@ -92,5 +75,7 @@
 <!--          <Compile Remove="SourceGeneratedViewer\**" />-->
 <!--          <None Include="SourceGeneratedViewer\**" />-->
 <!--      </ItemGroup>-->
-    
+
+<Import Project="..\TestProject.targets" />
+
 </Project>

@@ -1,9 +1,10 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
 [Skip("Issue with AOT - https://github.com/microsoft/testfx/issues/4972")]
-public class ConfigurationTests : InvokableTestBase
+public class ConfigurationTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

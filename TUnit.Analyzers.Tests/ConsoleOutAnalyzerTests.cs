@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.ConsoleOutAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
@@ -24,8 +23,9 @@ public class ConsoleOutAnalyzerTests
             );
     }
     
-    [TestCase("SetOut")]
-    [TestCase("SetError")]
+    [Test]
+    [Arguments("SetOut")]
+    [Arguments("SetError")]
     public async Task Static_Error(string method)
     {
         

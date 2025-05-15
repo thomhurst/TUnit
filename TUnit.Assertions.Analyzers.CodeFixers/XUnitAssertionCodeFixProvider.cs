@@ -13,12 +13,12 @@ namespace TUnit.Assertions.Analyzers.CodeFixers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(XUnitAssertionCodeFixProvider)), Shared]
 public class XUnitAssertionCodeFixProvider : CodeFixProvider
 {
-    public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
+    public override sealed ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(Rules.XUnitAssertion.Id);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
-    public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override sealed async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)
         {

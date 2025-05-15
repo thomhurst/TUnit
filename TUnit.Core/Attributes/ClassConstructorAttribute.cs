@@ -3,7 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public abstract class ClassConstructorAttribute : TestDataAttribute
+public abstract class ClassConstructorAttribute : TUnitAttribute, IDataAttribute
 {
     public abstract Type ClassConstructorType { get; }
 

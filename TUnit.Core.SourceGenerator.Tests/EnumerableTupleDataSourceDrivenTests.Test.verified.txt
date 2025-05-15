@@ -64,6 +64,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -103,7 +104,9 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -170,6 +173,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -209,7 +213,9 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg, methodArg1, methodArg2],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,

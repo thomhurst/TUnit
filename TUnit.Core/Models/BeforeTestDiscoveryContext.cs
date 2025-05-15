@@ -10,7 +10,7 @@ public class BeforeTestDiscoveryContext : Context
     /// <summary>
     /// Gets or sets the current before test discovery context.
     /// </summary>
-    public new static BeforeTestDiscoveryContext? Current
+    public static new BeforeTestDiscoveryContext? Current
     {
         get => Contexts.Value;
         internal set => Contexts.Value = value;

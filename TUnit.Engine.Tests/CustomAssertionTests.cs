@@ -1,10 +1,11 @@
 ﻿using Shouldly;
 using TUnit.Engine.Tests.Attributes;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
 [SkipNetFramework("Json library not available")]
-public class CustomAssertionTests : InvokableTestBase
+public class CustomAssertionTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

@@ -49,6 +49,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -81,7 +82,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -161,6 +164,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -193,7 +197,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method2(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -273,6 +279,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -305,7 +312,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method_WithAction(void System.Action()):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -396,6 +405,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -428,7 +438,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method3(int):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -490,6 +502,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 									{
+										Parent = null,
 										Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 										{
@@ -522,7 +535,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 										TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method3(int):0",
 										TestClassArguments = [],
 										TestMethodArguments = [methodArg],
-										TestClassProperties = [],
+										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+										{
+										},
 										CurrentRepeatAttempt = 0,
 										RepeatLimit = 0,
 										ResettableClassFactory = resettableClassFactory,
@@ -623,6 +638,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -655,7 +671,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(int):0",
 									TestClassArguments = [],
 									TestMethodArguments = [methodArg],
-									TestClassProperties = [],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,
@@ -725,6 +743,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 													],
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 													{
+														Parent = null,
 														Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 														{
@@ -757,7 +776,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 														TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(int):0",
 														TestClassArguments = [],
 														TestMethodArguments = [methodArg],
-														TestClassProperties = [],
+														TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+														{
+														},
 														CurrentRepeatAttempt = 0,
 														RepeatLimit = 0,
 														ResettableClassFactory = resettableClassFactory,
@@ -827,6 +848,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																		],
 																		Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 																		{
+																			Parent = null,
 																			Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 																			Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 																			{
@@ -859,7 +881,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																			TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(int):0",
 																			TestClassArguments = [],
 																			TestMethodArguments = [methodArg],
-																			TestClassProperties = [],
+																			TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+																			{
+																			},
 																			CurrentRepeatAttempt = 0,
 																			RepeatLimit = 0,
 																			ResettableClassFactory = resettableClassFactory,
@@ -929,6 +953,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																							],
 																							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 																							{
+																								Parent = null,
 																								Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 																								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 																								{
@@ -961,7 +986,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS3:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(int):0",
 																								TestClassArguments = [],
 																								TestMethodArguments = [methodArg],
-																								TestClassProperties = [],
+																								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+																								{
+																								},
 																								CurrentRepeatAttempt = 0,
 																								RepeatLimit = 0,
 																								ResettableClassFactory = resettableClassFactory,
@@ -1041,6 +1068,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1073,7 +1101,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_WithBaseReturn(TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -1153,6 +1183,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -1188,7 +1219,9 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTest(string[]):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodData],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,

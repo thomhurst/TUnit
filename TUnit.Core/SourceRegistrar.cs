@@ -13,6 +13,8 @@ namespace TUnit.Core;
 /// </summary>
 public class SourceRegistrar
 {
+    public static bool IsEnabled { get; set; }
+    
     /// <summary>
     /// Registers an assembly loader.
     /// </summary>

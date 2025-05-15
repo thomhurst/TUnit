@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+    
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net8.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
@@ -13,16 +13,13 @@
     <ItemGroup>
         <PackageReference Include="CliWrap" />
         <PackageReference Include="MessagePack" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
         <PackageReference Include="Microsoft.Testing.Platform" />
-        <PackageReference Include="NUnit"/>
-        <PackageReference Include="NUnit.Analyzers"/>
-        <PackageReference Include="NUnit3TestAdapter"/>
+        <PackageReference Include="Sourcy.DotNet">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="TUnit"/>
         <PackageReference Include="StreamJsonRpc" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Using Include="NUnit.Framework"/>
     </ItemGroup>
 
 </Project>

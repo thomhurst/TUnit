@@ -6,7 +6,7 @@
 public class TestDiscoveryContext : Context
 {
     private static readonly AsyncLocal<TestDiscoveryContext?> Contexts = new();
-    public new static TestDiscoveryContext? Current
+    public static new TestDiscoveryContext? Current
     {
         get => Contexts.Value;
         internal set => Contexts.Value = value;

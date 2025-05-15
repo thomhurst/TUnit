@@ -1,8 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public class CustomFilteringTests1 : InvokableTestBase
+public class CustomFilteringTests1(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()

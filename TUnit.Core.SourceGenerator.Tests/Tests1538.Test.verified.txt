@@ -84,6 +84,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1538", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -128,7 +129,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(bool,string,string,string,string,string,string,string):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -284,6 +287,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1538", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -336,7 +340,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(bool,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7, methodArg8, methodArg9, methodArg10, methodArg11, methodArg12, methodArg13, methodArg14, methodArg15],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,

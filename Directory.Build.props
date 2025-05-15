@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == ''">
-    <TargetFrameworks Condition="'$(SDK_VERSION)' == ''">net8.0;net9.0</TargetFrameworks>
-    <!--suppress MsbuildTargetFrameworkTagInspection -->
-    <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net8'">net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net9'">net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LibraryTargetFramework Condition="$(TargetFramework.StartsWith('net4'))">netstandard2.0</LibraryTargetFramework>
+    <LibraryTargetFramework Condition="!$(TargetFramework.StartsWith('net4'))">$(TargetFramework)</LibraryTargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <NoWarn>NU1507;NU1903;CS9107</NoWarn>
     <BuildTransitivePath>buildTransitive/$(TargetFramework)/</BuildTransitivePath>

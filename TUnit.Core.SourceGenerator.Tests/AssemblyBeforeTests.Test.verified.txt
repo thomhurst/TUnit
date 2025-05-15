@@ -51,6 +51,7 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblyBase1", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase1),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -69,12 +70,6 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 5,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -140,6 +135,7 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblyBase1", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase1),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -156,13 +152,6 @@ file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGen
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.AssemblyBase1)classInstance).BeforeEach1()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 			];
 		}
@@ -227,6 +216,7 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblyBase2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase2),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -245,12 +235,6 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 20,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -316,6 +300,7 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblyBase2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase2),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -332,13 +317,6 @@ file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGen
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.AssemblyBase2)classInstance).BeforeEach2()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 			];
 		}
@@ -403,6 +381,7 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblyBase3", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase3),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -421,12 +400,6 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 35,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -492,6 +465,7 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblyBase3", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase3),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -508,13 +482,6 @@ file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGen
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.AssemblyBase3)classInstance).BeforeEach3()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 			];
 		}
@@ -579,6 +546,7 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -597,12 +565,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 50,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -674,6 +636,7 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -692,12 +655,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 56,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -769,6 +726,7 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -787,12 +745,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 62,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -869,6 +821,7 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -887,12 +840,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 68,
-				MethodAttributes = 
-				[
-					new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Assembly)
-				],
-				ClassAttributes = [],
-				AssemblyAttributes = [],
 			},
 		];
 	}
@@ -958,6 +905,7 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -974,13 +922,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.AssemblySetupTests)classInstance).Setup()),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 			];
 		}
@@ -1054,6 +995,7 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -1070,14 +1012,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.AssemblySetupTests)classInstance).Setup(cancellationToken)),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),
-						new global::TUnit.Core.TimeoutAttribute(30_000)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 			];
 		}
@@ -1150,6 +1084,7 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -1166,13 +1101,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.AssemblySetupTests)classInstance).SetupWithContext(context)),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 			];
 		}
@@ -1251,6 +1179,7 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AssemblyBeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -1267,14 +1196,6 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.AssemblySetupTests)classInstance).SetupWithContext(context, cancellationToken)),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),
-						new global::TUnit.Core.TimeoutAttribute(30_000)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 			];
 		}

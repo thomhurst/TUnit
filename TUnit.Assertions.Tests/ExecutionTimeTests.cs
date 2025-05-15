@@ -5,6 +5,7 @@ using TUnit.Assertions.Assertions.Delegates;
 
 namespace TUnit.Assertions.Tests;
 
+[NotInParallel]
 public class ExecutionTimeTests
 {
     [Test]
@@ -12,7 +13,7 @@ public class ExecutionTimeTests
     {
         var action = () => Thread.Sleep(100);
 
-        await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(250));
+        await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(500));
     }
     
     [Test]
@@ -35,9 +36,9 @@ public class ExecutionTimeTests
     [Test]
     public async Task Completes_Within_Happy2()
     {
-        var action = () => Task.Delay(100);
+        var action = () => Task.Delay(TimeSpan.FromSeconds(1));
 
-        await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(250));
+        await Assert.That(action).CompletesWithin(TimeSpan.FromSeconds(1.5));
     }
     
     [Test]

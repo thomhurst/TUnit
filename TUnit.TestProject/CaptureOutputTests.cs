@@ -81,7 +81,7 @@ public class CaptureOutputTests
     {
         public void DoSomething(int i)
         {
-            Console.WriteLine($"Blah{i}");
+            Console.WriteLine($@"Blah{i}");
         }
     }
 }

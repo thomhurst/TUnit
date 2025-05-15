@@ -1,15 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsLibraryTestProject>true</IsLibraryTestProject>
-    <LangVersion>preview</LangVersion>
-    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
-    <IsPackable>false</IsPackable>
-    <OutputType>Exe</OutputType>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-  </PropertyGroup>
+  <Import Project="..\TestProject.props" />
   
   <ItemGroup>
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
@@ -18,4 +9,6 @@
   <ItemGroup>
     <Compile Remove="ThrowTests.cs" />
   </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
 </Project>

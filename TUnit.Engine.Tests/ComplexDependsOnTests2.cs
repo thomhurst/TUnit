@@ -1,8 +1,9 @@
 ﻿using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public class ComplexDependsOnTests2 : InvokableTestBase
+public class ComplexDependsOnTests2(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
     public async Task Test()
@@ -11,8 +12,8 @@ public class ComplexDependsOnTests2 : InvokableTestBase
             "/*/*ComplexDependsOn2/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(112),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(112),
+                result => result.ResultSummary.Counters.Total.ShouldBe(144),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(144),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);

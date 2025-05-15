@@ -63,9 +63,9 @@ public class ReadTests2(string data) : BaseClass;
 [InheritsTests]
 [DependsOn<ReadTests2>]
 [MethodDataSource<TestsDataSource>(nameof(TestsDataSource.Data))]
-public class UpdateTests2 : BaseClass;
+public class UpdateTests2(string value) : BaseClass;
 
 [InheritsTests]
 [DependsOn<UpdateTests2>]
 [MethodDataSource<TestsDataSource>(nameof(TestsDataSource.Data))]
-public class DeleteTest2 : BaseClass;
+public class DeleteTest2(string value) : BaseClass;

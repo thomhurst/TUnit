@@ -46,6 +46,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.RepeatTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -80,7 +81,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					TestId = $"TUnit.TestProject.RepeatTests.One:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 1,
 					ResettableClassFactory = resettableClassFactory,
@@ -128,6 +131,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.RepeatTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -162,7 +166,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"TUnit.TestProject.RepeatTests.One:1",
 						TestClassArguments = [],
 						TestMethodArguments = [],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 1,
 						RepeatLimit = 1,
 						ResettableClassFactory = resettableClassFactory,
@@ -240,6 +246,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.RepeatTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -274,7 +281,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					TestId = $"TUnit.TestProject.RepeatTests.Two:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 2,
 					ResettableClassFactory = resettableClassFactory,
@@ -322,6 +331,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.RepeatTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -356,7 +366,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"TUnit.TestProject.RepeatTests.Two:1",
 						TestClassArguments = [],
 						TestMethodArguments = [],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 1,
 						RepeatLimit = 2,
 						ResettableClassFactory = resettableClassFactory,
@@ -404,6 +416,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						Parameters = [],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.RepeatTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -438,7 +451,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestId = $"TUnit.TestProject.RepeatTests.Two:2",
 							TestClassArguments = [],
 							TestMethodArguments = [],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 2,
 							RepeatLimit = 2,
 							ResettableClassFactory = resettableClassFactory,
@@ -516,6 +531,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.RepeatTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -550,7 +566,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					TestId = $"TUnit.TestProject.RepeatTests.Three:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 3,
 					ResettableClassFactory = resettableClassFactory,
@@ -597,6 +615,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.RepeatTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -631,7 +650,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						TestId = $"TUnit.TestProject.RepeatTests.Three:1",
 						TestClassArguments = [],
 						TestMethodArguments = [],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 1,
 						RepeatLimit = 3,
 						ResettableClassFactory = resettableClassFactory,
@@ -678,6 +699,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						Parameters = [],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.RepeatTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -712,7 +734,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestId = $"TUnit.TestProject.RepeatTests.Three:2",
 							TestClassArguments = [],
 							TestMethodArguments = [],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 2,
 							RepeatLimit = 3,
 							ResettableClassFactory = resettableClassFactory,
@@ -759,6 +783,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							Parameters = [],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.RepeatTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{
@@ -793,7 +818,9 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								TestId = $"TUnit.TestProject.RepeatTests.Three:3",
 								TestClassArguments = [],
 								TestMethodArguments = [],
-								TestClassProperties = [],
+								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+								{
+								},
 								CurrentRepeatAttempt = 3,
 								RepeatLimit = 3,
 								ResettableClassFactory = resettableClassFactory,

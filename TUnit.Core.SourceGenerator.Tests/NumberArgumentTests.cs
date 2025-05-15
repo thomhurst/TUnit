@@ -1,3 +1,4 @@
+using TUnit.Core.Executors;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -14,7 +15,6 @@ internal class NumberArgumentTests : TestsBase<TestsGenerator>
         });
 
     [Test]
-    [SetCulture("de-DE")]
-    [SetUICulture("de-DE")]
+    [Culture("de-DE")]
     public Task TestDE() => Test();
 }

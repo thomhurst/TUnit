@@ -10,6 +10,7 @@ using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 #pragma warning disable TPEXP
@@ -109,9 +110,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
             foreach (var afterDiscoveryHook in afterDiscoveryHooks)
             {
-                await logger.LogDebugAsync("Executing [After(TestDiscovery)] hook");
-
-                await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
+                try
+                {
+                    await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [Before(Test)] hook: {afterDiscoveryHook.MethodInfo.Type.FullName}.{afterDiscoveryHook.Name}", e);
+                }
             }
             
             var filteredTests = await serviceProvider.TestDiscoverer
@@ -149,9 +155,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     foreach (var afterSessionHook in afterSessionHooks)
                     {
-                        await logger.LogDebugAsync("Executing [After(TestSession)] hook");
-
-                        await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
+                        try
+                        {
+                            await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new HookFailedException($"Error executing [After(TestSession)] hook: {afterSessionHook.MethodInfo.Type.FullName}.{afterSessionHook.Name}", e);
+                        }
                     }
                     
                     foreach (var artifact in testSessionContext.Artifacts)

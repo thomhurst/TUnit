@@ -2,14 +2,28 @@
 using CliWrap;
 using CliWrap.Buffered;
 using TrxTools.TrxParser;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
-public abstract class InvokableTestBase
+[MethodDataSource(nameof(GetTestModes))]
+public abstract class InvokableTestBase(TestMode testMode)
 {
+    public static IEnumerable<TestMode> GetTestModes()
+    {
+        yield return TestMode.SourceGenerated;
+        yield return TestMode.Reflection;
+        
+        if (!EnvironmentVariables.IsNetFramework)
+        {
+            yield return TestMode.AOT;
+            yield return TestMode.SingleFileApplication;
+        }
+    }
+    
     private static readonly string GetEnvironmentVariable = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net9.0";
 
-    public static bool IsNetFramework => GetEnvironmentVariable == "net472";
+    public static bool IsNetFramework => GetEnvironmentVariable.StartsWith("net4");
     
     protected Task RunTestsWithFilter(string filter,
         List<Action<TestRun>> assertions,
@@ -18,20 +32,18 @@ public abstract class InvokableTestBase
         return RunTestsWithFilter(filter, assertions, new RunOptions(), assertionExpression);
     }
 
-    protected async Task RunTestsWithFilter(string filter,
+    protected Task RunTestsWithFilter(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions,
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
-        await RunWithoutAot(filter, assertions, runOptions, assertionExpression);
-
-        if (EnvironmentVariables.IsNet472)
+        return testMode switch
         {
-            return;
-        }
-        
-        await RunWithAot(filter, assertions, runOptions, assertionExpression);
-
-        await RunWithSingleFile(filter, assertions, runOptions, assertionExpression);
+            TestMode.SourceGenerated => RunWithoutAot(filter, assertions, runOptions, assertionExpression),
+            TestMode.Reflection => RunWithoutAot(filter, assertions, runOptions.WithArgument("--reflection-scanner"), assertionExpression),
+            TestMode.AOT => RunWithAot(filter, assertions, runOptions, assertionExpression),
+            TestMode.SingleFileApplication => RunWithSingleFile(filter, assertions, runOptions, assertionExpression),
+            _ => throw new ArgumentOutOfRangeException(nameof(testMode), testMode, null)
+        };
     }
 
     private async Task RunWithoutAot(string filter,
@@ -52,7 +64,7 @@ public abstract class InvokableTestBase
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}_", 
                     "--timeout", "5m",
-                    "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.txt", "--hangdump-timeout", "3m",
+                    // "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.txt", "--hangdump-timeout", "3m",
 
                     ..runOptions.AdditionalArguments
                 ]
@@ -176,4 +188,10 @@ public abstract class InvokableTestBase
 public record RunOptions
 {
     public List<string> AdditionalArguments { get; init; } = [];
+    
+    public RunOptions WithArgument(string argument)
+    {
+        AdditionalArguments.Add(argument);
+        return this;
+    }
 }

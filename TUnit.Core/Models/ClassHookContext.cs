@@ -3,7 +3,7 @@
 public class ClassHookContext : Context
 {
     private static readonly AsyncLocal<ClassHookContext?> Contexts = new();
-    public new static ClassHookContext? Current
+    public static new ClassHookContext? Current
     {
         get => Contexts.Value;
         internal set => Contexts.Value = value;

@@ -2,7 +2,7 @@
 
 public class DedicatedThreadExecutor : GenericAbstractExecutor
 {
-    protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
+    protected override sealed async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
         var tcs = new TaskCompletionSource<object?>();
 

@@ -1,8 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AutoFixture;
+using TUnit.Assertions.Extensions;
 using TUnit.Core;
 using TUnit.Core.Extensions;
+using TUnit.Core.Helpers;
 using TestContext = TUnit.Core.TestContext;
 
 namespace TUnit.UnitTests;
@@ -12,7 +14,7 @@ public class TestExtensionsTests
     private readonly Fixture _fixture = new();
 
     [Test]
-    public void TopLevelClass()
+    public async Task TopLevelClass()
     {
         var testDetails = _fixture.Build<TestDetails<TestExtensionsTests>>()
             .With(x => x.DynamicAttributes, [])
@@ -34,6 +36,7 @@ public class TestExtensionsTests
                     Parameters = [],
                     Properties = [],
                     Type = typeof(TestExtensionsTests),
+                    Parent = null,
                 },
                 Name = "DummyMethod",
                 Parameters = [],
@@ -47,11 +50,11 @@ public class TestExtensionsTests
 
         var name = context.GetClassTypeName();
         
-        Assert.That(name, Is.EqualTo("TestExtensionsTests"));
+        await Assert.That(name).IsEqualTo("TestExtensionsTests");
     }
 
     [Test]
-    public void NestedClass()
+    public async Task NestedClass()
     {
         var testDetails = _fixture.Build<TestDetails<InnerClass>>()
             .With(x => x.DynamicAttributes, [])
@@ -62,6 +65,7 @@ public class TestExtensionsTests
                 Attributes = [],
                 Class = new SourceGeneratedClassInformation
                 {
+                    Parent = ReflectionToSourceModelHelpers.GetParent(typeof(InnerClass)),
                     Name = "InnerClass",
                     Namespace = "TUnit.UnitTests",
                     Assembly = new SourceGeneratedAssemblyInformation
@@ -85,7 +89,7 @@ public class TestExtensionsTests
 
         var name = context.GetClassTypeName();
         
-        Assert.That(name, Is.EqualTo("TestExtensionsTests+InnerClass"));
+        await Assert.That(name).IsEqualTo("TestExtensionsTests+InnerClass");
     }
 
     private TestContext CreateTestContext<
@@ -113,6 +117,7 @@ public class TestExtensionsTests
                 Attributes = [],
                 Class = new SourceGeneratedClassInformation
                 {
+                    Parent = ReflectionToSourceModelHelpers.GetParent(typeof(TestExtensionsTests)),
                     Name = "TestExtensionsTests",
                     Namespace = "TUnit.UnitTests",
                     Assembly = new SourceGeneratedAssemblyInformation

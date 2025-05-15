@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject.Library.Bugs._1889;
+﻿namespace TUnit.TestProject.Library.Bugs._1889;
 
 public abstract class BaseTest<T>
 {

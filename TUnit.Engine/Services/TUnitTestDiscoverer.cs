@@ -10,14 +10,13 @@ using TUnit.Engine.Models;
 namespace TUnit.Engine.Services;
 
 internal class TUnitTestDiscoverer(
-    TestsConstructor testsConstructor,
+    BaseTestsConstructor testsConstructor,
     TestFilterService testFilterService,
     TestGrouper testGrouper,
     TestRegistrar testRegistrar,
     ITUnitMessageBus tUnitMessageBus,
     TUnitFrameworkLogger logger,
-    TestsExecutor testsExecutor,
-    IExtension extension) : IDataProducer
+    TestsExecutor testsExecutor)
 {
     private IReadOnlyCollection<DiscoveredTest>? _cachedTests;
 
@@ -70,15 +69,4 @@ internal class TUnitTestDiscoverer(
             );
         }
     }
-
-    public Task<bool> IsEnabledAsync()
-    {
-        return extension.IsEnabledAsync();
-    }
-
-    public string Uid => extension.Uid;
-    public string Version => extension.Version;
-    public string DisplayName => extension.DisplayName;
-    public string Description => extension.Description;
-    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
 }

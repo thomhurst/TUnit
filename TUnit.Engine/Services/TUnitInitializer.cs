@@ -13,9 +13,9 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         ParseParameters();
         SetUpExceptionListeners();
 
-        if (TestContext.OutputDirectory != null)
+        if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
         {
-            TestContext.WorkingDirectory = TestContext.OutputDirectory;
+            TestContext.WorkingDirectory = TestContext.OutputDirectory!;
         }
     }
 

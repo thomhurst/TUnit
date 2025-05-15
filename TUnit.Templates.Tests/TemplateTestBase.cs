@@ -25,7 +25,7 @@ public abstract partial class TemplateTestBase : IDisposable
     protected TemplateVerifierOptions Options =>
         new TemplateVerifierOptions(TemplateShortName)
         {
-            TemplatePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "content", TemplateShortName),
+            TemplatePath = Path.Combine(TestContext.OutputDirectory!, "content", TemplateShortName),
         }.WithCustomScrubbers(ScrubbersDefinition.Empty.AddScrubber(sb =>
         {
             var original = sb.ToString();

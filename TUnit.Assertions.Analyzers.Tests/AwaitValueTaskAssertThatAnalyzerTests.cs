@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using Verifier = TUnit.Assertions.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Assertions.Analyzers.AwaitValueTaskAssertThatAnalyzer>;
 
 namespace TUnit.Assertions.Analyzers.Tests;

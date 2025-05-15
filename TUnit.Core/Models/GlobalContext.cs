@@ -5,7 +5,7 @@ namespace TUnit.Core;
 public class GlobalContext : Context
 {
     private static readonly AsyncLocal<GlobalContext?> Contexts = new();
-    public new static GlobalContext Current
+    public static new GlobalContext Current
     {
         get
         {

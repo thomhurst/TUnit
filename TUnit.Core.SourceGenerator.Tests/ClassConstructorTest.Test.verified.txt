@@ -41,6 +41,7 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -89,7 +90,9 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,

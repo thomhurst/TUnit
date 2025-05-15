@@ -1,8 +1,8 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
-using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
@@ -10,7 +10,7 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-internal class TestHookOrchestrator(HooksCollector hooksCollector, TUnitFrameworkLogger logger)
+internal class TestHookOrchestrator(HooksCollectorBase hooksCollector)
 {
     public async Task<ExecutionContext?> ExecuteBeforeHooks(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
@@ -20,11 +20,17 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector, TUnitFramewor
 
         foreach (var executableHook in beforeHooks)
         {
-            await logger.LogDebugAsync("Executing [Before(Test)] hook");
-
             await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
-                executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken)
-            );
+            {
+                try
+                {
+                    return executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [Before(Test)] hook: {executableHook.MethodInfo.Type.FullName}.{executableHook.Name}", e);
+                }
+            });
             
             ExecutionContextHelper.RestoreContext(discoveredTest.TestContext.ExecutionContext);
         }

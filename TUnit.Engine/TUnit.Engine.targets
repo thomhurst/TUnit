@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-
+    
     <ItemGroup Condition="'$(TUnitImplicitUsings)' == 'true'">
         <Using Include="TUnit.Core" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(TUnitReflectionScanner)' == 'true'">
+        <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --reflection-scanner</TestingPlatformCommandLineArguments>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(TUnitReflectionScanner)' == 'true'">
+        <AssemblyMetadata Include="TUnitReflectionScanner" Value="true" />
     </ItemGroup>
 
 </Project>

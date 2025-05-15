@@ -1,2 +1,2 @@
-﻿global using Assert = NUnit.Framework.Assert;
-global using TestAttribute = NUnit.Framework.TestAttribute;
+﻿global using Assert = TUnit.Assertions.Assert;
+global using TestAttribute = TUnit.Core.TestAttribute;

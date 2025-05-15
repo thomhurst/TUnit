@@ -11,7 +11,21 @@ public static class SourceInformationWriter
     {
         sourceCodeWriter.Write($"global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd(\"{namedTypeSymbol.GloballyQualified()}\", () => new global::TUnit.Core.SourceGeneratedClassInformation");
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");    
+        sourceCodeWriter.WriteLine("{");
+
+        var parent = namedTypeSymbol.ContainingType;
+
+        if (parent != null)
+        {
+            sourceCodeWriter.WriteTabs();
+            sourceCodeWriter.Write("Parent = ");
+            GenerateClassInformation(sourceCodeWriter, context, parent);
+        }
+        else
+        {
+            sourceCodeWriter.WriteLine("Parent = null,");
+        }
+        
         sourceCodeWriter.WriteLine($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
         
         sourceCodeWriter.WriteTabs();

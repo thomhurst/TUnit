@@ -16,12 +16,12 @@ namespace TUnit.Analyzers.CodeFixers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(InheritsTestsCodeFixProvider)), Shared]
 public class InheritsTestsCodeFixProvider : CodeFixProvider
 {
-    public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
+    public override sealed ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(Rules.DoesNotInheritTestsWarning.Id);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
-    public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override sealed async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)
         {

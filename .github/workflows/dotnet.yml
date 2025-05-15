@@ -50,8 +50,12 @@ jobs:
         with:
           dotnet-version: 9.0.x 
 
+      - name: Setup .NET Framework
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
+
       - name: Build .NET 9
-        run: dotnet build -c Release -p:SDK_VERSION=net9
+        run: dotnet build -c Release
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline

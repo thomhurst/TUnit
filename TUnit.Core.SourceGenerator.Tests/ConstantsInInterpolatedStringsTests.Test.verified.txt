@@ -49,6 +49,7 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantsInInterpolatedStringsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -82,7 +83,9 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests.SomeTest(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,

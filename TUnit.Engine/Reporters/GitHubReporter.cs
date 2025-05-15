@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -69,6 +70,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             return Task.CompletedTask;
         }
 
+        var targetFramework = Assembly.GetExecutingAssembly()
+                .GetCustomAttributes<System.Runtime.Versioning.TargetFrameworkAttribute>()
+                .SingleOrDefault()
+                ?.FrameworkDisplayName
+            ?? RuntimeInformation.FrameworkDescription;
+
         var last = _updates.ToDictionary(x => x.Key, x => x.Value.Last());
 
         var passedCount = last.Count(x =>
@@ -88,7 +95,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine($"### {Assembly.GetEntryAssembly()?.GetName().Name}");
+        stringBuilder.AppendLine($"### {Assembly.GetEntryAssembly()?.GetName().Name} ({targetFramework})");
         
         if (!string.IsNullOrEmpty(Filter))
         {
