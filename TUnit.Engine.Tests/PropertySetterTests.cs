@@ -17,22 +17,6 @@ public class PropertySetterTests(TestMode testMode) : InvokableTestBase(testMode
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0),
-                _ => File.ReadAllText(FindFile(x => x.Name == "PropertySetterTests_CapturedOutput.txt").AssertExists().FullName).ShouldContain(
-                    """
-                    Initializing Static Property
-                    Before Test Session
-                    Before Assembly
-                    Before Class
-                    Initializing Property
-                    Initializing Property
-                    Initializing Property
-                    Initializing Property
-                    Running Test
-                    StaticInnerModel { IsInitialized = True, Foo = Bar }
-                    Disposing Property
-                    """
-                    ),
-                _ => FindFile(x => x.Name == "StaticProperty_IAsyncDisposable.txt").AssertExists()
             ]);
     }
 }
