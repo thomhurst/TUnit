@@ -292,7 +292,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									ResettableClassFactory = resettableClassFactory,
 									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 									TestFilePath = @"",
-									TestLineNumber = 70,
+									TestLineNumber = 67,
 									TestMethod = testInformation,
 									TestBuilderContext = testBuilderContext,
 								});
@@ -308,7 +308,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									MethodName = $"Test",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PropertySetterTests.Test failed to initialize", exception),
 									TestFilePath = @"",
-									TestLineNumber = 70,
+									TestLineNumber = 67,
 								});
 							}
 							return nodes;
