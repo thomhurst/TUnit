@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="TUnit" Version="0.20.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="GlobalSetup.fs" />
+		<Compile Include="Test1.fs" />
+	</ItemGroup>
+
+</Project>
