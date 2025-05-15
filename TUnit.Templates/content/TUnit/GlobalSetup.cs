@@ -11,12 +11,12 @@ public class GlobalHooks
     [Before(TestSession)]
     public static void SetUp()
     {
-        Console.WriteLine("Or you can define methods that do stuff before...");
+        Console.WriteLine(@"Or you can define methods that do stuff before...");
     }
 
     [After(TestSession)]
     public static void CleanUp()
     {
-        Console.WriteLine("...and after!");
+        Console.WriteLine(@"...and after!");
     }
 }

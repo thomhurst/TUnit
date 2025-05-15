@@ -4,12 +4,12 @@ public class ReproFixtureBase : IDisposable
 {
     public ReproFixtureBase()
     {
-        Console.WriteLine($"Constructing {GetType().Name}");
+        Console.WriteLine($@"Constructing {GetType().Name}");
     }
 
     public void Dispose()
     {
-        Console.WriteLine($"Disposing {GetType().Name}");
+        Console.WriteLine($@"Disposing {GetType().Name}");
     }
 }
 
@@ -20,7 +20,7 @@ public class SharedTypeNoneTests(SharedTypeNoneFixture fixture)
     [Test]
     public void Test()
     {
-        Console.WriteLine($"Test using {fixture.GetType().Name}");
+        Console.WriteLine($@"Test using {fixture.GetType().Name}");
     }
 }
 
@@ -31,7 +31,7 @@ public class SharedTypePerClassTests(SharedTypePerClassFixture fixture)
     [Test]
     public void Test()
     {
-        Console.WriteLine($"Test using {fixture.GetType().Name}");
+        Console.WriteLine($@"Test using {fixture.GetType().Name}");
     }
 }
 
@@ -42,7 +42,7 @@ public class SharedTypeKeyedTests(SharedTypeKeyedFixture fixture)
     [Test]
     public void Test()
     {
-        Console.WriteLine($"Test using {fixture.GetType().Name}");
+        Console.WriteLine($@"Test using {fixture.GetType().Name}");
     }
 }
 
@@ -53,7 +53,7 @@ public class SharedTypePerAssemblyTests(SharedTypePerAssemblyFixture fixture)
     [Test]
     public void Test()
     {
-        Console.WriteLine($"Test using {fixture.GetType().Name}");
+        Console.WriteLine($@"Test using {fixture.GetType().Name}");
     }
 }
 
@@ -64,6 +64,6 @@ public class SharedTypePerTestSessionTests(SharedTypePerPerTestSessionFixture fi
     [Test]
     public void Test()
     {
-        Console.WriteLine($"Test using {fixture.GetType().Name}");
+        Console.WriteLine($@"Test using {fixture.GetType().Name}");
     }
 }

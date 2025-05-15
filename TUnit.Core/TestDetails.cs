@@ -67,7 +67,7 @@ public abstract record TestDetails
     /// <summary>
     /// Gets or sets the injected property arguments for the test class.
     /// </summary>
-    public required object?[] TestClassInjectedPropertyArguments { get; init; }
+    public required IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; }
 
     internal readonly List<string> MutableCategories = [];
 

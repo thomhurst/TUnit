@@ -62,6 +62,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -107,7 +108,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 					TestClassArguments = [classArg],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -164,6 +167,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -209,7 +213,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 						TestClassArguments = [classArg],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -266,6 +272,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -311,7 +318,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 							TestClassArguments = [classArg],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -368,6 +377,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{
@@ -413,7 +423,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 								TestClassArguments = [classArg],
 								TestMethodArguments = [methodArg],
-								TestClassProperties = [],
+								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+								{
+								},
 								CurrentRepeatAttempt = 0,
 								RepeatLimit = 0,
 								ResettableClassFactory = resettableClassFactory,
@@ -470,6 +482,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -515,7 +528,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 									TestClassArguments = [classArg],
 									TestMethodArguments = [methodArg],
-									TestClassProperties = [],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,
@@ -572,6 +587,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 									{
+										Parent = null,
 										Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 										{
@@ -617,7 +633,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 										TestClassArguments = [classArg],
 										TestMethodArguments = [methodArg],
-										TestClassProperties = [],
+										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+										{
+										},
 										CurrentRepeatAttempt = 0,
 										RepeatLimit = 0,
 										ResettableClassFactory = resettableClassFactory,
@@ -674,6 +692,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 										{
+											Parent = null,
 											Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 											{
@@ -719,7 +738,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 											TestClassArguments = [classArg],
 											TestMethodArguments = [methodArg],
-											TestClassProperties = [],
+											TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+											{
+											},
 											CurrentRepeatAttempt = 0,
 											RepeatLimit = 0,
 											ResettableClassFactory = resettableClassFactory,
@@ -776,6 +797,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 											{
+												Parent = null,
 												Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 												{
@@ -821,7 +843,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 												TestClassArguments = [classArg],
 												TestMethodArguments = [methodArg],
-												TestClassProperties = [],
+												TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+												{
+												},
 												CurrentRepeatAttempt = 0,
 												RepeatLimit = 0,
 												ResettableClassFactory = resettableClassFactory,
@@ -878,6 +902,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												],
 												Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
 												{
+													Parent = null,
 													Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 													Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 													{
@@ -923,7 +948,9 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 													TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 													TestClassArguments = [classArg],
 													TestMethodArguments = [methodArg],
-													TestClassProperties = [],
+													TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+													{
+													},
 													CurrentRepeatAttempt = 0,
 													RepeatLimit = 0,
 													ResettableClassFactory = resettableClassFactory,

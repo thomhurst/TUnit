@@ -41,6 +41,7 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PropertySetterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.PropertySetterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -277,13 +278,21 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
 									TestClassArguments = [],
 									TestMethodArguments = [],
-									TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3, propertyArg4, propertyArg5],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+										["Property1"] = propertyArg,
+										["Property2"] = propertyArg1,
+										["Property3"] = propertyArg2,
+										["Property4"] = propertyArg3,
+										["Property5"] = propertyArg4,
+										["Property6"] = propertyArg5,
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,
 									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 									TestFilePath = @"",
-									TestLineNumber = 70,
+									TestLineNumber = 67,
 									TestMethod = testInformation,
 									TestBuilderContext = testBuilderContext,
 								});
@@ -299,7 +308,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									MethodName = $"Test",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PropertySetterTests.Test failed to initialize", exception),
 									TestFilePath = @"",
-									TestLineNumber = 70,
+									TestLineNumber = 67,
 								});
 							}
 							return nodes;
@@ -349,6 +358,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -519,13 +529,21 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 									TestId = $"TUnit.TestProject.InheritedPropertySetterTests.Test:0",
 									TestClassArguments = [],
 									TestMethodArguments = [],
-									TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3, propertyArg4, propertyArg5],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+										["Property1"] = propertyArg,
+										["Property2"] = propertyArg1,
+										["Property3"] = propertyArg2,
+										["Property4"] = propertyArg3,
+										["Property5"] = propertyArg4,
+										["Property6"] = propertyArg5,
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,
 									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 									TestFilePath = @"",
-									TestLineNumber = 70,
+									TestLineNumber = 67,
 									TestMethod = testInformation,
 									TestBuilderContext = testBuilderContext,
 								});
@@ -541,7 +559,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 									MethodName = $"Test",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedPropertySetterTests.Test failed to initialize", exception),
 									TestFilePath = @"",
-									TestLineNumber = 70,
+									TestLineNumber = 67,
 								});
 							}
 							return nodes;

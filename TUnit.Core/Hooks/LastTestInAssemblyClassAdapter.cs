@@ -26,6 +26,7 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
         ReturnType = typeof(ValueTask),
         Class = new SourceGeneratedClassInformation
         {
+            Parent = null,
             Type = typeof(ILastTestInAssemblyEventReceiver),
             Assembly = new SourceGeneratedAssemblyInformation
             {

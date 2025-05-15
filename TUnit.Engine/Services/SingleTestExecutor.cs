@@ -9,6 +9,7 @@ using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Logging;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
@@ -33,9 +34,9 @@ internal class SingleTestExecutor(
     : IDataProducer
 {
     private static readonly Lock Lock = new();
-    private static readonly SemaphoreSlim _assemblyEventsLock = new(1, 1);
-    private static readonly SemaphoreSlim _classEventsLock = new(1, 1);
-    private static readonly SemaphoreSlim _sessionEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim AssemblyEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim ClassEventsLock = new(1, 1);
+    private static readonly SemaphoreSlim SessionEventsLock = new(1, 1);
     
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         bool isStartedAsDependencyForAnotherTest)
@@ -108,18 +109,12 @@ internal class SingleTestExecutor(
                 await logger.LogInformationAsync($"Skipping {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}...");
                 
                 testContext.SetResult(skipTestException);
-
+                
                 await messageBus.Skipped(testContext, skipTestException.Reason);
-            }
-            catch (TestRunCanceledException testRunCanceledException)
-            {
-                testContext.SetResult(testRunCanceledException);
-
-                await messageBus.Cancelled(testContext, start.Value);
             }
             catch (Exception e)
             {
-                await logger.LogDebugAsync($"Error in test: {e}");
+                await logger.LogDebugAsync($"Error in test {testContext.TestDetails.TestClass.Type.FullName}.{testContext.GetTestDisplayName()}: {e}");
                 testContext.SetResult(e);
                 throw;
             }
@@ -138,11 +133,28 @@ internal class SingleTestExecutor(
             {
                 Status.Passed => messageBus.Passed(test.TestContext, start.GetValueOrDefault()),
                 Status.Failed => messageBus.Failed(test.TestContext, result.Exception!, start.GetValueOrDefault()),
+                Status.Cancelled => messageBus.Cancelled(test.TestContext, start.GetValueOrDefault()),
                 _ => default,
             };
 
             await task;
         }
+    }
+
+    private bool IsCancelled(Exception ex)
+    {
+        if (ex is TestRunCanceledException)
+        {
+            return true;
+        }
+
+        if (ex is TaskCanceledException or OperationCanceledException
+            && engineCancellationToken.Token.IsCancellationRequested)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private async Task RunFirstTestEventReceivers(TestContext testContext)
@@ -163,7 +175,7 @@ internal class SingleTestExecutor(
         
         if (!testSessionContext.FirstTestStarted)
         {
-            await _sessionEventsLock.WaitAsync();
+            await SessionEventsLock.WaitAsync();
             try
             {
                 if (!testSessionContext.FirstTestStarted)
@@ -181,7 +193,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                _sessionEventsLock.Release();
+                SessionEventsLock.Release();
             }
         }
         
@@ -194,7 +206,7 @@ internal class SingleTestExecutor(
 
         if (!assemblyHookContext.FirstTestStarted)
         {
-            await _assemblyEventsLock.WaitAsync();
+            await AssemblyEventsLock.WaitAsync();
             try
             {
                 if (!assemblyHookContext.FirstTestStarted)
@@ -212,7 +224,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                _assemblyEventsLock.Release();
+                AssemblyEventsLock.Release();
             }
         }
 
@@ -225,7 +237,7 @@ internal class SingleTestExecutor(
 
         if (!classHookContext.FirstTestStarted)
         {
-            await _classEventsLock.WaitAsync();
+            await ClassEventsLock.WaitAsync();
             try
             {
                 if (!classHookContext.FirstTestStarted)
@@ -243,7 +255,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                _classEventsLock.Release();
+                ClassEventsLock.Release();
             }
         }
         
@@ -274,8 +286,6 @@ internal class SingleTestExecutor(
             {
                 foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
                 {
-                    await logger.LogDebugAsync("Executing ITestSkippedEventReceivers");
-
                     await RunHelpers.RunValueTaskSafelyAsync(() => testSkippedEventReceiver.OnTestSkipped(testContext),
                         cleanUpExceptions);
                 }
@@ -309,9 +319,17 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterClassHooks)
         {
-            await logger.LogDebugAsync("Executing [After(Class)] hook");
-
-            await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
+            await RunHelpers.RunValueTaskSafelyAsync(() =>
+            {
+                try
+                {
+                    return afterHook.ExecuteAsync(classHookContext, CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [After(Class)] hook: {afterHook.MethodInfo.Type.FullName}.{afterHook.Name}", e);
+                }
+            }, cleanUpExceptions);
         }
                 
         ClassHookContext.Current = null;
@@ -323,9 +341,17 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterAssemblyHooks)
         {
-            await logger.LogDebugAsync("Executing [After(Assembly)] hook");
-
-            await RunHelpers.RunValueTaskSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
+            await RunHelpers.RunValueTaskSafelyAsync(() =>
+            {
+                try
+                {
+                    return afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [After(Assembly)] hook: {afterHook.MethodInfo.Type.FullName}.{afterHook.Name}", e);
+                }
+            }, cleanUpExceptions);
         }
                 
         AssemblyHookContext.Current = null;
@@ -336,8 +362,6 @@ internal class SingleTestExecutor(
 
             foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
             {
-                await logger.LogDebugAsync("Executing ILastTestInTestSessionEventReceivers");
-
                 await RunHelpers.RunValueTaskSafelyAsync(
                     () => testEndEventsObject.OnLastTestInTestSession(testSessionContext, testContext),
                     cleanUpExceptions);
@@ -447,10 +471,12 @@ internal class SingleTestExecutor(
 
     private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)
     {
+        var dependencies = CollectDependencyChain(test).ToArray();
+        
         // Reverse so most nested dependencies resolve first
-        for (var index = test.Dependencies.Length - 1; index >= 0; index--)
+        for (var index = dependencies.Length - 1; index >= 0; index--)
         {
-            var dependency = test.Dependencies[index];
+            var dependency = dependencies[index];
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, true);
@@ -464,6 +490,22 @@ internal class SingleTestExecutor(
             {
                 throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}",
                     e);
+            }
+        }
+    }
+
+    private static IEnumerable<Dependency> CollectDependencyChain(DiscoveredTest test)
+    {
+        foreach (var testDependency in test.Dependencies)
+        {
+            yield return testDependency;
+        }
+
+        foreach (var testDependency in test.Dependencies)
+        {
+            foreach (var dependency in CollectDependencyChain(testDependency.Test))
+            {
+                yield return dependency;
             }
         }
     }

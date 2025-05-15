@@ -15,7 +15,7 @@ public partial class TestContext
     /// <summary>
     /// Gets or sets the current test context.
     /// </summary>
-    public new static TestContext? Current
+    public static new TestContext? Current
     {
         get => TestContexts.Value;
         internal set => TestContexts.Value = value;
@@ -47,10 +47,8 @@ public partial class TestContext
                 return AppContext.BaseDirectory;
             }
 #endif
-
             return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
                    ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
         }
     }
 

@@ -3,4 +3,4 @@
 namespace TUnit.TestProject.Bugs._1889;
 
 [InheritsTests]
-public class DerivedTest: BaseTest<DummyReferenceTypeClass>;
+public class DerivedTest : BaseTest<DummyReferenceTypeClass>;

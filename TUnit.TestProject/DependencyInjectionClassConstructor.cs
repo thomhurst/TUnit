@@ -9,11 +9,11 @@ public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEv
     private readonly IServiceProvider _serviceProvider = CreateServiceProvider();
     private AsyncServiceScope? _scope;
 
-    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(ClassConstructorMetadata classConstructorMetadata) where T : class
+    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
     {
         _scope ??= _serviceProvider.CreateAsyncScope();
 
-        return ActivatorUtilities.GetServiceOrCreateInstance<T>(_scope!.Value.ServiceProvider);
+        return ActivatorUtilities.GetServiceOrCreateInstance(_scope!.Value.ServiceProvider, type);
     }
 
     public ValueTask OnTestEnd(TestContext testContext)

@@ -48,6 +48,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -91,7 +92,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DefaultTest(System.Threading.CancellationToken):0",
 					TestClassArguments = [classArg],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -172,6 +175,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -215,7 +219,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).BasicTest(System.Threading.CancellationToken):0",
 					TestClassArguments = [classArg],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -295,6 +301,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -338,7 +345,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).InheritedTimeoutAttribute(System.Threading.CancellationToken):0",
 					TestClassArguments = [classArg],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -424,6 +433,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -469,7 +479,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataTest(int,System.Threading.CancellationToken):0",
 					TestClassArguments = [classArg],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -555,6 +567,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -599,7 +612,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataSourceTest(int,System.Threading.CancellationToken):0",
 					TestClassArguments = [classArg],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -667,7 +682,6 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				Attributes = 
 				[
 					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.Core.MatrixDataSourceAttribute(),
 					new global::TUnit.Core.TimeoutAttribute(5_000),
 					new global::TUnit.Core.CategoryAttribute("Blah")
 				],
@@ -689,6 +703,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -763,7 +778,9 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
 						TestClassArguments = [classArg],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,

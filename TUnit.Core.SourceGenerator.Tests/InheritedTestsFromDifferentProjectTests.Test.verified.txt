@@ -41,6 +41,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -75,7 +76,9 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -155,6 +158,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -190,7 +194,9 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -270,6 +276,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -305,7 +312,9 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -377,6 +386,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -411,13 +421,15 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 					TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest:0",
 					TestClassArguments = [],
 					TestMethodArguments = [],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.BaseTest()),
 					TestFilePath = @"",
-					TestLineNumber = 7,
+					TestLineNumber = 5,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -433,7 +445,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 					MethodName = $"BaseTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedTestsFromDifferentProjectTests.BaseTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 7,
+					TestLineNumber = 5,
 				});
 			}
 			return nodes;

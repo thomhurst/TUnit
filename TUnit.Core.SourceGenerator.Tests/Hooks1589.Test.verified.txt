@@ -52,6 +52,7 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.BaseTests<>", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<>),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -68,13 +69,6 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod("Setup", []).Invoke(classInstance, [])),
 					HookExecutor = DefaultExecutor.Instance,
 					Order = 0,
-					MethodAttributes = 
-					[
-						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
-					ClassAttributes = [],
-										AssemblyAttributes = 
-[],
 				},
 				new global::TUnit.Core.Hooks.InstanceHookMethod
 				{
@@ -92,6 +86,7 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 						Parameters = [],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -131,13 +126,6 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>)classInstance).Setup()),
 						HookExecutor = DefaultExecutor.Instance,
 						Order = 0,
-						MethodAttributes = 
-						[
-							new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-						],
-						ClassAttributes = [],
-												AssemblyAttributes = 
-[],
 					},
 				];
 			}

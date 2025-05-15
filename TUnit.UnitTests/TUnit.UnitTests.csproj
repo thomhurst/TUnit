@@ -2,34 +2,27 @@
 
     <PropertyGroup>
         <EnablePolyfill>false</EnablePolyfill>
-        <IsLibraryTestProject>true</IsLibraryTestProject>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-
-        <IsPackable>false</IsPackable>
-        <IsTestProject>true</IsTestProject>
-
-        <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
-        <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
-        <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
-        <TUnitImplicitUsings>false</TUnitImplicitUsings>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\strongname.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
+
+    <Import Project="..\TestProject.props" />
 
     <ItemGroup>
         <PackageReference Include="AutoFixture" />
-        <PackageReference Include="coverlet.collector"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
-        <PackageReference Include="NUnit"/>
-        <PackageReference Include="NUnit.Analyzers"/>
-        <PackageReference Include="NUnit3TestAdapter"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Using Include="NUnit.Framework"/>
+        <PackageReference Include="NSubstitute" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\strongname.snk">
+        <Link>strongname.snk</Link>
+      </None>
+    </ItemGroup>
+
+    <Import Project="..\TestProject.targets" />
 
 </Project>

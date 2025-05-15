@@ -41,6 +41,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.MyTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -109,7 +110,9 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1594.MyTests(TUnit.TestProject.Bugs._1594.MyFixture).Test1:0",
 							TestClassArguments = [classArgGeneratedData],
 							TestMethodArguments = [],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,

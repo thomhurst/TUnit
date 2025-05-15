@@ -67,6 +67,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -102,7 +103,9 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -167,6 +170,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -202,7 +206,9 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -267,6 +273,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -305,7 +312,9 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 								TestClassArguments = [],
 								TestMethodArguments = [methodData],
-								TestClassProperties = [],
+								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+								{
+								},
 								CurrentRepeatAttempt = 0,
 								RepeatLimit = 0,
 								ResettableClassFactory = resettableClassFactory,
@@ -371,6 +380,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{
@@ -409,7 +419,9 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 									TestClassArguments = [],
 									TestMethodArguments = [methodData],
-									TestClassProperties = [],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,
@@ -475,6 +487,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -513,7 +526,9 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 										TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 										TestClassArguments = [],
 										TestMethodArguments = [methodData],
-										TestClassProperties = [],
+										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+										{
+										},
 										CurrentRepeatAttempt = 0,
 										RepeatLimit = 0,
 										ResettableClassFactory = resettableClassFactory,
@@ -579,6 +594,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 									{
+										Parent = null,
 										Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 										{
@@ -617,7 +633,9 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 											TestClassArguments = [],
 											TestMethodArguments = [methodData],
-											TestClassProperties = [],
+											TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+											{
+											},
 											CurrentRepeatAttempt = 0,
 											RepeatLimit = 0,
 											ResettableClassFactory = resettableClassFactory,

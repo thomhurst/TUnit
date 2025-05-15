@@ -1,4 +1,5 @@
-﻿using TUnit.Core;
+﻿using System.Diagnostics;
+using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
 
@@ -19,7 +20,7 @@ internal class DependencyCollector
     {
         try
         {
-            return GetDependencies(test, [], [], allTests, cancellationToken).ToArray();
+            return CollectDependencies(test, allTests, new HashSet<TestDetails>([test.TestDetails], new TestDetailsEqualityComparer()), new HashSet<TestDetails>([test.TestDetails], new TestDetailsEqualityComparer()), cancellationToken).ToArray();
         }
         catch (Exception e)
         {
@@ -29,46 +30,42 @@ internal class DependencyCollector
         return [];
     }
 
-    private IEnumerable<Dependency> GetDependencies(DiscoveredTest test,
-        List<DiscoveredTest> currentChain, HashSet<DiscoveredTest> visited, DiscoveredTest[] allTests, CancellationToken cancellationToken)
+    internal IEnumerable<Dependency> CollectDependencies(
+        DiscoveredTest test, 
+        DiscoveredTest[] allTests, 
+        HashSet<TestDetails> visited, 
+        HashSet<TestDetails> currentChain, 
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (currentChain.Any(x => x.TestDetails.IsSameTest(test.TestDetails)))
-        {
-            var chain = currentChain
-                .SkipWhile(x => !x.TestDetails.IsSameTest(test.TestDetails))
-                .Select(x => x.TestDetails)
-                .Append(test.TestDetails);
-
-            throw new DependencyConflictException(chain);
-        }
-
-        if (!visited.Add(test))
-        {
-            yield break;
-        }
-
-        currentChain.Add(test);
-        
         foreach (var dependsOnAttribute in test.TestDetails.Attributes.OfType<DependsOnAttribute>())
         {
-            var dependencies = GetDependencies(test, dependsOnAttribute, allTests);
-
-            foreach (var dependency in dependencies)
+            foreach (var dependency in GetDependencies(test, dependsOnAttribute, allTests))
             {
+                if (!currentChain.Add(dependency.TestDetails))
+                {
+                    throw new DependencyConflictException(currentChain.Select(x => x).Append(dependency.TestDetails).ToArray());
+                }
+
+                if (!visited.Add(dependency.TestDetails))
+                {
+                    currentChain.Remove(dependency.TestDetails);
+                    continue;
+                }
+                
                 yield return new Dependency(dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(dependency, [..currentChain], visited, allTests, cancellationToken))
+                foreach (var nestedDependency in CollectDependencies(dependency, allTests, visited, currentChain, cancellationToken))
                 {
                     yield return nestedDependency;
                 }
+                
+                currentChain.Remove(dependency.TestDetails);
             }
         }
-        
-        currentChain.Remove(test);
     }
-
+    
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
     {
         var testsForClass = allTests.Where(x => x.TestDetails.TestClass.Type == (dependsOnAttribute.TestClass ?? test.TestDetails.TestClass.Type));
@@ -98,5 +95,39 @@ internal class DependencyCollector
         }
 
         return foundTests;
+    }
+
+    [DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
+    internal class TestDetailsEqualityComparer : IEqualityComparer<TestDetails>
+    {
+        public bool Equals(TestDetails? x, TestDetails? y)
+        {
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+            
+            if (x is null)
+            {
+                return false;
+            }
+            
+            if (y is null)
+            {
+                return false;
+            }
+            
+            if (x.GetType() != y.GetType())
+            {
+                return false;
+            }
+            
+            return x.IsSameTest(y);
+        }
+
+        public int GetHashCode(TestDetails obj)
+        {
+            return obj.TestName.GetHashCode();
+        }
     }
 }

@@ -1,4 +1,8 @@
-﻿using Microsoft.Testing.Platform.Capabilities.TestFramework;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -9,7 +13,9 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
@@ -29,7 +35,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitFrameworkLogger Logger { get; }
     public TUnitMessageBus TUnitMessageBus { get; }
 
-    public HooksCollector HooksCollector { get; set; }
+    public HooksCollectorBase HooksCollector { get; set; }
     public TUnitInitializer Initializer { get; }
     public StandardOutConsoleInterceptor StandardOutConsoleInterceptor { get; }
     public StandardErrorConsoleInterceptor StandardErrorConsoleInterceptor { get; }
@@ -44,6 +50,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public AssemblyHookOrchestrator AssemblyHookOrchestrator { get; }
     public EngineCancellationToken EngineCancellationToken { get; }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
         IMessageBus messageBus,
@@ -78,37 +85,51 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var instanceTracker = Register(new InstanceTracker());
         
-        HooksCollector = Register(new HooksCollector(context.Request.Session.SessionUid.Value));
+        var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions);
+
+        HooksCollector = Register<HooksCollectorBase>
+        (
+            isReflectionScannerEnabled
+                ? new ReflectionHooksCollector(context.Request.Session.SessionUid.Value)
+                : new SourceGeneratedHooksCollector(context.Request.Session.SessionUid.Value)
+        );
 
         var dependencyCollector = new DependencyCollector();
         
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
-        var testsConstructor = Register(new TestsConstructor(extension, testMetadataCollector, dependencyCollector, this));
+
+        var testsConstructor = Register<BaseTestsConstructor>
+        (
+            isReflectionScannerEnabled
+                ? new ReflectionTestsConstructor(extension, dependencyCollector, this)
+                : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, this)
+        );
+        
         var testFilterService = Register(new TestFilterService(LoggerFactory));
         
         TestGrouper = Register(new TestGrouper());
         
-        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector, Logger));
+        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector));
 
-        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector, Logger, stringFilter));
-        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector, AssemblyHookOrchestrator, Logger, stringFilter));
+        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector, stringFilter));
+        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector, AssemblyHookOrchestrator, stringFilter));
         
-        var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, HooksCollector, Logger));
+        var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, HooksCollector));
         
-        var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector, Logger));
+        var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector));
 
         var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
         
         Disposer = Register(new Disposer(Logger));
         
-        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Logger, Disposer));
+        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Disposer));
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
         
         var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar, GetCapability<StopExecutionCapability>()));
         
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken, AssemblyHookOrchestrator, classHookOrchestrator));
         
-        TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor, extension));
+        TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor));
 
         DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(testsConstructor, testRegistrar,
             TestGrouper, TUnitMessageBus, TestsExecutor, EngineCancellationToken));
@@ -166,5 +187,22 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
         
         return capability;
+    }
+    
+    private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions)
+    {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            return false;
+        }
+#endif
+
+        return IsReflectionScannerEnabledByCommandLine(commandLineOptions) || !SourceRegistrar.IsEnabled;
+    }
+
+    private static bool IsReflectionScannerEnabledByCommandLine(ICommandLineOptions commandLineOptions)
+    {
+        return commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner);
     }
 }

@@ -4,7 +4,7 @@ using TUnit.Core;
 namespace TUnit.Engine.Services;
 
 internal class DynamicTestRegistrar(
-    TestsConstructor testsConstructor,
+    BaseTestsConstructor testsConstructor,
     TestRegistrar testRegistrar,
     TestGrouper testGrouper,
     ITUnitMessageBus messageBus,

@@ -1,15 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <EnablePolyfill>false</EnablePolyfill>
-    <IsLibraryPackage>true</IsLibraryPackage>
-    <IsTestProject>false</IsTestProject>
-    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
-    <LangVersion>preview</LangVersion>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(LaunchDebugger)' != ''">
-    <DefineConstants>LAUNCH_DEBUGGER</DefineConstants>
-  </PropertyGroup>
+
+  <Import Project="..\Library.props" />
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TUnit.Engine" />
+    <InternalsVisibleTo Include="TUnit.UnitTests" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="EnumerableAsyncProcessor" />
@@ -21,7 +20,7 @@
       <Pack>true</Pack>
       <PackagePath>$(BuildTransitivePath)</PackagePath>
     </TfmSpecificPackageFile>
-    
+
     <None Include="TUnit.Engine.props">
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>

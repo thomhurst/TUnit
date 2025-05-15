@@ -5,13 +5,13 @@ using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
-using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector, TUnitFrameworkLogger logger)
+internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollectorBase hooksCollector)
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyHookContexts = new();
 
@@ -41,9 +41,14 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
 
             foreach (var beforeHook in beforeAssemblyHooks)
             {
-                await logger.LogDebugAsync("Executing [Before(Assembly)] hook");
-
-                await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                try
+                {
+                    await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [Before(Assembly)] hook: {beforeHook.MethodInfo.Type.FullName}.{beforeHook.Name}", e);
+                }
                 
                 ExecutionContextHelper.RestoreContext(assemblyHookContext.ExecutionContext);
             }

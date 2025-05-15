@@ -45,6 +45,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -110,7 +111,9 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived1:0",
 						TestClassArguments = [classArgGeneratedData],
 						TestMethodArguments = [],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -158,6 +161,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -223,7 +227,9 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived1:0",
 							TestClassArguments = [classArgGeneratedData],
 							TestMethodArguments = [],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -300,6 +306,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 				Parameters = [],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -365,7 +372,9 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived2:0",
 						TestClassArguments = [classArgGeneratedData],
 						TestMethodArguments = [],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -413,6 +422,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					Parameters = [],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -478,7 +488,9 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived2:0",
 							TestClassArguments = [classArgGeneratedData],
 							TestMethodArguments = [],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,

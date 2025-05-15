@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <Import Project="..\TestProject.props" />
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="Tests.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FSharp.Core" />
+    </ItemGroup>
+    
+    <Import Project="..\TestProject.targets" />
+
+</Project>

@@ -11,7 +11,7 @@ using TUnit.Engine.Reporters;
 
 namespace TUnit.Engine.Extensions;
 
-internal static class TestApplicationBuilderExtensions
+public static class TestApplicationBuilderExtensions
 {
     public static void AddTUnit(this ITestApplicationBuilder testApplicationBuilder)
     {
@@ -33,7 +33,8 @@ internal static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
-        
+        testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionScannerCommandProvider(extension));
+
         testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
         testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(_ => githubReporter);
     }
@@ -44,7 +45,7 @@ internal static class TestApplicationBuilderExtensions
         [
             new TrxReportCapability(),
             new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>(), serviceProvider.GetCommandLineOptions()),
-            new StopExecutionCapability()
+            new StopExecutionCapability(),
         ];
     }
 }

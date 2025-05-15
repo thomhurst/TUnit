@@ -12,7 +12,7 @@ public class Tests
     [Category("Pass")]
     public async Task ConsoleOutput()
     {
-        Console.WriteLine("Blah!");
+        Console.WriteLine(@"Blah!");
 
         await Assert.That(TestContext.Current?.GetStandardOutput()).IsEqualTo("Blah!", StringComparison.Ordinal);
     }
@@ -166,7 +166,7 @@ public class Tests
     [Category("Pass")]
     public async Task TestDataSource_Wrong(int value)
     {
-        await Assert.That(value).IsEqualTo(1);
+        await Assert.That(value).IsNotEqualTo(1);
     }
 
     [Test]

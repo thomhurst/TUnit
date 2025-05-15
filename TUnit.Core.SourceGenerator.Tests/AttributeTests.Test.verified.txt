@@ -62,6 +62,7 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 								Parameters = [],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AttributeTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.AttributeTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AttributeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -93,7 +94,9 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 									TestId = $"TUnit.TestProject.AttributeTests.MyTest:0",
 									TestClassArguments = [],
 									TestMethodArguments = [],
-									TestClassProperties = [],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,

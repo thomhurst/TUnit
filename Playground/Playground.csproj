@@ -1,15 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <Import Project="..\TestProject.props" />
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <IsPackable>false</IsPackable>
-        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
-        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+        <TUnitReflectionScanner>true</TUnitReflectionScanner>
     </PropertyGroup>
 
     <ItemGroup>
@@ -32,9 +26,10 @@
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    </ItemGroup>
-    
+    <Import Project="..\TestProject.targets" />
+
+    <PropertyGroup>
+        <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
+    </PropertyGroup>
+
 </Project>

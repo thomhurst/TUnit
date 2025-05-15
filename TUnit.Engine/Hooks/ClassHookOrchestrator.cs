@@ -4,13 +4,13 @@ using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Core.Hooks;
 using TUnit.Core.Logging;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
-using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector, TUnitFrameworkLogger logger)
+internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollectorBase hooksCollector)
 {
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classHookContexts = new();
     
@@ -65,13 +65,16 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
 
             foreach (var beforeHook in beforeClassHooks)
             {
+                try
                 {
-                    await logger.LogDebugAsync("Executing [Before(Class)] hook");
-
                     await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
-                    
-                    ExecutionContextHelper.RestoreContext(classHookContext.ExecutionContext);
                 }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [Before(Class)] hook: {beforeHook.MethodInfo.Type.FullName}.{beforeHook.Name}", e);
+                }
+                    
+                ExecutionContextHelper.RestoreContext(classHookContext.ExecutionContext);
             }
 
             ClassHookContext.Current = null;

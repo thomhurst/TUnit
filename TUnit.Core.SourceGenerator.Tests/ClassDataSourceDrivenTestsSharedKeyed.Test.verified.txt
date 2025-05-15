@@ -48,6 +48,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -110,7 +111,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class(SomeAsyncDisposableClass):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArgGeneratedData],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -190,6 +193,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -252,7 +256,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							TestId = $"global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic(SomeAsyncDisposableClass):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArgGeneratedData],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,

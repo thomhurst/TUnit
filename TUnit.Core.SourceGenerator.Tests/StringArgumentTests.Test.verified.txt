@@ -70,6 +70,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -103,7 +104,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -169,6 +172,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -202,7 +206,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -268,6 +274,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -301,7 +308,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -367,6 +376,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{
@@ -400,7 +410,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS3:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 								TestClassArguments = [],
 								TestMethodArguments = [methodArg],
-								TestClassProperties = [],
+								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+								{
+								},
 								CurrentRepeatAttempt = 0,
 								RepeatLimit = 0,
 								ResettableClassFactory = resettableClassFactory,
@@ -466,6 +478,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -499,7 +512,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS4:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 									TestClassArguments = [],
 									TestMethodArguments = [methodArg],
-									TestClassProperties = [],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,
@@ -565,6 +580,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 									{
+										Parent = null,
 										Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 										{
@@ -598,7 +614,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS5:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 										TestClassArguments = [],
 										TestMethodArguments = [methodArg],
-										TestClassProperties = [],
+										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+										{
+										},
 										CurrentRepeatAttempt = 0,
 										RepeatLimit = 0,
 										ResettableClassFactory = resettableClassFactory,
@@ -664,6 +682,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 										{
+											Parent = null,
 											Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 											{
@@ -697,7 +716,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS6:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 											TestClassArguments = [],
 											TestMethodArguments = [methodArg],
-											TestClassProperties = [],
+											TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+											{
+											},
 											CurrentRepeatAttempt = 0,
 											RepeatLimit = 0,
 											ResettableClassFactory = resettableClassFactory,
@@ -763,6 +784,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 											{
+												Parent = null,
 												Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 												{
@@ -799,7 +821,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 												TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS7:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 												TestClassArguments = [],
 												TestMethodArguments = [methodArg],
-												TestClassProperties = [],
+												TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+												{
+												},
 												CurrentRepeatAttempt = 0,
 												RepeatLimit = 0,
 												ResettableClassFactory = resettableClassFactory,
@@ -896,6 +920,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -929,7 +954,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -991,6 +1018,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -1024,7 +1052,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -1086,6 +1116,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -1119,7 +1150,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -1181,6 +1214,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 							{
+								Parent = null,
 								Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 								{
@@ -1214,7 +1248,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS3:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 								TestClassArguments = [],
 								TestMethodArguments = [methodArg],
-								TestClassProperties = [],
+								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+								{
+								},
 								CurrentRepeatAttempt = 0,
 								RepeatLimit = 0,
 								ResettableClassFactory = resettableClassFactory,
@@ -1276,6 +1312,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 								{
+									Parent = null,
 									Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 									{
@@ -1309,7 +1346,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS4:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 									TestClassArguments = [],
 									TestMethodArguments = [methodArg],
-									TestClassProperties = [],
+									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+									{
+									},
 									CurrentRepeatAttempt = 0,
 									RepeatLimit = 0,
 									ResettableClassFactory = resettableClassFactory,
@@ -1371,6 +1410,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 									{
+										Parent = null,
 										Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 										{
@@ -1404,7 +1444,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS5:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 										TestClassArguments = [],
 										TestMethodArguments = [methodArg],
-										TestClassProperties = [],
+										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+										{
+										},
 										CurrentRepeatAttempt = 0,
 										RepeatLimit = 0,
 										ResettableClassFactory = resettableClassFactory,
@@ -1466,6 +1508,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 										{
+											Parent = null,
 											Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 											{
@@ -1499,7 +1542,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS6:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 											TestClassArguments = [],
 											TestMethodArguments = [methodArg],
-											TestClassProperties = [],
+											TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+											{
+											},
 											CurrentRepeatAttempt = 0,
 											RepeatLimit = 0,
 											ResettableClassFactory = resettableClassFactory,
@@ -1561,6 +1606,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 											{
+												Parent = null,
 												Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 												{
@@ -1594,7 +1640,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 												TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS7:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 												TestClassArguments = [],
 												TestMethodArguments = [methodArg],
-												TestClassProperties = [],
+												TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+												{
+												},
 												CurrentRepeatAttempt = 0,
 												RepeatLimit = 0,
 												ResettableClassFactory = resettableClassFactory,

@@ -24,7 +24,7 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
             throw new ObjectDisposedException(nameof(DataClass));
         }
 
-        Console.WriteLine("This method is called when the test class is disposed");
+        Console.WriteLine(@"This method is called when the test class is disposed");
 
         return default;
     }

@@ -13,11 +13,9 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<PublishAOTModule>]
 public class PublishSingleFileModule : Module<CommandResult>
 {
-    public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
-    
     protected override Task<SkipDecision> ShouldSkip(IPipelineContext context)
     {
-        return Task.FromResult<SkipDecision>(EnvironmentVariables.IsNet472);
+        return Task.FromResult<SkipDecision>(EnvironmentVariables.IsNetFramework);
     }
     
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)

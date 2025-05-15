@@ -1,36 +1,56 @@
-﻿using EnumerableAsyncProcessor.Extensions;
+﻿using System.Runtime.InteropServices;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
-using ModularPipelines.Modules;
+using Polly.Retry;
+using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+public class TestNugetPackageModule : AbstractTestNugetPackageModule
+{
+    public override string ProjectName => "TUnit.NugetTester.csproj";
+}
+
+public class TestFSharpNugetPackageModule : AbstractTestNugetPackageModule
+{
+    public override string ProjectName => "TUnit.NugetTester.FSharp.fsproj";
+}
+
+public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
+{
+    public override string ProjectName => "TUnit.NugetTester.VB.vbproj";
+}
+
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]
-public class TestNugetPackageModule : Module<CommandResult[]>
+public abstract class AbstractTestNugetPackageModule : TestBaseModule
 {
-    private readonly List<string> _frameworks = [
-        /* TODO: Bug with:
-        Unhandled exception. System.MissingMethodException: Method not found: 'Void 
-        Microsoft.Testing.Platform.Extensions.Messages.TestNode.set_DisplayName(System.S
-        tring)'.
-        "net6.0", */ 
-        "net8.0", "net9.0"];
-
-    public TestNugetPackageModule()
+    protected override AsyncRetryPolicy<IReadOnlyList<CommandResult>?> RetryPolicy
+        => CreateRetryPolicy(3);
+    protected override IEnumerable<string> TestableFrameworks
     {
-        if (EnvironmentVariables.IsNet472)
+        get
         {
-            _frameworks.AddRange(["net462", "net472", "net481"]);
+            yield return "net9.0";
+            yield return "net8.0";
+            yield return "net7.0";
+            yield return "net6.0";
+        
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                yield return "net481";
+                yield return "net48";
+                yield return "net472";
+                yield return "net462";
+            }   
         }
     }
 
-    protected override async Task<CommandResult[]?> ExecuteAsync(IPipelineContext context,
+    protected override async Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework,
         CancellationToken cancellationToken)
     {
         var version = await GetModule<GenerateVersionModule>();
@@ -38,21 +58,19 @@ public class TestNugetPackageModule : Module<CommandResult[]>
         var project = context.Git()
             .RootDirectory
             .AssertExists()
-            .FindFile(x => x.Name == "TUnit.NugetTester.csproj")
+            .FindFile(x => x.Name == ProjectName)
             .AssertExists();
 
-        return await _frameworks.SelectAsync(framework =>
-                SubModule(framework, () =>
-                    context.DotNet().Run(new DotNetRunOptions
-                    {
-                        Project = project,
-                        Framework = framework,
-                        Properties =
-                        [
-                            new KeyValue("TUnitVersion", version.Value!.SemVer!)
-                        ]
-                    }, cancellationToken)
-                )
-            , cancellationToken: cancellationToken).ProcessOneAtATime();
+        return new DotNetRunOptions
+        {
+            WorkingDirectory = project.Folder!,
+            Framework = framework,
+            Properties =
+            [
+                new KeyValue("TUnitVersion", version.Value!.SemVer!)
+            ]
+        };
     }
+
+    public abstract string ProjectName { get; }
 }

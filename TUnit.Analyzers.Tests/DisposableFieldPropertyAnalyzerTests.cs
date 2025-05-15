@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.DisposableFieldPropertyAnalyzer>;
+﻿using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.DisposableFieldPropertyAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
@@ -69,12 +68,13 @@ public class DisposableFieldPropertyAnalyzerTests
             );
     }
     
-    [TestCase("Class", "Assembly")]
-    [TestCase("Class", "TestSession")]
-    [TestCase("Assembly", "Class")]
-    [TestCase("Assembly", "TestSession")]
-    [TestCase("TestSession", "Class")]
-    [TestCase("TestSession", "Assembly")]
+    [Test]
+    [Arguments("Class", "Assembly")]
+    [Arguments("Class", "TestSession")]
+    [Arguments("Assembly", "Class")]
+    [Arguments("Assembly", "TestSession")]
+    [Arguments("TestSession", "Class")]
+    [Arguments("TestSession", "Assembly")]
     public async Task New_Disposable__Static_Flags_Issue_When_Wrong_Hook_Used(string beforeHook, string afterHook)
     {
         await Verifier
@@ -112,9 +112,10 @@ public class DisposableFieldPropertyAnalyzerTests
             );
     }
     
-    [TestCase("Class")]
-    [TestCase("Assembly")]
-    [TestCase("TestSession")]
+    [Test]
+    [Arguments("Class")]
+    [Arguments("Assembly")]
+    [Arguments("TestSession")]
     public async Task New_Disposable__Static_No_Issue_When_Same_Hook_Used(string hook)
     {
         await Verifier

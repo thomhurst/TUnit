@@ -56,6 +56,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -89,7 +90,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -146,6 +149,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -179,7 +183,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -236,6 +242,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -269,7 +276,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
@@ -356,6 +365,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
+					Parent = null,
 					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
@@ -389,7 +399,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
-					TestClassProperties = [],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
@@ -446,6 +458,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 					{
+						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
@@ -479,7 +492,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg],
-						TestClassProperties = [],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
 						CurrentRepeatAttempt = 0,
 						RepeatLimit = 0,
 						ResettableClassFactory = resettableClassFactory,
@@ -536,6 +551,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 						{
+							Parent = null,
 							Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 							{
@@ -569,7 +585,9 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
 							TestClassArguments = [],
 							TestMethodArguments = [methodArg],
-							TestClassProperties = [],
+							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+							{
+							},
 							CurrentRepeatAttempt = 0,
 							RepeatLimit = 0,
 							ResettableClassFactory = resettableClassFactory,
