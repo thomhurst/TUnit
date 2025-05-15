@@ -1,9 +1,6 @@
 ﻿#pragma warning disable TUnit0042
 
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
-using Polyfills;
 
 namespace TUnit.TestProject;
 
