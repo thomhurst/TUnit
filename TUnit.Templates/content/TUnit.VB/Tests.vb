@@ -38,8 +38,8 @@ Namespace TestProject
         End Function
 
         '<Test>
-        '<TUnit.Core.ClassDataSource(Of DataClass)>
-        'Public Sub ClassDataSource(dataClass As DataClass)
+        '<ClassDataSource(Of DataClass)>
+        'Public Sub ClassDataSourceTest(dataClass As DataClass)
         '    Console.WriteLine("This test can accept a class, which can also be pre-initialized before being injected in")
         '    Console.WriteLine("These can also be shared among other tests, or new'd up each time, by using the `Shared` property on the attribute")
         'End Sub
