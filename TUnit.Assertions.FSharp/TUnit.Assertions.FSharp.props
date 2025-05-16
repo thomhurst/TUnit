@@ -1,0 +1,13 @@
+﻿<Project>
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <ImplicitUsingsMode>auto</ImplicitUsingsMode>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Using Include="TUnit.Assertions.Assert" Static="true" />
+        <Using Include="TUnit.Assertions.FSharp" />
+        <Using Include="TUnit.Assertions.FSharp.Extensions" />
+        <Using Include="TUnit.Assertions.FSharp.ValueExtensions" />
+    </ItemGroup>
+</Project>

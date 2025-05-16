@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace TUnit.Core;
 
@@ -7,6 +9,8 @@ namespace TUnit.Core;
 /// </summary>
 public static class AsyncConvert
 {
+    private static Type? _fSharpAsyncType;
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining
 #if NET
                 | MethodImplOptions.AggressiveOptimization
@@ -92,6 +96,29 @@ public static class AsyncConvert
             return valueTask;
         }
 
-        throw new ArgumentException("Invalid object type");
+        var type = invoke.GetType();
+        if (type.IsGenericType 
+            && type.GetGenericTypeDefinition().FullName == "Microsoft.FSharp.Control.FSharpAsync`1")
+        {
+        #pragma warning disable
+            return StartAsFSharpTask(invoke, type);
+        #pragma warning restore
+        }
+
+        throw new ArgumentException("Invalid object type: " + type.Name, nameof(invoke));
+    }
+    
+    [RequiresDynamicCode("Dynamic code is required to call F# async methods.")]
+    [RequiresUnreferencedCode("Dynamic code is required to call F# async methods.")]
+    private static ValueTask StartAsFSharpTask(object invoke, Type type)
+    {
+        var startAsTaskOpenGenericMethod = (_fSharpAsyncType ??= type.Assembly.GetType("Microsoft.FSharp.Control.FSharpAsync"))!
+            .GetRuntimeMethods()
+            .First(m => m.Name == "StartAsTask");
+
+        var fSharpTask = (Task)startAsTaskOpenGenericMethod.MakeGenericMethod(type.GetGenericArguments()[0])
+            .Invoke(null, [invoke, null, null])!;
+            
+        return new ValueTask(fSharpTask);
     }
 }
