@@ -3,7 +3,6 @@ Imports System.Collections.Generic
 Imports TUnit.Core
 
 Namespace Data
-
     Public Class DataGenerator
         Inherits DataSourceGeneratorAttribute(Of Integer, Integer, Integer)
 
@@ -14,5 +13,5 @@ Namespace Data
         End Function
 
     End Class
-
 End Namespace
+
