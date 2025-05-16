@@ -1,6 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<OutputType>Exe</OutputType>
@@ -12,6 +13,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="Data\DataClass.fs" />
+		<Compile Include="Data\DataGenerator.fs" />
+		<Compile Include="Data\DependencyInjectionClassConstructor.fs" />
 		<Compile Include="GlobalSetup.fs" />
 		<Compile Include="Test1.fs" />
 	</ItemGroup>

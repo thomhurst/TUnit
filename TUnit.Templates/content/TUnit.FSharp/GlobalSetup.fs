@@ -1,4 +1,4 @@
-﻿module TestProject
+﻿namespace TestProject
 
 // Here you could define global logic that would affect all tests
 
