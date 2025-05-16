@@ -17,7 +17,9 @@
 		<Compile Include="Data\DataGenerator.fs" />
 		<Compile Include="Data\DependencyInjectionClassConstructor.fs" />
 		<Compile Include="GlobalSetup.fs" />
-		<Compile Include="Test1.fs" />
+		<Compile Include="Tests.fs" />
+		<Compile Include="Tests2.fs" />
+		<Compile Include="Tests3.fs" />
 	</ItemGroup>
 
 </Project>
