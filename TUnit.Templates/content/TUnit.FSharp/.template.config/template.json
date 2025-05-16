@@ -7,7 +7,7 @@
       "TUnit"
     ],
     "name": "TUnit Mixed Test Project",
-    "identity": "TUnit.Test.Mixed",
+    "identity": "TUnit.Test.Mixed.FSharp",
     "groupIdentity": "TUnit",
     "shortName": "TUnit",
     "tags": {
