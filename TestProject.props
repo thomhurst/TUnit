@@ -4,6 +4,9 @@
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Engine\TUnit.Engine.props" />
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions\TUnit.Assertions.props" />
 
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions.FSharp\TUnit.Assertions.FSharp.props"
+        Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
+
     <PropertyGroup>
         <TargetFrameworks>net472;net8.0;net9.0</TargetFrameworks>
 
