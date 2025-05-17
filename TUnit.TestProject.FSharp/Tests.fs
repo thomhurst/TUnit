@@ -16,7 +16,5 @@ type Tests() =
     member this.TestAsync() = async {
             let result = 1 + 1
             do! check (Assert.That(result).IsPositive())
-            let! assertionResult = checkAndReturn (Assert.That(result).IsPositive())
-            Console.WriteLine(assertionResult)
         }
 #endif
