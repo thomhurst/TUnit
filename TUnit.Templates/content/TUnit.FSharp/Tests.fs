@@ -8,7 +8,7 @@ open TUnit
 open TUnit.Core
 open TUnit.Assertions
 open TUnit.Assertions.Extensions
-open TUnit.Assertions.AssertionBuilders
+open TUnit.Assertions.FSharp.Extensions
 
 type Tests() =
 
@@ -19,27 +19,21 @@ type Tests() =
     [<Test>]
     [<Arguments(1, 2, 3)>]
     [<Arguments(2, 3, 5)>]
-    member _.DataDrivenArguments(a: int, b: int, c: int): Task =
-        task {
+    member _.DataDrivenArguments(a: int, b: int, c: int) =
+        async {
             Console.WriteLine("This one can accept arguments from an attribute")
             let result = a + b
-            // Properly await the assertion`
-            let assertion = Assert.That(result).IsEqualTo(c)
-            let awaiter = (assertion :> InvokableValueAssertionBuilder<int>).GetAwaiter()
-            awaiter.GetResult() |> ignore
+            do! check(Assert.That(result).IsEqualTo(c))
         }
 
 
     [<Test>]
     [<MethodDataSource("DataSource")>]
-    member _.MethodDataSource(a: int, b: int, c: int) : Task =
-        task {
+    member _.MethodDataSource(a: int, b: int, c: int) =
+        async {
             Console.WriteLine("This one can accept arguments from a method")
             let result = a + b
-            // Properly await the assertion`
-            let assertion = Assert.That(result).IsEqualTo(c)
-            let awaiter = (assertion :> InvokableValueAssertionBuilder<int>).GetAwaiter()
-            awaiter.GetResult() |> ignore
+            do! check(Assert.That(result).IsEqualTo(c))
         }
 
     //[<Test>]
@@ -53,14 +47,11 @@ type Tests() =
 
     [<Test>]
     [<DataGenerator>]
-    member _.CustomDataGenerator(a: int, b: int, c: int) : Task =
-        task {
+    member _.CustomDataGenerator(a: int, b: int, c: int) =
+        async {
             Console.WriteLine("You can even define your own custom data generators")
             let result = a + b
-            // Properly await the assertion`
-            let assertion = Assert.That(result).IsEqualTo(c)
-            let awaiter = (assertion :> InvokableValueAssertionBuilder<int>).GetAwaiter()
-            awaiter.GetResult() |> ignore
+            do! check(Assert.That(result).IsEqualTo(c))
         }
 
     static member DataSource() : IEnumerable<struct (int * int * int)> =
