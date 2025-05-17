@@ -13,6 +13,7 @@ public class GetPackageProjectsModule : Module<List<File>>
         return
         [
             Sourcy.DotNet.Projects.TUnit_Assertions,
+            Sourcy.DotNet.Projects.TUnit_Assertions_FSharp,
             Sourcy.DotNet.Projects.TUnit_Core,
             Sourcy.DotNet.Projects.TUnit_Engine,
             Sourcy.DotNet.Projects.TUnit,

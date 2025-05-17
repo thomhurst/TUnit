@@ -1,8 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
+    <PropertyGroup>
+      <LangVersion>9.0</LangVersion>
+    </PropertyGroup>
+    
     <Import Project="..\TestProject.props" />
 
     <ItemGroup>
+        <ProjectReference Include="..\TUnit.Assertions.FSharp\TUnit.Assertions.FSharp.fsproj" />
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 

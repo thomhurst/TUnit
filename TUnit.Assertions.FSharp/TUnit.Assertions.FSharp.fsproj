@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions.FSharp.props" />
+    <Import Project="..\Library.props" />
+
+    <ItemGroup>
+        <Compile Include="Extensions.fs" />
+        <Content Include="TUnit.Assertions.FSharp.props" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+    </ItemGroup>
+
+</Project>
