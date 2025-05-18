@@ -37,12 +37,12 @@ Namespace TestProject
             Await Assert.That(result).IsEqualTo(c)
         End Function
 
-        '<Test>
-        '<ClassDataSource(Of DataClass)>
-        'Public Sub ClassDataSourceTest(dataClass As DataClass)
-        '    Console.WriteLine("This test can accept a class, which can also be pre-initialized before being injected in")
-        '    Console.WriteLine("These can also be shared among other tests, or new'd up each time, by using the `Shared` property on the attribute")
-        'End Sub
+        <Test>
+        <ClassDataSource(GetType(DataClass))>
+        Public Sub ClassDataSourceTest(dataClass As DataClass)
+            Console.WriteLine("This test can accept a class, which can also be pre-initialized before being injected in")
+            Console.WriteLine("These can also be shared among other tests, or new'd up each time, by using the `Shared` property on the attribute")
+        End Sub
 
         <Test>
         <DataGenerator>

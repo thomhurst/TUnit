@@ -1,12 +1,8 @@
 ﻿Imports System
 Imports TUnit.Core
 
-' VB.NET does not support generic attributes, so you cannot use <ClassDataSource(Of DataClass)> or <ClassConstructor(Of DependencyInjectionClassConstructor)>.
-' If your test framework provides non-generic alternatives that accept a Type parameter, use them as shown below.
-' Otherwise, these attributes must be omitted or handled in C#.
-
-' <ClassDataSource(GetType(DataClass))>
-' <ClassConstructor(GetType(DependencyInjectionClassConstructor))>
+'<ClassDataSource(GetType(DataClass))>
+'<ClassConstructor(GetType(DependencyInjectionClassConstructor))>
 'Public Class AndEvenMoreTests
 
 '    Private ReadOnly _dataClass As DataClass

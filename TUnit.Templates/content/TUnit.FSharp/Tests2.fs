@@ -12,8 +12,8 @@ type MoreTests(title: string) =
         Console.WriteLine(title)
         Console.WriteLine("Did I forget that data injection works on classes too?")
 
-    //[<ClassDataSource(typeof<DataClass>, Shared = SharedType.PerTestSession)>]
-    //member val DataClass: DataClass = Unchecked.defaultof<_> with get, init
+    [<ClassDataSource(typeof<DataClass>, Shared = SharedType.PerTestSession)>]
+    member val DataClass: DataClass = Unchecked.defaultof<_> with get, set
 
     [<Test>]
     [<MatrixDataSource>]
