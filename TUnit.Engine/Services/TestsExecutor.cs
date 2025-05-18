@@ -128,7 +128,7 @@ internal class TestsExecutor
         await ProcessCollection(queue, filter, cancellationToken);
     }
 
-    [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
+    [UnconditionalSuppressMessage("ReSharper", "AccessToDisposedClosure")]
     private async Task ProcessCollection(IEnumerable<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
         CancellationToken cancellationToken)

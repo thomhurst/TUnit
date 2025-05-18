@@ -6,7 +6,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-[SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 internal record UntypedDiscoveredTest(ResettableLazy<object> ResettableLazy) : DiscoveredTest
 {
     public override async ValueTask ExecuteTest(CancellationToken cancellationToken)

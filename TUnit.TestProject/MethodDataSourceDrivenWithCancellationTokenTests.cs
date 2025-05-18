@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.TestProject;
 
-[SuppressMessage("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")]
+[UnconditionalSuppressMessage("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")]
 public class MethodDataSourceDrivenWithCancellationTokenTests
 {
     [Test]

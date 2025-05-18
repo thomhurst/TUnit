@@ -721,6 +721,9 @@ namespace TUnit.Assertions.AssertionBuilders.Groups
         public TUnit.Assertions.AssertionBuilders.Groups.AndAssertionGroup<TActual, TAssertionBuilder> And(System.Func<TAssertionBuilder, TUnit.Assertions.AssertionBuilders.InvokableAssertionBuilder<TActual>> assert) { }
         public override System.Runtime.CompilerServices.TaskAwaiter<TActual?> GetAwaiter() { }
     }
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Usage", "TUnitAssertions0002:Assert statements must be awaited")]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Usage", "TUnitAssertions0008:ValueTasks should be awaited when used within Assert.That(..." +
+        ")")]
     public static class AssertionGroup
     {
         public static TUnit.Assertions.AssertionBuilders.Groups.AndAssertionGroupInvoker<TActual, TAssertionBuilder> And<TActual, TAssertionBuilder>(TUnit.Assertions.AssertionBuilders.Groups.AssertionGroup<TActual, TAssertionBuilder> group1, TUnit.Assertions.AssertionBuilders.Groups.AssertionGroup<TActual, TAssertionBuilder> group2)
@@ -1190,6 +1193,7 @@ namespace TUnit.Assertions.Extensions
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<char?> IsNotEqualTo(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<char?> valueSource, char expected) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<char?> IsNotEqualTo(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<char?> valueSource, char? expected) { }
     }
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Usage", "TUnitAssertions0003:Compiler argument populated")]
     public static class CollectionsIsExtensions
     {
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<System.Collections.Generic.IEnumerable<TInner>> IsEmpty<TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<System.Collections.Generic.IEnumerable<TInner>> valueSource) { }
@@ -1396,6 +1400,7 @@ namespace TUnit.Assertions.Extensions
         public static TUnit.Assertions.AssertionBuilders.Wrappers.SingleItemAssertionBuilderWrapper<System.Collections.Generic.IEnumerable<TInner>, TInner> HasSingleItem<TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<System.Collections.Generic.IEnumerable<TInner>> valueSource) { }
         public static TUnit.Assertions.AssertionBuilders.Wrappers.SingleItemAssertionBuilderWrapper<System.Collections.Immutable.ImmutableArray<TInner>, TInner> HasSingleItem<TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<System.Collections.Immutable.ImmutableArray<TInner>> valueSource) { }
     }
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Usage", "TUnitAssertions0003:Compiler argument populated")]
     public static class ImmutableArrayIsExtensions
     {
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<System.Collections.Immutable.ImmutableArray<TInner>> IsEmpty<TInner>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<System.Collections.Immutable.ImmutableArray<TInner>> valueSource) { }

@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.Testing;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-[SuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file")]
+[UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file")]
 internal class ReferencesHelper
 {
     public static readonly List<PortableExecutableReference> References =
