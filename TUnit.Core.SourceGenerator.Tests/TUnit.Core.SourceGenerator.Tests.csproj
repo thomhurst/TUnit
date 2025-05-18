@@ -5,7 +5,6 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
