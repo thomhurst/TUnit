@@ -635,7 +635,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                            using TUnit.Core;
                                            using System.Diagnostics.CodeAnalysis;
                                            
-                                           [SuppressMessage("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")]
+                                           [UnconditionalSuppressMessage("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")]
                                            public class MethodDataSourceDrivenWithCancellationTokenTests
                                            {
                                                [Test]

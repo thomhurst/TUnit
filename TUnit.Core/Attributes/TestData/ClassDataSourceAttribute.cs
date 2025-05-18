@@ -134,7 +134,7 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
     public SharedType Shared { get; set; } = SharedType.None;
     public string Key { get; set; } = string.Empty;
     
-    [SuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.")]
     public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () =>

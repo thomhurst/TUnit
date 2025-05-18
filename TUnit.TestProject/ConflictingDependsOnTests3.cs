@@ -2,7 +2,7 @@
 
 namespace TUnit.TestProject;
 
-[SuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")]
+[UnconditionalSuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")]
 public class ConflictingDependsOnTests3
 {
     [Test, DependsOn(nameof(Test5))]

@@ -100,16 +100,17 @@ public static class AsyncConvert
         if (type.IsGenericType 
             && type.GetGenericTypeDefinition().FullName == "Microsoft.FSharp.Control.FSharpAsync`1")
         {
-        #pragma warning disable
             return StartAsFSharpTask(invoke, type);
-        #pragma warning restore
         }
 
         throw new ArgumentException("Invalid object type: " + type.Name, nameof(invoke));
     }
     
-    [RequiresDynamicCode("Dynamic code is required to call F# async methods.")]
-    [RequiresUnreferencedCode("Dynamic code is required to call F# async methods.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2060:Call to \'System.Reflection.MethodInfo.MakeGenericMethod\' can not be statically analyzed. It\'s not possible to guarantee the availability of requirements of the generic method.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     private static ValueTask StartAsFSharpTask(object invoke, Type type)
     {
         var startAsTaskOpenGenericMethod = (_fSharpAsyncType ??= type.Assembly.GetType("Microsoft.FSharp.Control.FSharpAsync"))!

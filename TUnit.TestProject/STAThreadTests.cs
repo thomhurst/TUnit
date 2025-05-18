@@ -5,7 +5,7 @@ using TUnit.Core.Executors;
 
 namespace TUnit.TestProject;
 
-[SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
+[UnconditionalSuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
 public class STAThreadTests
 {
     [Before(Test)]

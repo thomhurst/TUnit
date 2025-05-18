@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Helpers;
 
-[SuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 internal class FuncHelper
 {
     public static bool TryInvokeFunc(object? func, out object? result)
