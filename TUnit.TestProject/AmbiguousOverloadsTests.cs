@@ -4,7 +4,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 
-[SuppressMessage("Usage", "TUnitAssertions0005:Assert.That(...) should not be used with a constant value")]
+[UnconditionalSuppressMessage("Usage", "TUnitAssertions0005:Assert.That(...) should not be used with a constant value")]
 public class AmbiguousOverloadsTests
 {
     [Test]

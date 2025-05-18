@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Executors;
 
@@ -10,6 +11,18 @@ public sealed class TestExecutorAttribute<T> : TUnitAttribute, ITestRegisteredEv
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetTestExecutor(new T());
+        return default;
+    }
+}
+
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+public sealed class TestExecutorAttribute([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type) : TUnitAttribute, ITestRegisteredEventReceiver
+{
+    public int Order => 0;
+
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    {
+        context.SetTestExecutor((ITestExecutor)Activator.CreateInstance(type)!);
         return default;
     }
 }

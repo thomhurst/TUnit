@@ -29,7 +29,7 @@ public class MicrosoftDependencyInjectionDataSourceAttribute : DependencyInjecti
 }
 
 [MicrosoftDependencyInjectionDataSource]
-[SuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
+[UnconditionalSuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 public class MEDITest(MEDIClass mediClass)
 {
     [Test]

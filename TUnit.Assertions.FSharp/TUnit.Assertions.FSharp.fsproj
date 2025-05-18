@@ -4,8 +4,8 @@
     <Import Project="..\Library.props" />
 
     <ItemGroup>
-        <Compile Include="Extensions.fs" />
         <Content Include="TUnit.Assertions.FSharp.props" />
+        <Compile Include="Extensions.fs" />
     </ItemGroup>
 
     <ItemGroup>

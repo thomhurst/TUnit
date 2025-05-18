@@ -1,6 +1,6 @@
 ﻿using TUnit.Core.Interfaces;
 
-namespace TUnit.TestProject.Dummy;
+namespace TUnit.TestProject.Library.Models;
 
 public class ParallelLimit3 : IParallelLimit
 {

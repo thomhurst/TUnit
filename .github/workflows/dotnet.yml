@@ -30,6 +30,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup .NET Framework
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
       - name: Setup .NET 6
         uses: actions/setup-dotnet@v4
         with:
@@ -48,13 +51,14 @@ jobs:
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x 
+          dotnet-version: 9.0.x
+          
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
 
-      - name: Setup .NET Framework
-        if: matrix.os == 'windows-latest'
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Build .NET 9
+      - name: Build
         run: dotnet build -c Release
 
       - name: Run Pipeline

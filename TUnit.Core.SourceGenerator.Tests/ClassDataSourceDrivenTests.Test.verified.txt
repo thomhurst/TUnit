@@ -40,7 +40,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
 					{
 						Name = "value",
 						Attributes = [],
@@ -74,7 +74,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestInformation = testInformation,
 					MembersToGenerate = 
 					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
 						{
 							Name = "value",
 							Attributes = [],
@@ -84,7 +84,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				};
-				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>();
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>();
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
@@ -104,7 +104,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Dummy.SomeAsyncDisposableClass):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArgGeneratedData],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -115,7 +115,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class(methodArgGeneratedData)),
 						TestFilePath = @"",
-						TestLineNumber = 10,
+						TestLineNumber = 9,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -128,11 +128,11 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Dummy.SomeAsyncDisposableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 					MethodName = $"DataSource_Class",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.DataSource_Class failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 10,
+					TestLineNumber = 9,
 				});
 			}
 			return nodes;
@@ -181,7 +181,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
 					{
 						Name = "value",
 						Attributes = [],
@@ -215,7 +215,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestInformation = testInformation,
 					MembersToGenerate = 
 					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
 						{
 							Name = "value",
 							Attributes = [],
@@ -225,7 +225,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				};
-				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>();
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>();
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
@@ -245,7 +245,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Dummy.SomeAsyncDisposableClass):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArgGeneratedData],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -256,7 +256,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class_Generic(methodArgGeneratedData)),
 						TestFilePath = @"",
-						TestLineNumber = 17,
+						TestLineNumber = 16,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -269,11 +269,11 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Dummy.SomeAsyncDisposableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 					MethodName = $"DataSource_Class_Generic",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.DataSource_Class_Generic failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 17,
+					TestLineNumber = 16,
 				});
 			}
 			return nodes;
@@ -322,7 +322,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
@@ -356,7 +356,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestInformation = testInformation,
 					MembersToGenerate = 
 					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class1",
 							Attributes = [],
@@ -366,7 +366,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				};
-				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>();
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass>();
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
@@ -386,7 +386,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.InitializableClass):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.Library.Models.InitializableClass):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArgGeneratedData],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -397,7 +397,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.IsInitialized_With_1_ClassDataSource(methodArgGeneratedData)),
 						TestFilePath = @"",
-						TestLineNumber = 24,
+						TestLineNumber = 23,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -410,11 +410,11 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.Library.Models.InitializableClass):0",
 					MethodName = $"IsInitialized_With_1_ClassDataSource",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 24,
+					TestLineNumber = 23,
 				});
 			}
 			return nodes;
@@ -463,12 +463,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
@@ -502,12 +502,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestInformation = testInformation,
 					MembersToGenerate = 
 					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class1",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
@@ -517,7 +517,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				};
-				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>();
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
@@ -529,8 +529,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-					global::TUnit.TestProject.InitializableClass methodArg = methodArgGeneratedData.Item1;
-					global::TUnit.TestProject.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg = methodArgGeneratedData.Item1;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
@@ -540,7 +540,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -551,7 +551,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.IsInitialized_With_2_ClassDataSources(methodArg, methodArg1)),
 						TestFilePath = @"",
-						TestLineNumber = 31,
+						TestLineNumber = 30,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -564,11 +564,11 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 					MethodName = $"IsInitialized_With_2_ClassDataSources",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 31,
+					TestLineNumber = 30,
 				});
 			}
 			return nodes;
@@ -617,17 +617,17 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
@@ -661,17 +661,17 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestInformation = testInformation,
 					MembersToGenerate = 
 					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class1",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
@@ -681,7 +681,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				};
-				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>();
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
@@ -693,9 +693,9 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-					global::TUnit.TestProject.InitializableClass methodArg = methodArgGeneratedData.Item1;
-					global::TUnit.TestProject.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
-					global::TUnit.TestProject.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg = methodArgGeneratedData.Item1;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
@@ -705,7 +705,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -716,7 +716,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.IsInitialized_With_3_ClassDataSources(methodArg, methodArg1, methodArg2)),
 						TestFilePath = @"",
-						TestLineNumber = 39,
+						TestLineNumber = 38,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -729,11 +729,11 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 					MethodName = $"IsInitialized_With_3_ClassDataSources",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 39,
+					TestLineNumber = 38,
 				});
 			}
 			return nodes;
@@ -782,22 +782,22 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class4",
 						Attributes = [],
@@ -831,22 +831,22 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestInformation = testInformation,
 					MembersToGenerate = 
 					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class1",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class4",
 							Attributes = [],
@@ -856,7 +856,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				};
-				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>();
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
@@ -868,10 +868,10 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-					global::TUnit.TestProject.InitializableClass methodArg = methodArgGeneratedData.Item1;
-					global::TUnit.TestProject.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
-					global::TUnit.TestProject.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
-					global::TUnit.TestProject.InitializableClass methodArg3 = methodArgGeneratedData.Item4;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg = methodArgGeneratedData.Item1;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg3 = methodArgGeneratedData.Item4;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
@@ -881,7 +881,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -892,7 +892,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.IsInitialized_With_4_ClassDataSources(methodArg, methodArg1, methodArg2, methodArg3)),
 						TestFilePath = @"",
-						TestLineNumber = 48,
+						TestLineNumber = 47,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -905,11 +905,11 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 					MethodName = $"IsInitialized_With_4_ClassDataSources",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 48,
+					TestLineNumber = 47,
 				});
 			}
 			return nodes;
@@ -958,27 +958,27 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class1",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class4",
 						Attributes = [],
 					},
-					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class5",
 						Attributes = [],
@@ -1012,27 +1012,27 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestInformation = testInformation,
 					MembersToGenerate = 
 					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class1",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class4",
 							Attributes = [],
 						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class5",
 							Attributes = [],
@@ -1042,7 +1042,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				};
-				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>();
+				var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>();
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
@@ -1054,11 +1054,11 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					classInstanceArguments = [];
 
 					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-					global::TUnit.TestProject.InitializableClass methodArg = methodArgGeneratedData.Item1;
-					global::TUnit.TestProject.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
-					global::TUnit.TestProject.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
-					global::TUnit.TestProject.InitializableClass methodArg3 = methodArgGeneratedData.Item4;
-					global::TUnit.TestProject.InitializableClass methodArg4 = methodArgGeneratedData.Item5;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg = methodArgGeneratedData.Item1;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg3 = methodArgGeneratedData.Item4;
+					global::TUnit.TestProject.Library.Models.InitializableClass methodArg4 = methodArgGeneratedData.Item5;
 
 					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => 
 					new global::TUnit.TestProject.ClassDataSourceDrivenTests()
@@ -1068,7 +1068,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 						TestClassArguments = [],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1079,7 +1079,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.IsInitialized_With_5_ClassDataSources(methodArg, methodArg1, methodArg2, methodArg3, methodArg4)),
 						TestFilePath = @"",
-						TestLineNumber = 58,
+						TestLineNumber = 57,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -1092,11 +1092,11 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 			{
 				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 					MethodName = $"IsInitialized_With_5_ClassDataSources",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 58,
+					TestLineNumber = 57,
 				});
 			}
 			return nodes;
