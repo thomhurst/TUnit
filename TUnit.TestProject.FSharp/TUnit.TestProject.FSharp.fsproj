@@ -19,6 +19,8 @@
 
     <ItemGroup>
       <PackageReference Include="FSharp.Core" />
+      <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+      <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     </ItemGroup>
     
     <Import Project="..\TestProject.targets" />
