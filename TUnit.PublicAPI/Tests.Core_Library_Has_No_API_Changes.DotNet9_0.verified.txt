@@ -823,6 +823,7 @@ namespace TUnit.Core
         public TestBuilderContextAccessor(TUnit.Core.TestBuilderContext context) { }
         public TUnit.Core.TestBuilderContext Current { get; set; }
     }
+    [System.Diagnostics.DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
     public class TestContext : TUnit.Core.Context
     {
         public readonly System.Threading.Lock Lock;
