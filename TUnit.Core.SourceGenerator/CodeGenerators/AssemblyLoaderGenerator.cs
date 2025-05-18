@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.CodeGenerators.Equality;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
@@ -9,16 +10,14 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.CompilationProvider
-            .Select((x, _) => x.GetUsedAssemblyReferences())
-            .WithComparer(new AssemblyComparer())
-            .Combine(context.CompilationProvider);
+            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer());
         
-        context.RegisterSourceOutput(provider, (sourceProductionContext, source) => GenerateCode(sourceProductionContext, source.Right, source.Left));
+        context.RegisterSourceOutput(provider, (sourceProductionContext, source) => GenerateCode(sourceProductionContext, source));
     }
 
-    private void GenerateCode(SourceProductionContext context, Compilation compilation, ImmutableArray<MetadataReference> metadataReferences)
+    private void GenerateCode(SourceProductionContext context, Compilation compilation)
     {
-        var assemblyReferences = metadataReferences
+        var assemblyReferences = compilation.References
             .Where(x => x.Properties.Kind == MetadataImageKind.Assembly)
             .Where(x => !string.IsNullOrEmpty(x.Display));
 
@@ -26,8 +25,9 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
             .Select(compilation.GetAssemblyOrModuleSymbol)
             .OfType<IAssemblySymbol>()
             .Where(x => !IsSystemAssembly(x))
-            .Select(GetAssemblyFullName)
-            .Distinct();
+            .Distinct(SymbolEqualityComparer.Default)
+            .OfType<IAssemblySymbol>()
+            .ToArray();
         
         var sourceBuilder = new SourceCodeWriter();
 
@@ -40,9 +40,10 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("public static void Initialize()");
         sourceBuilder.WriteLine("{");
 
+        var visitedAssemblies = new HashSet<IAssemblySymbol>(SymbolEqualityComparer.Default);
         foreach (var assembly in assemblySymbols)
         {
-            sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{assembly}\"));");
+            WriteAssemblyLoad(sourceBuilder, assembly, visitedAssemblies);
         }
 
         sourceBuilder.WriteLine("}");
@@ -51,6 +52,21 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         context.AddSource("AssemblyLoader.g.cs", sourceBuilder.ToString());
     }
 
+    private static void WriteAssemblyLoad(SourceCodeWriter sourceBuilder, IAssemblySymbol assembly, HashSet<IAssemblySymbol> visitedAssemblies)
+    {
+        if (!visitedAssemblies.Add(assembly))
+        {
+            return;
+        }
+        
+        sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
+
+        foreach (var innerAssembly in assembly.Modules.SelectMany(x => x.ReferencedAssemblySymbols))
+        {
+            WriteAssemblyLoad(sourceBuilder, innerAssembly, visitedAssemblies);
+        }
+    }
+    
     private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)
     {
         // Check for well-known public key tokens of system assemblies
@@ -71,23 +87,5 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
     {
         var identity = assemblySymbol.Identity;
         return $"{identity.Name}, Version={identity.Version}, Culture={(string.IsNullOrEmpty(identity.CultureName) ? "neutral" : identity.CultureName)}, PublicKeyToken={(identity.PublicKeyToken.Length > 0 ? BitConverter.ToString(identity.PublicKeyToken.ToArray()).Replace("-", "").ToLowerInvariant() : "null")}";
-    }
-
-    private class AssemblyComparer : IEqualityComparer<ImmutableArray<MetadataReference>>
-    {
-        public bool Equals(ImmutableArray<MetadataReference> x, ImmutableArray<MetadataReference> y)
-        {
-            return GetAssemblyNamesString(x).Equals(GetAssemblyNamesString(y));
-        }
-
-        public int GetHashCode(ImmutableArray<MetadataReference> obj)
-        {
-            return GetAssemblyNamesString(obj).GetHashCode();
-        }
-
-        private static string GetAssemblyNamesString(ImmutableArray<MetadataReference> metadataReferences)
-        {
-            return string.Join("|", metadataReferences.Select(x => x.Display));
-        }
     }
 }
