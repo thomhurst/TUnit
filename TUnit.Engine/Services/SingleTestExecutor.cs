@@ -112,7 +112,8 @@ internal class SingleTestExecutor(
             }
             catch (Exception e)
             {
-                if (testContext.Result?.IsOverridden is false
+                if (testContext.Result is null
+                    || testContext.Result?.IsOverridden is false
                     || testContext.Result?.Status is Status.Failed or Status.Cancelled)
                 {
                     await logger.LogDebugAsync($"Error in test {testContext.TestDetails.TestClass.Type.FullName}.{testContext.GetTestDisplayName()}: {e}");
