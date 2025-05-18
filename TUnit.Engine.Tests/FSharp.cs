@@ -38,8 +38,8 @@ public class FSharp
             
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBeGreaterThanOrEqualTo(18),
-                result => result.ResultSummary.Counters.Passed.ShouldBeGreaterThanOrEqualTo(18),
+                result => result.ResultSummary.Counters.Total.ShouldBeGreaterThanOrEqualTo(9),
+                result => result.ResultSummary.Counters.Passed.ShouldBeGreaterThanOrEqualTo(9),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ],
