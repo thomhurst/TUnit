@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.Tests.Old;
 
-[SuppressMessage("Usage", "TUnitAssertions0005:Assert.That(...) should not be used with a constant value")]
+[UnconditionalSuppressMessage("Usage", "TUnitAssertions0005:Assert.That(...) should not be used with a constant value")]
 public class AssertMultipleTests
 {
     [Test]
