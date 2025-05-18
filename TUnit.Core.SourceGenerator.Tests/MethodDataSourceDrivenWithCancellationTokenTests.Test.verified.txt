@@ -78,7 +78,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+						new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 					],
 					Parameters = [],
 					Properties = [],
@@ -181,7 +181,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						Namespace = "TUnit.TestProject",
 						Attributes = 
 						[
-							new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+							new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 						],
 						Parameters = [],
 						Properties = [],
@@ -284,7 +284,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							Namespace = "TUnit.TestProject",
 							Attributes = 
 							[
-								new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+								new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 							],
 							Parameters = [],
 							Properties = [],
@@ -391,7 +391,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								Namespace = "TUnit.TestProject",
 								Attributes = 
 								[
-									new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+									new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 								],
 								Parameters = [],
 								Properties = [],
@@ -498,7 +498,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									Namespace = "TUnit.TestProject",
 									Attributes = 
 									[
-										new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+										new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 									],
 									Parameters = [],
 									Properties = [],
@@ -605,7 +605,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 										Namespace = "TUnit.TestProject",
 										Attributes = 
 										[
-											new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+											new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 										],
 										Parameters = [],
 										Properties = [],
