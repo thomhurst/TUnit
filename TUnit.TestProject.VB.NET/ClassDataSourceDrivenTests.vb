@@ -3,7 +3,7 @@ Imports TUnit.Assertions
 Imports TUnit.Assertions.Extensions
 Imports TUnit.Core
 Imports TUnit.Core.Interfaces
-Imports TUnit.TestProject.Dummy
+Imports TUnit.TestProject.Library.Models
 
 
 Public Class ClassDataSourceDrivenTests

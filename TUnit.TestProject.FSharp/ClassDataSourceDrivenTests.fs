@@ -5,7 +5,7 @@ open TUnit.Assertions
 open TUnit.Assertions.Extensions
 open TUnit.Assertions.FSharp.Operations
 open TUnit.Core
-open TUnit.TestProject.Dummy
+open TUnit.TestProject.Library.Models
 
 type ClassDataSourceDrivenTests() =
 

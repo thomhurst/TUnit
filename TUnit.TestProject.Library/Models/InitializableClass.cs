@@ -1,6 +1,6 @@
 ﻿using TUnit.Core.Interfaces;
 
-namespace TUnit.TestProject;
+namespace TUnit.TestProject.Library.Models;
 
 public class InitializableClass : IAsyncInitializer
 {
