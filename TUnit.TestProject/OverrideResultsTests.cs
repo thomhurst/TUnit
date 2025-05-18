@@ -27,5 +27,7 @@ public class OverrideResultsTests
             afterTestContext.OverrideResult(Status.Passed, "Because I said so");
             return default;
         }
+
+        public int Order => 0;
     }
 }
