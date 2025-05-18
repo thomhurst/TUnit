@@ -7,6 +7,15 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators;
 [Generator]
 public class AssemblyLoaderGenerator : IIncrementalGenerator
 {
+    private static readonly string[] _excludedAssemblies =
+    [
+        "b77a5c561934e089",
+        "b03f5f7f11d50a3a",
+        "31bf3856ad364e35",
+        "cc7b13ffcd2ddd51",
+        "7cec85d7bea7798e",
+        
+    ];
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.CompilationProvider
@@ -24,7 +33,6 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         var assemblySymbols = assemblyReferences
             .Select(compilation.GetAssemblyOrModuleSymbol)
             .OfType<IAssemblySymbol>()
-            .Where(x => !IsSystemAssembly(x))
             .Distinct(SymbolEqualityComparer.Default)
             .OfType<IAssemblySymbol>()
             .ToArray();
@@ -54,7 +62,7 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
 
     private static void WriteAssemblyLoad(SourceCodeWriter sourceBuilder, IAssemblySymbol assembly, HashSet<IAssemblySymbol> visitedAssemblies)
     {
-        if (!visitedAssemblies.Add(assembly))
+        if (!visitedAssemblies.Add(assembly) || IsSystemAssembly(assembly))
         {
             return;
         }
@@ -69,18 +77,16 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
     
     private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)
     {
-        // Check for well-known public key tokens of system assemblies
-        var publicKeyToken = assemblySymbol.Identity.PublicKeyToken;
-        
-        if (publicKeyToken == null)
+        if (assemblySymbol.Identity.PublicKeyToken.IsDefaultOrEmpty)
         {
             return false;
         }
         
-        return publicKeyToken.SequenceEqual(new byte[] { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 }) // .NET Framework
-            || publicKeyToken.SequenceEqual(new byte[] { 0x7c, 0xec, 0x85, 0xd7, 0xbe, 0xa7, 0x79, 0x8e }) // .NET Core
-            || publicKeyToken.SequenceEqual(new byte[] { 0xcc, 0x7b, 0x13, 0xff, 0xcd, 0x2d, 0xdd, 0x51 }) // System.Private
-            || publicKeyToken.SequenceEqual(new byte[] { 0xb0, 0x3f, 0x5f, 0x7f, 0x11, 0xd5, 0x0a, 0x3a }); // mscorlib
+        var stringPublicTokenKey = BitConverter.ToString(assemblySymbol.Identity.PublicKeyToken.ToArray())
+            .Replace("-", "")
+            .ToLowerInvariant();
+      
+        return _excludedAssemblies.Contains(stringPublicTokenKey);
     }
     
     private static string GetAssemblyFullName(IAssemblySymbol assemblySymbol)
