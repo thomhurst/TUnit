@@ -8,10 +8,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\TUnit.Assertions.FSharp\TUnit.Assertions.FSharp.fsproj" />
+        <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="ClassDataSourceDrivenTests.fs" />
         <Compile Include="Tests.fs" />
     </ItemGroup>
 

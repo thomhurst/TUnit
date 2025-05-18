@@ -60,7 +60,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-internal sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
+public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
 {
     private readonly Type[] _types;
     

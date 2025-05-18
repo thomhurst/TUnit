@@ -59,8 +59,14 @@
     <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.18" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
-    <PackageVersion Include="Sourcy.DotNet" Version="0.7.6" />
-    <PackageVersion Include="Sourcy.Git" Version="0.7.6" />
+    <PackageVersion Include="Sourcy.DotNet" Version="0.7.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="Sourcy.Git" Version="0.7.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
     <PackageVersion Include="StreamJsonRpc" Version="2.22.11" />
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.5" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />

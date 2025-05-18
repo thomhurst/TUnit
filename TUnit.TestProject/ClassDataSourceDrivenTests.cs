@@ -1,6 +1,5 @@
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
-using TUnit.Core.Interfaces;
 using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;
@@ -65,15 +64,4 @@ public class ClassDataSourceDrivenTests
         await Assert.That(class4.IsInitialized).IsTrue();
         await Assert.That(class5.IsInitialized).IsTrue();
     }
-}
-
-public class InitializableClass : IAsyncInitializer
-{
-    public Task InitializeAsync()
-    {
-        IsInitialized = true;
-        return Task.CompletedTask;
-    }
-
-    public bool IsInitialized { get; private set; }
 }
