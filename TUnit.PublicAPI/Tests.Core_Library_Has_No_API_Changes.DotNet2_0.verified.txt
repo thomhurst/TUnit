@@ -125,6 +125,19 @@ namespace TUnit.Core
         public required string TestSessionId { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
+    public sealed class ClassDataSourceAttribute : TUnit.Core.NonTypedDataSourceGeneratorAttribute
+    {
+        public ClassDataSourceAttribute(System.Type type) { }
+        public ClassDataSourceAttribute(params System.Type[] types) { }
+        public ClassDataSourceAttribute(System.Type type, System.Type type2) { }
+        public ClassDataSourceAttribute(System.Type type, System.Type type2, System.Type type3) { }
+        public ClassDataSourceAttribute(System.Type type, System.Type type2, System.Type type3, System.Type type4) { }
+        public ClassDataSourceAttribute(System.Type type, System.Type type2, System.Type type3, System.Type type4, System.Type type5) { }
+        public string Key { get; set; }
+        public TUnit.Core.SharedType Shared { get; set; }
+        public override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T> : TUnit.Core.DataSourceGeneratorAttribute<T>
         where T : new()
     {
@@ -1084,16 +1097,16 @@ namespace TUnit.Core.Executors
         public int Order { get; }
         public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
     }
-    public abstract class HookExecutorAttribute : TUnit.Core.TUnitAttribute
+    public class HookExecutorAttribute : TUnit.Core.TUnitAttribute
     {
-        public abstract System.Type HookExecutorType { get; }
+        public HookExecutorAttribute(System.Type type) { }
+        public System.Type HookExecutorType { get; }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public sealed class HookExecutorAttribute<T> : TUnit.Core.Executors.HookExecutorAttribute
         where T : TUnit.Core.Interfaces.IHookExecutor, new ()
     {
         public HookExecutorAttribute() { }
-        public override System.Type HookExecutorType { get; }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public class InvariantCultureAttribute : TUnit.Core.Executors.CultureAttribute
@@ -1104,6 +1117,13 @@ namespace TUnit.Core.Executors
     public class STAThreadExecutorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
     {
         public STAThreadExecutorAttribute() { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public sealed class TestExecutorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
+    {
+        public TestExecutorAttribute(System.Type type) { }
         public int Order { get; }
         public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
     }

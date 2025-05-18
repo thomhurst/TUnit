@@ -73,7 +73,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
-        await AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await TrxAsserter.AssertTrx(result, assertions, trxFilename, assertionExpression);
     }
     
     private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
@@ -108,7 +108,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
-        await AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await TrxAsserter.AssertTrx(result, assertions, trxFilename, assertionExpression);
     }
     
     private async Task RunWithSingleFile(string filter,
@@ -143,7 +143,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
-        await AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await TrxAsserter.AssertTrx(result, assertions, trxFilename, assertionExpression);
     }
 
     protected static FileInfo? FindFile(Func<FileInfo, bool> predicate)
@@ -154,34 +154,6 @@ public abstract class InvokableTestBase(TestMode testMode)
     protected static DirectoryInfo? FindFolder(Func<DirectoryInfo, bool> predicate)
     {
         return FileSystemHelpers.FindFolder(predicate);
-    }
-
-    private async Task AssertTrx(BufferedCommandResult commandResult,
-        List<Action<TestRun>> assertions,
-        string trxFilename, string assertionExpression)
-    {
-        try
-        {
-            var trxFile = FindFile(x => x.Name == trxFilename)?.FullName ?? throw new FileNotFoundException($"Could not find trx file {trxFilename}");
-            
-            var trxFileContents = await File.ReadAllTextAsync(trxFile);
-
-            var testRun = TrxControl.ReadTrx(new StringReader(trxFileContents));
-            
-            assertions.ForEach(x => x.Invoke(testRun));
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(@$"Command Input: {commandResult}");
-            Console.WriteLine(@$"Error: {commandResult.StandardError}");
-            Console.WriteLine(@$"Output: {commandResult.StandardOutput}");
-
-            throw new Exception($"""
-                                 Error asserting results for {GetType().Name}: {e.Message}
-
-                                 Expression: {assertionExpression}
-                                 """, e);
-        }
     }
 }
 

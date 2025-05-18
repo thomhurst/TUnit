@@ -1,9 +1,8 @@
 ﻿namespace TUnit.TestProject.FSharp
 
-open System
 open TUnit.Assertions
 open TUnit.Assertions.Extensions
-open TUnit.Assertions.FSharp.Extensions
+open TUnit.Assertions.FSharp.Operations
 open TUnit.Core
 
 type Tests() =
