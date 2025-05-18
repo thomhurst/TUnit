@@ -37,4 +37,30 @@ public static partial class DoesNotExtensions
             $"not contain the value '{expected}'")
             , [doNotPopulateThisValue]);
     }
+    
+    public static InvokableValueAssertionBuilder<IReadOnlyDictionary<TKey, TValue>> DoesNotContainKey<TKey, TValue>(this IValueSource<IReadOnlyDictionary<TKey, TValue>> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    {
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<IReadOnlyDictionary<TKey, TValue>, TKey>(expected,
+                (actual, _, _) =>
+                {
+                    Verify.ArgNotNull(actual);
+                    return !actual.Keys.Contains(expected, equalityComparer);
+                },
+                (_, _, _) => $"The key \"{expected}\" was found in the dictionary",
+                $"not contain the key '{expected}'")
+            , [doNotPopulateThisValue]);
+    }
+    
+    public static InvokableValueAssertionBuilder<IReadOnlyDictionary<TKey, TValue>> DoesNotContainValue<TKey, TValue>(this IValueSource<IReadOnlyDictionary<TKey, TValue>> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    {
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<IReadOnlyDictionary<TKey, TValue>, TValue>(expected,
+                (actual, _, _) =>
+                {
+                    Verify.ArgNotNull(actual);
+                    return !actual.Values.Contains(expected, equalityComparer);
+                },
+                (_, _, _) => $"The value \"{expected}\" was found in the dictionary",
+                $"not contain the value '{expected}'")
+            , [doNotPopulateThisValue]);
+    }
 }
