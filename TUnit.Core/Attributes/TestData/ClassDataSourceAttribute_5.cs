@@ -1,12 +1,14 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<
-    T1, 
-    T2, 
-    T3, 
-    T4, 
-    T5> 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T1, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T2, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T3, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T4, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T5> 
     : DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> 
     where T1 : new()
     where T2 : new()
