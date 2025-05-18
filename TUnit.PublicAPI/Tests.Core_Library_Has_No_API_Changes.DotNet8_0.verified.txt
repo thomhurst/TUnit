@@ -13,6 +13,14 @@ namespace TUnit.Core
     {
         public AfterEveryAttribute(TUnit.Core.HookType hookType, [System.Runtime.CompilerServices.CallerFilePath] string file = "", [System.Runtime.CompilerServices.CallerLineNumber] int line = 0) { }
     }
+    public class AfterTestContext
+    {
+        public TUnit.Core.TestContext TestContext { get; }
+        public TUnit.Core.TestDetails TestDetails { get; }
+        public void OverrideResult(System.Exception exception, string reason) { }
+        public void OverrideResult(TUnit.Core.Enums.Status status, string reason) { }
+        public static TUnit.Core.TestContext op_Implicit(TUnit.Core.AfterTestContext afterTestContext) { }
+    }
     public abstract class ArgumentDisplayFormatter
     {
         protected ArgumentDisplayFormatter() { }
@@ -93,6 +101,7 @@ namespace TUnit.Core
         public void AddLinkedCancellationToken(System.Threading.CancellationToken cancellationToken) { }
         public void SetHookExecutor(TUnit.Core.Interfaces.IHookExecutor hookExecutor) { }
         public void SetTestExecutor(TUnit.Core.Interfaces.ITestExecutor testExecutor) { }
+        public static TUnit.Core.TestContext op_Implicit(TUnit.Core.BeforeTestContext beforeTestContext) { }
     }
     public class BeforeTestDiscoveryContext : TUnit.Core.Context
     {
@@ -814,6 +823,7 @@ namespace TUnit.Core
         public TestBuilderContextAccessor(TUnit.Core.TestBuilderContext context) { }
         public TUnit.Core.TestBuilderContext Current { get; set; }
     }
+    [System.Diagnostics.DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
     public class TestContext : TUnit.Core.Context
     {
         public readonly object Lock;
@@ -844,7 +854,7 @@ namespace TUnit.Core
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.AssemblyHookContext, TUnit.Core.TestContext>>? OnLastTestInAssembly { get; set; }
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.ClassHookContext, TUnit.Core.TestContext>>? OnLastTestInClass { get; set; }
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.TestSessionContext, TUnit.Core.TestContext>>? OnLastTestInTestSession { get; set; }
-        public TUnit.Core.AsyncEvent<TUnit.Core.TestContext>? OnTestEnd { get; set; }
+        public TUnit.Core.AsyncEvent<TUnit.Core.AfterTestContext>? OnTestEnd { get; set; }
         public TUnit.Core.AsyncEvent<TUnit.Core.TestRegisteredContext>? OnTestRegistered { get; set; }
         [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 null,
@@ -957,7 +967,9 @@ namespace TUnit.Core
         public required System.TimeSpan? Duration { get; init; }
         public required System.DateTimeOffset? End { get; init; }
         public required System.Exception? Exception { get; init; }
+        public bool IsOverridden { get; set; }
         public string? Output { get; }
+        public string? OverrideReason { get; set; }
         public required System.DateTimeOffset? Start { get; init; }
         public required TUnit.Core.Enums.Status Status { get; init; }
     }
@@ -1455,7 +1467,7 @@ namespace TUnit.Core.Interfaces
     }
     public interface ITestEndEventReceiver : TUnit.Core.Interfaces.IEventReceiver
     {
-        System.Threading.Tasks.ValueTask OnTestEnd(TUnit.Core.TestContext testContext);
+        System.Threading.Tasks.ValueTask OnTestEnd(TUnit.Core.AfterTestContext afterTestContext);
     }
     public interface ITestExecutor
     {

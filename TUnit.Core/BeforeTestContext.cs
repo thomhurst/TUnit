@@ -30,4 +30,6 @@ public class BeforeTestContext
     }
     
     public void AddAsyncLocalValues() => TestContext.AddAsyncLocalValues();
+    
+    public static implicit operator TestContext(BeforeTestContext beforeTestContext) => beforeTestContext.TestContext;
 }
