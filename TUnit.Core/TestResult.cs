@@ -48,4 +48,7 @@ public record TestResult
     /// </summary>
     [JsonIgnore]
     internal TestContext? TestContext { get; init; }
+    
+    public string? OverrideReason { get; set; }
+    public bool IsOverridden { get; set; }
 }

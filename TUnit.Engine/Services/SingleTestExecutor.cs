@@ -109,14 +109,16 @@ internal class SingleTestExecutor(
                 await logger.LogInformationAsync($"Skipping {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}...");
                 
                 testContext.SetResult(skipTestException);
-                
-                await messageBus.Skipped(testContext, skipTestException.Reason);
             }
             catch (Exception e)
             {
-                await logger.LogDebugAsync($"Error in test {testContext.TestDetails.TestClass.Type.FullName}.{testContext.GetTestDisplayName()}: {e}");
-                testContext.SetResult(e);
-                throw;
+                if (testContext.Result?.IsOverridden is false
+                    || testContext.Result?.Status is Status.Failed or Status.Cancelled)
+                {
+                    await logger.LogDebugAsync($"Error in test {testContext.TestDetails.TestClass.Type.FullName}.{testContext.GetTestDisplayName()}: {e}");
+                    testContext.SetResult(e);
+                    throw;
+                }
             }
             finally
             {
@@ -134,27 +136,12 @@ internal class SingleTestExecutor(
                 Status.Passed => messageBus.Passed(test.TestContext, start.GetValueOrDefault()),
                 Status.Failed => messageBus.Failed(test.TestContext, result.Exception!, start.GetValueOrDefault()),
                 Status.Cancelled => messageBus.Cancelled(test.TestContext, start.GetValueOrDefault()),
+                Status.Skipped => messageBus.Skipped(test.TestContext, test.TestContext.SkipReason!),
                 _ => default,
             };
 
             await task;
         }
-    }
-
-    private bool IsCancelled(Exception ex)
-    {
-        if (ex is TestRunCanceledException)
-        {
-            return true;
-        }
-
-        if (ex is TaskCanceledException or OperationCanceledException
-            && engineCancellationToken.Token.IsCancellationRequested)
-        {
-            return true;
-        }
-
-        return false;
     }
 
     private async Task RunFirstTestEventReceivers(TestContext testContext)

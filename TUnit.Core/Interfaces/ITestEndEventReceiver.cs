@@ -2,5 +2,5 @@
 
 public interface ITestEndEventReceiver : IEventReceiver
 {
-    ValueTask OnTestEnd(TestContext testContext);
+    ValueTask OnTestEnd(AfterTestContext afterTestContext);
 }

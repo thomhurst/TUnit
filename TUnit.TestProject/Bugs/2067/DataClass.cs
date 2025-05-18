@@ -35,7 +35,7 @@ public class DataClass :
     }
 
 
-    public ValueTask OnTestEnd(TestContext testContext)
+    public ValueTask OnTestEnd(AfterTestContext testContext)
     {
         IsEnded = true;
         return default;
