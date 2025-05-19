@@ -1,20 +1,37 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public abstract class ClassConstructorAttribute : TUnitAttribute, IDataAttribute
+// Base abstract class
+public abstract class BaseClassConstructorAttribute : TUnitAttribute, IDataAttribute
 {
-    public abstract Type ClassConstructorType { get; }
+    public abstract Type ClassConstructorType { get; set; }
 
-    internal ClassConstructorAttribute()
-    {
-    }
+    internal BaseClassConstructorAttribute() { }
+    internal BaseClassConstructorAttribute(Type classType) { ClassConstructorType = classType; }
 }
 
+// Single sealed attribute with both generic and non-generic constructors
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class)]
-public sealed class ClassConstructorAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> 
-    : ClassConstructorAttribute where T : IClassConstructor, new()
+public partial class ClassConstructorAttribute : BaseClassConstructorAttribute
 {
-    public override Type ClassConstructorType { get; } = typeof(T);
+    public ClassConstructorAttribute(Type classConstructorType)
+        : base(classConstructorType)
+    {
+        ClassConstructorType = classConstructorType;
+    }
+
+    public override Type ClassConstructorType { get; set; }
+}
+
+// Generic version for C#
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class)]
+public sealed class ClassConstructorAttribute<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
+    : ClassConstructorAttribute(typeof(T))
+    where T : IClassConstructor, new()
+{
+    public override Type ClassConstructorType { get; set; } = typeof(T);
 }
