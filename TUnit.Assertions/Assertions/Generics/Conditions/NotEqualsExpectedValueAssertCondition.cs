@@ -5,7 +5,7 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions;
 public class NotEqualsExpectedValueAssertCondition<TActual>(TActual expected)
     : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => $"to not be equal to {ExpectedValue}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TActual? expectedValue) => AssertionResult

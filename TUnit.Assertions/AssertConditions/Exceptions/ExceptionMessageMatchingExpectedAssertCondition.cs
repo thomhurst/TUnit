@@ -7,7 +7,7 @@ public class ExceptionMessageMatchingExpectedAssertCondition<TException>(StringM
     : ExpectedValueAssertCondition<TException, StringMatcher>(match)
 where TException : Exception
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => $"message to match {Formatter.Format(ExpectedValue).TruncateWithEllipsis(100)}";
 
     protected override ValueTask<AssertionResult> GetResult(TException? actualValue, StringMatcher? expectedValue)

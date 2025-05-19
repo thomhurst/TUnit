@@ -17,7 +17,7 @@ public class EquivalentToExpectedValueAssertCondition<
 
     public EquivalencyKind EquivalencyKind { get; set; } = EquivalencyKind.Full;
     
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
         var expectedMessage = typeof(TExpected).IsSimpleType() || typeof(IEnumerable).IsAssignableFrom(typeof(TExpected)) 
             ? Formatter.Format(ExpectedValue)

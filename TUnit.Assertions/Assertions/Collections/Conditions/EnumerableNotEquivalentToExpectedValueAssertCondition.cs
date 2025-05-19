@@ -10,7 +10,7 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-    protected override string GetExpectation() => $"to not be equivalent to {(ExpectedValue != null ? Formatter.Format(ExpectedValue) : null)}";
+    internal protected override string GetExpectation() => $"to not be equivalent to {(ExpectedValue != null ? Formatter.Format(ExpectedValue) : null)}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {

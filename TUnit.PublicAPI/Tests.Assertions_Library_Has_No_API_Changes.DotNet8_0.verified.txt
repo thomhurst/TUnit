@@ -666,6 +666,7 @@ namespace TUnit.Assertions.AssertionBuilders
     public interface IOrAssertionBuilder { }
     public class InvokableAssertionBuilder<TActual> : TUnit.Assertions.AssertionBuilders.AssertionBuilder, TUnit.Assertions.AssertConditions.Interfaces.ISource, TUnit.Assertions.AssertionBuilders.IInvokableAssertionBuilder
     {
+        protected readonly TUnit.Assertions.AssertConditions.Interfaces.ISource Source;
         protected System.Collections.Generic.Stack<TUnit.Assertions.AssertConditions.BaseAssertCondition> Assertions { get; }
         public System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TUnit.Assertions.AssertConditions.AssertionResult>> GetAssertionResults() { }
         public System.Runtime.CompilerServices.TaskAwaiter GetAwaiter() { }

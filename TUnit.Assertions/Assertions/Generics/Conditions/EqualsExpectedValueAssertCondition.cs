@@ -11,7 +11,7 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected, IEqua
     {
     }
     
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => $"to be equal to {ExpectedValue}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TActual? expectedValue)
