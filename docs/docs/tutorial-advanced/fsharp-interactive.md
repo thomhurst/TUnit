@@ -88,6 +88,7 @@ format. To use TUnit with F# Interactive, follow these steps:
 
 3. **Run your tests**: You can run your tests by executing the script in F# Interactive. The results will be printed to the console.
    To run the script, you can use the following command
-   ```bash
+
+   ```powershell
    dotnet fsi your_script.fsx
    ```
