@@ -22,10 +22,72 @@ format. To use TUnit with F# Interactive, follow these steps:
    Alternatively, you can specify a specific version:
 
    ```fsharp
-   #r "nuget: TUnit, 0.20.11"
+   #r "nuget: TUnit, 0.20.16"
    ```
 
 2. **Write your tests**: You can write your tests in the same way you would in a regular F# project. For example:
-   ```fsharp
 
+   ```fsharp
+      #r "nuget: TUnit, 0.20.16"
+      #r "nuget: TUnit.Assertions.Fsharp, 0.20.16"
+
+      open System
+      open TUnit
+      open TUnit.Engine
+      open TUnit.Core
+      open TUnit.Assertions
+      open TUnit.Assertions
+      open TUnit.Assertions.Extensions
+      open TUnit.Assertions.FSharp.Operations
+      open TUnit.Engine.Services
+      open System.Collections.Generic
+
+      type tests() =
+         [<Test>]
+         member _.Basic() =
+            Console.WriteLine("This is a basic test")
+
+         [<Test>]
+         [<Arguments(1, 2, 3)>]
+         [<Arguments(2, 3, 5)>]
+         member _.DataDrivenArguments(a: int, b: int, c: int) =
+            async {
+                  Console.WriteLine("This one can accept arguments from an attribute")
+                  let result = a + b
+                  do! check (Assert.That(result).IsEqualTo(c))
+            }
+
+         [<DynamicTestBuilder>]
+         member _.BuildTests(context: DynamicTestBuilderContext) =
+            context.AddTest(DynamicTest<tests>(TestMethod = fun instance -> instance.Basic()))
+
+            context.AddTest(
+                  DynamicTest<tests>(
+                     TestMethod = fun instance -> instance.DataDrivenArguments(1, 2, 3) |> Async.RunSynchronously
+                  )
+            )
+
+      // Instantiate your test class
+      let testInstance = tests ()
+
+      testInstance.BuildTests
+
+      // Create a test runner and get the results
+      let resultsTask =
+         task {
+            // Set results directory to current working directory
+            let args = [| "--results-directory"; System.IO.Directory.GetCurrentDirectory() |]
+            let! testResults = TUnitRunner.RunTests(args)
+            return testResults
+         }
+
+      printf "Running tests..."
+
+      resultsTask |> Async.AwaitTask |> Async.RunSynchronously
+   ```
+
+3. **Run your tests**: You can run your tests by executing the script in F# Interactive. The results will be printed to the console.
+   To run the script, you can use the following command
+   ```bash
+   dotnet fsi your_script.fsx
    ```
