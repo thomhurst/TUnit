@@ -7,7 +7,7 @@ public class StringNotContainsExpectedValueAssertCondition(string expected, Stri
     : ExpectedValueAssertCondition<string, string>(expected)
 {
     protected override string GetExpectation()
-        => $"to not contain {Formatter.Format(expected).TruncateWithEllipsis(100)}";
+        => $"to not contain {Formatter.Format(Expectation).TruncateWithEllipsis(100)}";
 
     protected override ValueTask<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {

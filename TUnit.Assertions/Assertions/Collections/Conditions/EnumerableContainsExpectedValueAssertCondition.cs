@@ -6,7 +6,7 @@ public class EnumerableContainsExpectedValueAssertCondition<TActual, TInner>(
     : ExpectedValueAssertCondition<TActual, TInner>(expected)
     where TActual : IEnumerable<TInner>
 {
-    protected override string GetExpectation() => $"to contain {expected}";
+    protected override string GetExpectation() => $"to contain {ExpectedValue}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TInner? inner)
         => AssertionResult

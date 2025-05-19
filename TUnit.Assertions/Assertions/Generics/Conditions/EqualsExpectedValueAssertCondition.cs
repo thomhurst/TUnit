@@ -12,7 +12,7 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected, IEqua
     }
     
     protected override string GetExpectation()
-        => $"to be equal to {expected}";
+        => $"to be equal to {ExpectedValue}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TActual? expectedValue)
     {

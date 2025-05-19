@@ -10,7 +10,7 @@ public class StringContainsExpectedValueAssertCondition(string expected, StringC
     internal bool IgnoreWhitespace { get; set; }
     
     protected override string GetExpectation()
-        => $"to contain {Formatter.Format(expected).TruncateWithEllipsis(100)}";
+        => $"to contain {Formatter.Format(ExpectedValue).TruncateWithEllipsis(100)}";
 
     protected override ValueTask<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {

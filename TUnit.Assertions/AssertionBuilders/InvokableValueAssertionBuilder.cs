@@ -14,7 +14,7 @@ public class InvokableValueAssertionBuilder<TActual>(ISource source) : Invokable
     public InvokableValueAssertionBuilder<TActual> Because(string reason)
     {
         var becauseReason = new BecauseReason(reason);
-        var assertion = source.Assertions.Peek();
+        var assertion = Source.Assertions.Peek();
         assertion.SetBecauseReason(becauseReason);
         return this;
     }

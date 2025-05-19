@@ -20,7 +20,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
             return "to match";
         }
         
-        return $"to be equivalent to {(expected != null ? Formatter.Format(expected) : null)}";
+        return $"to be equivalent to {(ExpectedValue != null ? Formatter.Format(ExpectedValue) : null)}";
     }
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)

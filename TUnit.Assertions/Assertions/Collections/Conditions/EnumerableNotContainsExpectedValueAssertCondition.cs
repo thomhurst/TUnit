@@ -6,7 +6,7 @@ public class EnumerableNotContainsExpectedValueAssertCondition<TActual, TInner>(
     : ExpectedValueAssertCondition<TActual, TInner>(expected)
     where TActual : IEnumerable<TInner>
 {
-    protected override string GetExpectation() => $"to not contain {expected}";
+    protected override string GetExpectation() => $"to not contain {ExpectedValue}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TInner? inner)
         => AssertionResult

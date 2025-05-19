@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -21,6 +22,13 @@ public class SourceRegistrar
     /// <param name="assemblyLoader">The assembly loader to register.</param>
     public static void RegisterAssembly(Func<Assembly> assemblyLoader)
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            return;
+        }
+#endif 
+        
         Sources.AssemblyLoaders.Enqueue(assemblyLoader);
     }
     

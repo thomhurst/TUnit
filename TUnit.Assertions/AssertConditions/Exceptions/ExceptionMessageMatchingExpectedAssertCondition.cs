@@ -8,7 +8,7 @@ public class ExceptionMessageMatchingExpectedAssertCondition<TException>(StringM
 where TException : Exception
 {
     protected override string GetExpectation()
-        => $"message to match {Formatter.Format(match).TruncateWithEllipsis(100)}";
+        => $"message to match {Formatter.Format(ExpectedValue).TruncateWithEllipsis(100)}";
 
     protected override ValueTask<AssertionResult> GetResult(TException? actualValue, StringMatcher? expectedValue)
     {
@@ -22,7 +22,7 @@ where TException : Exception
         return AssertionResult
             .FailIf(expectedValue is null,
                 "expected value was null")
-            .OrFailIf(!match.Matches(actualValue.Message),
+            .OrFailIf(!ExpectedValue!.Matches(actualValue.Message),
                 $"found message {Formatter.Format(actualValue.Message).TruncateWithEllipsis(100)}");
     }
 }

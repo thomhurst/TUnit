@@ -7,7 +7,7 @@ public class NotSameReferenceExpectedValueAssertCondition<TActual, TExpected>(TE
     : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
     protected override string GetExpectation()
-        => $"to not have the same reference as {expected}";
+        => $"to not have the same reference as {ExpectedValue}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
     {

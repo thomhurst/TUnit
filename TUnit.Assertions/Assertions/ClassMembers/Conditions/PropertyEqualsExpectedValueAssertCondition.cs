@@ -8,7 +8,7 @@ public class PropertyEqualsExpectedValueAssertCondition<TRootObjectType, TProper
 {
     protected override string GetExpectation()
     {
-        return $"{typeof(TRootObjectType).Name}.{ExpressionHelpers.GetName(propertySelector)} to be equal to {expected}";
+        return $"{typeof(TRootObjectType).Name}.{ExpressionHelpers.GetName(propertySelector)} to be equal to {ExpectedValue}";
     }
 
     protected override ValueTask<AssertionResult> GetResult(TRootObjectType? actualValue, TPropertyType? expectedValue)

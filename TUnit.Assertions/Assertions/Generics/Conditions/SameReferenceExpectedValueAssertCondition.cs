@@ -7,7 +7,7 @@ public class SameReferenceExpectedValueAssertCondition<TActual, TExpected>(TExpe
     : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
     protected override string GetExpectation()
-        => $"to have the same reference as {expected}";
+        => $"to have the same reference as {ExpectedValue}";
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
     {

@@ -8,7 +8,7 @@ public class ExceptionMessageContainingExpectedValueAssertCondition<TException>(
 where TException : Exception
 {
     protected override string GetExpectation()
-        => $"message to contain {Formatter.Format(expected).TruncateWithEllipsis(100)}";
+        => $"message to contain {Formatter.Format(ExpectedValue).TruncateWithEllipsis(100)}";
 
     protected override ValueTask<AssertionResult> GetResult(TException? actualValue, string? expectedValue)
     {
