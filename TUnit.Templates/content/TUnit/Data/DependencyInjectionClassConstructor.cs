@@ -15,5 +15,4 @@ public class DependencyInjectionClassConstructor : IClassConstructor
 
         throw new NotImplementedException();
     }
-
 }
