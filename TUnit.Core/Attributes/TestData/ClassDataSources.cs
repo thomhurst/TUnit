@@ -261,7 +261,7 @@ internal class ClassDataSources
         }
     }
     
-    public async Task OnTestEnd<T>(TestContext context, T item) where T : new()
+    public async Task OnTestEnd<T>(AfterTestContext context, T item) where T : new()
     {
         if (item is ITestEndEventReceiver testEndEventReceiver)
         {

@@ -23,7 +23,7 @@ public record TestContextEvents :
     public AsyncEvent<TestRegisteredContext>? OnTestRegistered { get; set; }
     public AsyncEvent<TestContext>? OnInitialize { get; set; }
     public AsyncEvent<BeforeTestContext>? OnTestStart { get; set; }
-    public AsyncEvent<TestContext>? OnTestEnd { get; set; }
+    public AsyncEvent<AfterTestContext>? OnTestEnd { get; set; }
     public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
     public AsyncEvent<(ClassHookContext, TestContext)>? OnLastTestInClass { get; set; }
     public AsyncEvent<(AssemblyHookContext, TestContext)>? OnLastTestInAssembly { get; set; }
@@ -40,7 +40,7 @@ public record TestContextEvents :
         return OnTestStart?.InvokeAsync(this, beforeTestContext) ?? default;
     }
 
-    ValueTask ITestEndEventReceiver.OnTestEnd(TestContext testContext)
+    ValueTask ITestEndEventReceiver.OnTestEnd(AfterTestContext testContext)
     {
         return OnTestEnd?.InvokeAsync(this, testContext) ?? default;
     }
