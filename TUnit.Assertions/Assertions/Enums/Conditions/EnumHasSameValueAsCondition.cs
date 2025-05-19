@@ -6,7 +6,7 @@ public class EnumHasSameValueAsCondition<TEnum, TExpected>(TExpected expected) :
     where TEnum : Enum
     where TExpected : Enum
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
         return $"to have the same value as {Enum.GetName(typeof(TExpected), expected)}";
     }

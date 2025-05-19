@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 public class EnumerableCountNotEqualToExpectedValueAssertCondition<TActual, TInner>(int expected)
     : ExpectedValueAssertCondition<TActual, int>(expected) where TActual : IEnumerable<TInner>
 {
-    protected override string GetExpectation() => $"to have a count different to {expected}";
+    internal protected override string GetExpectation() => $"to have a count different to {ExpectedValue}";
     
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, int count)
     {

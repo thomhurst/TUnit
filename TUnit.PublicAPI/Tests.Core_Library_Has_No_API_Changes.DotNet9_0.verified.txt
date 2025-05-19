@@ -780,11 +780,11 @@ namespace TUnit.Core
     [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
     public class SourceGeneratedParameterInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation>
     {
-        public SourceGeneratedParameterInformation(System.Type Type) { }
+        public SourceGeneratedParameterInformation([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)] System.Type Type) { }
         public override System.Type Type { get; init; }
     }
     [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
-    public class SourceGeneratedParameterInformation<T> : TUnit.Core.SourceGeneratedParameterInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation<T>>
+    public class SourceGeneratedParameterInformation<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]  T> : TUnit.Core.SourceGeneratedParameterInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation<T>>
     {
         public SourceGeneratedParameterInformation() { }
     }
