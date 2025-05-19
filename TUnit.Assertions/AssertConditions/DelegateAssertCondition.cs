@@ -43,7 +43,7 @@ public abstract class DelegateAssertCondition<TActual, TException> : BaseAssertC
 
     protected virtual string GetFailureMessage(TException? exception) => "";
 
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
         return GetFailureMessage(Exception as TException);
     }

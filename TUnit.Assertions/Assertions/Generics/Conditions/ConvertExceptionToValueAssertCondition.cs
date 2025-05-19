@@ -5,7 +5,7 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions;
 public class ConvertExceptionToValueAssertCondition<TException> : BaseAssertCondition<object?>
     where TException : Exception
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
         return $"to throw {typeof(TException).Name}";
     }

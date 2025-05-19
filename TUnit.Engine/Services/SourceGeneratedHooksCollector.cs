@@ -12,12 +12,12 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
     {
         while (Sources.TestDiscoveryHookSources.TryDequeue(out var hookSource))
         {
-            foreach (var beforeHook in hookSource.CollectBeforeTestDiscoveryHooks(sessionId))
+            foreach (var beforeHook in hookSource.CollectBeforeTestDiscoveryHooks(SessionId))
             {
                 BeforeTestDiscoveryHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterTestDiscoveryHooks(sessionId))
+            foreach (var afterHook in hookSource.CollectAfterTestDiscoveryHooks(SessionId))
             {
                 AfterTestDiscoveryHooks.Add(afterHook);
             }
@@ -28,12 +28,12 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
     {
         while (Sources.TestSessionHookSources.TryDequeue(out var hookSource))
         {
-            foreach (var beforeHook in hookSource.CollectBeforeTestSessionHooks(sessionId))
+            foreach (var beforeHook in hookSource.CollectBeforeTestSessionHooks(SessionId))
             {
                 BeforeTestSessionHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterTestSessionHooks(sessionId))
+            foreach (var afterHook in hookSource.CollectAfterTestSessionHooks(SessionId))
             {
                 AfterTestSessionHooks.Add(afterHook);
             }
@@ -44,24 +44,24 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
     {
         while (Sources.TestHookSources.TryDequeue(out var hookSource))
         {
-            foreach (var beforeHook in hookSource.CollectBeforeTestHooks(sessionId))
+            foreach (var beforeHook in hookSource.CollectBeforeTestHooks(SessionId))
             {
                 var beforeList = BeforeTestHooks.GetOrAdd(beforeHook.ClassType, _ => []);
                 beforeList.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterTestHooks(sessionId))
+            foreach (var afterHook in hookSource.CollectAfterTestHooks(SessionId))
             {
                 var afterList = AfterTestHooks.GetOrAdd(afterHook.ClassType, _ => []);
                 afterList.Add(afterHook);
             }
             
-            foreach (var beforeHook in hookSource.CollectBeforeEveryTestHooks(sessionId))
+            foreach (var beforeHook in hookSource.CollectBeforeEveryTestHooks(SessionId))
             {
                 BeforeEveryTestHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterEveryTestHooks(sessionId))
+            foreach (var afterHook in hookSource.CollectAfterEveryTestHooks(SessionId))
             {
                 AfterEveryTestHooks.Add(afterHook);
             }
@@ -69,24 +69,24 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
 
         while (Sources.ClassHookSources.TryDequeue(out var hookSource))
         {
-            foreach (var beforeHook in hookSource.CollectBeforeClassHooks(sessionId))
+            foreach (var beforeHook in hookSource.CollectBeforeClassHooks(SessionId))
             {
                 var beforeList = BeforeClassHooks.GetOrAdd(beforeHook.ClassType, _ => []);
                 beforeList.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterClassHooks(sessionId))
+            foreach (var afterHook in hookSource.CollectAfterClassHooks(SessionId))
             {
                 var afterList = AfterClassHooks.GetOrAdd(afterHook.ClassType, _ => []);
                 afterList.Add(afterHook);
             }
             
-            foreach (var beforeHook in hookSource.CollectBeforeEveryClassHooks(sessionId))
+            foreach (var beforeHook in hookSource.CollectBeforeEveryClassHooks(SessionId))
             {
                 BeforeEveryClassHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterEveryClassHooks(sessionId))
+            foreach (var afterHook in hookSource.CollectAfterEveryClassHooks(SessionId))
             {
                 AfterEveryClassHooks.Add(afterHook);
             }
@@ -94,22 +94,22 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
 
         while (Sources.AssemblyHookSources.TryDequeue(out var hookSource))
         {
-            foreach (var beforeHook in hookSource.CollectBeforeAssemblyHooks(sessionId))
+            foreach (var beforeHook in hookSource.CollectBeforeAssemblyHooks(SessionId))
             {
                 BeforeAssemblyHooks.GetOrAdd(beforeHook.Assembly, _ => []).Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterAssemblyHooks(sessionId))
+            foreach (var afterHook in hookSource.CollectAfterAssemblyHooks(SessionId))
             {
                 AfterAssemblyHooks.GetOrAdd(afterHook.Assembly, _ => []).Add(afterHook);
             }
             
-            foreach (var beforeHook in hookSource.CollectBeforeEveryAssemblyHooks(sessionId))
+            foreach (var beforeHook in hookSource.CollectBeforeEveryAssemblyHooks(SessionId))
             {
                 BeforeEveryAssemblyHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterEveryAssemblyHooks(sessionId))
+            foreach (var afterHook in hookSource.CollectAfterEveryAssemblyHooks(SessionId))
             {
                 AfterEveryAssemblyHooks.Add(afterHook);
             }

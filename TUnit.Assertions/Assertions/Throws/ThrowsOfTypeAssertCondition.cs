@@ -4,7 +4,7 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, Exception>
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => $"to throw {typeof(TExpectedException).Name.PrependAOrAn()}";
 
     protected override ValueTask<AssertionResult> GetResult(

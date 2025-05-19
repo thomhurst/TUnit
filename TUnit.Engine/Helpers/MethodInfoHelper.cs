@@ -1,9 +1,12 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core;
 
 namespace TUnit.Engine.Helpers;
 
+[RequiresUnreferencedCode("Reflection")]
+[RequiresDynamicCode("Reflection")]
 internal static class MethodInfoHelper
 {
     public static object? InvokeStaticHook(this MethodInfo methodInfo, object context, CancellationToken cancellationToken)
@@ -59,10 +62,8 @@ internal static class MethodInfoHelper
         {
             if (methodInfo.DeclaringType!.ContainsGenericParameters)
             {
-#pragma warning disable IL2075
                 return instance.GetType()
                     .GetMembers()
-#pragma warning restore IL2075
                     .OfType<MethodInfo>()
                     .First(x => x.Name == methodInfo.Name 
                         && x.GetParameters().Length == methodInfo.GetParameters().Length)

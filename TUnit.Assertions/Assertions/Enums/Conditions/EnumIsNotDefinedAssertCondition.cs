@@ -4,7 +4,7 @@ namespace TUnit.Assertions.Assertions.Enums.Conditions;
 
 public class EnumIsNotDefinedAssertCondition<TEnum> : BaseAssertCondition<TEnum> where TEnum : Enum
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
         return "to not be defined";
     }

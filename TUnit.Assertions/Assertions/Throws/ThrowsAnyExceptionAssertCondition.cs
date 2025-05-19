@@ -3,7 +3,7 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 public class ThrowsAnyExceptionAssertCondition<TActual>
     : DelegateAssertCondition<TActual, Exception>
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => "to throw an exception";
 
     protected override ValueTask<AssertionResult> GetResult(

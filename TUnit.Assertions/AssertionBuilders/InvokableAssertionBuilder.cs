@@ -7,12 +7,12 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class InvokableAssertionBuilder<TActual> : 
     AssertionBuilder, IInvokableAssertionBuilder 
 {
-    private readonly ISource _source;
+    protected readonly ISource Source;
 
     internal InvokableAssertionBuilder(ISource source) : base(source.AssertionDataTask, source.ActualExpression!,
         source.ExpressionBuilder, source.Assertions)
     {
-        _source = source;
+        Source = source;
         
         if (source is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
         {
@@ -36,7 +36,7 @@ public class InvokableAssertionBuilder<TActual> :
 
     string IInvokableAssertionBuilder.GetExpression()
     {
-        var expression = _source.ExpressionBuilder.ToString();
+        var expression = Source.ExpressionBuilder.ToString();
 
         if (expression.Length < 100)
         {
@@ -46,5 +46,5 @@ public class InvokableAssertionBuilder<TActual> :
         return $"{expression[..100]}...";
     }
 
-    internal protected Stack<BaseAssertCondition> Assertions => _source.Assertions;
+    internal protected Stack<BaseAssertCondition> Assertions => Source.Assertions;
 }

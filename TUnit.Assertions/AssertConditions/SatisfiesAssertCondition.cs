@@ -19,7 +19,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
         SetSubject(mapperExpression);
     }
 
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => $"to satisfy {_assertionBuilderExpression}";
 
     protected override async ValueTask<AssertionResult> GetResult(

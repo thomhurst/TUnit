@@ -4,9 +4,9 @@ public class DateTimeEqualsExpectedValueAssertCondition(DateTime expected) : Exp
 {
     private TimeSpan? _tolerance;
 
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
-        if (_tolerance == null || _tolerance == default)
+        if (_tolerance == null || _tolerance == TimeSpan.Zero)
         {
             return $"to be equal to {expected}";
         }

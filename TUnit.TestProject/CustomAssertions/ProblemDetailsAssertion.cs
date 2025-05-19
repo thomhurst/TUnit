@@ -36,8 +36,13 @@ public class ProblemDetails
 
 public class HttpResponseDeserializesToAssertCondition<TToType>(JsonTypeInfo<TToType> jsonTypeInfo) : ConvertToAssertCondition<HttpResponseMessage, TToType>
 {
-    public override async ValueTask<(AssertionResult, TToType?)> ConvertValue(HttpResponseMessage value)
+    public override async ValueTask<(AssertionResult, TToType?)> ConvertValue(HttpResponseMessage? value)
     {
+        if (value is null)
+        {
+            return (AssertionResult.Fail("HttpResponseMessage is null"), default(TToType?));
+        }
+        
         var convertedValue = await value.Content.ReadFromJsonAsync(jsonTypeInfo);
         
         return (AssertionResult.Passed, convertedValue);

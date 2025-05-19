@@ -88,7 +88,7 @@ public class DictionaryAssertionTests
             return true;
         }
 
-        public bool TryGetValue(string key, [MaybeNullWhen(false)] out string value)
+        public bool TryGetValue(string key, out string value)
         {
             value = "Value";
             return true;

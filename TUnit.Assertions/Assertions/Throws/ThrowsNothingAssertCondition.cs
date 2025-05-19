@@ -4,7 +4,7 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsNothingAssertCondition<TActual> : DelegateAssertCondition<TActual, Exception>
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => "to throw nothing";
 
     protected override ValueTask<AssertionResult> GetResult(

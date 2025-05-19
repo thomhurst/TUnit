@@ -7,7 +7,7 @@ public class DelegateConversionAssertionCondition<TToType>(
     IDelegateSource source,
     BaseAssertCondition<object?> assertCondition) : BaseAssertCondition<TToType> where TToType : Exception
 {
-    protected override string GetExpectation() => assertCondition.Expectation;
+    internal protected override string GetExpectation() => assertCondition.GetExpectation();
 
     protected override async ValueTask<AssertionResult> GetResult(
         TToType? actualValue, Exception? exception,

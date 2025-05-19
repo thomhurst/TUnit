@@ -7,6 +7,9 @@
         <TargetFrameworks>netstandard2.0;net8.0;net9.0</TargetFrameworks>
 
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+        <TrimmerSingleWarn>false</TrimmerSingleWarn>
+        
         <IsAotCompatible
             Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
 

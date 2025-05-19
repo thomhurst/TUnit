@@ -6,9 +6,9 @@ namespace TUnit.Assertions.AssertConditions.ClassMember;
 public class PropertyEqualsExpectedValueAssertCondition<TRootObjectType, TPropertyType>(Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
     : ExpectedValueAssertCondition<TRootObjectType, TPropertyType>(expected)
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
-        return $"{typeof(TRootObjectType).Name}.{ExpressionHelpers.GetName(propertySelector)} to be equal to {expected}";
+        return $"{typeof(TRootObjectType).Name}.{ExpressionHelpers.GetName(propertySelector)} to be equal to {ExpectedValue}";
     }
 
     protected override ValueTask<AssertionResult> GetResult(TRootObjectType? actualValue, TPropertyType? expectedValue)

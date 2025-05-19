@@ -6,8 +6,8 @@ namespace TUnit.Assertions.AssertConditions.String;
 public class StringEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-    protected override string GetExpectation()
-        => $"to be equal to {Formatter.Format(expected).TruncateWithEllipsis(100)}";
+    internal protected override string GetExpectation()
+        => $"to be equal to {Formatter.Format(ExpectedValue).TruncateWithEllipsis(100)}";
 
     protected override ValueTask<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {

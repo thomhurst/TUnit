@@ -5,7 +5,7 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions;
 public class NotAssignableToExpectedValueAssertCondition<TActual>(Type expectedType)
     : BaseAssertCondition<TActual>
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => $"to not be assignable to type {expectedType.Name}";
 
     protected override ValueTask<AssertionResult> GetResult(

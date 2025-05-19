@@ -10,7 +10,7 @@ public class ThrowsWithMessageAssertCondition<TActual, TException>(
     : DelegateAssertCondition<TActual, Exception>
     where TException : Exception
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => $"to throw {typeof(TException).Name.PrependAOrAn()} which message equals \"{expectedMessage.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
     protected override ValueTask<AssertionResult> GetResult(

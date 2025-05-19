@@ -6,7 +6,7 @@ namespace TUnit.Assertions.Assertions.Delegates;
 
 public class CompleteWithinAssertCondition<TActual>(TimeSpan timeSpan) : DelegateAssertCondition<TActual>
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
         => $"to complete within {timeSpan.PrettyPrint()}";
 
     protected override ValueTask<AssertionResult> GetResult(
