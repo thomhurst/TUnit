@@ -9,13 +9,13 @@ public abstract class BaseClassConstructorAttribute : TUnitAttribute, IDataAttri
 {
     public abstract Type ClassConstructorType { get; set; }
 
-    internal BaseClassConstructorAttribute() { }
-    internal BaseClassConstructorAttribute(Type classType) { ClassConstructorType = classType; }
+    private protected BaseClassConstructorAttribute() { }
+    private protected BaseClassConstructorAttribute(Type classType) { ClassConstructorType = classType; }
 }
 
 // Single sealed attribute with both generic and non-generic constructors
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class)]
-public partial class ClassConstructorAttribute : BaseClassConstructorAttribute
+public class ClassConstructorAttribute : BaseClassConstructorAttribute
 {
     public ClassConstructorAttribute(Type classConstructorType)
         : base(classConstructorType)
