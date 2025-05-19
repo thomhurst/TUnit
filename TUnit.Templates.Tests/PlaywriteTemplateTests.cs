@@ -2,11 +2,12 @@
 
 public class PlaywriteTemplateTests : TemplateTestBase
 {
-    protected override string TemplateShortName => "TUnit.Playwright";
+    protected override string TemplateShortName { get; set; }
 
     [Test]
     public async Task InstantiationTest()
     {
+        TemplateShortName = "TUnit.Playwright";
         await Engine.Execute(Options).ConfigureAwait(false);
     }
 }

@@ -9,7 +9,7 @@
     "name": "TUnit Mixed Test Project",
     "identity": "TUnit.Test.Mixed.FSharp",
     "groupIdentity": "TUnit",
-    "shortName": "TUnit",
+    "shortName": "TUnit.FSharp",
     "tags": {
       "language": "F#",
       "type": "project"

@@ -2,7 +2,7 @@
 
 public class AspNetTemplateTests : TemplateTestBase
 {
-    protected override string TemplateShortName => "TUnit.AspNet";
+    protected override string TemplateShortName { get; set; }
 
     [Test]
     public async Task InstantiationTest()
