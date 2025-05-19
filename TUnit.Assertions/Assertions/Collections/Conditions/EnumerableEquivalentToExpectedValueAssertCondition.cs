@@ -12,7 +12,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
         if (!typeof(TInner).IsSimpleType()
             && equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 })
@@ -20,7 +20,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
             return "to match";
         }
         
-        return $"to be equivalent to {(expected != null ? Formatter.Format(expected) : null)}";
+        return $"to be equivalent to {(ExpectedValue != null ? Formatter.Format(ExpectedValue) : null)}";
     }
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)

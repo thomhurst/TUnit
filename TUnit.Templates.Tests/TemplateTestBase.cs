@@ -29,7 +29,7 @@ public abstract partial class TemplateTestBase : IDisposable
         }.WithCustomScrubbers(ScrubbersDefinition.Empty.AddScrubber(sb =>
         {
             var original = sb.ToString();
-            var matches = PackageVersionRegex().Matches(original);
+            var matches = VersionRegex().Matches(original);
             
             foreach (Match match in matches.Where(m => m.Success))
             {
@@ -59,7 +59,7 @@ public abstract partial class TemplateTestBase : IDisposable
     }
 
     [GeneratedRegex("""
-                    <PackageReference Include="[^"]*" Version="([^"]*)"
+                    Version="([^"]*)"
                     """)]
-    private static partial Regex PackageVersionRegex();
+    private static partial Regex VersionRegex();
 }

@@ -6,7 +6,7 @@ public class EnumerableContainsExpectedFuncAssertCondition<TActual, TInner>(
     where TActual : IEnumerable<TInner>
 {
     private bool _wasFound;
-    protected override string GetExpectation() => $"to contain an entry matching {matcherString ?? "null"}";
+    internal protected override string GetExpectation() => $"to contain an entry matching {matcherString ?? "null"}";
     
     protected override ValueTask<AssertionResult> GetResult(
         TActual? actualValue, Exception? exception,

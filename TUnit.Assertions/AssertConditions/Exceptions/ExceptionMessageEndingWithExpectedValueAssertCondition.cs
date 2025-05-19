@@ -7,8 +7,8 @@ public class ExceptionMessageEndingWithExpectedValueAssertCondition<TException>(
     : ExpectedValueAssertCondition<TException, string>(expected)
 where TException : Exception
 {
-    protected override string GetExpectation()
-        => $"message to end with {Formatter.Format(expected).TruncateWithEllipsis(100)}";
+    internal protected override string GetExpectation()
+        => $"message to end with {Formatter.Format(ExpectedValue).TruncateWithEllipsis(100)}";
 
     protected override ValueTask<AssertionResult> GetResult(TException? actualValue, string? expectedValue)
     {

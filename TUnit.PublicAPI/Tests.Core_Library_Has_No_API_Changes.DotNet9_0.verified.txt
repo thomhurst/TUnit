@@ -77,6 +77,10 @@ namespace TUnit.Core
         public static TUnit.Core.AsyncEvent<TEventArgs> operator +(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object, TEventArgs, System.Threading.Tasks.Task> callback) { }
         public static TUnit.Core.AsyncEvent<TEventArgs>? operator -(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object, TEventArgs, System.Threading.Tasks.Task> callback) { }
     }
+    public abstract class BaseClassConstructorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.IDataAttribute
+    {
+        public abstract System.Type ClassConstructorType { get; set; }
+    }
     [System.AttributeUsage(System.AttributeTargets.Method)]
     public abstract class BaseTestAttribute : TUnit.Core.TUnitAttribute
     {
@@ -116,16 +120,18 @@ namespace TUnit.Core
         public int Order { get; }
         public void OnTestDiscovery(TUnit.Core.DiscoveredTestContext discoveredTestContext) { }
     }
-    public abstract class ClassConstructorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.IDataAttribute
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class)]
+    public class ClassConstructorAttribute : TUnit.Core.BaseClassConstructorAttribute
     {
-        public abstract System.Type ClassConstructorType { get; }
+        public ClassConstructorAttribute(System.Type classConstructorType) { }
+        public override System.Type ClassConstructorType { get; set; }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class)]
     public sealed class ClassConstructorAttribute<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T> : TUnit.Core.ClassConstructorAttribute
         where T : TUnit.Core.Interfaces.IClassConstructor, new ()
     {
         public ClassConstructorAttribute() { }
-        public override System.Type ClassConstructorType { get; }
+        public override System.Type ClassConstructorType { get; set; }
     }
     public class ClassConstructorMetadata : System.IEquatable<TUnit.Core.ClassConstructorMetadata>
     {
@@ -774,11 +780,11 @@ namespace TUnit.Core
     [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
     public class SourceGeneratedParameterInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation>
     {
-        public SourceGeneratedParameterInformation(System.Type Type) { }
+        public SourceGeneratedParameterInformation([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)] System.Type Type) { }
         public override System.Type Type { get; init; }
     }
     [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
-    public class SourceGeneratedParameterInformation<T> : TUnit.Core.SourceGeneratedParameterInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation<T>>
+    public class SourceGeneratedParameterInformation<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]  T> : TUnit.Core.SourceGeneratedParameterInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation<T>>
     {
         public SourceGeneratedParameterInformation() { }
     }

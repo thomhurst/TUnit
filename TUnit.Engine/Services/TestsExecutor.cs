@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using Polyfills;
 using TUnit.Core;
@@ -119,7 +119,7 @@ internal class TestsExecutor
 
                 await ProcessTest(test, filter, cancellationToken);
             }
-        });
+        }, cancellationToken);
     }
 
     private async Task ProcessParallelTests(IEnumerable<DiscoveredTest> queue, ITestExecutionFilter? filter,
@@ -202,6 +202,11 @@ internal class TestsExecutor
 
     private int GetParallelTestsLimit()
     {
+        if (Debugger.IsAttached)
+        {
+            return 1;
+        }
+        
         if (_commandLineOptions.TryGetOptionArgumentList(MaximumParallelTestsCommandProvider.MaximumParallelTests,
                 out var values))
         {
