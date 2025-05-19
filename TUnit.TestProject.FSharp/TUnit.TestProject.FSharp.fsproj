@@ -16,6 +16,7 @@
         <Compile Include="DummyReferenceTypeClass.fs" />
         <Compile Include="DependencyInjectionClassConstructor.fs" />
         <Compile Include="ClassConstructorTest.fs" />
+        <Compile Include="ClassConstructorWithEnumerableTest.fs" />
         <Compile Include="ClassDataSourceDrivenTests.fs" />
         <Compile Include="Tests.fs" />
     </ItemGroup>
