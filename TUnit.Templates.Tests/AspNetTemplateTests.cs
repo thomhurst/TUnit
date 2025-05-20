@@ -7,6 +7,7 @@ public class AspNetTemplateTests : TemplateTestBase
     [Test]
     public async Task InstantiationTest()
     {
+        TemplateShortName = "TUnit.AspNet";
         await Engine.Execute(Options).ConfigureAwait(false);
     }
 }
