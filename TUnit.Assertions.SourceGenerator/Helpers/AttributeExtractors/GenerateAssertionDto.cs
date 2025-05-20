@@ -1,15 +1,8 @@
-﻿// ---------------------------------------------------------------------------------------------------------------------
-// Imports
-// ---------------------------------------------------------------------------------------------------------------------
-
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 
-// ---------------------------------------------------------------------------------------------------------------------
-// Code
-// ---------------------------------------------------------------------------------------------------------------------
 public class GenerateAssertionDto(
     Location? attributeLocation,
     ITypeSymbol typeArg,

@@ -1,15 +1,9 @@
-﻿// ---------------------------------------------------------------------------------------------------------------------
-// Imports
-// ---------------------------------------------------------------------------------------------------------------------
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 
 namespace TUnit.Assertions.SourceGenerator;
 
-// ---------------------------------------------------------------------------------------------------------------------
-// Code
-// ---------------------------------------------------------------------------------------------------------------------
 public static class AssertionHolderDtoFactory {
     public static AssertionHolderDto? Create(GeneratorSyntaxContext context, CancellationToken ct) {
         var classNode = (ClassDeclarationSyntax)context.Node;

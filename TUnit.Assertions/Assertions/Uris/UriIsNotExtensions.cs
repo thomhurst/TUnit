@@ -1,11 +1,6 @@
-﻿// ---------------------------------------------------------------------------------------------------------------------
-// Imports
-// ---------------------------------------------------------------------------------------------------------------------
-namespace TUnit.Assertions.Assertions.Uris;
+﻿namespace TUnit.Assertions.Assertions.Uris;
 
-// ---------------------------------------------------------------------------------------------------------------------
-// Code
-// ---------------------------------------------------------------------------------------------------------------------
+
 [GenerateAssertion<Uri>(AssertionType.IsNot, nameof(Uri.IsAbsoluteUri))]
 // [GenerateAssertion<Uri>(AssertionType.IsNot, nameof(Uri.IsBaseOf))] // TODO requires extra options
 [GenerateAssertion<Uri>(AssertionType.IsNot, nameof(Uri.IsDefaultPort))]

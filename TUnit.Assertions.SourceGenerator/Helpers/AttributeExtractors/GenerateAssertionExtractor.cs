@@ -1,15 +1,8 @@
-﻿// ---------------------------------------------------------------------------------------------------------------------
-// Imports
-// ---------------------------------------------------------------------------------------------------------------------
-
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 
-// ---------------------------------------------------------------------------------------------------------------------
-// Code
-// ---------------------------------------------------------------------------------------------------------------------
 public static class GenerateAssertionExtractor {
     public const string GenerateIsAssertionAttribute = "TUnit.Assertions.GenerateAssertionAttribute<TBase>";
     

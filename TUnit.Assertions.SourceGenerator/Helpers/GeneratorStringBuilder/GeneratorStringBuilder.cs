@@ -1,15 +1,8 @@
-﻿// ---------------------------------------------------------------------------------------------------------------------
-// Imports
-// ---------------------------------------------------------------------------------------------------------------------
-
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Text;
 
 namespace TUnit.Assertions.SourceGenerator.Helpers;
 
-// ---------------------------------------------------------------------------------------------------------------------
-// Code
-// ---------------------------------------------------------------------------------------------------------------------
 /// <summary>
 ///     A utility class for building text-based generators, providing methods to construct consistent
 ///     and formatted output such as namespace declarations, using statements, and indented text bodies.
@@ -52,10 +45,6 @@ public class GeneratorStringBuilder(int paddingChars = 4) {
         [(3, 4)] = new(' ', 3 * 4), // Most common is up to 4 indents with 4 characters
     }.ToImmutableDictionary();
 
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // Methods
-    // -----------------------------------------------------------------------------------------------------------------
 
     #region Append (straight stringbuilder)
 

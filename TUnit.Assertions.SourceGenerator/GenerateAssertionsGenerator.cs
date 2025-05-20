@@ -1,7 +1,4 @@
-﻿// ---------------------------------------------------------------------------------------------------------------------
-// Imports
-// ---------------------------------------------------------------------------------------------------------------------
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using TUnit.Assertions.SourceGenerator.Helpers;
@@ -9,9 +6,6 @@ using TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 
 namespace TUnit.Assertions.SourceGenerator;
 
-// ---------------------------------------------------------------------------------------------------------------------
-// Code
-// ---------------------------------------------------------------------------------------------------------------------
 [Generator(LanguageNames.CSharp)]
 public class GenerateAssertionsGenerator : IIncrementalGenerator {
     public void Initialize(IncrementalGeneratorInitializationContext context) {

@@ -1,12 +1,5 @@
-﻿// ---------------------------------------------------------------------------------------------------------------------
-// Imports
-// ---------------------------------------------------------------------------------------------------------------------
+﻿namespace TUnit.Assertions.SourceGenerator.Helpers;
 
-namespace TUnit.Assertions.SourceGenerator.Helpers;
-
-// ---------------------------------------------------------------------------------------------------------------------
-// Code
-// ---------------------------------------------------------------------------------------------------------------------
 public static class AppendExtensions {
     public static GeneratorStringBuilder AppendUsings(this GeneratorStringBuilder builder, string @using)
         => builder.AppendLine($"using {@using};");

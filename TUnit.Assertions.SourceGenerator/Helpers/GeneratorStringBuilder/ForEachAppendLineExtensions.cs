@@ -1,12 +1,5 @@
-﻿// ---------------------------------------------------------------------------------------------------------------------
-// Imports
-// ---------------------------------------------------------------------------------------------------------------------
+﻿namespace TUnit.Assertions.SourceGenerator.Helpers;
 
-namespace TUnit.Assertions.SourceGenerator.Helpers;
-
-// ---------------------------------------------------------------------------------------------------------------------
-// Code
-// ---------------------------------------------------------------------------------------------------------------------
 public static class ForEachAppendLineExtensions {
     public static GeneratorStringBuilder ForEachAppendLine(
         this GeneratorStringBuilder builder,
