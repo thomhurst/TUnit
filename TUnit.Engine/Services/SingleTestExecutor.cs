@@ -283,11 +283,6 @@ internal class SingleTestExecutor(
 
             await ExecuteStaticAfterHooks(test, testContext, cleanUpExceptions);
 
-            foreach (var artifact in testContext.Artifacts)
-            {
-                await messageBus.TestArtifact(testContext, artifact);
-            }
-
             ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
         }
         catch (Exception e)
@@ -514,6 +509,5 @@ internal class SingleTestExecutor(
     public Type[] DataTypesProduced { get; } =
     [
         typeof(TestNodeUpdateMessage),
-        typeof(TestNodeFileArtifact)
     ];
 }
