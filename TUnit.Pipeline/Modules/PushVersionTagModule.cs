@@ -2,12 +2,15 @@
 using ModularPipelines.Context;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
+using ModularPipelines.Git.Attributes;
 using ModularPipelines.Git.Options;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
+[RunOnlyOnBranch("main")]
+[RunOnLinuxOnly]
 [DependsOn<GenerateVersionModule>]
 public class PushVersionTagModule : Module<CommandResult>
 {
