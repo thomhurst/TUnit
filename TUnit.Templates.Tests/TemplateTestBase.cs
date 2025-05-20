@@ -18,7 +18,7 @@ public abstract partial class TemplateTestBase : IDisposable
     private bool _disposed;
     private readonly ILoggerFactory _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
-    protected abstract string TemplateShortName { get; }
+    protected abstract string TemplateShortName { get; set; }
 
     protected VerificationEngine Engine => new(_loggerFactory);
 

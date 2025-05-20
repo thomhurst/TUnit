@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Tom Longhurst",
+    "description": "Templates for getting started with TUnit",
+    "classifications": [
+      "Test",
+      "TUnit"
+    ],
+    "name": "TUnit Mixed Test Project",
+    "identity": "TUnit.Test.Mixed.FSharp",
+    "groupIdentity": "TUnit",
+    "shortName": "TUnit.FSharp",
+    "tags": {
+      "language": "F#",
+      "type": "project"
+    },
+    "sourceName": "TestProject",
+    "preferNameDirectory": true
+  }
+  
