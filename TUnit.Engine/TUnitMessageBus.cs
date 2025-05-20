@@ -145,19 +145,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         );
     }
 
-    public async ValueTask TestArtifact(TestContext testContext, Artifact artifact)
-    {
-        await context.MessageBus.PublishAsync(this,
-            new TestNodeFileArtifact(
-                context.Request.Session.SessionUid,
-                testContext.ToTestNode(),
-                artifact.File,
-                artifact.DisplayName,
-                artifact.Description
-            )
-        );
-    }
-
     private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
     {
         if (overallStart == default)
@@ -227,5 +214,5 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     public string Description => extension.Description;
 
-    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage), typeof(SessionFileArtifact), typeof(TestNodeFileArtifact)];
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage), typeof(SessionFileArtifact)];
 }

@@ -28,11 +28,16 @@ internal static class TestExtensions
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
-                    ReturnTypeFullName: testDetails.ReturnType.FullName!
+                    ReturnTypeFullName: testDetails.ReturnType.FullName!,
+                    MethodArity: testDetails.TestMethod.GenericTypeCount
                     ),
+                
                 // Custom TUnit Properties
                 ..testDetails.Categories.Select(category => new TestMetadataProperty(category, string.Empty)),
                 ..testDetails.CustomProperties.Select(x => new TestMetadataProperty(x.Key, x.Value)),
+                
+                // Artifacts
+                ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
                 
                 // TRX Report Properties
                 new TrxFullyQualifiedTypeNameProperty(testDetails.TestClass.Type.FullName!),
