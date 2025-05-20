@@ -4,5 +4,9 @@
     <PropertyGroup>
         <TUnitImplicitUsings>true</TUnitImplicitUsings>
     </PropertyGroup>
+
+    <ItemGroup>
+        <CompilerVisibleProperty Include="EnableTUnitPolyfills" />
+    </ItemGroup>
     
 </Project>
