@@ -6,9 +6,9 @@ public class DateOnlyEqualsExpectedValueAssertCondition(DateOnly expected) : Exp
 {
     private int? _tolerance;
 
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
-        if (_tolerance == null || _tolerance == default)
+        if (_tolerance is null or 0)
         {
             return $"to be equal to {expected}";
         }

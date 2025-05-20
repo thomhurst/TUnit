@@ -1,4 +1,4 @@
-﻿namespace TUnit.TestProject.Dummy;
+﻿namespace TUnit.TestProject.Library.Models;
 
 public class SomeAsyncDisposableClass : IAsyncDisposable
 {

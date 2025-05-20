@@ -31,13 +31,23 @@ public class CreateReleaseModule : Module<Release>
         var versionModule = await GetModule<GenerateVersionModule>();
 
         var version = versionModule.Value!.SemVer;
+        
+        var repositoryId = long.Parse(context.GitHub().EnvironmentVariables.RepositoryId!);
+
+        var lastRelease = await context.GitHub().Client.Repository.Release.GetLatest(repositoryId);
+
+        var releaseNotes = await context.GitHub().Client.Repository.Release.GenerateReleaseNotes(repositoryId, new GenerateReleaseNotesRequest($"v{version}")
+        {
+            PreviousTagName = lastRelease.TagName
+        });
 
         return await context.GitHub().Client.Repository.Release.Create(
-            long.Parse(context.GitHub().EnvironmentVariables.RepositoryId!),
+            repositoryId,
             new NewRelease($"v{version}")
             {
                 Name = version,
-                GenerateReleaseNotes = true,
+                GenerateReleaseNotes = false,
+                Body = releaseNotes.Body,
             });
     }
 }

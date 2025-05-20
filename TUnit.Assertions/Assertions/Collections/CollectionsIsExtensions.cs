@@ -11,7 +11,7 @@ using TUnit.Assertions.Equality;
 
 namespace TUnit.Assertions.Extensions;
 
-[SuppressMessage("Usage", "TUnitAssertions0003:Compiler argument populated")]
+[UnconditionalSuppressMessage("Usage", "TUnitAssertions0003:Compiler argument populated")]
 public static class CollectionsIsExtensions
 {
     public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual,  

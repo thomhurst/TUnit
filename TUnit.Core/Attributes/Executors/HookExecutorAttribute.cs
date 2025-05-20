@@ -2,17 +2,10 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Executors;
 
-public abstract class HookExecutorAttribute : TUnitAttribute
+public class HookExecutorAttribute(Type type) : TUnitAttribute
 {
-    public abstract Type HookExecutorType { get; }
-
-    internal HookExecutorAttribute()
-    {
-    }
+    public Type HookExecutorType { get; } = type;
 }
 
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class HookExecutorAttribute<T> : HookExecutorAttribute where T : IHookExecutor, new()
-{
-    public override Type HookExecutorType { get; } = typeof(T);
-}
+public sealed class HookExecutorAttribute<T>() : HookExecutorAttribute(typeof(T)) where T : IHookExecutor, new();

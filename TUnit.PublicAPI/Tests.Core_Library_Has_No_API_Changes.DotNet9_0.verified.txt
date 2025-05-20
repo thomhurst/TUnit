@@ -13,6 +13,14 @@ namespace TUnit.Core
     {
         public AfterEveryAttribute(TUnit.Core.HookType hookType, [System.Runtime.CompilerServices.CallerFilePath] string file = "", [System.Runtime.CompilerServices.CallerLineNumber] int line = 0) { }
     }
+    public class AfterTestContext
+    {
+        public TUnit.Core.TestContext TestContext { get; }
+        public TUnit.Core.TestDetails TestDetails { get; }
+        public void OverrideResult(System.Exception exception, string reason) { }
+        public void OverrideResult(TUnit.Core.Enums.Status status, string reason) { }
+        public static TUnit.Core.TestContext op_Implicit(TUnit.Core.AfterTestContext afterTestContext) { }
+    }
     public abstract class ArgumentDisplayFormatter
     {
         protected ArgumentDisplayFormatter() { }
@@ -69,6 +77,10 @@ namespace TUnit.Core
         public static TUnit.Core.AsyncEvent<TEventArgs> operator +(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object, TEventArgs, System.Threading.Tasks.Task> callback) { }
         public static TUnit.Core.AsyncEvent<TEventArgs>? operator -(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object, TEventArgs, System.Threading.Tasks.Task> callback) { }
     }
+    public abstract class BaseClassConstructorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.IDataAttribute
+    {
+        public abstract System.Type ClassConstructorType { get; set; }
+    }
     [System.AttributeUsage(System.AttributeTargets.Method)]
     public abstract class BaseTestAttribute : TUnit.Core.TUnitAttribute
     {
@@ -93,6 +105,7 @@ namespace TUnit.Core
         public void AddLinkedCancellationToken(System.Threading.CancellationToken cancellationToken) { }
         public void SetHookExecutor(TUnit.Core.Interfaces.IHookExecutor hookExecutor) { }
         public void SetTestExecutor(TUnit.Core.Interfaces.ITestExecutor testExecutor) { }
+        public static TUnit.Core.TestContext op_Implicit(TUnit.Core.BeforeTestContext beforeTestContext) { }
     }
     public class BeforeTestDiscoveryContext : TUnit.Core.Context
     {
@@ -107,16 +120,18 @@ namespace TUnit.Core
         public int Order { get; }
         public void OnTestDiscovery(TUnit.Core.DiscoveredTestContext discoveredTestContext) { }
     }
-    public abstract class ClassConstructorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.IDataAttribute
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class)]
+    public class ClassConstructorAttribute : TUnit.Core.BaseClassConstructorAttribute
     {
-        public abstract System.Type ClassConstructorType { get; }
+        public ClassConstructorAttribute(System.Type classConstructorType) { }
+        public override System.Type ClassConstructorType { get; set; }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class)]
     public sealed class ClassConstructorAttribute<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T> : TUnit.Core.ClassConstructorAttribute
         where T : TUnit.Core.Interfaces.IClassConstructor, new ()
     {
         public ClassConstructorAttribute() { }
-        public override System.Type ClassConstructorType { get; }
+        public override System.Type ClassConstructorType { get; set; }
     }
     public class ClassConstructorMetadata : System.IEquatable<TUnit.Core.ClassConstructorMetadata>
     {
@@ -125,7 +140,44 @@ namespace TUnit.Core
         public required string TestSessionId { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T> : TUnit.Core.DataSourceGeneratorAttribute<T>
+    public sealed class ClassDataSourceAttribute : TUnit.Core.NonTypedDataSourceGeneratorAttribute
+    {
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
+            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+        public ClassDataSourceAttribute([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection")]
+        public ClassDataSourceAttribute(params System.Type[] types) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
+            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+        public ClassDataSourceAttribute([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type2) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
+            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+        public ClassDataSourceAttribute([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type3) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
+            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+        public ClassDataSourceAttribute([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type4) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
+            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+        public ClassDataSourceAttribute([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type5) { }
+        public string Key { get; set; }
+        public TUnit.Core.SharedType Shared { get; set; }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the" +
+            " value passed to it can not be statically analyzed.")]
+        public override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
+    public sealed class ClassDataSourceAttribute<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T> : TUnit.Core.DataSourceGeneratorAttribute<T>
         where T : new()
     {
         public ClassDataSourceAttribute() { }
@@ -134,7 +186,7 @@ namespace TUnit.Core
         public override System.Collections.Generic.IEnumerable<System.Func<T>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T1, T2> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2>
+    public sealed class ClassDataSourceAttribute<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T2> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2>
         where T1 : new()
         where T2 : new()
     {
@@ -144,7 +196,7 @@ namespace TUnit.Core
         public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T1, T2, T3> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3>
+    public sealed class ClassDataSourceAttribute<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T3> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3>
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -155,7 +207,7 @@ namespace TUnit.Core
         public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T1, T2, T3, T4> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4>
+    public sealed class ClassDataSourceAttribute<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T4> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4>
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -167,7 +219,7 @@ namespace TUnit.Core
         public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T1, T2, T3, T4, T5> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
+    public sealed class ClassDataSourceAttribute<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T1, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T2, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T3, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T4, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  T5> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -728,11 +780,11 @@ namespace TUnit.Core
     [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
     public class SourceGeneratedParameterInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation>
     {
-        public SourceGeneratedParameterInformation(System.Type Type) { }
+        public SourceGeneratedParameterInformation([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)] System.Type Type) { }
         public override System.Type Type { get; init; }
     }
     [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
-    public class SourceGeneratedParameterInformation<T> : TUnit.Core.SourceGeneratedParameterInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation<T>>
+    public class SourceGeneratedParameterInformation<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)]  T> : TUnit.Core.SourceGeneratedParameterInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation<T>>
     {
         public SourceGeneratedParameterInformation() { }
     }
@@ -777,6 +829,7 @@ namespace TUnit.Core
         public TestBuilderContextAccessor(TUnit.Core.TestBuilderContext context) { }
         public TUnit.Core.TestBuilderContext Current { get; set; }
     }
+    [System.Diagnostics.DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
     public class TestContext : TUnit.Core.Context
     {
         public readonly System.Threading.Lock Lock;
@@ -807,7 +860,7 @@ namespace TUnit.Core
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.AssemblyHookContext, TUnit.Core.TestContext>>? OnLastTestInAssembly { get; set; }
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.ClassHookContext, TUnit.Core.TestContext>>? OnLastTestInClass { get; set; }
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.TestSessionContext, TUnit.Core.TestContext>>? OnLastTestInTestSession { get; set; }
-        public TUnit.Core.AsyncEvent<TUnit.Core.TestContext>? OnTestEnd { get; set; }
+        public TUnit.Core.AsyncEvent<TUnit.Core.AfterTestContext>? OnTestEnd { get; set; }
         public TUnit.Core.AsyncEvent<TUnit.Core.TestRegisteredContext>? OnTestRegistered { get; set; }
         [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 null,
@@ -920,7 +973,9 @@ namespace TUnit.Core
         public required System.TimeSpan? Duration { get; init; }
         public required System.DateTimeOffset? End { get; init; }
         public required System.Exception? Exception { get; init; }
+        public bool IsOverridden { get; set; }
         public string? Output { get; }
+        public string? OverrideReason { get; set; }
         public required System.DateTimeOffset? Start { get; init; }
         public required TUnit.Core.Enums.Status Status { get; init; }
     }
@@ -1118,16 +1173,16 @@ namespace TUnit.Core.Executors
         public int Order { get; }
         public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
     }
-    public abstract class HookExecutorAttribute : TUnit.Core.TUnitAttribute
+    public class HookExecutorAttribute : TUnit.Core.TUnitAttribute
     {
-        public abstract System.Type HookExecutorType { get; }
+        public HookExecutorAttribute(System.Type type) { }
+        public System.Type HookExecutorType { get; }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public sealed class HookExecutorAttribute<T> : TUnit.Core.Executors.HookExecutorAttribute
         where T : TUnit.Core.Interfaces.IHookExecutor, new ()
     {
         public HookExecutorAttribute() { }
-        public override System.Type HookExecutorType { get; }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public class InvariantCultureAttribute : TUnit.Core.Executors.CultureAttribute
@@ -1139,6 +1194,13 @@ namespace TUnit.Core.Executors
     public class STAThreadExecutorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
     {
         public STAThreadExecutorAttribute() { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public sealed class TestExecutorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
+    {
+        public TestExecutorAttribute([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] System.Type type) { }
         public int Order { get; }
         public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
     }
@@ -1411,7 +1473,7 @@ namespace TUnit.Core.Interfaces
     }
     public interface ITestEndEventReceiver : TUnit.Core.Interfaces.IEventReceiver
     {
-        System.Threading.Tasks.ValueTask OnTestEnd(TUnit.Core.TestContext testContext);
+        System.Threading.Tasks.ValueTask OnTestEnd(TUnit.Core.AfterTestContext afterTestContext);
     }
     public interface ITestExecutor
     {

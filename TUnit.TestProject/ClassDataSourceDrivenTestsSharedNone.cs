@@ -1,4 +1,4 @@
-using TUnit.TestProject.Dummy;
+using TUnit.TestProject.Library.Models;
 
 namespace TUnit.TestProject;
 

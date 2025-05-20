@@ -67,7 +67,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
         
         foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
         {
-            await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
+            await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(new AfterTestContext(testContext.InternalDiscoveredTest)),
                 cleanUpExceptions);
         }
         

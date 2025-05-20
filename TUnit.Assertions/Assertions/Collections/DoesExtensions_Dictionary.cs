@@ -24,6 +24,19 @@ public static partial class DoesExtensions
             , [doNotPopulateThisValue]);
     }
     
+    public static InvokableValueAssertionBuilder<IReadOnlyDictionary<TKey, TValue>> ContainsKey<TKey, TValue>(this IValueSource<IReadOnlyDictionary<TKey, TValue>> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
+    {
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<IReadOnlyDictionary<TKey, TValue>, TKey>(expected,
+                (actual, _, _) =>
+                {
+                    Verify.ArgNotNull(actual);
+                    return actual.Keys.Contains(expected, equalityComparer);
+                },
+                (_, _, _) => $"The key \"{expected}\" was not found in the dictionary",
+                $"contain the key '{expected}'")
+            , [doNotPopulateThisValue]);
+    }
+    
     public static InvokableValueAssertionBuilder<TDictionary> ContainsValue<TDictionary, TValue>(this IValueSource<TDictionary> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
         where TDictionary : IDictionary
     {

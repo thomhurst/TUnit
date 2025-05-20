@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 
 namespace TUnit.Templates.Tests;
@@ -18,7 +19,7 @@ public abstract partial class TemplateTestBase : IDisposable
     private bool _disposed;
     private readonly ILoggerFactory _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
-    protected abstract string TemplateShortName { get; }
+    protected abstract string TemplateShortName { get; set; }
 
     protected VerificationEngine Engine => new(_loggerFactory);
 
@@ -26,17 +27,24 @@ public abstract partial class TemplateTestBase : IDisposable
         new TemplateVerifierOptions(TemplateShortName)
         {
             TemplatePath = Path.Combine(TestContext.OutputDirectory!, "content", TemplateShortName),
-        }.WithCustomScrubbers(ScrubbersDefinition.Empty.AddScrubber(sb =>
-        {
-            var original = sb.ToString();
-            var matches = PackageVersionRegex().Matches(original);
+        }.WithCustomScrubbers(
+            ScrubbersDefinition.Empty
+                .AddScrubber(ScrubVersions, "csproj")
+                .AddScrubber(ScrubVersions, "fsproj")
+                .AddScrubber(ScrubVersions, "vbproj")
+            );
+
+    private static void ScrubVersions(StringBuilder sb)
+    {
+        var original = sb.ToString();
+        var matches = VersionRegex().Matches(original);
             
-            foreach (Match match in matches.Where(m => m.Success))
-            {
-                var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "1.0.0");
-                sb.Replace(match.Value, line);
-            }
-        }, "csproj"));
+        foreach (Match match in matches.Where(m => m.Success))
+        {
+            var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "1.0.0");
+            sb.Replace(match.Value, line);
+        }
+    }
 
     protected void Dispose(bool disposing)
     {
@@ -59,7 +67,7 @@ public abstract partial class TemplateTestBase : IDisposable
     }
 
     [GeneratedRegex("""
-                    <PackageReference Include="[^"]*" Version="([^"]*)"
+                    Version="([^"]*)"
                     """)]
-    private static partial Regex PackageVersionRegex();
+    private static partial Regex VersionRegex();
 }

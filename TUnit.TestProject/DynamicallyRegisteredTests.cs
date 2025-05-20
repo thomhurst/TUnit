@@ -39,8 +39,10 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
 
     [Experimental("WIP")]
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Dynamic Code Only attribute on test")]
-    public async ValueTask OnTestEnd(TestContext testContext)
+    public async ValueTask OnTestEnd(AfterTestContext afterTestContext)
     {
+        var testContext = afterTestContext.TestContext;
+        
         if (testContext.Result?.Status == Status.Failed)
         {
             await _cancellationTokenSource.CancelAsync();

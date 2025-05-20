@@ -14,8 +14,8 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
             AdditionalFiles =
             [
                 Path.Combine(Git.RootDirectory.FullName,
-                    "TUnit.TestProject",
-                    "Dummy",
+                    "TUnit.TestProject.Library",
+                    "Models",
                     "SomeAsyncDisposableClass.cs")
             ]
         },

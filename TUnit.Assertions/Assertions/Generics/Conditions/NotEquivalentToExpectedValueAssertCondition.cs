@@ -18,10 +18,10 @@ public class NotEquivalentToExpectedValueAssertCondition<
 
     public EquivalencyKind EquivalencyKind { get; set; } = EquivalencyKind.Full;
     
-    protected override string GetExpectation()
+    internal protected override string GetExpectation()
     {
         var expectedMessage = typeof(TExpected).IsSimpleType() || typeof(IEnumerable).IsAssignableFrom(typeof(TExpected)) 
-            ? Formatter.Format(expected)
+            ? Formatter.Format(ExpectedValue)
             : expectedExpression;
         
         return $"to not be equivalent to {expectedMessage ?? "null"}";

@@ -6,7 +6,21 @@ file static class AssemblyLoader_Guid
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialize()
 	{
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Core.SourceGenerator.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"));
 		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b8d4030011dbd70c"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Verify.TUnit, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Verify, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Argon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=00a55352ff068a54"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("DiffEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("EmptyFiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("SimpleInfoName, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Assertions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b8d4030011dbd70c"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Core.SourceGenerator, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Engine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b8d4030011dbd70c"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("EnumerableAsyncProcessor, Version=2.1.0.0, Culture=neutral, PublicKeyToken=7a7adb9c614908c9"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Sourcy.Core, Version=0.7.7.0, Culture=neutral, PublicKeyToken=null"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.TestProject.Library, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"));
 	}
 }
 

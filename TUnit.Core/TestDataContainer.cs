@@ -14,8 +14,6 @@ internal static class TestDataContainer
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, object>> InjectedSharedPerClassType = new();
     private static readonly GetOnlyDictionary<Assembly, GetOnlyDictionary<Type, object>> InjectedSharedPerAssembly = new();
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
-
-    private static readonly Lock Lock = new();
     
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, Counter>> CountsPerKey = new();
     private static readonly ConcurrentDictionary<Type, Counter> CountsPerTestSession = new();
@@ -27,29 +25,29 @@ internal static class TestDataContainer
     /// <summary>
     /// Gets an instance for the specified class.
     /// </summary>
-    /// <typeparam name="T">The type of the instance.</typeparam>
     /// <param name="testClass">The test class type.</param>
+    /// <param name="type">The type of object to retrieve</param>
     /// <param name="func">The function to create the instance.</param>
     /// <returns>The instance.</returns>
-    public static T GetInstanceForClass<T>(Type testClass, Func<T> func)
+    public static object GetInstanceForClass(Type testClass, Type type, Func<object> func)
     {
         var objectsForClass = InjectedSharedPerClassType.GetOrAdd(testClass, _ => new GetOnlyDictionary<Type, object>());
         
-        return (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
+        return objectsForClass.GetOrAdd(type, _ => func());
     }
-    
+
     /// <summary>
     /// Gets an instance for the specified assembly.
     /// </summary>
-    /// <typeparam name="T">The type of the instance.</typeparam>
     /// <param name="assembly">The assembly.</param>
+    /// <param name="type">The type of object to retrieve</param>
     /// <param name="func">The function to create the instance.</param>
     /// <returns>The instance.</returns>
-    public static T GetInstanceForAssembly<T>(Assembly assembly, Func<T> func)
+    public static object GetInstanceForAssembly(Assembly assembly, Type type, Func<object> func)
     {
         var objectsForClass = InjectedSharedPerAssembly.GetOrAdd(assembly, _ => new GetOnlyDictionary<Type, object>());
         
-        return  (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
+        return  objectsForClass.GetOrAdd(type, _ => func());
     }
     
     /// <summary>
@@ -64,12 +62,12 @@ internal static class TestDataContainer
     /// <summary>
     /// Gets a global instance of the specified type.
     /// </summary>
-    /// <typeparam name="T">The type of the instance.</typeparam>
+    /// <param name="type">The type of object to retrieve</param>
     /// <param name="func">The function to create the instance.</param>
     /// <returns>The instance.</returns>
-    public static T GetGlobalInstance<T>(Func<T> func)
+    public static object GetGlobalInstance(Type type, Func<object> func)
     {
-        return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => func()!);
+        return InjectedSharedGlobally.GetOrAdd(type, _ => func());
     }
     
     /// <summary>
@@ -111,15 +109,15 @@ internal static class TestDataContainer
     /// <summary>
     /// Gets an instance for the specified key.
     /// </summary>
-    /// <typeparam name="T">The type of the instance.</typeparam>
+    /// <param name="type">The type of object to retrieve</param>
     /// <param name="key">The key.</param>
     /// <param name="func">The function to create the instance.</param>
     /// <returns>The instance.</returns>
-    public static T GetInstanceForKey<T>(string key, Func<T> func)
+    public static object GetInstanceForKey(string key, Type type, Func<object> func)
     {
-        var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
+        var instancesForType = InjectedSharedPerKey.GetOrAdd(type, _ => new GetOnlyDictionary<string, object>());
 
-        return (T)instancesForType.GetOrAdd(key, _ => func()!);
+        return instancesForType.GetOrAdd(key, _ => func());
     }
     
     /// <summary>

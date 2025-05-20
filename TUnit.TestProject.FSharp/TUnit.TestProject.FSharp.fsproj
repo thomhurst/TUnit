@@ -1,17 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
+    <PropertyGroup>
+      <LangVersion>9.0</LangVersion>
+    </PropertyGroup>
+    
     <Import Project="..\TestProject.props" />
 
     <ItemGroup>
+        <ProjectReference Include="..\TUnit.Assertions.FSharp\TUnit.Assertions.FSharp.fsproj" />
+        <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="DummyReferenceTypeClass.fs" />
+        <Compile Include="DependencyInjectionClassConstructor.fs" />
+        <Compile Include="ClassConstructorTest.fs" />
+        <Compile Include="ClassConstructorWithEnumerableTest.fs" />
+        <Compile Include="ClassDataSourceDrivenTests.fs" />
         <Compile Include="Tests.fs" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="FSharp.Core" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+      <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+      <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     </ItemGroup>
     
     <Import Project="..\TestProject.targets" />
