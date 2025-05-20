@@ -8,6 +8,8 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
+[RunOnlyOnBranch("main")]
+[RunOnLinuxOnly]
 [DependsOn<GenerateVersionModule>]
 public class PushVersionTagModule : Module<CommandResult>
 {
