@@ -25,8 +25,11 @@ public class HookMessagePublisher(IExtension extension, IMessageBus messageBus) 
                             new LinePosition(hookMethod.LineNumber, 0))),
                     new TestMethodIdentifierProperty
                     (
-                        hookMethod.Assembly.FullName!, hookMethod.ClassType.Namespace!,
-                        hookMethod.ClassType.Name, hookMethod.Name,
+                        hookMethod.Assembly.FullName!, 
+                        hookMethod.ClassType.Namespace!,
+                        hookMethod.ClassType.Name, 
+                        hookMethod.Name,
+                        hookMethod.MethodInfo.GenericTypeCount,
                         hookMethod.MethodInfo.Parameters.Select(x => x.Type.FullName!).ToArray(),
                         hookMethod.MethodInfo.ReturnType.FullName!
                     )
@@ -71,8 +74,11 @@ public class HookMessagePublisher(IExtension extension, IMessageBus messageBus) 
                     new TimingProperty(new TimingInfo(start, end, end - start)),
                     new TestMethodIdentifierProperty
                     (
-                        hookMethod.Assembly.FullName!, hookMethod.ClassType.Namespace!,
-                        hookMethod.ClassType.Name, hookMethod.Name,
+                        hookMethod.Assembly.FullName!,
+                        hookMethod.ClassType.Namespace!,
+                        hookMethod.ClassType.Name, 
+                        hookMethod.Name,
+                        hookMethod.MethodInfo.GenericTypeCount,
                         hookMethod.MethodInfo.Parameters.Select(x => x.Type.FullName!).ToArray(),
                         hookMethod.MethodInfo.ReturnType.FullName!
                     ),

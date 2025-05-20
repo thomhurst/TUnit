@@ -51,11 +51,4 @@ internal interface ITUnitMessageBus
     /// </summary>
     /// <param name="artifact">The artifact.</param>
     ValueTask SessionArtifact(Artifact artifact);
-
-    /// <summary>
-    /// Sends a test artifact message for the specified test context.
-    /// </summary>
-    /// <param name="testContext">The test context.</param>
-    /// <param name="artifact">The artifact.</param>
-    ValueTask TestArtifact(TestContext testContext, Artifact artifact);
 }
