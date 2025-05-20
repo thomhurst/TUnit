@@ -11,6 +11,10 @@
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
+    <ItemGroup>
+        <CompilerVisibleProperty Include="EnableTUnitPolyfills" />
+    </ItemGroup>
+
     <PropertyGroup>
         <TUnitImplicitUsings>true</TUnitImplicitUsings>
         <TUnitAssertionsImplicitUsings>true</TUnitAssertionsImplicitUsings>
