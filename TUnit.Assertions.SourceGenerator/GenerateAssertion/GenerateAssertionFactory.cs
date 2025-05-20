@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
-namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
+namespace TUnit.Assertions.SourceGenerator.GenerateAssertion;
 
 public static class GenerateAssertionFactory {
     public const string GenerateIsAssertionAttribute = "TUnit.Assertions.GenerateAssertionAttribute<TBase>";
@@ -11,7 +11,6 @@ public static class GenerateAssertionFactory {
         INamedTypeSymbol classSymbol,
         CancellationToken ct
     ) {
-        
         var attributes = classSymbol.GetAttributes()
             .Where(attr => attr.AttributeClass?.ConstructedFrom.ToDisplayString() == GenerateIsAssertionAttribute)
             .ToImmutableArray();

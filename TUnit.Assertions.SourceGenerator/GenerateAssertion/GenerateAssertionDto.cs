@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using TUnit.Assertions.SourceGenerator.Helpers;
 
-namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
+namespace TUnit.Assertions.SourceGenerator.GenerateAssertion;
 
 public record GenerateAssertionDto(
     Location? AttributeLocation,

@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
+using TUnit.Assertions.SourceGenerator.GenerateAssertion;
 
-namespace TUnit.Assertions.SourceGenerator;
+namespace TUnit.Assertions.SourceGenerator.AssertionHolder;
 
 public record AssertionHolderDto(
     INamedTypeSymbol Symbol,

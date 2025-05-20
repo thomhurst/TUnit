@@ -16,7 +16,7 @@ public static class StringCaseExtensions {
         foreach (string t1 in words) {
             if (string.IsNullOrEmpty(t1)) continue;
 
-            var wordSpan = t1.AsSpan();
+            ReadOnlySpan<char> wordSpan = t1.AsSpan();
 
             // add separator
             if (position > 0) result[position++] = ' ';

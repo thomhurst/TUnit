@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
+namespace TUnit.Assertions.SourceGenerator.GenerateAssertion;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Code

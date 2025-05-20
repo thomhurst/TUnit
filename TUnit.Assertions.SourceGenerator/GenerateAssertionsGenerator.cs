@@ -1,8 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
+using TUnit.Assertions.SourceGenerator.AssertionHolder;
+using TUnit.Assertions.SourceGenerator.GenerateAssertion;
 using TUnit.Assertions.SourceGenerator.Helpers;
-using TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 
 namespace TUnit.Assertions.SourceGenerator;
 
@@ -21,9 +22,11 @@ public class GenerateAssertionsGenerator : IIncrementalGenerator {
         return s is ClassDeclarationSyntax { AttributeLists.Count: > 0 };
     }
 
-    private static void GenerateFiles(SourceProductionContext spc,
-        (Compilation Compilation, ImmutableArray<AssertionHolderDto> DtoArray) box) {
-        var dtoArray = box.DtoArray;
+    private static void GenerateFiles(
+        SourceProductionContext spc,
+        (Compilation Compilation, ImmutableArray<AssertionHolderDto> DtoArray) box
+    ) {
+        (_, ImmutableArray<AssertionHolderDto> dtoArray) = box;
         var builder = new GeneratorStringBuilder();
 
         foreach (AssertionHolderDto holderDto in dtoArray) {

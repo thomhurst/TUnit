@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
+using TUnit.Assertions.SourceGenerator.GenerateAssertion;
 
-namespace TUnit.Assertions.SourceGenerator;
+namespace TUnit.Assertions.SourceGenerator.AssertionHolder;
 
 public static class AssertionHolderDtoFactory {
     public static AssertionHolderDto? Create(GeneratorSyntaxContext context, CancellationToken ct) {
