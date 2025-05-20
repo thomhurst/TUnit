@@ -15,7 +15,7 @@ public static class AssertionHolderDtoFactory {
         
         return new AssertionHolderDto(
             symbol,
-            GenerateAssertionExtractor.Extract(context, symbol, ct)
+            GenerateAssertionFactory.Create(context, symbol, ct)
         );
     }
 }

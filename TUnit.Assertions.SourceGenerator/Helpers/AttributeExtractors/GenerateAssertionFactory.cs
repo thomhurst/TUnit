@@ -3,11 +3,14 @@ using Microsoft.CodeAnalysis;
 
 namespace TUnit.Assertions.SourceGenerator.Helpers.AttributeExtractors;
 
-public static class GenerateAssertionExtractor {
+public static class GenerateAssertionFactory {
     public const string GenerateIsAssertionAttribute = "TUnit.Assertions.GenerateAssertionAttribute<TBase>";
     
-    public static ImmutableArray<GenerateAssertionDto> Extract(GeneratorSyntaxContext context,
-        INamedTypeSymbol classSymbol, CancellationToken ct) {
+    public static ImmutableArray<GenerateAssertionDto> Create(
+        GeneratorSyntaxContext context,
+        INamedTypeSymbol classSymbol,
+        CancellationToken ct
+    ) {
         
         var attributes = classSymbol.GetAttributes()
             .Where(attr => attr.AttributeClass?.ConstructedFrom.ToDisplayString() == GenerateIsAssertionAttribute)
@@ -19,11 +22,11 @@ public static class GenerateAssertionExtractor {
         foreach (AttributeData attribute in attributes) {
             ITypeSymbol? typeArg = attribute?.AttributeClass?.TypeArguments.FirstOrDefault();
             if (typeArg is null) continue;
+
+            if (attribute?.ConstructorArguments[0].Value is not int type || !Enum.IsDefined(typeof(AssertionType), type)) continue;
+            var assertionType = (AssertionType)type;
             
-            var type = (AssertionType)(attribute?.ConstructorArguments[0].Value as int? ?? 0);
-            if (type is AssertionType.Undefined) continue;
-            
-            var methodName = attribute?.ConstructorArguments[1].Value as string;
+            string? methodName = attribute?.ConstructorArguments[1].Value as string;
             if (string.IsNullOrEmpty(methodName)) continue;
             
             // Optional params 
@@ -37,9 +40,9 @@ public static class GenerateAssertionExtractor {
                 expectationExpression = attribute.ConstructorArguments[3].Value as string;
             
             assertions.Add(new GenerateAssertionDto(
-                attributeLocation: attribute?.ApplicationSyntaxReference!.GetSyntax(ct).GetLocation(),
+                AttributeLocation: attribute?.ApplicationSyntaxReference!.GetSyntax(ct).GetLocation(),
                 typeArg,
-                type,
+                assertionType,
                 methodName!,
                 messageFactoryMethodName,
                 expectationExpression
