@@ -2,12 +2,11 @@
 
 public class BasicTemplateTests : TemplateTestBase
 {
-    protected override string TemplateShortName { get; set; }
+    protected override string TemplateShortName { get; set; } = "TUnit";
 
     [Test]
     public async Task InstantiationTest()
     {
-        TemplateShortName = "TUnit";
         await Engine.Execute(Options).ConfigureAwait(false);
     }
 

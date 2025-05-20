@@ -2,12 +2,11 @@
 {
     public class AspireStarterTemplateTests : TemplateTestBase
     {
-        protected override string TemplateShortName { get; set; }
+        protected override string TemplateShortName { get; set; } = "TUnit.Aspire.Starter";
 
         [Test]
         public async Task InstantiationTest()
         {
-            TemplateShortName = "TUnit.Aspire.Starter";
             await Engine.Execute(Options).ConfigureAwait(false);
         }
     }
