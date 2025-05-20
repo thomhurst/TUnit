@@ -7,7 +7,6 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFrameworkIdentifier)'!='.NETCoreApp'">
-        <PackageReference Include="System.Text.Json" />
         <PackageReference Include="System.Threading.Tasks.Extensions" />
     </ItemGroup>
 </Project>
