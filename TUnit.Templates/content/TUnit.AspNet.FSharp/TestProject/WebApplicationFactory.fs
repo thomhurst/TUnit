@@ -5,7 +5,7 @@ open Microsoft.AspNetCore.Mvc.Testing
 open TUnit.Core.Interfaces
 
 type WebApplicationFactory() =
-    inherit WebApplicationFactory<WebApp.Program>()
+    inherit WebApplicationFactory<WebApp.Program.Program>()
 
     interface IAsyncInitializer with
         member this.InitializeAsync() : Task =

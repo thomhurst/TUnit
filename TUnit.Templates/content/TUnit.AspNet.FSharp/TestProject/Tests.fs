@@ -19,6 +19,14 @@ type Tests() =
             let client = this.WebApplicationFactory.CreateClient()
             let! response = client.GetAsync("/ping") |> Async.AwaitTask
             let! stringContent = response.Content.ReadAsStringAsync() |> Async.AwaitTask
-            // Use named argument for the optional parameter to help F# resolve the overload
-            do! check (Assert.That(stringContent).IsEqualTo("Hello World"))
+            do! check (Assert.That<string>(stringContent).IsEqualTo("Hello, World!"))
+        }
+
+    [<Test>]
+    member this.GetWeatherForecast() =
+        async {
+            let client = this.WebApplicationFactory.CreateClient()
+            let! response = client.GetAsync("/weatherforecast") |> Async.AwaitTask
+            let! stringContent = response.Content.ReadAsStringAsync() |> Async.AwaitTask
+            do! check (Assert.That<string>(stringContent).IsNotNullOrEmpty())
         }

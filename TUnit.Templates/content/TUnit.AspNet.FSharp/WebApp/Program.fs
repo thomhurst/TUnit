@@ -14,15 +14,17 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 
-type Program() =
-    static member exitCode = 0
+module Program =
+    type Program = class end 
+    let exitCode = 0
 
-    static member Main(args: string[]) =
+    [<EntryPoint>]
+    let main (args: string[]) =
         let builder = WebApplication.CreateBuilder(args)
 
-        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddEndpointsApiExplorer() |> ignore
 
-        builder.Services.AddControllers()
+        builder.Services.AddControllers() |> ignore
 
         let app = builder.Build()
 
@@ -35,4 +37,4 @@ type Program() =
 
         app.Run()
 
-        Program.exitCode
+        exitCode
