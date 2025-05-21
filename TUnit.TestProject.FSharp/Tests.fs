@@ -25,7 +25,7 @@ type Tests() =
     [<Category("Pass")>]
     member _.Test1() = async {
         let value = "1"
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1"))
+        do! check (Assert.That<string>(value).IsEqualTo("1"))
     }
 
     [<Test>]
@@ -39,21 +39,21 @@ type Tests() =
     [<Category("Fail")>]
     member _.Test2() = async {
         let value = "2"
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1"))
+        do! check (Assert.That<string>(value).IsEqualTo("1"))
     }
 
     [<Test>]
     [<Category("Pass")>]
     member _.Test3() = async {
         let value = "1"
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1"))
+        do! check (Assert.That<string>(value).IsEqualTo("1"))
     }
 
     [<Test>]
     [<Category("Fail")>]
     member _.Test4() = async {
         let value = "2"
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1"))
+        do! check (Assert.That<string>(value).IsEqualTo("1"))
     }
 
     [<Test>]
@@ -64,7 +64,7 @@ type Tests() =
     [<Arguments("5")>]
     [<Category("Fail")>]
     member _.ParameterisedTests1(value: string) = async {
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1").And.HasLength().EqualTo(1))
+        do! check (Assert.That<string>(value).IsEqualTo("1").And.HasLength().EqualTo(1))
     }
 
     [<Test>]
@@ -75,7 +75,7 @@ type Tests() =
     [<Arguments("5")>]
     [<Category("Fail")>]
     member _.ParameterisedTests2(value: string) = async {
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1"))
+        do! check (Assert.That<string>(value).IsEqualTo("1"))
     }
 
     [<Test>]
@@ -83,7 +83,7 @@ type Tests() =
     [<Category("Skip")>]
     member _.Skip1() = async {
         let value = "1"
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1"))
+        do! check (Assert.That<string>(value).IsEqualTo("1"))
     }
 
     [<Test>]
@@ -91,7 +91,7 @@ type Tests() =
     [<Category("Skip")>]
     member _.Skip2() = async {
         let value = "1"
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1"))
+        do! check (Assert.That<string>(value).IsEqualTo("1"))
     }
 
     [<Test>]
@@ -99,7 +99,7 @@ type Tests() =
     [<Category("Skip")>]
     member _.CustomSkip1() = async {
         let value = "1"
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(value), "1"))
+        do! check (Assert.That<string>(value).IsEqualTo("1"))
     }
 
     [<Test>]
@@ -186,7 +186,7 @@ type Tests() =
     [<Test>]
     [<Category("Fail")>]
     member _.Throws2() = async {
-        do! check (Assert.That(fun () -> async { do! Async.Yield() }).ThrowsException())
+        do! check (Assert.That(fun () -> async { do! Task.Yield() }).ThrowsException())
     }
 
     [<Test>]
@@ -195,11 +195,11 @@ type Tests() =
         do! check (Assert.That(fun () -> raise (ApplicationException())).ThrowsException())
     }
 
-    //[<Test>]
-    //[<Category("Pass")>]
-    //member _.Throws4() = async {
-    //    do! check (Assert.That(fun () -> async { do! Async.Yield(); true }).ThrowsNothing())
-    //}
+    [<Test>]
+    [<Category("Pass")>]
+    member _.Throws4() = async {
+        do! check (Assert.That(fun () -> async { do! Async.Yield(); true }).ThrowsNothing())
+    }
 
     [<Test>]
     [<Timeout(500)>]
@@ -211,13 +211,13 @@ type Tests() =
     [<Test>]
     [<Category("Pass")>]
     member _.String_And_Condition() = async {
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>("1"), "1").And.HasLength().EqualTo(1))
+        do! check (Assert.That<string>("1").IsEqualTo("1").And.HasLength().EqualTo(1))
     }
 
     [<Test>]
     [<Category("Fail")>]
     member _.String_And_Condition2() = async {
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>("1"), "2").And.HasLength().EqualTo(2))
+        do! check (Assert.That<string>("1").IsEqualTo("2").And.HasLength().EqualTo(2))
     }
 
     [<Test>]
@@ -283,7 +283,7 @@ type Tests() =
         let two = "Foo bar!"
         use _ = Assert.Multiple()
         do! check (Assert.That(one).IsNull().Or.IsEmpty())
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>(two), "2").Or.IsNull())
+        do! check (Assert.That<string>(two).IsEqualTo("2").Or.IsNull())
     }
 
     [<Test>]
@@ -312,12 +312,12 @@ type Tests() =
 
     [<Test>]
     member _.Long_String_Not_Equals() = async {
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>("ABCDEFGHIJKLMNOOPQRSTUVWXYZ"), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", StringComparison.Ordinal))
+        do! check (Assert.That<string>("ABCDEFGHIJKLMNOOPQRSTUVWXYZ").IsNotEqualTo("ABCDEFGHIJKLMNOPQRSTUVWXYZ", StringComparison.Ordinal)) 
     }
 
     [<Test>]
     member _.Short_String_Not_Equals() = async {
-        do! check (TUnit.Assertions.Extensions.StringIsExtensions.IsEqualTo(Assert.That<string>("ABCCDE"), "ABCDE", StringComparison.Ordinal))
+        do! check (Assert.That<string>("ABCCDE").IsNotEqualTo("ABCDE", StringComparison.Ordinal))
     }
 
     // Data source methods
