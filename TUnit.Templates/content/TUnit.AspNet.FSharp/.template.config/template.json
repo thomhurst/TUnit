@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Tom Longhurst",
+    "description": "A template for testing an ASP.NET Core project with TUnit",
+    "classifications": [
+      "Test",
+      "TUnit",
+      "Asp",
+      "ASP.NET"
+    ],
+    "name": "TUnit ASP.NET Core Project",
+    "identity": "TUnit.Test.AspNet.FSharp",
+    "groupIdentity": "TUnit.AspNet",
+    "shortName": "TUnit.AspNet.FSharp",
+    "tags": {
+      "language": "F#",
+      "type": "project"
+    },
+    "sourceName": "TestProject",
+    "preferNameDirectory": true
+  }
+  
