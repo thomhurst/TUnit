@@ -12,6 +12,8 @@ open TUnit.Assertions.AssertConditions.Throws
 
 type Tests() =
 
+    let _retryCount = 0
+
     [<Test>]
     [<Category("Pass")>]
     member _.ConsoleOutput() = async {
@@ -166,13 +168,13 @@ type Tests() =
     [<Test>]
     [<Category("Pass")>]
     member _.TestContext1() = async {
-        do! check (Assert.That(TestContext.Current?.TestDetails.TestName).IsEqualTo("TestContext1"))
+        do! check ((Assert.That(TestContext.Current.TestDetails.TestName: string | null).IsEqualTo("TestContext1")))
     }
 
     [<Test>]
     [<Category("Fail")>]
     member _.TestContext2() = async {
-        do! check (Assert.That(TestContext.Current?.TestDetails.TestName).IsEqualTo("TestContext1"))
+        do! check ((Assert.That(TestContext.Current.TestDetails.TestName: string | null).IsEqualTo("TestContext1")))
     }
 
     [<Test>]
@@ -283,9 +285,6 @@ type Tests() =
         do! check (Assert.That(one).IsNull().Or.IsEmpty())
         do! check (Assert.That(two).IsEqualTo("Foo bar").Or.IsNull())
     }
-
-    // For Throws5, Throws6, Throws7, just throw as in C#
-    let mutable _retryCount = 0
 
     [<Test>]
     member _.Throws5() = async {
