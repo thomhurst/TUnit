@@ -16,7 +16,7 @@ type Tests() =
     [<Category("Pass")>]
     member _.ConsoleOutput() = async {
         Console.WriteLine("Blah!")
-        do! check ((Assert.That(TestContext.Current.GetStandardOutput()).IsEqualTo("Blah!", StringComparison.Ordinal)))
+        do! check ((Assert.That(TestContext.Current.GetStandardOutput(): string | null).IsEqualTo("Blah!", StringComparison.Ordinal)))
     }
 
     [<Test>]
