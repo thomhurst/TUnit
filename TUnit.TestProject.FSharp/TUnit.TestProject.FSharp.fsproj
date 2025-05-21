@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="CustomSkipAttribute.fs" />
         <Compile Include="TestDataSources.fs" />
         <Compile Include="DummyReferenceTypeClass.fs" />
         <Compile Include="DependencyInjectionClassConstructor.fs" />
