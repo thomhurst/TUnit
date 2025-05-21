@@ -9,11 +9,11 @@
       "ASP.NET"
     ],
     "name": "TUnit ASP.NET Core Project",
-    "identity": "TUnit.Test.AspNet",
+    "identity": "TUnit.Test.AspNet.FSharp",
     "groupIdentity": "TUnit.AspNet",
-    "shortName": "TUnit.AspNet",
+    "shortName": "TUnit.AspNet.FSharp",
     "tags": {
-      "language": "C#",
+      "language": "F#",
       "type": "project"
     },
     "sourceName": "TestProject",
