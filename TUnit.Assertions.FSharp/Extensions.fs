@@ -2,8 +2,6 @@
 
 open TUnit.Assertions.AssertionBuilders
 open TUnit.Assertions.AssertConditions.Throws
-open System.Threading.Tasks
-open System.Reflection
 
 module Operations =
     [<CustomOperation(MaintainsVariableSpaceUsingBind = true)>]
