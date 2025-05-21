@@ -180,13 +180,13 @@ type Tests() =
     [<Test>]
     [<Category("Fail")>]
     member _.Throws1() = async {
-        do! check (Assert.That<Func<string>>(fun () -> new string([||])).ThrowsException())
+        do! check (Assert.That<string>(fun () -> task { return new string([||]) }).ThrowsException())
     }
 
     [<Test>]
     [<Category("Fail")>]
     member _.Throws2() = async {
-        do! check (Assert.That(fun () -> task { do! Task.Yield() }).ThrowsException())
+        do! check (Assert.That<unit>(fun () -> task { do! Task.Yield() }).ThrowsException())
     }
 
     [<Test>]
