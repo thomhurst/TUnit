@@ -312,12 +312,12 @@ type Tests() =
 
     [<Test>]
     member _.Long_String_Not_Equals() = async {
-        do! check (Assert.That<string>("ABCDEFGHIJKLMNOOPQRSTUVWXYZ").IsNotEqualTo("ABCDEFGHIJKLMNOPQRSTUVWXYZ", StringComparison.Ordinal)) 
+        do! check (Assert.That<string>("ABCDEFGHIJKLMNOOPQRSTUVWXYZ").IsEqualTo("ABCDEFGHIJKLMNOPQRSTUVWXYZ", StringComparison.Ordinal)) 
     }
 
     [<Test>]
     member _.Short_String_Not_Equals() = async {
-        do! check (Assert.That<string>("ABCCDE").IsNotEqualTo("ABCDE", StringComparison.Ordinal))
+        do! check (Assert.That<string>("ABCCDE").IsEqualTo("ABCDE", StringComparison.Ordinal))
     }
 
     // Data source methods
