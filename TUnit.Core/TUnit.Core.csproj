@@ -51,7 +51,7 @@
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <PackageReference Include="Microsoft.CSharp" />
-        <PackageReference Include="System.Text.Json" VersionOverride="8.0.0" />
+        <PackageReference Include="System.Text.Json" VersionOverride="9.0.5" />
         <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="8.0.0" />
     </ItemGroup>
 </Project>
