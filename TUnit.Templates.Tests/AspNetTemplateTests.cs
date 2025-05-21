@@ -9,4 +9,11 @@ public class AspNetTemplateTests : TemplateTestBase
     {
         await Engine.Execute(Options).ConfigureAwait(false);
     }
+
+    [Test]
+    public async Task InstantiationTestWithFSharp()
+    {
+        TemplateShortName = "TUnit.AspNet.FSharp";
+        await Engine.Execute(Options).ConfigureAwait(false);
+    }
 }
