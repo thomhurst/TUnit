@@ -14,6 +14,13 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<GenerateVersionModule>]
 public class PushVersionTagModule : Module<CommandResult>
 {
+    protected override async Task<bool> ShouldIgnoreFailures(IPipelineContext context, Exception exception)
+    {
+        var versionInformation = await GetModule<GenerateVersionModule>();
+
+        return exception.Message.Contains($"tag 'v{versionInformation.Value!.SemVer}' already exists");
+    }
+
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var versionInformation = await GetModule<GenerateVersionModule>();
