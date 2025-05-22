@@ -122,7 +122,9 @@ internal class DependencyCollector
                 return false;
             }
             
-            return x.IsSameTest(y);
+            return x.IsSameTest(y) && 
+                   x.TestMethodParameterTypes.SequenceEqual(y.TestMethodParameterTypes) &&
+                   x.TestMethodArguments.SequenceEqual(y.TestMethodArguments);
         }
 
         public int GetHashCode(TestDetails obj)

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
@@ -71,6 +72,9 @@ public partial class TestContext : Context
     /// Gets the details of the test.
     /// </summary>
     public TestDetails TestDetails { get; }
+
+    [field: AllowNull, MaybeNull]
+    public TestContext[] Dependencies => field ??= InternalDiscoveredTest.Dependencies.Select(x => x.Test.TestContext).ToArray();
 
     /// <summary>
     /// Gets or sets the current retry attempt for the test.
