@@ -6,7 +6,7 @@ open TUnit.Assertions
 open TUnit.Assertions.Extensions
 open TUnit.Core
 
-// Equivalent of DependsOnTests3.cs
+// F# equivalent of DependsOnTests3.cs
 
 type DependsOnTests3() =
     static let mutable test1Start = DateTime.MinValue

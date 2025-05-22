@@ -1,9 +1,16 @@
 namespace TUnit.TestProject.FSharp
 
 open System.Threading.Tasks
+open System.Runtime.CompilerServices
 open TUnit.Core
 
-// Equivalent of DynamicCodeOnlyAttribute.cs
+// F# equivalent of DynamicCodeOnlyAttribute.cs
 
 type DynamicCodeOnlyAttribute() =
-    inherit System.Attribute()
+    inherit SkipAttribute("This test is only supported when dynamic code is available")
+    override _.ShouldSkip(context: BeforeTestContext) =
+#if NET
+        Task.FromResult(not RuntimeFeature.IsDynamicCodeSupported)
+#else
+        Task.FromResult(false)
+#endif

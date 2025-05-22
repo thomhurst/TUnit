@@ -3,15 +3,13 @@ namespace TUnit.TestProject.FSharp
 open System.Threading.Tasks
 open TUnit.Core
 
-// Equivalent of ExperimentalTests.cs
+// F# equivalent of ExperimentalTests.cs
 
 type ExperimentalTests() =
     [<Experimental("Blah")>]
     [<Test>]
-    member _.SynchronousTest() =
-        () // Dummy method
+    member _.SynchronousTest() = ()
 
     [<Experimental("Blah")>]
     [<Test>]
-    member _.AsynchronousTest() : Task =
-        Task.CompletedTask
+    member _.AsynchronousTest() : Task = Task.CompletedTask
