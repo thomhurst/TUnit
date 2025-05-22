@@ -7,7 +7,6 @@
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-        <LangVersion>latest</LangVersion>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
