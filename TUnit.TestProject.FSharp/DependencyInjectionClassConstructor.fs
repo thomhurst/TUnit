@@ -1,26 +1,25 @@
 ﻿namespace TUnit.TestProject.FSharp
 
 open System
-open System.Threading.Tasks
 open Microsoft.Extensions.DependencyInjection
 open TUnit.Core.Interfaces
 
+// F# equivalent of DependencyInjectionClassConstructor.cs
+
 type DependencyInjectionClassConstructor() =
-    let serviceProvider: IServiceProvider = 
+    let mutable scope: AsyncServiceScope option = None
+    let serviceProvider =
         ServiceCollection()
             .AddTransient<DummyReferenceTypeClass>()
             .BuildServiceProvider()
-    let mutable scope : AsyncServiceScope option = None
-
     interface IClassConstructor with
-        member _.Create(typ, _) =
+        member _.Create(t: Type, classConstructorMetadata: ClassConstructorMetadata) =
             if scope.IsNone then
                 scope <- Some(serviceProvider.CreateAsyncScope())
-            ActivatorUtilities.GetServiceOrCreateInstance(scope.Value.ServiceProvider, typ)
-
+            ActivatorUtilities.GetServiceOrCreateInstance(scope.Value.Value.ServiceProvider, t)
     interface ITestEndEventReceiver with
-        member _.OnTestEnd(_testContext) =
+        member _.OnTestEnd(testContext: AfterTestContext) =
             match scope with
-            | Some s -> s.DisposeAsync()
+            | Some s -> s.DisposeAsync() |> ValueTask
             | None -> ValueTask()
         member _.Order = 0
