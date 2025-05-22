@@ -3,6 +3,8 @@
 open System
 open Microsoft.Extensions.DependencyInjection
 open TUnit.Core.Interfaces
+open TUnit.Core
+open System.Threading.Tasks
 
 // F# equivalent of DependencyInjectionClassConstructor.cs
 
@@ -16,10 +18,10 @@ type DependencyInjectionClassConstructor() =
         member _.Create(t: Type, classConstructorMetadata: ClassConstructorMetadata) =
             if scope.IsNone then
                 scope <- Some(serviceProvider.CreateAsyncScope())
-            ActivatorUtilities.GetServiceOrCreateInstance(scope.Value.Value.ServiceProvider, t)
+            ActivatorUtilities.GetServiceOrCreateInstance(scope.Value.ServiceProvider, t)
     interface ITestEndEventReceiver with
         member _.OnTestEnd(testContext: AfterTestContext) =
             match scope with
-            | Some s -> s.DisposeAsync() |> ValueTask
+            | Some s -> s.DisposeAsync()
             | None -> ValueTask()
         member _.Order = 0
