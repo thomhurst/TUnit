@@ -3,7 +3,7 @@
     <Import Project="..\TestProject.props" />
 
     <PropertyGroup>
-        <RootNamespace>TUnit.TestProject.VB.NET</RootNamespace>
+        <RootNamespace>TUnit.TestProject.VB</RootNamespace>
     </PropertyGroup>
     
     <ItemGroup>
