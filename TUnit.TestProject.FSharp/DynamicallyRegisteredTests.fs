@@ -7,6 +7,7 @@ open System.Threading.Tasks
 open TUnit.Core
 open TUnit.Core.Enums
 open TUnit.Core.Interfaces
+open TUnit.Engine.Extensions
 
 type DynamicDataGenerator() =
     inherit DataSourceGeneratorAttribute<int>()
@@ -33,10 +34,10 @@ type DynamicDataGenerator() =
                         raise (Exception())
                     if DynamicDataGenerator.IsReregisteredTest(testContext) then
                         () // Optionally suppress reporting
-                    do! testContext.ReregisterTestWithArguments([|(Random()).Next()|],
-                        dict [ "DynamicDataGeneratorRetry", box true ])
+                    let retryDict = Dictionary<string, obj>()
+                    retryDict.Add("DynamicDataGeneratorRetry", box true)
+                    do! testContext.ReregisterTestWithArguments([|(Random()).Next()|], retryDict)
             } |> ValueTask
-        member _.Order = 0
 
     interface IEventReceiver with
         member _.Order = 0
@@ -50,5 +51,7 @@ type DynamicallyRegisteredTests() =
     [<DynamicDataGenerator>]
     member _.MyTest(value: int) =
         raise (Exception($"Value {value} !"))
+
+
 
 

@@ -1,10 +1,11 @@
 namespace TUnit.TestProject.FSharp
 
 open TUnit.Core
+open System.Diagnostics.CodeAnalysis
 
 // Equivalent of DeepNestedDependencyConflict.cs
 
-[<UnconditionalSuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")>]
+[<SuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")>]
 type DeepNestedDependencyConflict() =
     [<Test>]
     [<DependsOn("Test2")>]

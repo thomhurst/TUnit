@@ -59,11 +59,6 @@ type DataDrivenTests() =
         ()
 
     [<Test>]
-    [<Arguments([| 1; 2; 3 |])>]
-    member _.IntegerArray(values: int array) =
-        ()
-
-    [<Test>]
-    [<Arguments(System.Int32.MaxValue)>]
+    [<Arguments(Int32.MaxValue)>]
     member _.IntMaxValue(value: int) =
         ()

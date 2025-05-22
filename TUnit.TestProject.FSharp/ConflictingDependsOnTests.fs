@@ -2,9 +2,10 @@ namespace TUnit.TestProject.FSharp
 
 open System
 open System.Threading.Tasks
+open System.Diagnostics.CodeAnalysis
 open TUnit.Core
 
-[<UnconditionalSuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")>]
+[<SuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")>]
 type ConflictingDependsOnTests() =
     [<Test>]
     [<DependsOn("Test2")>]

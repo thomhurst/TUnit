@@ -10,8 +10,6 @@ open TUnit.Core
 module SharedInjectedKeyedContainer =
     let instancesPerKey = ConcurrentDictionary<string, ResizeArray<DummyReferenceTypeClass>>()
 
-type DummyReferenceTypeClass() = class end
-
 [<ClassDataSource(typeof<DummyReferenceTypeClass>, Shared=SharedType.PerClass)>]
 [<NotInParallel>]
 type InjectSharedPerKey1(dummyReferenceTypeClass: DummyReferenceTypeClass) =

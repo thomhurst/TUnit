@@ -5,6 +5,7 @@ open System.Threading.Tasks
 open TUnit.Assertions
 open TUnit.Assertions.Extensions
 open TUnit.Core
+open TUnit.Assertions.FSharp.Operations
 
 // F# equivalent of EnumerableDataSourceDrivenTests.cs
 
@@ -19,13 +20,17 @@ type ConcreteValue2() =
 type EnumerableDataSourceDrivenTests() =
     [<Test>]
     [<MethodDataSource("SomeMethod")>]
-    member _.DataSource_Method(value: int) : Task =
-        Assert.That(value).IsEqualTo(1)
+    member _.DataSource_Method(value: int) =
+        async{
+            do! check(Assert.That(value).IsEqualTo(1))
+        }
 
     [<Test>]
     [<MethodDataSource("SomeMethod")>]
-    member _.DataSource_Method2(value: int) : Task =
-        Assert.That(value).IsEqualTo(1)
+    member _.DataSource_Method2(value: int) =
+        async{
+            do! check(Assert.That(value).IsEqualTo(1))
+        }
 
     [<Test>]
     [<MethodDataSource("MethodWithBaseReturn")>]
