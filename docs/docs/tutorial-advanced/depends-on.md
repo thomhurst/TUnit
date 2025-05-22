@@ -8,7 +8,13 @@ A test can depend on another test. This means that your test will not start unle
 
 To do this, add a  `[DependsOn]` to your test.
 
-This takes a test name, which you can easily reference by using the `nameof(TestMethod)` keyword. And if your test you depend on has parameters, you must include the types of those too.
+This takes a test name, which you can easily reference by using the `nameof(TestMethod)` keyword.
+
+:::info
+
+If you have multiple tests with the same name, but different parameter types, then you you must include the types of parameters in the `[DependsOn]` attribute too so TUnit can locate the correct test.
+
+:::
 
 e.g.:
 ```csharp
