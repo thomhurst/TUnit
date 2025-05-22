@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 
+    <PropertyGroup>
+        <LangVersion Condition="'$(LangVersion)' == ''">latest</LangVersion>
+    </PropertyGroup>
+
     <ItemGroup Condition="'$(TUnitImplicitUsings)' == 'true'">
         <Using Include="TUnit.Core" />
         <Using Include="TUnit.Core.HookType" Static="True" />
