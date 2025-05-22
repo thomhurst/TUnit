@@ -790,6 +790,7 @@ namespace TUnit.Core
         public System.Collections.Generic.List<TUnit.Core.ArgumentDisplayFormatter> ArgumentDisplayFormatters { get; }
         public System.Threading.CancellationToken CancellationToken { get; }
         public int CurrentRetryAttempt { get; }
+        public TUnit.Core.TestContext[] Dependencies { get; }
         public TUnit.Core.TestContextEvents Events { get; }
         public bool IsRegistered { get; }
         public System.Collections.Generic.Dictionary<string, object?> ObjectBag { get; }
