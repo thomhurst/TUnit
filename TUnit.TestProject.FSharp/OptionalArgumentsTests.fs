@@ -1,11 +1,12 @@
 namespace TUnit.TestProject.FSharp
 
-open System.Threading.Tasks
 open TUnit.Core
 
-// Equivalent of OptionalArgumentsTests.cs
+// F# equivalent of OptionalArgumentsTests.cs
 
 type OptionalArgumentsTests() =
     [<Test>]
-    member _.Test(?x: int, ?y: string) =
-        ()
+    [<Arguments(1)>]
+    member _.Test(value: int, ?flag: bool) =
+        let flag = defaultArg flag true
+        () // Dummy Method
