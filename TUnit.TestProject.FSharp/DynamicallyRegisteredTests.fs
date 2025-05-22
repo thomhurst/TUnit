@@ -8,20 +8,13 @@ open TUnit.Core
 open TUnit.Core.Enums
 open TUnit.Core.Interfaces
 
-[<DynamicCodeOnly>]
-type DynamicallyRegisteredTests() =
-    [<Test>]
-    [<DynamicDataGenerator>]
-    member _.MyTest(value: int) =
-        raise (Exception($"Value {value} !"))
-
 type DynamicDataGenerator() =
     inherit DataSourceGeneratorAttribute<int>()
     let mutable count = 0
     let cts = new CancellationTokenSource()
 
     override _.GenerateDataSources(dataGeneratorMetadata) =
-        seq { yield (fun () -> (Random()).Next()) }
+        seq { yield Func<int>(fun () -> (Random()).Next()) }
 
     interface ITestStartEventReceiver with
         member _.OnTestStart(beforeTestContext: BeforeTestContext) =
@@ -45,5 +38,17 @@ type DynamicDataGenerator() =
             } |> ValueTask
         member _.Order = 0
 
+    interface IEventReceiver with
+        member _.Order = 0
+
     static member private IsReregisteredTest(testContext: TestContext) =
         testContext.ObjectBag.ContainsKey("DynamicDataGeneratorRetry")
+
+[<DynamicCodeOnly>]
+type DynamicallyRegisteredTests() =
+    [<Test>]
+    [<DynamicDataGenerator>]
+    member _.MyTest(value: int) =
+        raise (Exception($"Value {value} !"))
+
+
