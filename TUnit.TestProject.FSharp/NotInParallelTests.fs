@@ -21,7 +21,7 @@ type NotInParallelTests() =
 
     [<After(HookType.Test)>]
     member _.TestOverlaps() : Task = task {
-        testDateTimeRanges.Add(DateTimeRange(TestContext.Current.Value.TestStart.Value.DateTime, TestContext.Current.Value.Result.Value.End.Value.DateTime))
+        testDateTimeRanges.Add(DateTimeRange(TestContext.Current.TestStart.Value.DateTime, TestContext.Current.Result.End.Value.DateTime))
         do! NotInParallelTests.AssertNoOverlaps()
     }
 

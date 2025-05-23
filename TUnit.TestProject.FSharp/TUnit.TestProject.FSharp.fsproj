@@ -35,7 +35,6 @@
         <Compile Include="ConsoleConcurrentTests.fs" />
         <Compile Include="DataDrivenTests.fs" />
         <Compile Include="DeepNestedDependencyConflict.fs" />
-        <Compile Include="DependencyInjectionClassConstructor.fs" />
         <Compile Include="DynamicCodeOnlyAttribute.fs" />
         <Compile Include="DynamicallyRegisteredTests.fs" />
         <Compile Include="EnumerableDataSourceDrivenTests.fs" />
