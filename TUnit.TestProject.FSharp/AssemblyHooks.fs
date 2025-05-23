@@ -5,6 +5,7 @@ open System.Threading.Tasks
 open TUnit.Assertions
 open TUnit.Assertions.Extensions
 open TUnit.Core
+open TUnit.Assertions.FSharp.Operations
 
 // F# equivalent of AssemblyHooks.cs
 
@@ -17,8 +18,8 @@ type AssemblyHooks() =
 
 #if NET
     [<Before(HookType.Assembly)>]
-    static member BeforeHook2(context: AssemblyHookContext) : Task = task {
-        do! Assert.That(context.TestCount).IsPositive()
+    static member BeforeHook2(context: AssemblyHookContext) = async{
+        do! check(Assert.That(context.TestCount).IsPositive())
     }
 #endif
 
@@ -30,20 +31,20 @@ type AssemblyHooks() =
 #if NET
     [<Before(HookType.Assembly)>]
     [<Timeout(30000)>]
-    static member BeforeHook4(context: AssemblyHookContext, cancellationToken: CancellationToken) : Task = task {
-        do! Assert.That(context.TestCount).IsPositive()
+    static member BeforeHook4(context: AssemblyHookContext, cancellationToken: CancellationToken) = async {
+        do! check(Assert.That(context.TestCount).IsPositive())
     }
 #endif
 
     [<After(HookType.Assembly)>]
-    static member AfterHook1() : Task = task {
-        do! Assert.That(beforeHook1Calls).IsEqualTo(1)
+    static member AfterHook1() = async {
+        do! check(Assert.That(beforeHook1Calls).IsEqualTo(1))
     }
 
 #if NET
     [<After(HookType.Assembly)>]
-    static member AfterHook2(context: AssemblyHookContext) : Task = task {
-        do! Assert.That(context.TestCount).IsPositive()
+    static member AfterHook2(context: AssemblyHookContext) = async {
+        do! check(Assert.That(context.TestCount).IsPositive())
     }
 #endif
 
@@ -55,7 +56,7 @@ type AssemblyHooks() =
 #if NET
     [<After(HookType.Assembly)>]
     [<Timeout(30000)>]
-    static member AfterHook4(context: AssemblyHookContext, cancellationToken: CancellationToken) : Task = task {
-        do! Assert.That(context.TestCount).IsPositive()
+    static member AfterHook4(context: AssemblyHookContext, cancellationToken: CancellationToken)  = async {
+        do! check(Assert.That(context.TestCount).IsPositive())
     }
 #endif

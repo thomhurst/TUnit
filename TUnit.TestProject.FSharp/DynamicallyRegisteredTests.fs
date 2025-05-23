@@ -1,5 +1,6 @@
 namespace TUnit.TestProject.FSharp
 
+#nowarn "57"
 open System
 open System.Collections.Generic
 open System.Threading
@@ -26,17 +27,20 @@ type DynamicDataGenerator() =
     interface ITestEndEventReceiver with
         member _.OnTestEnd(afterTestContext: AfterTestContext) =
             task {
-                let testContext = afterTestContext.TestContext
-                if testContext.Result <> null && testContext.Result.Status = Status.Failed then
-                    cts.Cancel()
-                    count <- count + 1
-                    if count > 5 then
-                        raise (Exception())
-                    if DynamicDataGenerator.IsReregisteredTest(testContext) then
-                        () // Optionally suppress reporting
-                    let retryDict = Dictionary<string, obj>()
-                    retryDict.Add("DynamicDataGeneratorRetry", box true)
-                    do! testContext.ReregisterTestWithArguments([|(Random()).Next()|], retryDict)
+                let testContext: TestContext | null = afterTestContext.TestContext
+                match testContext with
+                | null -> ()
+                | ctx ->
+                    if ctx.Result <> null && ctx.Result.Status = Status.Failed then
+                        cts.Cancel()
+                        count <- count + 1
+                        if count > 5 then
+                            raise (Exception())
+                        if DynamicDataGenerator.IsReregisteredTest(ctx) then
+                            () // Optionally suppress reporting
+                        let retryDict = Dictionary<string, obj | null>()
+                        retryDict.Add("DynamicDataGeneratorRetry", box true)
+                        do! ctx.ReregisterTestWithArguments([|(Random()).Next()|], retryDict)
             } |> ValueTask
 
     interface IEventReceiver with
@@ -51,7 +55,6 @@ type DynamicallyRegisteredTests() =
     [<DynamicDataGenerator>]
     member _.MyTest(value: int) =
         raise (Exception($"Value {value} !"))
-
 
 
 
