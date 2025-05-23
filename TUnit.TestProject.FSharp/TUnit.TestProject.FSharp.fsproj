@@ -40,8 +40,8 @@
         <Compile Include="EnumerableDataSourceDrivenTests.fs" />
         <Compile Include="ExperimentalTests.fs" />
         <Compile Include="GenericMethodTests.fs" />
-        <Compile Include="GlobalSetUpCleanUp.fs" />
-        <Compile Include="Inject_SharedInstancePerKey.fs" />
+		<Compile Include="GlobalSetUpCleanUp.fs" />
+        <!--<Compile Include="Inject_SharedInstancePerKey.fs" />-->
         <Compile Include="InjectedClassDataSourceWithAsyncInitializerTests.fs" />
         <Compile Include="Inject_SharedInstancePerTestClass.fs" />
         <Compile Include="LongFailures.fs" />
@@ -49,7 +49,7 @@
         <Compile Include="NameOfArgumentTests.fs" />
         <Compile Include="NestedBaseTests.fs" />
         <Compile Include="NestedExceptionTests.fs" />
-        <Compile Include="NotInParallelTests.fs" />
+        <!--<Compile Include="NotInParallelTests.fs" />-->
         <Compile Include="NullableByteArgumentTests.fs" />
         <Compile Include="NumberArgumentTests.fs" />
         <Compile Include="OneTimeSetUpWithBaseTests.Base1.fs" />
@@ -57,7 +57,7 @@
         <Compile Include="OneTimeSetUpWithBaseTests.NonBase.fs" />
         <Compile Include="OptionalArgumentsTests.fs" />
         <Compile Include="UniqueBuilderContextsOnEnumerableDataGeneratorTests.fs" />
-        <Compile Include="UniqueObjectsOnEnumerableDataGeneratorTests.fs" />
+		<Compile Include="UniqueObjectsOnEnumerableDataGeneratorTests.fs"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -55,6 +55,3 @@ type DynamicallyRegisteredTests() =
     [<DynamicDataGenerator>]
     member _.MyTest(value: int) =
         raise (Exception($"Value {value} !"))
-
-
-
