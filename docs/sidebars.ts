@@ -1,4 +1,4 @@
-import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
+import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 
 /**
  * Creating a sidebar enables you to:
@@ -18,7 +18,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'intro',
         'getting-started/installation',
-        'getting-started/libraries',
         'getting-started/writing-your-first-test',
         'getting-started/running-your-tests',
         'getting-started/congratulations',
@@ -87,7 +86,7 @@ const sidebars: SidebarsConfig = {
         'test-lifecycle/dependency-injection',
       ],
     },
-        {
+    {
       type: 'category',
       label: 'Execution Control',
       items: [
@@ -96,6 +95,7 @@ const sidebars: SidebarsConfig = {
         'execution/timeouts',
         'execution/test-filters',
         'execution/executors',
+        'execution/engine-modes',
       ],
     },
     {
@@ -116,6 +116,7 @@ const sidebars: SidebarsConfig = {
         'customization-extensibility/argument-formatters',
         'customization-extensibility/logging',
         'customization-extensibility/display-names',
+        'customization-extensibility/libraries',
       ],
     },
     {
@@ -136,8 +137,13 @@ const sidebars: SidebarsConfig = {
       items: [
         'comparison/framework-differences',
         'comparison/attributes',
-        'reference/engine-modes',
         'reference/test-configuration',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Migration Guides',
+      items: [
         'migration/xunit',
       ],
     },
