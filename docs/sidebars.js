@@ -13,8 +13,10 @@ module.exports = {
       label: 'Getting Started',
       items: [
         'getting-started/installation',
+        'getting-started/libraries',
         'getting-started/writing-your-first-test',
         'getting-started/running-your-tests',
+        'getting-started/congratulations',
         'getting-started/migration-from-xunit',
       ],
     },
@@ -24,9 +26,11 @@ module.exports = {
       items: [
         'test-authoring/things-to-know',
         'test-authoring/method-data-source',
+        'test-authoring/data-driven-tests',
         'test-authoring/skip',
         'test-authoring/explicit',
         'test-authoring/depends-on',
+        'test-authoring/order',
       ],
     },
     {
@@ -34,7 +38,8 @@ module.exports = {
       label: 'Assertions',
       items: [
         'assertions/awaiting',
-        'assertions/custom-assertions', // Create if needed
+        'assertions/scopes',
+        'assertions/custom-assertions',
         'assertions/extensibility-chaining-and-converting',
         'assertions/extensibility-returning-items-from-await',
       ],
@@ -45,6 +50,10 @@ module.exports = {
       items: [
         'test-lifecycle/setup',
         'test-lifecycle/cleanup',
+        'test-lifecycle/test-context',
+        'test-lifecycle/properties',
+        'test-lifecycle/class-constructors',
+        'test-lifecycle/dependency-injection',
         'test-lifecycle/property-injection',
         'test-lifecycle/event-subscribing',
       ],
@@ -78,6 +87,7 @@ module.exports = {
         'examples/playwright',
         'examples/instrumenting-global-test-ids',
         'examples/tunit-ci-pipeline',
+        'examples/fsharp-interactive',
       ],
     },
     {
@@ -86,6 +96,9 @@ module.exports = {
       items: [
         'reference/attributes',
         'reference/framework-differences',
+        'reference/command-line-flags',
+        'reference/engine-modes',
+        'reference/test-configuration',
       ],
     },
     {
