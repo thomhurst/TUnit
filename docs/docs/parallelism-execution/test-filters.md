@@ -25,7 +25,7 @@ or
 
 `dotnet run --treenode-filter /*/*/*/AcceptCookiesTest` - To run all tests with the name `AcceptCookiesTest`
 
-TUnit also supports filtering by your own [properties](properties). So you could do:
+TUnit also supports filtering by your own [properties](../tutorial-advanced/properties.md). So you could do:
 
 `dotnet run --treenode-filter /*/*/*/*[MyFilterName=*SomeValue*]`
 
