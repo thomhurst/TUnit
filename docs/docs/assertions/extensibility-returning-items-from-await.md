@@ -3,6 +3,8 @@
 Sometimes, you may want your assertion to return a value, such as an item found in a collection, so you can use it in further assertions or logic.  
 TUnit supports this by allowing your assertion to return a mapped result when awaited.
 
+This is useful for scenarios where you want to extract a value from an assertion and use it in subsequent test logic, reducing the need for manual extraction or casting.
+
 It may make sense for our assertions to return data that is different from the input, based on what the assertion is doing. This can allow more cleanly written tests than have to manually do casting or parsing afterwards.
 
 For example, `await Assert.That(collection).Contains(item => item.Price < 0.99)`

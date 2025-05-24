@@ -1,5 +1,8 @@
 # Argument Formatters
 
+When writing data-driven tests, especially with custom classes as arguments, the test explorer may only show the class name, making it hard to distinguish test cases.  
+Argument formatters let you control how arguments are displayed in test names and test explorers.
+
 If you want control over how injected arguments appear in the test explorer, you can create a class that inherits from `ArgumentDisplayFormatter` and then decorate your test with the `[ArgumentDisplayFormatter<T>]` attribute.
 
 For example:

@@ -11,7 +11,7 @@ If you want simple control over the name of a test, you can use the `[DisplayNam
     }
 ```
 
-This is also able to reference parameters by using `$parameterName` within the attribute.
+You can reference test parameters in the display name by using `$parameterName` within the attribute string. At runtime, these will be replaced with the actual argument values for each test case.
 
 ```csharp
     [Test]
@@ -31,7 +31,8 @@ The above would generate two test cases with their respective display name as:
 If you have custom classes, you can combine this with [Argument Formatters](customization-extensibility/argument-formatters.md) to specify how to show them.
 
 :::info
-If you want to include a literal `$` in your display name, escape it as `$$`.
+If you want to include a literal `$` in your display name, escape it as `$$`.  
+For example: `[DisplayName("Total cost: $$100")]` will display as "Total cost: $100".
 :::
 
 ## Custom Logic

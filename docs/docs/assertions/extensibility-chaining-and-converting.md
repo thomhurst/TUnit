@@ -3,9 +3,13 @@
 TUnit allows you to chain assertions that change the type being asserted, enabling fluent and expressive test code.  
 This is useful when an assertion transforms the value (e.g., parsing a response), and you want to continue asserting on the new type.
 
+Chaining is especially helpful when you want to perform multiple assertions on a value that is transformed by a previous assertion, without having to create intermediate variables.
+
 For example:
 
 ```csharp
+        HttpResponseMessage response = ...;
+        
         await Assert.That(response)
             .IsProblemDetails()
             .And
