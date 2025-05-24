@@ -44,9 +44,21 @@ const sidebars: SidebarsConfig = {
       label: 'Assertions',
       items: [
         'assertions/awaiting',
-        'assertions/extensibility-chaining-and-converting',
-        'assertions/extensibility-returning-items-from-await',
+        'assertions/and-conditions',
+        'assertions/or-conditions',
         'assertions/scopes',
+        'assertions/assertion-groups',
+        'assertions/delegates',
+        {
+          type: 'category',
+          label: 'Extensibility',
+          items: [
+            'assertions/extensibility/custom-assertions',
+            'assertions/extensibility/extensibility-chaining-and-converting',
+            'assertions/extensibility/extensibility-returning-items-from-await',
+          ],
+        },
+        'assertions/fsharp',
       ],
     },
     {
