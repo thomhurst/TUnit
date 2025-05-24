@@ -1,7 +1,3 @@
----
-sidebar_position: 99
----
-
 # FAQ
 
 ### My test project won't execute / I get errors about runtime identifiers?
@@ -18,4 +14,6 @@ Ensure you're not installing the old `Microsoft.NET.Test.Sdk` NuGet package
 
 ### I can't see any tests in my IDE?
 
-Make sure you've enabled Testing Platform support in your IDE's settings
+Make sure you've enabled Testing Platform support in your IDE's settings.  
+Currently, TUnit is best supported in Visual Studio 2022 (v17.9+) and JetBrains Rider (2024.1+).
+

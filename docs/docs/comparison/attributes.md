@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Attributes
 
 Here are TUnit's equivalent attributes to other test frameworks.
@@ -62,3 +58,4 @@ Here are TUnit's equivalent attributes to other test frameworks.
 | ---------- | ---------------------- | ---------- | -------------- |
 | [Category] | [Trait("Category","")] | [Category] | [TestCategory] |
 | [Property] | [Trait]                | [Property] | [TestProperty] |
+

@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Playwright
 
 There is a NuGet package to help with Playwright: `TUnit.Playwright`

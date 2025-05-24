@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Extensions
 
 As TUnit is built on top of Microsoft.Testing.Platform, it can tap into generic testing extension packages.

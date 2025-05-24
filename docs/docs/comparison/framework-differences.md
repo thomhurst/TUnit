@@ -1,10 +1,11 @@
----
-sidebar_position: 2
----
-
 # Framework Differences
 
 TUnit is inspired by NUnit and xUnit, and first and foremost I want to say that these are amazing frameworks and no hate to them.
+
+**Why use TUnit?**  
+TUnit aims to address some pain points and limitations found in other frameworks, especially around parallelism, lifecycle hooks, test isolation, and extensibility.  
+Below are some scenarios where TUnit offers a different or improved approach.
+
 So you'll be asking why use TUnit instead of them, right?
 Here are some things I've stumbled across in the past that I've found limiting when writing a test suite.
 

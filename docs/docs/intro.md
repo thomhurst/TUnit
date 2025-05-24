@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Intro
 
 **TUnit** is another testing framework for C# / .NET.
