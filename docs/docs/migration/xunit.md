@@ -85,3 +85,4 @@ Interfaces:
 `IAsyncLifetime` on injected data becomes `IAsyncInitializer`
 
 `I(Async)Disposable` on a test class can remain, or be converted to a method attributed with `[After(Test)]`
+

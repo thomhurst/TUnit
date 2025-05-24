@@ -89,3 +89,4 @@ class MyTestClassThatNeedsUniqueTestIds
 ```
 
 The test identifier for each test is assigned in the order that TUnit discovers the tests. The test identifier is unique for each test and is guaranteed to be assigned before the test starts. For other uses cases, you would need to adjust the implementation of `AssignTestIdentifiersAttribute` to suit your needs. For example, you could choose to use GUIDs instead of integers. We've only used integers to match the Redis database number example.
+

@@ -9,6 +9,6 @@ This control is given to you by the `[ClassConstructorAttribute<T>]` - Where `T`
 
 This interface simply requires you to generate a `T` object - How you do that is up to you!
 
-You can also add [event-subscribing interfaces](event-subscribing.md) to get notified for things like when the test has finished. This functionality can be used to dispose objects afterwards, etc.
+You can also add [event-subscribing interfaces](test-lifecycle/event-subscribing.md) to get notified for things like when the test has finished. This functionality can be used to dispose objects afterwards, etc.
 
 These attributes are new'd up per test, so you can store state within them.

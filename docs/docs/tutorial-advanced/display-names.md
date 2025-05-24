@@ -32,7 +32,7 @@ The above would generate two test cases with their respective display name as:
 - "Test with: foo 1 True"
 - "Test with: bar 2 False"
 
-If you have custom classes, you can combine this with [Argument Formatters](./argument-formatters.md) to specify how to show them.
+If you have custom classes, you can combine this with [Argument Formatters](customization-extensibility/argument-formatters.md) to specify how to show them.
 
 ## Custom Logic
 

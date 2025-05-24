@@ -19,3 +19,4 @@ Ensure you're not installing the old `Microsoft.NET.Test.Sdk` NuGet package
 ### I can't see any tests in my IDE?
 
 Make sure you've enabled Testing Platform support in your IDE's settings
+

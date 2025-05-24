@@ -90,3 +90,4 @@ Visual Studio Code is supported.
 - Enable Dotnet > Test Window > Use Testing Platform Protocol
 
 ![Visual Studio Code Settings](../../static/img/visual-studio-code.png)
+
