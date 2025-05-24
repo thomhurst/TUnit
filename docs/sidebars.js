@@ -50,11 +50,7 @@ module.exports = {
       type: 'category',
       label: 'Assertions',
       items: [
-        'assertions/awaiting',
-        'assertions/scopes',
-        'assertions/custom-assertions',
-        'assertions/extensibility-chaining-and-converting',
-        'assertions/extensibility-returning-items-from-await',
+        
       ],
     },
     {
