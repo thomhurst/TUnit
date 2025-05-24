@@ -30,12 +30,24 @@ const sidebars: SidebarsConfig = {
       label: 'Test Authoring',
       items: [
         'test-authoring/things-to-know',
-        'test-authoring/method-data-source',
-        'test-authoring/data-driven-tests',
+        {
+          type: 'category',
+          label: 'Data Driven Testing',
+          items: [
+            'test-authoring/arguments',
+            'test-authoring/method-data-source',
+            'test-authoring/class-data-source',
+            'test-authoring/matrix-tests',
+            {
+              type: 'link',
+              label: 'Data Source Generators',
+              href: '/docs/customization-extensibility/data-source-generators',
+            },
+          ],
+        },
         'test-authoring/skip',
         'test-authoring/explicit',
         'test-authoring/depends-on',
-        'test-authoring/matrix-tests',
         'test-authoring/order',
       ],
     },
@@ -75,14 +87,24 @@ const sidebars: SidebarsConfig = {
         'test-lifecycle/dependency-injection',
       ],
     },
+        {
+      type: 'category',
+      label: 'Execution Control',
+      items: [
+        'execution/retrying',
+        'execution/repeating',
+        'execution/timeouts',
+        'execution/test-filters',
+        'execution/executors',
+      ],
+    },
     {
       type: 'category',
-      label: 'Parallelism & Execution Control',
+      label: 'Parallelism Control',
       items: [
-        'parallelism-execution/not-in-parallel',
-        'parallelism-execution/parallel-groups',
-        'parallelism-execution/test-filters',
-        'reference/command-line-flags',
+        'parallelism/not-in-parallel',
+        'parallelism/parallel-groups',
+        'parallelism/parallel-limiter',
       ],
     },
     {
