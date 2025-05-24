@@ -30,6 +30,10 @@ The above would generate two test cases with their respective display name as:
 
 If you have custom classes, you can combine this with [Argument Formatters](customization-extensibility/argument-formatters.md) to specify how to show them.
 
+:::info
+If you want to include a literal `$` in your display name, escape it as `$$`.
+:::
+
 ## Custom Logic
 
 If you want to have more control over how your test names are, you can create an attribute that inherits from `DisplayNameFormatterAttribute`.

@@ -131,8 +131,9 @@ This works similar to the `[Arguments(...)]` attribute, and if objects match a g
 
 This helps you exclude specific one-off scenarios without having to complicate your tests with `if` conditions.
 
-> **Tip:**  
-> Use exclusions to keep your test matrix manageable and avoid unnecessary or invalid test cases.
+:::info
+Use exclusions to keep your test matrix manageable and avoid unnecessary or invalid test cases.
+:::
 
 ```csharp
 using TUnit.Assertions;

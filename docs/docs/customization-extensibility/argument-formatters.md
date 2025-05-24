@@ -32,6 +32,7 @@ public class MyFormatter : ArgumentDisplayFormatter
 }
 ```
 
-> **Tip:**  
-> You can apply multiple `[ArgumentDisplayFormatter<T>]` attributes if you have different types to format.  
-> The first formatter whose `CanHandle` returns true will be used.
+:::info
+You can apply multiple `[ArgumentDisplayFormatter<T>]` attributes if you have different types to format.  
+The first formatter whose `CanHandle` returns true will be used.
+:::

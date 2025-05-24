@@ -26,8 +26,9 @@ Must be a static method. Will run once after tests are discovered.
 All [AfterEvery(...)] methods must be static - And should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
 e.g. `GlobalHooks.cs` at the root of the test project.
 
-> **Tip:**  
-> Use `[AfterEvery(...)]` for global clean-up logic that should run after every test/class/assembly/session, regardless of where the test is defined.
+:::info
+Use `[AfterEvery(...)]` for global clean-up logic that should run after every test/class/assembly/session, regardless of where the test is defined.
+:::
 
 ### [AfterEvery(Test)]
 Will be executed after every test that will run in the test session.
