@@ -3,10 +3,6 @@
 TUnit allows you to chain assertions that change the type being asserted, enabling fluent and expressive test code.  
 This is useful when an assertion transforms the value (e.g., parsing a response), and you want to continue asserting on the new type.
 
-We may want to chain assertions together that change the type of object being asserted, to keep the assertions reading clear and concise, and not having to declare more variables and more boiler-plate assert calls.
-
-This is possible in TUnit.
-
 For example:
 
 ```csharp
