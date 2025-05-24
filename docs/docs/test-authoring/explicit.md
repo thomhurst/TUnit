@@ -10,6 +10,9 @@ That means that you could run all tests in a class with an `[Explicit]` attribut
 
 This can be useful for 'Tests' that make sense in a local environment, and maybe not part of your CI builds. Or they could be helpers that ping things to warm them up, and by making them explicit tests, they are easily runnable, but don't affect your overall test suite.
 
+> **Tip:**  
+> To run explicit tests, use a filter to select only those tests (e.g., by name or category), or run them directly from your IDE's test explorer.
+
 ```csharp
 using TUnit.Core;
 

@@ -92,6 +92,10 @@ This is done by calling the `GetTests` method on a `TestContext` object. It take
 
 You'll notice this returns an array - This is because tests may be data driven and be invoked multiple times - If this is the case you'll have to find the one you want yourself.
 
+> **Tip:**  
+> For data-driven tests (e.g., with `[Arguments]` or `[MethodDataSource]`), `GetTests` returns all invocations.  
+> Use argument values or other properties to select the specific test context you need.
+
 Example:
 
 ```csharp

@@ -6,7 +6,8 @@ In TUnit you `await` your assertions, and this serves two purposes:
 
 Because of this, your tests should be `async` and return a `Task`.
 
-Don't worry about forgetting to `await` - There's an analyzer built in that will notify you if you've missed any!
+Don't worry about forgetting to `await` - There's an analyzer built in that will notify you if you've missed any!  
+If you forget to `await`, your assertion will not actually be executed, and your test may pass when it should fail.
 
 This will error:
 

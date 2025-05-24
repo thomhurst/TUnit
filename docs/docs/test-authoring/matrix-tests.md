@@ -2,7 +2,10 @@
 
 The Matrix data source is a way to specify different arguments per parameter, and then generate every possible combination of all of those arguments.
 
-Now bear in mind, that as your number of arguments and/or parameters increase, that the number of test cases will grow exponentially. This means you could very quickly get into the territory of generating thousands of test cases. So use it with caution.
+> **Warning:**  
+> As your number of arguments and/or parameters increase, the number of test cases will grow exponentially.  
+> For example, 3 parameters with 10 values each will generate 1,000 test cases (10 × 10 × 10).  
+> Use with caution to avoid very large test suites.
 
 For our arguments, we'll add a `[Matrix]` attribute. Instead of this being added to the test method, it's added to the parameters themselves.
 
@@ -127,6 +130,9 @@ You can also add a `[MatrixExclusion(...)]` attribute to your tests.
 This works similar to the `[Arguments(...)]` attribute, and if objects match a generated matrix test case, it'll be ignored.
 
 This helps you exclude specific one-off scenarios without having to complicate your tests with `if` conditions.
+
+> **Tip:**  
+> Use exclusions to keep your test matrix manageable and avoid unnecessary or invalid test cases.
 
 ```csharp
 using TUnit.Assertions;

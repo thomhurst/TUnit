@@ -10,6 +10,10 @@ If we want test data represented in the form of objects, or just to use somethin
 
 If methods are returning reference types, they should return a `Func<T>` rather than just a `T`, and make sure that `Func<>` returns a `new T()`, and not a reference to an already instantiated object - This ensures each test has its own instance of that object and tests aren't sharing objects which could lead to unintended side effects.
 
+> **Tip:**  
+> Returning a `Func<T>` ensures that each test gets a fresh object.  
+> If you return a reference to the same object, tests may interfere with each other.
+
 Here's an example returning a simple object:
 
 ```csharp
