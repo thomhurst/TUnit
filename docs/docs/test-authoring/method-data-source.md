@@ -1,7 +1,3 @@
----
-sidebar_position: 5
----
-
 # Method Data Sources
 
 A limitation of passing data in with `[Arguments(...)]` is that the data must be `constant` values. For example, we can't new up an object and pass it into this attribute as an argument. This is a constraint of the language and we can't change that.

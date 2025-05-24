@@ -1,7 +1,3 @@
----
-sidebar_position: 11
----
-
 # Ordering Tests
 
 :::warning

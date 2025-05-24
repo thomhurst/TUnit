@@ -1,7 +1,3 @@
----
-sidebar_position: 8
----
-
 # Test Filters
 
 Running TUnit via `dotnet run` supports test filters.

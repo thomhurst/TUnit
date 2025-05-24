@@ -1,7 +1,3 @@
----
-sidebar_position: 7
----
-
 # Test Configuration
 
 TUnit supports having a `testconfig.json` file within your test project.

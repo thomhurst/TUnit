@@ -1,7 +1,3 @@
----
-sidebar_position: 3
----
-
 # Retrying
 
 Unfortunately sometimes our tests hit issues. It could be a blip on the network, but that could cause our entire test suite to fail which is frustrating.

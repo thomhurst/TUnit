@@ -1,7 +1,3 @@
----
-sidebar_position: 7
----
-
 # Things to know
 
 TUnit has made some decisions by design. You may need to know about them:

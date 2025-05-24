@@ -1,7 +1,3 @@
----
-sidebar_position: 99
----
-
 # FAQ
 
 ### My test project won't execute / I get errors about runtime identifiers?

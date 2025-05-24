@@ -1,7 +1,3 @@
----
-sidebar_position: 7
----
-
 # Assertion Groups
 
 Mixing 'Or' & 'And' conditions within `Assert.That(...)` statements may result in unexpected logic. 

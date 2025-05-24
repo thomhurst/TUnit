@@ -1,7 +1,3 @@
----
-sidebar_position: 7
----
-
 # Test Context
 
 All tests have a `TestContext` object available to them.

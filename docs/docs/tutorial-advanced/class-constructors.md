@@ -1,7 +1,3 @@
----
-sidebar_position: 13
----
-
 # Class Constructor Helpers
 
 Some test suites might be more complex than others, and a user may want control over 'newing' up their test classes.

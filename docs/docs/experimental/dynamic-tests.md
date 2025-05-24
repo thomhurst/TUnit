@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Dynamically Created Tests
 
 TUnit offers the ability to create your tests via dynamic code, as opposed to the standard `[Test]` attribute and data attributes.

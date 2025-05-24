@@ -1,7 +1,3 @@
----
-sidebar_position: 13
----
-
 # Property Injection
 
 TUnit makes it easy to initialise some properties on your test class instead of passing them into the constructor.

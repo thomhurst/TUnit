@@ -1,7 +1,3 @@
----
-sidebar_position: 3
----
-
 # Assertion Scopes
 
 In TUnit you can create an assertion scope by calling `Assert.Multiple()`. This returns an `IDisposable` and so you should use that by encapsulating the returned value in a `using` block. This will make sure that any assertion exceptionss are aggregated together and thrown only after the scope is exited.

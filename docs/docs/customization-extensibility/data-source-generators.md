@@ -1,7 +1,3 @@
----
-sidebar_position: 13
----
-
 # Data Source Generators
 
 TUnit exposes an `abstract` `DataSourceGeneratorAttribute` class that you can inherit from and implement your own logic for creating values.

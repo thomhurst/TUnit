@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # Test Clean Ups
 
 TUnit supports having your test class implement `IDisposable` or `IAsyncDisposable`. These will be called after your test has finished executing. However, using the attributes below offers better support for running multiple methods, and without having to implement your own try/catch logic. Every `[After]` method will be run, and any exceptions will be lazily thrown afterwards.

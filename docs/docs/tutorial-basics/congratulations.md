@@ -1,7 +1,3 @@
----
-sidebar_position: 9
----
-
 # Congratulations!
 
 You have just learned the basics of writing a test in TUnit.

@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # Framework Differences
 
 TUnit is inspired by NUnit and xUnit, and first and foremost I want to say that these are amazing frameworks and no hate to them.

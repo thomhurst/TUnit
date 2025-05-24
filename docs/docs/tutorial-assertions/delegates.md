@@ -1,7 +1,3 @@
----
-sidebar_position: 6
----
-
 # Delegates
 
 TUnit can execute your delegates for you, and this allows you to assert on the data returned (if any was) - Or on any exceptions thrown:

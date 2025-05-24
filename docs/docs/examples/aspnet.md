@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # ASP.NET Core Web App/Api
 
 If you want to test a web app, you can utilise the Microsoft.Mvc.Testing packages to wrap your web app within an in-memory test server.

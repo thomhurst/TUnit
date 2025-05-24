@@ -1,7 +1,3 @@
----
-sidebar_position: 4
----
-
 # Data Driven Tests
 
 It's common to want to repeat tests but pass in different values on each execution.

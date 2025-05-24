@@ -1,7 +1,3 @@
----
-sidebar_position: 12
----
-
 # Executors
 
 In some advanced cases, you may need to control how a test or hook is executed.

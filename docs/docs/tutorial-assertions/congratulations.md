@@ -1,7 +1,3 @@
----
-sidebar_position: 99
----
-
 # Congratulations
 
 That's all you need to know about assertions.

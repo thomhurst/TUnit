@@ -1,7 +1,3 @@
----
-sidebar_position: 16
----
-
 # Argument Formatters
 
 If you are writing data driven tests, and using custom classes to represent your data, then the test explorer might not show you useful information to distinguish test cases, and instead only show you the class name.

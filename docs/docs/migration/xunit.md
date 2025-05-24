@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Migrating from xUnit.net
 
 ## Using TUnit's Code Fixers

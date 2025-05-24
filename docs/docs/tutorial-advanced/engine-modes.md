@@ -1,7 +1,3 @@
----
-sidebar_position: 30
----
-
 # Engine Modes
 
 In some scenarios, source generation may not be available for you.

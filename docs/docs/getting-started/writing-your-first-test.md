@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # Writing your first test
 
 Start by creating a new class:

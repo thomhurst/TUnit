@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Custom Assertions
 
 The TUnit Assertions can be easily extended so that you can create your own assertions.

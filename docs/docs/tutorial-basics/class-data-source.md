@@ -1,7 +1,3 @@
----
-sidebar_position: 5
----
-
 # Injectable Class Data Source
 
 The `ClassDataSource` attribute is used to instantiate and inject in new classes as parameters to your tests and/or test classes.

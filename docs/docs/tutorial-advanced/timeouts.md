@@ -1,7 +1,3 @@
----
-sidebar_position: 5
----
-
 # Timeouts
 
 If you want to stop a test after a specified amount of time, add a `[Timeout]` attribute onto your test method or class. This takes an `int` of how many milliseconds a test can execute for.

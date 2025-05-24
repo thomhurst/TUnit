@@ -1,7 +1,3 @@
----
-sidebar_position: 10
----
-
 # Not in Parallel
 
 By default, TUnit tests will run in parallel. 

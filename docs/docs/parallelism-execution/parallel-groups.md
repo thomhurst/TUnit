@@ -1,7 +1,3 @@
----
-sidebar_position: 11
----
-
 # Parallel Groups
 
 Parallel Groups are an alternative parallel mechanism to [NotInParallel].

@@ -1,7 +1,3 @@
----
-sidebar_position: 11
----
-
 # Parallel Limiter
 
 TUnit allows the user to control the parallel limit on a test, class or assembly level.

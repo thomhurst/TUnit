@@ -1,7 +1,3 @@
----
-sidebar_position: 20
----
-
 # Logging
 
 By default, TUnit will intercept any logs to the `Console`, and attempt to correlate them to the test that triggered that log by the current async context that it is in.

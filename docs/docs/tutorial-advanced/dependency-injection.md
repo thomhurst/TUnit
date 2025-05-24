@@ -1,7 +1,3 @@
----
-sidebar_position: 13
----
-
 # Dependency Injection
 
 Dependency Injection can be set up by leveraging the power of the Data Source Generators.

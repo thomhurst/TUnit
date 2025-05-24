@@ -1,7 +1,3 @@
----
-sidebar_position: 3
----
-
 # Returning Data via `await`
 
 It may make sense for our assertions to return data that is different from the input, based on what the assertion is doing. This can allow more cleanly written tests than have to manually do casting or parsing afterwards.

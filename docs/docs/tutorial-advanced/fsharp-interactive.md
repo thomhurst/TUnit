@@ -1,7 +1,3 @@
----
-sidebar_position: 31
----
-
 # F# Interactive
 
 F# Interactive (FSI) is a REPL (Read-Eval-Print Loop) for F#. It allows you to execute F# code interactively, making it a powerful tool for testing and prototyping.

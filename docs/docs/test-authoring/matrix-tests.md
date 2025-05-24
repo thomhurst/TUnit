@@ -1,7 +1,3 @@
----
-sidebar_position: 6
----
-
 # Matrix Tests
 
 The Matrix data source is a way to specify different arguments per parameter, and then generate every possible combination of all of those arguments.

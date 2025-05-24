@@ -1,7 +1,3 @@
----
-sidebar_position: 4
----
-
 # Or Conditions
 
 Similar to the `And` property, there is also the `Or` property.

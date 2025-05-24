@@ -1,7 +1,3 @@
----
-sidebar_position: 8
----
-
 # Libraries
 
 If you want a library package to define things like re-useable base classes with hooks etc, then you shouldn't use the main `TUnit` package - As this assumes your project is a test project and tries to build it as an executable etc.

@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Attributes
 
 Here are TUnit's equivalent attributes to other test frameworks.

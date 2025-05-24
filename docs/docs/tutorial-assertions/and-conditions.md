@@ -1,7 +1,3 @@
----
-sidebar_position: 3
----
-
 # And Conditions
 
 TUnit can chain assertions together, using the `And` property. This reads very much like English, and aims to keep the test easy to read and understand, and doesn't require you repeat boilerplate code such as `Assert.That` over and over.

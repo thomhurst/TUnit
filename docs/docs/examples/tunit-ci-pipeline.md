@@ -1,7 +1,3 @@
----
-sidebar_position: 4
----
-
 # TUnit in CI pipelines
 
 When using TUnit for end-to-end (E2E) tests or TUnit's Playwright library for UI testing, you will likely run these tests in a CI/CD pipeline—either on a schedule or as part of a release. In such cases, it is important to publish the test results for visibility and reporting.

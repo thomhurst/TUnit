@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # Chaining and Converting
 
 We may want to chain assertions together that change the type of object being asserted, to keep the assertions reading clear and concise, and not having to declare more variables and more boiler-plate assert calls.

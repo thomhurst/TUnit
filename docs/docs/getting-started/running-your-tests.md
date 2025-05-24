@@ -1,7 +1,3 @@
----
-sidebar_position: 3
----
-
 # Running your tests
 
 As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined with the fact that TUnit tests are source generated, running your tests is available in a variety of ways. 

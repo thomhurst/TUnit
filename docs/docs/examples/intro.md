@@ -1,7 +1,3 @@
----
-sidebar_position: 0
----
-
 # Examples
 
 This can serve as a place to show how to use TUnit to test more complex systems, utilising advanced features like ClassData sources with IAsyncInitializers and IAsyncDisposables, or utilising test events to drive things.

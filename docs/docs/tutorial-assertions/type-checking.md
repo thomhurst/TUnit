@@ -1,7 +1,3 @@
----
-sidebar_position: 5
----
-
 # Type Checking
 
 TUnit assertions try to check the types at compile time. 

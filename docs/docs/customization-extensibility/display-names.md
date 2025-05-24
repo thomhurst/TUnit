@@ -1,7 +1,3 @@
----
-sidebar_position: 15
----
-
 # Display Names
 
 If you want simple control over the name of a test, you can use the `[DisplayName(...)]` attribute.

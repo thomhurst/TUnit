@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Test Set Ups
 
 Most setup for a test can be performed in the constructor (think setting up mocks, assigning fields.)

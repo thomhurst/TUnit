@@ -1,7 +1,3 @@
----
-sidebar_position: 6
----
-
 # Properties
 
 Custom properties can be added to a test using the `[PropertyAttribute]`.

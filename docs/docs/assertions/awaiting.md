@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # Awaiting
 
 In TUnit you `await` your assertions, and this serves two purposes:
