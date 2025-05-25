@@ -340,8 +340,11 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 ).WithLeadingTrivia(SyntaxFactory.ElasticMarker))
                 .ToList();
             
-            node = node.AddAttributeLists(SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(classFixturesToConvert)));
-            
+            if(classFixturesToConvert.Count > 0)
+            {
+                node = node.AddAttributeLists(SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(classFixturesToConvert)));
+            }
+
             var newBaseList = types.Where(x => !x.ContainingNamespace.Name.StartsWith("Xunit"))
                 .Select(x => SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(x.ToDisplayString())))
                 .ToList();
