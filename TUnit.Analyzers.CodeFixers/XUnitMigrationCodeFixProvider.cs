@@ -56,31 +56,27 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         
         var syntaxTree = root.SyntaxTree;
         
+        // Always use the latest updatedRoot as input for the next transformation
         var updatedRoot = UpdateInitializeDispose(compilation, root);
-        
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
-        
-        // Convert all attributes in the syntax tree
-        updatedRoot = UpdateClassAttributes(compilation, root);
-        
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
-        
-        // Remove all xUnit specific interfaces and base classes
-        updatedRoot = RemoveInterfacesAndBaseClasses(compilation, updatedRoot);
-        
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
 
-        // Remove using directives that are no longer needed
-        updatedRoot = RemoveUsingDirectives(updatedRoot);
-        
+        updatedRoot = UpdateClassAttributes(compilation, updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
-        
+
+        updatedRoot = RemoveInterfacesAndBaseClasses(compilation, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+
+        updatedRoot = RemoveUsingDirectives(updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+
         // Apply all changes in one step
         return document.WithSyntaxRoot(updatedRoot);
     }
 
     private static SyntaxNode UpdateInitializeDispose(Compilation compilation, SyntaxNode root)
     {
+        // Always operate on the latest root
+        var currentRoot = root;
         foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList())
         {
             var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
@@ -91,7 +87,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             }
 
             // Always get the latest node from the current root
-            var currentClass = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+            var currentClass = currentRoot.DescendantNodes().OfType<ClassDeclarationSyntax>()
                 .FirstOrDefault(n => n.SpanStart == classDeclaration.SpanStart && n.Identifier.Text == classDeclaration.Identifier.Text);
 
             if (currentClass == null)
@@ -100,14 +96,16 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             var newNode = new InitializeDisposeRewriter(symbol).VisitClassDeclaration(currentClass);
 
             if (!ReferenceEquals(currentClass, newNode))
-                root = root.ReplaceNode(currentClass, newNode);
+                currentRoot = currentRoot.ReplaceNode(currentClass, newNode);
         }
 
-        return root;
+        return currentRoot;
     }
 
     private static SyntaxNode RemoveInterfacesAndBaseClasses(Compilation compilation, SyntaxNode root)
     {
+        // Always operate on the latest root
+        var currentRoot = root;
         foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList())
         {
             if (classDeclaration.BaseList is null)
@@ -123,7 +121,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             }
 
             // Always get the latest node from the current root
-            var currentClass = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+            var currentClass = currentRoot.DescendantNodes().OfType<ClassDeclarationSyntax>()
                 .FirstOrDefault(n => n.SpanStart == classDeclaration.SpanStart && n.Identifier.Text == classDeclaration.Identifier.Text);
 
             if (currentClass == null)
@@ -132,10 +130,10 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             var newNode = new BaseTypeRewriter(symbol).VisitClassDeclaration(currentClass);
 
             if (newNode != null && !ReferenceEquals(currentClass, newNode))
-                root = root.ReplaceNode(currentClass, newNode);
+                currentRoot = currentRoot.ReplaceNode(currentClass, newNode);
         }
 
-        return root;
+        return currentRoot;
     }
 
     private static SyntaxNode RemoveUsingDirectives(SyntaxNode updatedRoot)
@@ -148,8 +146,8 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
     private static SyntaxNode UpdateClassAttributes(Compilation compilation, SyntaxNode root)
     {
+        // Always operate on the latest root
         var rewriter = new AttributeRewriter(compilation);
-        
         return rewriter.Visit(root);
     }
 
