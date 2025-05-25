@@ -146,12 +146,21 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
     private static SyntaxNode RemoveUsingDirectives(SyntaxNode updatedRoot)
     {
-        return updatedRoot.RemoveNodes(
-                updatedRoot.DescendantNodes()
-                    .OfType<UsingDirectiveSyntax>()
-                    .Where(x => x.Name?.ToString().StartsWith("Xunit") is true),
-                SyntaxRemoveOptions.AddElasticMarker)!
-            .NormalizeWhitespace();
+        var compilationUnit = updatedRoot.DescendantNodesAndSelf()
+            .OfType<CompilationUnitSyntax>()
+            .FirstOrDefault();
+        
+        if (compilationUnit is null)
+        {
+            return updatedRoot;
+        }
+
+        return compilationUnit.WithUsings(
+            SyntaxFactory.List(
+                compilationUnit.Usings
+                    .Where(x => x.Name?.ToString().StartsWith("Xunit") is false)
+            )
+        );
     }
 
     private static SyntaxNode UpdateClassAttributes(Compilation compilation, SyntaxNode root)
