@@ -318,18 +318,12 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             {
                 // Preserve original trivia instead of forcing elastic trivia
                 return node.WithBaseList(null)
-                    .WithLeadingTrivia(node.GetLeadingTrivia())
-                    .WithTrailingTrivia(node.GetTrailingTrivia());
+                    .WithOpenBraceToken(node.OpenBraceToken.WithLeadingTrivia(node.BaseList.GetTrailingTrivia()));
             }
 
-            var baseListSyntax = node.BaseList.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList))
-                .WithLeadingTrivia(node.BaseList.GetLeadingTrivia())
-                .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
+            var baseListSyntax = node.BaseList.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList));
             
-            // Preserve original trivia instead of forcing elastic trivia
-            return node.WithBaseList(baseListSyntax)
-                .WithLeadingTrivia(node.GetLeadingTrivia())
-                .WithTrailingTrivia(node.GetTrailingTrivia());
+            return node.WithBaseList(baseListSyntax);
         }
     }
 }
