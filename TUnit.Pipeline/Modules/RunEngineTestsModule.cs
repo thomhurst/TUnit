@@ -9,9 +9,19 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("DotNetTests")]
 [DependsOn<PublishSingleFileModule>]
 [DependsOn<PublishAOTModule>]
+[DependsOn<RunAnalyzersTestsModule>]
+[DependsOn<RunUnitTestsModule>]
+[DependsOn<RunTemplateTestsModule>]
+[DependsOn<RunAspNetTestsModule>]
+[DependsOn<RunAssertionsTestsModule>]
+[DependsOn<RunPlaywrightTestsModule>]
+[DependsOn<RunRpcTestsModule>]
+[DependsOn<RunAssertionsAnalyzersTestsModule>]
+[DependsOn<RunPublicAPITestsModule>]
+[DependsOn<RunSourceGeneratorTestsModule>]
+[DependsOn<RunAssertionsCodeFixersTestsModule>]
 public class RunEngineTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)

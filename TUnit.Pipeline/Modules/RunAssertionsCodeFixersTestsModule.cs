@@ -9,7 +9,6 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("DotNetTests")]
 public class RunAssertionsCodeFixersTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
