@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Operations;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace TUnit.Analyzers.CodeFixers;
 
@@ -36,11 +36,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
     
     private static async Task<Document> ConvertCodeAsync(Document document, SyntaxNode? node, CancellationToken cancellationToken)
     {
-        if (node is not ClassDeclarationSyntax classDeclarationSyntax)
-        {
-            return document;
-        }
-
+        var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
         if (root is null)
@@ -48,14 +44,40 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var newExpression = await GetNewExpression(document, attributeSyntax);
-
-        root = root.ReplaceNode(attributeSyntax, newExpression);
+        await UpdateClassAttributesAsync(editor, root, node?.TryGetInferredMemberName());
         
-        return document.WithSyntaxRoot(root);
+        return editor.GetChangedDocument();
+    }
+    
+    private static async Task<Document> UpdateClassAttributesAsync(DocumentEditor editor, SyntaxNode root, string? className)
+    {
+        // Find the class declaration by name
+        var classDeclaration = root.DescendantNodes()
+            .OfType<ClassDeclarationSyntax>()
+            .FirstOrDefault(c => c.Identifier.Text == className);
+
+        if (classDeclaration is null)
+        {
+            return editor.GetChangedDocument();
+        }
+
+        var attributeListSyntax = SyntaxFactory.AttributeList();
+        foreach (var attributeSyntax in classDeclaration.AttributeLists.SelectMany(x => x.Attributes))
+        {
+            var attributeSyntaxes = await ConvertAttribute(editor.GetChangedDocument(), attributeSyntax);
+            attributeListSyntax = attributeListSyntax.WithAttributes(SyntaxFactory.SeparatedList(attributeSyntaxes));
+        }
+
+        // Add the new attribute to the class
+        var updatedClass = classDeclaration.WithAttributeLists(SyntaxFactory.SingletonList(attributeListSyntax));
+
+        // Replace the old class declaration with the updated one
+        editor.ReplaceNode(classDeclaration, updatedClass);
+
+        return editor.GetChangedDocument();
     }
 
-    private static async Task<IEnumerable<SyntaxNode>> GetNewExpression(Document document, AttributeSyntax attributeSyntax)
+    private static async Task<IEnumerable<AttributeSyntax>> ConvertAttribute(Document document, AttributeSyntax attributeSyntax)
     {
         var name = GetSimpleName(attributeSyntax);
 

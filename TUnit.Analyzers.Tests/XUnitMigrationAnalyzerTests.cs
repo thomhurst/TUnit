@@ -15,15 +15,15 @@ public class XUnitMigrationAnalyzerTests
         await Verifier
             .VerifyAnalyzerAsync(
                 $$"""
-                using Xunit;
+                {|#0:using Xunit;
 
                 public class MyClass
                 {
-                    [{|#0:{{attributeName}}|}]
+                    [{{attributeName}}]
                     public void MyTest()
                     {
                     }
-                }
+                }|}
                 """,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
             );
@@ -47,16 +47,16 @@ public class XUnitMigrationAnalyzerTests
         await CodeFixer
             .VerifyCodeFixAsync(
                 $$"""
-                using TUnit.Core;
+                {|#0:using TUnit.Core;
                 using Xunit;
 
                 public class MyClass
                 {
-                    [{|#0:{{attribute}}|}]
+                    [{{attribute}}]
                     public void MyTest()
                     {
                     }
-                }
+                }|}
                 """,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 $$"""
@@ -84,16 +84,16 @@ public class XUnitMigrationAnalyzerTests
         await CodeFixer
             .VerifyCodeFixAsync(
                 $$"""
-                  using TUnit.Core;
+                  {|#0:using TUnit.Core;
                   using Xunit;
 
                   public class MyClass
                   {
-                      [{|#0:{{attribute}}(Skip = "Reason")|}]
+                      [{{attribute}}(Skip = "Reason")]
                       public void MyTest()
                       {
                       }
-                  }
+                  }|}
                   """,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 $$"""
@@ -117,12 +117,12 @@ public class XUnitMigrationAnalyzerTests
         await CodeFixer
             .VerifyCodeFixAsync(
                 """
-                using TUnit.Core;
+                {|#0:using TUnit.Core;
                 using Xunit;
 
                 public class MyType;
 
-                [{|#1:Collection("MyCollection")|}]
+                [Collection("MyCollection")]
                 public class MyClass
                 {
                     [Test]
@@ -131,10 +131,10 @@ public class XUnitMigrationAnalyzerTests
                     }
                 }
                 
-                [{|#0:CollectionDefinition("MyCollection")|}]
+                [CollectionDefinition("MyCollection")]
                 public class MyCollection : ICollectionFixture<MyType>
                 {
-                }
+                }|}
                 """,
                 [
                     Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
@@ -169,12 +169,12 @@ public class XUnitMigrationAnalyzerTests
         await CodeFixer
             .VerifyCodeFixAsync(
                 """
-                using TUnit.Core;
+                {|#0:using TUnit.Core;
                 using Xunit;
 
                 public class MyType;
 
-                [{|#1:Collection("MyCollection")|}]
+                [Collection("MyCollection")]
                 public class MyClass
                 {
                     [Test]
@@ -183,10 +183,10 @@ public class XUnitMigrationAnalyzerTests
                     }
                 }
 
-                [{|#0:CollectionDefinition("MyCollection", DisableParallelization = true)|}]
+                [CollectionDefinition("MyCollection", DisableParallelization = true)]
                 public class MyCollection
                 {
-                }
+                }|}
                 """,
                 [
                     Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
@@ -221,12 +221,12 @@ public class XUnitMigrationAnalyzerTests
         await CodeFixer
             .VerifyCodeFixAsync(
                 """
-                using TUnit.Core;
+                {|#0:using TUnit.Core;
                 using Xunit;
 
                 public class MyType;
 
-                [{|#1:Collection("MyCollection")|}]
+                [Collection("MyCollection")]
                 public class MyClass
                 {
                     [Test]
@@ -235,10 +235,10 @@ public class XUnitMigrationAnalyzerTests
                     }
                 }
 
-                [{|#0:CollectionDefinition("MyCollection", DisableParallelization = true)|}]
+                [CollectionDefinition("MyCollection", DisableParallelization = true)]
                 public class MyCollection : ICollectionFixture<MyType>
                 {
-                }
+                }|}
                 """,
                 [
                     Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
@@ -275,7 +275,7 @@ public class XUnitMigrationAnalyzerTests
         await CodeFixer
             .VerifyCodeFixAsync(
                 $$"""
-                  using System;
+                  {|#0:using System;
                   using TUnit.Core;
                   using Xunit;
                   
@@ -288,7 +288,7 @@ public class XUnitMigrationAnalyzerTests
                       public void MyTest()
                       {
                       }
-                  }
+                  }|}
                   """,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 $$"""
@@ -307,6 +307,117 @@ public class XUnitMigrationAnalyzerTests
                       }
                   }
                   """
+            );
+    }
+    
+    [Test]
+    public async Task ClassFixture_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyType;
+
+                public class MyClass : IClassFixture<MyType>
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task ClassFixture_Can_Be_Fixed()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyType;
+
+                public class MyClass(MyType myType) : IClassFixture<MyType>
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using Xunit;
+
+                public class MyType;
+
+                [ClassDataSource<MyType>(Shared = SharedType.PerClass)]
+                public class MyClass(MyType myType)
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Xunit_Directive_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                {|#0:using TUnit.Core;
+                using Xunit;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task Xunit_Directive_Can_Be_Removed()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+                using Xunit;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """
             );
     }
 }

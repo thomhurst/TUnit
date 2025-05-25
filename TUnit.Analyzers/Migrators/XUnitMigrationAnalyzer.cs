@@ -14,57 +14,64 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ClassDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.CompilationUnit);
     }
-    
+
     private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
     {
-        if(context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
+        if (context.Node is not CompilationUnitSyntax compilationUnitSyntax)
         {
             return;
         }
-        
-        var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
-        
-        if (symbol is null)
+
+        var classDeclarationSyntaxes = compilationUnitSyntax
+            .DescendantNodes()
+            .OfType<ClassDeclarationSyntax>();
+
+        foreach (var classDeclarationSyntax in classDeclarationSyntaxes)
         {
-            return;
-        }
-        
-        if (symbol.AllInterfaces.Any(i => i.ContainingNamespace.Name.StartsWith("Xunit")))
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(Rules.XunitMigration, context.Node.GetLocation())
-            );
-            
-            return;
-        }
-        
-        if (AnalyzeAttributes(context, symbol)) 
-        {
-            return;
-        }
-        
-        foreach (var methodSymbol in symbol.GetMembers().OfType<IMethodSymbol>())
-        {
-            if (AnalyzeAttributes(context, methodSymbol))
+            var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
+
+            if (symbol is null)
             {
                 return;
             }
-        }
-        
-        var usingDirectiveSyntaxes = classDeclarationSyntax
-            .SyntaxTree
-            .GetCompilationUnitRoot()
-            .Usings;
-        
-        foreach (var usingDirectiveSyntax in usingDirectiveSyntaxes)
-        {
-            if (usingDirectiveSyntax.Name is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Xunit" } }
-                or IdentifierNameSyntax { Identifier.Text: "Xunit" })
+
+            if (symbol.AllInterfaces.Any(i => i.ContainingNamespace.Name.StartsWith("Xunit")))
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rules.XunitMigration, context.Node.GetLocation()));
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rules.XunitMigration, context.Node.GetLocation())
+                );
+
                 return;
+            }
+
+            if (AnalyzeAttributes(context, symbol))
+            {
+                return;
+            }
+
+            foreach (var methodSymbol in symbol.GetMembers().OfType<IMethodSymbol>())
+            {
+                if (AnalyzeAttributes(context, methodSymbol))
+                {
+                    return;
+                }
+            }
+
+            var usingDirectiveSyntaxes = classDeclarationSyntax
+                .SyntaxTree
+                .GetCompilationUnitRoot()
+                .Usings;
+
+            foreach (var usingDirectiveSyntax in usingDirectiveSyntaxes)
+            {
+                if (usingDirectiveSyntax.Name is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Xunit" } }
+                    or IdentifierNameSyntax { Identifier.Text: "Xunit" })
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(Rules.XunitMigration, context.Node.GetLocation()));
+                    return;
+                }
             }
         }
     }
