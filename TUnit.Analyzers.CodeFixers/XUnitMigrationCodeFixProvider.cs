@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 
 namespace TUnit.Analyzers.CodeFixers;
 
@@ -17,24 +16,22 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
-    public override sealed async Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override sealed Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         foreach (var diagnostic in context.Diagnostics)
         {
-            var diagnosticSpan = diagnostic.Location.SourceSpan;
-
-            var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Rules.XunitMigration.Title.ToString(),
-                    createChangedDocument: c => ConvertCodeAsync(context.Document, root?.FindNode(diagnosticSpan), c),
+                    createChangedDocument: c => ConvertCodeAsync(context.Document, c),
                     equivalenceKey: Rules.XunitMigration.Title.ToString()),
                 diagnostic);
         }
+        
+        return Task.CompletedTask;
     }
 
-    private static async Task<Document> ConvertCodeAsync(Document document, SyntaxNode? node, CancellationToken cancellationToken)
+    private static async Task<Document> ConvertCodeAsync(Document document, CancellationToken cancellationToken)
     {
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
@@ -44,81 +41,19 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
 
         // Collect all changes
-        var updatedRoot = await UpdateClassAttributesAsync(root);
+        var compilation = await document.Project.GetCompilationAsync(cancellationToken);
+        
+        var updatedRoot = UpdateClassAttributesAsync(compilation, root);
 
         // Apply all changes in one step
         return document.WithSyntaxRoot(updatedRoot);
     }
 
-    private static async Task<SyntaxNode> UpdateClassAttributesAsync(SyntaxNode root)
+    private static SyntaxNode UpdateClassAttributesAsync(Compilation? compilation, SyntaxNode root)
     {
-        var classDeclarations = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
-
-        var rewriter = new AttributeRewriter();
+        var rewriter = new AttributeRewriter(compilation!);
         
-        foreach (var classDeclaration in classDeclarations)
-        {
-            root = rewriter.Visit(classDeclaration);
-        }
-
-        return root;
-    }
-
-    private static async Task ConvertAttribute(DocumentEditor editor, AttributeSyntax attributeSyntax)
-    {
-        var name = GetSimpleName(attributeSyntax);
-
-        var newSyntaxes = name switch
-        {
-            "Fact" or "FactAttribute"
-                or "Theory" or "TheoryAttribute" => ConvertTestAttribute(attributeSyntax),
-
-            "Trait" or "TraitAttribute" =>
-            [
-                SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"),
-                    attributeSyntax.ArgumentList)
-            ],
-
-            "InlineData" or "InlineDataAttribute" =>
-            [
-                SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"),
-                    attributeSyntax.ArgumentList)
-            ],
-
-            "MemberData" or "MemberDataAttribute" =>
-            [
-                SyntaxFactory.Attribute(
-                    SyntaxFactory.IdentifierName("MethodDataSource"), attributeSyntax.ArgumentList)
-            ],
-
-            "ClassData" or "ClassDataAttribute" =>
-            [
-                SyntaxFactory.Attribute(
-                    SyntaxFactory.IdentifierName("MethodDataSource"),
-                    (attributeSyntax.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(
-                        SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
-                            SyntaxFactory.Literal("GetEnumerator")))))
-            ],
-
-            "Collection" or "CollectionAttribute" => await ConvertCollection(editor, attributeSyntax),
-
-            "CollectionDefinition" or "CollectionDefinitionAttribute" =>
-            [
-                SyntaxFactory.Attribute(
-                    SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
-                        SyntaxFactory.IdentifierName("Obsolete")))
-            ],
-
-            _ => [attributeSyntax]
-        };
-
-        var list = (AttributeListSyntax)attributeSyntax.Parent!;
-
-        var newAttributeList = list
-            .RemoveNode(attributeSyntax, SyntaxRemoveOptions.AddElasticMarker)!
-            .AddAttributes(newSyntaxes.ToArray());
-
-        editor.ReplaceNode(list, newAttributeList);
+        return rewriter.Visit(root);
     }
 
     private static string GetSimpleName(AttributeSyntax attributeSyntax)
@@ -144,15 +79,8 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
     }
 
-    private static async Task<IEnumerable<AttributeSyntax>> ConvertCollection(DocumentEditor editor, AttributeSyntax attributeSyntax)
+    private static IEnumerable<AttributeSyntax> ConvertCollection(Compilation compilation, AttributeSyntax attributeSyntax)
     {
-        var compilation = await editor.GetChangedDocument().Project.GetCompilationAsync();
-
-        if (compilation is null)
-        {
-            return [attributeSyntax];
-        }
-
         var collectionDefinition = GetCollectionAttribute(compilation, attributeSyntax);
 
         if (collectionDefinition is null)
@@ -225,42 +153,6 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         return SyntaxFactory.ParseExpression(firstToken.Value.Text);
     }
 
-    private static TypeArgumentListSyntax GetGenericArguments(Compilation compilation, Document document,
-        AttributeSyntax attributeSyntax)
-    {
-        var collectionAttribute = GetCollectionAttribute(compilation, attributeSyntax);
-
-        if (collectionAttribute is null)
-        {
-            return SyntaxFactory.TypeArgumentList();
-        }
-
-        var classDeclaration = collectionAttribute.Parent?.Parent;
-
-        if (classDeclaration is null)
-        {
-            return SyntaxFactory.TypeArgumentList();
-        }
-
-        var classSymbol = compilation.GetSemanticModel(classDeclaration.SyntaxTree).GetDeclaredSymbol(classDeclaration);
-
-        if (classSymbol is not ITypeSymbol typeSymbol)
-        {
-            return SyntaxFactory.TypeArgumentList();
-        }
-
-        var interfaceType = typeSymbol.AllInterfaces.FirstOrDefault(x => x.Name == "ICollectionFixture");
-
-        if (interfaceType is null)
-        {
-            return SyntaxFactory.TypeArgumentList();
-        }
-
-        return SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
-            SyntaxFactory.IdentifierName(interfaceType.TypeArguments.First().Name)
-        ));
-    }
-
     private static AttributeSyntax? GetCollectionAttribute(Compilation compilation, AttributeSyntax attributeSyntax)
     {
         var firstToken = attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken();
@@ -313,30 +205,37 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         return null;
     }
 
-    private class AttributeRewriter : CSharpSyntaxRewriter
+    private class AttributeRewriter(Compilation compilation) : CSharpSyntaxRewriter
     {
-        public override SyntaxNode VisitAttribute(AttributeSyntax node)
+        public override SyntaxNode VisitAttributeList(AttributeListSyntax node)
         {
-            var name = GetSimpleName(node);
+            var newAttributes = new List<AttributeSyntax>();
 
-            var newAttributes = name switch
+            foreach (var attr in node.Attributes)
             {
-                "Fact" or "FactAttribute" or "Theory" or "TheoryAttribute" => ConvertTestAttribute(node),
-                "Trait" or "TraitAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"), node.ArgumentList)],
-                "InlineData" or "InlineDataAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"), node.ArgumentList)],
-                "MemberData" or "MemberDataAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MethodDataSource"), node.ArgumentList)],
-                "ClassData" or "ClassDataAttribute" =>
-                [
-                    SyntaxFactory.Attribute(
-                        SyntaxFactory.IdentifierName("MethodDataSource"),
-                        (node.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(
-                            SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
-                                SyntaxFactory.Literal("GetEnumerator")))))
-                ],
-                _ => [node]
-            };
+                var name = GetSimpleName(attr);
 
-            // Wrap the SeparatedSyntaxList in an AttributeListSyntax
+                var converted = name switch
+                {
+                    "Fact" or "FactAttribute" or "Theory" or "TheoryAttribute" => ConvertTestAttribute(attr),
+                    "Trait" or "TraitAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"), attr.ArgumentList)],
+                    "InlineData" or "InlineDataAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"), attr.ArgumentList)],
+                    "MemberData" or "MemberDataAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MethodDataSource"), attr.ArgumentList)],
+                    "ClassData" or "ClassDataAttribute" =>
+                    [
+                        SyntaxFactory.Attribute(
+                            SyntaxFactory.IdentifierName("MethodDataSource"),
+                            (attr.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(
+                                SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
+                                    SyntaxFactory.Literal("GetEnumerator")))))
+                    ],
+                    "Collection" or "CollectionAttribute" => ConvertCollection(compilation, attr),
+                    _ => [attr]
+                };
+
+                newAttributes.AddRange(converted);
+            }
+
             return SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(newAttributes));
         }
     }
