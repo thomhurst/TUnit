@@ -463,7 +463,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                         )
                                     )
                                 )
-                                .WithTrailingTrivia(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.ElasticLineFeed)
+                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
                     
                     node = node.RemoveNode(GetInitializeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
@@ -489,7 +489,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                         )
                                     )
                                 )
-                                .WithTrailingTrivia(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.ElasticLineFeed)
+                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
                     
                     node = node.RemoveNode(GetDisposeAsyncMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
@@ -514,7 +514,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                         )
                                     )
                                 )
-                                .WithTrailingTrivia(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.ElasticLineFeed)
+                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
                     
                     node = node.RemoveNode(GetDisposeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
