@@ -441,20 +441,20 @@ public class XUnitMigrationAnalyzerTests
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
                 using TUnit.Core;
-
+                
                 public class MyClass
                 {
                     [Test]
                     public void MyTest()
                     {
                     }
-                    
+                
                     [Before(Test)]
                     public Task InitializeAsync()
                     {
                         return default;
                     }
-                    
+                
                     [After(Test)]
                     public Task DisposeAsync()
                     {
