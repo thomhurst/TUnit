@@ -97,7 +97,6 @@ public class XUnitMigrationAnalyzerTests
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 $$"""
                   using TUnit.Core;
-                  using Xunit;
 
                   public class MyClass
                   {
@@ -137,11 +136,9 @@ public class XUnitMigrationAnalyzerTests
                 """,
                 [
                     Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
-                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(1)
                     ],
                     """
                     using TUnit.Core;
-                    using Xunit;
 
                     public class MyType;
 
@@ -189,11 +186,9 @@ public class XUnitMigrationAnalyzerTests
                 """,
                 [
                     Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
-                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(1)
                 ],
                 """
                 using TUnit.Core;
-                using Xunit;
 
                 public class MyType;
 
@@ -241,11 +236,9 @@ public class XUnitMigrationAnalyzerTests
                 """,
                 [
                     Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
-                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(1)
                 ],
                 """
                 using TUnit.Core;
-                using Xunit;
 
                 public class MyType;
 
@@ -293,7 +286,6 @@ public class XUnitMigrationAnalyzerTests
                 $$"""
                   using System;
                   using TUnit.Core;
-                  using Xunit;
 
                   [assembly: {{expected}}]
                   namespace MyNamespace;
@@ -351,8 +343,6 @@ public class XUnitMigrationAnalyzerTests
                 """,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
-                using Xunit;
-
                 public class MyType;
 
                 [ClassDataSource<MyType>(Shared = SharedType.PerClass)]
