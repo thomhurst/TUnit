@@ -289,9 +289,10 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 newAttributes.AddRange(converted);
             }
 
+            // Preserve original trivia instead of forcing elastic trivia
             return SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(newAttributes))
-                .WithLeadingTrivia(SyntaxFactory.ElasticMarker)
-                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
+                .WithLeadingTrivia(node.GetLeadingTrivia())
+                .WithTrailingTrivia(node.GetTrailingTrivia());
         }
     }
     
@@ -315,18 +316,20 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
             if (newBaseList.Count == 0)
             {
+                // Preserve original trivia instead of forcing elastic trivia
                 return node.WithBaseList(null)
-                    .WithLeadingTrivia(SyntaxFactory.ElasticMarker)
-                    .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
+                    .WithLeadingTrivia(node.GetLeadingTrivia())
+                    .WithTrailingTrivia(node.GetTrailingTrivia());
             }
 
             var baseListSyntax = node.BaseList.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList))
                 .WithLeadingTrivia(node.BaseList.GetLeadingTrivia())
                 .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
             
+            // Preserve original trivia instead of forcing elastic trivia
             return node.WithBaseList(baseListSyntax)
-                .WithLeadingTrivia(SyntaxFactory.ElasticMarker)
-                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
+                .WithLeadingTrivia(node.GetLeadingTrivia())
+                .WithTrailingTrivia(node.GetTrailingTrivia());
         }
     }
 }
