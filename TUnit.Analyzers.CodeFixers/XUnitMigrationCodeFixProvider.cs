@@ -81,19 +81,26 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
     private static SyntaxNode UpdateInitializeDispose(Compilation compilation, SyntaxNode root)
     {
-        foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+        foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList())
         {
             var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
-            
+
             if (semanticModel.GetDeclaredSymbol(classDeclaration) is not { } symbol)
             {
                 continue;
             }
-            
-            root = root.ReplaceNode(
-                classDeclaration,
-                new InitializeDisposeRewriter(symbol).VisitClassDeclaration(classDeclaration)
-            );
+
+            // Always get the latest node from the current root
+            var currentClass = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+                .FirstOrDefault(n => n.SpanStart == classDeclaration.SpanStart && n.Identifier.Text == classDeclaration.Identifier.Text);
+
+            if (currentClass == null)
+                continue;
+
+            var newNode = new InitializeDisposeRewriter(symbol).VisitClassDeclaration(currentClass);
+
+            if (!ReferenceEquals(currentClass, newNode))
+                root = root.ReplaceNode(currentClass, newNode);
         }
 
         return root;
@@ -101,7 +108,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
     private static SyntaxNode RemoveInterfacesAndBaseClasses(Compilation compilation, SyntaxNode root)
     {
-        foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+        foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList())
         {
             if (classDeclaration.BaseList is null)
             {
@@ -109,16 +116,23 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             }
 
             var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
-            
+
             if (semanticModel.GetDeclaredSymbol(classDeclaration) is not { } symbol)
             {
                 continue;
             }
 
-            root = root.ReplaceNode(
-                classDeclaration,
-                new BaseTypeRewriter(symbol).VisitClassDeclaration(classDeclaration)
-            );
+            // Always get the latest node from the current root
+            var currentClass = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+                .FirstOrDefault(n => n.SpanStart == classDeclaration.SpanStart && n.Identifier.Text == classDeclaration.Identifier.Text);
+
+            if (currentClass == null)
+                continue;
+
+            var newNode = new BaseTypeRewriter(symbol).VisitClassDeclaration(currentClass);
+
+            if (newNode != null && !ReferenceEquals(currentClass, newNode))
+                root = root.ReplaceNode(currentClass, newNode);
         }
 
         return root;
