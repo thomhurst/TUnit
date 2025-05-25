@@ -410,7 +410,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 return node;
             }
 
-            var interfaces = namedTypeSymbol.AllInterfaces
+            var interfaces = namedTypeSymbol.Interfaces
                 .Where(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) is "global::Xunit.IAsyncLifetime" or "global::System.IAsyncDisposable" or "global::System.IDisposable")
                 .ToArray();
 
@@ -507,10 +507,22 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 if (hasAsyncLifetime && GetInitializeMethod(node) is {} initializeMethod)
                 {
                     node = node
-                        .WithBaseList(SyntaxFactory.BaseList(node.BaseList.Types.Remove(node.BaseList.Types.First(x => x.Type.TryGetInferredMemberName()!.EndsWith("IAsyncLifetime"))))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
                         .ReplaceNode(initializeMethod, initializeMethod.WithReturnType(SyntaxFactory.ParseTypeName("Task")))
                         .NormalizeWhitespace();
+
+                    node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
+                        [
+                            ..node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncLifetime") is null or false),
+                            SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IAsyncInitializer"))
+                        ])))
+                        .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
                 }
+            }
+
+            if (hasAsyncLifetime && !hasAsyncDisposable)
+            {
+                node = node
+                    .WithBaseList(node.BaseList!.AddTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IAsyncDisposable"))));
             }
 
             if (node.BaseList is not null && node.BaseList.Types.Count == 0)
