@@ -141,7 +141,6 @@ public class XUnitMigrationAnalyzerTests
                     using TUnit.Core;
 
                     public class MyType;
-
                     [ClassDataSource<MyType>(Shared = SharedType.Keyed, Key = "MyCollection")]
                     public class MyClass
                     {
@@ -152,7 +151,7 @@ public class XUnitMigrationAnalyzerTests
                     }
                     
                     [System.Obsolete]
-                    public class MyCollection 
+                    public class MyCollection
                     {
                     }
                     """
@@ -191,7 +190,6 @@ public class XUnitMigrationAnalyzerTests
                 using TUnit.Core;
 
                 public class MyType;
-
                 [NotInParallel]
                 public class MyClass
                 {
@@ -241,7 +239,6 @@ public class XUnitMigrationAnalyzerTests
                 using TUnit.Core;
 
                 public class MyType;
-
                 [NotInParallel, ClassDataSource<MyType>(Shared = SharedType.Keyed, Key = "MyCollection")]
                 public class MyClass
                 {
@@ -252,7 +249,7 @@ public class XUnitMigrationAnalyzerTests
                 }
 
                 [System.Obsolete]
-                public class MyCollection 
+                public class MyCollection
                 {
                 }
                 """
@@ -343,11 +340,9 @@ public class XUnitMigrationAnalyzerTests
                 """,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
-                
                 public class MyType;
-
                 [ClassDataSource<MyType>(Shared = SharedType.PerClass)]
-                public class MyClass(MyType myType) 
+                public class MyClass(MyType myType)
                 {
                     [Test]
                     public void MyTest()

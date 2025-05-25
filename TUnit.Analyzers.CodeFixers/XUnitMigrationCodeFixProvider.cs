@@ -79,6 +79,11 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         var currentRoot = root;
         foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList())
         {
+            if (classDeclaration.BaseList is null)
+            {
+                continue;
+            }
+            
             var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
 
             if (semanticModel.GetDeclaredSymbol(classDeclaration) is not { } symbol)
@@ -160,7 +165,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 compilationUnit.Usings
                     .Where(x => x.Name?.ToString().StartsWith("Xunit") is false)
             )
-        );
+        ).NormalizeWhitespace();
     }
 
     private static SyntaxNode UpdateClassAttributes(Compilation compilation, SyntaxNode root)
@@ -445,8 +450,6 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 if(hasAsyncLifetime && GetInitializeMethod(node) is {} initializeMethod)
                 {
                     node = node
-                        .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
-                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncLifetime") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
                         .AddMembers(
                             SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "InitializeAsync")
                                 .WithModifiers(initializeMethod.Modifiers)
@@ -463,13 +466,16 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                         );
                     
                     node = node.RemoveNode(GetInitializeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
+
+                    node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
+                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncLifetime") is null or false))))
+                        .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
+
                 }
                 
                 if((hasAsyncLifetime || hasAsyncDisposable) && GetDisposeAsyncMethod(node) is { } disposeAsyncMethod)
                 {
                     node = node
-                        .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
-                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncDisposable") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
                         .AddMembers(
                             SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "DisposeAsync")
                                 .WithModifiers(disposeAsyncMethod.Modifiers)
@@ -486,13 +492,15 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                         );
                     
                     node = node.RemoveNode(GetDisposeAsyncMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
+
+                    node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
+                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncDisposable") is null or false))))
+                        .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
                 }
                 
                 if(hasDisposable && GetDisposeMethod(node) is {} disposeMethod)
                 {
                     node = node
-                        .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
-                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IDisposable") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
                         .AddMembers(
                             SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)), "Dispose")
                                 .WithModifiers(disposeMethod.Modifiers)
@@ -509,6 +517,10 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                         );
                     
                     node = node.RemoveNode(GetDisposeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
+
+                    node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
+                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IDisposable") is null or false))))
+                        .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
                 }
             }
             else
@@ -526,12 +538,12 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                         ])))
                         .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
                 }
-            }
-
-            if (hasAsyncLifetime && !hasAsyncDisposable)
-            {
-                node = node
-                    .WithBaseList(node.BaseList!.AddTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IAsyncDisposable"))));
+                
+                if (hasAsyncLifetime && !hasAsyncDisposable)
+                {
+                    node = node
+                        .WithBaseList(node.BaseList!.AddTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IAsyncDisposable"))));
+                }
             }
 
             if (node.BaseList is not null && node.BaseList.Types.Count == 0)
