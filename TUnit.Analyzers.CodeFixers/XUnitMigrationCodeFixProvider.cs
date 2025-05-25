@@ -37,6 +37,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
     private static async Task<Document> ConvertCodeAsync(Document document, SyntaxNode? node, CancellationToken cancellationToken)
     {
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
+        
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
         if (root is null)
@@ -44,44 +45,39 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        await UpdateClassAttributesAsync(editor, root, node?.TryGetInferredMemberName());
+        await UpdateClassAttributesAsync(editor, root);
         
         return editor.GetChangedDocument();
     }
     
-    private static async Task<Document> UpdateClassAttributesAsync(DocumentEditor editor, SyntaxNode root, string? className)
+    private static async Task UpdateClassAttributesAsync(DocumentEditor editor, SyntaxNode root)
     {
         // Find the class declaration by name
-        var classDeclaration = root.DescendantNodes()
-            .OfType<ClassDeclarationSyntax>()
-            .FirstOrDefault(c => c.Identifier.Text == className);
+        var classDeclarations = root.DescendantNodes()
+            .OfType<ClassDeclarationSyntax>();
 
-        if (classDeclaration is null)
+        foreach (var classDeclaration in classDeclarations)
         {
-            return editor.GetChangedDocument();
+            foreach (var attributeSyntax in classDeclaration.AttributeLists.SelectMany(x => x.Attributes))
+            {
+                await ConvertAttribute(editor, attributeSyntax);
+            }
+
+            foreach (var methodDeclaration in classDeclaration.DescendantNodes().OfType<MethodDeclarationSyntax>())
+            {
+                foreach (var attributeSyntax in methodDeclaration.AttributeLists.SelectMany(x => x.Attributes))
+                {
+                    await ConvertAttribute(editor, attributeSyntax);
+                }
+            }
         }
-
-        var attributeListSyntax = SyntaxFactory.AttributeList();
-        foreach (var attributeSyntax in classDeclaration.AttributeLists.SelectMany(x => x.Attributes))
-        {
-            var attributeSyntaxes = await ConvertAttribute(editor.GetChangedDocument(), attributeSyntax);
-            attributeListSyntax = attributeListSyntax.WithAttributes(SyntaxFactory.SeparatedList(attributeSyntaxes));
-        }
-
-        // Add the new attribute to the class
-        var updatedClass = classDeclaration.WithAttributeLists(SyntaxFactory.SingletonList(attributeListSyntax));
-
-        // Replace the old class declaration with the updated one
-        editor.ReplaceNode(classDeclaration, updatedClass);
-
-        return editor.GetChangedDocument();
     }
 
-    private static async Task<IEnumerable<AttributeSyntax>> ConvertAttribute(Document document, AttributeSyntax attributeSyntax)
+    private static async Task ConvertAttribute(DocumentEditor editor, AttributeSyntax attributeSyntax)
     {
         var name = GetSimpleName(attributeSyntax);
 
-        return name switch
+        var newSyntaxes = name switch
         {
             "Fact" or "FactAttribute"
                 or "Theory" or "TheoryAttribute" => ConvertTestAttribute(attributeSyntax),
@@ -101,14 +97,22 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                     SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
                         SyntaxFactory.Literal("GetEnumerator")))))],
 
-            "Collection" or "CollectionAttribute" => await ConvertCollection(document, attributeSyntax),
+            "Collection" or "CollectionAttribute" => await ConvertCollection(editor, attributeSyntax),
 
             "CollectionDefinition" or "CollectionDefinitionAttribute" => [SyntaxFactory.Attribute(
                 SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
                     SyntaxFactory.IdentifierName("Obsolete")))],
 
-            _ => []
+            _ => [attributeSyntax]
         };
+
+        var list = (AttributeListSyntax)attributeSyntax.Parent!;
+        
+        var newAttributeList = list
+            .RemoveNode(attributeSyntax, SyntaxRemoveOptions.AddElasticMarker)!
+            .AddAttributes(newSyntaxes.ToArray());
+        
+        editor.ReplaceNode(list, newAttributeList);
     }
 
     private static string GetSimpleName(AttributeSyntax attributeSyntax)
@@ -134,20 +138,20 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
     }
 
-    private static async Task<IEnumerable<AttributeSyntax>> ConvertCollection(Document document, AttributeSyntax attributeSyntax)
+    private static async Task<IEnumerable<AttributeSyntax>> ConvertCollection(DocumentEditor editor, AttributeSyntax attributeSyntax)
     {
-        var compilation = await document.Project.GetCompilationAsync();
+        var compilation = await editor.GetChangedDocument().Project.GetCompilationAsync();
 
         if (compilation is null)
         {
-            return [];
+            return [attributeSyntax];
         }
         
         var collectionDefinition = GetCollectionAttribute(compilation, attributeSyntax);
 
         if (collectionDefinition is null)
         {
-            return [];
+            return [attributeSyntax];
         }
 
         var disableParallelism =
