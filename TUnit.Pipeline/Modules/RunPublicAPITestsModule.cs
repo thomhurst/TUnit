@@ -10,6 +10,7 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+[NotInParallel("DotNetTests")]
 public class RunPublicAPITestsModule : TestBaseModule
 {
     protected override Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken)

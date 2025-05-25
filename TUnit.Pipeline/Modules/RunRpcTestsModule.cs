@@ -10,6 +10,7 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+[NotInParallel("DotNetTests")]
 public class RunRpcTestsModule : TestBaseModule
 {
     protected override IEnumerable<string> TestableFrameworks =>

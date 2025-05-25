@@ -9,6 +9,7 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
+[NotInParallel("DotNetTests")]
 [DependsOn<PublishSingleFileModule>]
 [DependsOn<PublishAOTModule>]
 [DependsOn<RunAnalyzersTestsModule>]
