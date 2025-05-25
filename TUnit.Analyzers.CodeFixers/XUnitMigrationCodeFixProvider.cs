@@ -290,7 +290,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             }
 
             return SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(newAttributes))
-                .WithLeadingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+                .WithLeadingTrivia(SyntaxFactory.ElasticMarker)
                 .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
         }
     }
@@ -316,12 +316,16 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             if (newBaseList.Count == 0)
             {
                 return node.WithBaseList(null)
-                    .WithLeadingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+                    .WithLeadingTrivia(SyntaxFactory.ElasticMarker)
                     .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
             }
 
-            return node.WithBaseList(node.BaseList.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList)))
-                .WithLeadingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+            var baseListSyntax = node.BaseList.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList))
+                .WithLeadingTrivia(node.BaseList.GetLeadingTrivia())
+                .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
+            
+            return node.WithBaseList(baseListSyntax)
+                .WithLeadingTrivia(SyntaxFactory.ElasticMarker)
                 .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
         }
     }
