@@ -2,11 +2,26 @@
 <Project>
 
     <PropertyGroup>
+        <XunitPackageReferenceFound>false</XunitPackageReferenceFound>
+    </PropertyGroup>
+
+    <Target Name="SetXunitPackageReferenceFound" BeforeTargets="PrepareForBuild">
+        <!-- Filter PackageReference for xunit and xunit.v3 -->
+        <ItemGroup>
+            <_XunitReference Include="@(PackageReference)"
+                Condition="'%(PackageReference.Identity)' == 'xunit' Or '%(PackageReference.Identity)' == 'xunit.v3'" />
+        </ItemGroup>
+        <PropertyGroup>
+            <XunitPackageReferenceFound Condition="'@(_XunitReference)' != ''">true</XunitPackageReferenceFound>
+        </PropertyGroup>
+    </Target>
+
+    <PropertyGroup Condition="'$(XunitPackageReferenceFound)' == 'false'">
         <TUnitImplicitUsings>true</TUnitImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
         <CompilerVisibleProperty Include="EnableTUnitPolyfills" />
     </ItemGroup>
-    
+
 </Project>
