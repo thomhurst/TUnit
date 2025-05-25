@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Composition;
+using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -462,7 +463,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                         )
                                     )
                                 )
-                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+                                .WithTrailingTrivia(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.ElasticLineFeed)
                         );
                     
                     node = node.RemoveNode(GetInitializeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
@@ -488,7 +489,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                         )
                                     )
                                 )
-                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+                                .WithTrailingTrivia(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.ElasticLineFeed)
                         );
                     
                     node = node.RemoveNode(GetDisposeAsyncMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
@@ -513,7 +514,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                         )
                                     )
                                 )
-                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+                                .WithTrailingTrivia(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.ElasticLineFeed)
                         );
                     
                     node = node.RemoveNode(GetDisposeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
