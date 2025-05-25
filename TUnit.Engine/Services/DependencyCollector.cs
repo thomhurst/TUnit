@@ -73,7 +73,7 @@ internal class DependencyCollector
         if (dependsOnAttribute.TestClass == null)
         {
             testsForClass = testsForClass
-                .Where(x => x.TestDetails.TestClassArguments.SequenceEqual(test.TestDetails.TestClassArguments));
+                .Where(x => EqualArgs(x.TestDetails.TestClassArguments, test.TestDetails.TestClassArguments));
         }
 
         if (dependsOnAttribute.TestName != null)
@@ -95,6 +95,50 @@ internal class DependencyCollector
         }
 
         return foundTests;
+    }
+
+    private bool EqualArgs(object?[] args1, object?[] args2)
+    {
+        if(args1.Length != args2.Length)
+        {
+            return false;
+        }
+        
+        for (var i = 0; i < args1.Length; i++)
+        {
+            var objA = args1[i];
+            var objB = args2[i];
+            
+            var type1 = objA?.GetType();
+            var type2 = objB?.GetType();
+            
+            if (type1 != type2)
+            {
+                return false;
+            }
+            
+            if(objA is null || objB is null)
+            {
+                if (objA != objB)
+                {
+                    return false;
+                }
+                
+                continue;
+            }
+
+            if (!type1!.IsValueType)
+            {
+                continue;
+            }
+            
+            if (!Equals(objA, objB))
+            {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     [DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
