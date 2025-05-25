@@ -452,13 +452,13 @@ public class XUnitMigrationAnalyzerTests
                     [Before(Test)]
                     public Task InitializeAsync()
                     {
-                        return Task.CompletedTask;
+                        return default;
                     }
                     
                     [After(Test)]
                     public Task DisposeAsync()
                     {
-                        return Task.CompletedTask;
+                        return default;
                     }
                 }
                 """

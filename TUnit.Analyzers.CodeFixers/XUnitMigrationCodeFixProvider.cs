@@ -91,15 +91,19 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 .FirstOrDefault(n => n.SpanStart == classDeclaration.SpanStart && n.Identifier.Text == classDeclaration.Identifier.Text);
 
             if (currentClass == null)
+            {
                 continue;
+            }
 
             var newNode = new InitializeDisposeRewriter(symbol).VisitClassDeclaration(currentClass);
 
             if (!ReferenceEquals(currentClass, newNode))
+            {
                 currentRoot = currentRoot.ReplaceNode(currentClass, newNode);
+            }
         }
 
-        return currentRoot;
+        return currentRoot.NormalizeWhitespace();
     }
 
     private static SyntaxNode RemoveInterfacesAndBaseClasses(Compilation compilation, SyntaxNode root)
@@ -125,12 +129,16 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 .FirstOrDefault(n => n.SpanStart == classDeclaration.SpanStart && n.Identifier.Text == classDeclaration.Identifier.Text);
 
             if (currentClass == null)
+            {
                 continue;
+            }
 
             var newNode = new BaseTypeRewriter(symbol).VisitClassDeclaration(currentClass);
 
-            if (newNode != null && !ReferenceEquals(currentClass, newNode))
+            if (!ReferenceEquals(currentClass, newNode))
+            {
                 currentRoot = currentRoot.ReplaceNode(currentClass, newNode);
+            }
         }
 
         return currentRoot;
@@ -139,9 +147,11 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
     private static SyntaxNode RemoveUsingDirectives(SyntaxNode updatedRoot)
     {
         return updatedRoot.RemoveNodes(
-            updatedRoot.DescendantNodes().OfType<UsingDirectiveSyntax>()
-                .Where(x => x.Name?.ToString().StartsWith("Xunit") is true),
-            SyntaxRemoveOptions.AddElasticMarker)!;
+                updatedRoot.DescendantNodes()
+                    .OfType<UsingDirectiveSyntax>()
+                    .Where(x => x.Name?.ToString().StartsWith("Xunit") is true),
+                SyntaxRemoveOptions.AddElasticMarker)!
+            .NormalizeWhitespace();
     }
 
     private static SyntaxNode UpdateClassAttributes(Compilation compilation, SyntaxNode root)
@@ -420,119 +430,118 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                     .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) is "global::Xunit.FactAttribute"
                         or "global::Xunit.TheoryAttribute")
                 );
-            
-            var initializeMethod = node.Members
-                .OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(m => m.Identifier.Text == "InitializeAsync");
-            
-            var disposeAsyncMethod = node.Members
-                .OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(m => m.Identifier.Text == "DisposeAsync");
-            
-            var disposeMethod = node.Members
-                .OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(m => m.Identifier.Text == "Dispose");
 
             if (isTestClass)
             {
-                if (hasAsyncLifetime && initializeMethod is not null)
-                {
-                    node = node.RemoveNode(initializeMethod, SyntaxRemoveOptions.AddElasticMarker)!;
-                }
-                
-                if ((hasAsyncLifetime || hasAsyncDisposable) && disposeAsyncMethod is not null)
-                {
-                    node = node.RemoveNode(disposeAsyncMethod, SyntaxRemoveOptions.AddElasticMarker)!;
-                }
-                
-                if (hasDisposable && disposeMethod is not null)
-                {
-                    node = node.RemoveNode(disposeMethod, SyntaxRemoveOptions.AddElasticMarker)!;
-                }
-                
-                if(hasAsyncLifetime && initializeMethod is not null)
+                if(hasAsyncLifetime && GetInitializeMethod(node) is {} initializeMethod)
                 {
                     node = node
-                            
                         .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
                             node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncLifetime") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
                         .AddMembers(
                             SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "InitializeAsync")
                                 .WithModifiers(initializeMethod.Modifiers)
                                 .WithBody(initializeMethod.Body)
-                                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
                                 .WithAttributeLists(
                                     SyntaxFactory.SingletonList(
                                         SyntaxFactory.AttributeList(
                                             SyntaxFactory.SingletonSeparatedList(
-                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("Before"), SyntaxFactory.ParseAttributeArgumentList("Test")))
+                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("Before"), SyntaxFactory.ParseAttributeArgumentList("(Test)")))
                                         )
                                     )
                                 )
+                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
+                    
+                    node = node.RemoveNode(GetInitializeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
                 }
                 
-                if((hasAsyncLifetime || hasAsyncDisposable) && disposeMethod is not null)
+                if((hasAsyncLifetime || hasAsyncDisposable) && GetDisposeAsyncMethod(node) is { } disposeAsyncMethod)
                 {
                     node = node
-                        .RemoveNode(disposeMethod!, SyntaxRemoveOptions.AddElasticMarker)!
                         .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
                             node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncDisposable") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
                         .AddMembers(
                             SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "DisposeAsync")
-                                .WithModifiers(disposeMethod.Modifiers)
-                                .WithBody(disposeMethod?.Body)
-                                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                                .WithModifiers(disposeAsyncMethod.Modifiers)
+                                .WithBody(disposeAsyncMethod.Body)
                                 .WithAttributeLists(
                                     SyntaxFactory.SingletonList(
                                         SyntaxFactory.AttributeList(
                                             SyntaxFactory.SingletonSeparatedList(
-                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("Test")))
+                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("(Test)")))
                                         )
                                     )
                                 )
+                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
+                    
+                    node = node.RemoveNode(GetDisposeAsyncMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
                 }
                 
-                if(hasDisposable && disposeMethod is not null)
+                if(hasDisposable && GetDisposeMethod(node) is {} disposeMethod)
                 {
                     node = node
-                        .RemoveNode(disposeMethod!, SyntaxRemoveOptions.AddElasticMarker)!
                         .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
                             node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IDisposable") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
                         .AddMembers(
                             SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)), "Dispose")
                                 .WithModifiers(disposeMethod.Modifiers)
-                                .WithBody(disposeMethod?.Body)
-                                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                                .WithBody(disposeMethod.Body)
                                 .WithAttributeLists(
                                     SyntaxFactory.SingletonList(
                                         SyntaxFactory.AttributeList(
                                             SyntaxFactory.SingletonSeparatedList(
-                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("Test")))
+                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("(Test)")))
                                         )
                                     )
                                 )
+                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
+                    
+                    node = node.RemoveNode(GetDisposeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
                 }
             }
             else
             {
-                if (hasAsyncLifetime && initializeMethod is not null)
+                if (hasAsyncLifetime && GetInitializeMethod(node) is {} initializeMethod)
                 {
                     node = node
                         .WithBaseList(SyntaxFactory.BaseList(node.BaseList.Types.Remove(node.BaseList.Types.First(x => x.Type.TryGetInferredMemberName()!.EndsWith("IAsyncLifetime"))))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
-                        .ReplaceNode(initializeMethod, initializeMethod.WithReturnType(SyntaxFactory.ParseTypeName("Task")));
+                        .ReplaceNode(initializeMethod, initializeMethod.WithReturnType(SyntaxFactory.ParseTypeName("Task")))
+                        .NormalizeWhitespace();
                 }
             }
 
             if (node.BaseList is not null && node.BaseList.Types.Count == 0)
             {
                 node = node.WithBaseList(null)
-                    .WithOpenBraceToken(node.OpenBraceToken.WithLeadingTrivia(node.BaseList.GetTrailingTrivia()));
+                    .WithOpenBraceToken(node.OpenBraceToken.WithLeadingTrivia(node.BaseList.GetTrailingTrivia()))
+                    .NormalizeWhitespace();
             }
 
             return node.NormalizeWhitespace();
+
+            MethodDeclarationSyntax? GetInitializeMethod(ClassDeclarationSyntax classDeclaration)
+            {
+                return classDeclaration.Members
+                    .OfType<MethodDeclarationSyntax>()
+                    .FirstOrDefault(m => m.Identifier.Text == "InitializeAsync");
+            }
+
+            MethodDeclarationSyntax? GetDisposeAsyncMethod(ClassDeclarationSyntax classDeclaration)
+            {
+                return classDeclaration.Members
+                    .OfType<MethodDeclarationSyntax>()
+                    .FirstOrDefault(m => m.Identifier.Text == "DisposeAsync");
+            }
+
+            MethodDeclarationSyntax? GetDisposeMethod(ClassDeclarationSyntax classDeclaration)
+            {
+                return classDeclaration.Members
+                    .OfType<MethodDeclarationSyntax>()
+                    .FirstOrDefault(m => m.Identifier.Text == "Dispose");
+            }
         }
     }
 
