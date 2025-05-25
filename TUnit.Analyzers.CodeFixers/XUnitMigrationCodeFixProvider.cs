@@ -188,7 +188,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                         nameColon: null,
                         expression: GetMethodArgumentName(attributeSyntax)
                     )
-                )
+                ).NormalizeWhitespace()
         ));
 
         return attributes;
@@ -283,6 +283,9 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                     SyntaxFactory.Literal("GetEnumerator")))))
                     ],
                     "Collection" or "CollectionAttribute" => ConvertCollection(compilation, attr),
+                    "CollectionDefinition" or "CollectionDefinitionAttribute" => [SyntaxFactory.Attribute(
+                        SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
+                            SyntaxFactory.IdentifierName("Obsolete")))],
                     _ => [attr]
                 };
 

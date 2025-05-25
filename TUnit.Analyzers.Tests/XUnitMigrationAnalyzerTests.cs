@@ -152,7 +152,7 @@ public class XUnitMigrationAnalyzerTests
                     }
                     
                     [System.Obsolete]
-                    public class MyCollection : ICollectionFixture<MyType>
+                    public class MyCollection 
                     {
                     }
                     """
@@ -252,7 +252,7 @@ public class XUnitMigrationAnalyzerTests
                 }
 
                 [System.Obsolete]
-                public class MyCollection : ICollectionFixture<MyType>
+                public class MyCollection 
                 {
                 }
                 """
@@ -346,9 +346,9 @@ public class XUnitMigrationAnalyzerTests
                 public class MyType;
 
                 [ClassDataSource<MyType>(Shared = SharedType.PerClass)]
-                public class MyClass(MyType myType)
+                public class MyClass(MyType myType) 
                 {
-                    [Fact]
+                    [Test]
                     public void MyTest()
                     {
                     }
