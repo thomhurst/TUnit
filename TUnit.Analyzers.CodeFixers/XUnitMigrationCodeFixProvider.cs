@@ -24,7 +24,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             var diagnosticSpan = diagnostic.Location.SourceSpan;
 
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-            
+
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Rules.XunitMigration.Title.ToString(),
@@ -33,11 +33,9 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 diagnostic);
         }
     }
-    
+
     private static async Task<Document> ConvertCodeAsync(Document document, SyntaxNode? node, CancellationToken cancellationToken)
     {
-        var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
-        
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
         if (root is null)
@@ -45,32 +43,25 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        await UpdateClassAttributesAsync(editor, root);
-        
-        return editor.GetChangedDocument();
-    }
-    
-    private static async Task UpdateClassAttributesAsync(DocumentEditor editor, SyntaxNode root)
-    {
-        // Find the class declaration by name
-        var classDeclarations = root.DescendantNodes()
-            .OfType<ClassDeclarationSyntax>();
+        // Collect all changes
+        var updatedRoot = await UpdateClassAttributesAsync(root);
 
+        // Apply all changes in one step
+        return document.WithSyntaxRoot(updatedRoot);
+    }
+
+    private static async Task<SyntaxNode> UpdateClassAttributesAsync(SyntaxNode root)
+    {
+        var classDeclarations = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+
+        var rewriter = new AttributeRewriter();
+        
         foreach (var classDeclaration in classDeclarations)
         {
-            foreach (var attributeSyntax in classDeclaration.AttributeLists.SelectMany(x => x.Attributes))
-            {
-                await ConvertAttribute(editor, attributeSyntax);
-            }
-
-            foreach (var methodDeclaration in classDeclaration.DescendantNodes().OfType<MethodDeclarationSyntax>())
-            {
-                foreach (var attributeSyntax in methodDeclaration.AttributeLists.SelectMany(x => x.Attributes))
-                {
-                    await ConvertAttribute(editor, attributeSyntax);
-                }
-            }
+            root = rewriter.Visit(classDeclaration);
         }
+
+        return root;
     }
 
     private static async Task ConvertAttribute(DocumentEditor editor, AttributeSyntax attributeSyntax)
@@ -81,37 +72,52 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         {
             "Fact" or "FactAttribute"
                 or "Theory" or "TheoryAttribute" => ConvertTestAttribute(attributeSyntax),
-            
-            "Trait" or "TraitAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"),
-                attributeSyntax.ArgumentList)],
 
-            "InlineData" or "InlineDataAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"),
-                attributeSyntax.ArgumentList)],
+            "Trait" or "TraitAttribute" =>
+            [
+                SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"),
+                    attributeSyntax.ArgumentList)
+            ],
 
-            "MemberData" or "MemberDataAttribute" => [SyntaxFactory.Attribute(
-                SyntaxFactory.IdentifierName("MethodDataSource"), attributeSyntax.ArgumentList)],
+            "InlineData" or "InlineDataAttribute" =>
+            [
+                SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"),
+                    attributeSyntax.ArgumentList)
+            ],
 
-            "ClassData" or "ClassDataAttribute" => [SyntaxFactory.Attribute(
-                SyntaxFactory.IdentifierName("MethodDataSource"),
-                (attributeSyntax.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(
-                    SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal("GetEnumerator")))))],
+            "MemberData" or "MemberDataAttribute" =>
+            [
+                SyntaxFactory.Attribute(
+                    SyntaxFactory.IdentifierName("MethodDataSource"), attributeSyntax.ArgumentList)
+            ],
+
+            "ClassData" or "ClassDataAttribute" =>
+            [
+                SyntaxFactory.Attribute(
+                    SyntaxFactory.IdentifierName("MethodDataSource"),
+                    (attributeSyntax.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(
+                        SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
+                            SyntaxFactory.Literal("GetEnumerator")))))
+            ],
 
             "Collection" or "CollectionAttribute" => await ConvertCollection(editor, attributeSyntax),
 
-            "CollectionDefinition" or "CollectionDefinitionAttribute" => [SyntaxFactory.Attribute(
-                SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
-                    SyntaxFactory.IdentifierName("Obsolete")))],
+            "CollectionDefinition" or "CollectionDefinitionAttribute" =>
+            [
+                SyntaxFactory.Attribute(
+                    SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
+                        SyntaxFactory.IdentifierName("Obsolete")))
+            ],
 
             _ => [attributeSyntax]
         };
 
         var list = (AttributeListSyntax)attributeSyntax.Parent!;
-        
+
         var newAttributeList = list
             .RemoveNode(attributeSyntax, SyntaxRemoveOptions.AddElasticMarker)!
             .AddAttributes(newSyntaxes.ToArray());
-        
+
         editor.ReplaceNode(list, newAttributeList);
     }
 
@@ -131,7 +137,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
     {
         yield return SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Test"));
 
-        if (attributeSyntax.ArgumentList?.Arguments.FirstOrDefault(x => x.NameEquals?.Name.Identifier.ValueText == "Skip") is {} skip)
+        if (attributeSyntax.ArgumentList?.Arguments.FirstOrDefault(x => x.NameEquals?.Name.Identifier.ValueText == "Skip") is { } skip)
         {
             yield return SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Skip"))
                 .AddArgumentListArguments(SyntaxFactory.AttributeArgument(skip.Expression));
@@ -146,7 +152,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         {
             return [attributeSyntax];
         }
-        
+
         var collectionDefinition = GetCollectionAttribute(compilation, attributeSyntax);
 
         if (collectionDefinition is null)
@@ -155,38 +161,37 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
 
         var disableParallelism =
-            collectionDefinition.ArgumentList?.Arguments.Any(
-                x => x.NameEquals?.Name.Identifier.Text == "DisableParallelization"
-                     && x.Expression is LiteralExpressionSyntax { Token.ValueText: "true" }) ?? false;
+            collectionDefinition.ArgumentList?.Arguments.Any(x => x.NameEquals?.Name.Identifier.Text == "DisableParallelization"
+                && x.Expression is LiteralExpressionSyntax { Token.ValueText: "true" }) ?? false;
 
         var attributes = new List<AttributeSyntax>();
-        
+
         if (disableParallelism)
         {
             attributes.Add(SyntaxFactory.Attribute(SyntaxFactory.ParseName("NotInParallel")));
         }
-        
+
         var baseListSyntax = collectionDefinition.Parent?.Parent?.ChildNodes().OfType<BaseListSyntax>().FirstOrDefault();
 
         if (baseListSyntax is null)
         {
             return attributes;
         }
-        
+
         var collectionFixture = baseListSyntax.Types.Select(x => x.Type).OfType<GenericNameSyntax>().FirstOrDefault(x => x.Identifier.Text == "ICollectionFixture");
-        
+
         if (collectionFixture is null)
         {
             return attributes;
         }
-        
+
         var type = collectionFixture.TypeArgumentList.Arguments.FirstOrDefault();
 
         if (type is null)
         {
             return attributes;
         }
-        
+
         attributes.Add(SyntaxFactory.Attribute(
             SyntaxFactory.GenericName(SyntaxFactory.Identifier("ClassDataSource"),
                 SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList(type))),
@@ -216,7 +221,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         {
             return SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(""));
         }
-        
+
         return SyntaxFactory.ParseExpression(firstToken.Value.Text);
     }
 
@@ -231,26 +236,26 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
 
         var classDeclaration = collectionAttribute.Parent?.Parent;
-        
+
         if (classDeclaration is null)
         {
             return SyntaxFactory.TypeArgumentList();
         }
-        
+
         var classSymbol = compilation.GetSemanticModel(classDeclaration.SyntaxTree).GetDeclaredSymbol(classDeclaration);
-        
+
         if (classSymbol is not ITypeSymbol typeSymbol)
         {
             return SyntaxFactory.TypeArgumentList();
         }
-        
+
         var interfaceType = typeSymbol.AllInterfaces.FirstOrDefault(x => x.Name == "ICollectionFixture");
 
         if (interfaceType is null)
         {
             return SyntaxFactory.TypeArgumentList();
         }
-        
+
         return SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
             SyntaxFactory.IdentifierName(interfaceType.TypeArguments.First().Name)
         ));
@@ -266,7 +271,8 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
 
         var collectionName = firstToken.Value.IsKind(SyntaxKind.NameOfKeyword)
-            ? GetNameFromNameOfToken(firstToken.Value) : firstToken.Value.ValueText;
+            ? GetNameFromNameOfToken(firstToken.Value)
+            : firstToken.Value.ValueText;
 
         if (collectionName is null)
         {
@@ -280,15 +286,16 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             .FirstOrDefault(x =>
             {
                 var syntaxToken = x.ArgumentList?.Arguments.FirstOrDefault()?.GetFirstToken();
-                
+
                 if (!syntaxToken.HasValue)
                 {
                     return false;
                 }
-                
+
                 var name = syntaxToken.Value.IsKind(SyntaxKind.NameOfKeyword)
-                    ? GetNameFromNameOfToken(syntaxToken.Value) : syntaxToken.Value.ValueText;
-                
+                    ? GetNameFromNameOfToken(syntaxToken.Value)
+                    : syntaxToken.Value.ValueText;
+
                 return name == collectionName;
             });
     }
@@ -304,5 +311,33 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
 
         return null;
+    }
+
+    private class AttributeRewriter : CSharpSyntaxRewriter
+    {
+        public override SyntaxNode VisitAttribute(AttributeSyntax node)
+        {
+            var name = GetSimpleName(node);
+
+            var newAttributes = name switch
+            {
+                "Fact" or "FactAttribute" or "Theory" or "TheoryAttribute" => ConvertTestAttribute(node),
+                "Trait" or "TraitAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Property"), node.ArgumentList)],
+                "InlineData" or "InlineDataAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("Arguments"), node.ArgumentList)],
+                "MemberData" or "MemberDataAttribute" => [SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MethodDataSource"), node.ArgumentList)],
+                "ClassData" or "ClassDataAttribute" =>
+                [
+                    SyntaxFactory.Attribute(
+                        SyntaxFactory.IdentifierName("MethodDataSource"),
+                        (node.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(
+                            SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
+                                SyntaxFactory.Literal("GetEnumerator")))))
+                ],
+                _ => [node]
+            };
+
+            // Wrap the SeparatedSyntaxList in an AttributeListSyntax
+            return SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(newAttributes));
+        }
     }
 }
