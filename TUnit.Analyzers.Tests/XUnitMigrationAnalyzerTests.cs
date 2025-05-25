@@ -410,4 +410,58 @@ public class XUnitMigrationAnalyzerTests
                 """
             );
     }
+    
+    [Test]
+    public async Task Test_Initialize_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+                using Xunit;
+
+                public class MyClass : IAsyncLifetime
+                {
+                    public ValueTask InitializeAsync()
+                    {
+                        return default;
+                    }
+
+                    public ValueTask DisposeAsync()
+                    {
+                        return default;
+                    }
+
+                    [Fact]
+                    public void MyTest()
+                    {
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                    
+                    [Before(Test)]
+                    public Task InitializeAsync()
+                    {
+                        return Task.CompletedTask;
+                    }
+                    
+                    [After(Test)]
+                    public Task DisposeAsync()
+                    {
+                        return Task.CompletedTask;
+                    }
+                }
+                """
+            );
+    }
 }

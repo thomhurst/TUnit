@@ -56,8 +56,12 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         
         var syntaxTree = root.SyntaxTree;
         
+        var updatedRoot = UpdateInitializeDispose(compilation, root);
+        
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        
         // Convert all attributes in the syntax tree
-        var updatedRoot = UpdateClassAttributesAsync(compilation, root);
+        updatedRoot = UpdateClassAttributes(compilation, root);
         
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
         
@@ -75,10 +79,24 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         return document.WithSyntaxRoot(updatedRoot);
     }
 
-    private static void UpdateSyntaxTrees(ref Compilation compilation, ref SyntaxTree syntaxTree, SyntaxNode updatedRoot)
+    private static SyntaxNode UpdateInitializeDispose(Compilation compilation, SyntaxNode root)
     {
-        compilation = compilation.ReplaceSyntaxTree(syntaxTree, updatedRoot.SyntaxTree);
-        syntaxTree = updatedRoot.SyntaxTree;
+        foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+        {
+            var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
+            
+            if (semanticModel.GetDeclaredSymbol(classDeclaration) is not { } symbol)
+            {
+                continue;
+            }
+            
+            root = root.ReplaceNode(
+                classDeclaration,
+                new InitializeDisposeRewriter(symbol).VisitClassDeclaration(classDeclaration)
+            );
+        }
+
+        return root;
     }
 
     private static SyntaxNode RemoveInterfacesAndBaseClasses(Compilation compilation, SyntaxNode root)
@@ -114,7 +132,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             SyntaxRemoveOptions.AddElasticMarker)!;
     }
 
-    private static SyntaxNode UpdateClassAttributesAsync(Compilation compilation, SyntaxNode root)
+    private static SyntaxNode UpdateClassAttributes(Compilation compilation, SyntaxNode root)
     {
         var rewriter = new AttributeRewriter(compilation);
         
@@ -310,10 +328,9 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 .WithTrailingTrivia(node.GetTrailingTrivia());
         }
     }
-    
+
     private class BaseTypeRewriter(INamedTypeSymbol namedTypeSymbol) : CSharpSyntaxRewriter
     {
-        
         public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             if (node.BaseList is null)
@@ -353,12 +370,163 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             {
                 // Preserve original trivia instead of forcing elastic trivia
                 return node.WithBaseList(null)
-                    .WithOpenBraceToken(node.OpenBraceToken.WithLeadingTrivia(node.BaseList.GetTrailingTrivia()));
+                    .WithOpenBraceToken(node.OpenBraceToken.WithLeadingTrivia(node.BaseList!.GetTrailingTrivia()));
             }
 
-            var baseListSyntax = node.BaseList.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList));
+            var baseListSyntax = node.BaseList!.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList));
             
             return node.WithBaseList(baseListSyntax);
         }
+    }
+    
+    private class InitializeDisposeRewriter(INamedTypeSymbol namedTypeSymbol) : CSharpSyntaxRewriter
+    {
+        public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
+        {
+            if (node.BaseList is null)
+            {
+                return node;
+            }
+
+            var interfaces = namedTypeSymbol.AllInterfaces
+                .Where(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) is "global::Xunit.IAsyncLifetime" or "global::System.IAsyncDisposable" or "global::System.IDisposable")
+                .ToArray();
+
+            if (interfaces.Length == 0)
+            {
+                return node;
+            }
+            
+            var hasAsyncLifetime = interfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == "global::Xunit.IAsyncLifetime");
+            var hasAsyncDisposable = interfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == "global::System.IAsyncDisposable");
+            var hasDisposable = interfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == "global::System.IDisposable");
+
+            var isTestClass = namedTypeSymbol
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Any(m => m.GetAttributes()
+                    .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) is "global::Xunit.FactAttribute"
+                        or "global::Xunit.TheoryAttribute")
+                );
+            
+            var initializeMethod = node.Members
+                .OfType<MethodDeclarationSyntax>()
+                .FirstOrDefault(m => m.Identifier.Text == "InitializeAsync");
+            
+            var disposeAsyncMethod = node.Members
+                .OfType<MethodDeclarationSyntax>()
+                .FirstOrDefault(m => m.Identifier.Text == "DisposeAsync");
+            
+            var disposeMethod = node.Members
+                .OfType<MethodDeclarationSyntax>()
+                .FirstOrDefault(m => m.Identifier.Text == "Dispose");
+
+            if (isTestClass)
+            {
+                if (hasAsyncLifetime && initializeMethod is not null)
+                {
+                    node = node.RemoveNode(initializeMethod, SyntaxRemoveOptions.AddElasticMarker)!;
+                }
+                
+                if ((hasAsyncLifetime || hasAsyncDisposable) && disposeAsyncMethod is not null)
+                {
+                    node = node.RemoveNode(disposeAsyncMethod, SyntaxRemoveOptions.AddElasticMarker)!;
+                }
+                
+                if (hasDisposable && disposeMethod is not null)
+                {
+                    node = node.RemoveNode(disposeMethod, SyntaxRemoveOptions.AddElasticMarker)!;
+                }
+                
+                if(hasAsyncLifetime && initializeMethod is not null)
+                {
+                    node = node
+                            
+                        .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
+                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncLifetime") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
+                        .AddMembers(
+                            SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "InitializeAsync")
+                                .WithModifiers(initializeMethod.Modifiers)
+                                .WithBody(initializeMethod.Body)
+                                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                                .WithAttributeLists(
+                                    SyntaxFactory.SingletonList(
+                                        SyntaxFactory.AttributeList(
+                                            SyntaxFactory.SingletonSeparatedList(
+                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("Before"), SyntaxFactory.ParseAttributeArgumentList("Test")))
+                                        )
+                                    )
+                                )
+                        );
+                }
+                
+                if((hasAsyncLifetime || hasAsyncDisposable) && disposeMethod is not null)
+                {
+                    node = node
+                        .RemoveNode(disposeMethod!, SyntaxRemoveOptions.AddElasticMarker)!
+                        .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
+                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncDisposable") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
+                        .AddMembers(
+                            SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "DisposeAsync")
+                                .WithModifiers(disposeMethod.Modifiers)
+                                .WithBody(disposeMethod?.Body)
+                                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                                .WithAttributeLists(
+                                    SyntaxFactory.SingletonList(
+                                        SyntaxFactory.AttributeList(
+                                            SyntaxFactory.SingletonSeparatedList(
+                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("Test")))
+                                        )
+                                    )
+                                )
+                        );
+                }
+                
+                if(hasDisposable && disposeMethod is not null)
+                {
+                    node = node
+                        .RemoveNode(disposeMethod!, SyntaxRemoveOptions.AddElasticMarker)!
+                        .WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
+                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IDisposable") is null or false)))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
+                        .AddMembers(
+                            SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)), "Dispose")
+                                .WithModifiers(disposeMethod.Modifiers)
+                                .WithBody(disposeMethod?.Body)
+                                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                                .WithAttributeLists(
+                                    SyntaxFactory.SingletonList(
+                                        SyntaxFactory.AttributeList(
+                                            SyntaxFactory.SingletonSeparatedList(
+                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("Test")))
+                                        )
+                                    )
+                                )
+                        );
+                }
+            }
+            else
+            {
+                if (hasAsyncLifetime && initializeMethod is not null)
+                {
+                    node = node
+                        .WithBaseList(SyntaxFactory.BaseList(node.BaseList.Types.Remove(node.BaseList.Types.First(x => x.Type.TryGetInferredMemberName()!.EndsWith("IAsyncLifetime"))))).WithTrailingTrivia(node.BaseList.GetTrailingTrivia())
+                        .ReplaceNode(initializeMethod, initializeMethod.WithReturnType(SyntaxFactory.ParseTypeName("Task")));
+                }
+            }
+
+            if (node.BaseList is not null && node.BaseList.Types.Count == 0)
+            {
+                node = node.WithBaseList(null)
+                    .WithOpenBraceToken(node.OpenBraceToken.WithLeadingTrivia(node.BaseList.GetTrailingTrivia()));
+            }
+
+            return node.NormalizeWhitespace();
+        }
+    }
+
+    private static void UpdateSyntaxTrees(ref Compilation compilation, ref SyntaxTree syntaxTree, SyntaxNode updatedRoot)
+    {
+        compilation = compilation.ReplaceSyntaxTree(syntaxTree, updatedRoot.SyntaxTree);
+        syntaxTree = updatedRoot.SyntaxTree;
     }
 }
