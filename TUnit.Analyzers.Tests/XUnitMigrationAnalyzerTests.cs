@@ -343,6 +343,7 @@ public class XUnitMigrationAnalyzerTests
                 """,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
+                
                 public class MyType;
 
                 [ClassDataSource<MyType>(Shared = SharedType.PerClass)]

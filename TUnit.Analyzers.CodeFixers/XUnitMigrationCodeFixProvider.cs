@@ -54,19 +54,31 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
         
+        var syntaxTree = root.SyntaxTree;
+        
         // Convert all attributes in the syntax tree
         var updatedRoot = UpdateClassAttributesAsync(compilation, root);
         
-        compilation = compilation.ReplaceSyntaxTree(root.SyntaxTree, updatedRoot.SyntaxTree);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
         
         // Remove all xUnit specific interfaces and base classes
         updatedRoot = RemoveInterfacesAndBaseClasses(compilation, updatedRoot);
+        
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
 
         // Remove using directives that are no longer needed
         updatedRoot = RemoveUsingDirectives(updatedRoot);
         
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        
         // Apply all changes in one step
         return document.WithSyntaxRoot(updatedRoot);
+    }
+
+    private static void UpdateSyntaxTrees(ref Compilation compilation, ref SyntaxTree syntaxTree, SyntaxNode updatedRoot)
+    {
+        compilation = compilation.ReplaceSyntaxTree(syntaxTree, updatedRoot.SyntaxTree);
+        syntaxTree = updatedRoot.SyntaxTree;
     }
 
     private static SyntaxNode RemoveInterfacesAndBaseClasses(Compilation compilation, SyntaxNode root)
@@ -309,14 +321,31 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 return node;
             }
 
-            ITypeSymbol[] types = namedTypeSymbol.BaseType != null && namedTypeSymbol.BaseType.SpecialType != SpecialType.System_Object
+            INamedTypeSymbol[] types = namedTypeSymbol.BaseType != null && namedTypeSymbol.BaseType.SpecialType != SpecialType.System_Object
                 ? [namedTypeSymbol.BaseType, ..namedTypeSymbol.AllInterfaces] 
                 : [..namedTypeSymbol.AllInterfaces];
+            
+            var classFixturesToConvert = types
+                .Where(x => x.Name == "IClassFixture" && x.ContainingNamespace.Name.StartsWith("Xunit"))
+                .Select(x => SyntaxFactory.Attribute(
+                    SyntaxFactory.GenericName(SyntaxFactory.ParseToken("ClassDataSource"), SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.ParseTypeName(x.TypeArguments.First().ToDisplayString())))).WithoutTrailingTrivia(),
+                    SyntaxFactory.AttributeArgumentList()
+                        .AddArguments(
+                            SyntaxFactory.AttributeArgument(
+                                nameEquals: SyntaxFactory.NameEquals("Shared"),
+                                nameColon: null,
+                                expression: SyntaxFactory.ParseExpression("SharedType.PerClass")
+                            )
+                        )
+                ).WithLeadingTrivia(SyntaxFactory.ElasticMarker))
+                .ToList();
+            
+            node = node.AddAttributeLists(SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(classFixturesToConvert)));
             
             var newBaseList = types.Where(x => !x.ContainingNamespace.Name.StartsWith("Xunit"))
                 .Select(x => SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(x.ToDisplayString())))
                 .ToList();
-
+            
             if (newBaseList.Count == 0)
             {
                 // Preserve original trivia instead of forcing elastic trivia
