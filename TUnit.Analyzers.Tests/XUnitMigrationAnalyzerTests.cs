@@ -1,9 +1,9 @@
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitAttributesAnalyzer>;
-using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitAttributesAnalyzer, TUnit.Analyzers.CodeFixers.XUnitAttributesCodeFixProvider>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitMigrationAnalyzer>;
+using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitMigrationAnalyzer, TUnit.Analyzers.CodeFixers.XUnitMigrationCodeFixProvider>;
 
 namespace TUnit.Analyzers.Tests;
 
-public class XUnitAttributesAnalyzerTests
+public class XUnitMigrationAnalyzerTests
 {
     [Arguments("Fact")]
     [Arguments("Theory")]
@@ -25,7 +25,7 @@ public class XUnitAttributesAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0)
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
             );
     }
     
@@ -58,7 +58,7 @@ public class XUnitAttributesAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 $$"""
                 using TUnit.Core;
                 using Xunit;
@@ -95,7 +95,7 @@ public class XUnitAttributesAnalyzerTests
                       }
                   }
                   """,
-                Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 $$"""
                   using TUnit.Core;
                   using Xunit;
@@ -137,8 +137,8 @@ public class XUnitAttributesAnalyzerTests
                 }
                 """,
                 [
-                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
-                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(1)
+                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(1)
                     ],
                     """
                     using TUnit.Core;
@@ -189,8 +189,8 @@ public class XUnitAttributesAnalyzerTests
                 }
                 """,
                 [
-                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
-                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(1)
+                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(1)
                 ],
                 """
                 using TUnit.Core;
@@ -241,8 +241,8 @@ public class XUnitAttributesAnalyzerTests
                 }
                 """,
                 [
-                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
-                    Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(1)
+                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                    Verifier.Diagnostic(Rules.XunitMigration).WithLocation(1)
                 ],
                 """
                 using TUnit.Core;
@@ -290,7 +290,7 @@ public class XUnitAttributesAnalyzerTests
                       }
                   }
                   """,
-                Verifier.Diagnostic(Rules.XunitAttributes).WithLocation(0),
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 $$"""
                   using System;
                   using TUnit.Core;

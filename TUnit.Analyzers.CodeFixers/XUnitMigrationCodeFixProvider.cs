@@ -9,11 +9,11 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace TUnit.Analyzers.CodeFixers;
 
-[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(XUnitAttributesCodeFixProvider)), Shared]
-public class XUnitAttributesCodeFixProvider : CodeFixProvider
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(XUnitMigrationCodeFixProvider)), Shared]
+public class XUnitMigrationCodeFixProvider : CodeFixProvider
 {
     public override sealed ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.XunitAttributes.Id);
+        ImmutableArray.Create(Rules.XunitMigration.Id);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -27,16 +27,16 @@ public class XUnitAttributesCodeFixProvider : CodeFixProvider
             
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    title: Rules.XunitAttributes.Title.ToString(),
-                    createChangedDocument: c => ConvertAttributesAsync(context.Document, root?.FindNode(diagnosticSpan), c),
-                    equivalenceKey: Rules.XunitAttributes.Title.ToString()),
+                    title: Rules.XunitMigration.Title.ToString(),
+                    createChangedDocument: c => ConvertCodeAsync(context.Document, root?.FindNode(diagnosticSpan), c),
+                    equivalenceKey: Rules.XunitMigration.Title.ToString()),
                 diagnostic);
         }
     }
     
-    private static async Task<Document> ConvertAttributesAsync(Document document, SyntaxNode? node, CancellationToken cancellationToken)
+    private static async Task<Document> ConvertCodeAsync(Document document, SyntaxNode? node, CancellationToken cancellationToken)
     {
-        if (node is not AttributeSyntax attributeSyntax)
+        if (node is not ClassDeclarationSyntax classDeclarationSyntax)
         {
             return document;
         }
