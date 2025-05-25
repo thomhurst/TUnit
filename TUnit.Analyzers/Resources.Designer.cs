@@ -1437,87 +1437,6 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to xUnit attribute can be converted to TUnit attribute..
-        /// </summary>
-        internal static string TUnit0052Description {
-            get {
-                return ResourceManager.GetString("TUnit0052Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to xUnit attribute can be converted to TUnit attribute.
-        /// </summary>
-        internal static string TUnit0052MessageFormat {
-            get {
-                return ResourceManager.GetString("TUnit0052MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to xUnit attribute can be converted to TUnit attribute.
-        /// </summary>
-        internal static string TUnit0052Title {
-            get {
-                return ResourceManager.GetString("TUnit0052Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute..
-        /// </summary>
-        internal static string TUnit0053Description {
-            get {
-                return ResourceManager.GetString("TUnit0053Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute.
-        /// </summary>
-        internal static string TUnit0053MessageFormat {
-            get {
-                return ResourceManager.GetString("TUnit0053MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to xUnit class fixture can be converted to TUnit attribute.
-        /// </summary>
-        internal static string TUnit0053Title {
-            get {
-                return ResourceManager.GetString("TUnit0053Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit..
-        /// </summary>
-        internal static string TUnit0054Description {
-            get {
-                return ResourceManager.GetString("TUnit0054Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit.
-        /// </summary>
-        internal static string TUnit0054MessageFormat {
-            get {
-                return ResourceManager.GetString("TUnit0054MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to xUnit using directives can be removed once migrated to TUnit.
-        /// </summary>
-        internal static string TUnit0054Title {
-            get {
-                return ResourceManager.GetString("TUnit0054Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Overwriting the Console writer can break TUnit logging..
         /// </summary>
         internal static string TUnit0055Description {
@@ -1568,6 +1487,33 @@ namespace TUnit.Analyzers {
         internal static string TUnit0056Title {
             get {
                 return ResourceManager.GetString("TUnit0056Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit code can be converted to TUnit code..
+        /// </summary>
+        internal static string TUXU0001Description {
+            get {
+                return ResourceManager.GetString("TUXU0001Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit code can be converted to TUnit code.
+        /// </summary>
+        internal static string TUXU0001MessageFormat {
+            get {
+                return ResourceManager.GetString("TUXU0001MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to xUnit code can be converted to TUnit code.
+        /// </summary>
+        internal static string TUXU0001Title {
+            get {
+                return ResourceManager.GetString("TUXU0001Title", resourceCulture);
             }
         }
     }

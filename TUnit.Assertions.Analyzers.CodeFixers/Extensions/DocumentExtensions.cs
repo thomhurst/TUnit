@@ -16,7 +16,7 @@ public static class DocumentExtensions
         }
 
         var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(namespaceName).WithLeadingTrivia(SyntaxFactory.Space))
-            .WithTrailingTrivia(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? SyntaxFactory.ElasticCarriageReturnLineFeed : SyntaxFactory.ElasticLineFeed);
+            .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
 
         return root.AddUsings(usingDirective);
     }

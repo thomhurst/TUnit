@@ -25,25 +25,14 @@ In your csproj add:
 
 This is temporary - Just to make sure no types clash, and so the code fixers can distinguish between xUnit and TUnit types with similar names.
 
-### Rebuild the project
+#### Rebuild the project
 This ensures the TUnit packages have been restored and the analyzers should be loaded.
 
-#### Run the code fixers via the dotnet CLI
+#### Run the code fixer via the dotnet CLI
 
-Running them in a specific order is recommended.
-So try the following:
+`dotnet format analyzers --severity info --diagnostics TUXU0001`
 
-`dotnet format analyzers --severity info --diagnostics TUnit0052`
-
-`dotnet format analyzers --severity info --diagnostics TUnit0053`
-
-`dotnet format analyzers --severity info --diagnostics TUnitAssertions0009`
-
-Revert step `Remove the automatically added global usings`
-
-`dotnet format analyzers --severity info --diagnostics TUnit0054`
-
-`dotnet format analyzers --severity info --diagnostics TUnitAssertions0002`
+#### Revert step `Remove the automatically added global usings`
 
 #### Perform any manual bits that are still necessary
 This bit's on you! You'll have to work out what still needs doing.
