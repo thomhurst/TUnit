@@ -39,19 +39,72 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         {
             return document;
         }
-
-        // Collect all changes
-        var compilation = await document.Project.GetCompilationAsync(cancellationToken);
         
-        var updatedRoot = UpdateClassAttributesAsync(compilation, root);
+        var compilation = await document.Project.GetCompilationAsync(cancellationToken);
 
+        if (compilation is null)
+        {
+            return document;
+        }
+        
+        var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
+        
+        if (semanticModel is null)
+        {
+            return document;
+        }
+        
+        // Convert all attributes in the syntax tree
+        var updatedRoot = UpdateClassAttributesAsync(compilation, root);
+        
+        compilation = compilation.ReplaceSyntaxTree(root.SyntaxTree, updatedRoot.SyntaxTree);
+        
+        // Remove all xUnit specific interfaces and base classes
+        updatedRoot = RemoveInterfacesAndBaseClasses(compilation, updatedRoot);
+
+        // Remove using directives that are no longer needed
+        updatedRoot = RemoveUsingDirectives(updatedRoot);
+        
         // Apply all changes in one step
         return document.WithSyntaxRoot(updatedRoot);
     }
 
-    private static SyntaxNode UpdateClassAttributesAsync(Compilation? compilation, SyntaxNode root)
+    private static SyntaxNode RemoveInterfacesAndBaseClasses(Compilation compilation, SyntaxNode root)
     {
-        var rewriter = new AttributeRewriter(compilation!);
+        foreach (var classDeclaration in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+        {
+            if (classDeclaration.BaseList is null)
+            {
+                continue;
+            }
+
+            var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
+            
+            if (semanticModel.GetDeclaredSymbol(classDeclaration) is not { } symbol)
+            {
+                continue;
+            }
+
+            root = root.ReplaceNode(
+                classDeclaration,
+                new BaseTypeRewriter(symbol).VisitClassDeclaration(classDeclaration)
+            );
+        }
+
+        return root;
+    }
+
+    private static SyntaxNode RemoveUsingDirectives(SyntaxNode updatedRoot)
+    {
+        return updatedRoot.RemoveNodes(
+            updatedRoot.DescendantNodes().OfType<UsingDirectiveSyntax>()
+                .Where(x => x.Name?.ToString().StartsWith("Xunit") is true),
+            SyntaxRemoveOptions.AddElasticMarker)!;
+    }
+
+    private static SyntaxNode UpdateClassAttributesAsync(Compilation compilation, SyntaxNode root)
+    {
+        var rewriter = new AttributeRewriter(compilation);
         
         return rewriter.Visit(root);
     }
@@ -236,7 +289,40 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 newAttributes.AddRange(converted);
             }
 
-            return SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(newAttributes));
+            return SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(newAttributes))
+                .WithLeadingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
+        }
+    }
+    
+    private class BaseTypeRewriter(INamedTypeSymbol namedTypeSymbol) : CSharpSyntaxRewriter
+    {
+        
+        public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
+        {
+            if (node.BaseList is null)
+            {
+                return node;
+            }
+
+            ITypeSymbol[] types = namedTypeSymbol.BaseType != null && namedTypeSymbol.BaseType.SpecialType != SpecialType.System_Object
+                ? [namedTypeSymbol.BaseType, ..namedTypeSymbol.AllInterfaces] 
+                : [..namedTypeSymbol.AllInterfaces];
+            
+            var newBaseList = types.Where(x => !x.ContainingNamespace.Name.StartsWith("Xunit"))
+                .Select(x => SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(x.ToDisplayString())))
+                .ToList();
+
+            if (newBaseList.Count == 0)
+            {
+                return node.WithBaseList(null)
+                    .WithLeadingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+                    .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
+            }
+
+            return node.WithBaseList(node.BaseList.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList)))
+                .WithLeadingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
+                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
         }
     }
 }
