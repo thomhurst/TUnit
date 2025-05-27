@@ -67,14 +67,92 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         updatedRoot = RemoveInterfacesAndBaseClasses(compilation, updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
 
-        updatedRoot = RemoveUsingDirectives(updatedRoot);
+        updatedRoot = ConvertTheoryData(compilation, updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
 
-        updatedRoot = ConvertTheoryData(compilation, updatedRoot);
+        updatedRoot = ConvertTestOutputHelpers(ref compilation, ref syntaxTree, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+
+        updatedRoot = RemoveUsingDirectives(updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
         
         // Apply all changes in one step
         return document.WithSyntaxRoot(updatedRoot);
+    }
+
+    private static SyntaxNode ConvertTestOutputHelpers(ref Compilation compilation, ref SyntaxTree syntaxTree, SyntaxNode root)
+    {
+        var currentRoot = root;
+
+        var compilationValue = compilation;
+        
+        while (currentRoot.DescendantNodes()
+               .OfType<InvocationExpressionSyntax>()
+               .FirstOrDefault(x => IsTestOutputHelperInvocation(compilationValue, x))
+               is {} invocationExpressionSyntax)
+        {
+            var memberAccessExpressionSyntax = (MemberAccessExpressionSyntax)invocationExpressionSyntax.Expression;
+
+            currentRoot = currentRoot.ReplaceNode(
+                invocationExpressionSyntax,
+                invocationExpressionSyntax.WithExpression(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName("Console"),
+                        SyntaxFactory.IdentifierName(memberAccessExpressionSyntax.Name.Identifier.Text)
+                    )
+                )
+            );
+            
+            UpdateSyntaxTrees(ref compilation, ref syntaxTree, currentRoot);
+            compilationValue = compilation;
+        }
+
+        while (currentRoot.DescendantNodes()
+                     .OfType<ParameterSyntax>()
+                     .FirstOrDefault(x => x.Type?.TryGetInferredMemberName() == "ITestOutputHelper") 
+               is {} parameterSyntax)
+        {
+            currentRoot = currentRoot.RemoveNode(parameterSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
+        }
+        
+        while (currentRoot.DescendantNodes()
+                     .OfType<PropertyDeclarationSyntax>()
+                     .FirstOrDefault(x => x.Type.TryGetInferredMemberName() == "ITestOutputHelper")
+                     is {} propertyDeclarationSyntax)
+        {
+            currentRoot = currentRoot.RemoveNode(propertyDeclarationSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
+        }
+        
+        while (currentRoot.DescendantNodes()
+                     .OfType<FieldDeclarationSyntax>()
+                     .FirstOrDefault(x => x.Declaration.Type.TryGetInferredMemberName() == "ITestOutputHelper")
+                     is {} fieldDeclarationSyntax)
+        {
+            currentRoot = currentRoot.RemoveNode(fieldDeclarationSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
+        }
+        
+        return currentRoot;
+    }
+
+    private static bool IsTestOutputHelperInvocation(Compilation compilation, InvocationExpressionSyntax invocationExpressionSyntax)
+    {
+        var semanticModel = compilation.GetSemanticModel(invocationExpressionSyntax.SyntaxTree);
+
+        var symbolInfo = semanticModel.GetSymbolInfo(invocationExpressionSyntax);
+
+        if (symbolInfo.Symbol is not IMethodSymbol methodSymbol)
+        {
+            return false;
+        }
+
+        if (invocationExpressionSyntax.Expression is not MemberAccessExpressionSyntax)
+        {
+            return false;
+        }
+
+        return methodSymbol.ContainingType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
+            is "global::Xunit.Abstractions.ITestOutputHelper" or "global::Xunit.ITestOutputHelper";
     }
 
     private static SyntaxNode ConvertTheoryData(Compilation compilation, SyntaxNode root)
@@ -88,6 +166,11 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 ImplicitObjectCreationExpressionSyntax implicitObjectCreationExpressionSyntax => SyntaxFactory.ParseTypeName(compilation.GetSemanticModel(implicitObjectCreationExpressionSyntax.SyntaxTree).GetTypeInfo(implicitObjectCreationExpressionSyntax).Type!.ToDisplayString()),
                 _ => null
             };
+
+            while (type is QualifiedNameSyntax qualifiedNameSyntax)
+            {
+                type = qualifiedNameSyntax.Right;
+            }
             
             if (type is not GenericNameSyntax genericNameSyntax ||
                 genericNameSyntax.Identifier.Text != "TheoryData")

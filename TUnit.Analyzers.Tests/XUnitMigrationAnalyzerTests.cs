@@ -560,4 +560,69 @@ public class XUnitMigrationAnalyzerTests
                 """
             );
     }
+    
+    [Test]
+    public async Task ITestOutputHelper_Is_Flagged()
+    {
+        await CodeFixer
+            .VerifyAnalyzerAsync(
+                """
+                {|#0:using System;
+                using Xunit;
+
+                public class UnitTest1(ITestOutputHelper testOutputHelper)
+                {
+                    private ITestOutputHelper _testOutputHelper = testOutputHelper;
+                    public ITestOutputHelper TestOutputHelper { get; } = testOutputHelper;
+                
+                    [Fact]
+                    public void Test1()
+                    {
+                        _testOutputHelper.WriteLine("Foo");
+                        TestOutputHelper.WriteLine("Bar");
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task ITestOutputHelper_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+                using Xunit;
+
+                public class UnitTest1(ITestOutputHelper testOutputHelper)
+                {
+                    private ITestOutputHelper _testOutputHelper = testOutputHelper;
+                    public ITestOutputHelper TestOutputHelper { get; } = testOutputHelper;
+                
+                    [Fact]
+                    public void Test1()
+                    {
+                        _testOutputHelper.WriteLine("Foo");
+                        TestOutputHelper.WriteLine("Bar");
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class UnitTest1()
+                {
+                    [Test]
+                    public void Test1()
+                    {
+                        Console.WriteLine("Foo");
+                        Console.WriteLine("Bar");
+                    }
+                }
+                """
+            );
+    }
 }
