@@ -70,8 +70,64 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         updatedRoot = RemoveUsingDirectives(updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
 
+        updatedRoot = ConvertTheoryData(compilation, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        
         // Apply all changes in one step
         return document.WithSyntaxRoot(updatedRoot);
+    }
+
+    private static SyntaxNode ConvertTheoryData(Compilation compilation, SyntaxNode root)
+    {
+        var currentRoot = root;
+        foreach (var objectCreationExpressionSyntax in currentRoot.DescendantNodes().OfType<BaseObjectCreationExpressionSyntax>())
+        {
+            var type = objectCreationExpressionSyntax switch
+            {
+                ObjectCreationExpressionSyntax explicitObjectCreationExpressionSyntax => explicitObjectCreationExpressionSyntax.Type,
+                ImplicitObjectCreationExpressionSyntax implicitObjectCreationExpressionSyntax => SyntaxFactory.ParseTypeName(compilation.GetSemanticModel(implicitObjectCreationExpressionSyntax.SyntaxTree).GetTypeInfo(implicitObjectCreationExpressionSyntax).Type!.ToDisplayString()),
+                _ => null
+            };
+            
+            if (type is not GenericNameSyntax genericNameSyntax ||
+                genericNameSyntax.Identifier.Text != "TheoryData")
+            {
+                continue;
+            }
+            
+            var collectionItems = objectCreationExpressionSyntax.Initializer!
+                .ChildNodes()
+                .Select(x => x.DescendantNodesAndSelf().OfType<ExpressionSyntax>().First());
+
+            var arrayCreationExpressionSyntax = SyntaxFactory.ArrayCreationExpression(
+                SyntaxFactory.ArrayType(genericNameSyntax.TypeArgumentList.Arguments[0],
+                    SyntaxFactory.SingletonList(
+                        SyntaxFactory.ArrayRankSpecifier(
+                            SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                                SyntaxFactory.OmittedArraySizeExpression()
+                            )
+                        )
+                    )
+                ),
+                SyntaxFactory.InitializerExpression(
+                    SyntaxKind.ArrayInitializerExpression,
+                    SyntaxFactory.SeparatedList(collectionItems)
+                )
+            ).NormalizeWhitespace();
+
+            currentRoot = currentRoot.ReplaceNode(objectCreationExpressionSyntax, arrayCreationExpressionSyntax);
+        }
+
+        foreach (var genericTheoryDataTypeSyntax in currentRoot.DescendantNodes().OfType<GenericNameSyntax>().Where(x => x.Identifier.Text == "TheoryData"))
+        {
+            var enumerableTypeSyntax = SyntaxFactory.GenericName(
+                SyntaxFactory.Identifier("IEnumerable"),
+                SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(genericTheoryDataTypeSyntax.TypeArgumentList.Arguments)));
+
+            currentRoot = currentRoot.ReplaceNode(genericTheoryDataTypeSyntax, enumerableTypeSyntax);
+        }
+        
+        return currentRoot.NormalizeWhitespace();
     }
 
     private static SyntaxNode UpdateInitializeDispose(Compilation compilation, SyntaxNode root)
