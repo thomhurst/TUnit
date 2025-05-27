@@ -501,4 +501,63 @@ public class XUnitMigrationAnalyzerTests
                 """
             );
     }
+    
+    [Test]
+    public async Task TheoryData_Is_Flagged()
+    {
+        await CodeFixer
+            .VerifyAnalyzerAsync(
+                """
+                {|#0:using System;
+                using Xunit;
+
+                public class MyClass
+                {
+                    public static readonly TheoryData<TimeSpan> Times = new()
+                    {
+                        TimeSpan.FromSeconds(1),
+                        TimeSpan.FromHours(1),
+                        TimeSpan.FromMilliseconds(10)
+                    };
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task TheoryData_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+                using Xunit;
+
+                public class MyClass
+                {
+                    public static readonly TheoryData<TimeSpan> Times = new()
+                    {
+                        TimeSpan.FromSeconds(1),
+                        TimeSpan.FromHours(1),
+                        TimeSpan.FromMilliseconds(10)
+                    };
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    public static readonly IEnumerable<TimeSpan> Times = new TimeSpan[]
+                    {
+                        TimeSpan.FromSeconds(1),
+                        TimeSpan.FromHours(1),
+                        TimeSpan.FromMilliseconds(10)
+                    };
+                }
+                """
+            );
+    }
 }
