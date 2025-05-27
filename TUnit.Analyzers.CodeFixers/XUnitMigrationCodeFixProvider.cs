@@ -84,28 +84,14 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
     {
         var currentRoot = root;
 
-        var array = () =>  currentRoot.DescendantNodes()
-            .OfType<InvocationExpressionSyntax>()
-            .ToArray();
+        var compilationValue = compilation;
         
-        for (var index = 0; index < array().Length; index++)
+        while (currentRoot.DescendantNodes()
+               .OfType<InvocationExpressionSyntax>()
+               .FirstOrDefault(x => IsTestOutputHelperInvocation(compilationValue, x))
+               is {} invocationExpressionSyntax)
         {
-            var invocationExpressionSyntax = array()[index];
-            var semanticModel = compilation.GetSemanticModel(invocationExpressionSyntax.SyntaxTree);
-
-            var symbolInfo = semanticModel.GetSymbolInfo(invocationExpressionSyntax);
-
-            if (symbolInfo.Symbol is not IMethodSymbol methodSymbol ||
-                methodSymbol.ContainingType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
-                    is not "global::Xunit.Abstractions.ITestOutputHelper" and not "global::Xunit.ITestOutputHelper")
-            {
-                continue;
-            }
-
-            if (invocationExpressionSyntax.Expression is not MemberAccessExpressionSyntax memberAccessExpressionSyntax)
-            {
-                continue;
-            }
+            var memberAccessExpressionSyntax = (MemberAccessExpressionSyntax)invocationExpressionSyntax.Expression;
 
             currentRoot = currentRoot.ReplaceNode(
                 invocationExpressionSyntax,
@@ -119,27 +105,54 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             );
             
             UpdateSyntaxTrees(ref compilation, ref syntaxTree, currentRoot);
+            compilationValue = compilation;
         }
 
-        foreach (var parameterSyntax in currentRoot.DescendantNodes()
-                     .OfType<ParameterSyntax>().Where(x => x.Type?.TryGetInferredMemberName() == "ITestOutputHelper"))
+        while (currentRoot.DescendantNodes()
+                     .OfType<ParameterSyntax>()
+                     .FirstOrDefault(x => x.Type?.TryGetInferredMemberName() == "ITestOutputHelper") 
+               is {} parameterSyntax)
         {
             currentRoot = currentRoot.RemoveNode(parameterSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
         }
         
-        foreach (var propertyDeclarationSyntax in currentRoot.DescendantNodes()
-                     .OfType<PropertyDeclarationSyntax>().Where(x => x.Type.TryGetInferredMemberName() == "ITestOutputHelper"))
+        while (currentRoot.DescendantNodes()
+                     .OfType<PropertyDeclarationSyntax>()
+                     .FirstOrDefault(x => x.Type.TryGetInferredMemberName() == "ITestOutputHelper")
+                     is {} propertyDeclarationSyntax)
         {
             currentRoot = currentRoot.RemoveNode(propertyDeclarationSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
         }
         
-        foreach (var fieldDeclarationSyntax in currentRoot.DescendantNodes()
-                     .OfType<FieldDeclarationSyntax>().Where(x => x.Declaration.Type.TryGetInferredMemberName() == "ITestOutputHelper"))
+        while (currentRoot.DescendantNodes()
+                     .OfType<FieldDeclarationSyntax>()
+                     .FirstOrDefault(x => x.Declaration.Type.TryGetInferredMemberName() == "ITestOutputHelper")
+                     is {} fieldDeclarationSyntax)
         {
             currentRoot = currentRoot.RemoveNode(fieldDeclarationSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
         }
         
         return currentRoot;
+    }
+
+    private static bool IsTestOutputHelperInvocation(Compilation compilation, InvocationExpressionSyntax invocationExpressionSyntax)
+    {
+        var semanticModel = compilation.GetSemanticModel(invocationExpressionSyntax.SyntaxTree);
+
+        var symbolInfo = semanticModel.GetSymbolInfo(invocationExpressionSyntax);
+
+        if (symbolInfo.Symbol is not IMethodSymbol methodSymbol)
+        {
+            return false;
+        }
+
+        if (invocationExpressionSyntax.Expression is not MemberAccessExpressionSyntax)
+        {
+            return false;
+        }
+
+        return methodSymbol.ContainingType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
+            is "global::Xunit.Abstractions.ITestOutputHelper" or "global::Xunit.ITestOutputHelper";
     }
 
     private static SyntaxNode ConvertTheoryData(Compilation compilation, SyntaxNode root)
@@ -153,6 +166,11 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 ImplicitObjectCreationExpressionSyntax implicitObjectCreationExpressionSyntax => SyntaxFactory.ParseTypeName(compilation.GetSemanticModel(implicitObjectCreationExpressionSyntax.SyntaxTree).GetTypeInfo(implicitObjectCreationExpressionSyntax).Type!.ToDisplayString()),
                 _ => null
             };
+
+            while (type is QualifiedNameSyntax qualifiedNameSyntax)
+            {
+                type = qualifiedNameSyntax.Right;
+            }
             
             if (type is not GenericNameSyntax genericNameSyntax ||
                 genericNameSyntax.Identifier.Text != "TheoryData")
