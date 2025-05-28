@@ -33,7 +33,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITestDiscoveryEventReceiver, ITestRegisteredEventReceiver
+public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITestDiscoveryEventReceiver
 {
     /// <inheritdoc />
     public int Order => 0;
@@ -48,14 +48,5 @@ public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITest
     public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
     {
         discoveredTestContext.TestDetails.Timeout = Timeout;
-    }
-
-    /// <inheritdoc />
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
-    {
-        // Apply the timeout to the test when it's registered
-        // The test runner will use this value to enforce the timeout during execution
-        context.TestDetails.Timeout = Timeout;
-        return new ValueTask();
     }
 }
