@@ -20,6 +20,8 @@ namespace TUnit.Assertions
         public static System.Exception Throws(System.Type type, System.Action @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
         public static TException Throws<TException>(System.Action @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
             where TException : System.Exception { }
+        public static TException Throws<TException>(string parameterName, System.Action @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+            where TException : System.ArgumentException { }
         public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
         public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
         public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
@@ -32,6 +34,12 @@ namespace TUnit.Assertions
             where TException : System.Exception { }
         public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
             where TException : System.Exception { }
+        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(string parameterName, System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+            where TException : System.ArgumentException { }
+        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(string parameterName, System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+            where TException : System.ArgumentException { }
+        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(string parameterName, System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+            where TException : System.ArgumentException { }
     }
     public readonly struct AssertionData : System.IEquatable<TUnit.Assertions.AssertionData>
     {
