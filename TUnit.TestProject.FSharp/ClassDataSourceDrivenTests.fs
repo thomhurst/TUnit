@@ -1,4 +1,4 @@
-namespace TUnit.TestProject
+namespace TUnit.TestProject.FSharp
 
 open System.Threading.Tasks
 open TUnit.Assertions

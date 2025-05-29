@@ -1,4 +1,4 @@
-﻿namespace TUnit.TestProject
+﻿namespace TUnit.TestProject.FSharp
 
 type DummyReferenceTypeClass() = class end
 
