@@ -59,22 +59,22 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         
         // Always use the latest updatedRoot as input for the next transformation
         var updatedRoot = UpdateInitializeDispose(compilation, root);
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
         updatedRoot = UpdateClassAttributes(compilation, updatedRoot);
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
         updatedRoot = RemoveInterfacesAndBaseClasses(compilation, updatedRoot);
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
         updatedRoot = ConvertTheoryData(compilation, updatedRoot);
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
         updatedRoot = ConvertTestOutputHelpers(ref compilation, ref syntaxTree, updatedRoot);
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
         updatedRoot = RemoveUsingDirectives(updatedRoot);
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
         
         // Apply all changes in one step
         return document.WithSyntaxRoot(updatedRoot);
@@ -104,7 +104,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 )
             );
             
-            UpdateSyntaxTrees(ref compilation, ref syntaxTree, currentRoot);
+            UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref currentRoot);
             compilationValue = compilation;
         }
 
@@ -494,8 +494,13 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                             SyntaxFactory.IdentifierName("Obsolete")))],
                     _ => [attr]
                 };
-
+                
                 newAttributes.AddRange(converted);
+            }
+
+            if (node.Attributes.SequenceEqual(newAttributes))
+            {
+                return node;
             }
 
             // Preserve original trivia instead of forcing elastic trivia
@@ -718,9 +723,24 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
     }
 
-    private static void UpdateSyntaxTrees(ref Compilation compilation, ref SyntaxTree syntaxTree, SyntaxNode updatedRoot)
+    private static void UpdateSyntaxTrees(ref Compilation compilation, ref SyntaxTree syntaxTree, ref SyntaxNode updatedRoot)
     {
-        compilation = compilation.ReplaceSyntaxTree(syntaxTree, updatedRoot.SyntaxTree);
-        syntaxTree = updatedRoot.SyntaxTree;
+        var parseOptions = syntaxTree.Options;
+        var newSyntaxTree = updatedRoot.SyntaxTree;
+
+        // If the parse options differ, re-parse the updatedRoot with the correct options
+        if (!Equals(newSyntaxTree.Options, parseOptions))
+        {
+            newSyntaxTree = CSharpSyntaxTree.ParseText(
+                updatedRoot.ToFullString(),
+                (CSharpParseOptions)parseOptions,
+                syntaxTree.FilePath
+            );
+        }
+
+        compilation = compilation.ReplaceSyntaxTree(syntaxTree, newSyntaxTree);
+        syntaxTree = newSyntaxTree;
+        
+        updatedRoot = newSyntaxTree.GetRoot();
     }
 }

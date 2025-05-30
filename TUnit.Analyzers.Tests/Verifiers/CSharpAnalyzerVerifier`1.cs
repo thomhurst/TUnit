@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using Polly.CircuitBreaker;
 using TUnit.Core;
 using TUnit.TestProject.Library;
@@ -25,13 +26,18 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         => CSharpAnalyzerVerifier<TAnalyzer, DefaultVerifier>.Diagnostic(descriptor);
 
     /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
-    public static async Task VerifyAnalyzerAsync([StringSyntax("c#")] string source, params DiagnosticResult[] expected)
+    public static Task VerifyAnalyzerAsync([StringSyntax("c#")] string source, params DiagnosticResult[] expected)
+    {
+        return VerifyAnalyzerAsync(source, _ => { }, expected);
+    }
+    
+    /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
+    public static async Task VerifyAnalyzerAsync([StringSyntax("c#")] string source, Action<Test> configureTest, params DiagnosticResult[] expected)
     {
         var test = new Test
         {
             TestCode = source,
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90
-                .AddPackages([new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")]),
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
             TestState =
             {
                 AdditionalReferences =
@@ -44,6 +50,9 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
+        
+        configureTest(test);
+        
         await test.RunAsync(CancellationToken.None);
     }
 }

@@ -1,3 +1,5 @@
+using Microsoft.CodeAnalysis.Testing;
+using Microsoft.CodeAnalysis.Text;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitMigrationAnalyzer>;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitMigrationAnalyzer, TUnit.Analyzers.CodeFixers.XUnitMigrationCodeFixProvider>;
 
@@ -15,9 +17,7 @@ public class XUnitMigrationAnalyzerTests
         await Verifier
             .VerifyAnalyzerAsync(
                 $$"""
-                {|#0:using Xunit;
-
-                public class MyClass
+                {|#0:public class MyClass
                 {
                     [{{attributeName}}]
                     public void MyTest()
@@ -25,10 +25,11 @@ public class XUnitMigrationAnalyzerTests
                     }
                 }|}
                 """,
+                ConfigureXUnitTest,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
             );
     }
-    
+
     [Arguments("Fact", "Test")]
     [Arguments("Theory", "Test")]
     [Arguments("InlineData", "Arguments")]
@@ -48,7 +49,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 $$"""
                 {|#0:using TUnit.Core;
-                using Xunit;
 
                 public class MyClass
                 {
@@ -69,10 +69,11 @@ public class XUnitMigrationAnalyzerTests
                     {
                     }
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     [Arguments("Fact")]
     [Arguments("Theory")]
@@ -84,7 +85,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 $$"""
                   {|#0:using TUnit.Core;
-                  using Xunit;
 
                   public class MyClass
                   {
@@ -105,7 +105,8 @@ public class XUnitMigrationAnalyzerTests
                       {
                       }
                   }
-                  """
+                  """,
+                ConfigureXUnitTest
             );
     }
 
@@ -116,7 +117,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 """
                 {|#0:using TUnit.Core;
-                using Xunit;
 
                 public class MyType;
 
@@ -154,10 +154,11 @@ public class XUnitMigrationAnalyzerTests
                     public class MyCollection
                     {
                     }
-                    """
+                    """,
+                    ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     public async Task Collection_Disable_Parallelism_Attributes_Can_Be_Fixed()
     {
@@ -165,7 +166,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 """
                 {|#0:using TUnit.Core;
-                using Xunit;
 
                 public class MyType;
 
@@ -203,10 +203,11 @@ public class XUnitMigrationAnalyzerTests
                 public class MyCollection
                 {
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     public async Task Combined_Collection_Fixture_And_Disable_Parallelism_Attributes_Can_Be_Fixed()
     {
@@ -214,7 +215,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 """
                 {|#0:using TUnit.Core;
-                using Xunit;
 
                 public class MyType;
 
@@ -252,7 +252,8 @@ public class XUnitMigrationAnalyzerTests
                 public class MyCollection
                 {
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
 
@@ -266,7 +267,6 @@ public class XUnitMigrationAnalyzerTests
                 $$"""
                   {|#0:using System;
                   using TUnit.Core;
-                  using Xunit;
                   
                   [assembly: {|#0:{{attribute}}|}]
                   namespace MyNamespace;
@@ -294,19 +294,18 @@ public class XUnitMigrationAnalyzerTests
                       {
                       }
                   }
-                  """
+                  """,
+                ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     public async Task ClassFixture_Flagged()
     {
         await Verifier
             .VerifyAnalyzerAsync(
                 """
-                {|#0:using Xunit;
-
-                public class MyType;
+                {|#0:public class MyType;
 
                 public class MyClass : IClassFixture<MyType>
                 {
@@ -316,19 +315,18 @@ public class XUnitMigrationAnalyzerTests
                     }
                 }|}
                 """,
+                ConfigureXUnitTest,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task ClassFixture_Can_Be_Fixed()
     {
         await CodeFixer
             .VerifyCodeFixAsync(
                 """
-                {|#0:using Xunit;
-
-                public class MyType;
+                {|#0:public class MyType;
 
                 public class MyClass(MyType myType) : IClassFixture<MyType>
                 {
@@ -349,10 +347,11 @@ public class XUnitMigrationAnalyzerTests
                     {
                     }
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     public async Task Xunit_Directive_Flagged()
     {
@@ -370,10 +369,11 @@ public class XUnitMigrationAnalyzerTests
                     }
                 }|}
                 """,
+                ConfigureXUnitTest,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task Xunit_Directive_Can_Be_Removed()
     {
@@ -402,10 +402,11 @@ public class XUnitMigrationAnalyzerTests
                     {
                     }
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     public async Task Test_Initialize_Can_Be_Converted()
     {
@@ -413,7 +414,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 """
                 {|#0:using TUnit.Core;
-                using Xunit;
 
                 public class MyClass : IAsyncLifetime
                 {
@@ -456,10 +456,11 @@ public class XUnitMigrationAnalyzerTests
                         return default;
                     }
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     public async Task NonTest_Initialize_Can_Be_Converted()
     {
@@ -467,7 +468,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 """
                 {|#0:using TUnit.Core;
-                using Xunit;
 
                 public class MyClass : IAsyncLifetime
                 {
@@ -498,18 +498,18 @@ public class XUnitMigrationAnalyzerTests
                         return default;
                     }
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     public async Task TheoryData_Is_Flagged()
     {
-        await CodeFixer
+        await Verifier
             .VerifyAnalyzerAsync(
                 """
                 {|#0:using System;
-                using Xunit;
 
                 public class MyClass
                 {
@@ -521,10 +521,11 @@ public class XUnitMigrationAnalyzerTests
                     };
                 }|}
                 """,
+                ConfigureXUnitTest,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task TheoryData_Can_Be_Converted()
     {
@@ -532,7 +533,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 """
                 {|#0:using TUnit.Core;
-                using Xunit;
 
                 public class MyClass
                 {
@@ -557,24 +557,24 @@ public class XUnitMigrationAnalyzerTests
                         TimeSpan.FromMilliseconds(10)
                     };
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
-    
+
     [Test]
     public async Task ITestOutputHelper_Is_Flagged()
     {
-        await CodeFixer
+        await Verifier
             .VerifyAnalyzerAsync(
                 """
                 {|#0:using System;
-                using Xunit;
 
                 public class UnitTest1(ITestOutputHelper testOutputHelper)
                 {
                     private ITestOutputHelper _testOutputHelper = testOutputHelper;
                     public ITestOutputHelper TestOutputHelper { get; } = testOutputHelper;
-                
+
                     [Fact]
                     public void Test1()
                     {
@@ -583,10 +583,11 @@ public class XUnitMigrationAnalyzerTests
                     }
                 }|}
                 """,
+                ConfigureXUnitTest,
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task ITestOutputHelper_Can_Be_Converted()
     {
@@ -594,7 +595,6 @@ public class XUnitMigrationAnalyzerTests
             .VerifyCodeFixAsync(
                 """
                 {|#0:using TUnit.Core;
-                using Xunit;
 
                 public class UnitTest1(ITestOutputHelper testOutputHelper)
                 {
@@ -622,7 +622,33 @@ public class XUnitMigrationAnalyzerTests
                         Console.WriteLine("Bar");
                     }
                 }
-                """
+                """,
+                ConfigureXUnitTest
             );
     }
+
+    private static void ConfigureXUnitTest(Verifier.Test test)
+    {
+        var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
+
+        test.TestState.Sources.Add(globalUsings);
+
+        test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
+            new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")
+        ]);
+    }
+
+    private static void ConfigureXUnitTest(CodeFixer.Test test)
+    {
+        var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
+        
+        test.TestState.Sources.Add(globalUsings);
+        test.FixedState.Sources.Add(globalUsings);
+
+        test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
+            new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")
+        ]);
+    }
 }
+
+
