@@ -506,7 +506,7 @@ public class XUnitMigrationAnalyzerTests
     [Test]
     public async Task TheoryData_Is_Flagged()
     {
-        await CodeFixer
+        await Verifier
             .VerifyAnalyzerAsync(
                 """
                 {|#0:using System;
@@ -565,7 +565,7 @@ public class XUnitMigrationAnalyzerTests
     [Test]
     public async Task ITestOutputHelper_Is_Flagged()
     {
-        await CodeFixer
+        await Verifier
             .VerifyAnalyzerAsync(
                 """
                 {|#0:using System;
@@ -574,7 +574,7 @@ public class XUnitMigrationAnalyzerTests
                 {
                     private ITestOutputHelper _testOutputHelper = testOutputHelper;
                     public ITestOutputHelper TestOutputHelper { get; } = testOutputHelper;
-                
+
                     [Fact]
                     public void Test1()
                     {
@@ -630,14 +630,14 @@ public class XUnitMigrationAnalyzerTests
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
-        
+
         test.TestState.Sources.Add(globalUsings);
-        
+
         test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
             new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")
         ]);
     }
-    
+
     private static void ConfigureXUnitTest(CodeFixer.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
@@ -650,4 +650,5 @@ public class XUnitMigrationAnalyzerTests
         ]);
     }
 }
+
 
