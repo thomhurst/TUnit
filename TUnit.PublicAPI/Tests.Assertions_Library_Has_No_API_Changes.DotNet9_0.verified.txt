@@ -22,23 +22,23 @@ namespace TUnit.Assertions
             where TException : System.Exception { }
         public static TException Throws<TException>(string parameterName, System.Action @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
             where TException : System.ArgumentException { }
-        public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
-        public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
-        public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
-        public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Type type, System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
-        public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Type type, System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
-        public static System.Threading.Tasks.Task<System.Exception> ThrowsAsync(System.Type type, System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
-        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsAsync(System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsAsync(System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsAsync(System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsAsync(System.Type type, System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsAsync(System.Type type, System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsAsync(System.Type type, System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsAsync<TException>(System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
             where TException : System.Exception { }
-        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsAsync<TException>(System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
             where TException : System.Exception { }
-        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsAsync<TException>(System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
             where TException : System.Exception { }
-        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(string parameterName, System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsAsync<TException>(string parameterName, System.Func<System.Threading.Tasks.Task> @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null, [System.Runtime.CompilerServices.CallerArgumentExpression("parameterName")] string? doNotPopulateThisValue2 = null)
             where TException : System.ArgumentException { }
-        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(string parameterName, System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsAsync<TException>(string parameterName, System.Threading.Tasks.Task @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null, [System.Runtime.CompilerServices.CallerArgumentExpression("parameterName")] string? doNotPopulateThisValue2 = null)
             where TException : System.ArgumentException { }
-        public static System.Threading.Tasks.Task<TException> ThrowsAsync<TException>(string parameterName, System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsAsync<TException>(string parameterName, System.Threading.Tasks.ValueTask @delegate, [System.Runtime.CompilerServices.CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null, [System.Runtime.CompilerServices.CallerArgumentExpression("parameterName")] string? doNotPopulateThisValue2 = null)
             where TException : System.ArgumentException { }
     }
     public readonly struct AssertionData : System.IEquatable<TUnit.Assertions.AssertionData>
@@ -582,9 +582,11 @@ namespace TUnit.Assertions.AssertConditions.Throws
         public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, System.Exception> WithInnerException() { }
         public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> WithMessage(string expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
         public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> WithMessageMatching(TUnit.Assertions.AssertConditions.StringMatcher match, [System.Runtime.CompilerServices.CallerArgumentExpression("match")] string? doNotPopulateThisValue = null) { }
+        public static System.Threading.Tasks.Task<TException?> op_Explicit(TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> throwsException) { }
     }
     public static class ThrowsExtensions
     {
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> Throws(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, System.Type type, [System.Runtime.CompilerServices.CallerArgumentExpression("type")] string? doNotPopulateThisValue = null) { }
         public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> Throws<TException>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource)
             where TException : System.Exception { }
         public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsExactly<TException>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource)
@@ -592,8 +594,8 @@ namespace TUnit.Assertions.AssertConditions.Throws
         public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsException(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource) { }
         public static TUnit.Assertions.AssertionBuilders.CastableResultAssertionBuilder<object?, object?> ThrowsNothing(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource) { }
         public static TUnit.Assertions.AssertionBuilders.CastableResultAssertionBuilder<TActual, TActual> ThrowsNothing<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueDelegateSource<TActual> delegateSource) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableDelegateAssertionBuilder ThrowsWithin(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, System.TimeSpan timeSpan, [System.Runtime.CompilerServices.CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null) { }
-        public static TUnit.Assertions.AssertionBuilders.InvokableDelegateAssertionBuilder ThrowsWithin<TException>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, System.TimeSpan timeSpan, [System.Runtime.CompilerServices.CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, System.Exception> ThrowsWithin(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, System.TimeSpan timeSpan, [System.Runtime.CompilerServices.CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null) { }
+        public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<object?, TException> ThrowsWithin<TException>(this TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource delegateSource, System.TimeSpan timeSpan, [System.Runtime.CompilerServices.CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
             where TException : System.Exception { }
         public static TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> WithParameterName<TActual, TException>(this TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> throwsException, string expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null)
             where TException : System.ArgumentException { }
@@ -604,7 +606,14 @@ namespace TUnit.Assertions.AssertConditions.Throws
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }
-    public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : TUnit.Assertions.AssertConditions.DelegateAssertCondition<TActual, System.Exception>
+    public class ThrowsOfTypeAssertCondition : TUnit.Assertions.AssertConditions.DelegateAssertCondition<object?, System.Exception>
+    {
+        public ThrowsOfTypeAssertCondition(System.Type type) { }
+        protected override string GetExpectation() { }
+        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(object? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
+    }
+    public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : TUnit.Assertions.AssertConditions.DelegateAssertCondition<TActual, TExpectedException>
+        where TExpectedException : System.Exception
     {
         public ThrowsOfTypeAssertCondition() { }
         protected override string GetExpectation() { }

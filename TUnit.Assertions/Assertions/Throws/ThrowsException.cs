@@ -58,4 +58,6 @@ public class ThrowsException<TActual, TException> where TException : Exception
     public DelegateOr<object?> Or => _delegateAssertionBuilder.Or;
 
     internal void RegisterAssertion(Func<Func<Exception?, Exception?>, BaseAssertCondition<TActual>> conditionFunc, string?[] argumentExpressions, [CallerMemberName] string? caller = null) => _source.RegisterAssertion(conditionFunc(_selector), argumentExpressions, caller);
+    
+    public static explicit operator Task<TException?>(ThrowsException<TActual, TException> throwsException) => Task.Run(async () => await throwsException);
 }
