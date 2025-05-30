@@ -629,16 +629,22 @@ public class XUnitMigrationAnalyzerTests
 
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
-        test.TestState.Sources.Add(("GlobalUsings.cs", SourceText.From("global using Xunit;")));
+        test.TestState.Sources.Insert(0, ("GlobalUsings.cs", SourceText.From("global using Xunit;")));
 
-        test.ReferenceAssemblies.AddPackages([new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")]);
+        test.ReferenceAssemblies.AddPackages([
+            new PackageIdentity("xunit", "2.4.2"),
+            new PackageIdentity("xunit.runner.visualstudio", "2.4.5")
+        ]);
     }
     
     private static void ConfigureXUnitTest(CodeFixer.Test test)
     {
-        test.TestState.Sources.Add(("GlobalUsings.cs", SourceText.From("global using Xunit;")));
+        test.TestState.Sources.Insert(0, ("GlobalUsings.cs", SourceText.From("global using Xunit;")));
         
-        test.ReferenceAssemblies.AddPackages([new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")]);
+        test.ReferenceAssemblies.AddPackages([
+            new PackageIdentity("xunit", "2.4.2"),
+            new PackageIdentity("xunit.runner.visualstudio", "2.4.5")
+        ]);
     }
 }
 
