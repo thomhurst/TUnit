@@ -39,10 +39,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (symbol.AllInterfaces.Any(i => i.ContainingNamespace.Name.StartsWith("Xunit")))
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.XunitMigration, context.Node.GetLocation())
-                );
-
+                Flag(context);
                 return;
             }
 
@@ -69,9 +66,31 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 if (usingDirectiveSyntax.Name is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Xunit" } }
                     or IdentifierNameSyntax { Identifier.Text: "Xunit" })
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.XunitMigration, context.Node.GetLocation()));
+                    Flag(context);
                     return;
                 }
+            }
+            
+            var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
+
+            if (namedTypeSymbol is null)
+            {
+                return;
+            }
+
+            var members = namedTypeSymbol.GetMembers();
+
+            ITypeSymbol[] types =
+            [
+                ..members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace.Name.StartsWith("Xunit")).Select(x => x.Type),
+                ..members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace.Name.StartsWith("Xunit")).Select(x => x.ReturnType),
+                ..members.OfType<IFieldSymbol>().Where(x => x.Type.ContainingNamespace.Name.StartsWith("Xunit")).Select(x => x.Type),
+            ];
+
+            if (types.Any())
+            {
+                Flag(context);
+                return;
             }
         }
     }
@@ -84,14 +103,16 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             
             if(@namespace == "Xunit")
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.XunitMigration, context.Node.GetLocation())
-                );
-
+                Flag(context);
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static void Flag(SyntaxNodeAnalysisContext context)
+    {
+        context.ReportDiagnostic(Diagnostic.Create(Rules.XunitMigration, context.Node.GetLocation()));
     }
 }

@@ -629,8 +629,10 @@ public class XUnitMigrationAnalyzerTests
 
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
-        test.TestState.Sources.Insert(0, ("GlobalUsings.cs", SourceText.From("global using Xunit;")));
-
+        var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
+        
+        test.TestState.Sources.Add(globalUsings);
+        
         test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
             new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")
         ]);
