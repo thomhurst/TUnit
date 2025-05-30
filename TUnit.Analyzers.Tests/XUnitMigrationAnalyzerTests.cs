@@ -631,9 +631,8 @@ public class XUnitMigrationAnalyzerTests
     {
         test.TestState.Sources.Insert(0, ("GlobalUsings.cs", SourceText.From("global using Xunit;")));
 
-        test.ReferenceAssemblies.AddPackages([
-            new PackageIdentity("xunit", "2.4.2"),
-            new PackageIdentity("xunit.runner.visualstudio", "2.4.5")
+        test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
+            new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")
         ]);
     }
     
@@ -641,9 +640,8 @@ public class XUnitMigrationAnalyzerTests
     {
         test.TestState.Sources.Insert(0, ("GlobalUsings.cs", SourceText.From("global using Xunit;")));
         
-        test.ReferenceAssemblies.AddPackages([
-            new PackageIdentity("xunit", "2.4.2"),
-            new PackageIdentity("xunit.runner.visualstudio", "2.4.5")
+        test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
+            new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")
         ]);
     }
 }
