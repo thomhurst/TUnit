@@ -494,8 +494,13 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                             SyntaxFactory.IdentifierName("Obsolete")))],
                     _ => [attr]
                 };
-
+                
                 newAttributes.AddRange(converted);
+            }
+
+            if (node.Attributes.SequenceEqual(newAttributes))
+            {
+                return node;
             }
 
             // Preserve original trivia instead of forcing elastic trivia
