@@ -70,4 +70,27 @@ public class AssertMultipleTests
             ).ThrowsExactly<InvalidOperationException>();
         }
     }
+    
+    [Test]
+    public async Task Assert_Fail_Doesnt_Throw_Immediately_Within_AssertMultiple()
+    {
+        var endReached = false;
+
+        await Assert.That(() =>
+            {
+                using (Assert.Multiple())
+                {
+                    Assert.Fail("Error 1");
+                    Assert.Fail("Error 2");
+
+                    endReached = true;
+                }
+            })
+            .ThrowsException()
+            .WithMessageContaining("Error 1")
+            .And
+            .HasMessageContaining("Error 2");
+        
+        await Assert.That(endReached).IsTrue();
+    }
 }

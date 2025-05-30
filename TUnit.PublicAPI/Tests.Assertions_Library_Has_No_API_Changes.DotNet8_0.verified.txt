@@ -3,7 +3,6 @@ namespace TUnit.Assertions
 {
     public static class Assert
     {
-        [System.Diagnostics.CodeAnalysis.DoesNotReturn]
         public static void Fail(string reason) { }
         public static System.IDisposable Multiple() { }
         public static TUnit.Assertions.AssertionBuilders.DelegateAssertionBuilder That(System.Action value, [System.Runtime.CompilerServices.CallerArgumentExpression("value")] string? doNotPopulateThisValue = null) { }
@@ -581,6 +580,8 @@ namespace TUnit.Assertions.AssertConditions.Throws
         public System.Runtime.CompilerServices.TaskAwaiter<TException?> GetAwaiter() { }
         public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, System.Exception> WithInnerException() { }
         public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> WithMessage(string expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
+        public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> WithMessageContaining(string expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null) { }
+        public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> WithMessageContaining(string expected, System.StringComparison stringComparison, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string? doNotPopulateThisValue = null, [System.Runtime.CompilerServices.CallerArgumentExpression("stringComparison")] string? doNotPopulateThisValue2 = null) { }
         public TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> WithMessageMatching(TUnit.Assertions.AssertConditions.StringMatcher match, [System.Runtime.CompilerServices.CallerArgumentExpression("match")] string? doNotPopulateThisValue = null) { }
         public static System.Threading.Tasks.Task<TException?> op_Explicit(TUnit.Assertions.AssertConditions.Throws.ThrowsException<TActual, TException> throwsException) { }
     }
@@ -623,6 +624,13 @@ namespace TUnit.Assertions.AssertConditions.Throws
         where TException : System.Exception
     {
         public ThrowsWithMessageAssertCondition(string expectedMessage, System.StringComparison stringComparison, System.Func<System.Exception?, System.Exception?> exceptionSelector) { }
+        protected override string GetExpectation() { }
+        protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
+    }
+    public class ThrowsWithMessageContainingAssertCondition<TActual, TException> : TUnit.Assertions.AssertConditions.DelegateAssertCondition<TActual, System.Exception>
+        where TException : System.Exception
+    {
+        public ThrowsWithMessageContainingAssertCondition(string expected, System.StringComparison stringComparison, System.Func<System.Exception?, System.Exception?> exceptionSelector) { }
         protected override string GetExpectation() { }
         protected override System.Threading.Tasks.ValueTask<TUnit.Assertions.AssertConditions.AssertionResult> GetResult(TActual? actualValue, System.Exception? exception, TUnit.Assertions.AssertionMetadata assertionMetadata) { }
     }

@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Helpers;
 using TUnit.Assertions.Wrappers;
@@ -148,7 +149,7 @@ public static class Assert
         
         Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
 
-        return null;
+        return null!;
     }
     
     public static TException Throws<TException>(string parameterName, Action @delegate, [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null) where TException : ArgumentException
@@ -167,7 +168,16 @@ public static class Assert
     {
         return (TException) Throws(typeof(TException), @delegate, doNotPopulateThisValue);
     }
-
-    [DoesNotReturn]
-    public static void Fail(string reason) => TUnit.Assertions.Fail.Test(reason);
+    
+    public static void Fail(string reason)
+    {
+        try
+        {
+            TUnit.Assertions.Fail.Test(reason);
+        }
+        catch (AssertionException e) when (AssertionScope.GetCurrentAssertionScope() is {} assertionScope)
+        {
+            assertionScope.AddException(e);
+        }
+    }
 }
