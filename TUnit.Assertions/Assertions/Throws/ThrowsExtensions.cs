@@ -17,6 +17,14 @@ public static class ThrowsExtensions
             delegateSource,
             e => e);
     }
+    
+    public static ThrowsException<object?, Exception> Throws(this IDelegateSource delegateSource, Type type, [CallerArgumentExpression("type")] string? doNotPopulateThisValue = null)
+    {
+        return new ThrowsException<object?, Exception>(
+            delegateSource.RegisterAssertion(new ThrowsOfTypeAssertCondition<object?, Exception>(), [doNotPopulateThisValue]),
+            delegateSource,
+            e => e);
+    }
 
     public static ThrowsException<object?, TException> ThrowsExactly<TException>(this IDelegateSource delegateSource)
         where TException : Exception
@@ -27,16 +35,24 @@ public static class ThrowsExtensions
             e => e);
     }
     
-    public static InvokableDelegateAssertionBuilder ThrowsWithin(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null) 
+    public static ThrowsException<object?, Exception> ThrowsWithin(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null) 
     {
-        return delegateSource.RegisterAssertion(new ThrowsWithinAssertCondition<object?, Exception>(timeSpan), [doNotPopulateThisValue]);
+        return new ThrowsException<object?, Exception>(
+            delegateSource.RegisterAssertion(new ThrowsWithinAssertCondition<object?, Exception>(timeSpan), [doNotPopulateThisValue]),
+            delegateSource,
+            e => e
+            );
     }
     
-    public static InvokableDelegateAssertionBuilder ThrowsWithin<TException>(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
+    public static ThrowsException<object?, TException> ThrowsWithin<TException>(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
         where TException : Exception
     {
-        return delegateSource.RegisterAssertion(new ThrowsWithinAssertCondition<object?, TException>(timeSpan), [doNotPopulateThisValue],
-            $"{nameof(ThrowsWithin)}<{typeof(TException).Name}>");
+        return new ThrowsException<object?, TException>(
+            delegateSource.RegisterAssertion(new ThrowsWithinAssertCondition<object?, TException>(timeSpan), [doNotPopulateThisValue],
+                $"{nameof(ThrowsWithin)}<{typeof(TException).Name}>"),
+            delegateSource,
+            e => e
+        );
     }
 
     public static ThrowsException<object?, Exception> ThrowsException(this IDelegateSource delegateSource)
