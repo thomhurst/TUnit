@@ -34,6 +34,20 @@ public class ThrowsException<TActual, TException> where TException : Exception
             , [doNotPopulateThisValue]);
         return this;
     }
+    
+    public ThrowsException<TActual, TException> WithMessageContaining(string expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    {
+        _source.RegisterAssertion(new ThrowsWithMessageContainingAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _selector)
+            , [doNotPopulateThisValue]);
+        return this;
+    }
+    
+    public ThrowsException<TActual, TException> WithMessageContaining(string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(stringComparison))] string? doNotPopulateThisValue2 = null)
+    {
+        _source.RegisterAssertion(new ThrowsWithMessageContainingAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _selector)
+            , [doNotPopulateThisValue, doNotPopulateThisValue2]);
+        return this;
+    }
 
     public ThrowsException<TActual, Exception> WithInnerException()
     {
