@@ -81,7 +81,8 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         return new PropertyBag(
             [
                 ..properties,
-                ..categories
+                ..categories,
+                ..testDetails.Categories.Select(x => new KeyValuePairStringProperty("Category", x))
             ]
         );
     }
