@@ -1,6 +1,4 @@
 ﻿using System.Collections.Immutable;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 
@@ -26,10 +24,10 @@ public class CustomPropertyTests
         await Assert.That(GetDictionary()).ContainsValue("MethodPropertyValue2");
     }
 
-    private static ImmutableDictionary<string, string> GetDictionary()
+    private static ImmutableDictionary<string, IReadOnlyList<string>> GetDictionary()
     {
         return TestContext.Current?.TestDetails.CustomProperties.ToImmutableDictionary(x => x.Key, x => x.Value)
-            ?? ImmutableDictionary<string, string>.Empty;
+            ?? ImmutableDictionary<string, IReadOnlyList<string>>.Empty;
     }
 
     public class ClassPropertyAttribute() : PropertyAttribute("ClassProperty2", "ClassPropertyValue2");

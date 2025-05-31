@@ -1,5 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using TUnit.Core.Interfaces;
 
@@ -114,9 +115,12 @@ public abstract record TestDetails
     /// <summary>
     /// Gets the custom properties for the test.
     /// </summary>
-    public IReadOnlyDictionary<string, string> CustomProperties => InternalCustomProperties;
+    [field: AllowNull, MaybeNull]
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> CustomProperties => field ??= InternalCustomProperties.ToDictionary(
+        kvp => kvp.Key, IReadOnlyList<string> (kvp) => kvp.Value.AsReadOnly()
+    );
 
-    internal Dictionary<string, string> InternalCustomProperties { get; } = [];
+    internal ConcurrentDictionary<string, List<string>> InternalCustomProperties { get; } = [];
 
     /// <summary>
     /// Gets the attributes for the test assembly.

@@ -21,7 +21,7 @@ public record TestJson
 
     public required TimeSpan? Timeout { get; init; }
     
-    public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
+    public required IReadOnlyDictionary<string, IReadOnlyList<string>> CustomProperties { get; init; }
     
     public required string? ReturnType { get; init; }
     
