@@ -33,8 +33,8 @@ internal static class TestExtensions
                     ),
                 
                 // Custom TUnit Properties
-                ..testDetails.Categories.Select(category => new TestMetadataProperty(category, string.Empty)),
-                ..testDetails.CustomProperties.Select(x => new TestMetadataProperty(x.Key, x.Value)),
+                ..testDetails.Categories.Select(category => new TestMetadataProperty(category)),
+                ..ExtractProperties(testDetails),
                 
                 // Artifacts
                 ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
@@ -46,6 +46,17 @@ internal static class TestExtensions
         };
         
         return testNode;
+    }
+
+    public static IEnumerable<KeyValuePairStringProperty> ExtractProperties(this TestDetails testDetails)
+    {
+        foreach (var propertyGroup in testDetails.CustomProperties)
+        {
+            foreach (var propertyValue in propertyGroup.Value)
+            {
+                yield return new KeyValuePairStringProperty(propertyGroup.Key, propertyValue);
+            }
+        }
     }
 
     internal static TestNode WithProperty(this TestNode testNode, IProperty property)

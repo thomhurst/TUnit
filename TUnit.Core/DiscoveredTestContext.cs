@@ -19,7 +19,9 @@ public class DiscoveredTestContext
 
     public void AddProperty(string key, string value)
     {
-        TestContext.TestDetails.InternalCustomProperties.Add(key, value);
+        TestContext.TestDetails.InternalCustomProperties
+            .GetOrAdd(key, [])
+            .Add(value);
     }
 
     public void AddCategory(string category)
