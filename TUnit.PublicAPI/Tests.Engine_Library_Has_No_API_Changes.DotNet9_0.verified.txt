@@ -99,7 +99,7 @@ namespace TUnit.Engine.Json
         public TestJson() { }
         public required System.Collections.Generic.IReadOnlyList<string> Categories { get; init; }
         public required string? ClassType { get; init; }
-        public required System.Collections.Generic.IReadOnlyDictionary<string, string> CustomProperties { get; init; }
+        public required System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyList<string>> CustomProperties { get; init; }
         public required string DisplayName { get; set; }
         public required System.Collections.Generic.Dictionary<string, object?> ObjectBag { get; init; }
         public required TUnit.Engine.Json.TestResultJson? Result { get; set; }

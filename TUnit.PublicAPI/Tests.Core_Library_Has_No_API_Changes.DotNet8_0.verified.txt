@@ -890,7 +890,7 @@ namespace TUnit.Core
         public System.Attribute[] ClassAttributes { get; }
         public abstract object ClassInstance { get; }
         public required int CurrentRepeatAttempt { get; init; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> CustomProperties { get; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyList<string>> CustomProperties { get; }
         [System.Text.Json.Serialization.JsonIgnore]
         public required System.Attribute[] DataAttributes { get; init; }
         [System.Text.Json.Serialization.JsonIgnore]
