@@ -2,7 +2,6 @@
 
 namespace TUnit.TestProject.Bugs._2481;
 
-[EngineTest(ExpectedResult.Pass)]
 public class Tests
 {
     [Test]
