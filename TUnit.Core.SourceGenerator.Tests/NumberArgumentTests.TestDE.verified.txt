@@ -58,7 +58,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -91,7 +94,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Int(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -107,7 +110,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					MethodName = $"Int",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.Int failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 				});
 			}
 			return nodes;
@@ -174,7 +177,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -207,7 +213,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Double(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 12,
+					TestLineNumber = 15,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -223,7 +229,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					MethodName = $"Double",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.Double failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 12,
+					TestLineNumber = 15,
 				});
 			}
 			return nodes;
@@ -290,7 +296,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -323,7 +332,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Float(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 19,
+					TestLineNumber = 22,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -339,7 +348,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					MethodName = $"Float",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.Float failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 19,
+					TestLineNumber = 22,
 				});
 			}
 			return nodes;
@@ -406,7 +415,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -439,7 +451,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Long(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 26,
+					TestLineNumber = 29,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -455,7 +467,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					MethodName = $"Long",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.Long failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 26,
+					TestLineNumber = 29,
 				});
 			}
 			return nodes;
@@ -522,7 +534,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -555,7 +570,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ULong(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 33,
+					TestLineNumber = 36,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -571,7 +586,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					MethodName = $"ULong",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.ULong failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 33,
+					TestLineNumber = 36,
 				});
 			}
 			return nodes;
@@ -638,7 +653,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -671,7 +689,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.UInt(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 40,
+					TestLineNumber = 43,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -687,7 +705,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					MethodName = $"UInt",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NumberArgumentTests.UInt failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 40,
+					TestLineNumber = 43,
 				});
 			}
 			return nodes;

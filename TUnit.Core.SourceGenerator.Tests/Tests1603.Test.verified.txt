@@ -58,7 +58,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._1603",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -91,7 +94,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Casted_Integer_To_Short_Converts(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 8,
+					TestLineNumber = 10,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -107,7 +110,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					MethodName = $"Casted_Integer_To_Short_Converts",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Casted_Integer_To_Short_Converts failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 8,
+					TestLineNumber = 10,
 				});
 			}
 			return nodes;
@@ -174,7 +177,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._1603",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -207,7 +213,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Integer_To_Short_Converts(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 15,
+					TestLineNumber = 17,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -223,7 +229,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					MethodName = $"Integer_To_Short_Converts",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Integer_To_Short_Converts failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 15,
+					TestLineNumber = 17,
 				});
 			}
 			return nodes;

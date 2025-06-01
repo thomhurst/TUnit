@@ -50,7 +50,10 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 					}),
 					Name = "MyTests",
 					Namespace = "TUnit.TestProject.Bugs._1589",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
@@ -118,7 +121,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
 							TestFilePath = @"",
-							TestLineNumber = 15,
+							TestLineNumber = 17,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -135,7 +138,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						MethodName = $"Test1",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MyTests.Test1 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 15,
+						TestLineNumber = 17,
 					});
 				}
 				return nodes;

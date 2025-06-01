@@ -57,7 +57,10 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					}),
 					Name = "ClassDataSourceDrivenTestsSharedKeyed",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -119,7 +122,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class(methodArgGeneratedData)),
 							TestFilePath = @"",
-							TestLineNumber = 7,
+							TestLineNumber = 9,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -136,7 +139,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 						MethodName = $"DataSource_Class",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 7,
+						TestLineNumber = 9,
 					});
 				}
 				return nodes;
@@ -202,7 +205,10 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					}),
 					Name = "ClassDataSourceDrivenTestsSharedKeyed",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -264,7 +270,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class_Generic(methodArgGeneratedData)),
 							TestFilePath = @"",
-							TestLineNumber = 14,
+							TestLineNumber = 16,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -281,7 +287,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 						MethodName = $"DataSource_Class_Generic",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 14,
+						TestLineNumber = 16,
 					});
 				}
 				return nodes;

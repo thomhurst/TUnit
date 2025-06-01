@@ -51,7 +51,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = 
 					[
@@ -91,7 +94,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 					TestFilePath = @"",
-					TestLineNumber = 12,
+					TestLineNumber = 14,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -107,7 +110,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"Test",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 12,
+					TestLineNumber = 14,
 				});
 			}
 			return nodes;
@@ -167,7 +170,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = 
 					[
@@ -207,7 +213,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2()),
 					TestFilePath = @"",
-					TestLineNumber = 19,
+					TestLineNumber = 21,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -223,7 +229,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"Test2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test2 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 19,
+					TestLineNumber = 21,
 				});
 			}
 			return nodes;
@@ -306,7 +312,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = 
 					[
@@ -350,7 +359,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg, methodArg1, methodArg2)),
 					TestFilePath = @"",
-					TestLineNumber = 26,
+					TestLineNumber = 28,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -366,7 +375,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"Test3",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test3 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 26,
+					TestLineNumber = 28,
 				});
 			}
 			return nodes;
@@ -420,7 +429,10 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						}),
 						Name = "CustomDisplayNameTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = [],
 						Properties = 
 						[
@@ -464,7 +476,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg, methodArg1, methodArg2)),
 						TestFilePath = @"",
-						TestLineNumber = 26,
+						TestLineNumber = 28,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -480,7 +492,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						MethodName = $"Test3",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.Test3 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 26,
+						TestLineNumber = 28,
 					});
 				}
 				return nodes;
@@ -548,7 +560,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = 
 					[
@@ -589,7 +604,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MethodDataSourceTest(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 36,
+					TestLineNumber = 38,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -605,7 +620,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"MethodDataSourceTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.MethodDataSourceTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 36,
+					TestLineNumber = 38,
 				});
 			}
 			return nodes;
@@ -671,7 +686,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = 
 					[
@@ -738,7 +756,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.PasswordTest(methodArgGeneratedData)),
 						TestFilePath = @"",
-						TestLineNumber = 44,
+						TestLineNumber = 46,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -755,7 +773,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"PasswordTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.PasswordTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 44,
+					TestLineNumber = 46,
 				});
 			}
 			return nodes;
@@ -815,7 +833,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = 
 					[
@@ -855,7 +876,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SameClassConstantTest()),
 					TestFilePath = @"",
-					TestLineNumber = 51,
+					TestLineNumber = 53,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -871,7 +892,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"SameClassConstantTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.SameClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 51,
+					TestLineNumber = 53,
 				});
 			}
 			return nodes;
@@ -931,7 +952,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = 
 					[
@@ -971,7 +995,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DifferentClassConstantTest()),
 					TestFilePath = @"",
-					TestLineNumber = 58,
+					TestLineNumber = 60,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -987,7 +1011,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"DifferentClassConstantTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.DifferentClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 58,
+					TestLineNumber = 60,
 				});
 			}
 			return nodes;
@@ -1047,7 +1071,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = 
 					[
@@ -1087,7 +1114,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.NestedClassConstantTest()),
 					TestFilePath = @"",
-					TestLineNumber = 65,
+					TestLineNumber = 67,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -1103,7 +1130,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"NestedClassConstantTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("CustomDisplayNameTests.NestedClassConstantTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 65,
+					TestLineNumber = 67,
 				});
 			}
 			return nodes;

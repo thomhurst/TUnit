@@ -58,7 +58,10 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					}),
 					Name = "EnumerableDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -93,7 +96,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method(methodData)),
 						TestFilePath = @"",
-						TestLineNumber = 8,
+						TestLineNumber = 10,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -110,7 +113,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					MethodName = $"DataSource_Method",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumerableDataSourceDrivenTests.DataSource_Method failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 8,
+					TestLineNumber = 10,
 				});
 			}
 			return nodes;
@@ -177,7 +180,10 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					}),
 					Name = "EnumerableDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -212,7 +218,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method2(methodData)),
 						TestFilePath = @"",
-						TestLineNumber = 15,
+						TestLineNumber = 17,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -229,7 +235,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					MethodName = $"DataSource_Method2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumerableDataSourceDrivenTests.DataSource_Method2 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 15,
+					TestLineNumber = 17,
 				});
 			}
 			return nodes;
@@ -296,7 +302,10 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					}),
 					Name = "EnumerableDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -331,7 +340,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_WithBaseReturn(methodData)),
 						TestFilePath = @"",
-						TestLineNumber = 22,
+						TestLineNumber = 24,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -348,7 +357,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					MethodName = $"DataSource_WithBaseReturn",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumerableDataSourceDrivenTests.DataSource_WithBaseReturn failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 22,
+					TestLineNumber = 24,
 				});
 			}
 			return nodes;

@@ -52,6 +52,7 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
+						new EngineTest(Pass),
 						new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
 					],
 					Parameters = [],
@@ -292,7 +293,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									ResettableClassFactory = resettableClassFactory,
 									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 									TestFilePath = @"",
-									TestLineNumber = 67,
+									TestLineNumber = 69,
 									TestMethod = testInformation,
 									TestBuilderContext = testBuilderContext,
 								});
@@ -308,7 +309,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									MethodName = $"Test",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PropertySetterTests.Test failed to initialize", exception),
 									TestFilePath = @"",
-									TestLineNumber = 67,
+									TestLineNumber = 69,
 								});
 							}
 							return nodes;
@@ -369,7 +370,9 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
+						new EngineTest(Pass),
 						new global::TUnit.Core.InheritsTestsAttribute(),
+						new EngineTest(Pass),
 						new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
 					],
 					Parameters = [],
@@ -543,7 +546,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 									ResettableClassFactory = resettableClassFactory,
 									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 									TestFilePath = @"",
-									TestLineNumber = 67,
+									TestLineNumber = 69,
 									TestMethod = testInformation,
 									TestBuilderContext = testBuilderContext,
 								});
@@ -559,7 +562,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 									MethodName = $"Test",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedPropertySetterTests.Test failed to initialize", exception),
 									TestFilePath = @"",
-									TestLineNumber = 67,
+									TestLineNumber = 69,
 								});
 							}
 							return nodes;

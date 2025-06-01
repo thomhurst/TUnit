@@ -68,7 +68,10 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					}),
 					Name = "TupleDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -103,7 +106,7 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -119,7 +122,7 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					MethodName = $"DataSource_TupleMethod",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 				});
 			}
 			return nodes;

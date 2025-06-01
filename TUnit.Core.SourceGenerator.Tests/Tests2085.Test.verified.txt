@@ -60,7 +60,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._2085",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -122,7 +125,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Double_SpecialConsts(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 8,
+						TestLineNumber = 10,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -139,7 +142,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					MethodName = $"Double_SpecialConsts",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Double_SpecialConsts failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 8,
+					TestLineNumber = 10,
 				});
 			}
 			return nodes;
@@ -208,7 +211,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._2085",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -270,7 +276,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Float_SpecialConsts(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 15,
+						TestLineNumber = 17,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -287,7 +293,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					MethodName = $"Float_SpecialConsts",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Float_SpecialConsts failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 15,
+					TestLineNumber = 17,
 				});
 			}
 			return nodes;

@@ -58,7 +58,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					}),
 					Name = "MethodDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -90,7 +93,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 12,
+					TestLineNumber = 14,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -106,7 +109,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					MethodName = $"DataSource_Method",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 12,
+					TestLineNumber = 14,
 				});
 			}
 			return nodes;
@@ -173,7 +176,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					}),
 					Name = "MethodDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -205,7 +211,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method2(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 19,
+					TestLineNumber = 21,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -221,7 +227,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					MethodName = $"DataSource_Method2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method2 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 19,
+					TestLineNumber = 21,
 				});
 			}
 			return nodes;
@@ -288,7 +294,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					}),
 					Name = "MethodDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -320,7 +329,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method_WithAction(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 26,
+					TestLineNumber = 28,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -336,7 +345,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					MethodName = $"DataSource_Method_WithAction",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method_WithAction failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 26,
+					TestLineNumber = 28,
 				});
 			}
 			return nodes;
@@ -414,7 +423,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 							}),
 							Name = "MethodDataSourceDrivenTests",
 							Namespace = "TUnit.TestProject",
-							Attributes = [],
+							Attributes = 
+							[
+								new EngineTest(Pass)
+							],
 							Parameters = [],
 							Properties = [],
 						}),
@@ -446,7 +458,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method3(methodArg)),
 							TestFilePath = @"",
-							TestLineNumber = 33,
+							TestLineNumber = 35,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -462,7 +474,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 							MethodName = $"DataSource_Method3",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method3 failed to initialize", exception),
 							TestFilePath = @"",
-							TestLineNumber = 33,
+							TestLineNumber = 35,
 						});
 					}
 					return nodes;
@@ -511,7 +523,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 										}),
 										Name = "MethodDataSourceDrivenTests",
 										Namespace = "TUnit.TestProject",
-										Attributes = [],
+										Attributes = 
+										[
+											new EngineTest(Pass)
+										],
 										Parameters = [],
 										Properties = [],
 									}),
@@ -543,7 +558,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 										ResettableClassFactory = resettableClassFactory,
 										TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method3(methodArg)),
 										TestFilePath = @"",
-										TestLineNumber = 33,
+										TestLineNumber = 35,
 										TestMethod = testInformation,
 										TestBuilderContext = testBuilderContext,
 									});
@@ -559,7 +574,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 										MethodName = $"DataSource_Method3",
 										Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method3 failed to initialize", exception),
 										TestFilePath = @"",
-										TestLineNumber = 33,
+										TestLineNumber = 35,
 									});
 								}
 								return nodes;
@@ -647,7 +662,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 									}),
 									Name = "MethodDataSourceDrivenTests",
 									Namespace = "TUnit.TestProject",
-									Attributes = [],
+									Attributes = 
+									[
+										new EngineTest(Pass)
+									],
 									Parameters = [],
 									Properties = [],
 								}),
@@ -679,7 +697,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 									ResettableClassFactory = resettableClassFactory,
 									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method4(methodArg)),
 									TestFilePath = @"",
-									TestLineNumber = 42,
+									TestLineNumber = 44,
 									TestMethod = testInformation,
 									TestBuilderContext = testBuilderContext,
 								});
@@ -695,7 +713,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 									MethodName = $"DataSource_Method4",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method4 failed to initialize", exception),
 									TestFilePath = @"",
-									TestLineNumber = 42,
+									TestLineNumber = 44,
 								});
 							}
 							return nodes;
@@ -752,7 +770,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 														}),
 														Name = "MethodDataSourceDrivenTests",
 														Namespace = "TUnit.TestProject",
-														Attributes = [],
+														Attributes = 
+														[
+															new EngineTest(Pass)
+														],
 														Parameters = [],
 														Properties = [],
 													}),
@@ -784,7 +805,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 														ResettableClassFactory = resettableClassFactory,
 														TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method4(methodArg)),
 														TestFilePath = @"",
-														TestLineNumber = 42,
+														TestLineNumber = 44,
 														TestMethod = testInformation,
 														TestBuilderContext = testBuilderContext,
 													});
@@ -800,7 +821,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 														MethodName = $"DataSource_Method4",
 														Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method4 failed to initialize", exception),
 														TestFilePath = @"",
-														TestLineNumber = 42,
+														TestLineNumber = 44,
 													});
 												}
 												return nodes;
@@ -857,7 +878,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																			}),
 																			Name = "MethodDataSourceDrivenTests",
 																			Namespace = "TUnit.TestProject",
-																			Attributes = [],
+																			Attributes = 
+																			[
+																				new EngineTest(Pass)
+																			],
 																			Parameters = [],
 																			Properties = [],
 																		}),
@@ -889,7 +913,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																			ResettableClassFactory = resettableClassFactory,
 																			TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method4(methodArg)),
 																			TestFilePath = @"",
-																			TestLineNumber = 42,
+																			TestLineNumber = 44,
 																			TestMethod = testInformation,
 																			TestBuilderContext = testBuilderContext,
 																		});
@@ -905,7 +929,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																			MethodName = $"DataSource_Method4",
 																			Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method4 failed to initialize", exception),
 																			TestFilePath = @"",
-																			TestLineNumber = 42,
+																			TestLineNumber = 44,
 																		});
 																	}
 																	return nodes;
@@ -962,7 +986,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																								}),
 																								Name = "MethodDataSourceDrivenTests",
 																								Namespace = "TUnit.TestProject",
-																								Attributes = [],
+																								Attributes = 
+																								[
+																									new EngineTest(Pass)
+																								],
 																								Parameters = [],
 																								Properties = [],
 																							}),
@@ -994,7 +1021,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																								ResettableClassFactory = resettableClassFactory,
 																								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method4(methodArg)),
 																								TestFilePath = @"",
-																								TestLineNumber = 42,
+																								TestLineNumber = 44,
 																								TestMethod = testInformation,
 																								TestBuilderContext = testBuilderContext,
 																							});
@@ -1010,7 +1037,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																								MethodName = $"DataSource_Method4",
 																								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_Method4 failed to initialize", exception),
 																								TestFilePath = @"",
-																								TestLineNumber = 42,
+																								TestLineNumber = 44,
 																							});
 																						}
 																						return nodes;
@@ -1077,7 +1104,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					}),
 					Name = "MethodDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -1109,7 +1139,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_WithBaseReturn(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 53,
+					TestLineNumber = 55,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -1125,7 +1155,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					MethodName = $"DataSource_WithBaseReturn",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.DataSource_WithBaseReturn failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 53,
+					TestLineNumber = 55,
 				});
 			}
 			return nodes;
@@ -1192,7 +1222,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					}),
 					Name = "MethodDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -1227,7 +1260,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.EnumerableFuncArrayTest(methodData)),
 						TestFilePath = @"",
-						TestLineNumber = 59,
+						TestLineNumber = 61,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -1244,7 +1277,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					MethodName = $"EnumerableFuncArrayTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenTests.EnumerableFuncArrayTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 59,
+					TestLineNumber = 61,
 				});
 			}
 			return nodes;

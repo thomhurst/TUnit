@@ -88,7 +88,10 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					}),
 					Name = "GenericMethodTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -130,7 +133,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AggregateBy_HasExpectedOutput(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5)),
 						TestFilePath = @"",
-						TestLineNumber = 5,
+						TestLineNumber = 8,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -147,7 +150,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					MethodName = $"AggregateBy_HasExpectedOutput",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("GenericMethodTests.AggregateBy_HasExpectedOutput failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 				});
 			}
 			return nodes;
@@ -215,7 +218,10 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 						}),
 						Name = "GenericMethodTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = [],
 						Properties = [],
 					}),
@@ -257,7 +263,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AggregateBy_HasExpectedOutput(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5)),
 							TestFilePath = @"",
-							TestLineNumber = 5,
+							TestLineNumber = 8,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -274,7 +280,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 						MethodName = $"AggregateBy_HasExpectedOutput",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("GenericMethodTests.AggregateBy_HasExpectedOutput failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 5,
+						TestLineNumber = 8,
 					});
 				}
 				return nodes;

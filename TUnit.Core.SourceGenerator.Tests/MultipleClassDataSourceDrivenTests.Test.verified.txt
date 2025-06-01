@@ -50,7 +50,10 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 					}),
 					Name = "MultipleClassDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
@@ -164,7 +167,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
 							TestFilePath = @"",
-							TestLineNumber = 14,
+							TestLineNumber = 17,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -181,7 +184,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						MethodName = $"Test1",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MultipleClassDataSourceDrivenTests.Test1 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 14,
+						TestLineNumber = 17,
 					});
 				}
 				return nodes;
@@ -240,7 +243,10 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 					}),
 					Name = "MultipleClassDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
@@ -354,7 +360,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2()),
 							TestFilePath = @"",
-							TestLineNumber = 20,
+							TestLineNumber = 23,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -371,7 +377,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						MethodName = $"Test2",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MultipleClassDataSourceDrivenTests.Test2 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 20,
+						TestLineNumber = 23,
 					});
 				}
 				return nodes;

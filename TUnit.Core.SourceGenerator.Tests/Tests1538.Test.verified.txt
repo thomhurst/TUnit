@@ -93,7 +93,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._1538",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -137,7 +140,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Eight_Args(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7)),
 						TestFilePath = @"",
-						TestLineNumber = 5,
+						TestLineNumber = 8,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -154,7 +157,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					MethodName = $"Eight_Args",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Eight_Args failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 				});
 			}
 			return nodes;
@@ -296,7 +299,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._1538",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -348,7 +354,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SixteenArgs(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7, methodArg8, methodArg9, methodArg10, methodArg11, methodArg12, methodArg13, methodArg14, methodArg15)),
 						TestFilePath = @"",
-						TestLineNumber = 13,
+						TestLineNumber = 16,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -365,7 +371,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					MethodName = $"SixteenArgs",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.SixteenArgs failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 13,
+					TestLineNumber = 16,
 				});
 			}
 			return nodes;

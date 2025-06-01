@@ -65,7 +65,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					}),
 					Name = "EnumMemberNamesTests",
 					Namespace = "TUnit.TestProject.Bugs._1432",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -98,7 +101,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -114,7 +117,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					MethodName = $"SomeTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 				});
 			}
 			return nodes;
@@ -158,7 +161,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						}),
 						Name = "EnumMemberNamesTests",
 						Namespace = "TUnit.TestProject.Bugs._1432",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = [],
 						Properties = [],
 					}),
@@ -191,7 +197,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 5,
+						TestLineNumber = 8,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -207,7 +213,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						MethodName = $"SomeTest",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 5,
+						TestLineNumber = 8,
 					});
 				}
 				return nodes;
@@ -251,7 +257,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 							}),
 							Name = "EnumMemberNamesTests",
 							Namespace = "TUnit.TestProject.Bugs._1432",
-							Attributes = [],
+							Attributes = 
+							[
+								new EngineTest(Pass)
+							],
 							Parameters = [],
 							Properties = [],
 						}),
@@ -284,7 +293,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 							TestFilePath = @"",
-							TestLineNumber = 5,
+							TestLineNumber = 8,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -300,7 +309,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 							MethodName = $"SomeTest",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("EnumMemberNamesTests.SomeTest failed to initialize", exception),
 							TestFilePath = @"",
-							TestLineNumber = 5,
+							TestLineNumber = 8,
 						});
 					}
 					return nodes;

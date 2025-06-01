@@ -57,6 +57,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
+						new EngineTest(Pass),
 						new global::TUnit.Core.InheritsTestsAttribute()
 					],
 					Parameters = [],
@@ -145,6 +146,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						Namespace = "TUnit.TestProject.Bugs._1889",
 						Attributes = 
 						[
+							new EngineTest(Pass),
 							new global::TUnit.Core.InheritsTestsAttribute()
 						],
 						Parameters = [],
@@ -262,6 +264,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							Namespace = "TUnit.TestProject.Bugs._1889",
 							Attributes = 
 							[
+								new EngineTest(Pass),
 								new global::TUnit.Core.InheritsTestsAttribute()
 							],
 							Parameters = [],
@@ -352,6 +355,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 								Namespace = "TUnit.TestProject.Bugs._1889",
 								Attributes = 
 								[
+									new EngineTest(Pass),
 									new global::TUnit.Core.InheritsTestsAttribute()
 								],
 								Parameters = [],

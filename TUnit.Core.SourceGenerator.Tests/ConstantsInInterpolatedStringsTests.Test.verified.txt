@@ -58,7 +58,10 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 					}),
 					Name = "ConstantsInInterpolatedStringsTests",
 					Namespace = "TUnit.TestProject.Bugs._1432",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -91,7 +94,7 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 13,
+					TestLineNumber = 15,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -107,7 +110,7 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 					MethodName = $"SomeTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantsInInterpolatedStringsTests.SomeTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 13,
+					TestLineNumber = 15,
 				});
 			}
 			return nodes;
