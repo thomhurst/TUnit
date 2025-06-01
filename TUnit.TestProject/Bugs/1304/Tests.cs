@@ -1,10 +1,12 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 using Vogen;
 
 namespace TUnit.TestProject.Bugs._1304;
 
+[EngineTest(ExpectedResult.Pass)]
 public class Tests
 {
     [Test]

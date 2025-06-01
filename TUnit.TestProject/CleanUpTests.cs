@@ -1,4 +1,6 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.TestProject.Attributes;
+
+namespace TUnit.TestProject;
 
 public class CleanUpBase1
 {
@@ -45,6 +47,7 @@ public class CleanUpBase3 : CleanUpBase2
     }
 }
 
+[EngineTest(ExpectedResult.Pass)]
 public class CleanUpTests : CleanUpBase3, IDisposable
 {
     [After(Class)]

@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._2075;
 
@@ -45,6 +46,7 @@ public class FromWebApplicationFactoryAttribute : NonTypedDataSourceGeneratorAtt
     }
 }
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<WebApplicationFactory<Program>>(Shared = SharedType.PerTestSession)]
 public class MyTests(WebApplicationFactory<Program> factory)
 {

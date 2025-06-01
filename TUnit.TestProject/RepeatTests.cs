@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject;
+
+[EngineTest(ExpectedResult.Pass)]
 [Repeat(3)]
 public class RepeatTests
 {

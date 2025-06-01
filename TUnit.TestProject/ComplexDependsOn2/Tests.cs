@@ -1,6 +1,9 @@
-﻿#pragma warning disable
+﻿using TUnit.TestProject.Attributes;
+
+#pragma warning disable
 namespace TUnit.TestProject.ComplexDependsOn2;
 
+[EngineTest(ExpectedResult.Pass)]
 public abstract class BaseClass
 {
     [Test]

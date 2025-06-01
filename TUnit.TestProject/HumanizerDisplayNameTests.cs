@@ -1,8 +1,10 @@
 ﻿using Humanizer;
 using TUnit.Core.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [HumanizerDisplayName]
 public class HumanizerDisplayNameTests
 {

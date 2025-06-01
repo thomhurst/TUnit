@@ -3,6 +3,7 @@ using TUnit.TestProject.Enums;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class EnumTests
 {
     [EnumGenerator]

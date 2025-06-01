@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Failure)]
 [UnconditionalSuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")]
 public class ConflictingDependsOnTests2
 {

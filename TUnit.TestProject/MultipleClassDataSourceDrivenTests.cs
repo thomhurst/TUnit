@@ -1,7 +1,10 @@
+using TUnit.TestProject.Attributes;
+
 #pragma warning disable CS9113 // Parameter is unread.
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<Inject1, Inject2, Inject3, Inject4, Inject5>(Shared = [SharedType.None, SharedType.None, SharedType.None, SharedType.None, SharedType.None])]
 public class MultipleClassDataSourceDrivenTests(
     MultipleClassDataSourceDrivenTests.Inject1 inject1,

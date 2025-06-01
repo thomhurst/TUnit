@@ -1,9 +1,11 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1570;
 
+[EngineTest(ExpectedResult.Pass)]
 [Arguments(1)]
 [Arguments(2)]
 [Arguments(3)]

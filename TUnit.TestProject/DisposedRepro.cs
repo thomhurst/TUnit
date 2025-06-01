@@ -1,4 +1,6 @@
-﻿#pragma warning disable CS9113 // Parameter is unread.
+﻿using TUnit.TestProject.Attributes;
+
+#pragma warning disable CS9113 // Parameter is unread.
 namespace TUnit.TestProject;
 
 public abstract class DisposedReproTestBase : IDisposable
@@ -19,6 +21,7 @@ public abstract class DisposedReproTestBase : IDisposable
     }
 }
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<Dummy2>]
 [NotInParallel]
 public sealed class DisposedRepro(Dummy2 dummy) : DisposedReproTestBase

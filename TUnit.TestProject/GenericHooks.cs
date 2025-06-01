@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject;
+
+[EngineTest(ExpectedResult.Pass)]
 [Arguments(1)]
 [Arguments("Hello")]
 public class GenericHooks<T>(T arg)

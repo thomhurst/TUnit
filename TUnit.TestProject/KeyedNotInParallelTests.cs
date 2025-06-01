@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class KeyedNotInParallelTests
 {
     private static readonly ConcurrentBag<ConstraintDateTimeRange> TestDateTimeRanges = [];

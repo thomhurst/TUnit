@@ -1,8 +1,10 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1589;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<MyFixture>(Shared = SharedType.None)]
 public class MyTests : BaseTests<MyFixture>
 {

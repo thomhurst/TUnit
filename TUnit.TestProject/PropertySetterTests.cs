@@ -1,9 +1,11 @@
 ﻿#pragma warning disable TUnit0042
 
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [NotInParallel(nameof(PropertySetterTests))]
 public class PropertySetterTests
 {

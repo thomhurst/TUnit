@@ -2,9 +2,11 @@
 using TUnit.Assertions;
 using TUnit.Assertions.AssertionBuilders.Groups;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class MixedMatrixTests
 {
     [Test]

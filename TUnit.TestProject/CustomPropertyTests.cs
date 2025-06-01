@@ -1,7 +1,9 @@
 ﻿using System.Collections.Immutable;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [Property("ClassProperty", "ClassPropertyValue")]
 [ClassProperty]
 public class CustomPropertyTests

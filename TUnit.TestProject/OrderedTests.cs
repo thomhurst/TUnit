@@ -1,8 +1,10 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class OrderedTests
 {
     private static readonly List<string> RegisteredOrders = [];

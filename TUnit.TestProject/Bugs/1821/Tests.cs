@@ -1,8 +1,10 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1821;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<MyData>]
 public class Tests(MyData data)
 {

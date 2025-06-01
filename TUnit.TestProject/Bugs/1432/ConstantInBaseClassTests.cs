@@ -1,8 +1,10 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1432;
 
+[EngineTest(ExpectedResult.Pass)]
 internal abstract class ConstantInBaseClassTestsBase
 {
     protected const string BaseValue = "Value";

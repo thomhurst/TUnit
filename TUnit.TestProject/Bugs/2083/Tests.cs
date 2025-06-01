@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject.Bugs._2083;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject.Bugs._2083;
+
+[EngineTest(ExpectedResult.Pass)]
 public class Tests
 {
     [Test]

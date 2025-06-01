@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject.Bugs._1924.Keyed;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject.Bugs._1924.Keyed;
+
+[EngineTest(ExpectedResult.Pass)]
 public class BaseClass
 {
     [ClassDataSource<DataClass>(Shared = SharedType.Keyed, Key = "🔑")]

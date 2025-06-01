@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -9,6 +10,7 @@ public static class SharedInjectedKeyedContainer
     public static readonly ConcurrentDictionary<string, List<DummyReferenceTypeClass>> InstancesPerKey = new();
 }
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerClass), NotInParallel]
 public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass)
 {

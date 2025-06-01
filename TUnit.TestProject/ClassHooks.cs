@@ -1,9 +1,11 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Enums;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class ClassHooks
 {
     [Before(Class)]

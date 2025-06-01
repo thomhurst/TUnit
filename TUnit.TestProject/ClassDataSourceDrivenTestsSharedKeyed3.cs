@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 using TUnit.TestProject.Library.Models;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🌲")]
 [UnconditionalSuppressMessage("Usage", "TUnit0018:Test methods should not assign instance data")]
 public class ClassDataSourceDrivenTestsSharedKeyed3

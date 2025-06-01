@@ -1,7 +1,9 @@
+using TUnit.TestProject.Attributes;
 using TUnit.TestProject.Library.Models;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class ClassDataSourceDrivenTestsSharedForClass
 {
     [Test]

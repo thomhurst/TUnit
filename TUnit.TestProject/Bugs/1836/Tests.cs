@@ -1,6 +1,7 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1836;
 
@@ -46,6 +47,7 @@ public class TestDbContext : IAsyncInitializer, IAsyncDisposable, ITestEndEventR
     public int Order { get; }
 }
 
+[EngineTest(ExpectedResult.Pass)]
 public class Tests
 {
     [ClassDataSource<TestDbContext>(Shared = SharedType.PerTestSession)]

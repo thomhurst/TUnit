@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -13,6 +14,7 @@ public class TimeoutCancellationTokenTests
     }
 
     [Test]
+    [EngineTest(ExpectedResult.Pass)]
     public async Task DefaultTest(CancellationToken cancellationToken)
     {
         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
@@ -21,6 +23,7 @@ public class TimeoutCancellationTokenTests
     [Test]
     [Timeout(5_000)]
     [Category("Blah")]
+    [EngineTest(ExpectedResult.Failure)]
     public async Task BasicTest(CancellationToken cancellationToken)
     {
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
@@ -28,6 +31,7 @@ public class TimeoutCancellationTokenTests
 
     [Test]
     [FiveSecondTimeout]
+    [EngineTest(ExpectedResult.Failure)]
     public async Task InheritedTimeoutAttribute(CancellationToken cancellationToken)
     {
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
@@ -36,6 +40,7 @@ public class TimeoutCancellationTokenTests
     [Test]
     [Arguments(1)]
     [Timeout(5_000)]
+    [EngineTest(ExpectedResult.Failure)]
     public async Task DataTest(int value, CancellationToken cancellationToken)
     {
         await Assert.That(value).IsEqualTo(1);
@@ -44,6 +49,7 @@ public class TimeoutCancellationTokenTests
 
     [MethodDataSource(nameof(DataSource))]
     [Timeout(5_000)]
+    [EngineTest(ExpectedResult.Failure)]
     [Test]
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
@@ -54,6 +60,7 @@ public class TimeoutCancellationTokenTests
     [Test]
     [MatrixDataSource]
     [Timeout(5_000)]
+    [EngineTest(ExpectedResult.Failure)]
     [Category("Blah")]
     public async Task MatrixTest(
         [Matrix(1, 2, 3)] int value,

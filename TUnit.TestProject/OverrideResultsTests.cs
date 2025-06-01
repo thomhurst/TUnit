@@ -1,8 +1,10 @@
 ﻿using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class OverrideResultsTests
 {
     [Test, OverridePass]
