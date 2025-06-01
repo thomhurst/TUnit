@@ -52,7 +52,7 @@ public abstract class InvokableTestBase(TestMode testMode)
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        var result = await Cli.Wrap("dotnet")
+        var command = Cli.Wrap("dotnet")
             .WithArguments(
                 [
                     "run",
@@ -70,10 +70,11 @@ public abstract class InvokableTestBase(TestMode testMode)
                 ]
             )
             .WithWorkingDirectory(testProject.DirectoryName!)
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+            .WithValidation(CommandResultValidation.None);
+        
+        var result = await command.ExecuteBufferedAsync();
 
-        await TrxAsserter.AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await TrxAsserter.AssertTrx(command, result, assertions, trxFilename, assertionExpression);
     }
     
     private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
@@ -93,8 +94,8 @@ public abstract class InvokableTestBase(TestMode testMode)
 
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        
-        var result = await Cli.Wrap(aotApp.FullName)
+
+        var command = Cli.Wrap(aotApp.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -105,10 +106,11 @@ public abstract class InvokableTestBase(TestMode testMode)
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+            .WithValidation(CommandResultValidation.None);
+        
+        var result = await command.ExecuteBufferedAsync();
 
-        await TrxAsserter.AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await TrxAsserter.AssertTrx(command, result, assertions, trxFilename, assertionExpression: assertionExpression);
     }
     
     private async Task RunWithSingleFile(string filter,
@@ -128,8 +130,8 @@ public abstract class InvokableTestBase(TestMode testMode)
 
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        
-        var result = await Cli.Wrap(aotApp.FullName)
+
+        var command = Cli.Wrap(aotApp.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -140,10 +142,11 @@ public abstract class InvokableTestBase(TestMode testMode)
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+            .WithValidation(CommandResultValidation.None);
+        
+        var result = await command.ExecuteBufferedAsync();
 
-        await TrxAsserter.AssertTrx(result, assertions, trxFilename, assertionExpression);
+        await TrxAsserter.AssertTrx(command, result, assertions, trxFilename, assertionExpression: assertionExpression);
     }
 
     protected static FileInfo? FindFile(Func<FileInfo, bool> predicate)
