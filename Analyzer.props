@@ -1,0 +1,10 @@
+<Project>
+
+    <Import Project="$(MSBuildThisFileDirectory)Roslyn.props" />
+
+    <ItemGroup>
+        <Compile Include="..\TUnit.Analyzers\**\*.cs" Exclude="..\TUnit.Analyzers\obj\**\*.cs" />
+        <EmbeddedResource Include="..\TUnit.Analyzers\**\*.resx" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,9 @@
+<Project>
+    
+    <Import Project="$(MSBuildThisFileDirectory)Roslyn.props" />
+
+    <ItemGroup>
+        <Compile Include="..\TUnit.Core.SourceGenerator\**\*.cs" Exclude="..\TUnit.Core.SourceGenerator\obj\**\*.cs" />
+    </ItemGroup>
+
+</Project>
