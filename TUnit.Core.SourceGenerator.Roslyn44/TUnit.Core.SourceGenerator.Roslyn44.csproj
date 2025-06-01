@@ -4,17 +4,6 @@
         <RoslynVersion>4.4</RoslynVersion>
     </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="$(RoslynVersion).*"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynVersion).*"/>
-        <PackageReference Include="Polyfill">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Include="..\TUnit.Core.SourceGenerator\**\*.cs" Exclude="..\TUnit.Core.SourceGenerator\obj\**\*.cs" />
-    </ItemGroup>
+    <Import Project="..\SourceGenerator.props" />
 
 </Project>

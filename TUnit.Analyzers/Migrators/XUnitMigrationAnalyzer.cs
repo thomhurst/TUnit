@@ -37,7 +37,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (symbol.AllInterfaces.Any(i => i.ContainingNamespace.Name.StartsWith("Xunit")))
+            if (symbol.AllInterfaces.Any(i => i.ContainingNamespace?.Name.StartsWith("Xunit") is true))
             {
                 Flag(context);
                 return;
@@ -82,9 +82,9 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
             ITypeSymbol[] types =
             [
-                ..members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace.Name.StartsWith("Xunit")).Select(x => x.Type),
-                ..members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace.Name.StartsWith("Xunit")).Select(x => x.ReturnType),
-                ..members.OfType<IFieldSymbol>().Where(x => x.Type.ContainingNamespace.Name.StartsWith("Xunit")).Select(x => x.Type),
+                ..members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type),
+                ..members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.ReturnType),
+                ..members.OfType<IFieldSymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type),
             ];
 
             if (types.Any())

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RoslynVersion>4.7</RoslynVersion>
+        <RoslynVersion>4.14</RoslynVersion>
     </PropertyGroup>
 
     <Import Project="$(MSBuildThisFileDirectory)..\Analyzer.props" />

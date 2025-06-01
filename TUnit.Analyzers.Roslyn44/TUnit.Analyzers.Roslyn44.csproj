@@ -4,18 +4,6 @@
         <RoslynVersion>4.4</RoslynVersion>
     </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="$(RoslynVersion).*"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynVersion).*"/>
-        <PackageReference Include="Polyfill">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Include="..\TUnit.Analyzers\**\*.cs" Exclude="..\TUnit.Analyzers\obj\**\*.cs" />
-        <EmbeddedResource Include="..\TUnit.Analyzers\**\*.resx" />
-    </ItemGroup>
+    <Import Project="$(MSBuildThisFileDirectory)..\Analyzer.props" />
 
 </Project>
