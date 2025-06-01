@@ -4,11 +4,11 @@ namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T1, 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T2, 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T3, 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T4, 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T5> 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T1, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T2, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T3, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T4, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T5> 
     : DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> 
     where T1 : new()
     where T2 : new()

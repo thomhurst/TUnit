@@ -154,7 +154,6 @@ namespace TUnit.Core
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T> : TUnit.Core.DataSourceGeneratorAttribute<T>
-        where T : new()
     {
         public ClassDataSourceAttribute() { }
         public string Key { get; set; }

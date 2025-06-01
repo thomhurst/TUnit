@@ -1,7 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
+using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -23,7 +25,7 @@ internal class ClassDataSources
 
     public static ClassDataSources Get(string sessionId) => SourcesPerSession.GetOrAdd(sessionId, _ => new());
     
-    public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
+    public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
         var shared = sharedTypes.ElementAtOrDefault(index);
         var key = shared == SharedType.Keyed ? GetKey(index, sharedTypes, keys) : string.Empty;
@@ -43,60 +45,60 @@ internal class ClassDataSources
         return keys.ElementAtOrDefault(keyedIndex) ?? throw new ArgumentException($"Key at index {keyedIndex} not found");
     }
     
-    public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
+    public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (sharedType == SharedType.None)
         {
-            return Create<T>();
+            return Create<T>(dataGeneratorMetadata);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return (T)TestDataContainer.GetGlobalInstance(typeof(T), () => Create<T>());
+            return (T)TestDataContainer.GetGlobalInstance(typeof(T), () => Create<T>(dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return (T)TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create<T>());
+            return (T)TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create<T>(dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return (T)TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create<T>());
+            return (T)TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create<T>(dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return (T)TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create<T>());
+            return (T)TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create<T>(dataGeneratorMetadata));
         }
 
         throw new ArgumentOutOfRangeException();
     }
-    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
+    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (sharedType == SharedType.None)
         {
-            return Create(type);
+            return Create(type, dataGeneratorMetadata);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return TestDataContainer.GetGlobalInstance(type, () => Create(type));
+            return TestDataContainer.GetGlobalInstance(type, () => Create(type, dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return TestDataContainer.GetInstanceForClass(testClassType, type, () => Create(type));
+            return TestDataContainer.GetInstanceForClass(testClassType, type, () => Create(type, dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return TestDataContainer.GetInstanceForKey(key, type, () => Create(type));
+            return TestDataContainer.GetInstanceForKey(key, type, () => Create(type, dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, () => Create(type));
+            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, () => Create(type, dataGeneratorMetadata));
         }
 
         throw new ArgumentOutOfRangeException();
@@ -231,16 +233,20 @@ internal class ClassDataSources
     }
 
     [return: NotNull]
-    private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : new()
+    private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return ((T)Create(typeof(T)))!;
+        return ((T)Create(typeof(T), dataGeneratorMetadata))!;
     }
 
-    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type)
+    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
     {
         try
         {
-            return Activator.CreateInstance(type)!;
+            var instance = Activator.CreateInstance(type)!;
+            
+            InitializeDataSourceProperties(type, dataGeneratorMetadata, instance);
+            
+            return instance;
         }
         catch (TargetInvocationException targetInvocationException)
         {
@@ -253,7 +259,53 @@ internal class ClassDataSources
         }
     }
 
-    public async Task OnTestStart<T>(BeforeTestContext context, T item) where T : new()
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    private static void InitializeDataSourceProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata, object instance)
+    {
+        foreach (var propertyInfo in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (propertyInfo.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().FirstOrDefault() is not { } dataSourceGeneratorAttribute)
+            {
+                continue;
+            }
+                
+            var result = dataSourceGeneratorAttribute.GetType()
+                .GetMethod(nameof(DataSourceGeneratorAttribute<>.GenerateDataSources), BindingFlags.Public | BindingFlags.Instance)
+                ?.Invoke(dataSourceGeneratorAttribute, [dataGeneratorMetadata with
+                {
+                    Type = DataGeneratorType.Property,
+                    MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
+                }]);
+
+            if (result is IEnumerable enumerable)
+            {
+                var enumerator = enumerable.GetEnumerator();
+                
+                using var enumerator1 = enumerator as IDisposable;
+
+                enumerator.MoveNext();
+                
+                result = enumerator.Current;
+            }
+
+            if (result is Delegate @delegate)
+            {
+                result = @delegate.DynamicInvoke();
+            }
+                
+            propertyInfo.SetValue(instance, result);
+
+            if (result is not null)
+            {
+                InitializeDataSourceProperties(propertyInfo.PropertyType, dataGeneratorMetadata, result);
+            }
+        }
+    }
+
+    public async Task OnTestStart<T>(BeforeTestContext context, T item)
     {
         if (item is ITestStartEventReceiver testStartEventReceiver)
         {
@@ -261,7 +313,7 @@ internal class ClassDataSources
         }
     }
     
-    public async Task OnTestEnd<T>(AfterTestContext context, T item) where T : new()
+    public async Task OnTestEnd<T>(AfterTestContext context, T item)
     {
         if (item is ITestEndEventReceiver testEndEventReceiver)
         {
