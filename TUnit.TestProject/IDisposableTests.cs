@@ -24,7 +24,7 @@ public class DisposableTests : IDisposable
     }
     
     [After(Class)]
-    public static async Task AssertDisposed(ClassHookContext context#)
+    public static async Task AssertDisposed(ClassHookContext context)
     {
         foreach (var disposableTestse in context.Tests.Select(x => x.TestDetails.ClassInstance).OfType<DisposableTests>())
         {
