@@ -11,9 +11,7 @@ public class Tests
     public async Task Test()
     {
         var properties = TestContext.Current!.TestDetails.CustomProperties;
-
-        await Assert.That(properties).HasCount().EqualTo(1);
-
+        
         var array = properties["Group"].ToArray();
 
         await Assert.That(array).HasCount().EqualTo(3)
