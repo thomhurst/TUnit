@@ -20,10 +20,12 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
     protected private override List<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks()
     {
         var result = new List<StaticHookMethod<TestSessionContext>>();
+        
         foreach (var hookSource in Sources.TestSessionHookSources)
         {
             result.AddRange(hookSource.CollectBeforeTestSessionHooks(SessionId));
         }
+        
         return result;
     }
 

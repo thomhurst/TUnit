@@ -370,7 +370,6 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
 						new global::TUnit.Core.InheritsTestsAttribute(),
 						new EngineTest(Pass),
 						new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")

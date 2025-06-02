@@ -22,7 +22,7 @@ public class PlaywrightTest : WorkerAwareTest
     [After(HookType.TestSession, "", 0)]
     public static void PlaywrightCleanup()
     {
-        Playwright.Dispose();
+        Playwright?.Dispose();
     }
 
     public static void SetDefaultExpectTimeout(float timeout) => Microsoft.Playwright.Assertions.SetDefaultExpectTimeout(timeout);
