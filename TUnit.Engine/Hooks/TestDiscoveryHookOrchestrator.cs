@@ -9,8 +9,6 @@ internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector)
 {
     public async Task RunBeforeTestDiscovery(BeforeTestDiscoveryContext beforeTestDiscoveryContext)
     {
-        hooksCollector.CollectHooks();
-        
         var beforeDiscoveryHooks = CollectBeforeHooks();
         
         foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
