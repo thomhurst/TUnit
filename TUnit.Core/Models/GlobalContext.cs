@@ -14,7 +14,7 @@ public class GlobalContext : Context
         internal set => Contexts.Value = value;
     }
     
-    internal GlobalContext()
+    internal GlobalContext() : base(null)
     {
     }
 

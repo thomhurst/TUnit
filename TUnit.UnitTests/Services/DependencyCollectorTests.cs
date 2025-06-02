@@ -198,7 +198,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                     TestMethodArguments = [],
                     TestClassProperties = new Dictionary<string, object?>(),
                     TestBuilderContext = new TestBuilderContext()
-                }),
+                }, null!),
             TestBody = (_, _) => default(ValueTask),
         };
     }

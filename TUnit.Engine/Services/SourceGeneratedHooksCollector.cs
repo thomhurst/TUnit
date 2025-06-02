@@ -1,14 +1,10 @@
-﻿using System.Reflection;
-using TUnit.Core;
-using TUnit.Core.Data;
-using TUnit.Core.Hooks;
-using TUnit.Core.Interfaces.SourceGenerator;
+﻿using TUnit.Core;
 
 namespace TUnit.Engine.Services;
 
 internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorBase(sessionId)
 {
-    public override void CollectDiscoveryHooks()
+    public override void CollectHooks()
     {
         while (Sources.TestDiscoveryHookSources.TryDequeue(out var hookSource))
         {
@@ -22,10 +18,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
                 AfterTestDiscoveryHooks.Add(afterHook);
             }
         }
-    }
-
-    public override void CollectionTestSessionHooks()
-    {
+    
         while (Sources.TestSessionHookSources.TryDequeue(out var hookSource))
         {
             foreach (var beforeHook in hookSource.CollectBeforeTestSessionHooks(SessionId))
@@ -38,10 +31,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
                 AfterTestSessionHooks.Add(afterHook);
             }
         }
-    }
-
-    public override void CollectHooks()
-    {
+    
         while (Sources.TestHookSources.TryDequeue(out var hookSource))
         {
             foreach (var beforeHook in hookSource.CollectBeforeTestHooks(SessionId))

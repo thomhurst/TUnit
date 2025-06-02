@@ -431,7 +431,7 @@ namespace TUnit.Core
         protected GenericAbstractExecutor() { }
         public System.Threading.Tasks.ValueTask ExecuteAfterAssemblyHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.AssemblyHookContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
         public System.Threading.Tasks.ValueTask ExecuteAfterClassHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.ClassHookContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
-        public System.Threading.Tasks.ValueTask ExecuteAfterTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestDiscoveryContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
+        public System.Threading.Tasks.ValueTask ExecuteAfterTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestSessionContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
         public System.Threading.Tasks.ValueTask ExecuteAfterTestHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
         public System.Threading.Tasks.ValueTask ExecuteAfterTestSessionHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestSessionContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
         protected abstract System.Threading.Tasks.ValueTask ExecuteAsync(System.Func<System.Threading.Tasks.ValueTask> action);
@@ -875,13 +875,13 @@ namespace TUnit.Core
         [System.Text.Json.Serialization.JsonIgnore]
         public required TUnit.Core.ResettableLazy<TClassType> LazyClassInstance { get; init; }
     }
-    public class TestDiscoveryContext : TUnit.Core.Context
+    public class TestSessionContext : TUnit.Core.Context
     {
         public System.Collections.Generic.IEnumerable<TUnit.Core.TestContext> AllTests { get; }
         public System.Collections.Generic.IEnumerable<TUnit.Core.AssemblyHookContext> Assemblies { get; }
         public System.Collections.Generic.IEnumerable<TUnit.Core.ClassHookContext> TestClasses { get; }
         public required string? TestFilter { get; init; }
-        public new static TUnit.Core.TestDiscoveryContext? Current { get; }
+        public new static TUnit.Core.TestSessionContext? Current { get; }
     }
     public abstract class TestMetadata : System.IEquatable<TUnit.Core.TestMetadata>
     {
@@ -1210,10 +1210,10 @@ namespace TUnit.Core.Hooks
         public AfterClassHookMethod() { }
         public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.ClassHookContext context, System.Threading.CancellationToken cancellationToken) { }
     }
-    public class AfterTestDiscoveryHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestDiscoveryContext>, System.IEquatable<TUnit.Core.Hooks.AfterTestDiscoveryHookMethod>
+    public class AfterTestDiscoveryHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestSessionContext>, System.IEquatable<TUnit.Core.Hooks.AfterTestDiscoveryHookMethod>
     {
         public AfterTestDiscoveryHookMethod() { }
-        public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.TestDiscoveryContext context, System.Threading.CancellationToken cancellationToken) { }
+        public override System.Threading.Tasks.ValueTask ExecuteAsync(TUnit.Core.TestSessionContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public class AfterTestHookMethod : TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestContext>, System.IEquatable<TUnit.Core.Hooks.AfterTestHookMethod>
     {
@@ -1378,7 +1378,7 @@ namespace TUnit.Core.Interfaces
     {
         System.Threading.Tasks.ValueTask ExecuteAfterAssemblyHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.AssemblyHookContext context, System.Func<System.Threading.Tasks.ValueTask> action);
         System.Threading.Tasks.ValueTask ExecuteAfterClassHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.ClassHookContext context, System.Func<System.Threading.Tasks.ValueTask> action);
-        System.Threading.Tasks.ValueTask ExecuteAfterTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestDiscoveryContext context, System.Func<System.Threading.Tasks.ValueTask> action);
+        System.Threading.Tasks.ValueTask ExecuteAfterTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestSessionContext context, System.Func<System.Threading.Tasks.ValueTask> action);
         System.Threading.Tasks.ValueTask ExecuteAfterTestHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestContext context, System.Func<System.Threading.Tasks.ValueTask> action);
         System.Threading.Tasks.ValueTask ExecuteAfterTestSessionHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestSessionContext context, System.Func<System.Threading.Tasks.ValueTask> action);
         System.Threading.Tasks.ValueTask ExecuteBeforeAssemblyHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.AssemblyHookContext context, System.Func<System.Threading.Tasks.ValueTask> action);
@@ -1460,7 +1460,7 @@ namespace TUnit.Core.Interfaces.SourceGenerator
     }
     public interface ITestDiscoveryHookSource
     {
-        System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId);
+        System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.TestSessionContext>> CollectAfterTestDiscoveryHooks(string sessionId);
         System.Collections.Generic.IReadOnlyList<TUnit.Core.Hooks.StaticHookMethod<TUnit.Core.BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId);
     }
     public interface ITestHookSource

@@ -35,21 +35,26 @@ public partial class TestContext : Context
 #endif
 
     internal bool ReportResult = true;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="TestContext"/> class.
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="testDetails">The test details.</param>
     /// <param name="originalMetadata">The original metadata.</param>
-    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestMetadata originalMetadata)
+    /// <param name="classHookContext"></param>
+    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestMetadata originalMetadata, ClassHookContext classHookContext) : base(classHookContext)
     {
         _serviceProvider = serviceProvider;
         OriginalMetadata = originalMetadata;
         TestDetails = testDetails;
         ObjectBag = originalMetadata.TestBuilderContext.ObjectBag;
         Events = originalMetadata.TestBuilderContext.Events;
+        classHookContext.AddTest(this);
     }
+    
+    public ClassHookContext ClassContext => (ClassHookContext) Parent!;
+    public AssemblyHookContext AssemblyContext => ClassContext.AssemblyContext;
 
     /// <summary>
     /// Gets the events associated with the test context.

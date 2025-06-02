@@ -10,6 +10,11 @@ namespace TUnit.Core;
 /// </summary>
 public abstract class Context : IContext, IDisposable
 {
+    protected Context? Parent
+    {
+        get;
+    }
+    
     /// <summary>
     /// Gets the current context.
     /// </summary>
@@ -18,7 +23,7 @@ public abstract class Context : IContext, IDisposable
         ?? ClassHookContext.Current as Context
         ?? AssemblyHookContext.Current as Context
         ?? TestSessionContext.Current as Context
-        ?? TestDiscoveryContext.Current as Context
+        ?? TestSessionContext.Current as Context
         ?? BeforeTestDiscoveryContext.Current as Context
         ?? GlobalContext.Current;
 
@@ -35,12 +40,46 @@ public abstract class Context : IContext, IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Context"/> class.
     /// </summary>
-    internal Context()
+    internal Context(Context? parent)
     {
+        Parent = parent;
     }
 
-    internal ExecutionContext? ExecutionContext { get; set; }
-    
+#if NET
+    private List<ExecutionContext>? _executionContexts;
+#endif
+
+    internal ExecutionContext[] GetExecutionContexts()
+    {
+#if NET
+        if (_executionContexts is null)
+        {
+            return [];
+        }
+        
+        return _executionContexts.ToArray();
+#else
+        return [];
+#endif
+    }
+
+    internal void RestoreExecutionContext()
+    {
+#if NET
+        Parent?.RestoreExecutionContext();
+
+        if (_executionContexts is null)
+        {
+            return;
+        }
+        
+        foreach (var executionContext in _executionContexts)
+        {
+            ExecutionContext.Restore(executionContext);
+        }
+#endif
+    }
+
     /// <summary>
     /// Adds async local values to the context.
     /// </summary>
@@ -49,7 +88,10 @@ public abstract class Context : IContext, IDisposable
 #if NETSTANDARD
         throw new PlatformNotSupportedException("This method is not supported in .NET Standard - Please upgrade to .NET 8+.");
 #else
-        ExecutionContext = ExecutionContext.Capture();
+        if (ExecutionContext.Capture() is {} executionContext)
+        {
+            (_executionContexts ??= []).Add(executionContext);
+        }
 #endif
     }
     
@@ -85,6 +127,16 @@ public abstract class Context : IContext, IDisposable
     /// </summary>
     public void Dispose()
     {
-        ExecutionContext?.Dispose();
+#if NET
+        if (_executionContexts is null)
+        {
+            return;
+        }
+        
+        foreach (var executionContext in _executionContexts)
+        {
+            executionContext.Dispose();
+        }
+#endif
     }
 }

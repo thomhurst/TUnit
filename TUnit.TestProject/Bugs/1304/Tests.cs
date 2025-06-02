@@ -22,7 +22,8 @@ public class Tests
 
         // Assert
         await Assert.That(success).IsFalse();
-        await Assert.That(id).IsNull();
+        await Assert.That(id.HasValue).IsFalse();
+        await Assert.That(id.ToString()).IsEqualTo("[UNINITIALIZED]");
     }
 
     [Test]

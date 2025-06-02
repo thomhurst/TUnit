@@ -24,7 +24,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         | BindingFlags.Static
         | BindingFlags.DeclaredOnly;
     
-    public override void CollectDiscoveryHooks()
+    public override void CollectHooks()
     {
 #if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
@@ -70,10 +70,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 }
             }
         }
-    }
-
-    public override void CollectionTestSessionHooks()
-    {
+        
         foreach (var type in ReflectionScanner.GetTypes())
         {
             foreach (var methodInfo in type.GetMethods(BindingFlags)
@@ -111,10 +108,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 }
             }
         }
-    }
-
-    public override void CollectHooks()
-    {
+    
         foreach (var type in ReflectionScanner.GetTypes())
         {
             foreach (var methodInfo in type.GetMethods(BindingFlags)

@@ -35,6 +35,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitFrameworkLogger Logger { get; }
     public TUnitMessageBus TUnitMessageBus { get; }
 
+    public ContextManager ContextManager { get; }
+    
     public HooksCollectorBase HooksCollector { get; set; }
     public TUnitInitializer Initializer { get; }
     public StandardOutConsoleInterceptor StandardOutConsoleInterceptor { get; }
@@ -81,6 +83,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var stringFilter = FilterParser.GetTestFilter(context);
 
+        ContextManager = new ContextManager(context.Request.Session.SessionUid.Value, stringFilter);
+
         TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, context));
 
         var instanceTracker = Register(new InstanceTracker());
@@ -101,24 +105,24 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testsConstructor = Register<BaseTestsConstructor>
         (
             isReflectionScannerEnabled
-                ? new ReflectionTestsConstructor(extension, dependencyCollector, this)
-                : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, this)
+                ? new ReflectionTestsConstructor(extension, dependencyCollector, ContextManager, this)
+                : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, ContextManager, this)
         );
         
         var testFilterService = Register(new TestFilterService(LoggerFactory));
         
         TestGrouper = Register(new TestGrouper());
         
-        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector));
+        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector, ContextManager));
 
-        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector, stringFilter));
-        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector, AssemblyHookOrchestrator, stringFilter));
+        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector));
+        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector));
         
         var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, HooksCollector));
         
         var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector));
 
-        var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
+        var testRegistrar = Register(new TestRegistrar(instanceTracker));
         
         Disposer = Register(new Disposer(Logger));
         

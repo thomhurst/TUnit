@@ -19,10 +19,13 @@ public class BeforeTestDiscoveryContext : Context
     /// <summary>
     /// Initializes a new instance of the <see cref="BeforeTestDiscoveryContext"/> class.
     /// </summary>
-    internal BeforeTestDiscoveryContext()
+    internal BeforeTestDiscoveryContext() : base(GlobalContext.Current)
     {
         Current = this;
     }
+    
+    
+    public GlobalContext GlobalContext => (GlobalContext) Parent!;
     
     /// <summary>
     /// Gets or sets the test filter.

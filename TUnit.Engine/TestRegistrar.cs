@@ -1,11 +1,9 @@
-﻿using System.Reflection;
-using TUnit.Core;
+﻿using TUnit.Core;
 using TUnit.Core.Extensions;
-using TUnit.Engine.Hooks;
 
 namespace TUnit.Engine;
 
-internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrchestrator assemblyHookOrchestrator, ClassHookOrchestrator classHookOrchestrator)
+internal class TestRegistrar(InstanceTracker instanceTracker)
 {
 	internal async ValueTask RegisterInstance(DiscoveredTest discoveredTest, Func<Exception, ValueTask> onFailureToInitialize)
 	{
@@ -19,7 +17,7 @@ internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrches
 
 			var classType = testContext.TestDetails.TestClass.Type;
 			
-			RegisterTestContext(classType, testContext);
+			RegisterTestContext(classType);
 
 			foreach (var testRegisteredEventsObject in testRegisteredEventsObjects)
 			{
@@ -32,21 +30,8 @@ internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrches
 		}
 	}
 
-	private void RegisterTestContext(Type type, TestContext testContext)
+	private void RegisterTestContext(Type type)
 	{
 		instanceTracker.Register(type);
-
-		var classHookContext = classHookOrchestrator.GetContext(type);
-
-		classHookContext.Tests.Add(testContext);
-        
-		RegisterTestContext(type.Assembly, classHookContext);
-	}
-	
-	private void RegisterTestContext(Assembly assembly, ClassHookContext classHookContext)
-	{
-		var assemblyHookContext = assemblyHookOrchestrator.GetContext(assembly);
-
-		assemblyHookContext.TestClasses.Add(classHookContext);
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Enums;
@@ -147,18 +146,23 @@ internal class SingleTestExecutor(
 
     private async Task RunFirstTestEventReceivers(TestContext testContext)
     {
-        ExecutionContextHelper.RestoreContext(await RunFirstTestInSessionEventReceivers(testContext));
-        ExecutionContextHelper.RestoreContext(await RunFirstTestInAssemblyEventReceivers(testContext));
-        ExecutionContextHelper.RestoreContext(await RunFirstTestInClassEventReceivers(testContext));
+        var sessionExecutionContexts = await RunFirstTestInSessionEventReceivers(testContext);
+        ExecutionContextHelper.RestoreContexts(sessionExecutionContexts);
+
+        var assemblyExecutionContexts = await RunFirstTestInAssemblyEventReceivers(testContext);
+        ExecutionContextHelper.RestoreContexts(assemblyExecutionContexts);
+        
+        var classExecutionContexts = await RunFirstTestInClassEventReceivers(testContext);
+        ExecutionContextHelper.RestoreContexts(classExecutionContexts);
     }
 
-    private async Task<ExecutionContext?> RunFirstTestInSessionEventReceivers(TestContext testContext)
+    private async Task<ExecutionContext[]> RunFirstTestInSessionEventReceivers(TestContext testContext)
     {
         var testSessionContext = TestSessionContext.Current;
 
         if (testSessionContext == null)
         {
-            return null;
+            return [];
         }
         
         if (!testSessionContext.FirstTestStarted)
@@ -171,12 +175,12 @@ internal class SingleTestExecutor(
                     foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInTestSessionEventObjects())
                     {
                         await firstTestInAssemblyEventReceiver.OnFirstTestInTestSession(testSessionContext, testContext);
-                        ExecutionContextHelper.RestoreContext(testContext);
+                        testContext.RestoreExecutionContext();
                     }
                     
                     testSessionContext.FirstTestStarted = true;
                     
-                    return ExecutionContext.Capture();
+                    return testContext.GetExecutionContexts();
                 }
             }
             finally
@@ -185,12 +189,12 @@ internal class SingleTestExecutor(
             }
         }
         
-        return null;
+        return [];
     }
     
-    private async Task<ExecutionContext?> RunFirstTestInAssemblyEventReceivers(TestContext testContext)
+    private async Task<ExecutionContext[]> RunFirstTestInAssemblyEventReceivers(TestContext testContext)
     {
-        var assemblyHookContext = assemblyHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type.Assembly);
+        var assemblyHookContext = testContext.AssemblyContext;
 
         if (!assemblyHookContext.FirstTestStarted)
         {
@@ -202,12 +206,12 @@ internal class SingleTestExecutor(
                     foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInAssemblyEventObjects())
                     {
                         await firstTestInAssemblyEventReceiver.OnFirstTestInAssembly(assemblyHookContext, testContext);
-                        ExecutionContextHelper.RestoreContext(testContext);
+                        testContext.RestoreExecutionContext();
                     }
 
                     assemblyHookContext.FirstTestStarted = true;
 
-                    return ExecutionContext.Capture();
+                    return assemblyHookContext.GetExecutionContexts();
                 }
             }
             finally
@@ -216,12 +220,12 @@ internal class SingleTestExecutor(
             }
         }
 
-        return null;
+        return [];
     }
     
-    private async Task<ExecutionContext?> RunFirstTestInClassEventReceivers(TestContext testContext)
+    private async Task<ExecutionContext[]> RunFirstTestInClassEventReceivers(TestContext testContext)
     {
-        var classHookContext = classHookOrchestrator.GetContext(testContext.TestDetails.TestClass.Type);
+        var classHookContext = testContext.ClassContext;
 
         if (!classHookContext.FirstTestStarted)
         {
@@ -233,12 +237,12 @@ internal class SingleTestExecutor(
                     foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInClassEventObjects())
                     {
                         await firstTestInAssemblyEventReceiver.OnFirstTestInClass(classHookContext, testContext);
-                        ExecutionContextHelper.RestoreContext(testContext);
+                        testContext.RestoreExecutionContext();
                     }
                     
                     classHookContext.FirstTestStarted = true;
 
-                    return ExecutionContext.Capture();
+                    return classHookContext.GetExecutionContexts();
                 }
             }
             finally
@@ -247,7 +251,7 @@ internal class SingleTestExecutor(
             }
         }
         
-        return null;
+        return [];
     }
 
     private ValueTask RegisterIfNotAlready(TestContext testContext)
@@ -296,7 +300,7 @@ internal class SingleTestExecutor(
         List<Exception> cleanUpExceptions)
     {
         var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type);
-        var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.TestClass.Type);
+        var classHookContext = test.TestContext.ClassContext;
                 
         ClassHookContext.Current = classHookContext;
                 
@@ -318,7 +322,7 @@ internal class SingleTestExecutor(
         ClassHookContext.Current = null;
         
         var afterAssemblyHooks = assemblyHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type.Assembly);
-        var assemblyHookContext = assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.TestClass.Type.Assembly);
+        var assemblyHookContext = test.TestContext.AssemblyContext;
 
         AssemblyHookContext.Current = assemblyHookContext;
                 

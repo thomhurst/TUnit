@@ -1,8 +1,6 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
-using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
@@ -23,7 +21,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
                 await onInitializeObject.InitializeAsync();
             }
 
-            ExecutionContextHelper.RestoreContext(await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken));
+            ExecutionContextHelper.RestoreContexts(await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken));
             
             foreach (var testStartEventsObject in discoveredTest.TestContext.GetTestStartEventObjects())
             {

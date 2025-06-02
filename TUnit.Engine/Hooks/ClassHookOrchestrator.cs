@@ -3,17 +3,13 @@ using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Core.Hooks;
-using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
 internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollectorBase hooksCollector)
 {
-    private readonly ConcurrentDictionary<Type, ClassHookContext> _classHookContexts = new();
-    
     private readonly ConcurrentDictionary<Type, bool> _beforeHooksReached = new();
 
     internal GetOnlyDictionary<Type, TaskCompletionSource<bool>> PreviouslyRunBeforeHooks { get; } = new();
@@ -43,9 +39,9 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
         }
     }
     
-    public async Task<ExecutionContext?> ExecuteBeforeClassHooks(TestContext testContext)
+    public async Task ExecuteBeforeClassHooks(TestContext testContext)
     {
-        var classHookContext = GetContext(testContext.TestDetails.TestClass.Type);
+        var classHookContext = testContext.ClassContext;
 
         var classHooksTaskCompletionSource = PreviouslyRunBeforeHooks.GetOrAdd(
             testContext.TestDetails.TestClass.Type, _ => new TaskCompletionSource<bool>(),
@@ -54,7 +50,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
         if (classHooksTaskPreviouslyExisted)
         {
             await classHooksTaskCompletionSource.Task;
-            return classHookContext.ExecutionContext;
+            return;
         }
 
         try
@@ -74,7 +70,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
                     throw new HookFailedException($"Error executing [Before(Class)] hook: {beforeHook.MethodInfo.Type.FullName}.{beforeHook.Name}", e);
                 }
                     
-                ExecutionContextHelper.RestoreContext(classHookContext.ExecutionContext);
+                classHookContext.RestoreExecutionContext();
             }
 
             ClassHookContext.Current = null;
@@ -85,8 +81,6 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
             classHooksTaskCompletionSource.SetException(e);
             throw;
         }
-
-        return classHookContext.ExecutionContext;
     }
 
     public IEnumerable<IExecutableHook<ClassHookContext>> CollectAfterHooks(
@@ -138,13 +132,5 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
             yield return type;
             type = type.BaseType;
         }
-    }
-
-    public ClassHookContext GetContext(Type type)
-    {
-        return _classHookContexts.GetOrAdd(type, _ => new ClassHookContext
-        {
-            ClassType = type
-        });
     }
 }

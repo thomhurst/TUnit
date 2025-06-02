@@ -25,7 +25,5 @@ internal abstract class HooksCollectorBase(string sessionId)
     internal readonly List<StaticHookMethod<AssemblyHookContext>> AfterEveryAssemblyHooks = [];
     internal readonly List<StaticHookMethod<ClassHookContext>> AfterEveryClassHooks = [];
     internal readonly List<StaticHookMethod<TestContext>> AfterEveryTestHooks = [];
-    public abstract void CollectDiscoveryHooks();
-    public abstract void CollectionTestSessionHooks();
-    public abstract void CollectHooks();
+    
 }

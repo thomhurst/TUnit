@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions;
-using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
@@ -24,7 +23,8 @@ namespace TUnit.Engine.Services;
 [UnconditionalSuppressMessage("Trimming", "IL2111:Reflection")]
 internal class ReflectionTestsConstructor(IExtension extension, 
     DependencyCollector dependencyCollector, 
-    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, serviceProvider)
+    ContextManager contextManager,
+    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
 {
     protected override DiscoveredTest[] DiscoverTests()
     {

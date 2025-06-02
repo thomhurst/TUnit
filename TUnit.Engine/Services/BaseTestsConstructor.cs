@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
@@ -15,7 +14,8 @@ namespace TUnit.Engine.Services;
 [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
 internal abstract class BaseTestsConstructor(IExtension extension, 
-    DependencyCollector dependencyCollector, 
+    DependencyCollector dependencyCollector,
+    ContextManager contextManager,
     IServiceProvider serviceProvider) : IDataProducer
 {
     public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
@@ -33,7 +33,7 @@ internal abstract class BaseTestsConstructor(IExtension extension,
     {
         var testDetails = testMetadata.BuildTestDetails();
 
-        var testContext = new TestContext(serviceProvider, testDetails, testMetadata);
+        var testContext = new TestContext(serviceProvider, testDetails, testMetadata, contextManager.GetClassHookContext(testDetails.TestClass.Type));
 
         if (testMetadata.DiscoveryException is not null)
         {
