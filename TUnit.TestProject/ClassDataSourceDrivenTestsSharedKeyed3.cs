@@ -39,7 +39,7 @@ public class ClassDataSourceDrivenTestsSharedKeyed3
         MethodLevels.Add(value);
     }
 
-    [After(Class)]
+    [After(Assembly)]
     public static async Task AssertAfter()
     {
         await Assert.That(ClassLevels).IsNotEmpty();
