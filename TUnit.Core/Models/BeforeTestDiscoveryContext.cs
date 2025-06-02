@@ -31,4 +31,9 @@ public class BeforeTestDiscoveryContext : Context
     /// Gets or sets the test filter.
     /// </summary>
     public required string? TestFilter { get; init; }
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
+    }
 }

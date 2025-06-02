@@ -9,7 +9,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollectorBase hooksCollector, ContextManager contextManager)
+internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollectorBase hooksCollector, ContextManager contextManager, TestSessionHookOrchestrator testSessionHookOrchestrator)
 {
     private readonly ConcurrentDictionary<Assembly, bool> _beforeHooksReached = new();
     
@@ -22,10 +22,13 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
         var assemblyHooksTaskCompletionSource = PreviouslyRunBeforeHooks.GetOrAdd(
             testContext.TestDetails.TestClass.Type.Assembly, _ => new TaskCompletionSource<bool>(),
             out var assemblyHooksTaskPreviouslyExisted);
-
+        
         if (assemblyHooksTaskPreviouslyExisted)
         {
             await assemblyHooksTaskCompletionSource.Task;
+            
+            assemblyHookContext.RestoreExecutionContext();
+            
             return;
         }
 
@@ -33,6 +36,8 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
         {
             var beforeAssemblyHooks = CollectBeforeHooks(testContext.TestDetails.TestClass.Type.Assembly);
 
+            await testSessionHookOrchestrator.RunBeforeTestSession(testContext.AssemblyContext.TestSessionContext, testContext.CancellationToken);
+            
             AssemblyHookContext.Current = assemblyHookContext;
 
             foreach (var beforeHook in beforeAssemblyHooks)

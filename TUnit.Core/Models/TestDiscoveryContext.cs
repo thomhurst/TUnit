@@ -34,4 +34,9 @@ public class TestDiscoveryContext : Context
     public IEnumerable<ClassHookContext> TestClasses => field ??= AllTests.Select(x => x.ClassContext).Distinct().ToArray();
 
     public IReadOnlyList<TestContext> AllTests { get; private set; } = [];
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
+    }
 }

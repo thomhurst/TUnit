@@ -45,4 +45,9 @@ public class AssemblyHookContext : Context
             TestSessionContext.RemoveAssembly(this);
         }
     }
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
+    }
 }

@@ -48,4 +48,9 @@ public class TestSessionContext : Context
     {
         _assemblies.Remove(assemblyContext);
     }
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
+    }
 }

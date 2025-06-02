@@ -46,39 +46,26 @@ public abstract class Context : IContext, IDisposable
     }
 
 #if NET
-    private List<ExecutionContext>? _executionContexts;
+    internal ExecutionContext? ExecutionContext { get; private set; }
 #endif
 
-    internal ExecutionContext[] GetExecutionContexts()
+    public void RestoreExecutionContext()
     {
 #if NET
-        if (_executionContexts is null)
-        {
-            return [];
-        }
+        RestoreContextAsyncLocal();
         
-        return _executionContexts.ToArray();
-#else
-        return [];
-#endif
-    }
-
-    internal void RestoreExecutionContext()
-    {
-#if NET
         Parent?.RestoreExecutionContext();
 
-        if (_executionContexts is null)
+        if (ExecutionContext is not null)
         {
-            return;
+            ExecutionContext.Restore(ExecutionContext);
         }
         
-        foreach (var executionContext in _executionContexts)
-        {
-            ExecutionContext.Restore(executionContext);
-        }
+        RestoreContextAsyncLocal();
 #endif
     }
+
+    internal abstract void RestoreContextAsyncLocal();
 
     /// <summary>
     /// Adds async local values to the context.
@@ -90,7 +77,7 @@ public abstract class Context : IContext, IDisposable
 #else
         if (ExecutionContext.Capture() is {} executionContext)
         {
-            (_executionContexts ??= []).Add(executionContext);
+            ExecutionContext = executionContext;
         }
 #endif
     }
@@ -128,15 +115,7 @@ public abstract class Context : IContext, IDisposable
     public void Dispose()
     {
 #if NET
-        if (_executionContexts is null)
-        {
-            return;
-        }
-        
-        foreach (var executionContext in _executionContexts)
-        {
-            executionContext.Dispose();
-        }
+        ExecutionContext?.Dispose();
 #endif
     }
 }

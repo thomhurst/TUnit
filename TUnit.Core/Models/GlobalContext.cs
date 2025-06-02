@@ -23,4 +23,9 @@ public class GlobalContext : Context
     public string? TestFilter { get; internal set; }
     public TextWriter OriginalConsoleOut { get; set; } = Console.Out;
     public TextWriter OriginalConsoleError { get; set; } = Console.Error;
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
+    }
 }

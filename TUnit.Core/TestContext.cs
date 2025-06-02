@@ -144,4 +144,9 @@ public partial class TestContext : Context
     internal object?[]? EventObjects { get; set; }
 
     internal bool RunOnTestDiscovery { get; set; }
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
+    }
 }

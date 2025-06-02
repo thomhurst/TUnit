@@ -21,7 +21,9 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
                 await onInitializeObject.InitializeAsync();
             }
 
-            ExecutionContextHelper.RestoreContexts(await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken));
+            await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken);
+            
+            discoveredTest.TestContext.RestoreExecutionContext();
             
             foreach (var testStartEventsObject in discoveredTest.TestContext.GetTestStartEventObjects())
             {

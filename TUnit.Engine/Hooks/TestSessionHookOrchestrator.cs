@@ -8,22 +8,45 @@ namespace TUnit.Engine.Hooks;
 
 internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector)
 {
-    public async Task RunBeforeTestSession(ExecuteRequestContext executeRequestContext, TestSessionContext testSessionContext)
+    private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+    private bool _executed;
+    
+    public async Task RunBeforeTestSession(TestSessionContext testSessionContext, CancellationToken cancellationToken)
     {
-        var beforeSessionHooks = CollectBeforeHooks();
-
-        foreach (var beforeSessionHook in beforeSessionHooks)
+        if (_executed)
         {
-            try
-            {
-                testSessionContext.RestoreExecutionContext();
+            return;
+        }
 
-                await beforeSessionHook.ExecuteAsync(testSessionContext, executeRequestContext.CancellationToken);
-            }
-            catch (Exception e)
+        await _semaphoreSlim.WaitAsync(cancellationToken);
+
+        try
+        {
+            if (_executed)
             {
-                throw new HookFailedException($"Error executing [Before(TestSession)] hook: {beforeSessionHook.MethodInfo.Type.FullName}.{beforeSessionHook.Name}", e);
+                return;
             }
+        
+            var beforeSessionHooks = CollectBeforeHooks();
+
+            foreach (var beforeSessionHook in beforeSessionHooks)
+            {
+                try
+                {
+                    testSessionContext.RestoreExecutionContext();
+
+                    await beforeSessionHook.ExecuteAsync(testSessionContext, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    throw new HookFailedException($"Error executing [Before(TestSession)] hook: {beforeSessionHook.MethodInfo.Type.FullName}.{beforeSessionHook.Name}", e);
+                }
+            }
+        }
+        finally
+        {
+            _executed = true;
+            _semaphoreSlim.Release();
         }
     }
     

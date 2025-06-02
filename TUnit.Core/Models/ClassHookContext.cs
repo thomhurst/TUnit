@@ -69,4 +69,9 @@ public class ClassHookContext : Context
             AssemblyContext.RemoveClass(this);
         }
     }
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
+    }
 }
