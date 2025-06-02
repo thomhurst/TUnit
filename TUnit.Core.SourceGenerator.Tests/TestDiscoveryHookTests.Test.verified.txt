@@ -64,7 +64,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 					},
 				];
 			}
-			public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestSessionContext>> CollectAfterTestDiscoveryHooks(string sessionId)
+			public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)
 			{
 				return
 				[
@@ -100,7 +100,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 		[
 		];
 	}
-	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestSessionContext>> CollectAfterTestDiscoveryHooks(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)
 	{
 		return
 		[
