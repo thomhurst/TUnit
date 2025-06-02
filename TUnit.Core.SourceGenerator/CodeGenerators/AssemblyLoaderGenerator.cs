@@ -64,7 +64,7 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
 
         foreach (var assembly in visitedAssemblies)
         {
-            WriteAssemblyLoad(sourceBuilder, assembly, new HashSet<IAssemblySymbol>(SymbolEqualityComparer.Default));
+            WriteAssemblyLoad(sourceBuilder, assembly);
         }
 
         sourceBuilder.WriteLine("}");
@@ -72,19 +72,14 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         context.AddSource("AssemblyLoader.g.cs", sourceBuilder.ToString());
     }
 
-    private static void WriteAssemblyLoad(SourceCodeWriter sourceBuilder, IAssemblySymbol assembly, HashSet<IAssemblySymbol> visitedAssemblies)
+    private static void WriteAssemblyLoad(SourceCodeWriter sourceBuilder, IAssemblySymbol assembly)
     {
-        if (!visitedAssemblies.Add(assembly) || IsSystemAssembly(assembly))
+        if (IsSystemAssembly(assembly))
         {
             return;
         }
         
         sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
-
-        foreach (var innerAssembly in assembly.Modules.SelectMany(x => x.ReferencedAssemblySymbols))
-        {
-            WriteAssemblyLoad(sourceBuilder, innerAssembly, visitedAssemblies);
-        }
     }
     
     private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)
