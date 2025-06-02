@@ -8,6 +8,10 @@ public class WindowsOnlyAttribute : SkipAttribute
 
     public override Task<bool> ShouldSkip(BeforeTestContext context)
     {
+    #if NET
         return Task.FromResult(!OperatingSystem.IsWindows());
+    #else
+        return Task.FromResult(false);
+    #endif
     }
 }
