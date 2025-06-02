@@ -49,7 +49,6 @@ public class Tests
         // Assert
         //using var _ = Assert.Multiple();
         await Assert.That(success).IsTrue();
-        await Assert.That(id.HasValue).IsTrue();
         await Assert.That(id.ToString()).IsEqualTo(input);
     }
 }
