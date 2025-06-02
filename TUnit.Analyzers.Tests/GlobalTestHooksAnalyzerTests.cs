@@ -32,7 +32,7 @@ public class GlobalTestHooksAnalyzerTests
     }
     
     [Test]
-    [Arguments("TestDiscovery", "TestSessionContext context")]
+    [Arguments("TestDiscovery", "TestDiscoveryContext context")]
     [Arguments("TestDiscovery", "")]
     [Arguments("TestSession", "TestSessionContext context")]
     [Arguments("TestSession", "")]
@@ -223,7 +223,7 @@ public class GlobalTestHooksAnalyzerTests
     }
     
     [Test]
-    [Arguments("TestDiscovery", "TestSessionContext")]
+    [Arguments("TestDiscovery", "TestDiscoveryContext")]
     [Arguments("TestSession", "TestSessionContext")]
     [Arguments("Test", "TestContext")]
     [Arguments("Class", "ClassHookContext")]
@@ -285,7 +285,7 @@ public class GlobalTestHooksAnalyzerTests
     }
     
     [Test]
-    [Arguments("TestDiscovery", "TestSessionContext")]
+    [Arguments("TestDiscovery", "TestDiscoveryContext")]
     [Arguments("TestSession", "TestSessionContext")]
     [Arguments("Assembly", "AssemblyHookContext")]
     public async Task After_SeparateClass_Error(string hookType, string parameterType)
