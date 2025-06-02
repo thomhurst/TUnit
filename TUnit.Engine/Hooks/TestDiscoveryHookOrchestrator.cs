@@ -13,6 +13,8 @@ internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector)
         
         foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
         {
+            beforeTestDiscoveryContext.RestoreExecutionContext();
+
             try
             {
                 await beforeDiscoveryHook.ExecuteAsync(beforeTestDiscoveryContext, CancellationToken.None);
@@ -21,8 +23,6 @@ internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector)
             {
                 throw new HookFailedException($"Error executing [Before(TestDiscovery)] hook: {beforeDiscoveryHook.MethodInfo.Type.FullName}.{beforeDiscoveryHook.Name}", e);
             }
-            
-            beforeTestDiscoveryContext.RestoreExecutionContext();
         }
     }
     

@@ -16,14 +16,14 @@ internal class TestSessionHookOrchestrator(HooksCollectorBase hooksCollector)
         {
             try
             {
+                testSessionContext.RestoreExecutionContext();
+
                 await beforeSessionHook.ExecuteAsync(testSessionContext, executeRequestContext.CancellationToken);
             }
             catch (Exception e)
             {
                 throw new HookFailedException($"Error executing [Before(TestSession)] hook: {beforeSessionHook.MethodInfo.Type.FullName}.{beforeSessionHook.Name}", e);
             }
-            
-            testSessionContext.RestoreExecutionContext();
         }
     }
     

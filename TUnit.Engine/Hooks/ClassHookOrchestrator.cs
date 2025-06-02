@@ -61,6 +61,8 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
 
             foreach (var beforeHook in beforeClassHooks)
             {
+                classHookContext.RestoreExecutionContext();
+
                 try
                 {
                     await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
@@ -69,8 +71,6 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
                 {
                     throw new HookFailedException($"Error executing [Before(Class)] hook: {beforeHook.MethodInfo.Type.FullName}.{beforeHook.Name}", e);
                 }
-                    
-                classHookContext.RestoreExecutionContext();
             }
 
             ClassHookContext.Current = null;

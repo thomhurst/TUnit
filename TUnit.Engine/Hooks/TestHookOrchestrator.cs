@@ -12,7 +12,7 @@ namespace TUnit.Engine.Hooks;
 #endif
 internal class TestHookOrchestrator(HooksCollectorBase hooksCollector)
 {
-    public async Task<ExecutionContext[]> ExecuteBeforeHooks(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
+    public async Task ExecuteBeforeHooks(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
         var beforeHooks = CollectBeforeHooks(
             discoveredTest.TestContext.TestDetails.ClassInstance,
@@ -20,6 +20,8 @@ internal class TestHookOrchestrator(HooksCollectorBase hooksCollector)
 
         foreach (var executableHook in beforeHooks)
         {
+            discoveredTest.TestContext.RestoreExecutionContext();
+
             await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
             {
                 try
@@ -31,11 +33,7 @@ internal class TestHookOrchestrator(HooksCollectorBase hooksCollector)
                     throw new HookFailedException($"Error executing [Before(Test)] hook: {executableHook.MethodInfo.Type.FullName}.{executableHook.Name}", e);
                 }
             });
-            
-            discoveredTest.TestContext.RestoreExecutionContext();
         }
-
-        return discoveredTest.TestContext.GetExecutionContexts();
     }
     
     internal IEnumerable<IExecutableHook<TestContext>> CollectBeforeHooks(object classInstance, DiscoveredTest discoveredTest)

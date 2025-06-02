@@ -96,6 +96,8 @@ internal class SingleTestExecutor(
                 }
                 
                 TestContext.Current = testContext;
+                
+                testContext.RestoreExecutionContext();
 
                 await RunFirstTestEventReceivers(testContext);
                 

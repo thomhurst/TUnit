@@ -37,6 +37,8 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
 
             foreach (var beforeHook in beforeAssemblyHooks)
             {
+                assemblyHookContext.RestoreExecutionContext();
+
                 try
                 {
                     await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
@@ -45,8 +47,6 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
                 {
                     throw new HookFailedException($"Error executing [Before(Assembly)] hook: {beforeHook.MethodInfo.Type.FullName}.{beforeHook.Name}", e);
                 }
-                
-                assemblyHookContext.RestoreExecutionContext();
             }
 
             AssemblyHookContext.Current = null;

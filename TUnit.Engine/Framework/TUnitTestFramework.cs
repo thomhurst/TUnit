@@ -146,7 +146,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     TestSessionContext.Current = testSessionContext;
 
                     await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(context, testSessionContext);
-
+                    
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context.CancellationToken);
 
