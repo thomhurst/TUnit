@@ -14,7 +14,9 @@ internal static class TestDataContainer
     // New unified containers
     private static readonly ScopedContainer<string> GlobalContainer = new();
     private static readonly ScopedContainer<Type> ClassContainer = new();
-    private static readonly ScopedContainer<Assembly> AssemblyContainer = new();    private static readonly ScopedContainer<string> KeyContainer = new();    // Improved dependency tracking
+    private static readonly ScopedContainer<Assembly> AssemblyContainer = new();
+    private static readonly ScopedContainer<string> KeyContainer = new();
+    // Improved dependency tracking
     private static readonly Data.DependencyTracker DependencyTracker = new();
 
     // Legacy containers for backward compatibility (will be phased out)
@@ -129,7 +131,8 @@ internal static class TestDataContainer
         var instancesForType = InjectedSharedPerKey.GetOrAdd(type, _ => new GetOnlyDictionary<string, object>());
 
         return instancesForType.GetOrAdd(key, _ => func());
-    }      /// <summary>
+    }
+    /// <summary>
     /// Consumes the count for the specified key and type.
     /// </summary>
     /// <param name="key">The key.</param>
@@ -146,7 +149,8 @@ internal static class TestDataContainer
         var instancesForType = InjectedSharedPerKey.GetOrAdd(type, _ => new GetOnlyDictionary<string, object>());
 
         await DisposeWithNestedDependencies(instancesForType.Remove(key));
-    }/// <summary>
+    }
+    /// <summary>
     /// Consumes the global count for the specified item with improved error handling.
     /// </summary>
     /// <typeparam name="T">The type of the item.</typeparam>
@@ -168,7 +172,7 @@ internal static class TestDataContainer
 
         await DisposeWithNestedDependencies(item);
     }
-      /// <summary>
+    /// <summary>
     /// Consumes the assembly count for the specified item with improved error handling.
     /// </summary>
     /// <typeparam name="T">The type of the item.</typeparam>
@@ -216,19 +220,7 @@ internal static class TestDataContainer
         }
 
         await DisposeWithNestedDependencies(item);
-    }    /// <summary>
-    /// Gets an improved instance for the specified key using the unified container approach.
-    /// </summary>
-    /// <typeparam name="T">The type of object to retrieve</typeparam>
-    /// <param name="key">The key.</param>
-    /// <param name="func">The function to create the instance.</param>
-    /// <returns>The instance.</returns>
-    public static T GetKeyedInstance<T>(string key, Func<T> func) where T : class
-    {
-        var scopedInstance = KeyContainer.GetOrCreate(key, typeof(T), () => func()!);
-        return (T)scopedInstance.Instance;
     }
-
     /// <summary>
     /// Gets an improved global instance using the unified container approach.
     /// </summary>
@@ -239,47 +231,6 @@ internal static class TestDataContainer
     {
         var scopedInstance = GlobalContainer.GetOrCreate(typeof(T).FullName!, typeof(T), () => func()!);
         return (T)scopedInstance.Instance;
-    }
-
-    /// <summary>
-    /// Gets an improved class instance using the unified container approach.
-    /// </summary>
-    /// <typeparam name="T">The type of object to retrieve</typeparam>
-    /// <param name="testClass">The test class type.</param>
-    /// <param name="func">The function to create the instance.</param>
-    /// <returns>The instance.</returns>
-    public static T GetImprovedClassInstance<T>(Type testClass, Func<T> func) where T : class
-    {
-        var scopedInstance = ClassContainer.GetOrCreate(testClass, typeof(T), () => func()!);
-        return (T)scopedInstance.Instance;
-    }
-
-    /// <summary>
-    /// Gets an improved assembly instance using the unified container approach.
-    /// </summary>
-    /// <typeparam name="T">The type of object to retrieve</typeparam>
-    /// <param name="assembly">The assembly.</param>
-    /// <param name="func">The function to create the instance.</param>
-    /// <returns>The instance.</returns>
-    public static T GetImprovedAssemblyInstance<T>(Assembly assembly, Func<T> func) where T : class
-    {
-        var scopedInstance = AssemblyContainer.GetOrCreate(assembly, typeof(T), () => func()!);
-        return (T)scopedInstance.Instance;
-    }
-
-    /// <summary>
-    /// Consumes the count for the specified key and type with improved error handling.
-    /// </summary>
-    /// <param name="key">The key.</param>
-    /// <param name="type">The type.</param>
-    internal static async ValueTask ConsumeKeyImproved(string key, Type type)
-    {
-        var scopedInstance = KeyContainer.Remove(key, type);
-        if (scopedInstance != null)
-        {
-            await DependencyTracker.DisposeNestedDependenciesAsync(scopedInstance.Instance);
-            await Disposer.DisposeAsync(scopedInstance.Instance);
-        }
     }
 
     /// <summary>
