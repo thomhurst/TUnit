@@ -1074,6 +1074,18 @@ namespace TUnit.Core.Data
         public TValue? Remove(TKey key) { }
         public bool TryGetValue(TKey key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out TValue? value) { }
     }
+    public class TestDataMetrics
+    {
+        public TestDataMetrics() { }
+        public int AssemblyScopedInstances { get; set; }
+        public int ClassScopedInstances { get; set; }
+        public System.Collections.Generic.Dictionary<string, object> Details { get; set; }
+        public int GlobalInstances { get; set; }
+        public int KeyScopedInstances { get; set; }
+        public int NestedDependencies { get; set; }
+        public int TotalInstances { get; }
+        public override string ToString() { }
+    }
 }
 namespace TUnit.Core.Enums
 {

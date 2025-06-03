@@ -3,7 +3,7 @@ namespace TUnit.Core.Data;
 /// <summary>
 /// Provides metrics and diagnostic information about the test data container state.
 /// </summary>
-public class TestDataMetrics
+internal class TestDataMetrics
 {
     /// <summary>
     /// Gets or sets the number of globally scoped instances.

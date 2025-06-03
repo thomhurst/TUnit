@@ -306,13 +306,6 @@ internal static class TestDataContainer
                 ["Class"] = classDiagnostics,
                 ["Assembly"] = assemblyDiagnostics,
                 ["Key"] = keyDiagnostics,
-                ["LegacyCounts"] = new Dictionary<string, int>
-                {
-                    ["Global"] = CountsPerTestSession.Count,
-                    ["Class"] = CountsPerTestClass.Count,
-                    ["Assembly"] = CountsPerAssembly.Count,
-                    ["Key"] = CountsPerKey.Count
-                }
             }
         };
     }
@@ -335,14 +328,6 @@ internal static class TestDataContainer
         sb.AppendLine($"  Class Instances: {metrics.ClassScopedInstances}");
         sb.AppendLine($"  Assembly Instances: {metrics.AssemblyScopedInstances}");
         sb.AppendLine($"  Keyed Instances: {metrics.KeyScopedInstances}");
-        sb.AppendLine();
-
-        sb.AppendLine("Legacy Containers (backward compatibility):");
-        var legacyCounts = (Dictionary<string, int>)metrics.Details["LegacyCounts"];
-        sb.AppendLine($"  Global: {legacyCounts["Global"]}");
-        sb.AppendLine($"  Class: {legacyCounts["Class"]}");
-        sb.AppendLine($"  Assembly: {legacyCounts["Assembly"]}");
-        sb.AppendLine($"  Keyed: {legacyCounts["Key"]}");
         sb.AppendLine();
 
         sb.AppendLine($"Total Dependencies Tracked: {metrics.NestedDependencies}");
