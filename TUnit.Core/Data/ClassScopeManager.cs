@@ -5,22 +5,9 @@ namespace TUnit.Core.Data;
 /// <summary>
 /// Manages class-scoped test data instances.
 /// </summary>
-internal class ClassScopeManager : IScopeManager
+internal class ClassScopeManager
 {
     private readonly ScopedContainer<Type> _container = new();
-
-    /// <summary>
-    /// Gets or creates a class-scoped instance.
-    /// </summary>
-    /// <typeparam name="T">The type of object to get or create.</typeparam>
-    /// <param name="factory">The factory function to create the instance.</param>
-    /// <returns>The instance.</returns>
-    public T GetOrCreate<T>(Func<T> factory)
-    {
-        // For class scope, we need the test class type as context
-        // This is a simplified version - in practice, you'd pass the test class type
-        throw new NotSupportedException("ClassScopeManager requires test class context. Use the TestDataContainer directly.");
-    }
 
     /// <summary>
     /// Gets or creates a class-scoped instance for a specific test class.
@@ -36,13 +23,6 @@ internal class ClassScopeManager : IScopeManager
     }
 
     /// <summary>
-    /// Increments the usage count for a class-scoped type.
-    /// </summary>
-    /// <typeparam name="T">The type to increment usage for.</typeparam>
-    public void IncrementUsage<T>()
-    {
-        throw new NotSupportedException("ClassScopeManager requires test class context for usage tracking.");
-    }    /// <summary>
     /// Increments the usage count for a class-scoped type in a specific test class.
     /// </summary>
     /// <typeparam name="T">The type to increment usage for.</typeparam>
@@ -56,15 +36,6 @@ internal class ClassScopeManager : IScopeManager
     }
 
     /// <summary>
-    /// Attempts to dispose a class-scoped instance.
-    /// </summary>
-    /// <typeparam name="T">The type of object to dispose.</typeparam>
-    /// <param name="item">The item to dispose.</param>
-    /// <returns>True if the item was disposed; false if it's still in use.</returns>
-    public Task<bool> TryDisposeAsync<T>(T item)
-    {
-        throw new NotSupportedException("ClassScopeManager requires test class context for disposal.");
-    }    /// <summary>
     /// Attempts to dispose a class-scoped instance for a specific test class.
     /// </summary>
     /// <typeparam name="T">The type of object to dispose.</typeparam>
