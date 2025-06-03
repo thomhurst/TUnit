@@ -19,6 +19,9 @@ internal static class TestDataContainer
     private static readonly ConcurrentDictionary<Type, Counter> CountsPerTestSession = new();
     private static readonly ConcurrentDictionary<Assembly, ConcurrentDictionary<Type, Counter>> CountsPerAssembly = new();
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, Counter>> CountsPerTestClass = new();
+    
+    // Track nested dependencies: parent object -> list of (child object, child shared type, child key)
+    private static readonly ConcurrentDictionary<object, List<(object child, SharedType sharedType, string key)>> NestedDependencies = new();
 
     private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);
     
@@ -119,8 +122,7 @@ internal static class TestDataContainer
 
         return instancesForType.GetOrAdd(key, _ => func());
     }
-    
-    /// <summary>
+      /// <summary>
     /// Consumes the count for the specified key and type.
     /// </summary>
     /// <param name="key">The key.</param>
@@ -136,10 +138,8 @@ internal static class TestDataContainer
         
         var instancesForType = InjectedSharedPerKey.GetOrAdd(type, _ => new GetOnlyDictionary<string, object>());
         
-        await Disposer.DisposeAsync(instancesForType.Remove(key));
-    }
-
-    /// <summary>
+        await DisposeWithNestedDependencies(instancesForType.Remove(key));
+    }    /// <summary>
     /// Consumes the global count for the specified item.
     /// </summary>
     /// <typeparam name="T">The type of the item.</typeparam>
@@ -151,10 +151,9 @@ internal static class TestDataContainer
             return;
         }
         
-        await Disposer.DisposeAsync(item);
+        await DisposeWithNestedDependencies(item);
     }
-    
-    /// <summary>
+      /// <summary>
     /// Consumes the assembly count for the specified item.
     /// </summary>
     /// <typeparam name="T">The type of the item.</typeparam>
@@ -167,7 +166,7 @@ internal static class TestDataContainer
             return;
         }
         
-        await Disposer.DisposeAsync(item);
+        await DisposeWithNestedDependencies(item);
     }
     
     /// <summary>
@@ -183,6 +182,63 @@ internal static class TestDataContainer
             return;
         }
         
+        await DisposeWithNestedDependencies(item);
+    }
+      /// <summary>
+    /// Registers a nested dependency relationship between a parent and child object.
+    /// </summary>
+    /// <param name="parentObject">The parent object that depends on the child.</param>
+    /// <param name="childObject">The child object that the parent depends on.</param>
+    /// <param name="childSharedType">The shared type of the child object.</param>
+    /// <param name="childKey">The key of the child object (for keyed sharing).</param>
+    internal static void RegisterNestedDependency(object parentObject, object childObject, SharedType childSharedType, string childKey)
+    {
+        var dependencies = NestedDependencies.GetOrAdd(parentObject, _ => new List<(object, SharedType, string)>());
+        
+        lock (dependencies)
+        {
+            dependencies.Add((childObject, childSharedType, childKey));
+        }
+        
+        // Don't increment usage counts here - they're already managed by the main ClassDataSource attribute logic
+        // We only track the relationship for proper disposal ordering
+    }
+    
+    /// <summary>
+    /// Disposes an object and all its nested dependencies.
+    /// </summary>
+    /// <param name="item">The item to dispose.</param>
+    private static async ValueTask DisposeWithNestedDependencies<T>(T? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+        
+        // First, dispose nested dependencies
+        if (NestedDependencies.TryRemove(item, out var dependencies))
+        {
+            foreach (var (child, sharedType, key) in dependencies)
+            {
+                switch (sharedType)
+                {
+                    case SharedType.PerTestSession:
+                        await ConsumeGlobalCount(child);
+                        break;
+                    case SharedType.PerAssembly:
+                        await ConsumeAssemblyCount(child.GetType().Assembly, child);
+                        break;
+                    case SharedType.Keyed:
+                        await ConsumeKey(key, child.GetType());
+                        break;
+                    case SharedType.None:
+                        await Disposer.DisposeAsync(child);
+                        break;
+                }
+            }
+        }
+        
+        // Then dispose the item itself
         await Disposer.DisposeAsync(item);
     }
 }

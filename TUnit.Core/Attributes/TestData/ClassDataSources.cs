@@ -295,9 +295,25 @@ internal class ClassDataSources
             if (result is Delegate @delegate)
             {
                 result = @delegate.DynamicInvoke();
-            }
+            }            propertyInfo.SetValue(instance, result);
 
-            propertyInfo.SetValue(instance, result);
+            // Register nested dependency if this is a ClassDataSource property
+            if (result is not null && dataSourceGeneratorAttribute.GetType().Name.StartsWith("ClassDataSourceAttribute"))
+            {
+                var sharedTypeProperty = dataSourceGeneratorAttribute.GetType()
+                    .GetProperty(nameof(ClassDataSourceAttribute<object>.Shared));
+                var sharedType = sharedTypeProperty?.GetValue(dataSourceGeneratorAttribute) as SharedType? ?? SharedType.None;
+
+                var keyProperty = dataSourceGeneratorAttribute.GetType()
+                    .GetProperty(nameof(ClassDataSourceAttribute<object>.Key));
+                var key = keyProperty?.GetValue(dataSourceGeneratorAttribute) as string ?? string.Empty;
+
+                TestDataContainer.RegisterNestedDependency(instance, result, sharedType, key);
+
+                // Register the nested dependency with the test lifecycle - this is the key fix!
+                // We need to register it as if it were a main ClassDataSource so it gets proper usage tracking
+                RegisterNestedDependencyWithLifecycle(result, sharedType, key, dataGeneratorMetadata);
+            }
 
             if (result is not null)
             {
@@ -319,6 +335,39 @@ internal class ClassDataSources
         if (item is ITestEndEventReceiver testEndEventReceiver)
         {
             await testEndEventReceiver.OnTestEnd(context);
+        }
+    }
+
+    /// <summary>
+    /// Registers a nested dependency with proper usage tracking for its shared type.
+    /// </summary>
+    /// <param name="nestedObject">The nested dependency object.</param>
+    /// <param name="sharedType">The shared type of the nested dependency.</param>
+    /// <param name="key">The key for keyed sharing.</param>
+    /// <param name="dataGeneratorMetadata">The data generator metadata.</param>
+    private static void RegisterNestedDependencyWithLifecycle(object nestedObject, SharedType sharedType, string key, DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        // Increment usage count for the nested dependency based on its shared type
+        // This ensures it gets the same usage tracking as if it were a main ClassDataSource
+        switch (sharedType)
+        {
+            case SharedType.None:
+                // No usage tracking needed for non-shared objects
+                break;
+            case SharedType.PerClass:
+                TestDataContainer.IncrementTestClassUsage(dataGeneratorMetadata.TestClassType, nestedObject.GetType());
+                break;
+            case SharedType.PerAssembly:
+                TestDataContainer.IncrementAssemblyUsage(dataGeneratorMetadata.TestClassType.Assembly, nestedObject.GetType());
+                break;
+            case SharedType.PerTestSession:
+                TestDataContainer.IncrementGlobalUsage(nestedObject.GetType());
+                break;
+            case SharedType.Keyed:
+                TestDataContainer.IncrementKeyUsage(key, nestedObject.GetType());
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(sharedType));
         }
     }
 }
