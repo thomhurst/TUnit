@@ -15,7 +15,7 @@ internal class ClassDataSources
     private ClassDataSources()
     {
     }
-    
+
     public GetOnlyDictionary<Type, Task> GlobalInitializers = new();
     public readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, Task>> TestClassTypeInitializers = new();
     public readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> AssemblyInitializers = new();
@@ -24,7 +24,7 @@ internal class ClassDataSources
     public static readonly GetOnlyDictionary<string, ClassDataSources> SourcesPerSession = new();
 
     public static ClassDataSources Get(string sessionId) => SourcesPerSession.GetOrAdd(sessionId, _ => new());
-    
+
     public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
         var shared = sharedTypes.ElementAtOrDefault(index);
@@ -44,7 +44,7 @@ internal class ClassDataSources
 
         return keys.ElementAtOrDefault(keyedIndex) ?? throw new ArgumentException($"Key at index {keyedIndex} not found");
     }
-    
+
     public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (sharedType == SharedType.None)
@@ -74,6 +74,7 @@ internal class ClassDataSources
 
         throw new ArgumentOutOfRangeException();
     }
+
     public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (sharedType == SharedType.None)
@@ -103,17 +104,17 @@ internal class ClassDataSources
 
         throw new ArgumentOutOfRangeException();
     }
-    
+
     public Task InitializeObject(object? item)
     {
         if (item is IAsyncInitializer asyncInitializer)
         {
             return asyncInitializer.InitializeAsync();
         }
-        
+
         return Task.CompletedTask;
     }
-    
+
     public async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
     {
         switch (shared)
@@ -154,7 +155,7 @@ internal class ClassDataSources
             // Done already before test start
             return;
         }
-        
+
         await Initialize(testContext, shared, key, item);
     }
 
@@ -174,7 +175,7 @@ internal class ClassDataSources
         {
             var innerDictionary = TestClassTypeInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<Type, Task>());
-            
+
             return innerDictionary.GetOrAdd(testContext.TestDetails.TestClass.Type,
                 _ => InitializeObject(item));
         }
@@ -183,7 +184,7 @@ internal class ClassDataSources
         {
             var innerDictionary = AssemblyInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<Assembly, Task>());
-            
+
             return innerDictionary.GetOrAdd(testContext.TestDetails.TestClass.Type.Assembly,
                 _ => InitializeObject(item));
         }
@@ -192,7 +193,7 @@ internal class ClassDataSources
         {
             var innerDictionary = KeyedInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<string, Task>());
-            
+
             return innerDictionary.GetOrAdd(key, _ => InitializeObject(item));
         }
 
@@ -205,12 +206,12 @@ internal class ClassDataSources
         {
             await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(item);
         }
-        
+
         if (shared == SharedType.Keyed)
         {
             await TestDataContainer.ConsumeKey(key, typeof(T));
         }
-                
+
         if (shared == SharedType.PerClass)
         {
             await TestDataContainer.ConsumeTestClassCount(testContext.TestDetails.TestClass.Type, item);
@@ -220,13 +221,13 @@ internal class ClassDataSources
         {
             await TestDataContainer.ConsumeAssemblyCount(testContext.TestDetails.TestClass.Type.Assembly, item);
         }
-        
+
         if (shared == SharedType.PerTestSession)
         {
             await TestDataContainer.ConsumeGlobalCount(item);
         }
     }
-    
+
     public static bool IsStaticProperty(DataGeneratorMetadata dataGeneratorMetadata)
     {
         return dataGeneratorMetadata.MembersToGenerate is [SourceGeneratedPropertyInformation { IsStatic: true }];
@@ -243,9 +244,9 @@ internal class ClassDataSources
         try
         {
             var instance = Activator.CreateInstance(type)!;
-            
+
             InitializeDataSourceProperties(type, dataGeneratorMetadata, instance);
-            
+
             return instance;
         }
         catch (TargetInvocationException targetInvocationException)
@@ -271,7 +272,7 @@ internal class ClassDataSources
             {
                 continue;
             }
-                
+
             var result = dataSourceGeneratorAttribute.GetType()
                 .GetMethod(nameof(DataSourceGeneratorAttribute<>.GenerateDataSources), BindingFlags.Public | BindingFlags.Instance)
                 ?.Invoke(dataSourceGeneratorAttribute, [dataGeneratorMetadata with
@@ -283,11 +284,11 @@ internal class ClassDataSources
             if (result is IEnumerable enumerable)
             {
                 var enumerator = enumerable.GetEnumerator();
-                
+
                 using var enumerator1 = enumerator as IDisposable;
 
                 enumerator.MoveNext();
-                
+
                 result = enumerator.Current;
             }
 
@@ -295,7 +296,7 @@ internal class ClassDataSources
             {
                 result = @delegate.DynamicInvoke();
             }
-                
+
             propertyInfo.SetValue(instance, result);
 
             if (result is not null)
@@ -312,7 +313,7 @@ internal class ClassDataSources
             await testStartEventReceiver.OnTestStart(context);
         }
     }
-    
+
     public async Task OnTestEnd<T>(AfterTestContext context, T item)
     {
         if (item is ITestEndEventReceiver testEndEventReceiver)
