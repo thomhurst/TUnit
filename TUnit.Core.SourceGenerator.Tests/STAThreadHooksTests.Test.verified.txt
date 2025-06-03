@@ -65,6 +65,7 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 						Attributes = 
 						[
 							new EngineTest(Pass),
+							new WindowsOnly(),
 							new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
 						],
 						Parameters = [],
@@ -158,6 +159,7 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 						Attributes = 
 						[
 							new EngineTest(Pass),
+							new WindowsOnly(),
 							new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
 						],
 						Parameters = [],
