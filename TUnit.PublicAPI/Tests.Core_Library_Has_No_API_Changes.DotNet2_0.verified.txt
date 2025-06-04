@@ -71,6 +71,7 @@ namespace TUnit.Core
         public static System.Threading.Tasks.ValueTask Convert(System.Func<System.Threading.Tasks.Task> action) { }
         public static System.Threading.Tasks.ValueTask Convert(System.Func<System.Threading.Tasks.ValueTask> action) { }
         public static System.Threading.Tasks.ValueTask ConvertObject(object? invoke) { }
+        public static bool TryGetAwaitableTask(object awaitable, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out System.Threading.Tasks.Task? task) { }
     }
     public class AsyncEvent<TEventArgs>
     {
@@ -743,6 +744,10 @@ namespace TUnit.Core
     public class SourceGeneratedParameterInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedParameterInformation>
     {
         public SourceGeneratedParameterInformation(System.Type Type) { }
+        public object? DefaultValue { get; }
+        public bool IsOptional { get; }
+        public bool IsParams { get; }
+        public required System.Reflection.ParameterInfo ReflectionInfo { get; set; }
         public override System.Type Type { get; init; }
     }
     [System.Diagnostics.DebuggerDisplay("{Type} {Name})")]
@@ -1190,6 +1195,7 @@ namespace TUnit.Core.Helpers
     {
         public static object? Cast(System.Type type, object? value) { }
         public static T? Cast<T>(object? value) { }
+        public static System.Reflection.MethodInfo? GetConversionMethod(System.Type baseType, System.Type targetType) { }
     }
     [System.Diagnostics.DebuggerDisplay("Count = {CurrentCount}")]
     public class Counter

@@ -44,29 +44,25 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 					{
 						Name = "value1",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(string),
+						ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetConstructors().First().GetParameters()[0],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value2",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(int),
+						ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetConstructors().First().GetParameters()[1],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<double>
 					{
 						Name = "value3",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(double),
+						ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetConstructors().First().GetParameters()[2],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value4",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(bool),
+						ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetConstructors().First().GetParameters()[3],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AutoDataTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -101,29 +97,25 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 						{
 							Name = "value1",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(string),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1").GetParameters()[0],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value2",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(int),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1").GetParameters()[1],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<double>
 						{
 							Name = "value3",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(double),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1").GetParameters()[2],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value4",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(bool),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1").GetParameters()[3],
 						},
 					],
 					TestSessionId = sessionId,

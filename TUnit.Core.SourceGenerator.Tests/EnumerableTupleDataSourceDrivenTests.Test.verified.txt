@@ -50,22 +50,19 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					{
 						Name = "value",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(int),
+						ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(string),
+						ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(bool),
+						ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -168,22 +165,19 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 						{
 							Name = "value",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(int),
+							ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(string),
+							ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(bool),
+							ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

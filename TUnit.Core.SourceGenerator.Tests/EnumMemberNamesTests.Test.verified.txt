@@ -52,8 +52,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					{
 						Name = "value",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(string),
+						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -150,8 +149,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						{
 							Name = "value",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(string),
+							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetConstructors().First().GetParameters()[0],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -248,8 +246,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 							{
 								Name = "value",
 								Attributes = [],
-								IsOptional = false,
-								DefaultValue = default(string),
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetConstructors().First().GetParameters()[0],
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

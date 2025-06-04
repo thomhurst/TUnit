@@ -58,15 +58,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					{
 						Name = "value",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(int),
+						ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[0],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::System.Threading.CancellationToken),
+						ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[1],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -166,15 +164,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						{
 							Name = "value",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(int),
+							ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[0],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Threading.CancellationToken),
+							ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[1],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -274,15 +270,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							{
 								Name = "value",
 								Attributes = [],
-								IsOptional = false,
-								DefaultValue = default(int),
+								ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[0],
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 							{
 								Name = "cancellationToken",
 								Attributes = [],
-								IsOptional = false,
-								DefaultValue = default(global::System.Threading.CancellationToken),
+								ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[1],
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -386,15 +380,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								{
 									Name = "value",
 									Attributes = [],
-									IsOptional = false,
-									DefaultValue = default(int),
+									ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[0],
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 								{
 									Name = "cancellationToken",
 									Attributes = [],
-									IsOptional = false,
-									DefaultValue = default(global::System.Threading.CancellationToken),
+									ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[1],
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -498,15 +490,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									{
 										Name = "value",
 										Attributes = [],
-										IsOptional = false,
-										DefaultValue = default(int),
+										ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[0],
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 									{
 										Name = "cancellationToken",
 										Attributes = [],
-										IsOptional = false,
-										DefaultValue = default(global::System.Threading.CancellationToken),
+										ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[1],
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -610,15 +600,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 										{
 											Name = "value",
 											Attributes = [],
-											IsOptional = false,
-											DefaultValue = default(int),
+											ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[0],
 										},
 										new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 										{
 											Name = "cancellationToken",
 											Attributes = [],
-											IsOptional = false,
-											DefaultValue = default(global::System.Threading.CancellationToken),
+											ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetConstructors().First().GetParameters()[1],
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

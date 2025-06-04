@@ -638,8 +638,7 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 						{
 							Name = "context",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::TUnit.Core.ClassHookContext),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetConstructors().First().GetParameters()[0],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.CleanupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -730,8 +729,7 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 						{
 							Name = "cancellationToken",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Threading.CancellationToken),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetConstructors().First().GetParameters()[0],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.CleanupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -822,15 +820,13 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 						{
 							Name = "context",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::TUnit.Core.ClassHookContext),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetConstructors().First().GetParameters()[0],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Threading.CancellationToken),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetConstructors().First().GetParameters()[1],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.CleanupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1005,8 +1001,7 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 						{
 							Name = "cancellationToken",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Threading.CancellationToken),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetConstructors().First().GetParameters()[0],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.CleanupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1096,8 +1091,7 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 						{
 							Name = "testContext",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::TUnit.Core.TestContext),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetConstructors().First().GetParameters()[0],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.CleanupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1188,15 +1182,13 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 						{
 							Name = "testContext",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::TUnit.Core.TestContext),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetConstructors().First().GetParameters()[0],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Threading.CancellationToken),
+							ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetConstructors().First().GetParameters()[1],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.CleanupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

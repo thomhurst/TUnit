@@ -131,8 +131,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						{
 							Name = "condition",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(bool),
+							ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetConstructors().First().GetParameters()[0],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -171,8 +170,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							{
 								Name = "condition",
 								Attributes = [],
-								IsOptional = false,
-								DefaultValue = default(bool),
+								ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2").GetParameters()[0],
 							},
 						],
 						TestSessionId = sessionId,
@@ -253,8 +251,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							{
 								Name = "condition",
 								Attributes = [],
-								IsOptional = false,
-								DefaultValue = default(bool),
+								ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetConstructors().First().GetParameters()[0],
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -346,8 +343,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 								{
 									Name = "condition",
 									Attributes = [],
-									IsOptional = false,
-									DefaultValue = default(bool),
+									ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetConstructors().First().GetParameters()[0],
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation

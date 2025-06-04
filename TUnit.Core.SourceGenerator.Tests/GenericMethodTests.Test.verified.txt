@@ -50,43 +50,37 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					{
 						Name = "source",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::System.Collections.Generic.IEnumerable<TSource>),
+						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[0],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "keySelector",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::System.Func<TSource, TKey>),
+						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[1],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "seedSelector",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::System.Func<TKey, TAccumulate>),
+						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[2],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "func",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::System.Func<TAccumulate, TSource, TAccumulate>),
+						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[3],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "comparer",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::System.Collections.Generic.IEqualityComparer<TKey>),
+						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[4],
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "expected",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>),
+						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[5],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -192,43 +186,37 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 						{
 							Name = "source",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Collections.Generic.IEnumerable<TSource>),
+							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[0],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "keySelector",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Func<TSource, TKey>),
+							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[1],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "seedSelector",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Func<TKey, TAccumulate>),
+							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[2],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "func",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Func<TAccumulate, TSource, TAccumulate>),
+							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[3],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "comparer",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Collections.Generic.IEqualityComparer<TKey>),
+							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[4],
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "expected",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>),
+							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[5],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

@@ -47,8 +47,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						[
 							new global::TUnit.Core.MatrixAttribute(double.NaN, double.PositiveInfinity, double.NegativeInfinity)
 						],
-						IsOptional = false,
-						DefaultValue = default(double),
+						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2085.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -89,8 +88,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							[
 								new global::TUnit.Core.MatrixAttribute(double.NaN, double.PositiveInfinity, double.NegativeInfinity)
 							],
-							IsOptional = false,
-							DefaultValue = default(double),
+							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts").GetParameters()[0],
 						},
 					],
 					TestSessionId = sessionId,
@@ -202,8 +200,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						[
 							new global::TUnit.Core.MatrixAttribute(float.NaN, float.PositiveInfinity, float.NegativeInfinity)
 						],
-						IsOptional = false,
-						DefaultValue = default(float),
+						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2085.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -244,8 +241,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							[
 								new global::TUnit.Core.MatrixAttribute(float.NaN, float.PositiveInfinity, float.NegativeInfinity)
 							],
-							IsOptional = false,
-							DefaultValue = default(float),
+							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts").GetParameters()[0],
 						},
 					],
 					TestSessionId = sessionId,

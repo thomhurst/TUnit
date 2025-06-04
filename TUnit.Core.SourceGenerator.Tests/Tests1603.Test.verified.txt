@@ -45,8 +45,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "value",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(short),
+						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1603.Tests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1603.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -166,8 +165,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "value",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(short),
+						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1603.Tests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1603.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation

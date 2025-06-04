@@ -45,8 +45,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(string),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -166,8 +165,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(int),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -287,8 +285,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(double),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -408,8 +405,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(float),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -529,8 +525,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(long),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -650,8 +645,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(uint),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -771,8 +765,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(ulong),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

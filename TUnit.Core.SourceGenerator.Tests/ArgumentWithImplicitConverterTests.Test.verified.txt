@@ -52,8 +52,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					{
 						Name = "integer",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::TUnit.TestProject.ExplicitInteger),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -147,8 +146,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						{
 							Name = "integer",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::TUnit.TestProject.ExplicitInteger),
+							ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetConstructors().First().GetParameters()[0],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -242,8 +240,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 							{
 								Name = "integer",
 								Attributes = [],
-								IsOptional = false,
-								DefaultValue = default(global::TUnit.TestProject.ExplicitInteger),
+								ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetConstructors().First().GetParameters()[0],
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -367,8 +364,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					{
 						Name = "integer",
 						Attributes = [],
-						IsOptional = false,
-						DefaultValue = default(global::TUnit.TestProject.ImplicitInteger),
+						ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetConstructors().First().GetParameters()[0],
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -462,8 +458,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						{
 							Name = "integer",
 							Attributes = [],
-							IsOptional = false,
-							DefaultValue = default(global::TUnit.TestProject.ImplicitInteger),
+							ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetConstructors().First().GetParameters()[0],
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -557,8 +552,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 							{
 								Name = "integer",
 								Attributes = [],
-								IsOptional = false,
-								DefaultValue = default(global::TUnit.TestProject.ImplicitInteger),
+								ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetConstructors().First().GetParameters()[0],
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
