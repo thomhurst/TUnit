@@ -429,6 +429,11 @@ namespace TUnit.Core
         public System.Threading.CancellationToken Token { get; }
         public void Dispose() { }
     }
+    public sealed class ExcludeOnAttribute : TUnit.Core.SkipAttribute
+    {
+        public ExcludeOnAttribute(TUnit.Core.Enums.OS OperatingSystem) { }
+        public override System.Threading.Tasks.Task<bool> ShouldSkip(TUnit.Core.BeforeTestContext context) { }
+    }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public sealed class ExplicitAttribute : TUnit.Core.TUnitAttribute
     {
@@ -680,6 +685,11 @@ namespace TUnit.Core
         public int Times { get; }
         public void OnTestDiscovery(TUnit.Core.DiscoveredTestContext discoveredTestContext) { }
         public virtual System.Threading.Tasks.Task<bool> ShouldRetry(TUnit.Core.TestContext context, System.Exception exception, int currentRetryCount) { }
+    }
+    public sealed class RunOnAttribute : TUnit.Core.SkipAttribute
+    {
+        public RunOnAttribute(TUnit.Core.Enums.OS OperatingSystem) { }
+        public override System.Threading.Tasks.Task<bool> ShouldSkip(TUnit.Core.BeforeTestContext context) { }
     }
     public class RunOnDiscoveryAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestDiscoveryEventReceiver
     {
@@ -1079,6 +1089,13 @@ namespace TUnit.Core.Enums
         Warning = 3,
         Error = 4,
         Critical = 5,
+    }
+    [System.Flags]
+    public enum OS
+    {
+        Linux = 1,
+        Windows = 2,
+        MacOs = 4,
     }
     public enum Status
     {

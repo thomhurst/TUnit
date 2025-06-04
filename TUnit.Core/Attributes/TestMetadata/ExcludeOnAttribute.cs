@@ -58,7 +58,7 @@ public sealed class ExcludeOnAttribute(OS OperatingSystem) : SkipAttribute($"Thi
             || (OperatingSystem.HasFlag(OS.Linux) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             || (OperatingSystem.HasFlag(OS.MacOs) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
 #endif
-            ;
+            || true;
 
         // Return true if the test should be skipped (if we're on an excluded OS)
         return Task.FromResult(shouldSkip);
