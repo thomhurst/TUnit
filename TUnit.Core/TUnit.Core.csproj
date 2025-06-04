@@ -65,4 +65,8 @@
         <PackageReference Include="System.Text.Json" VersionOverride="8.0.5" />
         <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="8.0.0" />
     </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="IClassDataSourceAttribute.cs" />
+      <Compile Remove="Interfaces\INestedClassDataSourceInitializer.cs" />
+    </ItemGroup>
 </Project>

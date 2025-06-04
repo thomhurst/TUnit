@@ -14,13 +14,13 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         "31bf3856ad364e35",
         "cc7b13ffcd2ddd51",
         "7cec85d7bea7798e",
-        
+
     ];
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.CompilationProvider
             .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer());
-        
+
         context.RegisterSourceOutput(provider, (sourceProductionContext, source) => GenerateCode(sourceProductionContext, source));
     }
 
@@ -28,22 +28,22 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
     {
         // Collect all assemblies: start with the current assembly, then traverse references
         var visitedAssemblies = new HashSet<IAssemblySymbol>(SymbolEqualityComparer.Default);
-        
+
         var assembliesToVisit = new Queue<IAssemblySymbol>();
-        
+
         var currentAssembly = compilation.Assembly;
-        
+
         assembliesToVisit.Enqueue(currentAssembly);
 
         while (assembliesToVisit.Count > 0)
         {
             var assembly = assembliesToVisit.Dequeue();
-            
+
             if (!visitedAssemblies.Add(assembly))
             {
                 continue;
             }
-            
+
             foreach (var referenced in assembly.Modules.SelectMany(m => m.ReferencedAssemblySymbols))
             {
                 if (!visitedAssemblies.Contains(referenced))
@@ -78,24 +78,24 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         {
             return;
         }
-        
-        sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
+
+        sourceBuilder.WriteLine($"global::TUnit.Core.Registry.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
     }
-    
+
     private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)
     {
         if (assemblySymbol.Identity.PublicKeyToken.IsDefaultOrEmpty)
         {
             return false;
         }
-        
+
         var stringPublicTokenKey = BitConverter.ToString(assemblySymbol.Identity.PublicKeyToken.ToArray())
             .Replace("-", "")
             .ToLowerInvariant();
-      
+
         return _excludedAssemblies.Contains(stringPublicTokenKey);
     }
-    
+
     private static string GetAssemblyFullName(IAssemblySymbol assemblySymbol)
     {
         var identity = assemblySymbol.Identity;

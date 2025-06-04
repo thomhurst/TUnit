@@ -26,12 +26,12 @@ public static class TypeExtensions
         { "System.Object", "object" },
         { "System.String", "string" }
     };
-    
+
     public static string GetMetadataName(this Type type)
     {
         return $"{type.Namespace}.{type.Name}";
     }
-    
+
     public static IEnumerable<ISymbol> GetMembersIncludingBase(this ITypeSymbol namedTypeSymbol, bool reverse = true)
     {
         var list = new List<ISymbol>();
@@ -49,11 +49,11 @@ public static class TypeExtensions
             {
                 break;
             }
-            
+
             list.AddRange(reverse ? symbol.GetMembers().Reverse() : symbol.GetMembers());
             symbol = symbol.BaseType;
         }
-        
+
         if (reverse)
         {
             list.Reverse();
@@ -61,53 +61,53 @@ public static class TypeExtensions
 
         return list;
     }
-    
-    public static IEnumerable<ITypeSymbol> GetSelfAndBaseTypes(this ITypeSymbol namedTypeSymbol)
+
+    public static IEnumerable<INamedTypeSymbol> GetSelfAndBaseTypes(this INamedTypeSymbol namedTypeSymbol)
     {
         return [namedTypeSymbol, ..GetBaseTypes(namedTypeSymbol)];
     }
 
-    public static IEnumerable<ITypeSymbol> GetBaseTypes(this ITypeSymbol namedTypeSymbol)
+    public static IEnumerable<INamedTypeSymbol> GetBaseTypes(this ITypeSymbol namedTypeSymbol)
     {
         var type = namedTypeSymbol.BaseType;
-        
+
         while (type != null && type.SpecialType != SpecialType.System_Object)
         {
             yield return type;
             type = type.BaseType;
         }
     }
-    
-    public static IEnumerable<AttributeData> GetAttributesIncludingBaseTypes(this ITypeSymbol namedTypeSymbol)
+
+    public static IEnumerable<AttributeData> GetAttributesIncludingBaseTypes(this INamedTypeSymbol namedTypeSymbol)
     {
         return GetSelfAndBaseTypes(namedTypeSymbol).SelectMany(x => x.GetAttributes());
     }
 
-    public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, string typeName)
+    public static bool IsOrInherits(this INamedTypeSymbol namedTypeSymbol, string typeName)
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
             .Any(x => x.GloballyQualifiedNonGeneric() == typeName);
     }
-    
-    public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, [NotNullWhen(true)] ITypeSymbol? inheritedType)
+
+    public static bool IsOrInherits(this INamedTypeSymbol namedTypeSymbol, [NotNullWhen(true)] ITypeSymbol? inheritedType)
     {
         if (inheritedType is null)
         {
             return false;
         }
-        
+
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
             .Any(x => SymbolEqualityComparer.Default.Equals(x, inheritedType));
     }
-    
+
     public static bool IsIEnumerable(this ITypeSymbol namedTypeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
     {
         var interfaces = namedTypeSymbol.TypeKind == TypeKind.Interface
             ? [(INamedTypeSymbol)namedTypeSymbol, ..namedTypeSymbol.AllInterfaces]
             : namedTypeSymbol.AllInterfaces.AsEnumerable();
-        
+
         foreach (var enumerable in interfaces
                      .Where(x => x.IsGenericType)
                      .Where(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T))))
@@ -115,18 +115,18 @@ public static class TypeExtensions
             innerType = enumerable.TypeArguments[0];
             return true;
         }
-        
+
         innerType = null;
         return false;
     }
-    
+
     public static string GloballyQualifiedOrFallback(this ITypeSymbol? typeSymbol, TypedConstant? typedConstant = null)
     {
         if (typeSymbol is not null and not ITypeParameterSymbol)
         {
             return typeSymbol.GloballyQualified();
         }
-        
+
         if (typedConstant is not null)
         {
             return TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(typedConstant.Value);
@@ -157,10 +157,10 @@ public static class TypeExtensions
             var enumerableInterface = enumerable.AllInterfaces.FirstOrDefault(x =>
                 x.IsGenericType && x.ConstructUnboundGenericType()
                     .Equals(genericEnumerableType, SymbolEqualityComparer.Default));
-            
+
             enumerableInnerType = enumerableInterface?.TypeArguments.FirstOrDefault();
         }
-        
+
         if (enumerableInnerType is null)
         {
             enumerableInnerType = null;
@@ -168,12 +168,12 @@ public static class TypeExtensions
         }
 
         var firstParameterType = parameterTypes.FirstOrDefault();
-        
+
         if (context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(enumerableInnerType, firstParameterType))
         {
             return true;
         }
-        
+
         if (!enumerableInnerType.IsTupleType && firstParameterType is INamedTypeSymbol { IsGenericType:true })
         {
             return true;
@@ -192,7 +192,7 @@ public static class TypeExtensions
                 {
                     continue;
                 }
-                
+
                 if (!context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(tupleType, parameterType))
                 {
                     return false;
@@ -201,13 +201,13 @@ public static class TypeExtensions
 
             return true;
         }
-        
+
         return false;
     }
-    
+
     public static string GloballyQualified(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-    
+
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
 
@@ -217,7 +217,7 @@ public static class TypeExtensions
         {
             return true;
         }
-        
+
         if (typeSymbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return false;
@@ -230,7 +230,7 @@ public static class TypeExtensions
 
         return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
     }
-    
+
     public static bool IsCollectionType(this ITypeSymbol typeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
     {
         if (typeSymbol.SpecialType == SpecialType.System_String)
@@ -247,7 +247,7 @@ public static class TypeExtensions
         }
 
         var enumerableT = compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T);
-        
+
         if (typeSymbol is INamedTypeSymbol namedTypeSymbol
             && SymbolEqualityComparer.Default.Equals(typeSymbol.OriginalDefinition, enumerableT))
         {

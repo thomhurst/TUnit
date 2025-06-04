@@ -17,7 +17,7 @@ public static class DataSourceGeneratorRetriever
         AttributeData attributeData,
         ArgumentsType argumentsType,
         int index,
-        string? propertyName, 
+        string? propertyName,
         bool isStronglyTyped)
     {
         return new DataSourceGeneratorContainer
@@ -44,7 +44,7 @@ public static class DataSourceGeneratorRetriever
         };
     }
 
-    private static INamedTypeSymbol? GetDataGeneratorAttributeBaseClass(ITypeSymbol? attributeClass)
+    private static INamedTypeSymbol? GetDataGeneratorAttributeBaseClass(INamedTypeSymbol? attributeClass)
     {
         var selfAndBaseTypes = attributeClass?.GetSelfAndBaseTypes();
 

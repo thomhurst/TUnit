@@ -237,15 +237,19 @@ internal class ClassDataSources
     private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
     {
         return ((T)Create(typeof(T), dataGeneratorMetadata))!;
-    }
-
-    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
+    }    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
     {
         try
         {
             var instance = Activator.CreateInstance(type)!;
 
-            InitializeDataSourceProperties(type, dataGeneratorMetadata, instance);
+            if (!Sources.DataGeneratorProperties.TryGetValue(instance.GetType(), out var properties))
+            {
+                properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+            }
+
+            // Fallback to reflection-based initialization for backward compatibility
+            InitializeDataSourceProperties(dataGeneratorMetadata, instance, properties);
 
             return instance;
         }
@@ -264,9 +268,9 @@ internal class ClassDataSources
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static void InitializeDataSourceProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata, object instance)
+    private static void InitializeDataSourceProperties(DataGeneratorMetadata dataGeneratorMetadata, object instance, PropertyInfo[] properties)
     {
-        foreach (var propertyInfo in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var propertyInfo in properties)
         {
             if (propertyInfo.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().FirstOrDefault() is not { } dataSourceGeneratorAttribute)
             {
@@ -298,7 +302,7 @@ internal class ClassDataSources
             }            propertyInfo.SetValue(instance, result);
 
             // Register nested dependency if this is a ClassDataSource property
-            if (result is not null && dataSourceGeneratorAttribute.GetType().Name.StartsWith("ClassDataSourceAttribute"))
+            if (result is not null && dataSourceGeneratorAttribute.GetType().IsAssignableTo(typeof(IDataSourceGeneratorAttribute)))
             {
                 var sharedTypeProperty = dataSourceGeneratorAttribute.GetType()
                     .GetProperty(nameof(ClassDataSourceAttribute<object>.Shared));
@@ -317,7 +321,12 @@ internal class ClassDataSources
 
             if (result is not null)
             {
-                InitializeDataSourceProperties(propertyInfo.PropertyType, dataGeneratorMetadata, result);
+                if (!Sources.DataGeneratorProperties.TryGetValue(result.GetType(), out var nestedProperties))
+                {
+                    nestedProperties = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+                }
+
+                InitializeDataSourceProperties(dataGeneratorMetadata, result, nestedProperties);
             }
         }
     }
