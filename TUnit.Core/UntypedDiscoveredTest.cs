@@ -12,9 +12,9 @@ internal record UntypedDiscoveredTest(ResettableLazy<object> ResettableLazy) : D
     public override async ValueTask ExecuteTest(CancellationToken cancellationToken)
     {
         TestContext.CancellationToken = cancellationToken;
-        
+
         var arguments = TestDetails.TestMethodArguments.ToList();
-        
+
         if (TestDetails.TestMethod.Parameters.Any(x => x.Type == typeof(CancellationToken)))
         {
             arguments.Add(cancellationToken);

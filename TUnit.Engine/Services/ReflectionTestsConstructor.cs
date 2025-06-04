@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions;
+using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
@@ -459,8 +460,20 @@ internal class ReflectionTestsConstructor(IExtension extension,
             {
                 yield return () =>
                 {
+                    var parameterType = method?.GetParameters().ElementAtOrDefault(0)?.ParameterType;
+
+                    if (methodResult?.GetType().IsAssignableTo(parameterType) is true)
+                    {
+                        return [methodResult];
+                    }
+
                     if (FuncHelper.TryInvokeFunc(methodResult, out var funcResult))
                     {
+                        if (funcResult?.GetType().IsAssignableTo(parameterType) is true)
+                        {
+                            return [funcResult];
+                        }
+
                         if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var funcObjectArray))
                         {
                             return funcObjectArray;
@@ -492,8 +505,20 @@ internal class ReflectionTestsConstructor(IExtension extension,
             {
                 yield return () =>
                 {
+                    var parameterType = method?.GetParameters().ElementAtOrDefault(0)?.ParameterType;
+
+                    if (methodResult?.GetType().IsAssignableTo(parameterType) is true)
+                    {
+                        return [methodResult];
+                    }
+
                     if (FuncHelper.TryInvokeFunc(methodResult, out var funcResult))
                     {
+                        if (funcResult?.GetType().IsAssignableTo(parameterType) is true)
+                        {
+                            return [funcResult];
+                        }
+
                         if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var funcObjectArray))
                         {
                             return funcObjectArray;
