@@ -228,9 +228,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
         }
-    }
-
-    private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
+    }    private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
     {
         if (!methodInfo.IsGenericMethodDefinition)
         {
@@ -238,56 +236,104 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
 
         var typeArguments = methodInfo.GetGenericArguments();
-
         var parameters = methodInfo.GetParameters();
-
         var argumentsTypes = arguments.Select(x => x?.GetType()).ToArray();
 
-        List<Type> substituteTypes = [];
+        // Create a mapping from type parameters to concrete types
+        var typeParameterMap = new Dictionary<Type, Type>();
 
+        // First pass: map type parameters that directly correspond to parameter types
+        for (int i = 0; i < parameters.Length && i < argumentsTypes.Length; i++)
+        {
+            var parameterType = parameters[i].ParameterType;
+            var argumentType = argumentsTypes[i];
+
+            if (argumentType != null)
+            {
+                MapTypeParameters(parameterType, argumentType, typeParameterMap);
+            }
+        }
+
+        // Second pass: resolve any remaining unmapped type parameters
+        List<Type> substituteTypes = [];
         foreach (var typeArgument in typeArguments)
         {
-            if (!HasGenericParameter(typeArgument))
+            if (typeParameterMap.TryGetValue(typeArgument, out var mappedType))
             {
-                substituteTypes.Add(typeArgument);
-                continue;
-            }
-
-            var index = Array.IndexOf(typeArguments, typeArgument);
-
-            if (index < 0 || index >= parameters.Length)
-            {
-                throw new InvalidOperationException($"Generic type parameter '{typeArgument.Name}' not found in method parameters.");
-            }
-
-            var parameterType = parameters[index].ParameterType;
-
-            if (HasGenericParameter(parameterType))
-            {
-                // If the parameter is a generic type parameter, we use the type argument
-                substituteTypes.Add(argumentsTypes[index] ?? throw new InvalidOperationException($"No argument provided for generic type parameter '{typeArgument.Name}' at index {index}."));
-                continue;
-            }
-
-            if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                // If the parameter is a nullable type, we use the underlying type
-                substituteTypes.Add(parameterType.GetGenericArguments()[0]);
+                substituteTypes.Add(mappedType);
             }
             else
             {
-                substituteTypes.Add(parameterType);
+                // If we can't map the type parameter, try to infer it from the parameter position
+                var parameterIndex = -1;
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    if (parameters[i].ParameterType == typeArgument || 
+                        (parameters[i].ParameterType.IsGenericType && 
+                         parameters[i].ParameterType.GetGenericArguments().Contains(typeArgument)))
+                    {
+                        parameterIndex = i;
+                        break;
+                    }
+                }
+
+                if (parameterIndex >= 0 && parameterIndex < argumentsTypes.Length && argumentsTypes[parameterIndex] != null)
+                {
+                    var inferredType = argumentsTypes[parameterIndex]!;
+                    
+                    // Handle nullable types
+                    if (parameters[parameterIndex].ParameterType.IsGenericType && 
+                        parameters[parameterIndex].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        inferredType = Nullable.GetUnderlyingType(inferredType) ?? inferredType;
+                    }
+                    
+                    substituteTypes.Add(inferredType);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Cannot infer type for generic parameter '{typeArgument.Name}'. No matching argument found.");
+                }
             }
         }
 
         return methodInfo.MakeGenericMethod(substituteTypes.ToArray());
     }
 
-    private static bool HasGenericParameter(Type parameterType)
+    private static void MapTypeParameters(Type parameterType, Type argumentType, Dictionary<Type, Type> typeParameterMap)
     {
-        return parameterType.IsGenericParameter
-            || parameterType.IsGenericType && parameterType.GenericTypeArguments.Any(HasGenericParameter);
-    }
+        if (parameterType.IsGenericParameter)
+        {
+            // Direct mapping: T -> int, T -> string, etc.
+            if (!typeParameterMap.ContainsKey(parameterType))
+            {
+                typeParameterMap[parameterType] = argumentType;
+            }
+        }
+        else if (parameterType.IsGenericType && argumentType.IsGenericType)
+        {
+            // Handle generic types: List<T> -> List<int>, Dictionary<T, U> -> Dictionary<string, int>, etc.
+            var parameterGenericDef = parameterType.GetGenericTypeDefinition();
+            var argumentGenericDef = argumentType.GetGenericTypeDefinition();
+            
+            if (parameterGenericDef == argumentGenericDef)
+            {
+                var parameterTypeArgs = parameterType.GetGenericArguments();
+                var argumentTypeArgs = argumentType.GetGenericArguments();
+                
+                for (int i = 0; i < Math.Min(parameterTypeArgs.Length, argumentTypeArgs.Length); i++)
+                {
+                    MapTypeParameters(parameterTypeArgs[i], argumentTypeArgs[i], typeParameterMap);
+                }
+            }
+        }
+        else if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            // Handle nullable types: T? -> int, T? -> int? 
+            var underlyingParameterType = parameterType.GetGenericArguments()[0];
+            var underlyingArgumentType = Nullable.GetUnderlyingType(argumentType) ?? argumentType;
+            MapTypeParameters(underlyingParameterType, underlyingArgumentType, typeParameterMap);
+        }    }
 
     private static void AppendOptionalParameters(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)
     {
