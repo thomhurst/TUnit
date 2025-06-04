@@ -268,8 +268,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 var parameterIndex = -1;
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    if (parameters[i].ParameterType == typeArgument || 
-                        (parameters[i].ParameterType.IsGenericType && 
+                    if (parameters[i].ParameterType == typeArgument ||
+                        (parameters[i].ParameterType.IsGenericType &&
                          parameters[i].ParameterType.GetGenericArguments().Contains(typeArgument)))
                     {
                         parameterIndex = i;
@@ -280,14 +280,14 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 if (parameterIndex >= 0 && parameterIndex < argumentsTypes.Length && argumentsTypes[parameterIndex] != null)
                 {
                     var inferredType = argumentsTypes[parameterIndex]!;
-                    
+
                     // Handle nullable types
-                    if (parameters[parameterIndex].ParameterType.IsGenericType && 
+                    if (parameters[parameterIndex].ParameterType.IsGenericType &&
                         parameters[parameterIndex].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
                         inferredType = Nullable.GetUnderlyingType(inferredType) ?? inferredType;
                     }
-                    
+
                     substituteTypes.Add(inferredType);
                 }
                 else
@@ -315,12 +315,12 @@ internal class ReflectionTestsConstructor(IExtension extension,
             // Handle generic types: List<T> -> List<int>, Dictionary<T, U> -> Dictionary<string, int>, etc.
             var parameterGenericDef = parameterType.GetGenericTypeDefinition();
             var argumentGenericDef = argumentType.GetGenericTypeDefinition();
-            
+
             if (parameterGenericDef == argumentGenericDef)
             {
                 var parameterTypeArgs = parameterType.GetGenericArguments();
                 var argumentTypeArgs = argumentType.GetGenericArguments();
-                
+
                 for (int i = 0; i < Math.Min(parameterTypeArgs.Length, argumentTypeArgs.Length); i++)
                 {
                     MapTypeParameters(parameterTypeArgs[i], argumentTypeArgs[i], typeParameterMap);
@@ -329,7 +329,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
-            // Handle nullable types: T? -> int, T? -> int? 
+            // Handle nullable types: T? -> int, T? -> int?
             var underlyingParameterType = parameterType.GetGenericArguments()[0];
             var underlyingArgumentType = Nullable.GetUnderlyingType(argumentType) ?? argumentType;
             MapTypeParameters(underlyingParameterType, underlyingArgumentType, typeParameterMap);
@@ -576,12 +576,27 @@ internal class ReflectionTestsConstructor(IExtension extension,
                             return [funcResult];
                         }
 
+                        if (dataGeneratorType == DataGeneratorType.Property)
+                        {
+                            return [funcResult];
+                        }
+
                         if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var funcObjectArray))
                         {
                             return funcObjectArray;
                         }
 
                         return funcResult as object?[] ?? [funcResult];
+                    }
+
+                    if (methodResult?.GetType().IsAssignableTo(parameterType) is true)
+                    {
+                        return [funcResult];
+                    }
+
+                    if (dataGeneratorType == DataGeneratorType.Property)
+                    {
+                        return [funcResult];
                     }
 
                     if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))
@@ -621,12 +636,27 @@ internal class ReflectionTestsConstructor(IExtension extension,
                             return [funcResult];
                         }
 
+                        if (dataGeneratorType == DataGeneratorType.Property)
+                        {
+                            return [funcResult];
+                        }
+
                         if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var funcObjectArray))
                         {
                             return funcObjectArray;
                         }
 
                         return funcResult as object?[] ?? [funcResult];
+                    }
+
+                    if (methodResult?.GetType().IsAssignableTo(parameterType) is true)
+                    {
+                        return [funcResult];
+                    }
+
+                    if (dataGeneratorType == DataGeneratorType.Property)
+                    {
+                        return [funcResult];
                     }
 
                     if (TupleHelper.TryParseTupleToObjectArray(methodResult, out var objectArray))

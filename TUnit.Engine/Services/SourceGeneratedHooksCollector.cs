@@ -7,7 +7,7 @@ namespace TUnit.Engine.Services;
 
 internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorBase(sessionId)
 {
-    protected private override List<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks()
+    private protected override List<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks()
     {
         var result = new List<StaticHookMethod<BeforeTestDiscoveryContext>>();
         foreach (var hookSource in Sources.TestDiscoveryHookSources)
@@ -17,7 +17,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override List<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks()
+    private protected override List<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks()
     {
         var result = new List<StaticHookMethod<TestSessionContext>>();
         
@@ -29,7 +29,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectBeforeAssemblyHooks()
+    private protected override GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectBeforeAssemblyHooks()
     {
         var dict = new GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>>();
         foreach (var hookSource in Sources.AssemblyHookSources)
@@ -43,7 +43,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return dict;
     }
 
-    protected private override GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectBeforeClassHooks()
+    private protected override GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectBeforeClassHooks()
     {
         var dict = new GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>>();
         foreach (var hookSource in Sources.ClassHookSources)
@@ -57,7 +57,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return dict;
     }
 
-    protected private override GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectBeforeTestHooks()
+    private protected override GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectBeforeTestHooks()
     {
         var dict = new GetOnlyDictionary<Type, List<InstanceHookMethod>>();
         foreach (var hookSource in Sources.TestHookSources)
@@ -71,7 +71,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return dict;
     }
 
-    protected private override List<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryAssemblyHooks()
+    private protected override List<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryAssemblyHooks()
     {
         var result = new List<StaticHookMethod<AssemblyHookContext>>();
         foreach (var hookSource in Sources.AssemblyHookSources)
@@ -81,7 +81,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override List<StaticHookMethod<ClassHookContext>> CollectBeforeEveryClassHooks()
+    private protected override List<StaticHookMethod<ClassHookContext>> CollectBeforeEveryClassHooks()
     {
         var result = new List<StaticHookMethod<ClassHookContext>>();
         foreach (var hookSource in Sources.ClassHookSources)
@@ -91,7 +91,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override List<StaticHookMethod<TestContext>> CollectBeforeEveryTestHooks()
+    private protected override List<StaticHookMethod<TestContext>> CollectBeforeEveryTestHooks()
     {
         var result = new List<StaticHookMethod<TestContext>>();
         foreach (var hookSource in Sources.TestHookSources)
@@ -101,7 +101,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override List<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks()
+    private protected override List<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks()
     {
         var result = new List<StaticHookMethod<TestDiscoveryContext>>();
         foreach (var hookSource in Sources.TestDiscoveryHookSources)
@@ -111,7 +111,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override List<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks()
+    private protected override List<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks()
     {
         var result = new List<StaticHookMethod<TestSessionContext>>();
         foreach (var hookSource in Sources.TestSessionHookSources)
@@ -121,7 +121,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectAfterAssemblyHooks()
+    private protected override GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectAfterAssemblyHooks()
     {
         var dict = new GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>>();
         foreach (var hookSource in Sources.AssemblyHookSources)
@@ -135,7 +135,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return dict;
     }
 
-    protected private override GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectAfterClassHooks()
+    private protected override GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectAfterClassHooks()
     {
         var dict = new GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>>();
         foreach (var hookSource in Sources.ClassHookSources)
@@ -149,7 +149,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return dict;
     }
 
-    protected private override GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectAfterTestHooks()
+    private protected override GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectAfterTestHooks()
     {
         var dict = new GetOnlyDictionary<Type, List<InstanceHookMethod>>();
         foreach (var hookSource in Sources.TestHookSources)
@@ -163,7 +163,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return dict;
     }
 
-    protected private override List<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryAssemblyHooks()
+    private protected override List<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryAssemblyHooks()
     {
         var result = new List<StaticHookMethod<AssemblyHookContext>>();
         foreach (var hookSource in Sources.AssemblyHookSources)
@@ -173,7 +173,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override List<StaticHookMethod<ClassHookContext>> CollectAfterEveryClassHooks()
+    private protected override List<StaticHookMethod<ClassHookContext>> CollectAfterEveryClassHooks()
     {
         var result = new List<StaticHookMethod<ClassHookContext>>();
         foreach (var hookSource in Sources.ClassHookSources)
@@ -183,7 +183,7 @@ internal class SourceGeneratedHooksCollector(string sessionId) : HooksCollectorB
         return result;
     }
 
-    protected private override List<StaticHookMethod<TestContext>> CollectAfterEveryTestHooks()
+    private protected override List<StaticHookMethod<TestContext>> CollectAfterEveryTestHooks()
     {
         var result = new List<StaticHookMethod<TestContext>>();
         foreach (var hookSource in Sources.TestHookSources)

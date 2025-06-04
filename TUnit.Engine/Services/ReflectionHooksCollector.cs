@@ -71,7 +71,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         }
     }
 
-    protected private override List<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks()
+    private protected override List<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks()
     {
         var list = new List<StaticHookMethod<BeforeTestDiscoveryContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -98,7 +98,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override List<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks()
+    private protected override List<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks()
     {
         var list = new List<StaticHookMethod<TestSessionContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -126,7 +126,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectBeforeAssemblyHooks()
+    private protected override GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectBeforeAssemblyHooks()
     {
         var dict = new GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -155,7 +155,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return dict;
     }
 
-    protected private override GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectBeforeClassHooks()
+    private protected override GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectBeforeClassHooks()
     {
         var dict = new GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -183,7 +183,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return dict;
     }
 
-    protected private override GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectBeforeTestHooks()
+    private protected override GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectBeforeTestHooks()
     {
         var dict = new GetOnlyDictionary<Type, List<InstanceHookMethod>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -210,7 +210,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return dict;
     }
 
-    protected private override List<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryAssemblyHooks()
+    private protected override List<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryAssemblyHooks()
     {
         var list = new List<StaticHookMethod<AssemblyHookContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -237,7 +237,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override List<StaticHookMethod<ClassHookContext>> CollectBeforeEveryClassHooks()
+    private protected override List<StaticHookMethod<ClassHookContext>> CollectBeforeEveryClassHooks()
     {
         var list = new List<StaticHookMethod<ClassHookContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -264,7 +264,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override List<StaticHookMethod<TestContext>> CollectBeforeEveryTestHooks()
+    private protected override List<StaticHookMethod<TestContext>> CollectBeforeEveryTestHooks()
     {
         var list = new List<StaticHookMethod<TestContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -291,7 +291,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override List<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks()
+    private protected override List<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks()
     {
         var list = new List<StaticHookMethod<TestDiscoveryContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -318,7 +318,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override List<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks()
+    private protected override List<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks()
     {
         var list = new List<StaticHookMethod<TestSessionContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -345,7 +345,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectAfterAssemblyHooks()
+    private protected override GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectAfterAssemblyHooks()
     {
         var dict = new GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -374,7 +374,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return dict;
     }
 
-    protected private override GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectAfterClassHooks()
+    private protected override GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectAfterClassHooks()
     {
         var dict = new GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -402,7 +402,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return dict;
     }
 
-    protected private override GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectAfterTestHooks()
+    private protected override GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectAfterTestHooks()
     {
         var dict = new GetOnlyDictionary<Type, List<InstanceHookMethod>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -429,7 +429,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return dict;
     }
 
-    protected private override List<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryAssemblyHooks()
+    private protected override List<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryAssemblyHooks()
     {
         var list = new List<StaticHookMethod<AssemblyHookContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -456,7 +456,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override List<StaticHookMethod<ClassHookContext>> CollectAfterEveryClassHooks()
+    private protected override List<StaticHookMethod<ClassHookContext>> CollectAfterEveryClassHooks()
     {
         var list = new List<StaticHookMethod<ClassHookContext>>();
         foreach (var type in ReflectionScanner.GetTypes())
@@ -483,7 +483,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
         return list;
     }
 
-    protected private override List<StaticHookMethod<TestContext>> CollectAfterEveryTestHooks()
+    private protected override List<StaticHookMethod<TestContext>> CollectAfterEveryTestHooks()
     {
         var list = new List<StaticHookMethod<TestContext>>();
         foreach (var type in ReflectionScanner.GetTypes())

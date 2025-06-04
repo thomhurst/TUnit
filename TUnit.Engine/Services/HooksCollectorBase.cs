@@ -74,21 +74,21 @@ using System.Reflection;
         internal List<StaticHookMethod<TestContext>> AfterEveryTestHooks
             => field ??= CollectAfterEveryTestHooks();
     
-        protected private abstract List<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks();
-        protected private abstract List<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks();
-        protected private abstract GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectBeforeAssemblyHooks();
-        protected private abstract GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectBeforeClassHooks();
-        protected private abstract GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectBeforeTestHooks();
-        protected private abstract List<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryAssemblyHooks();
-        protected private abstract List<StaticHookMethod<ClassHookContext>> CollectBeforeEveryClassHooks();
-        protected private abstract List<StaticHookMethod<TestContext>> CollectBeforeEveryTestHooks();
-        protected private abstract List<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks();
-        protected private abstract List<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks();
-        protected private abstract GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectAfterAssemblyHooks();
-        protected private abstract GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectAfterClassHooks();
-        protected private abstract GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectAfterTestHooks();
-        protected private abstract List<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryAssemblyHooks();
-        protected private abstract List<StaticHookMethod<ClassHookContext>> CollectAfterEveryClassHooks();
-        protected private abstract List<StaticHookMethod<TestContext>> CollectAfterEveryTestHooks();
+        private protected abstract List<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks();
+        private protected abstract List<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks();
+        private protected abstract GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectBeforeAssemblyHooks();
+        private protected abstract GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectBeforeClassHooks();
+        private protected abstract GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectBeforeTestHooks();
+        private protected abstract List<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryAssemblyHooks();
+        private protected abstract List<StaticHookMethod<ClassHookContext>> CollectBeforeEveryClassHooks();
+        private protected abstract List<StaticHookMethod<TestContext>> CollectBeforeEveryTestHooks();
+        private protected abstract List<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks();
+        private protected abstract List<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks();
+        private protected abstract GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> CollectAfterAssemblyHooks();
+        private protected abstract GetOnlyDictionary<Type, List<StaticHookMethod<ClassHookContext>>> CollectAfterClassHooks();
+        private protected abstract GetOnlyDictionary<Type, List<InstanceHookMethod>> CollectAfterTestHooks();
+        private protected abstract List<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryAssemblyHooks();
+        private protected abstract List<StaticHookMethod<ClassHookContext>> CollectAfterEveryClassHooks();
+        private protected abstract List<StaticHookMethod<TestContext>> CollectAfterEveryTestHooks();
     }
 
