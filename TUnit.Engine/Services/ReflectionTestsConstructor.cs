@@ -2,13 +2,13 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.Testing.Platform.Extensions;
 using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 #pragma warning disable TUnitWIP0001
 
@@ -339,6 +339,27 @@ internal class ReflectionTestsConstructor(IExtension extension,
     {
         if (arguments.Length == parameters.Length)
         {
+            if (parameters.Length > 0 && parameters.Last().IsParams
+                && arguments.Length > 0 && arguments.Last() is not IEnumerable)
+            {
+                var lastParameter = parameters.Last();
+
+                var underlyingType = lastParameter.Type.GetElementType()
+                    ?? lastParameter.Type.GenericTypeArguments.FirstOrDefault()
+                    ?? throw new InvalidOperationException("Cannot determine the underlying type of the params argument. Use an array to fix this.");
+
+                var typedArray = Array.CreateInstance(underlyingType, 1);
+
+                var value = CastHelper.Cast(underlyingType, arguments.Last());
+                typedArray.SetValue(value, 0);
+
+                arguments = [
+                    ..arguments.Take(arguments.Length - 1),
+                    typedArray
+                ];
+                return;
+            }
+
             return;
         }
 
@@ -377,17 +398,26 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             if (lastParameter.IsParams)
             {
-                var underlyingType = lastParameter.Type.GetElementType() ?? lastParameter.Type.GenericTypeArguments.FirstOrDefault();
+                var underlyingType = lastParameter.Type.GetElementType()
+                    ?? lastParameter.Type.GenericTypeArguments.FirstOrDefault()
+                    ?? throw new InvalidOperationException("Cannot determine the underlying type of the params argument. Use an array to fix this.");
 
-                var argumentsBeforeParams = parameters.Take(parameters.Length - 1).ToArray();
+                var argumentsBeforeParams = arguments.Take(parameters.Length - 1).ToArray();
                 var argumentsAfterParams = arguments.Skip(argumentsBeforeParams.Length).ToArray();
 
-                if(arguments.All(x => x is null || x.GetType() == underlyingType))
+                if(argumentsAfterParams.All(x => x is null || IsConvertibleTo(x, underlyingType)))
                 {
+                    var typedArray = Array.CreateInstance(underlyingType, argumentsAfterParams.Length);
+
+                    for (var i = 0; i < argumentsAfterParams.Length; i++)
+                    {
+                        typedArray.SetValue(CastHelper.Cast(underlyingType, argumentsAfterParams[i]), i);
+                    }
+
                     // We have a params argument, so we can just add the rest of the arguments
                     arguments = [
-                        ..arguments,
-                        argumentsAfterParams
+                        ..argumentsBeforeParams,
+                        typedArray
                     ];
                     return;
                 }
@@ -395,6 +425,29 @@ internal class ReflectionTestsConstructor(IExtension extension,
             }
 
             arguments = arguments.Take(parameters.Length).ToArray();
+        }
+    }
+
+    private static bool IsConvertibleTo(object x, Type underlyingType)
+    {
+        if (x.GetType().IsAssignableTo(underlyingType))
+        {
+            return true;
+        }
+
+        if (CastHelper.GetConversionMethod(x.GetType(), underlyingType) is not null)
+        {
+            return true;
+        }
+
+        try
+        {
+            _ = Convert.ChangeType(x, underlyingType);
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 
