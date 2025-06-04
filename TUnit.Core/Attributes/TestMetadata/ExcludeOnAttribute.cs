@@ -66,15 +66,6 @@ public sealed class ExcludeOnAttribute(OS OperatingSystem) : SkipAttribute(GetRe
 
     private static string GetReason(OS operatingSystems)
     {
-        var excludedOperatingSystems =
-#if NET
-            Enum.GetValues<OS>()
-#else
-            Enum.GetValues(typeof(OS)).Cast<OS>()
-#endif
-            .Where(os => operatingSystems.HasFlag(os))
-            .ToArray();
-
-        return $"The test is skipped because it is configured to not run on the current operating system: `{string.Join("`, `", excludedOperatingSystems)}`";
+        return $"This test is excluded on the following operating systems: `{operatingSystems}`.";
     }
 }
