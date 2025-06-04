@@ -45,7 +45,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -168,7 +168,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -291,7 +291,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

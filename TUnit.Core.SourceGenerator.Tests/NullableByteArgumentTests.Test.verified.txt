@@ -50,7 +50,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					{
 						Name = "someByte",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -146,7 +146,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						{
 							Name = "someByte",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -271,13 +271,13 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					{
 						Name = "byte1",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 					{
 						Name = "byte2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -374,13 +374,13 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						{
 							Name = "byte1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 						{
 							Name = "byte2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

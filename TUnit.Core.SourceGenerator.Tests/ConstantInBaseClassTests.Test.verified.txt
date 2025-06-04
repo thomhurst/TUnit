@@ -45,7 +45,7 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

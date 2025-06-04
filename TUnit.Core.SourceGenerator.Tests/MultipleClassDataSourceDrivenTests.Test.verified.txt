@@ -60,31 +60,31 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						{
 							Name = "inject1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
 						{
 							Name = "inject2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
 						{
 							Name = "inject3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
 						{
 							Name = "inject4",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[3],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
 						{
 							Name = "inject5",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[4],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -106,31 +106,31 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						{
 							Name = "inject1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
 						{
 							Name = "inject2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
 						{
 							Name = "inject3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
 						{
 							Name = "inject4",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[3],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
 						{
 							Name = "inject5",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[4],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -263,31 +263,31 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						{
 							Name = "inject1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
 						{
 							Name = "inject2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
 						{
 							Name = "inject3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
 						{
 							Name = "inject4",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[3],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
 						{
 							Name = "inject5",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[4],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -309,31 +309,31 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 						{
 							Name = "inject1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
 						{
 							Name = "inject2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
 						{
 							Name = "inject3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
 						{
 							Name = "inject4",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[3],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
 						{
 							Name = "inject5",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[4],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,

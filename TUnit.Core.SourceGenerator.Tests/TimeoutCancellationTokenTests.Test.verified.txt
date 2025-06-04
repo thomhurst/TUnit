@@ -45,7 +45,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -70,7 +70,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -175,7 +175,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -200,7 +200,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -304,7 +304,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -329,7 +329,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -434,13 +434,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -465,7 +465,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -572,13 +572,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -603,7 +603,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -712,13 +712,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 						],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -743,7 +743,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -768,7 +768,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							[
 								new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 							],
-							ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,

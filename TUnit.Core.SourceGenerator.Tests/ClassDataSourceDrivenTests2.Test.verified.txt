@@ -64,7 +64,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -86,7 +86,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -185,7 +185,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -207,7 +207,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -335,7 +335,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -357,7 +357,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -456,7 +456,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -478,7 +478,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,

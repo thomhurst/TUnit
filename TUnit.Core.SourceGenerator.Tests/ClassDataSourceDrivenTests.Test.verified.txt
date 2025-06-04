@@ -44,7 +44,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -82,7 +82,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -190,7 +190,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -228,7 +228,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -336,7 +336,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -374,7 +374,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -482,13 +482,13 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -526,13 +526,13 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources").GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -643,19 +643,19 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -693,19 +693,19 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources").GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources").GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -817,25 +817,25 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class4",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[3],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -873,25 +873,25 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources").GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources").GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class4",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources").GetParameters()[3],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -1004,31 +1004,31 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class4",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[3],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class5",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetConstructors().First().GetParameters()[4],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1066,31 +1066,31 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources").GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources").GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class4",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources").GetParameters()[3],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class5",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources").GetParameters()[4],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,

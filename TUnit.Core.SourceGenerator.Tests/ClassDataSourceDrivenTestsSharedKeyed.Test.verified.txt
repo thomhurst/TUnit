@@ -44,7 +44,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -82,7 +82,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -194,7 +194,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -232,7 +232,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic").GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,

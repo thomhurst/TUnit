@@ -52,19 +52,19 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -90,19 +90,19 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = 
@@ -244,19 +244,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -282,19 +282,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = 
@@ -436,19 +436,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -474,19 +474,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								{
 									Name = "value",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "value2",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
 									Name = "value3",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = 
@@ -628,19 +628,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								{
 									Name = "value",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "value2",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
 									Name = "value3",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -666,19 +666,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									{
 										Name = "value",
 										Attributes = [],
-										ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 									{
 										Name = "value2",
 										Attributes = [],
-										ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 									{
 										Name = "value3",
 										Attributes = [],
-										ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+										ReflectionInfo = null!,
 									},
 								],
 								Properties = 

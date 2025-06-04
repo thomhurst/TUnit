@@ -1281,6 +1281,13 @@ namespace TUnit.Core.Helpers
         public MethodInfoRetriever() { }
         public static System.Reflection.MethodInfo GetMethodInfo([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)] System.Type type, string methodName, int genericParameterCount, System.Type[] parameterTypes) { }
     }
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Uses reflection to retrieve parameter information")]
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Uses reflection to retrieve parameter information")]
+    public static class RobustParameterInfoRetriever
+    {
+        public static System.Reflection.ParameterInfo GetConstructorParameterInfo([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors)] System.Type type, System.Type[] parameterTypes, int parameterIndex, System.Type expectedType, string parameterName) { }
+        public static System.Reflection.ParameterInfo GetMethodParameterInfo([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.None | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods)] System.Type type, string methodName, int parameterIndex, System.Type[] parameterTypes, bool isStatic, int genericParameterCount) { }
+    }
 }
 namespace TUnit.Core.Hooks
 {

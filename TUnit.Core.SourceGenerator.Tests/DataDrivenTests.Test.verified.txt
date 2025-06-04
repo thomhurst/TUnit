@@ -52,7 +52,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -149,7 +149,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -246,7 +246,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -373,13 +373,13 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -477,13 +477,13 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -581,13 +581,13 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -715,7 +715,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "testEnum",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -812,7 +812,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						{
 							Name = "testEnum",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -909,7 +909,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 							{
 								Name = "testEnum",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1029,7 +1029,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1149,7 +1149,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1269,7 +1269,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1396,7 +1396,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1493,7 +1493,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1590,7 +1590,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1710,7 +1710,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1830,7 +1830,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "values",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1950,7 +1950,7 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

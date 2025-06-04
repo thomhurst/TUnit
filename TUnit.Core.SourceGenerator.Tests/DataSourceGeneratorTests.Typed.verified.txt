@@ -48,7 +48,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -72,19 +72,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -106,19 +106,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -145,7 +145,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method").GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -234,7 +234,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -258,19 +258,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -292,19 +292,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -331,7 +331,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								{
 									Name = "value",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method").GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 							],
 							TestSessionId = sessionId,
@@ -449,19 +449,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -485,19 +485,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -519,19 +519,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -558,19 +558,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2").GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2").GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2").GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -663,19 +663,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -699,19 +699,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -733,19 +733,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -772,19 +772,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								{
 									Name = "value",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2").GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "value2",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2").GetParameters()[1],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
 									Name = "value3",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2").GetParameters()[2],
+									ReflectionInfo = null!,
 								},
 							],
 							TestSessionId = sessionId,
@@ -906,19 +906,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -942,19 +942,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -976,19 +976,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -1015,19 +1015,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3").GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3").GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3").GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -1120,19 +1120,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1156,19 +1156,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -1190,19 +1190,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[1],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructors().First().GetParameters()[2],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -1229,19 +1229,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								{
 									Name = "value",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3").GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "value2",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3").GetParameters()[1],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
 									Name = "value3",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3").GetParameters()[2],
+									ReflectionInfo = null!,
 								},
 							],
 							TestSessionId = sessionId,

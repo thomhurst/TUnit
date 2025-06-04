@@ -45,19 +45,19 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

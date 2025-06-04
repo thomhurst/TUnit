@@ -45,7 +45,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -69,7 +69,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -91,7 +91,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -208,7 +208,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						[
 							new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
 						],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -232,7 +232,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -254,7 +254,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -292,7 +292,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 								[
 									new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
 								],
-								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MatrixDataSource").GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,

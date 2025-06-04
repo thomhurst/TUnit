@@ -11,7 +11,11 @@ namespace TUnit.Core.Helpers;
 public static class RobustParameterInfoRetriever
 {
     private static readonly BindingFlags RobustBindingFlags =
-        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
+        BindingFlags.Instance
+        | BindingFlags.Public
+        | BindingFlags.NonPublic
+        | BindingFlags.Static
+        | BindingFlags.FlattenHierarchy;
 
     /// <summary>
     /// Retrieves constructor parameter info with comprehensive fallback strategies.
@@ -19,15 +23,47 @@ public static class RobustParameterInfoRetriever
     /// <param name="type">The type containing the constructor</param>
     /// <param name="parameterIndex">The zero-based index of the parameter</param>
     /// <param name="parameterTypes">The expected parameter types for exact matching</param>
-    /// <param name="parameterCount">The expected parameter count</param>
+    /// <param name="expectedType"></param>
+    /// <param name="parameterName"></param>
     /// <returns>The ParameterInfo for the specified parameter</returns>
     /// <exception cref="InvalidOperationException">Thrown when no suitable constructor is found</exception>
     public static ParameterInfo GetConstructorParameterInfo(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type,
         Type[] parameterTypes,
-        int parameterIndex)
+        int parameterIndex,
+        Type expectedType,
+        string parameterName)
     {
-        return type.GetConstructor(parameterTypes)!.GetParameters()[parameterIndex];
+        var parameterInfo = type.GetConstructor(RobustBindingFlags, null, parameterTypes, null)?.GetParameters()[parameterIndex];
+
+        if (parameterInfo?.Name == parameterName && (parameterInfo.ParameterType == expectedType || parameterInfo.ParameterType.IsGenericParameter))
+        {
+            return parameterInfo;
+        }
+
+        foreach (var constructorInfo in type.GetConstructors(RobustBindingFlags).Where(x => x.GetParameters().Length == parameterTypes.Length))
+        {
+            foreach (var parameter in constructorInfo.GetParameters())
+            {
+                if (parameter.Name == parameterName && (parameter.ParameterType == expectedType || parameter.ParameterType.IsGenericParameter))
+                {
+                    return parameter;
+                }
+            }
+        }
+
+        foreach (var constructorInfo in type.GetConstructors(RobustBindingFlags))
+        {
+            foreach (var parameter in constructorInfo.GetParameters())
+            {
+                if (parameter.Name == parameterName && (parameter.ParameterType == expectedType || parameter.ParameterType.IsGenericParameter))
+                {
+                    return parameter;
+                }
+            }
+        }
+
+        return null!;
     }
 
     /// <summary>

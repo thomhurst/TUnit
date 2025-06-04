@@ -1216,6 +1216,11 @@ namespace TUnit.Core.Helpers
         public MethodInfoRetriever() { }
         public static System.Reflection.MethodInfo GetMethodInfo(System.Type type, string methodName, int genericParameterCount, System.Type[] parameterTypes) { }
     }
+    public static class RobustParameterInfoRetriever
+    {
+        public static System.Reflection.ParameterInfo GetConstructorParameterInfo(System.Type type, System.Type[] parameterTypes, int parameterIndex, System.Type expectedType, string parameterName) { }
+        public static System.Reflection.ParameterInfo GetMethodParameterInfo(System.Type type, string methodName, int parameterIndex, System.Type[] parameterTypes, bool isStatic, int genericParameterCount) { }
+    }
 }
 namespace TUnit.Core.Hooks
 {

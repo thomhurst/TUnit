@@ -155,7 +155,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -275,7 +275,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

@@ -50,13 +50,13 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "a",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<long[]>
 					{
 						Name = "arr",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2112.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -153,13 +153,13 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "a",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<long[]>
 						{
 							Name = "arr",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2112.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -285,13 +285,13 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "a",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<long[]>
 					{
 						Name = "arr",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2112.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -388,13 +388,13 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "a",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<long[]>
 						{
 							Name = "arr",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2112.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation

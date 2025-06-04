@@ -45,7 +45,7 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 					{
 						Name = "value",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

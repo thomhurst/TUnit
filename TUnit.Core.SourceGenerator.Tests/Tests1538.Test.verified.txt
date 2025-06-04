@@ -45,49 +45,49 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "expectedSuccess",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedError",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT0",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT1",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[3],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[4],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[5],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT4",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[6],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT5",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[7],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -219,97 +219,97 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "expectedSuccess",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item1",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item2",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item3",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[3],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item4",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[4],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item5",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[5],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item6",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[6],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item7",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[7],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item8",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[8],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item9",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[9],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item10",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[10],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item11",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[11],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item12",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[12],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item13",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[13],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item14",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[14],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item15",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetConstructors().First().GetParameters()[15],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation

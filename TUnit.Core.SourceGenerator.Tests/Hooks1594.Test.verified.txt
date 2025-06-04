@@ -71,7 +71,7 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 							{
 								Name = "myFixture",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -195,7 +195,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 								{
 									Name = "fixture",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>).GetConstructors().First().GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = [],
@@ -319,7 +319,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 								{
 									Name = "fixture",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>).GetConstructors().First().GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = 

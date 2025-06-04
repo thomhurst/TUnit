@@ -50,37 +50,37 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					{
 						Name = "source",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "keySelector",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[1],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "seedSelector",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[2],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "func",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[3],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "comparer",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[4],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 					{
 						Name = "expected",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[5],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -186,37 +186,37 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 						{
 							Name = "source",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "keySelector",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[1],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "seedSelector",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[2],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "func",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[3],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "comparer",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[4],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
 						{
 							Name = "expected",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetConstructors().First().GetParameters()[5],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

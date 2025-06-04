@@ -45,7 +45,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "i",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -165,7 +165,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "d",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -285,7 +285,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "f",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -405,7 +405,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "l",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -525,7 +525,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "l",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -645,7 +645,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "i",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

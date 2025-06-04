@@ -200,16 +200,14 @@ public static class SourceInformationWriter
 
     public static void GenerateParameterInformation(SourceCodeWriter sourceCodeWriter,
         GeneratorAttributeSyntaxContext context,
-        IParameterSymbol parameter, ArgumentsType argumentsType, IDictionary<string, string>? genericSubstitutions)
+        IParameterSymbol parameter, ArgumentsType argumentsType,
+        IDictionary<string, string>? genericSubstitutions)
     {
         var type = parameter.Type.GloballyQualified();
 
         if (parameter.Type.IsGenericDefinition())
         {
-            type = genericSubstitutions?.TryGetValue(type, out var substitution) == true
-                ? substitution
-                // We can't find the generic type - Fall back to object
-                : "object";
+            type = GetTypeOrSubstitution(parameter.Type);
         }
 
         sourceCodeWriter.Write($"new global::TUnit.Core.SourceGeneratedParameterInformation<{type}>");
@@ -221,29 +219,40 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, parameter.GetAttributes());
 
-        if(argumentsType == ArgumentsType.ClassConstructor)
-        {
-            var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
-            var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"));
-            var containingType = parameter.ContainingSymbol.ContainingType.GloballyQualified();
-            var parameterIndex = parameter.Ordinal;
+        // TODO: Struggling to get this to work with generic type parameters
+        sourceCodeWriter.WriteLine("ReflectionInfo = null!,");
 
-            sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetConstructorParameterInfo(typeof({containingType}), new Type[] {{{parameterTypesString}}}, {parameterIndex}),");
-        }
-
-        if (argumentsType == ArgumentsType.Method)
-        {
-            var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
-            var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"));
-            var containingType = parameter.ContainingSymbol.ContainingType.GloballyQualified();
-            var methodName = parameter.ContainingSymbol.Name;
-            var parameterIndex = parameter.Ordinal;
-            var isStatic = methodSymbol.IsStatic;
-            var genericParameterCount = methodSymbol.TypeParameters.Length;
-
-            sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetMethodParameterInfo(typeof({containingType}), \"{methodName}\", {parameterIndex}, new Type[] {{{parameterTypesString}}}, {isStatic.ToString().ToLowerInvariant()}, {genericParameterCount}),");
-        }
+        // if(argumentsType == ArgumentsType.ClassConstructor)
+        // {
+        //     var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
+        //     var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({GetTypeOrSubstitution(p.Type)})"));
+        //     var containingType = methodSymbol.ContainingType.GloballyQualified();
+        //     var parameterIndex = parameter.Ordinal;
+        //
+        //     sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetConstructorParameterInfo(typeof({containingType}), new Type[] {{{parameterTypesString}}}, {parameterIndex}, typeof({parameter.Type.GloballyQualified()}), \"{parameter.Name}\"),");
+        // }
+        //
+        // if (argumentsType == ArgumentsType.Method)
+        // {
+        //     var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
+        //     var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({GetTypeOrSubstitution(p.Type)})"));
+        //     var containingType = parameter.ContainingSymbol.ContainingType.GloballyQualified();
+        //     var methodName = parameter.ContainingSymbol.Name;
+        //     var parameterIndex = parameter.Ordinal;
+        //     var isStatic = methodSymbol.IsStatic;
+        //     var genericParameterCount = methodSymbol.TypeParameters.Length;
+        //
+        //     sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetMethodParameterInfo(typeof({containingType}), \"{methodName}\", {parameterIndex}, new Type[] {{{parameterTypesString}}}, {isStatic.ToString().ToLowerInvariant()}, {genericParameterCount}),");
+        // }
 
         sourceCodeWriter.WriteLine("},");
+
+        string GetTypeOrSubstitution(ITypeSymbol type)
+        {
+            return genericSubstitutions?.TryGetValue(type.GloballyQualified(), out var substitution) == true
+                ? substitution
+                // We can't find the generic type - Fall back to object
+                : "object";
+        }
     }
 }

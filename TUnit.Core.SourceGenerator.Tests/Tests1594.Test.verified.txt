@@ -60,7 +60,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						{
 							Name = "myFixture",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -82,7 +82,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						{
 							Name = "myFixture",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,

@@ -60,7 +60,7 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 						{
 							Name = "dummyReferenceTypeClass",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.ClassConstructorTest).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = 

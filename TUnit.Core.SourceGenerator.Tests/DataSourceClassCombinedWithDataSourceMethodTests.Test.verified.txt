@@ -58,7 +58,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					{
 						Name = "i",
 						Attributes = [],
-						ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -85,7 +85,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						{
 							Name = "i",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -166,7 +166,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						{
 							Name = "i",
 							Attributes = [],
-							ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -193,7 +193,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							{
 								Name = "i",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -274,7 +274,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							{
 								Name = "i",
 								Attributes = [],
-								ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -301,7 +301,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								{
 									Name = "i",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = [],
@@ -382,7 +382,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								{
 									Name = "i",
 									Attributes = [],
-									ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -409,7 +409,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									{
 										Name = "i",
 										Attributes = [],
-										ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+										ReflectionInfo = null!,
 									},
 								],
 								Properties = [],
@@ -490,7 +490,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									{
 										Name = "i",
 										Attributes = [],
-										ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+										ReflectionInfo = null!,
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -517,7 +517,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										{
 											Name = "i",
 											Attributes = [],
-											ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+											ReflectionInfo = null!,
 										},
 									],
 									Properties = [],
@@ -598,7 +598,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										{
 											Name = "i",
 											Attributes = [],
-											ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+											ReflectionInfo = null!,
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -625,7 +625,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											{
 												Name = "i",
 												Attributes = [],
-												ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+												ReflectionInfo = null!,
 											},
 										],
 										Properties = [],
@@ -706,7 +706,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											{
 												Name = "i",
 												Attributes = [],
-												ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+												ReflectionInfo = null!,
 											},
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -733,7 +733,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												{
 													Name = "i",
 													Attributes = [],
-													ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+													ReflectionInfo = null!,
 												},
 											],
 											Properties = [],
@@ -814,7 +814,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												{
 													Name = "i",
 													Attributes = [],
-													ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+													ReflectionInfo = null!,
 												},
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -841,7 +841,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 													{
 														Name = "i",
 														Attributes = [],
-														ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+														ReflectionInfo = null!,
 													},
 												],
 												Properties = [],
@@ -922,7 +922,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 													{
 														Name = "i",
 														Attributes = [],
-														ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+														ReflectionInfo = null!,
 													},
 												],
 												Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -949,7 +949,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 														{
 															Name = "i",
 															Attributes = [],
-															ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructors().First().GetParameters()[0],
+															ReflectionInfo = null!,
 														},
 													],
 													Properties = [],
