@@ -8,15 +8,18 @@ namespace TUnit.TestProject.Bugs._2075;
 
 public class ServiceProviderFactory : IAsyncInitializer
 {
-    public ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
-    
+    public ServiceProvider ServiceProvider { get; } = new ServiceCollection()
+        .AddSingleton<IFirebaseClient, FirebaseClient>()
+        .AddSingleton<DbContext>()
+        .BuildServiceProvider();
+
     public Task InitializeAsync()
     {
         return Task.CompletedTask;
     }
 }
 
-public class FromServiceProviderFactoryAttribute : NonTypedDataSourceGeneratorAttribute
+public class FromServiceProviderFactoryAttribute : NonTypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
     public Task InitializeAsync()
     {
@@ -35,9 +38,9 @@ public class FromServiceProviderFactoryAttribute : NonTypedDataSourceGeneratorAt
         {
             throw new Exception("WebApplicationFactory is not part of the class constructor arguments");
         }
-        
+
         var serviceProvider = webApplicationFactory.ServiceProvider;
-        
+
         yield return () =>
         {
             return dataGeneratorMetadata.MembersToGenerate.Select(x => ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, x.Type)).ToArray();
@@ -51,7 +54,7 @@ public class MyTests(ServiceProviderFactory factory)
 {
     [FromServiceProviderFactory]
     public required DbContext DbContext { get; init; }
-    
+
     [FromServiceProviderFactory]
     public required IFirebaseClient FirebaseClient { get; init; }
 
@@ -64,5 +67,7 @@ public class MyTests(ServiceProviderFactory factory)
 public class DbContext;
 
 public interface IFirebaseClient;
+
+public class FirebaseClient : IFirebaseClient;
 
 #endif

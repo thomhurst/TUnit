@@ -163,15 +163,15 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             for (var index = 0; index < repeatCount + 1; index++)
             {
-                foreach (var testArguments in GetArguments(type, testMethod, null, testDataAttribute, DataGeneratorType.TestParameters, classInstanceArguments, testInformation,
+                var invokedClassInstanceArguments = classInstanceArguments();
+
+                foreach (var testArguments in GetArguments(type, testMethod, null, testDataAttribute, DataGeneratorType.TestParameters, () => invokedClassInstanceArguments, testInformation,
                              testBuilderContextAccessor))
                 {
-                    var propertyArgs = GetPropertyArgs(type, classInstanceArguments, testInformation, testBuilderContextAccessor)
+                    var propertyArgs = GetPropertyArgs(type, invokedClassInstanceArguments, testInformation, testBuilderContextAccessor)
                         .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
 
-                    var testClassArguments = classInstanceArguments();
-
-                    AppendOptionalParameters(ref testClassArguments, testInformation.Class.Parameters);
+                    AppendOptionalParameters(ref invokedClassInstanceArguments, testInformation.Class.Parameters);
 
                     var testMethodArguments = testArguments();
 
@@ -183,7 +183,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
                         var substitutedTypes = type.GetGenericArguments()
                             .Select(pc => classParametersTypes.FindIndex(pt => pt == pc))
-                            .Select(i => testClassArguments[i]!.GetType())
+                            .Select(i => invokedClassInstanceArguments[i]!.GetType())
                             .ToArray();
 
                         type = type.MakeGenericType(substitutedTypes);
@@ -205,13 +205,15 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         TestMethodArguments = testMethodArguments,
                         Attributes = allAttributes,
                         TestName = testMethod.Name,
-                        TestClassArguments = testClassArguments,
+                        TestClassArguments = invokedClassInstanceArguments ??= classInstanceArguments(),
                         TestFilePath = testAttribute.File,
                         TestLineNumber = testAttribute.Line,
                         Properties = propertyArgs
                     });
 
                     testBuilderContextAccessor.Current = new TestBuilderContext();
+
+                    invokedClassInstanceArguments = classInstanceArguments();
                 }
             }
         }
@@ -451,7 +453,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
     }
 
-    private static IEnumerable<(PropertyInfo PropertyInfo, Func<object?[]> Args)> GetPropertyArgs(Type type, Func<object?[]> classInstanceArguments,
+    private static IEnumerable<(PropertyInfo PropertyInfo, Func<object?[]> Args)> GetPropertyArgs(Type type, object?[] classInstanceArguments,
         SourceGeneratedMethodInformation testInformation, TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var properties = type.GetProperties()
@@ -461,7 +463,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         foreach (var propertyInfo in properties)
         {
             var dataAttributes = GetDataAttributes(propertyInfo)[0];
-            var args = GetArguments(type, null, propertyInfo, dataAttributes, DataGeneratorType.Property, classInstanceArguments, testInformation, testBuilderContextAccessor).ToArray();
+            var args = GetArguments(type, null, propertyInfo, dataAttributes, DataGeneratorType.Property, () => classInstanceArguments, testInformation, testBuilderContextAccessor).ToArray();
             yield return (propertyInfo, args[0]);
         }
     }
@@ -481,7 +483,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             var args = classInstanceArguments.Select((x, i) => CastHelper.Cast(testInformation.Class.Parameters[i].Type, x)).ToArray();
 
-            var propertyArgs = GetPropertyArgs(type, () => args, testInformation, testBuilderContextAccessor)
+            var propertyArgs = GetPropertyArgs(type, args, testInformation, testBuilderContextAccessor)
                 .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
 
             return InstanceHelper.CreateInstance(testInformation.Class, args, propertyArgs, testBuilderContextAccessor.Current);
@@ -518,6 +520,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
+        var classInstanceArgumentsInvoked = dataGeneratorType != DataGeneratorType.ClassParameters ? classInstanceArguments() : null;
+
         if (testDataAttribute is IDataSourceGeneratorAttribute dataSourceGeneratorAttribute)
         {
             var memberAttributes = dataGeneratorType switch
@@ -534,7 +538,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 {
                     Type = dataGeneratorType,
                     TestInformation = testInformation,
-                    ClassInstanceArguments = needsInstance ? classInstanceArguments() : null,
+                    ClassInstanceArguments = classInstanceArgumentsInvoked,
                     MembersToGenerate = dataGeneratorType switch
                     {
                         DataGeneratorType.TestParameters => method!.GetParameters()
@@ -565,7 +569,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         _ => throw new ArgumentOutOfRangeException(nameof(dataGeneratorType), dataGeneratorType, null)
                     },
                     TestBuilderContext = testBuilderContextAccessor,
-                    TestClassInstance = needsInstance ? CreateInstance(testDataAttribute, type, classInstanceArguments(), testInformation, testBuilderContextAccessor, out _) : null,
+                    TestClassInstance = needsInstance ? CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out _) : null,
                     TestSessionId = string.Empty,
                 }
             ]) as IEnumerable;
@@ -598,7 +602,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (testDataAttribute is InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute)
         {
-            var instance = CreateInstance(testDataAttribute, type, classInstanceArguments(), testInformation, testBuilderContextAccessor, out var exception);
+            var instance = CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out var exception);
 
             var methodDataSourceType = instanceMethodDataSourceAttribute.ClassProvidingDataSource ?? type;
 
