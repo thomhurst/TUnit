@@ -40,6 +40,7 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
              """
         );
 
+        #if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
         {
             stringBuilder.Append(
@@ -50,6 +51,7 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
                 """
             );
         }
+        #endif
 
         return Task.FromResult<string?>(
             stringBuilder.ToString()
