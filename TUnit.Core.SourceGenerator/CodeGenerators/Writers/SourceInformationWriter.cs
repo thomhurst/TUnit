@@ -223,20 +223,25 @@ public static class SourceInformationWriter
 
         if(argumentsType == ArgumentsType.ClassConstructor)
         {
-            sourceCodeWriter.WriteLine(
-                $"ReflectionInfo = typeof({parameter.ContainingSymbol.ContainingType.GloballyQualified()}).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)" +
-                $".First(c => c.GetParameters().Length == {((IMethodSymbol)parameter.ContainingSymbol).Parameters.Length} && c.GetParameters()[{parameter.Ordinal}].ParameterType == typeof({type})).GetParameters()[{parameter.Ordinal}],");
+            var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
+            var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"));
+            var containingType = parameter.ContainingSymbol.ContainingType.GloballyQualified();
+            var parameterIndex = parameter.Ordinal;
+
+            sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetConstructorParameterInfo(typeof({containingType}), new Type[] {{{parameterTypesString}}}, {parameterIndex}),");
         }
 
         if (argumentsType == ArgumentsType.Method)
         {
             var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
             var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"));
+            var containingType = parameter.ContainingSymbol.ContainingType.GloballyQualified();
+            var methodName = parameter.ContainingSymbol.Name;
+            var parameterIndex = parameter.Ordinal;
+            var isStatic = methodSymbol.IsStatic;
+            var genericParameterCount = methodSymbol.TypeParameters.Length;
 
-            sourceCodeWriter.WriteLine(
-                $"ReflectionInfo = typeof({parameter.ContainingSymbol.ContainingType.GloballyQualified()})" +
-                $".GetMethod(\"{parameter.ContainingSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static, " +
-                $"null, new Type[] {{{parameterTypesString}}}, null).GetParameters()[{parameter.Ordinal}],");
+            sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetMethodParameterInfo(typeof({containingType}), \"{methodName}\", {parameterIndex}, new Type[] {{{parameterTypesString}}}, {isStatic.ToString().ToLowerInvariant()}, {genericParameterCount}),");
         }
 
         sourceCodeWriter.WriteLine("},");
