@@ -66,6 +66,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "s",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -171,6 +173,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						{
 							Name = "s",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -276,6 +280,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							{
 								Name = "s",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -381,6 +387,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								{
 									Name = "s",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(string),
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -486,6 +494,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									{
 										Name = "s",
 										Attributes = [],
+										IsOptional = false,
+										DefaultValue = default(string),
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -591,6 +601,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										{
 											Name = "s",
 											Attributes = [],
+											IsOptional = false,
+											DefaultValue = default(string),
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -696,6 +708,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											{
 												Name = "s",
 												Attributes = [],
+												IsOptional = false,
+												DefaultValue = default(string),
 											},
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -801,6 +815,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 												{
 													Name = "s",
 													Attributes = [],
+													IsOptional = false,
+													DefaultValue = default(string),
 												},
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -940,6 +956,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "s",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1041,6 +1059,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						{
 							Name = "s",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1142,6 +1162,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							{
 								Name = "s",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1243,6 +1265,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 								{
 									Name = "s",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(string),
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1344,6 +1368,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									{
 										Name = "s",
 										Attributes = [],
+										IsOptional = false,
+										DefaultValue = default(string),
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1445,6 +1471,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										{
 											Name = "s",
 											Attributes = [],
+											IsOptional = false,
+											DefaultValue = default(string),
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1546,6 +1574,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											{
 												Name = "s",
 												Attributes = [],
+												IsOptional = false,
+												DefaultValue = default(string),
 											},
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1647,6 +1677,8 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 												{
 													Name = "s",
 													Attributes = [],
+													IsOptional = false,
+													DefaultValue = default(string),
 												},
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

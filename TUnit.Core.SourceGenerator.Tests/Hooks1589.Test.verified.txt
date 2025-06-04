@@ -102,6 +102,8 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 								{
 									Name = "fixture",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(global::TUnit.TestProject.Bugs._1589.MyFixture),
 								},
 							],
 							Properties = 

@@ -56,11 +56,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(T),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expected",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -160,11 +164,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(T),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "expected",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -264,11 +272,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							{
 								Name = "value",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(T),
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "expected",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -368,11 +380,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 								{
 									Name = "value",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(T),
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "expected",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(string),
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -472,11 +488,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 									{
 										Name = "value",
 										Attributes = [],
+										IsOptional = false,
+										DefaultValue = default(T),
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 									{
 										Name = "expected",
 										Attributes = [],
+										IsOptional = false,
+										DefaultValue = default(string),
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation

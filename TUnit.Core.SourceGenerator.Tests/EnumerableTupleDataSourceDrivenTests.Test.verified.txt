@@ -50,16 +50,22 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -162,16 +168,22 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

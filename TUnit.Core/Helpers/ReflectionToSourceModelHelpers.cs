@@ -35,7 +35,7 @@ internal class ReflectionToSourceModelHelpers
         {
             return null;
         }
-        
+
         return GenerateClass(type.DeclaringType);
     }
 
@@ -74,7 +74,7 @@ internal class ReflectionToSourceModelHelpers
             Attributes = property.GetCustomAttributes().ToArray(),
             Name = property.Name,
             Type = property.PropertyType,
-            IsStatic = property.GetMethod?.IsStatic is true 
+            IsStatic = property.GetMethod?.IsStatic is true
                 || property.SetMethod?.IsStatic is true,
         };
     }
@@ -90,6 +90,8 @@ internal class ReflectionToSourceModelHelpers
         {
             Attributes = parameter.GetCustomAttributes().ToArray(),
             Name = parameter.Name ?? string.Empty,
+            IsOptional = parameter.IsOptional,
+            DefaultValue = parameter.HasDefaultValue ? parameter.DefaultValue : null,
         };
     }
 }

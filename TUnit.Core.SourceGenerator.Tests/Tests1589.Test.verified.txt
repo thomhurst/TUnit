@@ -60,6 +60,8 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						{
 							Name = "myFixture",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Bugs._1589.MyFixture),
 						},
 					],
 					Properties = [],
@@ -81,6 +83,8 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 						{
 							Name = "myFixture",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Bugs._1589.MyFixture),
 						},
 					],
 					TestSessionId = sessionId,

@@ -45,6 +45,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -163,6 +165,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -281,6 +285,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					{
 						Name = "action",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Action),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -410,6 +416,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 							{
 								Name = "value",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(int),
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -510,6 +518,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 										{
 											Name = "value",
 											Attributes = [],
+											IsOptional = false,
+											DefaultValue = default(int),
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -649,6 +659,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 									{
 										Name = "value",
 										Attributes = [],
+										IsOptional = false,
+										DefaultValue = default(int),
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -757,6 +769,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 														{
 															Name = "value",
 															Attributes = [],
+															IsOptional = false,
+															DefaultValue = default(int),
 														},
 													],
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -865,6 +879,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																			{
 																				Name = "value",
 																				Attributes = [],
+																				IsOptional = false,
+																				DefaultValue = default(int),
 																			},
 																		],
 																		Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -973,6 +989,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 																								{
 																									Name = "value",
 																									Attributes = [],
+																									IsOptional = false,
+																									DefaultValue = default(int),
 																								},
 																							],
 																							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1091,6 +1109,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1209,6 +1229,8 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					{
 						Name = "strings",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string[]),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

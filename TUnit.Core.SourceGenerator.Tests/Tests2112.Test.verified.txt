@@ -50,11 +50,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "a",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<long[]>
 					{
 						Name = "arr",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(long[]),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2112.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -151,11 +155,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "a",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<long[]>
 						{
 							Name = "arr",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(long[]),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2112.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -281,11 +289,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "a",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<long[]>
 					{
 						Name = "arr",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(long[]),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2112.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -382,11 +394,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "a",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<long[]>
 						{
 							Name = "arr",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(long[]),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2112.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation

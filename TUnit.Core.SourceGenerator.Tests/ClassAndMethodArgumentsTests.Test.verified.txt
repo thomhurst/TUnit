@@ -65,6 +65,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Properties = [],
@@ -159,6 +161,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg1",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						Properties = [],
@@ -269,6 +273,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					{
 						Name = "arg2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -293,6 +299,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Properties = [],
@@ -374,6 +382,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -398,6 +408,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg1",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						Properties = [],
@@ -479,6 +491,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg2",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -503,6 +517,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 								{
 									Name = "arg1",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(string),
 								},
 							],
 							Properties = [],
@@ -584,6 +600,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 								{
 									Name = "arg2",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(string),
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -608,6 +626,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 									{
 										Name = "arg1",
 										Attributes = [],
+										IsOptional = false,
+										DefaultValue = default(string),
 									},
 								],
 								Properties = [],
@@ -720,6 +740,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					{
 						Name = "arg2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -744,6 +766,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Properties = [],
@@ -825,6 +849,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -849,6 +875,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg1",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						Properties = [],
@@ -930,6 +958,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg2",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -954,6 +984,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 								{
 									Name = "arg1",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(string),
 								},
 							],
 							Properties = [],
@@ -1035,6 +1067,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 								{
 									Name = "arg2",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(string),
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1059,6 +1093,8 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 									{
 										Name = "arg1",
 										Attributes = [],
+										IsOptional = false,
+										DefaultValue = default(string),
 									},
 								],
 								Properties = [],

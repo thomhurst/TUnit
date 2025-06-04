@@ -45,6 +45,8 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

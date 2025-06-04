@@ -50,6 +50,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "t",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1692.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -145,6 +147,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "t",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1692.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation

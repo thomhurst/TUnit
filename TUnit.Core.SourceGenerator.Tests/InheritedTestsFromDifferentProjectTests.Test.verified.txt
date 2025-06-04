@@ -155,6 +155,8 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -274,6 +276,8 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

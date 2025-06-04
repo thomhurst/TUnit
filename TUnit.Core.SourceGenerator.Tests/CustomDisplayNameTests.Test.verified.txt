@@ -289,16 +289,22 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "value1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -406,16 +412,22 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
 							Name = "value1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -547,6 +559,8 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "foo",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -673,6 +687,8 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "password",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -719,6 +735,8 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
 							Name = "password",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 					],
 					TestSessionId = sessionId,

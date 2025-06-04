@@ -45,6 +45,8 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "name",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NameOfArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

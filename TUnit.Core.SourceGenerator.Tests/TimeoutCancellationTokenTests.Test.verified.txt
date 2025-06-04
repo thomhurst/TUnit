@@ -45,6 +45,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Threading.CancellationToken),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -69,6 +71,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					Properties = [],
@@ -173,6 +177,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Threading.CancellationToken),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -197,6 +203,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					Properties = [],
@@ -300,6 +308,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Threading.CancellationToken),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -324,6 +334,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					Properties = [],
@@ -428,11 +440,15 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Threading.CancellationToken),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -457,6 +473,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					Properties = [],
@@ -563,11 +581,15 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Threading.CancellationToken),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -592,6 +614,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					Properties = [],
@@ -700,11 +724,15 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Threading.CancellationToken),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -729,6 +757,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					Properties = [],
@@ -753,6 +783,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							[
 								new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					TestSessionId = sessionId,

@@ -632,6 +632,8 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "context",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.Core.AssemblyHookContext),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -722,6 +724,8 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Threading.CancellationToken),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -812,11 +816,15 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "context",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.Core.AssemblyHookContext),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::System.Threading.CancellationToken),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -991,6 +999,8 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "cancellationToken",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::System.Threading.CancellationToken),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1080,6 +1090,8 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "testContext",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.Core.TestContext),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1170,11 +1182,15 @@ file partial class Hooks_AssemblySetupTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "testContext",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.Core.TestContext),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::System.Threading.CancellationToken),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

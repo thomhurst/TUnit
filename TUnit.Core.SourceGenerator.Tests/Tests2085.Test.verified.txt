@@ -47,6 +47,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						[
 							new global::TUnit.Core.MatrixAttribute(double.NaN, double.PositiveInfinity, double.NegativeInfinity)
 						],
+						IsOptional = false,
+						DefaultValue = default(double),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2085.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -87,6 +89,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							[
 								new global::TUnit.Core.MatrixAttribute(double.NaN, double.PositiveInfinity, double.NegativeInfinity)
 							],
+							IsOptional = false,
+							DefaultValue = default(double),
 						},
 					],
 					TestSessionId = sessionId,
@@ -198,6 +202,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						[
 							new global::TUnit.Core.MatrixAttribute(float.NaN, float.PositiveInfinity, float.NegativeInfinity)
 						],
+						IsOptional = false,
+						DefaultValue = default(float),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2085.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -238,6 +244,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							[
 								new global::TUnit.Core.MatrixAttribute(float.NaN, float.PositiveInfinity, float.NegativeInfinity)
 							],
+							IsOptional = false,
+							DefaultValue = default(float),
 						},
 					],
 					TestSessionId = sessionId,

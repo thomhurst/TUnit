@@ -17,14 +17,14 @@ public class TestsGenerator : IIncrementalGenerator
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForTestMethodGeneration(ctx))
             .Where(static m => m is not null);
-        
+
         var inheritedTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.InheritsTestsAttribute",
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForInheritedTestsGeneration(ctx))
             .Where(static m => m is not null);
-        
+
         context.RegisterSourceOutput(standardTests, (sourceContext, data) => GenerateTests(sourceContext, data!));
         context.RegisterSourceOutput(inheritedTests, (sourceContext, data) => GenerateTests(sourceContext, data!, "Inherited_"));
     }
@@ -58,14 +58,14 @@ public class TestsGenerator : IIncrementalGenerator
 
         return new TestCollectionDataModel(methodSymbol.ParseTestDatas(context, methodSymbol.ContainingType));
     }
-    
+
     static TestCollectionDataModel? GetSemanticTargetForInheritedTestsGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return null;
         }
-        
+
         if (namedTypeSymbol.IsAbstract)
         {
             return null;
@@ -187,9 +187,9 @@ public class TestsGenerator : IIncrementalGenerator
                 title: "Error Generating Source",
                 messageFormat: "{0}",
                 category: "SourceGenerator",
-                DiagnosticSeverity.Error,
+                DiagnosticSeverity.Warning,
                 isEnabledByDefault: true);
-                
+
             context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));
         }
     }

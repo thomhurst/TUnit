@@ -71,6 +71,8 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 							{
 								Name = "myFixture",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(global::TUnit.TestProject.Bugs._1594.MyFixture),
 							},
 						],
 						Properties = [],
@@ -194,6 +196,8 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 								{
 									Name = "fixture",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(global::TUnit.TestProject.Bugs._1594.MyFixture),
 								},
 							],
 							Properties = [],
@@ -317,6 +321,8 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 								{
 									Name = "fixture",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(global::TUnit.TestProject.Bugs._1594.MyFixture),
 								},
 							],
 							Properties = 

@@ -45,41 +45,57 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "expectedSuccess",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedError",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT0",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT3",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT4",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "expectedT5",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -211,81 +227,113 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "expectedSuccess",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item3",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item4",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item5",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item6",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item7",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item8",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item9",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item10",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item11",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item12",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item13",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item14",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "item15",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation

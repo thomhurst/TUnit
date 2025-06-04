@@ -45,6 +45,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -68,6 +70,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Bugs._1821.MyData),
 						},
 					],
 					Properties = [],
@@ -89,6 +93,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Bugs._1821.MyData),
 						},
 					],
 					TestSessionId = sessionId,
@@ -205,6 +211,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						[
 							new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
 						],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -228,6 +236,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Bugs._1821.MyData),
 						},
 					],
 					Properties = [],
@@ -249,6 +259,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Bugs._1821.MyData),
 						},
 					],
 					TestSessionId = sessionId,
@@ -286,6 +298,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 								[
 									new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
 								],
+								IsOptional = false,
+								DefaultValue = default(string),
 							},
 						],
 						TestSessionId = sessionId,

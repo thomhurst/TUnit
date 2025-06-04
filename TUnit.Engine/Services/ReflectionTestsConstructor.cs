@@ -21,8 +21,8 @@ namespace TUnit.Engine.Services;
 [UnconditionalSuppressMessage("Trimming", "IL2055:Either the type on which the MakeGenericType is called can\'t be statically determined, or the type parameters to be used for generic arguments can\'t be statically determined.")]
 [UnconditionalSuppressMessage("Trimming", "IL2060:MakeGenericMethod call does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 [UnconditionalSuppressMessage("Trimming", "IL2111:Reflection")]
-internal class ReflectionTestsConstructor(IExtension extension, 
-    DependencyCollector dependencyCollector, 
+internal class ReflectionTestsConstructor(IExtension extension,
+    DependencyCollector dependencyCollector,
     ContextManager contextManager,
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
 {
@@ -34,9 +34,9 @@ internal class ReflectionTestsConstructor(IExtension extension,
             throw new InvalidOperationException("Reflection tests are not supported with AOT or trimming enabled.");
         }
 #endif
-        
+
         var allTypes = ReflectionScanner.GetTypes();
-        
+
         return DiscoverTestsInternal(allTypes)
             .Concat(DiscoverDynamicTests(allTypes))
             .SelectMany(ConstructTests)
@@ -54,9 +54,9 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     foreach (var argument in GetArguments(type, null, propertyInfo, dataAttribute, DataGeneratorType.Property, () => [], ReflectionToSourceModelHelpers.BuildTestMethod(type, propertyInfo.GetMethod!, null), new TestBuilderContextAccessor(new TestBuilderContext())).Take(1))
                     {
                         var value = argument()[0];
-                        
+
                         propertyInfo.SetValue(null, value);
-                        
+
                         // TODO:
                         // Make async
                         if (value is IAsyncInitializer asyncInitializer)
@@ -66,7 +66,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     }
                 }
             }
-            
+
             var testMethods = type.GetMethods()
                 .Where(x => !x.IsAbstract && IsTest(x))
                 .ToArray();
@@ -90,11 +90,11 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 }
 
                 var context = new DynamicTestBuilderContext(dynamicTestBuilderAttribute.File, dynamicTestBuilderAttribute.Line);
-                
+
                 var instance = Activator.CreateInstance(type)!;
-                
+
                 methodInfo.Invoke(instance, [context]);
-                
+
                 foreach (var contextTest in context.Tests)
                 {
                     yield return contextTest;
@@ -106,21 +106,21 @@ internal class ReflectionTestsConstructor(IExtension extension,
     private static IEnumerable<DynamicTest> Build(Type type, MethodInfo[] testMethods)
     {
         var testsBuilderDynamicTests = new List<DynamicTest>();
-        
+
         foreach (var testMethod in testMethods)
         {
             var testAttribute = testMethod.GetCustomAttribute<TestAttribute>()!;
-            
+
             try
             {
                 foreach (var typeDataAttribute in GetDataAttributes(type))
                 {
                     var testInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, testMethod, testMethod.Name);
-                            
+
                     foreach (var testDataAttribute in GetDataAttributes(testMethod))
                     {
                         var testBuilderContextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
-                            
+
                         foreach (var classInstanceArguments in GetArguments(type, testMethod, null, typeDataAttribute, DataGeneratorType.ClassParameters, () => [], testInformation, testBuilderContextAccessor))
                         {
                             BuildTests(type, classInstanceArguments, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute, testBuilderContextAccessor);
@@ -156,7 +156,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 ..type.GetCustomAttributes(),
                 ..type.Assembly.GetCustomAttributes()
             ];
-            
+
             var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
             for (var index = 0; index < repeatCount + 1; index++)
@@ -168,12 +168,17 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
 
                     var testClassArguments = classInstanceArguments();
+
+                    AppendOptionalParameters(ref testClassArguments, testInformation.Class.Parameters);
+
                     var testMethodArguments = testArguments();
-                    
+
+                    AppendOptionalParameters(ref testMethodArguments, testInformation.Parameters);
+
                     if (type.ContainsGenericParameters)
                     {
                         var classParametersTypes = testInformation.Class.Parameters.Select(p => p.Type).ToList();
-                        
+
                         var substitutedTypes = type.GetGenericArguments()
                             .Select(pc => classParametersTypes.FindIndex(pt => pt == pc))
                             .Select(i => testClassArguments[i]!.GetType())
@@ -190,12 +195,12 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     if (testMethod.ContainsGenericParameters)
                     {
                         var testParametersTypes = testInformation.Parameters.Select(p => p.Type).ToList();
-                        
+
                         var substitutedTypes = testMethod.GetGenericArguments()
                             .Select(pc => testParametersTypes.FindIndex(pt => pt == pc))
                             .Select(i => testMethodArguments[i]!.GetType())
                             .ToArray();
-                        
+
                         testMethod = testMethod.MakeGenericMethod(substitutedTypes);
                     }
 
@@ -225,8 +230,31 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 Exception = e,
                 TestClassType = type,
             });
-            
+
             testBuilderContextAccessor.Current = new TestBuilderContext();
+        }
+    }
+
+    private static void AppendOptionalParameters(ref object?[] testClassArguments, SourceGeneratedParameterInformation[] parameters)
+    {
+        if (testClassArguments.Length == parameters.Length)
+        {
+            return;
+        }
+
+        if (testClassArguments.Length < parameters.Length)
+        {
+            var missingParameters = parameters.Skip(testClassArguments.Length).ToArray();
+            if (missingParameters.All(x => x.IsOptional))
+            {
+                testClassArguments = [
+                    ..testClassArguments,
+                    ..missingParameters.Select(x => x.DefaultValue)
+                ];
+                return;
+            }
+
+            throw new InvalidOperationException($"Not enough arguments provided to fulfil the parameters. Expected {parameters.Length}, but got {testClassArguments.Length}.");
         }
     }
 
@@ -250,7 +278,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         out Exception? exception)
     {
         exception = null;
-        
+
         try
         {
             if (typeDataAttribute is ClassConstructorAttribute classConstructorAttribute)
@@ -259,7 +287,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             }
 
             var args = classInstanceArguments.Select((x, i) => CastHelper.Cast(testInformation.Class.Parameters[i].Type, x)).ToArray();
-            
+
             var propertyArgs = GetPropertyArgs(type, () => args, testInformation, testBuilderContextAccessor)
                 .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
 
@@ -281,11 +309,11 @@ internal class ReflectionTestsConstructor(IExtension extension,
             TestBuilderContext = new TestBuilderContext(),
             TestSessionId = string.Empty,
         };
-        
+
         var createMethod = typeof(IClassConstructor).GetMethod(nameof(IClassConstructor.Create))!.MakeGenericMethod(type);
 
         var instance = createMethod.Invoke(classConstructor, [metadata]);
-        
+
         return instance!;
     }
 
@@ -305,7 +333,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 DataGeneratorType.Property => [],
                 _ => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?.GetParameters().SelectMany(x => x.GetCustomAttributes()) ?? []
             };
-            
+
             var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
 
             var invoke = dataSourceGeneratorAttribute.GetType().GetMethod("GenerateDataSources")!.Invoke(testDataAttribute, [
@@ -321,6 +349,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
                             {
                                 Name = x.Name!,
                                 Attributes = x.GetCustomAttributes().ToArray(),
+                                IsOptional = x.IsOptional,
+                                DefaultValue = x.HasDefaultValue ? x.DefaultValue : null,
                             }).ToArray<SourceGeneratedMemberInformation>(),
                         DataGeneratorType.ClassParameters => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?
                             .GetParameters()
@@ -328,6 +358,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
                             {
                                 Name = x.Name!,
                                 Attributes = x.GetCustomAttributes().ToArray(),
+                                IsOptional = x.IsOptional,
+                                DefaultValue = x.HasDefaultValue ? x.DefaultValue : null,
                             }).ToArray<SourceGeneratedMemberInformation>() ?? [],
                         DataGeneratorType.Property =>
                         [
@@ -348,7 +380,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             ]) as IEnumerable;
 
             var funcEnumerable = invoke?.Cast<object>() ?? [];
-            
+
             foreach (var func in funcEnumerable)
             {
                 yield return () =>
@@ -376,7 +408,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         else if (testDataAttribute is InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute)
         {
             var instance = CreateInstance(testDataAttribute, type, classInstanceArguments(), testInformation, testBuilderContextAccessor, out var exception);
-            
+
             var methodDataSourceType = instanceMethodDataSourceAttribute.ClassProvidingDataSource ?? type;
 
             var result = methodDataSourceType.GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []);
@@ -411,7 +443,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         else if (testDataAttribute is MethodDataSourceAttribute methodDataSourceAttribute)
         {
             var methodDataSourceType = methodDataSourceAttribute.ClassProvidingDataSource ?? type;
-            
+
             var result = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy)!.Invoke(null, []) ?? Array.Empty<object>();
 
             var enumerableResult = result is not string and IEnumerable enumerable
@@ -461,7 +493,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         {
             return NoOpDataAttribute.Array;
         }
-        
+
         return dataAttributes;
     }
 

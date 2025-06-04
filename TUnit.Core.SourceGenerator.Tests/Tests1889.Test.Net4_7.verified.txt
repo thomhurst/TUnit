@@ -131,6 +131,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						{
 							Name = "condition",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -169,6 +171,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							{
 								Name = "condition",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(bool),
 							},
 						],
 						TestSessionId = sessionId,
@@ -249,6 +253,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							{
 								Name = "condition",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(bool),
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -340,6 +346,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 								{
 									Name = "condition",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(bool),
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation

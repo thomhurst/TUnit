@@ -58,6 +58,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(long),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -157,6 +159,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(long),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -256,6 +260,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							{
 								Name = "value",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(long),
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -355,6 +361,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 								{
 									Name = "value",
 									Attributes = [],
+									IsOptional = false,
+									DefaultValue = default(long),
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -454,6 +462,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 									{
 										Name = "value",
 										Attributes = [],
+										IsOptional = false,
+										DefaultValue = default(long),
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -553,6 +563,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 										{
 											Name = "value",
 											Attributes = [],
+											IsOptional = false,
+											DefaultValue = default(long),
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation

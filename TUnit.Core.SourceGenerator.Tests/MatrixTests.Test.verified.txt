@@ -47,6 +47,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute("A", "B", "C", "D")
 						],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
@@ -55,6 +57,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
@@ -63,6 +67,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(true, false)
 						],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -103,6 +109,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute("A", "B", "C", "D")
 							],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
@@ -111,6 +119,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
@@ -119,6 +129,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(true, false)
 							],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					TestSessionId = sessionId,
@@ -232,6 +244,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2)
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
@@ -240,6 +254,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
@@ -248,6 +264,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3, 4)
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
@@ -256,6 +274,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(true, false)
 						],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -296,6 +316,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(1, 2)
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
@@ -304,6 +326,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
@@ -312,6 +336,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(1, 2, 3, 4)
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
@@ -320,6 +346,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(true, false)
 							],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					TestSessionId = sessionId,
@@ -434,6 +462,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2)
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
 					{
@@ -442,11 +472,15 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(-1, global::TUnit.TestProject.TestEnum.One)
 						],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.TestEnum),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum?>
 					{
 						Name = "testEnum2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.TestEnum?),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -487,6 +521,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(1, 2)
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
 						{
@@ -495,11 +531,15 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(-1, global::TUnit.TestProject.TestEnum.One)
 							],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.TestEnum),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum?>
 						{
 							Name = "testEnum2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.TestEnum?),
 						},
 					],
 					TestSessionId = sessionId,
@@ -613,11 +653,15 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute("A", "B", "C")
 						],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "boolean",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -658,11 +702,15 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute("A", "B", "C")
 							],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "boolean",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					TestSessionId = sessionId,
@@ -775,6 +823,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute("A", "B", "C")
 						],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool?>
 					{
@@ -783,6 +833,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute()
 						],
+						IsOptional = false,
+						DefaultValue = default(bool?),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -823,6 +875,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute("A", "B", "C")
 							],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool?>
 						{
@@ -831,6 +885,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute()
 							],
+							IsOptional = false,
+							DefaultValue = default(bool?),
 						},
 					],
 					TestSessionId = sessionId,
@@ -943,6 +999,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute(global::TUnit.TestProject.TestEnum.One, Two)
 						],
+						IsOptional = false,
+						DefaultValue = default(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
@@ -951,6 +1009,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixAttribute()
 						],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -991,6 +1051,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute(global::TUnit.TestProject.TestEnum.One, Two)
 							],
+							IsOptional = false,
+							DefaultValue = default(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
@@ -999,6 +1061,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute()
 							],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					TestSessionId = sessionId,
@@ -1114,6 +1178,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven],
 }
 							],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.MatrixTests.CountToTenEnum),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
@@ -1122,6 +1188,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixAttribute()
 							],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1165,6 +1233,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 										Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven],
 }
 									],
+									IsOptional = false,
+									DefaultValue = default(global::TUnit.TestProject.MatrixTests.CountToTenEnum),
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
@@ -1173,6 +1243,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									[
 										new global::TUnit.Core.MatrixAttribute()
 									],
+									IsOptional = false,
+									DefaultValue = default(bool),
 								},
 							],
 							TestSessionId = sessionId,
@@ -1285,6 +1357,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1325,6 +1399,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					TestSessionId = sessionId,
@@ -1436,6 +1512,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ArrayMethod")
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1476,6 +1554,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ArrayMethod")
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					TestSessionId = sessionId,
@@ -1587,6 +1667,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("IntMethod")
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1627,6 +1709,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("IntMethod")
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					TestSessionId = sessionId,
@@ -1738,6 +1822,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ObjectMethod")
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1778,6 +1864,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("ObjectMethod")
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					TestSessionId = sessionId,
@@ -1892,6 +1980,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
@@ -1900,6 +1990,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
 						],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1940,6 +2032,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
@@ -1948,6 +2042,8 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new global::TUnit.Core.MatrixMethodAttribute<global::TUnit.TestProject.MatrixTests>("EnumerableMethod")
 							],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 					],
 					TestSessionId = sessionId,

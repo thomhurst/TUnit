@@ -26,14 +26,14 @@ public class TestHooksGenerator : IIncrementalGenerator
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, HookLocationType.After, false))
             .Where(static m => m is not null);
-        
+
         var beforeEveryMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.BeforeEveryAttribute",
                 predicate: static (s, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, HookLocationType.Before, true))
             .Where(static m => m is not null);
-        
+
         var afterEveryMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.AfterEveryAttribute",
@@ -54,10 +54,10 @@ public class TestHooksGenerator : IIncrementalGenerator
         {
             yield break;
         }
-        
+
         var containingType = methodSymbol.ContainingType;
         IEnumerable<INamedTypeSymbol> classTypes;
-        
+
         if (containingType.IsGenericDefinition())
         {
             classTypes = [containingType.ConstructUnboundGenericType(), ..GenericTypeHelper.GetConstructedTypes(context.SemanticModel.Compilation, containingType)];
@@ -72,7 +72,7 @@ public class TestHooksGenerator : IIncrementalGenerator
             foreach (var contextAttribute in context.Attributes)
             {
                 var hookLevel = contextAttribute.ConstructorArguments[0].ToCSharpString();
-            
+
                 yield return new HooksDataModel
                 {
                     Context = context,
@@ -199,9 +199,9 @@ public class TestHooksGenerator : IIncrementalGenerator
                 title: "Error Generating Source",
                 messageFormat: "{0}",
                 category: "SourceGenerator",
-                DiagnosticSeverity.Error,
+                DiagnosticSeverity.Warning,
                 isEnabledByDefault: true);
-                
+
             productionContext.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));
         }
     }
@@ -211,10 +211,10 @@ public class TestHooksGenerator : IIncrementalGenerator
         return hookLevel switch
         {
             "TUnit.Core.HookType.TestDiscovery" => "RegisterTestDiscoveryHookSource",
-            "TUnit.Core.HookType.TestSession" => "RegisterTestSessionHookSource", 
-            "TUnit.Core.HookType.Assembly" => "RegisterAssemblyHookSource", 
-            "TUnit.Core.HookType.Class" => "RegisterClassHookSource", 
-            "TUnit.Core.HookType.Test" => "RegisterTestHookSource", 
+            "TUnit.Core.HookType.TestSession" => "RegisterTestSessionHookSource",
+            "TUnit.Core.HookType.Assembly" => "RegisterAssemblyHookSource",
+            "TUnit.Core.HookType.Class" => "RegisterClassHookSource",
+            "TUnit.Core.HookType.Test" => "RegisterTestHookSource",
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -224,19 +224,19 @@ public class TestHooksGenerator : IIncrementalGenerator
         return hookLevel switch
         {
             "TUnit.Core.HookType.TestDiscovery" => "global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource",
-            "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource", 
-            "TUnit.Core.HookType.Assembly" => "global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource", 
-            "TUnit.Core.HookType.Class" => "global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource", 
-            "TUnit.Core.HookType.Test" => "global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource", 
+            "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource",
+            "TUnit.Core.HookType.Assembly" => "global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource",
+            "TUnit.Core.HookType.Class" => "global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource",
+            "TUnit.Core.HookType.Test" => "global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource",
             _ => throw new ArgumentOutOfRangeException()
         };
     }
-    
+
     private static string GetReturnType(string hookLevel, HookLocationType hookLocationType, bool isEvery)
     {
         return hookLevel switch
         {
-            "TUnit.Core.HookType.TestDiscovery" 
+            "TUnit.Core.HookType.TestDiscovery"
                 when hookLocationType == HookLocationType.Before => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>",
             "TUnit.Core.HookType.TestDiscovery" => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>",
             "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestSessionContext>",
@@ -247,21 +247,21 @@ public class TestHooksGenerator : IIncrementalGenerator
             _ => throw new ArgumentOutOfRangeException()
         };
     }
-    
+
     private static string GetMethodName(string hookLevel, HookLocationType hookLocationType, bool isEvery)
     {
         return hookLevel switch
         {
-            "TUnit.Core.HookType.TestDiscovery" 
+            "TUnit.Core.HookType.TestDiscovery"
                 when hookLocationType == HookLocationType.Before => "CollectBeforeTestDiscoveryHooks",
-            "TUnit.Core.HookType.TestDiscovery" 
+            "TUnit.Core.HookType.TestDiscovery"
                 when hookLocationType == HookLocationType.After => "CollectAfterTestDiscoveryHooks",
-            
-            "TUnit.Core.HookType.TestSession" 
+
+            "TUnit.Core.HookType.TestSession"
                 when hookLocationType == HookLocationType.Before => "CollectBeforeTestSessionHooks",
-            "TUnit.Core.HookType.TestSession" 
+            "TUnit.Core.HookType.TestSession"
                 when hookLocationType == HookLocationType.After => "CollectAfterTestSessionHooks",
-            
+
             "TUnit.Core.HookType.Assembly"
                 when hookLocationType == HookLocationType.Before && isEvery => "CollectBeforeEveryAssemblyHooks",
             "TUnit.Core.HookType.Assembly"
@@ -270,7 +270,7 @@ public class TestHooksGenerator : IIncrementalGenerator
                 when hookLocationType == HookLocationType.After && isEvery => "CollectAfterEveryAssemblyHooks",
             "TUnit.Core.HookType.Assembly"
                 when hookLocationType == HookLocationType.After => "CollectAfterAssemblyHooks",
-            
+
             "TUnit.Core.HookType.Class"
                 when hookLocationType == HookLocationType.Before && isEvery => "CollectBeforeEveryClassHooks",
             "TUnit.Core.HookType.Class"
@@ -279,7 +279,7 @@ public class TestHooksGenerator : IIncrementalGenerator
                 when hookLocationType == HookLocationType.After && isEvery => "CollectAfterEveryClassHooks",
             "TUnit.Core.HookType.Class"
                 when hookLocationType == HookLocationType.After => "CollectAfterClassHooks",
-            
+
             "TUnit.Core.HookType.Test"
                 when hookLocationType == HookLocationType.Before && isEvery => "CollectBeforeEveryTestHooks",
             "TUnit.Core.HookType.Test"
@@ -288,7 +288,7 @@ public class TestHooksGenerator : IIncrementalGenerator
                 when hookLocationType == HookLocationType.After && isEvery => "CollectAfterEveryTestHooks",
             "TUnit.Core.HookType.Test"
                 when hookLocationType == HookLocationType.After => "CollectAfterTestHooks",
-            
+
             _ => throw new ArgumentOutOfRangeException()
         };
     }

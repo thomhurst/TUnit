@@ -50,6 +50,8 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					{
 						Name = "someByte",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(byte?),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -145,6 +147,8 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						{
 							Name = "someByte",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(byte?),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -269,11 +273,15 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					{
 						Name = "byte1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(byte),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 					{
 						Name = "byte2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(byte?),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -370,11 +378,15 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						{
 							Name = "byte1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(byte),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 						{
 							Name = "byte2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(byte?),
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

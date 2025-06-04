@@ -44,6 +44,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -81,6 +83,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
 						},
 					],
 					TestSessionId = sessionId,
@@ -188,6 +192,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -225,6 +231,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
 						},
 					],
 					TestSessionId = sessionId,
@@ -332,6 +340,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -369,6 +379,8 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 					],
 					TestSessionId = sessionId,
@@ -476,11 +488,15 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -518,11 +534,15 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 					],
 					TestSessionId = sessionId,
@@ -633,16 +653,22 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -680,16 +706,22 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 					],
 					TestSessionId = sessionId,
@@ -801,21 +833,29 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class4",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -853,21 +893,29 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class4",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 					],
 					TestSessionId = sessionId,
@@ -980,26 +1028,36 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					{
 						Name = "class1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class3",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class4",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 					{
 						Name = "class5",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1037,26 +1095,36 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 						{
 							Name = "class1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class3",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class4",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.InitializableClass>
 						{
 							Name = "class5",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.InitializableClass),
 						},
 					],
 					TestSessionId = sessionId,

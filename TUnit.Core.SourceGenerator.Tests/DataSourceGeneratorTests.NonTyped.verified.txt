@@ -44,21 +44,29 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 					{
 						Name = "value1",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(string),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
 						Name = "value2",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(int),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<double>
 					{
 						Name = "value3",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(double),
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value4",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(bool),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AutoDataTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -93,21 +101,29 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 						{
 							Name = "value1",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(string),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value2",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(int),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<double>
 						{
 							Name = "value3",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(double),
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value4",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(bool),
 						},
 					],
 					TestSessionId = sessionId,

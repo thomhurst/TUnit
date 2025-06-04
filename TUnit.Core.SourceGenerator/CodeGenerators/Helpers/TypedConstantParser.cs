@@ -84,13 +84,18 @@ public static class TypedConstantParser
 
     private static string FormatPrimitive(TypedConstant typedConstant)
     {
-        var value = typedConstant.Value;
+        return FormatPrimitive(typedConstant.Value);
+    }
+
+    public static string FormatPrimitive(object? value)
+    {
         return value switch
         {
             string s => $"\"{s}\"",
             char c => $"'{c}'",
             bool b => b ? "true" : "false",
-            _ => value?.ToString() ?? "null"
+            null => "null",
+            _ => value.ToString() ?? "null"
         };
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 
@@ -25,16 +26,16 @@ public static class SourceInformationWriter
         {
             sourceCodeWriter.WriteLine("Parent = null,");
         }
-        
+
         sourceCodeWriter.WriteLine($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Assembly = ");
         GenerateAssemblyInformation(sourceCodeWriter, context, namedTypeSymbol.ContainingAssembly);
-        
+
         sourceCodeWriter.WriteLine($"Name = \"{namedTypeSymbol.Name}\",");
         sourceCodeWriter.WriteLine($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray());
@@ -43,7 +44,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write("Parameters = ");
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters
             ?? ImmutableArray<IParameterSymbol>.Empty;
-        
+
         if (parameters.Length == 0)
         {
             sourceCodeWriter.Write("[],");
@@ -53,7 +54,7 @@ public static class SourceInformationWriter
         {
             sourceCodeWriter.WriteLine();
             sourceCodeWriter.WriteLine("[");
-            
+
             foreach (var parameter in parameters)
             {
                 sourceCodeWriter.WriteTabs();
@@ -67,7 +68,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Properties = ");
         var properties = namedTypeSymbol.GetMembers().OfType<IPropertySymbol>().ToArray();
-        
+
         if(properties.Length == 0)
         {
             sourceCodeWriter.Write("[],");
@@ -94,11 +95,11 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine("{");
         sourceCodeWriter.WriteLine($"Name = \"{assembly.Name}\",");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, assembly.GetAttributes());
-        
+
         sourceCodeWriter.WriteLine("}),");
     }
 
@@ -113,7 +114,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteLine($"Name = \"{methodSymbol.Name}\",");
         sourceCodeWriter.WriteLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
         sourceCodeWriter.WriteLine($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, methodSymbol.GetAttributes());
@@ -121,7 +122,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Parameters = ");
         var parameters = methodSymbol.Parameters;
-        
+
         if (parameters.Length == 0)
         {
             sourceCodeWriter.Write("[],");
@@ -131,7 +132,7 @@ public static class SourceInformationWriter
         {
             sourceCodeWriter.WriteLine();
             sourceCodeWriter.WriteLine("[");
-            
+
             foreach (var parameter in parameters)
             {
                 sourceCodeWriter.WriteTabs();
@@ -141,9 +142,9 @@ public static class SourceInformationWriter
 
             sourceCodeWriter.WriteLine("],");
         }
-            
+
         sourceCodeWriter.WriteTabs();
-        
+
         sourceCodeWriter.Write("Class = ");
         GenerateClassInformation(sourceCodeWriter, context, namedTypeSymbol);
 
@@ -160,7 +161,7 @@ public static class SourceInformationWriter
             sourceCodeWriter.WriteLine();
             return;
         }
-        
+
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine("[");
 
@@ -175,7 +176,7 @@ public static class SourceInformationWriter
             sourceCodeWriter.WriteTabs();
             GenerateParameterInformation(sourceCodeWriter, context, parameter, argumentsType, null);
         }
-        
+
         sourceCodeWriter.WriteLine("],");
     }
 
@@ -214,11 +215,22 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine("{");
         sourceCodeWriter.WriteLine($"Name = \"{parameter.Name}\",");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, parameter.GetAttributes());
-        
+
+        sourceCodeWriter.WriteLine($"IsOptional = {TypedConstantParser.FormatPrimitive(parameter.IsOptional)},");
+
+        if (parameter.HasExplicitDefaultValue)
+        {
+            sourceCodeWriter.WriteLine($"DefaultValue = {TypedConstantParser.FormatPrimitive(parameter.ExplicitDefaultValue)},");
+        }
+        else
+        {
+            sourceCodeWriter.WriteLine($"DefaultValue = default({parameter.Type.GloballyQualified()}),");
+        }
+
         sourceCodeWriter.WriteLine("},");
     }
 }

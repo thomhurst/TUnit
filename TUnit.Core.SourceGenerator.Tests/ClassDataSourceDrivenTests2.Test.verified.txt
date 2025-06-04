@@ -64,6 +64,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base),
 						},
 					],
 					Properties = [],
@@ -85,6 +87,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base),
 						},
 					],
 					TestSessionId = sessionId,
@@ -183,6 +187,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base),
 							},
 						],
 						Properties = [],
@@ -204,6 +210,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base),
 							},
 						],
 						TestSessionId = sessionId,
@@ -331,6 +339,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base),
 						},
 					],
 					Properties = [],
@@ -352,6 +362,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base),
 						},
 					],
 					TestSessionId = sessionId,
@@ -450,6 +462,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base),
 							},
 						],
 						Properties = [],
@@ -471,6 +485,8 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
+								IsOptional = false,
+								DefaultValue = default(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base),
 							},
 						],
 						TestSessionId = sessionId,

@@ -44,6 +44,8 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -81,6 +83,8 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
 						},
 					],
 					TestSessionId = sessionId,
@@ -192,6 +196,8 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					{
 						Name = "value",
 						Attributes = [],
+						IsOptional = false,
+						DefaultValue = default(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -229,6 +235,8 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 						{
 							Name = "value",
 							Attributes = [],
+							IsOptional = false,
+							DefaultValue = default(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
 						},
 					],
 					TestSessionId = sessionId,
