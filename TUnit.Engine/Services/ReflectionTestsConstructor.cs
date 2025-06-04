@@ -196,14 +196,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
                     if (testMethod.ContainsGenericParameters)
                     {
-                        var testParametersTypes = testInformation.Parameters.Select(p => p.Type).ToList();
-
-                        var substitutedTypes = testMethod.GetGenericArguments()
-                            .Select(pc => testParametersTypes.FindIndex(pt => pt == pc))
-                            .Select(i => testMethodArguments[i]!.GetType())
-                            .ToArray();
-
-                        testMethod = testMethod.MakeGenericMethod(substitutedTypes);
+                        testMethod = GetRuntimeMethod(testMethod, testMethodArguments);
                     }
 
                     testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
@@ -235,6 +228,65 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
         }
+    }
+
+    private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
+    {
+        if (!methodInfo.IsGenericMethodDefinition)
+        {
+            return methodInfo;
+        }
+
+        var typeArguments = methodInfo.GetGenericArguments();
+
+        var parameters = methodInfo.GetParameters();
+
+        var argumentsTypes = arguments.Select(x => x?.GetType()).ToArray();
+
+        List<Type> substituteTypes = [];
+
+        foreach (var typeArgument in typeArguments)
+        {
+            if (!HasGenericParameter(typeArgument))
+            {
+                substituteTypes.Add(typeArgument);
+                continue;
+            }
+
+            var index = Array.IndexOf(typeArguments, typeArgument);
+
+            if (index < 0 || index >= parameters.Length)
+            {
+                throw new InvalidOperationException($"Generic type parameter '{typeArgument.Name}' not found in method parameters.");
+            }
+
+            var parameterType = parameters[index].ParameterType;
+
+            if (HasGenericParameter(parameterType))
+            {
+                // If the parameter is a generic type parameter, we use the type argument
+                substituteTypes.Add(argumentsTypes[index] ?? throw new InvalidOperationException($"No argument provided for generic type parameter '{typeArgument.Name}' at index {index}."));
+                continue;
+            }
+
+            if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                // If the parameter is a nullable type, we use the underlying type
+                substituteTypes.Add(parameterType.GetGenericArguments()[0]);
+            }
+            else
+            {
+                substituteTypes.Add(parameterType);
+            }
+        }
+
+        return methodInfo.MakeGenericMethod(substituteTypes.ToArray());
+    }
+
+    private static bool HasGenericParameter(Type parameterType)
+    {
+        return parameterType.IsGenericParameter
+            || parameterType.IsGenericType && parameterType.GenericTypeArguments.Any(HasGenericParameter);
     }
 
     private static void AppendOptionalParameters(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)

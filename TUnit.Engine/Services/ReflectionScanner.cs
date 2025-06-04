@@ -22,7 +22,7 @@ internal static class ReflectionScanner
                     return e.Types.OfType<Type>();
                 }
             })
-            .Where(x => x.Name == "MethodDataSourceDrivenTests")
+            .Where(x => x.Name == "GenericMethodTests")
             .ToHashSet();
     }
 }

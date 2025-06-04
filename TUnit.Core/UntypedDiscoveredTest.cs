@@ -7,6 +7,8 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[UnconditionalSuppressMessage("Trimming", "IL2060:Call to \'System.Reflection.MethodInfo.MakeGenericMethod\' can not be statically analyzed. It\'s not possible to guarantee the availability of requirements of the generic method.")]
+[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
 internal record UntypedDiscoveredTest(ResettableLazy<object> ResettableLazy) : DiscoveredTest
 {
     public override async ValueTask ExecuteTest(CancellationToken cancellationToken)
