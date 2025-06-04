@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Enums;
@@ -223,13 +224,19 @@ public static class SourceInformationWriter
         if(argumentsType == ArgumentsType.ClassConstructor)
         {
             sourceCodeWriter.WriteLine(
-                $"ReflectionInfo = typeof({parameter.ContainingSymbol.ContainingType.GloballyQualified()}).GetConstructors().First().GetParameters()[{parameter.Ordinal}],");
+                $"ReflectionInfo = typeof({parameter.ContainingSymbol.ContainingType.GloballyQualified()}).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)" +
+                $".First(c => c.GetParameters().Length == {((IMethodSymbol)parameter.ContainingSymbol).Parameters.Length} && c.GetParameters()[{parameter.Ordinal}].ParameterType == typeof({type})).GetParameters()[{parameter.Ordinal}],");
         }
 
         if (argumentsType == ArgumentsType.Method)
         {
+            var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
+            var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"));
+
             sourceCodeWriter.WriteLine(
-                $"ReflectionInfo = typeof({parameter.ContainingSymbol.ContainingType.GloballyQualified()}).GetMethod(\"{parameter.ContainingSymbol.Name}\").GetParameters()[{parameter.Ordinal}],");
+                $"ReflectionInfo = typeof({parameter.ContainingSymbol.ContainingType.GloballyQualified()})" +
+                $".GetMethod(\"{parameter.ContainingSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static, " +
+                $"null, new Type[] {{{parameterTypesString}}}, null).GetParameters()[{parameter.Ordinal}],");
         }
 
         sourceCodeWriter.WriteLine("},");
