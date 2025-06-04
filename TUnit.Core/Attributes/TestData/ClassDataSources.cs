@@ -6,6 +6,8 @@ using TUnit.Core.Data;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
+
 #pragma warning disable CS0618 // Type or member is obsolete
 
 namespace TUnit.Core;
@@ -237,7 +239,9 @@ internal class ClassDataSources
     private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
     {
         return ((T)Create(typeof(T), dataGeneratorMetadata))!;
-    }    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
+    }
+
+    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
     {
         try
         {
@@ -245,10 +249,16 @@ internal class ClassDataSources
 
             if (!Sources.DataGeneratorProperties.TryGetValue(instance.GetType(), out var properties))
             {
+                GlobalContext.Current.GlobalLogger.LogDebug("No Source Generated Properties found for {type.FullName}");
                 properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
             }
+            else
+            {
+                GlobalContext.Current.GlobalLogger.LogDebug($"Found Source Generated Properties for {type.FullName}");
+            }
 
-            // Fallback to reflection-based initialization for backward compatibility
+            GlobalContext.Current.GlobalLogger.LogDebug($"Properties found for {type.FullName}: {properties.Length}");
+
             InitializeDataSourceProperties(dataGeneratorMetadata, instance, properties);
 
             return instance;
@@ -277,35 +287,21 @@ internal class ClassDataSources
                 continue;
             }
 
-            var result = dataSourceGeneratorAttribute.GetType()
-                .GetMethod(nameof(DataSourceGeneratorAttribute<>.GenerateDataSources), BindingFlags.Public | BindingFlags.Instance)
-                ?.Invoke(dataSourceGeneratorAttribute, [dataGeneratorMetadata with
-                {
-                    Type = DataGeneratorType.Property,
-                    MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
-                }]);
-
-            if (result is IEnumerable enumerable)
+            var resultDelegateArray = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata with
             {
-                var enumerator = enumerable.GetEnumerator();
+                Type = DataGeneratorType.Property,
+                MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
+            });
 
-                using var enumerator1 = enumerator as IDisposable;
+            var result = resultDelegateArray.FirstOrDefault()?.Invoke()?.FirstOrDefault();
 
-                enumerator.MoveNext();
+            propertyInfo.SetValue(instance, result);
 
-                result = enumerator.Current;
-            }
-
-            if (result is Delegate @delegate)
-            {
-                result = @delegate.DynamicInvoke();
-            }            propertyInfo.SetValue(instance, result);
-
-            // Register nested dependency if this is a ClassDataSource property
             if (result is not null && dataSourceGeneratorAttribute.GetType().IsAssignableTo(typeof(IDataSourceGeneratorAttribute)))
             {
                 var sharedTypeProperty = dataSourceGeneratorAttribute.GetType()
                     .GetProperty(nameof(ClassDataSourceAttribute<object>.Shared));
+
                 var sharedType = sharedTypeProperty?.GetValue(dataSourceGeneratorAttribute) as SharedType? ?? SharedType.None;
 
                 var keyProperty = dataSourceGeneratorAttribute.GetType()
