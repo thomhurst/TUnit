@@ -45,7 +45,7 @@ namespace TUnit.Core;
 /// <seealso cref="SkipAttribute"/>
 /// <seealso cref="RunOnAttribute"/>
 /// <seealso cref="OS"/>
-public sealed class ExcludeOnAttribute(OS OperatingSystem) : SkipAttribute(GetReason(OperatingSystem))
+public sealed class ExcludeOnAttribute(OS OperatingSystem) : SkipAttribute($"This test is excluded on the following operating systems: `{OperatingSystem}`.")
 {
     /// <inheritdoc />
     public override Task<bool> ShouldSkip(BeforeTestContext context)
@@ -62,10 +62,5 @@ public sealed class ExcludeOnAttribute(OS OperatingSystem) : SkipAttribute(GetRe
 
         // Return true if the test should be skipped (if we're on an excluded OS)
         return Task.FromResult(shouldSkip);
-    }
-
-    private static string GetReason(OS operatingSystems)
-    {
-        return $"This test is excluded on the following operating systems: `{operatingSystems}`.";
     }
 }
