@@ -17,14 +17,12 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
         {
             Attributes = [],
             Name = "context",
-            IsOptional = false,
-            DefaultValue = null
+            ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }, new SourceGeneratedParameterInformation<TestContext>
         {
             Attributes = [],
             Name = "testContext",
-            IsOptional = false,
-            DefaultValue = null
+            ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),

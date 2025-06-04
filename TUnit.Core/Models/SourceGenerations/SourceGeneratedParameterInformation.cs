@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Core;
 
@@ -13,6 +14,9 @@ public record SourceGeneratedParameterInformation([DynamicallyAccessedMembers(Dy
     | DynamicallyAccessedMemberTypes.PublicMethods
     | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type Type) : SourceGeneratedMemberInformation
 {
-    public required bool IsOptional { get; set; }
-    public required object? DefaultValue { get; set; }
+    public required ParameterInfo ReflectionInfo { get; set; }
+    public bool IsParams => ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);
+    public bool IsOptional => ReflectionInfo.IsOptional;
+
+    public object? DefaultValue => ReflectionInfo.DefaultValue;
 }

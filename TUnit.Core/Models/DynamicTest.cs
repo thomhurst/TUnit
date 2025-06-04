@@ -108,13 +108,7 @@ public abstract record DynamicTest
 
     protected SourceGeneratedParameterInformation GenerateParameter(ParameterInfo parameter)
     {
-        return new SourceGeneratedParameterInformation(parameter.ParameterType)
-        {
-            Attributes = parameter.GetCustomAttributes().ToArray(),
-            Name = parameter.Name ?? string.Empty,
-            IsOptional = parameter.IsOptional,
-            DefaultValue = parameter.HasDefaultValue ? parameter.DefaultValue : null,
-        };
+        return ReflectionToSourceModelHelpers.GenerateParameter(parameter);
     }
 }
 

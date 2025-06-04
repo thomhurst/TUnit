@@ -90,8 +90,7 @@ internal class ReflectionToSourceModelHelpers
         {
             Attributes = parameter.GetCustomAttributes().ToArray(),
             Name = parameter.Name ?? string.Empty,
-            IsOptional = parameter.IsOptional,
-            DefaultValue = parameter.HasDefaultValue ? parameter.DefaultValue : null,
+            ReflectionInfo = parameter,
         };
     }
 }

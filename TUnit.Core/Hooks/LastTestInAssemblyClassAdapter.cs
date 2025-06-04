@@ -17,14 +17,12 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
         {
             Attributes = [],
             Name = "context",
-            IsOptional = false,
-            DefaultValue = null
+            ReflectionInfo = typeof(ILastTestInAssemblyEventReceiver).GetMethod(nameof(ILastTestInAssemblyEventReceiver.OnLastTestInAssembly))!.GetParameters()[0],
         }, new SourceGeneratedParameterInformation<TestContext>
         {
             Attributes = [],
             Name = "testContext",
-            IsOptional = false,
-            DefaultValue = null
+            ReflectionInfo = typeof(ILastTestInAssemblyEventReceiver).GetMethod(nameof(ILastTestInAssemblyEventReceiver.OnLastTestInAssembly))!.GetParameters()[1],
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),

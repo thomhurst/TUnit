@@ -235,26 +235,66 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
     }
 
-    private static void AppendOptionalParameters(ref object?[] testClassArguments, SourceGeneratedParameterInformation[] parameters)
+    private static void AppendOptionalParameters(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)
     {
-        if (testClassArguments.Length == parameters.Length)
+        if (arguments.Length == parameters.Length)
         {
             return;
         }
 
-        if (testClassArguments.Length < parameters.Length)
+        if(parameters.Length == 0)
         {
-            var missingParameters = parameters.Skip(testClassArguments.Length).ToArray();
+            arguments = [];
+            return;
+        }
+
+        if (arguments.Length < parameters.Length)
+        {
+            var missingParameters = parameters.Skip(arguments.Length).ToArray();
+
             if (missingParameters.All(x => x.IsOptional))
             {
-                testClassArguments = [
-                    ..testClassArguments,
+                arguments = [
+                    ..arguments,
                     ..missingParameters.Select(x => x.DefaultValue)
                 ];
                 return;
             }
 
-            throw new InvalidOperationException($"Not enough arguments provided to fulfil the parameters. Expected {parameters.Length}, but got {testClassArguments.Length}.");
+            if (parameters.LastOrDefault()?.Type == typeof(CancellationToken)
+                && arguments.LastOrDefault() is not CancellationToken)
+            {
+                // We'll add this later
+                return;
+            }
+
+            throw new InvalidOperationException($"Not enough arguments provided to fulfil the parameters. Expected {parameters.Length}, but got {arguments.Length}.");
+        }
+
+        if (arguments.Length > parameters.Length)
+        {
+            var lastParameter = parameters.Last();
+
+            if (lastParameter.IsParams)
+            {
+                var underlyingType = lastParameter.Type.GetElementType() ?? lastParameter.Type.GenericTypeArguments.FirstOrDefault();
+
+                var argumentsBeforeParams = parameters.Take(parameters.Length - 1).ToArray();
+                var argumentsAfterParams = arguments.Skip(argumentsBeforeParams.Length).ToArray();
+
+                if(arguments.All(x => x is null || x.GetType() == underlyingType))
+                {
+                    // We have a params argument, so we can just add the rest of the arguments
+                    arguments = [
+                        ..arguments,
+                        argumentsAfterParams
+                    ];
+                    return;
+                }
+
+            }
+
+            arguments = arguments.Take(parameters.Length).ToArray();
         }
     }
 
@@ -349,8 +389,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                             {
                                 Name = x.Name!,
                                 Attributes = x.GetCustomAttributes().ToArray(),
-                                IsOptional = x.IsOptional,
-                                DefaultValue = x.HasDefaultValue ? x.DefaultValue : null,
+                                ReflectionInfo = x,
                             }).ToArray<SourceGeneratedMemberInformation>(),
                         DataGeneratorType.ClassParameters => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?
                             .GetParameters()
@@ -358,8 +397,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                             {
                                 Name = x.Name!,
                                 Attributes = x.GetCustomAttributes().ToArray(),
-                                IsOptional = x.IsOptional,
-                                DefaultValue = x.HasDefaultValue ? x.DefaultValue : null,
+                                ReflectionInfo = x,
                             }).ToArray<SourceGeneratedMemberInformation>() ?? [],
                         DataGeneratorType.Property =>
                         [

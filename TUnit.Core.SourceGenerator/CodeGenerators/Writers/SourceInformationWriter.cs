@@ -220,15 +220,16 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, parameter.GetAttributes());
 
-        sourceCodeWriter.WriteLine($"IsOptional = {TypedConstantParser.FormatPrimitive(parameter.IsOptional)},");
-
-        if (parameter.HasExplicitDefaultValue)
+        if(argumentsType == ArgumentsType.ClassConstructor)
         {
-            sourceCodeWriter.WriteLine($"DefaultValue = {TypedConstantParser.FormatPrimitive(parameter.ExplicitDefaultValue)},");
+            sourceCodeWriter.WriteLine(
+                $"ReflectionInfo = typeof({parameter.ContainingSymbol.ContainingType.GloballyQualified()}).GetConstructors().First().GetParameters()[{parameter.Ordinal}],");
         }
-        else
+
+        if (argumentsType == ArgumentsType.Method)
         {
-            sourceCodeWriter.WriteLine($"DefaultValue = default({parameter.Type.GloballyQualified()}),");
+            sourceCodeWriter.WriteLine(
+                $"ReflectionInfo = typeof({parameter.ContainingSymbol.ContainingType.GloballyQualified()}).GetMethod(\"{parameter.ContainingSymbol.Name}\").GetParameters()[{parameter.Ordinal}],");
         }
 
         sourceCodeWriter.WriteLine("},");
