@@ -160,6 +160,7 @@ namespace TUnit.Core
     public sealed class ClassDataSourceAttribute<T> : TUnit.Core.DataSourceGeneratorAttribute<T>
     {
         public ClassDataSourceAttribute() { }
+        public System.Type ClassType { get; }
         public string Key { get; set; }
         public TUnit.Core.SharedType Shared { get; set; }
         public override System.Collections.Generic.IEnumerable<System.Func<T>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
@@ -770,6 +771,8 @@ namespace TUnit.Core
     {
         public SourceGeneratedPropertyInformation() { }
         public required bool IsStatic { get; init; }
+        public string? Key { get; init; }
+        public TUnit.Core.SharedType Shared { get; init; }
         public override required System.Type Type { get; init; }
     }
     public class SourceRegistrar
@@ -781,6 +784,7 @@ namespace TUnit.Core
         public static void RegisterAssemblyHookSource(TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource testSource) { }
         public static void RegisterClassHookSource(TUnit.Core.Interfaces.SourceGenerator.IClassHookSource testSource) { }
         public static void RegisterDynamic(TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource testSource) { }
+        public static void RegisterProperty<T>() { }
         public static void RegisterTestDiscoveryHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource testSource) { }
         public static void RegisterTestHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestHookSource testSource) { }
         public static void RegisterTestSessionHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource testSource) { }

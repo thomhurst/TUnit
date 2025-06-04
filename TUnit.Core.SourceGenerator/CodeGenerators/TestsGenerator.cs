@@ -128,7 +128,7 @@ public class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
                 sourceBuilder.WriteLine("public static void Initialise()");
                 sourceBuilder.WriteLine("{");
-                sourceBuilder.WriteLine($"global::TUnit.Core.Registry.Register(new {className}());");
+                sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.Register(new {className}());");
                 sourceBuilder.WriteLine("}");
 
                 sourceBuilder.WriteLine(

@@ -203,7 +203,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 #endif
 
-        return IsReflectionScannerEnabledByCommandLine(commandLineOptions) || !Registry.IsEnabled;
+        return IsReflectionScannerEnabledByCommandLine(commandLineOptions) || !SourceRegistrar.IsEnabled;
     }
 
     private static bool IsReflectionScannerEnabledByCommandLine(ICommandLineOptions commandLineOptions)

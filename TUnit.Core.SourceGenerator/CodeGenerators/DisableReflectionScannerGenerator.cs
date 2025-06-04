@@ -28,7 +28,7 @@ public class DisableReflectionScannerGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("public static void Initialize()");
         sourceBuilder.WriteLine("{");
 
-        sourceBuilder.WriteLine("global::TUnit.Core.Registry.IsEnabled = true;");
+        sourceBuilder.WriteLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
 
         sourceBuilder.WriteLine("}");
         sourceBuilder.WriteLine("}");

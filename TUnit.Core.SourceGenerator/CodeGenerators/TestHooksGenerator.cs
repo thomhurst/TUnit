@@ -134,7 +134,7 @@ public class TestHooksGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine($"var instance = new {className}();");
                 foreach (var hookLevel in distinctHookLevelsForClass)
                 {
-                    sourceBuilder.WriteLine($"Registry.{GetSourceRegisterMethodName(hookLevel)}(instance);");
+                    sourceBuilder.WriteLine($"SourceRegistrar.{GetSourceRegisterMethodName(hookLevel)}(instance);");
                 }
 
                 sourceBuilder.WriteLine("}");

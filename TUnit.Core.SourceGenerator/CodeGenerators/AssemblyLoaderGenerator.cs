@@ -79,7 +79,7 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
             return;
         }
 
-        sourceBuilder.WriteLine($"global::TUnit.Core.Registry.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
+        sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
     }
 
     private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)

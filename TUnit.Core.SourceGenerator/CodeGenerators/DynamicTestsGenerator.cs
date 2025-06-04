@@ -67,7 +67,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"global::TUnit.Core.Registry.RegisterDynamic(new {className}());");
+            sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterDynamic(new {className}());");
             sourceBuilder.WriteLine("}");
 
             sourceBuilder.WriteLine(

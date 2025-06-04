@@ -5,7 +5,7 @@ using TUnit.Core.SourceGenerator.Extensions;
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
 [Generator]
-public class PropertyInitializationGenerator : IIncrementalGenerator
+public class DataGeneratorPropertyGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -13,44 +13,59 @@ public class PropertyInitializationGenerator : IIncrementalGenerator
             .CreateSyntaxProvider(
                 predicate: static (node, _) => node is AttributeSyntax,
                 transform: GetClassesWithDataSourceProperties)
-            .Where(static m => m is not null)
+            .SelectMany(static (symbols, _) => symbols)
             .WithComparer(SymbolEqualityComparer.Default);
 
-        context.RegisterSourceOutput(classDataSourceClasses, GeneratePropertyInitializer!);
+        context.RegisterSourceOutput(classDataSourceClasses, GeneratePropertyInitializer);
     }
 
-    private static INamedTypeSymbol? GetClassesWithDataSourceProperties(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+    private static IEnumerable<INamedTypeSymbol> GetClassesWithDataSourceProperties(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
         if (context.Node is not AttributeSyntax attributeSyntax)
         {
-            return null;
+            return [];
         }
 
         var semanticModel = context.SemanticModel;
 
         if(semanticModel.GetSymbolInfo(attributeSyntax).Symbol is not IMethodSymbol attributeConstructorSymbol)
         {
-            return null;
+            return [];
         }
 
         var attributeClass = attributeConstructorSymbol.ContainingType;
 
         if (attributeClass == null)
         {
-            return null;
+            return [];
         }
 
-        if (IsDataSourceGeneratorAttribute(attributeClass, out var attributeBaseType))
+        if (!IsDataSourceGeneratorAttribute(attributeClass, out var attributeBaseType))
         {
-            return attributeBaseType;
+            return [];
         }
 
-        return null;
+        if (attributeBaseType?.IsGenericType is not true)
+        {
+            return [];
+        }
+
+        return attributeBaseType.TypeArguments
+            .Where(x => x is not ITypeParameterSymbol)
+            .OfType<INamedTypeSymbol>()
+            .Where(HasDataGeneratorProperties);
     }
 
-    private static void CollectProperties(INamedTypeSymbol? attributeBaseType)
+    private static bool HasDataGeneratorProperties(ITypeSymbol type)
     {
-        throw new NotImplementedException();
+        if (type is not INamedTypeSymbol namedTypeSymbol)
+        {
+            return false;
+        }
+
+        return namedTypeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Any(property => property.GetAttributes().Any(attr => IsDataSourceGeneratorAttribute(attr.AttributeClass, out _)));
     }
 
     private static bool IsDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass, out INamedTypeSymbol? attributeBaseType)
@@ -73,49 +88,6 @@ public class PropertyInitializationGenerator : IIncrementalGenerator
 
         attributeBaseType = null;
         return false;
-    }
-
-    private static Dictionary<string, object?> ExtractAttributeArguments(AttributeData attributeData)
-    {
-        var arguments = new Dictionary<string, object?>();
-
-        // Extract constructor arguments
-        for (int i = 0; i < attributeData.ConstructorArguments.Length; i++)
-        {
-            arguments[$"ConstructorArg{i}"] = attributeData.ConstructorArguments[i].Value;
-        }
-
-        // Extract named arguments
-        foreach (var namedArg in attributeData.NamedArguments)
-        {
-            arguments[namedArg.Key] = namedArg.Value.Value;
-        }        return arguments;
-    }
-
-    private static string ExtractSharedType(AttributeData attributeData)
-    {
-        // Look for Shared property in named arguments
-        var sharedArg = attributeData.NamedArguments.FirstOrDefault(arg => arg.Key == "Shared");
-        if (sharedArg.Key != null && sharedArg.Value.Value != null)
-        {
-            // Return the fully qualified enum value
-            return $"global::TUnit.Core.Enums.SharedType.{sharedArg.Value.Value}";
-        }
-
-        // Default to None
-        return "global::TUnit.Core.Enums.SharedType.None";
-    }
-
-    private static string? ExtractKey(AttributeData attributeData)
-    {
-        // Look for Key property in named arguments
-        var keyArg = attributeData.NamedArguments.FirstOrDefault(arg => arg.Key == "Key");
-        if (keyArg.Key != null && keyArg.Value.Value != null)
-        {
-            return $"\"{keyArg.Value.Value}\"";
-        }
-
-        return "null";
     }
 
     private void GeneratePropertyInitializer(SourceProductionContext context, INamedTypeSymbol type)
@@ -175,7 +147,7 @@ public class PropertyInitializationGenerator : IIncrementalGenerator
                 continue;
             }
 
-            sourceBuilder.WriteLine($"global::TUnit.Core.Registry.RegisterProperty<{type.GloballyQualified()}>();");
+            sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
 
             if (propertySymbol.Type is INamedTypeSymbol namedTypePropertySymbol)
             {
@@ -183,21 +155,4 @@ public class PropertyInitializationGenerator : IIncrementalGenerator
             }
         }
     }
-}
-
-public class PropertyInitializationModel
-{
-    public required string ClassName { get; init; }
-    public required string FullyQualifiedClassName { get; init; }
-    public required List<PropertyDataSourceInfo> Properties { get; init; }
-}
-
-public class PropertyDataSourceInfo
-{
-    public required string PropertyName { get; init; }
-    public required string PropertyType { get; init; }
-    public required string AttributeType { get; init; }
-    public required Dictionary<string, object?> AttributeArguments { get; init; }
-    public required string Shared { get; init; }
-    public required string? Key { get; init; }
 }

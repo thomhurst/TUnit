@@ -13,7 +13,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Provides methods to register various sources.
 /// </summary>
-public class Registry
+public class SourceRegistrar
 {
     public static bool IsEnabled { get; set; }
 
@@ -100,10 +100,10 @@ public class Registry
     /// Registers a property initializer for a specific type that takes a DataGeneratorMetadata parameter.
     /// </summary>
     /// <typeparam name="T">The type to register the initializer for.</typeparam>
-    public static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>()
+    public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>()
     {
         var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite && p.PropertyType.IsAssignableTo(typeof(IDataSourceGeneratorAttribute)))
+            .Where(p => p.CanWrite && p.IsDefined(typeof(IDataSourceGeneratorAttribute), true))
             .ToArray();
 
         if (properties.Length == 0)
