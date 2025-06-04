@@ -125,7 +125,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
                         foreach (var classInstanceArguments in GetArguments(type, testMethod, null, typeDataAttribute, DataGeneratorType.ClassParameters, () => [], testInformation, testBuilderContextAccessor))
                         {
-                            BuildTests(type, classInstanceArguments, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute, testBuilderContextAccessor);
+                            BuildTests(type, classInstanceArguments, typeDataAttribute, testMethod, testDataAttribute, testsBuilderDynamicTests, testAttribute, testBuilderContextAccessor);
                         }
                     }
                 }
@@ -145,7 +145,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         return testsBuilderDynamicTests;
     }
 
-    private static void BuildTests(Type type, Func<object?[]> classInstanceArguments, MethodInfo testMethod, IDataAttribute testDataAttribute,
+    private static void BuildTests(Type type, Func<object?[]> classInstanceArguments, IDataAttribute typeDataAttribute, MethodInfo testMethod, IDataAttribute testDataAttribute,
         List<DynamicTest> testsBuilderDynamicTests, BaseTestAttribute testAttribute, TestBuilderContextAccessor testBuilderContextAccessor)
     {
         try
@@ -171,11 +171,14 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     var propertyArgs = GetPropertyArgs(type, invokedClassInstanceArguments, testInformation, testBuilderContextAccessor)
                         .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
 
-                    AppendOptionalParameters(ref invokedClassInstanceArguments, testInformation.Class.Parameters);
+                    if (typeDataAttribute is not ClassConstructorAttribute)
+                    {
+                        MapImplicitParameters(ref invokedClassInstanceArguments, testInformation.Class.Parameters);
+                    }
 
                     var testMethodArguments = testArguments();
 
-                    AppendOptionalParameters(ref testMethodArguments, testInformation.Parameters);
+                    MapImplicitParameters(ref testMethodArguments, testInformation.Parameters);
 
                     if (type.ContainsGenericParameters)
                     {
@@ -337,7 +340,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             MapTypeParameters(underlyingParameterType, underlyingArgumentType, typeParameterMap);
         }    }
 
-    private static void AppendOptionalParameters(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)
+    private static void MapImplicitParameters(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)
     {
         if (arguments.Length == parameters.Length)
         {
