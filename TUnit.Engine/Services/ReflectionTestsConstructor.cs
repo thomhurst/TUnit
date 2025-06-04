@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.Testing.Platform.Extensions;
 using Polyfills;
 using TUnit.Core;
@@ -450,7 +451,10 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             var methodDataSourceType = instanceMethodDataSourceAttribute.ClassProvidingDataSource ?? type;
 
-            var result = methodDataSourceType.GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource)?.Invoke(instance, []);
+            var result = methodDataSourceType.GetMethod(
+                    name: instanceMethodDataSourceAttribute.MethodNameProvidingDataSource,
+                    types: instanceMethodDataSourceAttribute.Arguments.Select(x => x?.GetType() ?? typeof(object)).ToArray())
+                ?.Invoke(instance, instanceMethodDataSourceAttribute.Arguments);
 
             var enumerableResult = result is not string and IEnumerable enumerable
                 ? enumerable.Cast<object?>().ToArray()
@@ -495,7 +499,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         {
             var methodDataSourceType = methodDataSourceAttribute.ClassProvidingDataSource ?? type;
 
-            var result = methodDataSourceType.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy)!.Invoke(null, []) ?? Array.Empty<object>();
+            var result = InvokeMethodDataSource(methodDataSourceType, methodDataSourceAttribute);
 
             var enumerableResult = result is not string and IEnumerable enumerable
                 ? enumerable.Cast<object?>().ToArray()
@@ -544,6 +548,20 @@ internal class ReflectionTestsConstructor(IExtension extension,
         {
             throw new ArgumentOutOfRangeException(nameof(testDataAttribute));
         }
+    }
+
+    private static object InvokeMethodDataSource(Type methodDataSourceType, MethodDataSourceAttribute methodDataSourceAttribute)
+    {
+        var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
+
+        return methodDataSourceType.GetMethod(
+                name: methodDataSourceAttribute.MethodNameProvidingDataSource,
+                bindingAttr: bindingFlags,
+                binder: null,
+                types: methodDataSourceAttribute.Arguments.Select(x => x?.GetType() ?? typeof(object)).ToArray(),
+                modifiers: null
+            )!
+            .Invoke(null, methodDataSourceAttribute.Arguments) ?? Array.Empty<object>();
     }
 
     private static IDataAttribute[] GetDataAttributes(MemberInfo memberInfo)
