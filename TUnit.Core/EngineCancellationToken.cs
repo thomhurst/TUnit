@@ -9,12 +9,12 @@ public class EngineCancellationToken : IDisposable
     /// Gets the internal cancellation token source.
     /// </summary>
     internal CancellationTokenSource CancellationTokenSource { get; private set; } = new();
-    
+
     /// <summary>
     /// Gets the cancellation token.
     /// </summary>
     public CancellationToken Token { get; private set; }
-    
+
     /// <summary>
     /// Initializes the cancellation token with a linked token source.
     /// </summary>
@@ -23,6 +23,21 @@ public class EngineCancellationToken : IDisposable
     {
         CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         Token = CancellationTokenSource.Token;
+
+        Console.CancelKeyPress += (sender, e) =>
+        {
+            if (!CancellationTokenSource.IsCancellationRequested)
+            {
+                CancellationTokenSource.Cancel();
+                e.Cancel = true;
+            }
+
+            _ = Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(_ =>
+            {
+                Console.WriteLine("Forcefully terminating the process due to cancellation request.");
+                Environment.Exit(1);
+            });
+        };
     }
 
     /// <summary>
