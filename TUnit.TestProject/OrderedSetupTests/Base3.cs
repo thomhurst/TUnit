@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.OrderedSetupTests;
 
+[EngineTest(ExpectedResult.Pass)]
 #pragma warning disable
 public class Base3
 {

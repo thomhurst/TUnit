@@ -10,6 +10,11 @@ namespace TUnit.Core;
 /// </summary>
 public abstract class Context : IContext, IDisposable
 {
+    protected Context? Parent
+    {
+        get;
+    }
+    
     /// <summary>
     /// Gets the current context.
     /// </summary>
@@ -18,7 +23,7 @@ public abstract class Context : IContext, IDisposable
         ?? ClassHookContext.Current as Context
         ?? AssemblyHookContext.Current as Context
         ?? TestSessionContext.Current as Context
-        ?? TestDiscoveryContext.Current as Context
+        ?? TestSessionContext.Current as Context
         ?? BeforeTestDiscoveryContext.Current as Context
         ?? GlobalContext.Current;
 
@@ -35,12 +40,33 @@ public abstract class Context : IContext, IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="Context"/> class.
     /// </summary>
-    internal Context()
+    internal Context(Context? parent)
     {
+        Parent = parent;
     }
 
-    internal ExecutionContext? ExecutionContext { get; set; }
-    
+#if NET
+    internal ExecutionContext? ExecutionContext { get; private set; }
+#endif
+
+    public void RestoreExecutionContext()
+    {
+#if NET
+        RestoreContextAsyncLocal();
+        
+        Parent?.RestoreExecutionContext();
+
+        if (ExecutionContext is not null)
+        {
+            ExecutionContext.Restore(ExecutionContext);
+        }
+        
+        RestoreContextAsyncLocal();
+#endif
+    }
+
+    internal abstract void RestoreContextAsyncLocal();
+
     /// <summary>
     /// Adds async local values to the context.
     /// </summary>
@@ -49,7 +75,10 @@ public abstract class Context : IContext, IDisposable
 #if NETSTANDARD
         throw new PlatformNotSupportedException("This method is not supported in .NET Standard - Please upgrade to .NET 8+.");
 #else
-        ExecutionContext = ExecutionContext.Capture();
+        if (ExecutionContext.Capture() is {} executionContext)
+        {
+            ExecutionContext = executionContext;
+        }
 #endif
     }
     
@@ -85,6 +114,8 @@ public abstract class Context : IContext, IDisposable
     /// </summary>
     public void Dispose()
     {
+#if NET
         ExecutionContext?.Dispose();
+#endif
     }
 }

@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject.Bugs._1603;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject.Bugs._1603;
+
+[EngineTest(ExpectedResult.Pass)]
 public abstract class ParentTests<TFixture> : GrandParentTests<TFixture>
     where TFixture : BaseFixture
 {

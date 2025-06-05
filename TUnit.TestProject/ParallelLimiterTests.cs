@@ -1,7 +1,9 @@
-﻿using TUnit.TestProject.Library.Models;
+﻿using TUnit.TestProject.Attributes;
+using TUnit.TestProject.Library.Models;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [ParallelLimiter<ParallelLimit3>]
 public class ParallelLimiterTests
 {

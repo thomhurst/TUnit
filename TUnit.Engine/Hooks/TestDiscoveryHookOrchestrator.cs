@@ -1,41 +1,29 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Hooks;
-using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector, string? stringFilter)
+internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector)
 {
-    private BeforeTestDiscoveryContext? _beforeContext;
-    private TestDiscoveryContext? _afterContext;
-    
-    
-
-    public async Task<ExecutionContext?> RunBeforeTestDiscovery()
+    public async Task RunBeforeTestDiscovery(BeforeTestDiscoveryContext beforeTestDiscoveryContext)
     {
-        hooksCollector.CollectDiscoveryHooks();
-        
         var beforeDiscoveryHooks = CollectBeforeHooks();
-        var beforeContext = GetBeforeContext();
         
         foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
         {
+            beforeTestDiscoveryContext.RestoreExecutionContext();
+
             try
             {
-                await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
+                await beforeDiscoveryHook.ExecuteAsync(beforeTestDiscoveryContext, CancellationToken.None);
             }
             catch (Exception e)
             {
                 throw new HookFailedException($"Error executing [Before(TestDiscovery)] hook: {beforeDiscoveryHook.MethodInfo.Type.FullName}.{beforeDiscoveryHook.Name}", e);
             }
-            
-            ExecutionContextHelper.RestoreContext(beforeContext.ExecutionContext);
         }
-
-        return beforeContext.ExecutionContext;
     }
     
     public IEnumerable<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeHooks()
@@ -48,21 +36,5 @@ internal class TestDiscoveryHookOrchestrator(HooksCollectorBase hooksCollector, 
     {
         return hooksCollector.AfterTestDiscoveryHooks
             .OrderBy(x => x.Order);
-    }
-    
-    public BeforeTestDiscoveryContext GetBeforeContext()
-    {
-        return _beforeContext ??= new BeforeTestDiscoveryContext
-        {
-            TestFilter = stringFilter
-        };
-    }
-
-    public TestDiscoveryContext GetAfterContext(IEnumerable<DiscoveredTest> discoveredTests)
-    {
-        return _afterContext ??= new TestDiscoveryContext(discoveredTests)
-        {
-            TestFilter = stringFilter
-        };
     }
 }

@@ -48,6 +48,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -61,23 +62,29 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					}),
 					Name = "DataSourceGeneratorTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -99,16 +106,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -135,6 +145,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -177,7 +188,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method(methodArgGeneratedData)),
 							TestFilePath = @"",
-							TestLineNumber = 9,
+							TestLineNumber = 12,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -195,7 +206,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					MethodName = $"GeneratedData_Method",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 9,
+					TestLineNumber = 12,
 				});
 			}
 			return nodes;
@@ -223,6 +234,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -236,23 +248,29 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						}),
 						Name = "DataSourceGeneratorTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -274,16 +292,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -310,6 +331,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								{
 									Name = "value",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							TestSessionId = sessionId,
@@ -352,7 +374,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								ResettableClassFactory = resettableClassFactory,
 								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method(methodArgGeneratedData)),
 								TestFilePath = @"",
-								TestLineNumber = 9,
+								TestLineNumber = 12,
 								TestMethod = testInformation,
 								TestBuilderContext = testBuilderContext,
 							});
@@ -370,7 +392,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						MethodName = $"GeneratedData_Method",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 9,
+						TestLineNumber = 12,
 					});
 				}
 				return nodes;
@@ -427,16 +449,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -450,23 +475,29 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					}),
 					Name = "DataSourceGeneratorTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -488,16 +519,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -524,16 +558,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -580,7 +617,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method2(methodArg, methodArg1, methodArg2)),
 							TestFilePath = @"",
-							TestLineNumber = 17,
+							TestLineNumber = 20,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -598,7 +635,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					MethodName = $"GeneratedData_Method2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 17,
+					TestLineNumber = 20,
 				});
 			}
 			return nodes;
@@ -626,16 +663,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -649,23 +689,29 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						}),
 						Name = "DataSourceGeneratorTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -687,16 +733,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -723,16 +772,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								{
 									Name = "value",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "value2",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
 									Name = "value3",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							TestSessionId = sessionId,
@@ -779,7 +831,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								ResettableClassFactory = resettableClassFactory,
 								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method2(methodArg, methodArg1, methodArg2)),
 								TestFilePath = @"",
-								TestLineNumber = 17,
+								TestLineNumber = 20,
 								TestMethod = testInformation,
 								TestBuilderContext = testBuilderContext,
 							});
@@ -797,7 +849,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						MethodName = $"GeneratedData_Method2",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 17,
+						TestLineNumber = 20,
 					});
 				}
 				return nodes;
@@ -854,16 +906,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -877,23 +932,29 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					}),
 					Name = "DataSourceGeneratorTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -915,16 +976,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -951,16 +1015,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -1007,7 +1074,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method3(methodArg, methodArg1, methodArg2)),
 							TestFilePath = @"",
-							TestLineNumber = 25,
+							TestLineNumber = 27,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -1025,7 +1092,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					MethodName = $"GeneratedData_Method3",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 25,
+					TestLineNumber = 27,
 				});
 			}
 			return nodes;
@@ -1053,16 +1120,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1076,23 +1146,29 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						}),
 						Name = "DataSourceGeneratorTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -1114,16 +1190,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -1150,16 +1229,19 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								{
 									Name = "value",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "value2",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
 									Name = "value3",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							TestSessionId = sessionId,
@@ -1206,7 +1288,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 								ResettableClassFactory = resettableClassFactory,
 								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method3(methodArg, methodArg1, methodArg2)),
 								TestFilePath = @"",
-								TestLineNumber = 25,
+								TestLineNumber = 27,
 								TestMethod = testInformation,
 								TestBuilderContext = testBuilderContext,
 							});
@@ -1224,7 +1306,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 						MethodName = $"GeneratedData_Method3",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 25,
+						TestLineNumber = 27,
 					});
 				}
 				return nodes;

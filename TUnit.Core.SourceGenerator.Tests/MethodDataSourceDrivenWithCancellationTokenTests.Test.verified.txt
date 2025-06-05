@@ -58,11 +58,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -78,6 +80,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
+						new EngineTest(Pass),
 						new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 					],
 					Parameters = [],
@@ -111,7 +114,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodArg, cancellationToken)),
 					TestFilePath = @"",
-					TestLineNumber = 10,
+					TestLineNumber = 12,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -127,7 +130,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					MethodName = $"MyTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 10,
+					TestLineNumber = 12,
 				});
 			}
 			return nodes;
@@ -161,11 +164,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 						{
 							Name = "cancellationToken",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -181,6 +186,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						Namespace = "TUnit.TestProject",
 						Attributes = 
 						[
+							new EngineTest(Pass),
 							new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 						],
 						Parameters = [],
@@ -214,7 +220,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodArg, cancellationToken)),
 						TestFilePath = @"",
-						TestLineNumber = 10,
+						TestLineNumber = 12,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -230,7 +236,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 						MethodName = $"MyTest",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 10,
+						TestLineNumber = 12,
 					});
 				}
 				return nodes;
@@ -264,11 +270,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 							{
 								Name = "cancellationToken",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -284,6 +292,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							Namespace = "TUnit.TestProject",
 							Attributes = 
 							[
+								new EngineTest(Pass),
 								new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 							],
 							Parameters = [],
@@ -320,7 +329,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								ResettableClassFactory = resettableClassFactory,
 								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
 								TestFilePath = @"",
-								TestLineNumber = 10,
+								TestLineNumber = 12,
 								TestMethod = testInformation,
 								TestBuilderContext = testBuilderContext,
 							});
@@ -337,7 +346,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 							MethodName = $"MyTest",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 							TestFilePath = @"",
-							TestLineNumber = 10,
+							TestLineNumber = 12,
 						});
 					}
 					return nodes;
@@ -371,11 +380,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								{
 									Name = "value",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 								{
 									Name = "cancellationToken",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -391,6 +402,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								Namespace = "TUnit.TestProject",
 								Attributes = 
 								[
+									new EngineTest(Pass),
 									new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 								],
 								Parameters = [],
@@ -427,7 +439,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									ResettableClassFactory = resettableClassFactory,
 									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
 									TestFilePath = @"",
-									TestLineNumber = 10,
+									TestLineNumber = 12,
 									TestMethod = testInformation,
 									TestBuilderContext = testBuilderContext,
 								});
@@ -444,7 +456,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 								MethodName = $"MyTest",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 								TestFilePath = @"",
-								TestLineNumber = 10,
+								TestLineNumber = 12,
 							});
 						}
 						return nodes;
@@ -478,11 +490,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									{
 										Name = "value",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 									{
 										Name = "cancellationToken",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -498,6 +512,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									Namespace = "TUnit.TestProject",
 									Attributes = 
 									[
+										new EngineTest(Pass),
 										new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 									],
 									Parameters = [],
@@ -534,7 +549,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 										ResettableClassFactory = resettableClassFactory,
 										TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
 										TestFilePath = @"",
-										TestLineNumber = 10,
+										TestLineNumber = 12,
 										TestMethod = testInformation,
 										TestBuilderContext = testBuilderContext,
 									});
@@ -551,7 +566,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 									MethodName = $"MyTest",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 									TestFilePath = @"",
-									TestLineNumber = 10,
+									TestLineNumber = 12,
 								});
 							}
 							return nodes;
@@ -585,11 +600,13 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 										{
 											Name = "value",
 											Attributes = [],
+											ReflectionInfo = null!,
 										},
 										new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 										{
 											Name = "cancellationToken",
 											Attributes = [],
+											ReflectionInfo = null!,
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -605,6 +622,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 										Namespace = "TUnit.TestProject",
 										Attributes = 
 										[
+											new EngineTest(Pass),
 											new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
 										],
 										Parameters = [],
@@ -641,7 +659,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 											ResettableClassFactory = resettableClassFactory,
 											TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
 											TestFilePath = @"",
-											TestLineNumber = 10,
+											TestLineNumber = 12,
 											TestMethod = testInformation,
 											TestBuilderContext = testBuilderContext,
 										});
@@ -658,7 +676,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 										MethodName = $"MyTest",
 										Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
 										TestFilePath = @"",
-										TestLineNumber = 10,
+										TestLineNumber = 12,
 									});
 								}
 								return nodes;

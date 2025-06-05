@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject;
+
+[EngineTest(ExpectedResult.Failure)]
 public class DependsOnTestsWithoutProceedOnFailure
 {
     [Test]

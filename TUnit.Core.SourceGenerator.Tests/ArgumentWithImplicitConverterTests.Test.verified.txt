@@ -52,6 +52,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					{
 						Name = "integer",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -145,6 +146,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						{
 							Name = "integer",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -238,6 +240,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 							{
 								Name = "integer",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -361,6 +364,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					{
 						Name = "integer",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -454,6 +458,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 						{
 							Name = "integer",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -547,6 +552,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 							{
 								Name = "integer",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation

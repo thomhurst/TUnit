@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject.ClassDataSourceDisposal;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject.ClassDataSourceDisposal;
+
+[EngineTest(ExpectedResult.Pass)]
 public class ReproFixtureBase : IDisposable
 {
     public ReproFixtureBase()

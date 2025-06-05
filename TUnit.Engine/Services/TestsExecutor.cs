@@ -8,7 +8,6 @@ using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Engine.CommandLineProviders;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
@@ -112,9 +111,13 @@ internal class TestsExecutor
             {
                 if (test.TestContext.SkipReason == null)
                 {
-                    ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                    await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext);
+                    
+                    test.TestContext.AssemblyContext.RestoreExecutionContext();
 
-                    ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                    await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext);
+                    
+                    test.TestContext.ClassContext.RestoreExecutionContext();
                 }
 
                 await ProcessTest(test, filter, cancellationToken);
@@ -142,9 +145,13 @@ internal class TestsExecutor
         {
             if (test.TestContext.SkipReason == null)
             {
-                ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext);
 
-                ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                test.TestContext.AssemblyContext.RestoreExecutionContext();
+
+                await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext);
+                
+                test.TestContext.ClassContext.RestoreExecutionContext();
             }
 
             await ProcessTest(test, filter, token);
@@ -155,9 +162,13 @@ internal class TestsExecutor
             {
                 if (test.TestContext.SkipReason != null)
                 {
-                    ExecutionContextHelper.RestoreContext(await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext));
+                    await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext);
 
-                    ExecutionContextHelper.RestoreContext(await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext));
+                    test.TestContext.AssemblyContext.RestoreExecutionContext();
+                    
+                    await _classHookOrchestrator.ExecuteBeforeClassHooks(test.TestContext);
+                    
+                    test.TestContext.ClassContext.RestoreExecutionContext();
                 }
 
                 await ProcessTest(test, filter, cancellationToken);

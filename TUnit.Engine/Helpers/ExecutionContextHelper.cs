@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 
 namespace TUnit.Engine.Helpers;
@@ -6,13 +8,10 @@ namespace TUnit.Engine.Helpers;
 internal static class ExecutionContextHelper
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RestoreContext(Context context) => RestoreContext(context.ExecutionContext);
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RestoreContext(ExecutionContext? executionContext)
+    public static void RestoreContexts(ExecutionContext[] executionContexts)
     {
 #if NET
-        if (executionContext != null)
+        foreach (var executionContext in executionContexts)
         {
             ExecutionContext.Restore(executionContext);
         }

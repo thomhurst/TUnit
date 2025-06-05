@@ -14,27 +14,27 @@ public abstract record DynamicTest
     public string? TestName { get; init; }
 
     internal abstract MethodInfo TestBody { get; }
-    
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
-                                | DynamicallyAccessedMemberTypes.PublicMethods 
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+                                | DynamicallyAccessedMemberTypes.PublicMethods
                                 | DynamicallyAccessedMemberTypes.NonPublicMethods
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public abstract Type TestClassType { get; }
-    
+
     public object?[]? TestClassArguments { get; init; }
     public required object?[] TestMethodArguments { get; init; }
-    
+
     public Dictionary<string, object?>? Properties { get; init; }
-    
+
     public abstract IEnumerable<TestMetadata> BuildTestMetadatas();
-    
+
     internal string TestFilePath { get; init; } = string.Empty;
     internal int TestLineNumber { get; init; } = 0;
-    
+
     internal Exception? Exception { get; set; }
 
     public Attribute[] Attributes { get; init; } = [];
-    
+
     public Attribute[] GetAttributes()
     {
         return
@@ -45,9 +45,9 @@ public abstract record DynamicTest
             ..TestClassType.Assembly.GetCustomAttributes()
         ];
     }
-    
+
     public static T Argument<T>() => default!;
-    
+
     protected SourceGeneratedMethodInformation BuildTestMethod(MethodInfo methodInfo)
     {
         return new SourceGeneratedMethodInformation
@@ -108,18 +108,14 @@ public abstract record DynamicTest
 
     protected SourceGeneratedParameterInformation GenerateParameter(ParameterInfo parameter)
     {
-        return new SourceGeneratedParameterInformation(parameter.ParameterType)
-        {
-            Attributes = parameter.GetCustomAttributes().ToArray(),
-            Name = parameter.Name ?? string.Empty,
-        };
+        return ReflectionToSourceModelHelpers.GenerateParameter(parameter);
     }
 }
 
 [RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
 public record DynamicTest<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
                                 | DynamicallyAccessedMemberTypes.PublicMethods
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     TClass> : DynamicTest where TClass : class
@@ -132,22 +128,22 @@ public record DynamicTest<
     {
         _dynamicTestCounter = Interlocked.Increment(ref _dynamicTestCounter);
     }
-    
+
     public override string TestId => $"DynamicTest-{typeof(TClass).FullName}-{TestBody.Name}-{_dynamicTestCounter}";
 
     public required Expression<Action<TClass>> TestMethod { get; init; }
     internal override MethodInfo TestBody => GetMethodInfo(TestMethod);
-    
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
-                                | DynamicallyAccessedMemberTypes.PublicMethods 
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+                                | DynamicallyAccessedMemberTypes.PublicMethods
                                 | DynamicallyAccessedMemberTypes.NonPublicMethods
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType { get; } = typeof(TClass);
-    
+
     public override IEnumerable<TestMetadata> BuildTestMetadatas()
     {
         var attributes = GetAttributes();
-        
+
         var repeatLimit = attributes.OfType<RepeatAttribute>()
             .FirstOrDefault()
             ?.Times ?? 0;
@@ -157,7 +153,7 @@ public record DynamicTest<
             var testBuilderContext = new TestBuilderContext();
 
             var sourceGeneratedMethodInformation = BuildTestMethod(TestBody);
-            
+
             yield return new TestMetadata<TClass>
             {
                 TestId = $"{TestId}-{i}",
@@ -197,7 +193,7 @@ public record DynamicTest<
         {
             return methodCallExpression.Method;
         }
-        
+
         throw new InvalidOperationException($"A method call expression was not passed to the TestMethod property. Received: {expression.Body.GetType()}.");
     }
 
@@ -205,7 +201,7 @@ public record DynamicTest<
     {
         public Action<TClass>? SynchronousBody { get; init; }
         public Func<TClass, Task>? TaskBody { get; init; }
-        
+
         public static implicit operator MethodBody(Action<TClass> action)
         {
             return new MethodBody
@@ -213,7 +209,7 @@ public record DynamicTest<
                 SynchronousBody = action
             };
         }
-        
+
         public static implicit operator MethodBody(Func<TClass, Task> taskBody)
         {
             return new MethodBody

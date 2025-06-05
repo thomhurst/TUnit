@@ -1,3 +1,9 @@
-﻿namespace TUnit.TestProject;
+﻿using System.Diagnostics;
 
-public class DummyReferenceTypeClass;
+namespace TUnit.TestProject;
+
+[DebuggerDisplay("{Id}")]
+public class DummyReferenceTypeClass
+{
+    public string Id { get; } = Guid.NewGuid().ToString();
+}

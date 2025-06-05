@@ -45,6 +45,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -58,13 +59,17 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._1821",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1821.MyData>
 						{
 							Name = "data",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -86,6 +91,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -128,7 +134,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MethodDataSource(methodData)),
 							TestFilePath = @"",
-							TestLineNumber = 9,
+							TestLineNumber = 11,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -146,7 +152,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					MethodName = $"MethodDataSource",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.MethodDataSource failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 9,
+					TestLineNumber = 11,
 				});
 			}
 			return nodes;
@@ -202,6 +208,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						[
 							new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
 						],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -215,13 +222,17 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._1821",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1821.MyData>
 						{
 							Name = "data",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -243,6 +254,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						{
 							Name = "data",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -280,6 +292,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 								[
 									new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
 								],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -312,7 +325,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixDataSource(methodArg)),
 							TestFilePath = @"",
-							TestLineNumber = 16,
+							TestLineNumber = 18,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -330,7 +343,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					MethodName = $"MatrixDataSource",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.MatrixDataSource failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 16,
+					TestLineNumber = 18,
 				});
 			}
 			return nodes;

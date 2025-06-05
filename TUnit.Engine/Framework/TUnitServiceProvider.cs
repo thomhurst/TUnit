@@ -35,6 +35,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitFrameworkLogger Logger { get; }
     public TUnitMessageBus TUnitMessageBus { get; }
 
+    public ContextManager ContextManager { get; }
+
     public HooksCollectorBase HooksCollector { get; set; }
     public TUnitInitializer Initializer { get; }
     public StandardOutConsoleInterceptor StandardOutConsoleInterceptor { get; }
@@ -54,37 +56,39 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
         IMessageBus messageBus,
-        IServiceProvider frameworkServiceProvider, 
+        IServiceProvider frameworkServiceProvider,
         ITestFrameworkCapabilities capabilities)
     {
         _capabilities = capabilities;
-        
+
         Register(context);
-        
+
         EngineCancellationToken = Register(new EngineCancellationToken());
-        
+
         LoggerFactory = frameworkServiceProvider.GetLoggerFactory();
-        
+
         OutputDevice = frameworkServiceProvider.GetOutputDevice();
-        
+
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
 
         Logger = Register(new TUnitFrameworkLogger(extension, OutputDevice, LoggerFactory.CreateLogger<TUnitFrameworkLogger>(), CommandLineOptions));
-        
+
         Initializer = Register(new TUnitInitializer(CommandLineOptions));
-        
+
         StandardOutConsoleInterceptor = Register(new StandardOutConsoleInterceptor(CommandLineOptions));
-        
+
         StandardErrorConsoleInterceptor = Register(new StandardErrorConsoleInterceptor(CommandLineOptions));
 
         FilterParser = Register(new FilterParser());
 
         var stringFilter = FilterParser.GetTestFilter(context);
 
+        ContextManager = new ContextManager(context.Request.Session.SessionUid.Value, stringFilter);
+
         TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, context));
 
         var instanceTracker = Register(new InstanceTracker());
-        
+
         var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions);
 
         HooksCollector = Register<HooksCollectorBase>
@@ -95,51 +99,52 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         );
 
         var dependencyCollector = new DependencyCollector();
-        
+
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
 
         var testsConstructor = Register<BaseTestsConstructor>
         (
             isReflectionScannerEnabled
-                ? new ReflectionTestsConstructor(extension, dependencyCollector, this)
-                : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, this)
+                ? new ReflectionTestsConstructor(extension, dependencyCollector, ContextManager, this)
+                : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, ContextManager, this)
         );
-        
-        var testFilterService = Register(new TestFilterService(LoggerFactory));
-        
-        TestGrouper = Register(new TestGrouper());
-        
-        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector));
 
-        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector, stringFilter));
-        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector, AssemblyHookOrchestrator, stringFilter));
-        
+        var testFilterService = Register(new TestFilterService(LoggerFactory));
+
+        TestGrouper = Register(new TestGrouper());
+
+        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector));
+
+        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector, ContextManager, TestSessionHookOrchestrator));
+
+        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector));
+
         var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, HooksCollector));
-        
+
         var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector));
 
-        var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
-        
+        var testRegistrar = Register(new TestRegistrar(instanceTracker));
+
         Disposer = Register(new Disposer(Logger));
-        
+
         var testInvoker = Register(new TestInvoker(testHookOrchestrator, Disposer));
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
-        
+
         var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar, GetCapability<StopExecutionCapability>()));
-        
+
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken, AssemblyHookOrchestrator, classHookOrchestrator));
-        
+
         TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor));
 
         DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(testsConstructor, testRegistrar,
             TestGrouper, TUnitMessageBus, TestsExecutor, EngineCancellationToken));
-        
+
         TestFinder = Register(new TestsFinder(TestDiscoverer));
         Register<ITestFinder>(TestFinder);
-        
+
         // TODO
         Register(new HookMessagePublisher(extension, messageBus));
-        
+
         OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }
 
@@ -166,7 +171,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     private T Register<T>(T t)
     {
         _services.Add(typeof(T), t!);
-        
+
         return t;
     }
 
@@ -175,7 +180,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         _services.TryGetValue(serviceType, out object? result);
         return result;
     }
-    
+
     public TCapability GetCapability<TCapability>()
         where TCapability : class, ITestFrameworkCapability
     {
@@ -185,10 +190,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         {
             throw new InvalidOperationException($"No capability registered for {typeof(TCapability).Name}");
         }
-        
+
         return capability;
     }
-    
+
     private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions)
     {
 #if NET

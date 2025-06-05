@@ -45,6 +45,7 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -58,7 +59,10 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 					}),
 					Name = "ConstantInBaseClassTests",
 					Namespace = "TUnit.TestProject.Bugs._1432",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -91,7 +95,7 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 13,
+					TestLineNumber = 15,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -107,7 +111,7 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 					MethodName = $"SomeTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantInBaseClassTests.SomeTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 13,
+					TestLineNumber = 15,
 				});
 			}
 			return nodes;

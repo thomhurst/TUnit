@@ -1,9 +1,12 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.TestProject.Attributes;
+
+namespace TUnit.TestProject;
 
 public class PassFailTests
 {
     [Test]
     [Category("Pass")]
+    [EngineTest(ExpectedResult.Pass)]
     public void Pass1()
     {
         // Dummy method
@@ -16,6 +19,7 @@ public class PassFailTests
     [Arguments(4)]
     [Arguments(5)]
     [Category("Pass")]
+    [EngineTest(ExpectedResult.Pass)]
     public void Pass2(int value)
     {
         // Dummy method
@@ -30,6 +34,7 @@ public class PassFailTests
     [MethodDataSource(nameof(EnumerableData1))]
     [MethodDataSource(nameof(EnumerableData2))]
     [MethodDataSource(nameof(EnumerableData3))]
+    [EngineTest(ExpectedResult.Pass)]
     [Category("Pass")]
     public void Pass3(int value)
     {
@@ -39,6 +44,7 @@ public class PassFailTests
     [Test]
     [MatrixDataSource]
     [Category("Pass")]
+    [EngineTest(ExpectedResult.Pass)]
     public void Pass4(
         [Matrix(1, 2, 3, 4, 5)] int value,
         [Matrix(1, 2, 3, 4)] int value2,
@@ -49,6 +55,7 @@ public class PassFailTests
 
     [Test]
     [Category("Fail")]
+    [EngineTest(ExpectedResult.Failure)]
     public void Fail1()
     {
         throw new Exception();
@@ -61,6 +68,7 @@ public class PassFailTests
     [Arguments(4)]
     [Arguments(5)]
     [Category("Fail")]
+    [EngineTest(ExpectedResult.Failure)]
     public void Fail2(int value)
     {
         throw new Exception();
@@ -76,6 +84,7 @@ public class PassFailTests
     [MethodDataSource(nameof(EnumerableData2))]
     [MethodDataSource(nameof(EnumerableData3))]
     [Category("Fail")]
+    [EngineTest(ExpectedResult.Failure)]
     public void Fail3(int value)
     {
         throw new Exception();
@@ -84,6 +93,7 @@ public class PassFailTests
     [Test]
     [MatrixDataSource]
     [Category("Fail")]
+    [EngineTest(ExpectedResult.Failure)]
     public void Fail4(
         [Matrix(1, 2, 3, 4, 5)] int value,
         [Matrix(1, 2, 3, 4)] int value2,

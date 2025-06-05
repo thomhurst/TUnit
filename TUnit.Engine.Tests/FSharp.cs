@@ -14,7 +14,7 @@ public class FSharp
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject_FSharp;
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        var result = await Cli.Wrap("dotnet")
+        var command = Cli.Wrap("dotnet")
             .WithArguments(
                 [
                     "run",
@@ -31,10 +31,11 @@ public class FSharp
                 ]
             )
             .WithWorkingDirectory(testProject.DirectoryName!)
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+            .WithValidation(CommandResultValidation.None);
+        
+        var result = await command.ExecuteBufferedAsync();
 
-        await TrxAsserter.AssertTrx(result, 
+        await TrxAsserter.AssertTrx(command, result, 
             
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),

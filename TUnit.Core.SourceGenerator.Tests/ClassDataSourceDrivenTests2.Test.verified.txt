@@ -54,13 +54,17 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					}),
 					Name = "ClassDataSourceDrivenTests2",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
 						{
 							Name = "base",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -82,6 +86,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -119,7 +124,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Base_Derived1()),
 						TestFilePath = @"",
-						TestLineNumber = 9,
+						TestLineNumber = 12,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -136,7 +141,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					MethodName = $"Base_Derived1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived1 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 9,
+					TestLineNumber = 12,
 				});
 			}
 			return nodes;
@@ -170,13 +175,17 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						}),
 						Name = "ClassDataSourceDrivenTests2",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
 							{
 								Name = "base",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -198,6 +207,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -235,7 +245,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Base_Derived1()),
 							TestFilePath = @"",
-							TestLineNumber = 9,
+							TestLineNumber = 12,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -252,7 +262,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						MethodName = $"Base_Derived1",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived1 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 9,
+						TestLineNumber = 12,
 					});
 				}
 				return nodes;
@@ -315,13 +325,17 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					}),
 					Name = "ClassDataSourceDrivenTests2",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = 
 					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
 						{
 							Name = "base",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -343,6 +357,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						{
 							Name = "base",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -380,7 +395,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Base_Derived2()),
 						TestFilePath = @"",
-						TestLineNumber = 15,
+						TestLineNumber = 18,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -397,7 +412,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					MethodName = $"Base_Derived2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived2 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 15,
+					TestLineNumber = 18,
 				});
 			}
 			return nodes;
@@ -431,13 +446,17 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						}),
 						Name = "ClassDataSourceDrivenTests2",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
 							{
 								Name = "base",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -459,6 +478,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							{
 								Name = "base",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -496,7 +516,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Base_Derived2()),
 							TestFilePath = @"",
-							TestLineNumber = 15,
+							TestLineNumber = 18,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -513,7 +533,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 						MethodName = $"Base_Derived2",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests2.Base_Derived2 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 15,
+						TestLineNumber = 18,
 					});
 				}
 				return nodes;

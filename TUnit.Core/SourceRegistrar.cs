@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces.SourceGenerator;
@@ -15,7 +16,7 @@ namespace TUnit.Core;
 public class SourceRegistrar
 {
     public static bool IsEnabled { get; set; }
-    
+
     /// <summary>
     /// Registers an assembly loader.
     /// </summary>
@@ -27,11 +28,11 @@ public class SourceRegistrar
         {
             return;
         }
-#endif 
-        
+#endif
+
         Sources.AssemblyLoaders.Enqueue(assemblyLoader);
     }
-    
+
     /// <summary>
     /// Registers a test source.
     /// </summary>
@@ -40,7 +41,7 @@ public class SourceRegistrar
     {
         Sources.TestSources.Enqueue(testSource);
     }
-    
+
     /// <summary>
     /// Registers a test source.
     /// </summary>
@@ -93,5 +94,23 @@ public class SourceRegistrar
     public static void RegisterTestDiscoveryHookSource(ITestDiscoveryHookSource testSource)
     {
         Sources.TestDiscoveryHookSources.Enqueue(testSource);
+    }
+
+    /// <summary>
+    /// Registers a property initializer for a specific type that takes a DataGeneratorMetadata parameter.
+    /// </summary>
+    /// <typeparam name="T">The type to register the initializer for.</typeparam>
+    public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
+    {
+        var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+            .Where(p => p.CanWrite && p.IsDefined(typeof(IDataSourceGeneratorAttribute), true))
+            .ToArray();
+
+        if (properties.Length == 0)
+        {
+            return;
+        }
+
+        Sources.DataGeneratorProperties.TryAdd(typeof(T), properties);
     }
 }

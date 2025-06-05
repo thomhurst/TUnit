@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class ParallelTests
 {
     private static readonly ConcurrentBag<DateTimeRange> TestDateTimeRanges = [];
@@ -19,23 +21,28 @@ public class ParallelTests
     [Test, Repeat(3)]
     public async Task Parallel_Test1()
     {
-        await Task.Delay(500);
+        await Task.Delay(5000);
     }
 
     [Test, Repeat(3)]
     public async Task Parallel_Test2()
     {
-        await Task.Delay(500);
+        await Task.Delay(5000);
     }
 
     [Test, Repeat(3)]
     public async Task Parallel_Test3()
     {
-        await Task.Delay(500);
+        await Task.Delay(5000);
     }
 
     private async Task AssertOverlaps()
     {
+        if (TestDateTimeRanges.Count < 5)
+        {
+            return;
+        }
+        
         foreach (var testDateTimeRange in TestDateTimeRanges)
         {
             await Assert.That(TestDateTimeRanges

@@ -1,8 +1,10 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1603;
 
+[EngineTest(ExpectedResult.Pass)]
 public class Tests
 {
     [Test]

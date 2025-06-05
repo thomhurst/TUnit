@@ -1,7 +1,9 @@
 ﻿using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._2449;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<SampleDataClass>]
 public sealed class Tests(SampleDataClass arg)
 {

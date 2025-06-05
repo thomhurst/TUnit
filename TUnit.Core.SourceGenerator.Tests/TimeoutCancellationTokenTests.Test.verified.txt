@@ -36,7 +36,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
-					new global::TUnit.Core.TestAttribute()
+					new global::TUnit.Core.TestAttribute(),
+					new EngineTest(Pass)
 				],
 				Parameters = 
 				[
@@ -44,6 +45,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -68,6 +70,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -100,7 +103,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DefaultTest(cancellationToken)),
 					TestFilePath = @"",
-					TestLineNumber = 15,
+					TestLineNumber = 16,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -116,7 +119,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					MethodName = $"DefaultTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DefaultTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 15,
+					TestLineNumber = 16,
 				});
 			}
 			return nodes;
@@ -163,7 +166,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				[
 					new global::TUnit.Core.TestAttribute(),
 					new global::TUnit.Core.TimeoutAttribute(5_000),
-					new global::TUnit.Core.CategoryAttribute("Blah")
+					new global::TUnit.Core.CategoryAttribute("Blah"),
+					new EngineTest(Failure)
 				],
 				Parameters = 
 				[
@@ -171,6 +175,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -195,6 +200,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -227,7 +233,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.BasicTest(cancellationToken)),
 					TestFilePath = @"",
-					TestLineNumber = 21,
+					TestLineNumber = 23,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -243,7 +249,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					MethodName = $"BasicTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.BasicTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 21,
+					TestLineNumber = 23,
 				});
 			}
 			return nodes;
@@ -289,7 +295,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				Attributes = 
 				[
 					new global::TUnit.Core.TestAttribute(),
-					new global::TUnit.TestProject.TimeoutCancellationTokenTests.FiveSecondTimeout()
+					new global::TUnit.TestProject.TimeoutCancellationTokenTests.FiveSecondTimeout(),
+					new EngineTest(Failure)
 				],
 				Parameters = 
 				[
@@ -297,6 +304,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -321,6 +329,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -353,7 +362,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.InheritedTimeoutAttribute(cancellationToken)),
 					TestFilePath = @"",
-					TestLineNumber = 29,
+					TestLineNumber = 32,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -369,7 +378,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					MethodName = $"InheritedTimeoutAttribute",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.InheritedTimeoutAttribute failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 29,
+					TestLineNumber = 32,
 				});
 			}
 			return nodes;
@@ -416,7 +425,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				[
 					new global::TUnit.Core.TestAttribute(),
 					new global::TUnit.Core.ArgumentsAttribute(1),
-					new global::TUnit.Core.TimeoutAttribute(5_000)
+					new global::TUnit.Core.TimeoutAttribute(5_000),
+					new EngineTest(Failure)
 				],
 				Parameters = 
 				[
@@ -424,11 +434,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -453,6 +465,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -487,7 +500,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataTest(methodArg, cancellationToken)),
 					TestFilePath = @"",
-					TestLineNumber = 36,
+					TestLineNumber = 40,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -503,7 +516,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					MethodName = $"DataTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DataTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 36,
+					TestLineNumber = 40,
 				});
 			}
 			return nodes;
@@ -550,6 +563,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				[
 					new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
 					new global::TUnit.Core.TimeoutAttribute(5_000),
+					new EngineTest(Failure),
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
@@ -558,11 +572,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -587,6 +603,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -620,7 +637,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceTest(methodArg, cancellationToken)),
 					TestFilePath = @"",
-					TestLineNumber = 47,
+					TestLineNumber = 53,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -636,7 +653,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					MethodName = $"DataSourceTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.DataSourceTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 47,
+					TestLineNumber = 53,
 				});
 			}
 			return nodes;
@@ -683,6 +700,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 				[
 					new global::TUnit.Core.TestAttribute(),
 					new global::TUnit.Core.TimeoutAttribute(5_000),
+					new EngineTest(Failure),
 					new global::TUnit.Core.CategoryAttribute("Blah")
 				],
 				Parameters = 
@@ -694,11 +712,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 						],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
 					{
 						Name = "cancellationToken",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -723,6 +743,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -747,6 +768,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							[
 								new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 							],
+							ReflectionInfo = null!,
 						},
 					],
 					TestSessionId = sessionId,
@@ -786,7 +808,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken)),
 						TestFilePath = @"",
-						TestLineNumber = 54,
+						TestLineNumber = 60,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -803,7 +825,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					MethodName = $"MatrixTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("TimeoutCancellationTokenTests.MatrixTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 54,
+					TestLineNumber = 60,
 				});
 			}
 			return nodes;

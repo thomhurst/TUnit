@@ -102,10 +102,32 @@ public class TestExtensionsTests
         var constructor = typeof(TestContext).GetConstructor(
             BindingFlags.Instance | BindingFlags.NonPublic,
             null,
-            [typeof(IServiceProvider), typeof(TestDetails), typeof(TestMetadata)],
+            [typeof(IServiceProvider), typeof(TestDetails), typeof(TestMetadata), typeof(ClassHookContext)],
             [])!;
+        
+        var testDiscoveryContext = new BeforeTestDiscoveryContext()
+        {
+            TestFilter = ""
+        };
+        var beforeTestDiscoveryContext = new TestDiscoveryContext(testDiscoveryContext)
+        {
+            TestFilter = ""
+        };
+        var testSessionContext = new TestSessionContext(beforeTestDiscoveryContext)
+        {
+            TestFilter = "",
+            Id = "test-session-id",
+        };
+        var assemblyHookContext = new AssemblyHookContext(testSessionContext)
+        {
+            Assembly = typeof(T).Assembly
+        };
+        var classContext = new ClassHookContext(assemblyHookContext)
+        {
+            ClassType = typeof(T)
+        };
 
-        return (TestContext)constructor.Invoke([null, testDetails, CreateDummyMetadata()]);
+        return (TestContext)constructor.Invoke([null, testDetails, CreateDummyMetadata(), classContext]);
     }
 
     private TestMetadata<TestExtensionsTests> CreateDummyMetadata()

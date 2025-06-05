@@ -1,7 +1,9 @@
 ﻿using Shouldly;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class UniqueBuilderContextsOnEnumerableDataGeneratorTests
 {
     [Test, UniqueBuilderContextsOnEnumerableDataGeneratorTestsGenerator]

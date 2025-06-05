@@ -1,5 +1,8 @@
+using TUnit.TestProject.Attributes;
+
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<Derived1>]
 [ClassDataSource<Derived2>]
 public class ClassDataSourceDrivenTests2(ClassDataSourceDrivenTests2.Base @base)

@@ -16,11 +16,13 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
         Parameters = [new SourceGeneratedParameterInformation<AssemblyHookContext>
         {
             Attributes = [],
-            Name = "context"
+            Name = "context",
+            ReflectionInfo = typeof(ILastTestInAssemblyEventReceiver).GetMethod(nameof(ILastTestInAssemblyEventReceiver.OnLastTestInAssembly))!.GetParameters()[0],
         }, new SourceGeneratedParameterInformation<TestContext>
         {
             Attributes = [],
-            Name = "testContext"
+            Name = "testContext",
+            ReflectionInfo = typeof(ILastTestInAssemblyEventReceiver).GetMethod(nameof(ILastTestInAssemblyEventReceiver.OnLastTestInAssembly))!.GetParameters()[1],
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),
@@ -40,7 +42,7 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
             Properties = [],
         }
     };
-    
+
     public int Order => 0;
 
     public bool Execute(AssemblyHookContext context, CancellationToken cancellationToken)

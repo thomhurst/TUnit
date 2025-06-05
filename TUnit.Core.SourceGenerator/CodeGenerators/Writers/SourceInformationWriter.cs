@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 
@@ -25,16 +27,16 @@ public static class SourceInformationWriter
         {
             sourceCodeWriter.WriteLine("Parent = null,");
         }
-        
+
         sourceCodeWriter.WriteLine($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Assembly = ");
         GenerateAssemblyInformation(sourceCodeWriter, context, namedTypeSymbol.ContainingAssembly);
-        
+
         sourceCodeWriter.WriteLine($"Name = \"{namedTypeSymbol.Name}\",");
         sourceCodeWriter.WriteLine($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray());
@@ -43,7 +45,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write("Parameters = ");
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters
             ?? ImmutableArray<IParameterSymbol>.Empty;
-        
+
         if (parameters.Length == 0)
         {
             sourceCodeWriter.Write("[],");
@@ -53,7 +55,7 @@ public static class SourceInformationWriter
         {
             sourceCodeWriter.WriteLine();
             sourceCodeWriter.WriteLine("[");
-            
+
             foreach (var parameter in parameters)
             {
                 sourceCodeWriter.WriteTabs();
@@ -67,7 +69,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Properties = ");
         var properties = namedTypeSymbol.GetMembers().OfType<IPropertySymbol>().ToArray();
-        
+
         if(properties.Length == 0)
         {
             sourceCodeWriter.Write("[],");
@@ -94,11 +96,11 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine("{");
         sourceCodeWriter.WriteLine($"Name = \"{assembly.Name}\",");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, assembly.GetAttributes());
-        
+
         sourceCodeWriter.WriteLine("}),");
     }
 
@@ -113,7 +115,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteLine($"Name = \"{methodSymbol.Name}\",");
         sourceCodeWriter.WriteLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
         sourceCodeWriter.WriteLine($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, methodSymbol.GetAttributes());
@@ -121,7 +123,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Parameters = ");
         var parameters = methodSymbol.Parameters;
-        
+
         if (parameters.Length == 0)
         {
             sourceCodeWriter.Write("[],");
@@ -131,7 +133,7 @@ public static class SourceInformationWriter
         {
             sourceCodeWriter.WriteLine();
             sourceCodeWriter.WriteLine("[");
-            
+
             foreach (var parameter in parameters)
             {
                 sourceCodeWriter.WriteTabs();
@@ -141,9 +143,9 @@ public static class SourceInformationWriter
 
             sourceCodeWriter.WriteLine("],");
         }
-            
+
         sourceCodeWriter.WriteTabs();
-        
+
         sourceCodeWriter.Write("Class = ");
         GenerateClassInformation(sourceCodeWriter, context, namedTypeSymbol);
 
@@ -160,7 +162,7 @@ public static class SourceInformationWriter
             sourceCodeWriter.WriteLine();
             return;
         }
-        
+
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine("[");
 
@@ -175,7 +177,7 @@ public static class SourceInformationWriter
             sourceCodeWriter.WriteTabs();
             GenerateParameterInformation(sourceCodeWriter, context, parameter, argumentsType, null);
         }
-        
+
         sourceCodeWriter.WriteLine("],");
     }
 
@@ -198,27 +200,59 @@ public static class SourceInformationWriter
 
     public static void GenerateParameterInformation(SourceCodeWriter sourceCodeWriter,
         GeneratorAttributeSyntaxContext context,
-        IParameterSymbol parameter, ArgumentsType argumentsType, IDictionary<string, string>? genericSubstitutions)
+        IParameterSymbol parameter, ArgumentsType argumentsType,
+        IDictionary<string, string>? genericSubstitutions)
     {
         var type = parameter.Type.GloballyQualified();
 
         if (parameter.Type.IsGenericDefinition())
         {
-            type = genericSubstitutions?.TryGetValue(type, out var substitution) == true
-                ? substitution
-                // We can't find the generic type - Fall back to object
-                : "object";
+            type = GetTypeOrSubstitution(parameter.Type);
         }
 
         sourceCodeWriter.Write($"new global::TUnit.Core.SourceGeneratedParameterInformation<{type}>");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine("{");
         sourceCodeWriter.WriteLine($"Name = \"{parameter.Name}\",");
-        
+
         sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, parameter.GetAttributes());
-        
+
+        // TODO: Struggling to get this to work with generic type parameters
+        sourceCodeWriter.WriteLine("ReflectionInfo = null!,");
+
+        // if(argumentsType == ArgumentsType.ClassConstructor)
+        // {
+        //     var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
+        //     var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({GetTypeOrSubstitution(p.Type)})"));
+        //     var containingType = methodSymbol.ContainingType.GloballyQualified();
+        //     var parameterIndex = parameter.Ordinal;
+        //
+        //     sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetConstructorParameterInfo(typeof({containingType}), new Type[] {{{parameterTypesString}}}, {parameterIndex}, typeof({parameter.Type.GloballyQualified()}), \"{parameter.Name}\"),");
+        // }
+        //
+        // if (argumentsType == ArgumentsType.Method)
+        // {
+        //     var methodSymbol = (IMethodSymbol)parameter.ContainingSymbol;
+        //     var parameterTypesString = string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({GetTypeOrSubstitution(p.Type)})"));
+        //     var containingType = parameter.ContainingSymbol.ContainingType.GloballyQualified();
+        //     var methodName = parameter.ContainingSymbol.Name;
+        //     var parameterIndex = parameter.Ordinal;
+        //     var isStatic = methodSymbol.IsStatic;
+        //     var genericParameterCount = methodSymbol.TypeParameters.Length;
+        //
+        //     sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetMethodParameterInfo(typeof({containingType}), \"{methodName}\", {parameterIndex}, new Type[] {{{parameterTypesString}}}, {isStatic.ToString().ToLowerInvariant()}, {genericParameterCount}),");
+        // }
+
         sourceCodeWriter.WriteLine("},");
+
+        string GetTypeOrSubstitution(ITypeSymbol type)
+        {
+            return genericSubstitutions?.TryGetValue(type.GloballyQualified(), out var substitution) == true
+                ? substitution
+                // We can't find the generic type - Fall back to object
+                : "object";
+        }
     }
 }

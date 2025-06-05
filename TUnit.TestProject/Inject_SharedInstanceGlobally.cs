@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -8,6 +9,7 @@ public static class SharedInjectedGloballyContainer
     public static readonly List<DummyReferenceTypeClass> Instances = [];
 }
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerTestSession), NotInParallel]
 public class InjectSharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeClass)
 {

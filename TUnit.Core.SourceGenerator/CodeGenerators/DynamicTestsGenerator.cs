@@ -17,7 +17,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForTestMethodGeneration(ctx))
             .Where(static m => m is not null);
-        
+
         context.RegisterSourceOutput(standardTests, (sourceContext, data) => GenerateTests(sourceContext, data!));
     }
 
@@ -89,15 +89,15 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                 : $"new {dynamicTestSource.Class.GloballyQualified()}()";
 
             sourceBuilder.WriteLine($"{receiver}.{dynamicTestSource.Method.Name}(context);");
-            
+
             sourceBuilder.WriteLine("return context.Tests;");
-            
+
             sourceBuilder.WriteLine("}");
             sourceBuilder.WriteLine("catch (global::System.Exception exception)");
             sourceBuilder.WriteLine("{");
             FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, dynamicTestSource);
             sourceBuilder.WriteLine("}");
-            
+
             sourceBuilder.WriteLine("}");
 
             sourceBuilder.WriteLine("}");
@@ -110,7 +110,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                 title: "Error Generating Source",
                 messageFormat: "{0}",
                 category: "SourceGenerator",
-                DiagnosticSeverity.Error,
+                DiagnosticSeverity.Warning,
                 isEnabledByDefault: true);
 
             context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));

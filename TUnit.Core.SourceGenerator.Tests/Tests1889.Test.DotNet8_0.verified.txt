@@ -57,6 +57,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
+						new EngineTest(Pass),
 						new global::TUnit.Core.InheritsTestsAttribute()
 					],
 					Parameters = [],
@@ -130,6 +131,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						{
 							Name = "condition",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -145,6 +147,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						Namespace = "TUnit.TestProject.Bugs._1889",
 						Attributes = 
 						[
+							new EngineTest(Pass),
 							new global::TUnit.Core.InheritsTestsAttribute()
 						],
 						Parameters = [],
@@ -167,6 +170,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							{
 								Name = "condition",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						TestSessionId = sessionId,
@@ -247,6 +251,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							{
 								Name = "condition",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -262,6 +267,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							Namespace = "TUnit.TestProject.Bugs._1889",
 							Attributes = 
 							[
+								new EngineTest(Pass),
 								new global::TUnit.Core.InheritsTestsAttribute()
 							],
 							Parameters = [],
@@ -337,6 +343,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 								{
 									Name = "condition",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -352,6 +359,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 								Namespace = "TUnit.TestProject.Bugs._1889",
 								Attributes = 
 								[
+									new EngineTest(Pass),
 									new global::TUnit.Core.InheritsTestsAttribute()
 								],
 								Parameters = [],

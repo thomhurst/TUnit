@@ -7,6 +7,7 @@ using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class CultureTests
 {
     [Test, Culture("en-GB")]

@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject.Bugs._1432;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject.Bugs._1432;
+
+[EngineTest(ExpectedResult.Pass)]
 public class EnumMemberNamesTests
 {
     [Test]

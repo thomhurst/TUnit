@@ -13,7 +13,8 @@ namespace TUnit.Engine.Services;
 internal class SourceGeneratedTestsConstructor(IExtension extension, 
     TestsCollector testsCollector,
     DependencyCollector dependencyCollector, 
-    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, serviceProvider)
+    ContextManager contextManager,
+    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
 {
     protected override DiscoveredTest[] DiscoverTests()
     {

@@ -1,9 +1,11 @@
 ﻿using TUnit.Core.Extensions;
+using TUnit.TestProject.Attributes;
 
 #pragma warning disable WIP
 
 namespace TUnit.TestProject.DynamicTests;
 
+[EngineTest(ExpectedResult.Pass)]
 [RunOnDiscovery]
 [Arguments(1, 2, 3)]
 [Arguments(101, 202, 303)]

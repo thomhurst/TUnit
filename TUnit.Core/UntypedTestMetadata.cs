@@ -12,7 +12,7 @@ public record UntypedTestMetadata(
 {
     [field: AllowNull, MaybeNull]
     private ResettableLazy<object> ResettableLazy => field ??= new ResettableLazy<object>(() => InstanceHelper.CreateInstance(TestMethod.Class, TestClassArguments, TestClassProperties, TestBuilderContext), string.Empty, new TestBuilderContext());
-    
+
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     public override Type TestClassType
     {

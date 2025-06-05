@@ -180,6 +180,28 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
             LazyClassInstance = resettableLazy,
         };
 
+        var testDiscoveryContext = new BeforeTestDiscoveryContext()
+        {
+            TestFilter = ""
+        };
+        var beforeTestDiscoveryContext = new TestDiscoveryContext(testDiscoveryContext)
+        {
+            TestFilter = ""
+        };
+        var testSessionContext = new TestSessionContext(beforeTestDiscoveryContext)
+        {
+            TestFilter = "",
+            Id = "test-session-id",
+        };
+        var assemblyHookContext = new AssemblyHookContext(testSessionContext)
+        {
+            Assembly = typeof(DependencyCollectorTests).Assembly
+        };
+        var classContext = new ClassHookContext(assemblyHookContext)
+        {
+            ClassType = typeof(DependencyCollectorTests)
+        };
+            
         return new DiscoveredTest<DependencyCollectorTests>(resettableLazy)
         {
             TestContext = new TestContext(Substitute.For<IServiceProvider>(),
@@ -198,7 +220,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                     TestMethodArguments = [],
                     TestClassProperties = new Dictionary<string, object?>(),
                     TestBuilderContext = new TestBuilderContext()
-                }),
+                }, classContext!),
             TestBody = (_, _) => default(ValueTask),
         };
     }

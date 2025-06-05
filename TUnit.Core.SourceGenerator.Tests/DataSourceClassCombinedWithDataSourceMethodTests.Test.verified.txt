@@ -58,6 +58,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					{
 						Name = "i",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -73,6 +74,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
+						new EngineTest(Pass),
 						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 						new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -83,6 +85,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						{
 							Name = "i",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -116,7 +119,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 10,
+					TestLineNumber = 13,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -132,7 +135,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 10,
+					TestLineNumber = 13,
 				});
 			}
 			return nodes;
@@ -163,6 +166,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						{
 							Name = "i",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -178,6 +182,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						Namespace = "TUnit.TestProject",
 						Attributes = 
 						[
+							new EngineTest(Pass),
 							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 							new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -188,6 +193,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							{
 								Name = "i",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -221,7 +227,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 10,
+						TestLineNumber = 13,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -237,7 +243,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 10,
+						TestLineNumber = 13,
 					});
 				}
 				return nodes;
@@ -268,6 +274,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							{
 								Name = "i",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -283,6 +290,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							Namespace = "TUnit.TestProject",
 							Attributes = 
 							[
+								new EngineTest(Pass),
 								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -293,6 +301,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								{
 									Name = "i",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = [],
@@ -326,7 +335,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 							TestFilePath = @"",
-							TestLineNumber = 10,
+							TestLineNumber = 13,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -342,7 +351,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 							TestFilePath = @"",
-							TestLineNumber = 10,
+							TestLineNumber = 13,
 						});
 					}
 					return nodes;
@@ -373,6 +382,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								{
 									Name = "i",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -388,6 +398,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								Namespace = "TUnit.TestProject",
 								Attributes = 
 								[
+									new EngineTest(Pass),
 									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -398,6 +409,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									{
 										Name = "i",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 								],
 								Properties = [],
@@ -431,7 +443,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								ResettableClassFactory = resettableClassFactory,
 								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 								TestFilePath = @"",
-								TestLineNumber = 10,
+								TestLineNumber = 13,
 								TestMethod = testInformation,
 								TestBuilderContext = testBuilderContext,
 							});
@@ -447,7 +459,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 								MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 								TestFilePath = @"",
-								TestLineNumber = 10,
+								TestLineNumber = 13,
 							});
 						}
 						return nodes;
@@ -478,6 +490,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									{
 										Name = "i",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -493,6 +506,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									Namespace = "TUnit.TestProject",
 									Attributes = 
 									[
+										new EngineTest(Pass),
 										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 										new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -503,6 +517,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										{
 											Name = "i",
 											Attributes = [],
+											ReflectionInfo = null!,
 										},
 									],
 									Properties = [],
@@ -536,7 +551,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									ResettableClassFactory = resettableClassFactory,
 									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 									TestFilePath = @"",
-									TestLineNumber = 10,
+									TestLineNumber = 13,
 									TestMethod = testInformation,
 									TestBuilderContext = testBuilderContext,
 								});
@@ -552,7 +567,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 									MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 									TestFilePath = @"",
-									TestLineNumber = 10,
+									TestLineNumber = 13,
 								});
 							}
 							return nodes;
@@ -583,6 +598,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										{
 											Name = "i",
 											Attributes = [],
+											ReflectionInfo = null!,
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -598,6 +614,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										Namespace = "TUnit.TestProject",
 										Attributes = 
 										[
+											new EngineTest(Pass),
 											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 											new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -608,6 +625,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											{
 												Name = "i",
 												Attributes = [],
+												ReflectionInfo = null!,
 											},
 										],
 										Properties = [],
@@ -641,7 +659,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										ResettableClassFactory = resettableClassFactory,
 										TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 										TestFilePath = @"",
-										TestLineNumber = 10,
+										TestLineNumber = 13,
 										TestMethod = testInformation,
 										TestBuilderContext = testBuilderContext,
 									});
@@ -657,7 +675,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 										Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 										TestFilePath = @"",
-										TestLineNumber = 10,
+										TestLineNumber = 13,
 									});
 								}
 								return nodes;
@@ -688,6 +706,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											{
 												Name = "i",
 												Attributes = [],
+												ReflectionInfo = null!,
 											},
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -703,6 +722,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											Namespace = "TUnit.TestProject",
 											Attributes = 
 											[
+												new EngineTest(Pass),
 												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -713,6 +733,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												{
 													Name = "i",
 													Attributes = [],
+													ReflectionInfo = null!,
 												},
 											],
 											Properties = [],
@@ -746,7 +767,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											ResettableClassFactory = resettableClassFactory,
 											TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 											TestFilePath = @"",
-											TestLineNumber = 10,
+											TestLineNumber = 13,
 											TestMethod = testInformation,
 											TestBuilderContext = testBuilderContext,
 										});
@@ -762,7 +783,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 											Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 											TestFilePath = @"",
-											TestLineNumber = 10,
+											TestLineNumber = 13,
 										});
 									}
 									return nodes;
@@ -793,6 +814,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												{
 													Name = "i",
 													Attributes = [],
+													ReflectionInfo = null!,
 												},
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -808,6 +830,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												Namespace = "TUnit.TestProject",
 												Attributes = 
 												[
+													new EngineTest(Pass),
 													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -818,6 +841,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 													{
 														Name = "i",
 														Attributes = [],
+														ReflectionInfo = null!,
 													},
 												],
 												Properties = [],
@@ -851,7 +875,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												ResettableClassFactory = resettableClassFactory,
 												TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 												TestFilePath = @"",
-												TestLineNumber = 10,
+												TestLineNumber = 13,
 												TestMethod = testInformation,
 												TestBuilderContext = testBuilderContext,
 											});
@@ -867,7 +891,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 												MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 												Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 												TestFilePath = @"",
-												TestLineNumber = 10,
+												TestLineNumber = 13,
 											});
 										}
 										return nodes;
@@ -898,6 +922,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 													{
 														Name = "i",
 														Attributes = [],
+														ReflectionInfo = null!,
 													},
 												],
 												Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -913,6 +938,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 													Namespace = "TUnit.TestProject",
 													Attributes = 
 													[
+														new EngineTest(Pass),
 														new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 														new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 														new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
@@ -923,6 +949,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 														{
 															Name = "i",
 															Attributes = [],
+															ReflectionInfo = null!,
 														},
 													],
 													Properties = [],
@@ -956,7 +983,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 													ResettableClassFactory = resettableClassFactory,
 													TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceClassCombinedWithDataSourceMethodTest(methodArg)),
 													TestFilePath = @"",
-													TestLineNumber = 10,
+													TestLineNumber = 13,
 													TestMethod = testInformation,
 													TestBuilderContext = testBuilderContext,
 												});
@@ -972,7 +999,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 													MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
 													Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest failed to initialize", exception),
 													TestFilePath = @"",
-													TestLineNumber = 10,
+													TestLineNumber = 13,
 												});
 											}
 											return nodes;

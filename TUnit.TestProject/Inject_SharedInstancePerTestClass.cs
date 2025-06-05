@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -10,6 +11,7 @@ public static class SharedInjectedTypesContainer
     public static readonly List<DummyReferenceTypeClass> TestClass3Instances = [];
 }
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerClass), NotInParallel]
 public class InjectSharedPerType1(DummyReferenceTypeClass dummyReferenceTypeClass)
 {

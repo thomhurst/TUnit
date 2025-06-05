@@ -16,11 +16,13 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
         Parameters = [new SourceGeneratedParameterInformation<ClassHookContext>
         {
             Attributes = [],
-            Name = "context"
+            Name = "context",
+            ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }, new SourceGeneratedParameterInformation<TestContext>
         {
             Attributes = [],
-            Name = "testContext"
+            Name = "testContext",
+            ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),
@@ -40,7 +42,7 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
             Properties = [],
         }
     };
-    
+
     public int Order => 0;
 
     public bool Execute(ClassHookContext context, CancellationToken cancellationToken)

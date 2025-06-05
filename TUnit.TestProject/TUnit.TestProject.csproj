@@ -57,10 +57,6 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-  </ItemGroup>
-
 <!--      <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">-->
 <!--          <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />-->
 <!--          <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />-->

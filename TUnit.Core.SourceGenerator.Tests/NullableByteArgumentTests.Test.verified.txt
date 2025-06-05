@@ -50,6 +50,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					{
 						Name = "someByte",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -63,7 +64,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					}),
 					Name = "NullableByteArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -96,7 +100,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -112,7 +116,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					MethodName = $"Test",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 				});
 			}
 			return nodes;
@@ -142,6 +146,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						{
 							Name = "someByte",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -155,7 +160,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						}),
 						Name = "NullableByteArgumentTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = [],
 						Properties = [],
 					}),
@@ -188,7 +196,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test(methodArg)),
 						TestFilePath = @"",
-						TestLineNumber = 5,
+						TestLineNumber = 8,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -204,7 +212,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						MethodName = $"Test",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 5,
+						TestLineNumber = 8,
 					});
 				}
 				return nodes;
@@ -263,11 +271,13 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					{
 						Name = "byte1",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 					{
 						Name = "byte2",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -281,7 +291,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					}),
 					Name = "NullableByteArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -315,7 +328,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg, methodArg1)),
 					TestFilePath = @"",
-					TestLineNumber = 12,
+					TestLineNumber = 15,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -331,7 +344,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					MethodName = $"Test2",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 12,
+					TestLineNumber = 15,
 				});
 			}
 			return nodes;
@@ -361,11 +374,13 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						{
 							Name = "byte1",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 						{
 							Name = "byte2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -379,7 +394,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						}),
 						Name = "NullableByteArgumentTests",
 						Namespace = "TUnit.TestProject",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = [],
 						Properties = [],
 					}),
@@ -413,7 +431,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg, methodArg1)),
 						TestFilePath = @"",
-						TestLineNumber = 12,
+						TestLineNumber = 15,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -429,7 +447,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						MethodName = $"Test2",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 12,
+						TestLineNumber = 15,
 					});
 				}
 				return nodes;

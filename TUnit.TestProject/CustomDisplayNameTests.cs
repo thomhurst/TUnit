@@ -2,9 +2,11 @@
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class CustomDisplayNameTests
 {
     public const string SameClassConstant = "My constant";

@@ -1,9 +1,12 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
+
 #pragma warning disable TUnitWIP0001
 
 namespace TUnit.TestProject.DynamicTests;
 
+[EngineTest(ExpectedResult.Pass)]
 public class Basic2
 {
     [DynamicTestBuilder]

@@ -61,13 +61,17 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 						}),
 						Name = "MyTests",
 						Namespace = "TUnit.TestProject.Bugs._1594",
-						Attributes = [],
+						Attributes = 
+						[
+							new EngineTest(Pass)
+						],
 						Parameters = 
 						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
 							{
 								Name = "myFixture",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -191,6 +195,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 								{
 									Name = "fixture",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = [],
@@ -314,6 +319,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 								{
 									Name = "fixture",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = 

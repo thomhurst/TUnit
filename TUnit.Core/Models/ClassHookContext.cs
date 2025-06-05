@@ -9,14 +9,24 @@ public class ClassHookContext : Context
         internal set => Contexts.Value = value;
     }
     
-    internal ClassHookContext()
+    internal ClassHookContext(AssemblyHookContext assemblyHookContext) : base(assemblyHookContext)
     {
+        assemblyHookContext.AddClass(this);
     }
+    
+    public AssemblyHookContext AssemblyContext => (AssemblyHookContext) Parent!;
     
     public required Type ClassType { get; init; }
     
-    public List<TestContext> Tests { get; init; } = [];
-
+    private readonly List<TestContext> _tests = [];
+    
+    public void AddTest(TestContext testContext)
+    {
+        _tests.Add(testContext);
+    }
+    
+    public IReadOnlyList<TestContext> Tests => _tests;
+    
     public int TestCount => Tests.Count;
     internal bool FirstTestStarted { get; set; }
 
@@ -48,5 +58,20 @@ public class ClassHookContext : Context
     public override int GetHashCode()
     {
         return ClassType.GetHashCode();
+    }
+
+    internal void RemoveTest(TestContext test)
+    {
+        _tests.Remove(test);
+        
+        if(_tests.Count is 0)
+        {
+            AssemblyContext.RemoveClass(this);
+        }
+    }
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
     }
 }

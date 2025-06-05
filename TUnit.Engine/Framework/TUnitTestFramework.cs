@@ -96,33 +96,41 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
         serviceProvider.Initializer.Initialize();
         
-        TestSessionContext? testSessionContext = null;
+        var beforeTestDiscoveryContext = serviceProvider.ContextManager.BeforeTestDiscoveryContext;
+
+        var testSessionContext = serviceProvider.ContextManager.TestSessionContext;
+        
         try
         {
             serviceProvider.EngineCancellationToken.Initialise(context.CancellationToken);
-            
-            ExecutionContextHelper.RestoreContext(await serviceProvider.TestDiscoveryHookOrchestrator.RunBeforeTestDiscovery());
 
-            var allDiscoveredTests = serviceProvider.TestDiscoverer.GetTests(serviceProvider.EngineCancellationToken.Token);
+            await serviceProvider.TestDiscoveryHookOrchestrator.RunBeforeTestDiscovery(beforeTestDiscoveryContext);
+            
+            beforeTestDiscoveryContext.RestoreExecutionContext();
+
+            serviceProvider.ContextManager.AfterTestDiscoveryContext.AddTests(
+                serviceProvider.TestDiscoverer.GetTests().Select(x => x.TestContext)
+            );
             
             var afterDiscoveryHooks = serviceProvider.TestDiscoveryHookOrchestrator.CollectAfterHooks();
-            var afterContext = serviceProvider.TestDiscoveryHookOrchestrator.GetAfterContext(allDiscoveredTests);
-        
+            
             foreach (var afterDiscoveryHook in afterDiscoveryHooks)
             {
                 try
                 {
-                    await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
+                    await afterDiscoveryHook.ExecuteAsync(serviceProvider.ContextManager.AfterTestDiscoveryContext, CancellationToken.None);
                 }
                 catch (Exception e)
                 {
-                    throw new HookFailedException($"Error executing [Before(Test)] hook: {afterDiscoveryHook.MethodInfo.Type.FullName}.{afterDiscoveryHook.Name}", e);
+                    throw new HookFailedException($"Error executing [After(TestDiscovery)] hook: {afterDiscoveryHook.MethodInfo.Type.FullName}.{afterDiscoveryHook.Name}", e);
                 }
             }
             
+            testSessionContext.RestoreExecutionContext();
+
             var filteredTests = await serviceProvider.TestDiscoverer
                 .FilterTests(context, serviceProvider.EngineCancellationToken.Token);
-
+            
             switch (context.Request)
             {
                 case DiscoverTestExecutionRequest:
@@ -134,17 +142,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     break;
                 }
                 case RunTestExecutionRequest runTestExecutionRequest:
-                    testSessionContext =
-                        new TestSessionContext(serviceProvider.AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
-                        {
-                            TestFilter = stringFilter,
-                            Id = runTestExecutionRequest.Session.SessionUid.Value
-                        };
                     
                     TestSessionContext.Current = testSessionContext;
 
-                    ExecutionContextHelper.RestoreContext(await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(context));
-
+                    await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(testSessionContext, context.CancellationToken);
+                    
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context.CancellationToken);
 

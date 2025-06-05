@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject;
+
+[EngineTest(ExpectedResult.Pass)]
 [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.One))]
 [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Two))]
 [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Three))]

@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject.Bugs._1594;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject.Bugs._1594;
+
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<MyFixture>(Shared = SharedType.None)]
 public class MyTests : ParentTests<MyFixture>
 {

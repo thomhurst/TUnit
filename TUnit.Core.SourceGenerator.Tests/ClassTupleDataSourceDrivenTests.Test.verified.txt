@@ -52,16 +52,19 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 					{
 						Name = "value2",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 					{
 						Name = "value3",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -77,6 +80,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
+						new EngineTest(Pass),
 						new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod"),
 						new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 					],
@@ -86,16 +90,19 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = 
@@ -191,7 +198,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
 					TestFilePath = @"",
-					TestLineNumber = 24,
+					TestLineNumber = 27,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -207,7 +214,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 					MethodName = $"DataSource_TupleMethod",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 24,
+					TestLineNumber = 27,
 				});
 			}
 			return nodes;
@@ -237,16 +244,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
 							Name = "value",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 						{
 							Name = "value3",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -262,6 +272,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						Namespace = "TUnit.TestProject",
 						Attributes = 
 						[
+							new EngineTest(Pass),
 							new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod"),
 							new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 						],
@@ -271,16 +282,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = 
@@ -376,7 +390,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						ResettableClassFactory = resettableClassFactory,
 						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
 						TestFilePath = @"",
-						TestLineNumber = 24,
+						TestLineNumber = 27,
 						TestMethod = testInformation,
 						TestBuilderContext = testBuilderContext,
 					});
@@ -392,7 +406,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 						MethodName = $"DataSource_TupleMethod",
 						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 						TestFilePath = @"",
-						TestLineNumber = 24,
+						TestLineNumber = 27,
 					});
 				}
 				return nodes;
@@ -422,16 +436,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
 								Name = "value",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 							{
 								Name = "value2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 							{
 								Name = "value3",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -447,6 +464,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							Namespace = "TUnit.TestProject",
 							Attributes = 
 							[
+								new EngineTest(Pass),
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod"),
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 							],
@@ -456,16 +474,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								{
 									Name = "value",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "value2",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
 									Name = "value3",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = 
@@ -561,7 +582,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							ResettableClassFactory = resettableClassFactory,
 							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
 							TestFilePath = @"",
-							TestLineNumber = 24,
+							TestLineNumber = 27,
 							TestMethod = testInformation,
 							TestBuilderContext = testBuilderContext,
 						});
@@ -577,7 +598,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 							MethodName = $"DataSource_TupleMethod",
 							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 							TestFilePath = @"",
-							TestLineNumber = 24,
+							TestLineNumber = 27,
 						});
 					}
 					return nodes;
@@ -607,16 +628,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								{
 									Name = "value",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 								{
 									Name = "value2",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 								{
 									Name = "value3",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -632,6 +656,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								Namespace = "TUnit.TestProject",
 								Attributes = 
 								[
+									new EngineTest(Pass),
 									new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod"),
 									new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 								],
@@ -641,16 +666,19 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 									{
 										Name = "value",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 									{
 										Name = "value2",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 									{
 										Name = "value3",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 								],
 								Properties = 
@@ -746,7 +774,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								ResettableClassFactory = resettableClassFactory,
 								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
 								TestFilePath = @"",
-								TestLineNumber = 24,
+								TestLineNumber = 27,
 								TestMethod = testInformation,
 								TestBuilderContext = testBuilderContext,
 							});
@@ -762,7 +790,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 								MethodName = $"DataSource_TupleMethod",
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassTupleDataSourceDrivenTests.DataSource_TupleMethod failed to initialize", exception),
 								TestFilePath = @"",
-								TestLineNumber = 24,
+								TestLineNumber = 27,
 							});
 						}
 						return nodes;

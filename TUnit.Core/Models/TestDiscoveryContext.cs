@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Core;
 
 /// <summary>
 /// Represents the context for test discovery.
@@ -12,28 +14,29 @@ public class TestDiscoveryContext : Context
         internal set => Contexts.Value = value;
     }
     
-    internal TestDiscoveryContext(IEnumerable<DiscoveredTest> discoveredTests)
+    internal TestDiscoveryContext(BeforeTestDiscoveryContext parent) : base(parent)
     {
-        var classContexts = discoveredTests.GroupBy(x => x.TestDetails.TestClass.Type).Select(x => new ClassHookContext
-        {
-            ClassType = x.Key,
-            Tests = [..x.Select(dt => dt.TestContext)]
-        });
-
-        var assemblyContexts = classContexts.GroupBy(x => x.ClassType.Assembly).Select(x => new AssemblyHookContext
-        {
-            Assembly = x.Key,
-            TestClasses = [..x]
-        });
-
-        Assemblies = assemblyContexts;
-        Current = this;
     }
+
+    public void AddTests(IEnumerable<TestContext> tests)
+    {
+        AllTests = tests as IReadOnlyList<TestContext> ?? tests.ToArray();
+    }
+    
+    public BeforeTestDiscoveryContext BeforeTestDiscoveryContext => (BeforeTestDiscoveryContext) Parent!;
 
     public required string? TestFilter { get; init; }
 
-    public IEnumerable<AssemblyHookContext> Assemblies { get; }
-    public IEnumerable<ClassHookContext> TestClasses => Assemblies.SelectMany(x => x.TestClasses);
+    [field: AllowNull, MaybeNull]
+    public IEnumerable<AssemblyHookContext> Assemblies => field ??= TestClasses.Select(x => x.AssemblyContext).Distinct().ToArray();
+    
+    [field: AllowNull, MaybeNull]
+    public IEnumerable<ClassHookContext> TestClasses => field ??= AllTests.Select(x => x.ClassContext).Distinct().ToArray();
 
-    public IEnumerable<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests);
+    public IReadOnlyList<TestContext> AllTests { get; private set; } = [];
+    
+    internal override void RestoreContextAsyncLocal()
+    {
+        Current = this;
+    }
 }

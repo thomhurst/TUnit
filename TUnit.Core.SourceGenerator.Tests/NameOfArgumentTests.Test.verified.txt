@@ -33,7 +33,7 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				Type = typeof(global::TUnit.TestProject.NameOfArgumentTests),
 				Name = "TestName",
 				GenericTypeCount = 0,
-				ReturnType = typeof(void),
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
 				[
 					new global::TUnit.Core.TestAttribute(),
@@ -45,6 +45,7 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					{
 						Name = "name",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NameOfArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -58,7 +59,10 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					}),
 					Name = "NameOfArgumentTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -91,7 +95,7 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.TestName(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -107,7 +111,7 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					MethodName = $"TestName",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NameOfArgumentTests.TestName failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 5,
+					TestLineNumber = 8,
 				});
 			}
 			return nodes;

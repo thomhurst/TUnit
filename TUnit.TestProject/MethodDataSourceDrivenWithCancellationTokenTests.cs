@@ -1,9 +1,11 @@
 ﻿// ReSharper disable UseCollectionExpression
 
 using System.Diagnostics.CodeAnalysis;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [UnconditionalSuppressMessage("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")]
 public class MethodDataSourceDrivenWithCancellationTokenTests
 {

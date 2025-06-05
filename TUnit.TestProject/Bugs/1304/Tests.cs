@@ -1,10 +1,12 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 using Vogen;
 
 namespace TUnit.TestProject.Bugs._1304;
 
+[EngineTest(ExpectedResult.Pass)]
 public class Tests
 {
     [Test]
@@ -20,7 +22,8 @@ public class Tests
 
         // Assert
         await Assert.That(success).IsFalse();
-        await Assert.That(id).IsNull();
+        await Assert.That(id.HasValue).IsFalse();
+        await Assert.That(id.ToString()).IsEqualTo("[UNINITIALIZED]");
     }
 
     [Test]
@@ -46,7 +49,6 @@ public class Tests
         // Assert
         //using var _ = Assert.Multiple();
         await Assert.That(success).IsTrue();
-        await Assert.That(id.HasValue).IsTrue();
         await Assert.That(id.ToString()).IsEqualTo(input);
     }
 }

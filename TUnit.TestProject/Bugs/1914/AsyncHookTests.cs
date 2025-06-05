@@ -5,6 +5,7 @@ using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1914;
 
+[EngineTest(ExpectedResult.Pass)]
 [SkipNetFramework("ExecutionContext.Restore is not supported on .NET Framework")]
 [UnconditionalSuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 [UnconditionalSuppressMessage("Usage", "TUnit0047:Call `context.AddAsyncLocalValues`")]

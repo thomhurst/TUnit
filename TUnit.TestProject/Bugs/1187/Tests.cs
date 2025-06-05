@@ -3,6 +3,7 @@
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1187;
 
@@ -33,6 +34,7 @@ public class Context : IAsyncInitializer
     }
 }
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<Context>(Shared = SharedType.None)]
 [MethodDataSource(nameof(Contexts))]
 public class Tests(Context ctx)

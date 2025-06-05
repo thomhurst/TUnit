@@ -1,6 +1,4 @@
-﻿using Microsoft.Testing.Platform.Extensions;
-using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
+﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Logging;
@@ -30,7 +28,7 @@ internal class TUnitTestDiscoverer(
         cancellationToken.ThrowIfCancellationRequested();
                 
         var allDiscoveredTests = GetTests(cancellationToken);
-
+        
         var executionRequest = context.Request as TestExecutionRequest;
         
         var filteredTests = testFilterService.FilterTests(executionRequest, allDiscoveredTests);

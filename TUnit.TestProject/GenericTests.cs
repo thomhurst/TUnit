@@ -3,9 +3,11 @@
 using System.Numerics;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public abstract class GenericTests<T>
     where T : INumber<T>
 {

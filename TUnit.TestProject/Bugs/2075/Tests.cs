@@ -1,22 +1,25 @@
 ﻿#if NET9_0_OR_GREATER
 
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._2075;
 
-public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncInitializer
+public class ServiceProviderFactory : IAsyncInitializer
 {
+    public ServiceProvider ServiceProvider { get; } = new ServiceCollection()
+        .AddSingleton<IFirebaseClient, FirebaseClient>()
+        .AddSingleton<DbContext>()
+        .BuildServiceProvider();
+
     public Task InitializeAsync()
     {
-        _ = Server;
-
         return Task.CompletedTask;
     }
 }
 
-public class FromWebApplicationFactoryAttribute : NonTypedDataSourceGeneratorAttribute
+public class FromServiceProviderFactoryAttribute : NonTypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
     public Task InitializeAsync()
     {
@@ -30,14 +33,14 @@ public class FromWebApplicationFactoryAttribute : NonTypedDataSourceGeneratorAtt
             throw new Exception("ClassInstanceArguments is null");
         }
 
-        if (dataGeneratorMetadata.ClassInstanceArguments.OfType<WebApplicationFactory<Program>>().FirstOrDefault() is not
+        if (dataGeneratorMetadata.ClassInstanceArguments.OfType<ServiceProviderFactory>().FirstOrDefault() is not
             { } webApplicationFactory)
         {
             throw new Exception("WebApplicationFactory is not part of the class constructor arguments");
         }
-        
-        var serviceProvider = webApplicationFactory.Server.Services;
-        
+
+        var serviceProvider = webApplicationFactory.ServiceProvider;
+
         yield return () =>
         {
             return dataGeneratorMetadata.MembersToGenerate.Select(x => ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, x.Type)).ToArray();
@@ -45,13 +48,14 @@ public class FromWebApplicationFactoryAttribute : NonTypedDataSourceGeneratorAtt
     }
 }
 
-[ClassDataSource<WebApplicationFactory<Program>>(Shared = SharedType.PerTestSession)]
-public class MyTests(WebApplicationFactory<Program> factory)
+[EngineTest(ExpectedResult.Pass)]
+[ClassDataSource<ServiceProviderFactory>(Shared = SharedType.PerTestSession)]
+public class MyTests(ServiceProviderFactory factory)
 {
-    [FromWebApplicationFactory]
+    [FromServiceProviderFactory]
     public required DbContext DbContext { get; init; }
-    
-    [FromWebApplicationFactory]
+
+    [FromServiceProviderFactory]
     public required IFirebaseClient FirebaseClient { get; init; }
 
     [Test]
@@ -59,8 +63,6 @@ public class MyTests(WebApplicationFactory<Program> factory)
     {
     }
 }
-
-public class Program;
 
 public class DbContext;
 

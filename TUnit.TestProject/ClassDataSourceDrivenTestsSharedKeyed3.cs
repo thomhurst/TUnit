@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 using TUnit.TestProject.Library.Models;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🌲")]
 [UnconditionalSuppressMessage("Usage", "TUnit0018:Test methods should not assign instance data")]
 public class ClassDataSourceDrivenTestsSharedKeyed3
@@ -37,9 +39,14 @@ public class ClassDataSourceDrivenTestsSharedKeyed3
         MethodLevels.Add(value);
     }
 
-    [After(Class)]
-    public static async Task AssertAfter()
+    [After(Assembly)]
+    public static async Task AssertAfter(AssemblyHookContext assemblyHookContext)
     {
+        if(assemblyHookContext.TestClasses.Any(x => x.ClassType != typeof(ClassDataSourceDrivenTestsSharedKeyed3)))
+        {
+            return; // Skip if this class is not executed
+        }
+        
         await Assert.That(ClassLevels).IsNotEmpty();
         await Assert.That(MethodLevels).IsNotEmpty();
 

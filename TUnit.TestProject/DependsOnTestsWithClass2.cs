@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -15,6 +16,7 @@ public class DependsOnTestsOtherClass2
     }
 }
 
+[EngineTest(ExpectedResult.Pass)]
 public class DependsOnTestsWithClass2
 {
     private static DateTime _test2Start;

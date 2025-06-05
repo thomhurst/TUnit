@@ -58,6 +58,11 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             _ => UnhandledFilter(testExecutionFilter)
         };
 
+        if (!shouldRunTest)
+        {
+            discoveredTest.TestContext.ClassContext.RemoveTest(discoveredTest.TestContext);
+        }
+
         return shouldRunTest;
 #pragma warning restore TPEXP
     }

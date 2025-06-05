@@ -3,9 +3,11 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1577;
 
+[EngineTest(ExpectedResult.Pass)]
 public partial class Tests
 {
     public partial record MyRecordType(IEnumerable<string> SomeEnumerable);

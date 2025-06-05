@@ -1,9 +1,11 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class DependsOnTests3
 {
     private static DateTime _test1Start;

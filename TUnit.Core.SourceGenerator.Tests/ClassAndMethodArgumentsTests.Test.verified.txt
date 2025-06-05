@@ -65,6 +65,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg1",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -159,6 +160,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg1",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -269,6 +271,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					{
 						Name = "arg2",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -293,6 +296,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg1",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -374,6 +378,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -398,6 +403,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg1",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -479,6 +485,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -503,6 +510,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 								{
 									Name = "arg1",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = [],
@@ -584,6 +592,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 								{
 									Name = "arg2",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -608,6 +617,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 									{
 										Name = "arg1",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 								],
 								Properties = [],
@@ -720,6 +730,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					{
 						Name = "arg2",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -744,6 +755,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg1",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Properties = [],
@@ -825,6 +837,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						{
 							Name = "arg2",
 							Attributes = [],
+							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -849,6 +862,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg1",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Properties = [],
@@ -930,6 +944,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							{
 								Name = "arg2",
 								Attributes = [],
+								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -954,6 +969,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 								{
 									Name = "arg1",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Properties = [],
@@ -1035,6 +1051,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 								{
 									Name = "arg2",
 									Attributes = [],
+									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -1059,6 +1076,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 									{
 										Name = "arg1",
 										Attributes = [],
+										ReflectionInfo = null!,
 									},
 								],
 								Properties = [],

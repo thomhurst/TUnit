@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject.ComplexDependsOn;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject.ComplexDependsOn;
+
+[EngineTest(ExpectedResult.Pass)]
 public class BaseClass
 {
     [Test]

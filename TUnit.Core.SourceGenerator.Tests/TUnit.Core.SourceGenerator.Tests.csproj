@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\TestProject.props" />
-  
+
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />

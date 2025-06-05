@@ -1,5 +1,8 @@
-﻿namespace TUnit.TestProject.DynamicTests;
+﻿using TUnit.TestProject.Attributes;
 
+namespace TUnit.TestProject.DynamicTests;
+
+[EngineTest(ExpectedResult.Pass)]
 public class Basic
 {
     public void SomeMethod()

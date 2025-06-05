@@ -45,6 +45,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -58,7 +59,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -91,7 +95,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.String1(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 16,
+					TestLineNumber = 18,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -107,7 +111,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					MethodName = $"String1",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.String1 failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 16,
+					TestLineNumber = 18,
 				});
 			}
 			return nodes;
@@ -161,6 +165,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -174,7 +179,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -207,7 +215,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Int(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 23,
+					TestLineNumber = 25,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -223,7 +231,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					MethodName = $"Int",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Int failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 23,
+					TestLineNumber = 25,
 				});
 			}
 			return nodes;
@@ -277,6 +285,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -290,7 +299,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -323,7 +335,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Double(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 30,
+					TestLineNumber = 32,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -339,7 +351,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					MethodName = $"Double",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Double failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 30,
+					TestLineNumber = 32,
 				});
 			}
 			return nodes;
@@ -393,6 +405,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -406,7 +419,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -439,7 +455,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Float(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 37,
+					TestLineNumber = 39,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -455,7 +471,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					MethodName = $"Float",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Float failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 37,
+					TestLineNumber = 39,
 				});
 			}
 			return nodes;
@@ -509,6 +525,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -522,7 +539,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -555,7 +575,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Long(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 44,
+					TestLineNumber = 46,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -571,7 +591,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					MethodName = $"Long",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.Long failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 44,
+					TestLineNumber = 46,
 				});
 			}
 			return nodes;
@@ -625,6 +645,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -638,7 +659,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -671,7 +695,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.UInt(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 51,
+					TestLineNumber = 53,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -687,7 +711,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					MethodName = $"UInt",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.UInt failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 51,
+					TestLineNumber = 53,
 				});
 			}
 			return nodes;
@@ -741,6 +765,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					{
 						Name = "dummy",
 						Attributes = [],
+						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
@@ -754,7 +779,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
-					Attributes = [],
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
 					Parameters = [],
 					Properties = [],
 				}),
@@ -787,7 +815,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ULong(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 58,
+					TestLineNumber = 60,
 					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
@@ -803,7 +831,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					MethodName = $"ULong",
 					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ConstantArgumentsTests.ULong failed to initialize", exception),
 					TestFilePath = @"",
-					TestLineNumber = 58,
+					TestLineNumber = 60,
 				});
 			}
 			return nodes;

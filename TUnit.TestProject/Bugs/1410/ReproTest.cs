@@ -1,8 +1,10 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1410;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<SharedFixture>(Shared = SharedType.PerTestSession)]
 public class ReproTest(SharedFixture fixture)
 {

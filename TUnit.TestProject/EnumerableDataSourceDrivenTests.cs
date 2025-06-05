@@ -1,22 +1,24 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 public class EnumerableDataSourceDrivenTests
 {
     [Test]
     [MethodDataSource(nameof(SomeMethod))]
     public async Task DataSource_Method(int value)
     {
-        await Assert.That(value).IsEqualTo(1);
+        await Assert.That(value).IsBetween(1, 5).WithInclusiveBounds();
     }
 
     [Test]
     [MethodDataSource(nameof(SomeMethod))]
     public async Task DataSource_Method2(int value)
     {
-        await Assert.That(value).IsEqualTo(1);
+        await Assert.That(value).IsBetween(1, 5).WithInclusiveBounds();
     }
 
     [Test]

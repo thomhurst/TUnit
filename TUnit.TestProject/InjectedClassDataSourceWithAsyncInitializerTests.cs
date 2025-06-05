@@ -1,8 +1,11 @@
 ﻿using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
+
 #pragma warning disable CS9113 // Parameter is unread.
 
 namespace TUnit.TestProject;
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassDataSource<MyClass>(Shared = SharedType.Keyed, Key = "MyKey")]
 public class InjectedClassDataSourceWithAsyncInitializerTests(InjectedClassDataSourceWithAsyncInitializerTests.MyClass myClass)
 {
