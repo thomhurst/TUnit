@@ -249,15 +249,8 @@ internal class ClassDataSources
 
             if (!Sources.DataGeneratorProperties.TryGetValue(instance.GetType(), out var properties))
             {
-                GlobalContext.Current.GlobalLogger.LogDebug("No Source Generated Properties found for {type.FullName}");
                 properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
             }
-            else
-            {
-                GlobalContext.Current.GlobalLogger.LogDebug($"Found Source Generated Properties for {type.FullName}");
-            }
-
-            GlobalContext.Current.GlobalLogger.LogDebug($"Properties found for {type.FullName}: {properties.Length}");
 
             InitializeDataSourceProperties(dataGeneratorMetadata, instance, properties);
 
