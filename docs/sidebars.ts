@@ -129,6 +129,7 @@ const sidebars: SidebarsConfig = {
         'examples/instrumenting-global-test-ids',
         'examples/tunit-ci-pipeline',
         'examples/fsharp-interactive',
+        'examples/filebased-csharp'
       ],
     },
     {
