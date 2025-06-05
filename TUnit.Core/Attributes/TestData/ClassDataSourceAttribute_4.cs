@@ -4,11 +4,11 @@ namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T1, 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T2, 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T3, 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T1,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T2,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T3,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T4>
-    : DataSourceGeneratorAttribute<T1, T2, T3, T4> 
+    : DataSourceGeneratorAttribute<T1, T2, T3, T4>, ISharedDataSourceAttribute
     where T1 : new()
     where T2 : new()
     where T3 : new()
@@ -16,7 +16,7 @@ public sealed class ClassDataSourceAttribute<
 {
     public SharedType[] Shared { get; set; } = [SharedType.None, SharedType.None, SharedType.None, SharedType.None, SharedType.None];
     public string[] Keys { get; set; } = [string.Empty, string.Empty, string.Empty, string.Empty, string.Empty];
-    
+
     public override IEnumerable<Func<(T1, T2, T3, T4)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () =>
@@ -100,7 +100,7 @@ public sealed class ClassDataSourceAttribute<
                     itemsWithMetadata.Item4.Key,
                     itemsWithMetadata.Item4.T);
             };
-            
+
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (obj, context) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, itemsWithMetadata.Item1.T);
@@ -108,7 +108,7 @@ public sealed class ClassDataSourceAttribute<
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, itemsWithMetadata.Item2.T);
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, itemsWithMetadata.Item4.T);
             };
-            
+
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (obj, context) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, itemsWithMetadata.Item1.T);
@@ -143,7 +143,7 @@ public sealed class ClassDataSourceAttribute<
                     itemsWithMetadata.Item4.Key,
                     itemsWithMetadata.Item4.T);
             };
-            
+
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (obj, context) =>
             {
                 await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(
@@ -179,4 +179,8 @@ public sealed class ClassDataSourceAttribute<
             );
         };
     }
+
+    public IEnumerable<SharedType> GetSharedTypes() => Shared;
+
+    public IEnumerable<string> GetKeys() => Keys;
 }

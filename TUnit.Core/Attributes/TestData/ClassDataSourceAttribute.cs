@@ -3,7 +3,9 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T> : DataSourceGeneratorAttribute<T>
+public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>
+    : DataSourceGeneratorAttribute<T>,
+        ISharedDataSourceAttribute
 {
     public SharedType Shared { get; set; } = SharedType.None;
     public string Key { get; set; } = string.Empty;
@@ -58,10 +60,14 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
             return item;
         };
     }
+
+    public IEnumerable<SharedType> GetSharedTypes() => [Shared];
+
+    public IEnumerable<string> GetKeys() => string.IsNullOrEmpty(Key) ? [] : [Key];
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
+public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttribute, ISharedDataSourceAttribute
 {
     private readonly Type[] _types;
 
@@ -132,8 +138,8 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
         _types = types;
     }
 
-    public SharedType Shared { get; set; } = SharedType.None;
-    public string Key { get; set; } = string.Empty;
+    public SharedType[] Shared { get; set; } = [SharedType.None];
+    public string[] Keys { get; set; } = [];
 
     [UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.")]
     public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
@@ -145,7 +151,7 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
             for (var i = 0; i < _types.Length; i++)
             {
                 items[i] = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                    .Get(Shared, _types[i], dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
+                    .Get(Shared.ElementAtOrDefault(0), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(0), dataGeneratorMetadata);
             }
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (obj, context) =>
@@ -155,8 +161,8 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
                     await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestRegistered(
                         context.TestContext,
                         ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
-                        Shared,
-                        Key,
+                        Shared.ElementAtOrDefault(0),
+                        Keys.ElementAtOrDefault(0),
                         item);
                 }
             };
@@ -168,8 +174,8 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
                     await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
                         context,
                         ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
-                        Shared,
-                        Key,
+                        Shared.ElementAtOrDefault(0),
+                        Keys.ElementAtOrDefault(0),
                         item);
                 }
             };
@@ -194,7 +200,7 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
             {
                 foreach (var item in items)
                 {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared, Key, item);
+                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared.ElementAtOrDefault(0), Keys.ElementAtOrDefault(0), item);
                 }
             };
 
@@ -202,11 +208,15 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
             {
                 foreach (var item in items)
                 {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared, Key, item);
+                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared.ElementAtOrDefault(0), Keys.ElementAtOrDefault(0), item);
                 }
             };
 
             return items;
         };
     }
+
+    public IEnumerable<SharedType> GetSharedTypes() => Shared;
+
+    public IEnumerable<string> GetKeys() => Keys;
 }

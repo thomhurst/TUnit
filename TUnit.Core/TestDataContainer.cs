@@ -313,7 +313,7 @@ internal static class TestDataContainer
     /// <param name="childObject">The child object that the parent depends on.</param>
     /// <param name="childSharedType">The shared type of the child object.</param>
     /// <param name="childKey">The key of the child object (for keyed sharing).</param>
-    internal static void RegisterNestedDependency(object parentObject, object childObject, SharedType childSharedType, string childKey)
+    internal static void RegisterNestedDependency(object parentObject, object childObject, SharedType childSharedType, string? childKey)
     {
         // For now, we'll track the dependency relationship directly without scope managers
         // since the current scope managers don't have a unified interface that supports all scenarios

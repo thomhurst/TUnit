@@ -77,7 +77,7 @@ internal class ClassDataSources
         throw new ArgumentOutOfRangeException();
     }
 
-    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
+    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (sharedType == SharedType.None)
         {
@@ -96,7 +96,7 @@ internal class ClassDataSources
 
         if (sharedType == SharedType.Keyed)
         {
-            return TestDataContainer.GetInstanceForKey(key, type, () => Create(type, dataGeneratorMetadata));
+            return TestDataContainer.GetInstanceForKey(key!, type, () => Create(type, dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.PerAssembly)
@@ -117,7 +117,7 @@ internal class ClassDataSources
         return Task.CompletedTask;
     }
 
-    public async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
+    public async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string? key, T? item)
     {
         switch (shared)
         {
@@ -133,7 +133,7 @@ internal class ClassDataSources
                 TestDataContainer.IncrementGlobalUsage(typeof(T));
                 break;
             case SharedType.Keyed:
-                TestDataContainer.IncrementKeyUsage(key, typeof(T));
+                TestDataContainer.IncrementKeyUsage(key!, typeof(T));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -141,7 +141,7 @@ internal class ClassDataSources
 
         if (isStatic)
         {
-            await Initialize(testContext, shared, key, item);
+            await Initialize(testContext, shared, key!, item);
         }
 
         if (item is ITestRegisteredEventReceiver testRegisteredEventReceiver)
@@ -150,7 +150,7 @@ internal class ClassDataSources
         }
     }
 
-    public async ValueTask OnInitialize<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
+    public async ValueTask OnInitialize<T>(TestContext testContext, bool isStatic, SharedType shared, string? key, T? item)
     {
         if (isStatic)
         {
@@ -161,7 +161,7 @@ internal class ClassDataSources
         await Initialize(testContext, shared, key, item);
     }
 
-    public Task Initialize<T>(TestContext testContext, SharedType shared, string key, T? item)
+    public Task Initialize<T>(TestContext testContext, SharedType shared, string? key, T? item)
     {
         if (shared == SharedType.PerTestSession)
         {
@@ -196,13 +196,13 @@ internal class ClassDataSources
             var innerDictionary = KeyedInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<string, Task>());
 
-            return innerDictionary.GetOrAdd(key, _ => InitializeObject(item));
+            return innerDictionary.GetOrAdd(key!, _ => InitializeObject(item));
         }
 
         throw new ArgumentOutOfRangeException(nameof(shared));
     }
 
-    public async ValueTask OnDispose<T>(TestContext testContext, SharedType shared, string key, T? item)
+    public async ValueTask OnDispose<T>(TestContext testContext, SharedType shared, string? key, T? item)
     {
         if (shared is SharedType.None)
         {
@@ -211,7 +211,7 @@ internal class ClassDataSources
 
         if (shared == SharedType.Keyed)
         {
-            await TestDataContainer.ConsumeKey(key, typeof(T));
+            await TestDataContainer.ConsumeKey(key!, typeof(T));
         }
 
         if (shared == SharedType.PerClass)
@@ -299,14 +299,18 @@ internal class ClassDataSources
 
             if (result is not null && dataSourceGeneratorAttribute.GetType().IsAssignableTo(typeof(IDataSourceGeneratorAttribute)))
             {
-                var sharedTypeProperty = dataSourceGeneratorAttribute.GetType()
-                    .GetProperty(nameof(ClassDataSourceAttribute<object>.Shared));
-
-                var sharedType = sharedTypeProperty?.GetValue(dataSourceGeneratorAttribute) as SharedType? ?? SharedType.None;
-
-                var keyProperty = dataSourceGeneratorAttribute.GetType()
-                    .GetProperty(nameof(ClassDataSourceAttribute<object>.Key));
-                var key = keyProperty?.GetValue(dataSourceGeneratorAttribute) as string ?? string.Empty;
+                SharedType sharedType;
+                string? key;
+                if (dataSourceGeneratorAttribute is ISharedDataSourceAttribute sharedDataSourceAttribute)
+                {
+                    sharedType = sharedDataSourceAttribute.GetSharedTypes().FirstOrDefault();
+                    key = sharedDataSourceAttribute.GetKeys().FirstOrDefault();
+                }
+                else
+                {
+                    sharedType = SharedType.None;
+                    key = null;
+                }
 
                 TestDataContainer.RegisterNestedDependency(instance, result, sharedType, key);
 
@@ -350,7 +354,7 @@ internal class ClassDataSources
     /// <param name="sharedType">The shared type of the nested dependency.</param>
     /// <param name="key">The key for keyed sharing.</param>
     /// <param name="dataGeneratorMetadata">The data generator metadata.</param>
-    private static void RegisterNestedDependencyWithLifecycle(object nestedObject, SharedType sharedType, string key, DataGeneratorMetadata dataGeneratorMetadata)
+    private static void RegisterNestedDependencyWithLifecycle(object nestedObject, SharedType sharedType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Increment usage count for the nested dependency based on its shared type
         // This ensures it gets the same usage tracking as if it were a main ClassDataSource
@@ -369,7 +373,7 @@ internal class ClassDataSources
                 TestDataContainer.IncrementGlobalUsage(nestedObject.GetType());
                 break;
             case SharedType.Keyed:
-                TestDataContainer.IncrementKeyUsage(key, nestedObject.GetType());
+                TestDataContainer.IncrementKeyUsage(key!, nestedObject.GetType());
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(sharedType));
