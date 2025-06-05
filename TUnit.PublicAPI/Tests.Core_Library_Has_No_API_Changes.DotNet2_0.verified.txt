@@ -152,9 +152,11 @@ namespace TUnit.Core
         public ClassDataSourceAttribute(System.Type type, System.Type type2, System.Type type3) { }
         public ClassDataSourceAttribute(System.Type type, System.Type type2, System.Type type3, System.Type type4) { }
         public ClassDataSourceAttribute(System.Type type, System.Type type2, System.Type type3, System.Type type4, System.Type type5) { }
-        public string Key { get; set; }
-        public TUnit.Core.SharedType Shared { get; set; }
+        public string[] Keys { get; set; }
+        public TUnit.Core.SharedType[] Shared { get; set; }
         public override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public System.Collections.Generic.IEnumerable<string> GetKeys() { }
+        public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T> : TUnit.Core.DataSourceGeneratorAttribute<T>
@@ -164,6 +166,8 @@ namespace TUnit.Core
         public string Key { get; set; }
         public TUnit.Core.SharedType Shared { get; set; }
         public override System.Collections.Generic.IEnumerable<System.Func<T>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public System.Collections.Generic.IEnumerable<string> GetKeys() { }
+        public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T1, T2> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2>
@@ -174,6 +178,8 @@ namespace TUnit.Core
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
         public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public System.Collections.Generic.IEnumerable<string> GetKeys() { }
+        public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T1, T2, T3> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3>
@@ -185,6 +191,8 @@ namespace TUnit.Core
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
         public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public System.Collections.Generic.IEnumerable<string> GetKeys() { }
+        public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T1, T2, T3, T4> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4>
@@ -197,6 +205,8 @@ namespace TUnit.Core
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
         public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public System.Collections.Generic.IEnumerable<string> GetKeys() { }
+        public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T1, T2, T3, T4, T5> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
@@ -210,6 +220,8 @@ namespace TUnit.Core
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
         public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4, T5>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public System.Collections.Generic.IEnumerable<string> GetKeys() { }
+        public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     public class ClassHookContext : TUnit.Core.Context
     {
