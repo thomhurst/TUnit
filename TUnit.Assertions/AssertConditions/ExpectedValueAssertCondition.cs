@@ -14,7 +14,7 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
     {
         _transformations.Add((actualTransformation, expectedTransformation));
     }
-    
+
     public void WithComparer(Func<TActual?, TExpected?, AssertionDecision> comparer)
     {
         _customComparers.Add(comparer);
@@ -26,13 +26,13 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
     )
     {
         var expected = ExpectedValue;
-        
+
         foreach (var (actualTransformation, expectedTransformation) in _transformations)
         {
             actualValue = actualTransformation(actualValue);
             expected = expectedTransformation(expected);
         }
-        
+
         foreach (var result in _customComparers.Select(customComparer => customComparer(actualValue, expected)))
         {
             switch (result)
@@ -44,8 +44,13 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
             }
         }
 
+        if (exception is not null)
+        {
+            return FailWithMessage($"An exception was thrown during the assertion: {exception}");
+        }
+
         return GetResult(actualValue, expected);
     }
-    
+
     protected abstract ValueTask<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue);
 }
