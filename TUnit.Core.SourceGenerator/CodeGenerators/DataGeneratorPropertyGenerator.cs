@@ -140,14 +140,14 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
 
     private static void RegisterProperty(INamedTypeSymbol type, SourceCodeWriter sourceBuilder)
     {
+        sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
+
         foreach (var propertySymbol in type.GetSelfAndBaseTypes().SelectMany(x => x.GetMembers()).OfType<IPropertySymbol>())
         {
             if (!propertySymbol.GetAttributes().Any(x => IsDataSourceGeneratorAttribute(x.AttributeClass, out _)))
             {
                 continue;
             }
-
-            sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
 
             if (propertySymbol.Type is INamedTypeSymbol namedTypePropertySymbol)
             {
