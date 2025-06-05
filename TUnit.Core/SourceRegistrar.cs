@@ -100,7 +100,7 @@ public class SourceRegistrar
     /// Registers a property initializer for a specific type that takes a DataGeneratorMetadata parameter.
     /// </summary>
     /// <typeparam name="T">The type to register the initializer for.</typeparam>
-    public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>()
+    public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
     {
         var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
             .Where(p => p.CanWrite && p.IsDefined(typeof(IDataSourceGeneratorAttribute), true))
