@@ -27,6 +27,22 @@
 
 🎭 **Extensible** - Customize data sources, attributes, and test behavior
 
+---
+
+<div align="center">
+
+## 📚 **[Complete Documentation & Learning Center](https://tunit.dev)**
+
+**🚀 New to TUnit?** Start with our **[Getting Started Guide](https://tunit.dev/docs/getting-started/installation)**
+
+**🔄 Migrating?** See our **[Migration Guides](https://tunit.dev/docs/getting-started/migration-from-xunit)** from xUnit, NUnit, or MSTest
+
+**🎯 Advanced Features?** Explore **[Data-Driven Testing](https://tunit.dev/docs/test-authoring/arguments)**, **[Test Dependencies](https://tunit.dev/docs/test-authoring/depends-on)**, and **[Parallelism Control](https://tunit.dev/docs/parallelism/not-in-parallel)**
+
+</div>
+
+---
+
 ## 🏁 Quick Start
 
 ### Using the Project Template (Recommended)
@@ -40,7 +56,7 @@ dotnet new TUnit -n "MyTestProject"
 dotnet add package TUnit --prerelease
 ```
 
-📖 **Full Documentation**: <https://tunit.dev/>
+📖 **[📚 Complete Documentation & Guides](https://tunit.dev)** - Everything you need to master TUnit
 
 ## ✨ Key Features
 
@@ -279,9 +295,10 @@ The `DataSourceGenerator<T>` pattern and custom attribute system let you extend 
 </div>
 
 ### 🤝 **Active Community**
-- 💬 [GitHub Discussions](https://github.com/thomhurst/TUnit/discussions) - Get help and share ideas
-- 🐛 [Issue Tracking](https://github.com/thomhurst/TUnit/issues) - Report bugs and request features
-- 📢 [Release Notes](https://github.com/thomhurst/TUnit/releases) - Stay updated with latest improvements
+- 📚 **[Official Documentation](https://tunit.dev)** - Comprehensive guides, tutorials, and API reference
+- 💬 **[GitHub Discussions](https://github.com/thomhurst/TUnit/discussions)** - Get help and share ideas
+- 🐛 **[Issue Tracking](https://github.com/thomhurst/TUnit/issues)** - Report bugs and request features
+- 📢 **[Release Notes](https://github.com/thomhurst/TUnit/releases)** - Stay updated with latest improvements
 
 ## 🛠️ IDE Support
 
@@ -325,6 +342,8 @@ TUnit works seamlessly across all major .NET development environments:
 [ParallelLimit<CustomLimit>]
 public async Task Modern_TUnit_Test(string value) { }
 ```
+
+📖 **Need help migrating?** Check our detailed **[Migration Guides](https://tunit.dev/docs/getting-started/migration-from-xunit)** with step-by-step instructions for xUnit, NUnit, and MSTest.
 
 
 ## 💡 Current Status
