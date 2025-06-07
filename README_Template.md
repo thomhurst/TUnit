@@ -52,7 +52,7 @@ dotnet add package TUnit --prerelease
 - 🔥 Source-generated tests (no reflection)
 - ⚡ Parallel execution by default
 - 🚀 Native AOT & trimming support
-- 📈 2-5x faster than traditional frameworks
+- 📈 Optimized for performance
 
 </td>
 <td width="50%">
@@ -354,7 +354,7 @@ dotnet add package TUnit --prerelease
 <td align="center" width="25%">
 
 ### 📈 **Performance**
-**2-5x faster** test execution
+**Optimized execution**
 **Parallel by default**
 **Zero reflection overhead**
 
