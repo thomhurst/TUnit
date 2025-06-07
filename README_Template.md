@@ -10,15 +10,11 @@
 
 ## ⚡ Why Choose TUnit?
 
-**Faster Execution**: Source generators eliminate reflection overhead, while the modern Microsoft.Testing.Platform provides superior performance over legacy VSTest.
-
-**Parallel by Default**: Tests run concurrently out of the box, with fine-grained control over parallelization when needed.
-
-**Modern .NET Support**: First-class support for Native AOT, trimmed single-file applications, and the latest .NET features.
-
-**Intelligent Test Discovery**: Tests are discovered at compile-time, giving you access to test metadata, arguments, and properties before execution.
-
-**Extensible Architecture**: Built with extensibility in mind - customize data sources, create custom attributes, and extend functionality easily.
+🚀 **2-5x Faster** - Source generators eliminate reflection overhead
+⚡ **Parallel by Default** - Tests run concurrently with intelligent dependency management
+🎯 **Compile-Time Discovery** - Know your test structure before runtime
+🔧 **Modern .NET Ready** - Native AOT, trimming, and latest .NET features
+🎭 **Extensible** - Customize data sources, attributes, and test behavior
 
 ## 🏁 Quick Start
 
@@ -37,30 +33,15 @@ dotnet add package TUnit --prerelease
 
 ## ✨ Key Features
 
-### 🔥 **Performance & Modern Platform**
-- **Source-generated tests** - No reflection overhead
-- **Parallel execution by default** - Maximum throughput
-- **Native AOT & trimming support** - Deploy anywhere
-- **Microsoft.Testing.Platform** - Modern, extensible test infrastructure
-
-### 🎯 **Flexible Test Organization**
-- **Test dependencies** - Chain tests with `[DependsOn]`
-- **Parallel control** - `[NotInParallel]`, `[ParallelLimit]` per test/class/assembly
-- **Rich categorization** - `[Category]`, `[Property]`, custom attributes
-- **Conditional execution** - `[Skip]`, `[Explicit]`, custom conditions
-
-### 📊 **Powerful Data-Driven Testing**
-- **Matrix testing** - `[MatrixDataSource]` for combinatorial tests
-- **Class injection** - `[ClassDataSource<T>]` with configurable lifetimes
-- **Method data sources** - `[MethodDataSource]` for dynamic data
-- **Extensible generators** - Create custom `DataSourceGenerator<T>`
-
-### 🛡️ **Developer Experience**
-- **Built-in analyzers** - Catch test errors at compile time
-- **Comprehensive hooks** - Before/After at Test, Class, Assembly, and Session levels
-- **Rich assertions** - Fluent async assertion syntax
-- **IDE support** - Visual Studio, Rider, VS Code
-- **Dependency injection** - Full DI container support
+- 🔥 **Source-generated tests** - No reflection overhead, faster discovery
+- ⚡ **Parallel execution by default** - Maximum throughput with fine-grained control
+- 🎯 **Test dependencies** - Chain tests with `[DependsOn]` for integration scenarios
+- 📊 **Rich data sources** - `[Arguments]`, `[MatrixDataSource]`, `[ClassDataSource<T>]`
+- 🛡️ **Built-in analyzers** - Catch test errors at compile time
+- 🔧 **Comprehensive hooks** - Before/After at Test, Class, Assembly, and Session levels
+- 🚀 **Native AOT & trimming** - Deploy tests as single-file executables
+- 💉 **Dependency injection** - Full DI container support
+- 🎭 **Custom attributes** - Extensible test conditions and retry logic
 
 ## 📝 Simple Test Example
 
@@ -176,35 +157,16 @@ public class RetryOnHttpErrorAttribute : RetryAttribute
 }
 ```
 
-## 🚀 What Makes TUnit Special?
+## 🚀 What Makes TUnit Different?
 
 ### **Compile-Time Intelligence**
-Unlike traditional frameworks that discover tests at runtime, TUnit knows everything about your tests at compile time. This enables:
-- **Faster test discovery** - No runtime reflection
-- **Better tooling integration** - IDEs get full test information upfront
-- **Advanced lifecycle management** - Precise resource cleanup based on test counts
-- **Rich metadata access** - Test context includes full argument and property information
+Tests are discovered at build time, not runtime - enabling faster discovery, better IDE integration, and precise resource lifecycle management.
 
-### **True Parallel-First Design**
-Most frameworks bolt-on parallelization. TUnit was designed parallel-first:
-- **Parallel by default** - Maximum throughput without configuration
-- **Granular control** - Control parallelization per test, class, or assembly
-- **Dependency-aware** - `[DependsOn]` creates execution chains when needed
-- **Resource-safe** - Parallel limits prevent resource exhaustion
+### **Parallel-First Architecture**
+Built for concurrency from day one with `[DependsOn]` for test chains, `[ParallelLimit]` for resource control, and intelligent scheduling.
 
-### **Extensible Data Generation**
-TUnit's `DataSourceGenerator<T>` pattern lets you create powerful, reusable data sources:
-- **Type-safe** - Full compile-time checking
-- **Flexible lifetimes** - Per test, per class, per session
-- **Composable** - Combine multiple data sources
-- **Clean syntax** - Data generation logic stays out of test classes
-
-### **Modern .NET Integration**
-Built for modern .NET development:
-- **Native AOT ready** - Deploy tests as single-file executables
-- **Source generator powered** - Minimal runtime overhead
-- **Trimming compatible** - Works with aggressive IL trimming
-- **Dependency injection** - Full DI container support
+### **Extensible by Design**
+The `DataSourceGenerator<T>` pattern and custom attribute system let you extend TUnit's capabilities without modifying core framework code.
 
 ## 🛠️ IDE Support
 
@@ -240,12 +202,6 @@ TUnit works seamlessly across all major .NET development environments:
 **Coming from NUnit or xUnit?** TUnit maintains familiar syntax while adding modern capabilities:
 
 ```csharp
-// Familiar attribute-based approach
-[Test]
-[TestCase("value1")]
-[TestCase("value2")]
-public void Traditional_Style_Test(string value) { }
-
 // Enhanced with TUnit's advanced features
 [Test]
 [Arguments("value1")]
@@ -255,12 +211,6 @@ public void Traditional_Style_Test(string value) { }
 public async Task Modern_TUnit_Test(string value) { }
 ```
 
-**Key advantages over traditional frameworks:**
-- ⚡ **2-5x faster test execution** through source generation and parallel-first design
-- 🎯 **Compile-time test discovery** eliminates runtime reflection overhead
-- 🔧 **Better debugging experience** with rich test context and metadata
-- 🚀 **Modern .NET support** including Native AOT and trimming
-- 🎭 **Advanced orchestration** with test dependencies and lifecycle hooks
 
 ## 💡 Current Status
 
