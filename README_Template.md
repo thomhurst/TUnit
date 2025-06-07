@@ -214,14 +214,6 @@ public async Task Modern_TUnit_Test(string value) { }
 
 ## 💡 Current Status
 
-TUnit is feature-complete and production-ready, currently in **prerelease** while we finalize:
-
-✅ Core framework and all major features
-✅ Visual Studio 2022 17.13+ support
-🔄 Full Rider IDE integration
-🔄 Complete Visual Studio feature parity
-📢 Community feedback and API refinement
-
 The API is mostly stable, but may have some changes based on feedback or issues before v1.0 release.
 
 ---
