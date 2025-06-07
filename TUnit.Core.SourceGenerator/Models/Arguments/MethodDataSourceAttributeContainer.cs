@@ -35,9 +35,9 @@ public record MethodDataSourceAttributeContainer(
             ? CodeGenerators.VariableNames.ClassData
             : CodeGenerators.VariableNames.MethodData;
             
-        sourceCodeWriter.WriteLine($"foreach (var {dataName}Accessor in {GetMethodInvocation()})");
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
+        sourceCodeWriter.Write($"foreach (var {dataName}Accessor in {GetMethodInvocation()})");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"{enumerableIndexName}++;");
     }
 
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
@@ -52,7 +52,7 @@ public record MethodDataSourceAttributeContainer(
         }
         else
         {
-            sourceCodeWriter.WriteLine(GenerateVariable(TypesToInject[0].GloballyQualified(), $"{GetMethodInvocation()}{FuncParenthesis()}", ref variableIndex).ToString());
+            sourceCodeWriter.Write(GenerateVariable(TypesToInject[0].GloballyQualified(), $"{GetMethodInvocation()}{FuncParenthesis()}", ref variableIndex).ToString());
         }
     }
 
@@ -65,7 +65,7 @@ public record MethodDataSourceAttributeContainer(
             tupleVariableName += Guid.NewGuid().ToString("N");
         }
 
-        sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject.Select(x => x.GloballyQualified()))}>({GetMethodInvocation()}{FuncParenthesis()});");
+        sourceCodeWriter.Write($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject.Select(x => x.GloballyQualified()))}>({GetMethodInvocation()}{FuncParenthesis()});");
             
         for (var index = 0; index < TypesToInject.Length; index++)
         {
@@ -101,7 +101,7 @@ public record MethodDataSourceAttributeContainer(
 
         var refIndex = index;
         
-        sourceCodeWriter.WriteLine(GenerateVariable(tupleType.GloballyQualified(), accessor, ref refIndex).ToString());
+        sourceCodeWriter.Write(GenerateVariable(tupleType.GloballyQualified(), accessor, ref refIndex).ToString());
     }
 
     private void WriteEnumerable(SourceCodeWriter sourceCodeWriter)
@@ -115,7 +115,7 @@ public record MethodDataSourceAttributeContainer(
             ? CodeGenerators.VariableNames.ClassData
             : CodeGenerators.VariableNames.MethodData;
             
-        sourceCodeWriter.WriteLine($"var {dataName} = {dataName}Accessor{FuncParenthesis()};");
+        sourceCodeWriter.Write($"var {dataName} = {dataName}Accessor{FuncParenthesis()};");
             
         if (IsExpandableTuples)
         {
@@ -125,7 +125,7 @@ public record MethodDataSourceAttributeContainer(
                 tupleVariableName += Guid.NewGuid().ToString("N");
             }
                 
-            sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject.Select(x => x.GloballyQualified()))}>({dataName});");
+            sourceCodeWriter.Write($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject.Select(x => x.GloballyQualified()))}>({dataName});");
 
             for (var index = 0; index < TypesToInject.Length; index++)
             {
@@ -168,7 +168,7 @@ public record MethodDataSourceAttributeContainer(
     {
         if (IsExpandableEnumerable)
         { 
-            sourceCodeWriter.WriteLine("}");
+            sourceCodeWriter.Write("}");
         }
     }
 

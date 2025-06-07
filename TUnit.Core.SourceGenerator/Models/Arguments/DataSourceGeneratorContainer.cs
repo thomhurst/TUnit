@@ -7,10 +7,10 @@ using TUnit.Core.SourceGenerator.Extensions;
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
 public record DataSourceGeneratorContainer(
-    GeneratorAttributeSyntaxContext Context, 
+    GeneratorAttributeSyntaxContext Context,
     AttributeData AttributeData,
-    ArgumentsType ArgumentsType, 
-    ImmutableArray<ITypeSymbol> ParameterOrPropertyTypes, 
+    ArgumentsType ArgumentsType,
+    ImmutableArray<ITypeSymbol> ParameterOrPropertyTypes,
     INamedTypeSymbol TestClass,
     IMethodSymbol TestMethod,
     IPropertySymbol? Property,
@@ -27,56 +27,54 @@ public record DataSourceGeneratorContainer(
             // No scope as we don't allow enumerables for properties
             return;
         }
-        
+
         var type = ArgumentsType == ArgumentsType.Method ? "TestParameters" : "ClassParameters";
 
         var dataGeneratorMetadataVariableName = $"{VariableNamePrefix}DataGeneratorMetadata";
-        
-        sourceCodeWriter.WriteLine($"var {dataGeneratorMetadataVariableName} = new DataGeneratorMetadata");
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"Type = global::TUnit.Core.Enums.DataGeneratorType.{type},");
-        sourceCodeWriter.WriteLine("TestBuilderContext = testBuilderContextAccessor,");
-        sourceCodeWriter.WriteLine("TestInformation = testInformation,");
-        
-        sourceCodeWriter.WriteTabs();
+
+        sourceCodeWriter.Write($"var {dataGeneratorMetadataVariableName} = new DataGeneratorMetadata");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"Type = global::TUnit.Core.Enums.DataGeneratorType.{type},");
+        sourceCodeWriter.Write("TestBuilderContext = testBuilderContextAccessor,");
+        sourceCodeWriter.Write("TestInformation = testInformation,");
+
         sourceCodeWriter.Write("MembersToGenerate = ");
         SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, Parameters, null, ArgumentsType);
-        
-        sourceCodeWriter.WriteLine("TestSessionId = sessionId,");
-        sourceCodeWriter.WriteLine("TestClassInstance = classInstance,");
-        sourceCodeWriter.WriteLine("ClassInstanceArguments = classInstanceArguments,");
-        sourceCodeWriter.WriteLine("};");
-        
+
+        sourceCodeWriter.Write("TestSessionId = sessionId,");
+        sourceCodeWriter.Write("TestClassInstance = classInstance,");
+        sourceCodeWriter.Write("ClassInstanceArguments = classInstanceArguments,");
+        sourceCodeWriter.Write("};");
+
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
 
         var dataAttr = GenerateDataAttributeVariable("var", string.Empty,
             ref variableIndex);
-            
-        sourceCodeWriter.WriteTabs();
+
         sourceCodeWriter.Write($"{dataAttr.Type} {dataAttr.Name} = ");
         AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);
         sourceCodeWriter.Write(";");
         sourceCodeWriter.WriteLine();
-        
+
         sourceCodeWriter.WriteLine();
 
-        sourceCodeWriter.WriteLine($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
+        sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
         sourceCodeWriter.WriteLine();
-        
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName});");
+
+        sourceCodeWriter.Write($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName});");
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
-        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.Write($"foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
+        sourceCodeWriter.Write("{");
 
         if (ArgumentsType == ArgumentsType.ClassConstructor)
         {
-            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
+            sourceCodeWriter.Write($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
         }
-        
+
         if (ArgumentsType == ArgumentsType.Method)
         {
-            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
+            sourceCodeWriter.Write($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
         }
     }
 
@@ -88,62 +86,47 @@ public record DataSourceGeneratorContainer(
             ArgumentsType.ClassConstructor => "ClassParameters",
             _ => "TestParameters"
         };
-        
+
         if (Property is not null)
         {
             var attr = GenerateDataAttributeVariable("var",
                 string.Empty,
                 ref variableIndex);
-            
-            sourceCodeWriter.WriteTabs();
+
             sourceCodeWriter.Write($"{attr.Type} {attr.Name} = ");
-            AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);     
+            AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);
             sourceCodeWriter.Write(";");
             sourceCodeWriter.WriteLine();
-            
-            sourceCodeWriter.WriteLine($"testBuilderContext.DataAttributes.Add({attr.Name});");
+
+            sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({attr.Name});");
             sourceCodeWriter.WriteLine();
-            
+
             var dataSourceVariable = GenerateVariable("var", string.Empty, ref variableIndex);
 
-            sourceCodeWriter.WriteTabs();
             sourceCodeWriter.Write($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
-            
-            sourceCodeWriter.Write($"{attr.Name}.GenerateDataSources(new DataGeneratorMetadata");
-                sourceCodeWriter.WriteLine("{");
-            sourceCodeWriter.WriteLine($"Type = global::TUnit.Core.Enums.DataGeneratorType.{type},");
-                sourceCodeWriter.WriteLine("TestBuilderContext = testBuilderContextAccessor,");
-            sourceCodeWriter.WriteLine("TestInformation = testInformation,");
-            
-            sourceCodeWriter.WriteTabs();
-            sourceCodeWriter.Write("MembersToGenerate = ");
-            SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, ImmutableArray<IParameterSymbol>.Empty, Property, ArgumentsType.Property);
-                
-            sourceCodeWriter.WriteLine("TestSessionId = sessionId,");
-            sourceCodeWriter.WriteLine("TestClassInstance = classInstance,");
-            sourceCodeWriter.WriteLine("ClassInstanceArguments = classInstanceArguments,");
-            sourceCodeWriter.WriteLine("}).ElementAtOrDefault(0)();");
+
+            sourceCodeWriter.Write(GetPropertyAssignmentFromDataSourceGeneratorAttribute(attr.Name, Context, Property));
             sourceCodeWriter.WriteLine();
             return;
         }
-        
+
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
-        
-        sourceCodeWriter.WriteLine($"var {generatedDataVariableName} = {generatedDataVariableName}Accessor();");
+
+        sourceCodeWriter.Write($"var {generatedDataVariableName} = {generatedDataVariableName}Accessor();");
 
         if (GenericArguments.Length == 0)
         {
             for (var i = 0; i < ParameterOrPropertyTypes.Length; i++)
             {
                 var refIndex = i;
-                
+
                 if (IsStronglyTyped)
                 {
-                    sourceCodeWriter.WriteLine(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"({ParameterOrPropertyTypes[i].GloballyQualified()}){generatedDataVariableName}[{i}]", ref refIndex).ToString());
+                    sourceCodeWriter.Write(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"({ParameterOrPropertyTypes[i].GloballyQualified()}){generatedDataVariableName}[{i}]", ref refIndex).ToString());
                 }
                 else
                 {
-                    sourceCodeWriter.WriteLine(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"global::TUnit.Core.Helpers.CastHelper.Cast<{ParameterOrPropertyTypes[i].GloballyQualified()}>({generatedDataVariableName}[{i}])", ref refIndex).ToString());
+                    sourceCodeWriter.Write(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"global::TUnit.Core.Helpers.CastHelper.Cast<{ParameterOrPropertyTypes[i].GloballyQualified()}>({generatedDataVariableName}[{i}])", ref refIndex).ToString());
                 }
             }
         }
@@ -152,7 +135,7 @@ public record DataSourceGeneratorContainer(
             for (var i = 0; i < GenericArguments.Length; i++)
             {
                 var refIndex = i;
-                sourceCodeWriter.WriteLine(GenerateVariable(GenericArguments[i], $"{generatedDataVariableName}.Item{i + 1}", ref refIndex).ToString());
+                sourceCodeWriter.Write(GenerateVariable(GenericArguments[i], $"{generatedDataVariableName}.Item{i + 1}", ref refIndex).ToString());
             }
 
             sourceCodeWriter.WriteLine();
@@ -168,16 +151,47 @@ public record DataSourceGeneratorContainer(
         }
     }
 
+    public static string GetPropertyAssignmentFromDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, IPropertySymbol property)
+    {
+        var sourceCodeWriter = new SourceCodeWriter();
+
+        sourceCodeWriter.Write($"{attributeVariableName}.GenerateDataSources(");
+        WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, property);
+        sourceCodeWriter.Write(").ElementAtOrDefault(0)()");
+        sourceCodeWriter.Write(";");
+        sourceCodeWriter.WriteLine();
+
+        return sourceCodeWriter.ToString();
+    }
+
+    public static void WriteDataGeneratorMetadataProperty(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, IPropertySymbol property)
+    {
+        sourceCodeWriter.Write("new DataGeneratorMetadata");
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
+        sourceCodeWriter.Write("TestBuilderContext = testBuilderContextAccessor,");
+        sourceCodeWriter.Write("TestInformation = testInformation,");
+
+        sourceCodeWriter.Write("MembersToGenerate = ");
+        SourceInformationWriter.GenerateMembers(sourceCodeWriter, context, ImmutableArray<IParameterSymbol>.Empty, property, ArgumentsType.Property);
+
+        sourceCodeWriter.Write("TestSessionId = sessionId,");
+        sourceCodeWriter.Write("TestClassInstance = classInstance,");
+        sourceCodeWriter.Write("ClassInstanceArguments = classInstanceArguments,");
+        sourceCodeWriter.Write("}");
+    }
+
     public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         if (ArgumentsType is ArgumentsType.Property)
         {
             return;
         }
-        
-        sourceCodeWriter.WriteLine("}");
+
+        sourceCodeWriter.Write("}");
     }
-    
+
     public override string[] GetArgumentTypes()
     {
         return GenericArguments;

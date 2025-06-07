@@ -9,21 +9,21 @@ public static class GlobalTestHooksWriter
 {
     public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model)
     { 
-        sourceBuilder.WriteLine($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
-        sourceBuilder.WriteLine("{");
+        sourceBuilder.Write($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
+        sourceBuilder.Write("{");
         
         sourceBuilder.WriteTabs();
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
         
-        sourceBuilder.WriteLine($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)})),");
+        sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)})),");
 
-        sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
-        sourceBuilder.WriteLine($"Order = {model.Order},");
-        sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
-        sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
+        sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+        sourceBuilder.Write($"Order = {model.Order},");
+        sourceBuilder.Write($"""FilePath = @"{model.FilePath}",""");
+        sourceBuilder.Write($"LineNumber = {model.LineNumber},");
 
-        sourceBuilder.WriteLine("},");
+        sourceBuilder.Write("},");
     }
 
     private static string GetClassType(string hookType, HookLocationType hookLocationType)

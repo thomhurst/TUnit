@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
@@ -14,9 +15,9 @@ public class AttributeWriter
         var dataAttributeInterface =
             context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute
                 .WithoutGlobalPrefix);
-        
+
         attributeDatas = attributeDatas.RemoveAll(x => x.AttributeClass?.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataAttributeInterface)) == true);
-        
+
         if (attributeDatas.Length == 0)
         {
             sourceCodeWriter.Write("[],");
@@ -25,10 +26,9 @@ public class AttributeWriter
         }
 
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("[");
+        sourceCodeWriter.Write("[");
         for (var index = 0; index < attributeDatas.Length; index++)
         {
-            sourceCodeWriter.WriteTabs();
             var attributeData = attributeDatas[index];
 
             if (attributeData.ApplicationSyntaxReference is null)
@@ -45,18 +45,26 @@ public class AttributeWriter
 
             sourceCodeWriter.WriteLine();
         }
-        sourceCodeWriter.WriteLine("],");
+        sourceCodeWriter.Write("],");
     }
 
     public static void WriteAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData)
     {
+        sourceCodeWriter.Write(GetAttributeInvocation(context, attributeData));
+    }
+
+    public static string GetAttributeInvocation(GeneratorAttributeSyntaxContext context,
+        AttributeData attributeData)
+    {
+        var sourceCodeWriter = new SourceCodeWriter();
+
         var syntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
 
         if (syntax is null)
         {
             WriteAttributeWithoutSyntax(sourceCodeWriter, context, attributeData);
-            return;
+            return sourceCodeWriter.ToString();
         }
 
         var arguments = syntax.ChildNodes()
@@ -78,17 +86,35 @@ public class AttributeWriter
 
         if (formattedProperties.Length == 0)
         {
-            return;
+            return sourceCodeWriter.ToString();
         }
 
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.Write("{");
         foreach (var property in formattedProperties)
         {
-            sourceCodeWriter.WriteLine($"{property},");
+            sourceCodeWriter.Write($"{property},");
         }
 
+        WriteDataSourceGeneratorProperties(sourceCodeWriter, attributeData);
+
         sourceCodeWriter.Write("}");
+
+        return sourceCodeWriter.ToString();
+    }
+
+    private static void WriteDataSourceGeneratorProperties(SourceCodeWriter sourceCodeWriter, AttributeData attributeData)
+    {
+        foreach (var propertySymbol in attributeData.AttributeClass?.GetMembers().OfType<IPropertySymbol>() ?? [])
+        {
+            if (propertySymbol.GetAttributes().FirstOrDefault(x => x.IsDataSourceAttribute()) is not { } dataSourceAttribute)
+            {
+                continue;
+            }
+
+            sourceCodeWriter.Write($"{propertySymbol.Name} = ");
+            sourceCodeWriter.Write(DataSourceGeneratorContainer.GetPropertyAssignmentFromDataSourceGeneratorAttribute());
+        }
     }
 
     private static string FormatConstructorArgument(GeneratorAttributeSyntaxContext context, AttributeArgumentSyntax attributeArgumentSyntax)
@@ -125,8 +151,8 @@ public class AttributeWriter
         }
 
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"{formattedNamedArgs}");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"{formattedNamedArgs}");
         sourceCodeWriter.Write("}");
     }
 }

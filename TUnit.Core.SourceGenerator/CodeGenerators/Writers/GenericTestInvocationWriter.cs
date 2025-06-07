@@ -26,50 +26,50 @@ public static class GenericTestInvocationWriter
         
         sourceBuilder.WriteLine();
         
-        sourceBuilder.WriteLine("var testBuilderContext = new global::TUnit.Core.TestBuilderContext();");
-        sourceBuilder.WriteLine("var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);");
+        sourceBuilder.Write("var testBuilderContext = new global::TUnit.Core.TestBuilderContext();");
+        sourceBuilder.Write("var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);");
 
         WriteScopesAndArguments(sourceBuilder, testSourceDataModel);
 
         foreach (var (propertySymbol, argumentsContainer) in testSourceDataModel.PropertyArguments.InnerContainers.Where(c => c.PropertySymbol.IsStatic))
         {
-            sourceBuilder.WriteLine($"{fullyQualifiedClassType}.{propertySymbol.Name} = {argumentsContainer.DataVariables.Select(x => x.Name).ElementAt(0)};");
+            sourceBuilder.Write($"{fullyQualifiedClassType}.{propertySymbol.Name} = {argumentsContainer.DataVariables.Select(x => x.Name).ElementAt(0)};");
         }
         
         sourceBuilder.WriteLine();
         
         sourceBuilder.WriteLine();
         
-        sourceBuilder.WriteLine($"nodes.Add(new TestMetadata<{fullyQualifiedClassType}>");
-        sourceBuilder.WriteLine("{"); 
-        sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
+        sourceBuilder.Write($"nodes.Add(new TestMetadata<{fullyQualifiedClassType}>");
+        sourceBuilder.Write("{"); 
+        sourceBuilder.Write($"TestId = $\"{testId}\",");
+        sourceBuilder.Write($"TestClassArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
+        sourceBuilder.Write($"TestMethodArguments = [{testSourceDataModel.MethodArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
         
-        sourceBuilder.WriteLine("TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>");
-        sourceBuilder.WriteLine("{");
+        sourceBuilder.Write("TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>");
+        sourceBuilder.Write("{");
         foreach (var propertyContainer in testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
-            sourceBuilder.WriteLine($"[\"{propertyContainer.PropertySymbol.Name}\"] = {propertyContainer.ArgumentsContainer.DataVariables.Select(variable => variable.Name).ToCommaSeparatedString()},");
+            sourceBuilder.Write($"[\"{propertyContainer.PropertySymbol.Name}\"] = {propertyContainer.ArgumentsContainer.DataVariables.Select(variable => variable.Name).ToCommaSeparatedString()},");
         }
-        sourceBuilder.WriteLine("},");
+        sourceBuilder.Write("},");
 
 
-        sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
-        sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
-        sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
-        sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
-        sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
-        sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
+        sourceBuilder.Write($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
+        sourceBuilder.Write($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
+        sourceBuilder.Write("ResettableClassFactory = resettableClassFactory,");
+        sourceBuilder.Write($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
+        sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
+        sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
         
-        sourceBuilder.WriteLine("TestMethod = testInformation,");
+        sourceBuilder.Write("TestMethod = testInformation,");
         
-        sourceBuilder.WriteLine("TestBuilderContext = testBuilderContext,");
-        sourceBuilder.WriteLine("});");
+        sourceBuilder.Write("TestBuilderContext = testBuilderContext,");
+        sourceBuilder.Write("});");
         
-        sourceBuilder.WriteLine("resettableClassFactory = resettableClassFactoryDelegate();");
-        sourceBuilder.WriteLine("testBuilderContext = new();");
-        sourceBuilder.WriteLine("testBuilderContextAccessor.Current = testBuilderContext;");
+        sourceBuilder.Write("resettableClassFactory = resettableClassFactoryDelegate();");
+        sourceBuilder.Write("testBuilderContext = new();");
+        sourceBuilder.Write("testBuilderContextAccessor.Current = testBuilderContext;");
         
         testSourceDataModel.ClassArguments.CloseScope(sourceBuilder);
         testSourceDataModel.MethodArguments.CloseScope(sourceBuilder);
@@ -81,8 +81,8 @@ public static class GenericTestInvocationWriter
         var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
         
-        sourceBuilder.WriteLine($"{testSourceDataModel.TestClass.GloballyQualified()}? classInstance = null;");;
-        sourceBuilder.WriteLine("object?[]? classInstanceArguments = null;");;
+        sourceBuilder.Write($"{testSourceDataModel.TestClass.GloballyQualified()}? classInstance = null;");;
+        sourceBuilder.Write("object?[]? classInstanceArguments = null;");;
 
         if (NeedsClassInstantiatedForMethodData(testSourceDataModel))
         {
@@ -91,16 +91,16 @@ public static class GenericTestInvocationWriter
             testSourceDataModel.ClassArguments.OpenScope(sourceBuilder, ref classVariablesIndex);
             testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
             
-            sourceBuilder.WriteLine($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
+            sourceBuilder.Write($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
             
             testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
 
             NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
             
-            sourceBuilder.WriteLine(
+            sourceBuilder.Write(
                 "var resettableClassFactory = resettableClassFactoryDelegate();");
             
-            sourceBuilder.WriteLine("classInstance = resettableClassFactory.Value;");
+            sourceBuilder.Write("classInstance = resettableClassFactory.Value;");
         
             testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
 
@@ -114,14 +114,14 @@ public static class GenericTestInvocationWriter
 
         testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
         
-        sourceBuilder.WriteLine($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
+        sourceBuilder.Write($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
         
         testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
         testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
         
-        sourceBuilder.WriteLine(
+        sourceBuilder.Write(
             "var resettableClassFactory = resettableClassFactoryDelegate();");
     }
 

@@ -13,35 +13,31 @@ public static class SourceInformationWriter
     {
         sourceCodeWriter.Write($"global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd(\"{namedTypeSymbol.GloballyQualified()}\", () => new global::TUnit.Core.SourceGeneratedClassInformation");
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.Write("{");
 
         var parent = namedTypeSymbol.ContainingType;
 
         if (parent != null)
         {
-            sourceCodeWriter.WriteTabs();
             sourceCodeWriter.Write("Parent = ");
             GenerateClassInformation(sourceCodeWriter, context, parent);
         }
         else
         {
-            sourceCodeWriter.WriteLine("Parent = null,");
+            sourceCodeWriter.Write("Parent = null,");
         }
 
-        sourceCodeWriter.WriteLine($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
+        sourceCodeWriter.Write($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Assembly = ");
         GenerateAssemblyInformation(sourceCodeWriter, context, namedTypeSymbol.ContainingAssembly);
 
-        sourceCodeWriter.WriteLine($"Name = \"{namedTypeSymbol.Name}\",");
-        sourceCodeWriter.WriteLine($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
+        sourceCodeWriter.Write($"Name = \"{namedTypeSymbol.Name}\",");
+        sourceCodeWriter.Write($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray());
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Parameters = ");
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters
             ?? ImmutableArray<IParameterSymbol>.Empty;
@@ -54,19 +50,17 @@ public static class SourceInformationWriter
         else
         {
             sourceCodeWriter.WriteLine();
-            sourceCodeWriter.WriteLine("[");
+            sourceCodeWriter.Write("[");
 
             foreach (var parameter in parameters)
             {
-                sourceCodeWriter.WriteTabs();
-                GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
+                    GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
                     null);
             }
 
-            sourceCodeWriter.WriteLine("],");
+            sourceCodeWriter.Write("],");
         }
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Properties = ");
         var properties = namedTypeSymbol.GetMembers().OfType<IPropertySymbol>().ToArray();
 
@@ -78,15 +72,15 @@ public static class SourceInformationWriter
         else
         {
             sourceCodeWriter.WriteLine();
-            sourceCodeWriter.WriteLine("[");
+            sourceCodeWriter.Write("[");
             foreach (var propertySymbol in properties)
             {
                 GeneratePropertyInformation(sourceCodeWriter, context, propertySymbol);
             }
-            sourceCodeWriter.WriteLine("],");
+            sourceCodeWriter.Write("],");
         }
 
-        sourceCodeWriter.WriteLine("}),");
+        sourceCodeWriter.Write("}),");
     }
 
     private static void GenerateAssemblyInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, IAssemblySymbol assembly)
@@ -94,14 +88,13 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write(
             $"global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd(\"{assembly.Name}\", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation");
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"Name = \"{assembly.Name}\",");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"Name = \"{assembly.Name}\",");
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, assembly.GetAttributes());
 
-        sourceCodeWriter.WriteLine("}),");
+        sourceCodeWriter.Write("}),");
     }
 
     public static void GenerateMethodInformation(SourceCodeWriter sourceCodeWriter,
@@ -110,17 +103,15 @@ public static class SourceInformationWriter
     {
         sourceCodeWriter.Write("new global::TUnit.Core.SourceGeneratedMethodInformation");
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
-        sourceCodeWriter.WriteLine($"Name = \"{methodSymbol.Name}\",");
-        sourceCodeWriter.WriteLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
-        sourceCodeWriter.WriteLine($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
+        sourceCodeWriter.Write($"Name = \"{methodSymbol.Name}\",");
+        sourceCodeWriter.Write($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
+        sourceCodeWriter.Write($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, methodSymbol.GetAttributes());
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Parameters = ");
         var parameters = methodSymbol.Parameters;
 
@@ -132,16 +123,15 @@ public static class SourceInformationWriter
         else
         {
             sourceCodeWriter.WriteLine();
-            sourceCodeWriter.WriteLine("[");
+            sourceCodeWriter.Write("[");
 
             foreach (var parameter in parameters)
             {
-                sourceCodeWriter.WriteTabs();
-                GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
+                    GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
                     null);
             }
 
-            sourceCodeWriter.WriteLine("],");
+            sourceCodeWriter.Write("],");
         }
 
         sourceCodeWriter.WriteTabs();
@@ -164,21 +154,19 @@ public static class SourceInformationWriter
         }
 
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("[");
+        sourceCodeWriter.Write("[");
 
         if (property is not null)
         {
-            sourceCodeWriter.WriteTabs();
             GeneratePropertyInformation(sourceCodeWriter, context, property);
         }
 
         foreach (var parameter in parameters)
         {
-            sourceCodeWriter.WriteTabs();
             GenerateParameterInformation(sourceCodeWriter, context, parameter, argumentsType, null);
         }
 
-        sourceCodeWriter.WriteLine("],");
+        sourceCodeWriter.Write("],");
     }
 
     public static void GeneratePropertyInformation(SourceCodeWriter sourceCodeWriter,
@@ -186,16 +174,15 @@ public static class SourceInformationWriter
     {
         sourceCodeWriter.Write("new global::TUnit.Core.SourceGeneratedPropertyInformation");
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"Type = typeof({property.Type.GloballyQualified()}),");
-        sourceCodeWriter.WriteLine($"Name = \"{property.Name}\",");
-        sourceCodeWriter.WriteLine($"IsStatic = {property.IsStatic.ToString().ToLower()},");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"Type = typeof({property.Type.GloballyQualified()}),");
+        sourceCodeWriter.Write($"Name = \"{property.Name}\",");
+        sourceCodeWriter.Write($"IsStatic = {property.IsStatic.ToString().ToLower()},");
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, property.GetAttributes());
 
-        sourceCodeWriter.WriteLine("},");
+        sourceCodeWriter.Write("},");
     }
 
     public static void GenerateParameterInformation(SourceCodeWriter sourceCodeWriter,
@@ -212,15 +199,14 @@ public static class SourceInformationWriter
 
         sourceCodeWriter.Write($"new global::TUnit.Core.SourceGeneratedParameterInformation<{type}>");
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"Name = \"{parameter.Name}\",");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"Name = \"{parameter.Name}\",");
 
-        sourceCodeWriter.WriteTabs();
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, parameter.GetAttributes());
 
         // TODO: Struggling to get this to work with generic type parameters
-        sourceCodeWriter.WriteLine("ReflectionInfo = null!,");
+        sourceCodeWriter.Write("ReflectionInfo = null!,");
 
         // if(argumentsType == ArgumentsType.ClassConstructor)
         // {
@@ -245,7 +231,7 @@ public static class SourceInformationWriter
         //     sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetMethodParameterInfo(typeof({containingType}), \"{methodName}\", {parameterIndex}, new Type[] {{{parameterTypesString}}}, {isStatic.ToString().ToLowerInvariant()}, {genericParameterCount}),");
         // }
 
-        sourceCodeWriter.WriteLine("},");
+        sourceCodeWriter.Write("},");
 
         string GetTypeOrSubstitution(ITypeSymbol type)
         {

@@ -3,10 +3,16 @@ using System.Text;
 
 namespace TUnit.Core.SourceGenerator;
 
-public class SourceCodeWriter : IDisposable
+public class SourceCodeWriter(int tabLevel = 0, char lastCharacter = ' ') : IDisposable
 {
-    private int _tabLevel;
+    private int _tabLevel = tabLevel;
     private readonly StringBuilder _stringBuilder = new();
+
+    private static char[] _startOfStringTabLevelIncreasingChars = ['{', '['];
+    private static char[] _startOfStringTabLevelDecreasingChars = ['}', ']'];
+
+    private static char[] _endOfStringNewLineTriggerringChars = [',', ';'];
+
 
     public void WriteLine()
     {
@@ -15,37 +21,42 @@ public class SourceCodeWriter : IDisposable
 
     public void Write([StringSyntax("c#")] string value)
     {
-        _stringBuilder.Append(value);
-    }
-
-    public void WriteTabs()
-    {
-        for (var i = 0; i < _tabLevel; i++)
-        {
-            _stringBuilder.Append('\t');
-        }
-    }
-
-    public void WriteLine([StringSyntax("c#")] string value)
-    {
         if (string.IsNullOrEmpty(value))
         {
             return;
         }
-        
-        if (value[0] is '}' or ']')
+
+        var tempTabCount = 0;
+        if (value.Length > 0 && value[0] == '\t')
+        {
+            tempTabCount = value.TakeWhile(c => c == '\t').Count();
+        }
+
+        _tabLevel -= tempTabCount;
+
+        if (_startOfStringTabLevelDecreasingChars.Contains(value[0]))
         {
             _tabLevel--;
         }
-        
-        WriteTabs();
-        
-        _stringBuilder.AppendLine(value);
 
-        if (value is ['{' or '['])
+        for (var i = 0; i < _tabLevel; i++)
+        {
+            _stringBuilder.Append('\t');
+        }
+
+        _stringBuilder.Append(value);
+
+        if (_endOfStringNewLineTriggerringChars.Contains(value[^1]))
+        {
+            _stringBuilder.AppendLine();
+        }
+
+        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
         {
             _tabLevel++;
         }
+
+        _tabLevel += tempTabCount;
     }
 
     public override string ToString()

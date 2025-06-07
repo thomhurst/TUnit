@@ -11,26 +11,26 @@ public static class ClassHooksWriter
     { 
         if (model.HookLocationType == HookLocationType.Before)
         {
-            sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.BeforeClassHookMethod");
+            sourceBuilder.Write("new global::TUnit.Core.Hooks.BeforeClassHookMethod");
         }
         else
         {
-            sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.AfterClassHookMethod");
+            sourceBuilder.Write("new global::TUnit.Core.Hooks.AfterClassHookMethod");
         }
 
-        sourceBuilder.WriteLine("{");
+        sourceBuilder.Write("{");
         sourceBuilder.WriteTabs();
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
         
-        sourceBuilder.WriteLine($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
+        sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
         
-        sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
-        sourceBuilder.WriteLine($"Order = {model.Order},");
-        sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
-        sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
+        sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+        sourceBuilder.Write($"Order = {model.Order},");
+        sourceBuilder.Write($"""FilePath = @"{model.FilePath}",""");
+        sourceBuilder.Write($"LineNumber = {model.LineNumber},");
 
-        sourceBuilder.WriteLine("},");
+        sourceBuilder.Write("},");
     }
 
     private static string GetArgs(HooksDataModel model)

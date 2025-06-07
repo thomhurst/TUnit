@@ -9,16 +9,16 @@ public static class NewClassWriter
     {
         if (argumentsContainer is ClassConstructorAttributeContainer classConstructorAttributeContainer)
         {
-            sourceCodeWriter.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>(sessionId, testBuilderContext);");
+            sourceCodeWriter.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>(sessionId, testBuilderContext);");
             return;
         }
         
-        sourceCodeWriter.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{typeName}>(() => ");
+        sourceCodeWriter.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{typeName}>(() => ");
 
-        sourceCodeWriter.WriteLine($"new {typeName}({argumentsContainer.DataVariables.Select(x => x.Name).ToCommaSeparatedString()})");
+        sourceCodeWriter.Write($"new {typeName}({argumentsContainer.DataVariables.Select(x => x.Name).ToCommaSeparatedString()})");
 
         classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
         
-        sourceCodeWriter.WriteLine(", sessionId, testBuilderContext);");
+        sourceCodeWriter.Write(", sessionId, testBuilderContext);");
     }
 }

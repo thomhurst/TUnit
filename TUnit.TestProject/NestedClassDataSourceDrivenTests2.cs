@@ -1,47 +1,14 @@
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
-public class NestedClassDataSourceDrivenTests
+public class NestedClassDataSourceDrivenTests2
 {
     [Test]
-    [ClassDataSource<SomeClass1>(Shared = SharedType.PerClass)]
-    public async Task DataSource_Class(SomeClass1 value)
-    {
-        Console.WriteLine(value);
-
-        await Assert.That(value.IsInitialized).IsTrue();
-        await Assert.That(value.InnerClass.IsInitialized).IsTrue();
-        await Assert.That(value.InnerClass.InnerClass.IsInitialized).IsTrue();
-
-        await Assert.That(value.IsDisposed).IsFalse();
-        await Assert.That(value.InnerClass.IsDisposed).IsFalse();
-        await Assert.That(value.InnerClass.InnerClass.IsDisposed).IsFalse();
-    }
-
-    [Test]
-    [ClassDataSource<SomeClass1>(Shared = SharedType.PerClass)]
-    [DependsOn(nameof(DataSource_Class))]
-    public async Task DataSource_Class2(SomeClass1 value)
-    {
-        Console.WriteLine(value);
-
-        await Assert.That(value.IsInitialized).IsTrue();
-        await Assert.That(value.InnerClass.IsInitialized).IsTrue();
-        await Assert.That(value.InnerClass.InnerClass.IsInitialized).IsTrue();
-
-        await Assert.That(value.IsDisposed).IsFalse();
-        await Assert.That(value.InnerClass.IsDisposed).IsFalse();
-        await Assert.That(value.InnerClass.InnerClass.IsDisposed).IsFalse();
-    }
-
-    [Test]
-    [ClassDataSource<SomeClass1>(Shared = SharedType.PerClass)]
-    [DependsOn(nameof(DataSource_Class2))]
+    [MyDataProvider]
     public async Task DataSource_Class3(SomeClass1 value)
     {
         Console.WriteLine(value);
@@ -53,6 +20,18 @@ public class NestedClassDataSourceDrivenTests
         await Assert.That(value.IsDisposed).IsFalse();
         await Assert.That(value.InnerClass.IsDisposed).IsFalse();
         await Assert.That(value.InnerClass.InnerClass.IsDisposed).IsFalse();
+    }
+
+    [method: SetsRequiredMembers]
+    public class MyDataProvider() : DataSourceGeneratorAttribute<SomeClass1>
+    {
+        [ClassDataSource<SomeClass1>]
+        public required SomeClass1 InnerClass { get; init; }
+
+        public override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        {
+            yield return () => InnerClass;
+        }
     }
 
     public record SomeClass1 : IAsyncInitializer, IAsyncDisposable

@@ -13,33 +13,33 @@ public class TestHooksWriter : BaseHookWriter
         {
             if (model.HookLocationType == HookLocationType.Before)
             {
-                sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.BeforeTestHookMethod");
+                sourceBuilder.Write("new global::TUnit.Core.Hooks.BeforeTestHookMethod");
             }
             else
             {
-                sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.AfterTestHookMethod");
+                sourceBuilder.Write("new global::TUnit.Core.Hooks.AfterTestHookMethod");
             }
             
-            sourceBuilder.WriteLine("{ ");
+            sourceBuilder.Write("{ ");
             sourceBuilder.WriteTabs();
             sourceBuilder.Write("MethodInfo = ");
             SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
             
-            sourceBuilder.WriteLine($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
+            sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
             
-            sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
-            sourceBuilder.WriteLine($"Order = {model.Order},");
-            sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
-            sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
+            sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+            sourceBuilder.Write($"Order = {model.Order},");
+            sourceBuilder.Write($"""FilePath = @"{model.FilePath}",""");
+            sourceBuilder.Write($"LineNumber = {model.LineNumber},");
             
-            sourceBuilder.WriteLine("},");
+            sourceBuilder.Write("},");
 
             return;
         }
 
-        sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.InstanceHookMethod");
-        sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"ClassType = typeof({model.FullyQualifiedTypeName}),");
+        sourceBuilder.Write("new global::TUnit.Core.Hooks.InstanceHookMethod");
+        sourceBuilder.Write("{");
+        sourceBuilder.Write($"ClassType = typeof({model.FullyQualifiedTypeName}),");
         sourceBuilder.WriteTabs();
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
@@ -47,18 +47,18 @@ public class TestHooksWriter : BaseHookWriter
 
         if (model.ClassType.IsGenericDefinition())
         {
-            sourceBuilder.WriteLine(
+            sourceBuilder.Write(
                 $"Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
         }
         else
         {
-            sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => (({model.FullyQualifiedTypeName})classInstance).{model.MethodName}({GetArgs(model)})),");
+            sourceBuilder.Write($"Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => (({model.FullyQualifiedTypeName})classInstance).{model.MethodName}({GetArgs(model)})),");
         }
 
-        sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
-        sourceBuilder.WriteLine($"Order = {model.Order},");
+        sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+        sourceBuilder.Write($"Order = {model.Order},");
         
-        sourceBuilder.WriteLine("},");
+        sourceBuilder.Write("},");
     }
 
     private static string GetArgsOrEmptyArray(HooksDataModel model)
