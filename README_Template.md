@@ -4,10 +4,8 @@
 
 **TUnit** is a next-generation testing framework for C# that outpaces traditional frameworks with **source-generated tests**, **parallel execution by default**, and **Native AOT support**. Built on the modern Microsoft.Testing.Platform, TUnit delivers faster test runs, better developer experience, and unmatched flexibility.
 
-> 💬 *"TUnit has transformed our testing workflow - tests run 3x faster and the compile-time discovery catches issues before they reach CI."*
-> — **Development teams using TUnit**
-
 [![thomhurst%2FTUnit | Trendshift](https://trendshift.io/api/badge/repositories/11781)](https://trendshift.io/repositories/11781)
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8231644d844435eb9fd15110ea771d8)](https://app.codacy.com/gh/thomhurst/TUnit?utm_source=github.com&utm_medium=referral&utm_content=thomhurst/TUnit&utm_campaign=Badge_Grade) ![GitHub Repo stars](https://img.shields.io/github/stars/thomhurst/TUnit) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed-raw/thomhurst/TUnit)
  [![GitHub Sponsors](https://img.shields.io/github/sponsors/thomhurst)](https://github.com/sponsors/thomhurst) [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) [![NuGet Downloads](https://img.shields.io/nuget/dt/TUnit)](https://www.nuget.org/packages/TUnit/) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit)
 
@@ -20,12 +18,13 @@
 | Modern .NET | ⚠️ Limited AOT support | ✅ **Full Native AOT & trimming** |
 | Test Dependencies | ❌ Not supported | ✅ **`[DependsOn]` chains** |
 | Resource Management | ❌ Manual lifecycle | ✅ **Intelligent cleanup** |
-| IDE Integration | ⚠️ Basic | ✅ **Rich metadata & context** |
 
-🚀 **2-5x Faster** - Source generators eliminate reflection overhead
 ⚡ **Parallel by Default** - Tests run concurrently with intelligent dependency management
+
 🎯 **Compile-Time Discovery** - Know your test structure before runtime
+
 🔧 **Modern .NET Ready** - Native AOT, trimming, and latest .NET features
+
 🎭 **Extensible** - Customize data sources, attributes, and test behavior
 
 ## 🏁 Quick Start
