@@ -19,19 +19,18 @@ public class TestHooksWriter : BaseHookWriter
             {
                 sourceBuilder.Write("new global::TUnit.Core.Hooks.AfterTestHookMethod");
             }
-            
+
             sourceBuilder.Write("{ ");
-            sourceBuilder.WriteTabs();
             sourceBuilder.Write("MethodInfo = ");
             SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
-            
+
             sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
-            
+
             sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
             sourceBuilder.Write($"Order = {model.Order},");
             sourceBuilder.Write($"""FilePath = @"{model.FilePath}",""");
             sourceBuilder.Write($"LineNumber = {model.LineNumber},");
-            
+
             sourceBuilder.Write("},");
 
             return;
@@ -40,7 +39,6 @@ public class TestHooksWriter : BaseHookWriter
         sourceBuilder.Write("new global::TUnit.Core.Hooks.InstanceHookMethod");
         sourceBuilder.Write("{");
         sourceBuilder.Write($"ClassType = typeof({model.FullyQualifiedTypeName}),");
-        sourceBuilder.WriteTabs();
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
 
@@ -57,7 +55,7 @@ public class TestHooksWriter : BaseHookWriter
 
         sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
         sourceBuilder.Write($"Order = {model.Order},");
-        
+
         sourceBuilder.Write("},");
     }
 
@@ -67,7 +65,7 @@ public class TestHooksWriter : BaseHookWriter
         {
             return "[]";
         }
-        
+
         return GetArgs(model);
     }
 }

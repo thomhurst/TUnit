@@ -13,7 +13,7 @@ public static class AssemblyHooksWriter
         {
             return;
         }
-        
+
         if (model.HookLocationType == HookLocationType.Before)
         {
             sourceBuilder.Write("new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod");
@@ -24,31 +24,30 @@ public static class AssemblyHooksWriter
         }
 
         sourceBuilder.Write("{ ");
-        sourceBuilder.WriteTabs();
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
-        
+
         sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
-        
+
         sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
         sourceBuilder.Write($"Order = {model.Order},");
         sourceBuilder.Write($"""FilePath = @"{model.FilePath}",""");
         sourceBuilder.Write($"LineNumber = {model.LineNumber},");
-        
+
         sourceBuilder.Write("},");
     }
-    
+
     private static string GetArgs(HooksDataModel model)
     {
         List<string> args = [];
-        
+
         foreach (var type in model.ParameterTypes)
         {
             if (type == WellKnownFullyQualifiedClassNames.AssemblyHookContext.WithGlobalPrefix)
             {
                 args.Add("context");
             }
-            
+
             if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)
             {
                 args.Add("cancellationToken");

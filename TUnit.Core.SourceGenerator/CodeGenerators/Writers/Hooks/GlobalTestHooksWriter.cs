@@ -8,14 +8,13 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 public static class GlobalTestHooksWriter
 {
     public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model)
-    { 
+    {
         sourceBuilder.Write($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
         sourceBuilder.Write("{");
-        
-        sourceBuilder.WriteTabs();
+
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
-        
+
         sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)})),");
 
         sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
@@ -40,7 +39,7 @@ public static class GlobalTestHooksWriter
                 _ => throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null)
             };
         }
-        
+
         return hookType switch
         {
             "TUnit.Core.HookType.Test" => "global::TUnit.Core.Hooks.AfterTestHookMethod",
@@ -66,7 +65,7 @@ public static class GlobalTestHooksWriter
             "TUnit.Core.HookType.TestDiscovery" when hookLocationType == HookLocationType.After => WellKnownFullyQualifiedClassNames.TestDiscoveryContext,
             _ => throw new ArgumentOutOfRangeException()
         };
-        
+
         foreach (var type in model.ParameterTypes)
         {
             if (type == expectedType.WithGlobalPrefix)

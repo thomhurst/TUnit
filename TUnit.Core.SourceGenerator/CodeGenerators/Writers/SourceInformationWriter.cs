@@ -134,8 +134,6 @@ public static class SourceInformationWriter
             sourceCodeWriter.Write("],");
         }
 
-        sourceCodeWriter.WriteTabs();
-
         sourceCodeWriter.Write("Class = ");
         GenerateClassInformation(sourceCodeWriter, context, namedTypeSymbol);
 

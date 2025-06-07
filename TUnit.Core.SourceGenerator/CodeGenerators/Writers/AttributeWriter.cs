@@ -51,10 +51,10 @@ public class AttributeWriter
     public static void WriteAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData)
     {
-        sourceCodeWriter.Write(GetAttributeInvocation(context, attributeData));
+        sourceCodeWriter.Write(GetAttributeObjectInitializer(context, attributeData));
     }
 
-    public static string GetAttributeInvocation(GeneratorAttributeSyntaxContext context,
+    public static string GetAttributeObjectInitializer(GeneratorAttributeSyntaxContext context,
         AttributeData attributeData)
     {
         var sourceCodeWriter = new SourceCodeWriter();
@@ -96,14 +96,14 @@ public class AttributeWriter
             sourceCodeWriter.Write($"{property},");
         }
 
-        WriteDataSourceGeneratorProperties(sourceCodeWriter, attributeData);
+        WriteDataSourceGeneratorProperties(sourceCodeWriter, context, attributeData);
 
         sourceCodeWriter.Write("}");
 
         return sourceCodeWriter.ToString();
     }
 
-    private static void WriteDataSourceGeneratorProperties(SourceCodeWriter sourceCodeWriter, AttributeData attributeData)
+    private static void WriteDataSourceGeneratorProperties(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, AttributeData attributeData)
     {
         foreach (var propertySymbol in attributeData.AttributeClass?.GetMembers().OfType<IPropertySymbol>() ?? [])
         {
@@ -113,7 +113,10 @@ public class AttributeWriter
             }
 
             sourceCodeWriter.Write($"{propertySymbol.Name} = ");
-            sourceCodeWriter.Write(DataSourceGeneratorContainer.GetPropertyAssignmentFromDataSourceGeneratorAttribute());
+
+            var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute);
+
+            sourceCodeWriter.Write(DataSourceGeneratorContainer.GetPropertyAssignmentFromDataSourceGeneratorAttribute(innerAttribute, context, propertySymbol));
         }
     }
 

@@ -13,19 +13,18 @@ public static class GenericTestInvocationWriter
         TestSourceDataModel testSourceDataModel)
     {
         var testId = testSourceDataModel.TestId;
-        
+
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
-        
-        sourceBuilder.WriteTabs();
+
         sourceBuilder.Write("var testInformation = ");
 
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder,
             testSourceDataModel.TestGenerationContext.Context,
             testSourceDataModel.TestClass, testSourceDataModel.TestMethod,
             testSourceDataModel.GenericSubstitutions, ';');
-        
+
         sourceBuilder.WriteLine();
-        
+
         sourceBuilder.Write("var testBuilderContext = new global::TUnit.Core.TestBuilderContext();");
         sourceBuilder.Write("var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);");
 
@@ -35,17 +34,17 @@ public static class GenericTestInvocationWriter
         {
             sourceBuilder.Write($"{fullyQualifiedClassType}.{propertySymbol.Name} = {argumentsContainer.DataVariables.Select(x => x.Name).ElementAt(0)};");
         }
-        
+
         sourceBuilder.WriteLine();
-        
+
         sourceBuilder.WriteLine();
-        
+
         sourceBuilder.Write($"nodes.Add(new TestMetadata<{fullyQualifiedClassType}>");
-        sourceBuilder.Write("{"); 
+        sourceBuilder.Write("{");
         sourceBuilder.Write($"TestId = $\"{testId}\",");
         sourceBuilder.Write($"TestClassArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
         sourceBuilder.Write($"TestMethodArguments = [{testSourceDataModel.MethodArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
-        
+
         sourceBuilder.Write("TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>");
         sourceBuilder.Write("{");
         foreach (var propertyContainer in testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
@@ -61,16 +60,16 @@ public static class GenericTestInvocationWriter
         sourceBuilder.Write($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
         sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        
+
         sourceBuilder.Write("TestMethod = testInformation,");
-        
+
         sourceBuilder.Write("TestBuilderContext = testBuilderContext,");
         sourceBuilder.Write("});");
-        
+
         sourceBuilder.Write("resettableClassFactory = resettableClassFactoryDelegate();");
         sourceBuilder.Write("testBuilderContext = new();");
         sourceBuilder.Write("testBuilderContextAccessor.Current = testBuilderContext;");
-        
+
         testSourceDataModel.ClassArguments.CloseScope(sourceBuilder);
         testSourceDataModel.MethodArguments.CloseScope(sourceBuilder);
     }
@@ -80,7 +79,7 @@ public static class GenericTestInvocationWriter
         var methodVariablesIndex = 0;
         var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
-        
+
         sourceBuilder.Write($"{testSourceDataModel.TestClass.GloballyQualified()}? classInstance = null;");;
         sourceBuilder.Write("object?[]? classInstanceArguments = null;");;
 
@@ -90,37 +89,37 @@ public static class GenericTestInvocationWriter
             // We don't want to do this always because the standard ordering is better at reducing data re-use or leakage between tests
             testSourceDataModel.ClassArguments.OpenScope(sourceBuilder, ref classVariablesIndex);
             testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
-            
+
             sourceBuilder.Write($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
-            
+
             testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
 
             NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
-            
+
             sourceBuilder.Write(
                 "var resettableClassFactory = resettableClassFactoryDelegate();");
-            
+
             sourceBuilder.Write("classInstance = resettableClassFactory.Value;");
-        
+
             testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
 
             testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
-            
+
             return;
         }
-        
+
         testSourceDataModel.ClassArguments.OpenScope(sourceBuilder, ref classVariablesIndex);
         testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
 
         testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
-        
+
         sourceBuilder.Write($"classInstanceArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}];");
-        
+
         testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
         testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
-        
+
         sourceBuilder.Write(
             "var resettableClassFactory = resettableClassFactoryDelegate();");
     }
@@ -131,7 +130,7 @@ public static class GenericTestInvocationWriter
         {
             return true;
         }
-        
+
         if (testSourceDataModel.MethodArguments.Attribute?.AttributeClass?.Interfaces.Any(x => x.GloballyQualified() == "global::TUnit.Core.IAccessesInstanceData") is true)
         {
             return true;
