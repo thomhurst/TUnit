@@ -26,8 +26,8 @@ public class SourceCodeWriter : IDisposable
     private static char[] _startOfStringTabLevelIncreasingChars = ['{', '['];
     private static char[] _startOfStringTabLevelDecreasingChars = ['}', ']'];
 
-    private static char[] _endOfStringNewLineTriggerringChars = [',', ';'];
-    private static string[] _startOfStringNewLineTriggerringStrings = ["#pragma"];
+    private static char[] _endOfStringNewLineTriggerringChars = [',', ';', ']'];
+    private static string[] _startOfStringNewLineTriggerringStrings = ["#pragma", "}"];
 
 
     public void WriteLine()

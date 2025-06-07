@@ -12,9 +12,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyBase1();
 					SourceRegistrar.RegisterAssemblyHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId)
@@ -90,9 +93,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyBase1();
 					SourceRegistrar.RegisterTestHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
@@ -167,9 +173,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyBase2();
 					SourceRegistrar.RegisterAssemblyHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId)
@@ -245,9 +254,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyBase2();
 					SourceRegistrar.RegisterTestHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
@@ -322,9 +334,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyBase3();
 					SourceRegistrar.RegisterAssemblyHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId)
@@ -400,9 +415,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyBase3();
 					SourceRegistrar.RegisterTestHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
@@ -477,9 +495,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyCleanupTests();
 					SourceRegistrar.RegisterAssemblyHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId)
@@ -555,9 +576,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyCleanupTests();
 					SourceRegistrar.RegisterAssemblyHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId)
@@ -641,9 +665,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyCleanupTests();
 					SourceRegistrar.RegisterAssemblyHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId)
@@ -727,9 +754,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyCleanupTests();
 					SourceRegistrar.RegisterAssemblyHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId)
@@ -821,9 +851,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyCleanupTests();
 					SourceRegistrar.RegisterTestHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
@@ -898,9 +931,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyCleanupTests();
 					SourceRegistrar.RegisterTestHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
@@ -986,9 +1022,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyCleanupTests();
 					SourceRegistrar.RegisterTestHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
@@ -1071,9 +1110,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_AssemblyCleanupTests();
 					SourceRegistrar.RegisterTestHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)

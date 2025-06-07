@@ -10,9 +10,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					global::TUnit.Core.SourceRegistrar.Register(new Tests());
 				}				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 				{					return

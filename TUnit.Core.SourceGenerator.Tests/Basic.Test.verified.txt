@@ -10,9 +10,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Basic : global::TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Basic : global::TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					global::TUnit.Core.SourceRegistrar.RegisterDynamic(new Basic());
 				}				public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)
 				{					try

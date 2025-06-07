@@ -9,8 +9,11 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void InitializeProperties()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void InitializeProperties()
 				{					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>();
 					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass2>();
 					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass3>();
@@ -26,8 +29,11 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void InitializeProperties()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void InitializeProperties()
 				{					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>();
 					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass2>();
 					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass3>();
@@ -43,8 +49,11 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void InitializeProperties()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void InitializeProperties()
 				{					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>();
 					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass2>();
 					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass3>();
@@ -60,8 +69,11 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void InitializeProperties()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void InitializeProperties()
 				{					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass2>();
 					global::TUnit.Core.SourceRegistrar.RegisterProperty<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass3>();
 				}			}

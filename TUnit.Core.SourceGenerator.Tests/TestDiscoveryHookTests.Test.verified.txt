@@ -12,9 +12,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_TestDiscoveryHookTests();
 					SourceRegistrar.RegisterTestDiscoveryHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)
@@ -87,9 +90,12 @@ namespace TUnit.SourceGenerated;
 
 
 [global::System.Diagnostics.StackTraceHidden]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]		file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
+
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
 		{
-			[global::System.Runtime.CompilerServices.ModuleInitializer]				public static void Initialise()
+			[global::System.Runtime.CompilerServices.ModuleInitializer]
+				public static void Initialise()
 				{					var instance = new Hooks_TestDiscoveryHookTests();
 					SourceRegistrar.RegisterTestDiscoveryHookSource(instance);
 				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)
