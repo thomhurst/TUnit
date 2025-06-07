@@ -8,7 +8,8 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
-public static class StringIsNotExtensions
+[GenerateAssertion<string>(AssertionType.IsNot, nameof(string.IsNormalized))]
+public static partial class StringIsNotExtensions
 {
     public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
