@@ -16,7 +16,7 @@ Public Class MoreTests
         Console.WriteLine("Did I forget that data injection works on classes too?")
     End Sub
 
-    <ClassDataSource(GetType(DataClass), Shared:=SharedType.PerTestSession)>
+    <ClassDataSource(GetType(DataClass), Shared:={SharedType.PerTestSession})>
     Public Property DataClass As DataClass
 
     <Test>
