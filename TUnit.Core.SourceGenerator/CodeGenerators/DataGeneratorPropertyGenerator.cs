@@ -71,9 +71,16 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             return false;
         }
 
+        if (propertyType.SpecialType is not SpecialType.None
+            and not SpecialType.System_IDisposable)
+        {
+            return false;
+        }
+
         if (propertyType.AllInterfaces.Any(p =>
                 p.GloballyQualified() == "global::TUnit.Core.Interfaces.IAsyncInitializer" ||
                 p.GloballyQualified() == "global::System.IAsyncDisposable" ||
+                p.GloballyQualified() == "global::System.IDisposable" ||
                 p.GloballyQualified() == "global::TUnit.Core.Interfaces.IEventReceiver"))
         {
             return true;

@@ -122,6 +122,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int, string, bool)),
 							Name = "Property1",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property1,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
@@ -132,6 +133,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int, string, bool)),
 							Name = "Property2",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property2,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
@@ -142,6 +144,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property3",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property3,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
@@ -152,6 +155,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property4",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property4,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
@@ -322,6 +326,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int, string, bool)),
 							Name = "Property1",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property1,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
@@ -332,6 +337,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int, string, bool)),
 							Name = "Property2",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property2,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
@@ -342,6 +348,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property3",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property3,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
@@ -352,6 +359,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property4",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property4,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
@@ -522,6 +530,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int, string, bool)),
 							Name = "Property1",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property1,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
@@ -532,6 +541,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int, string, bool)),
 							Name = "Property2",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property2,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
@@ -542,6 +552,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property3",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property3,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
@@ -552,6 +563,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property4",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property4,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
@@ -722,6 +734,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int, string, bool)),
 							Name = "Property1",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property1,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
@@ -732,6 +745,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int, string, bool)),
 							Name = "Property2",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property2,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
@@ -742,6 +756,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property3",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property3,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
@@ -752,6 +767,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property4",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property4,
 							Attributes = 
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")

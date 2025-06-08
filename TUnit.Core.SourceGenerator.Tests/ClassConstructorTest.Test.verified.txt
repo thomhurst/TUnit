@@ -76,6 +76,7 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 							Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
 							Name = "DummyReferenceTypeClass",
 							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.ClassConstructorTest)o).DummyReferenceTypeClass,
 							Attributes = [],
 						},
 					],

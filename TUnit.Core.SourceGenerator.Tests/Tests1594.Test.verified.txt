@@ -69,7 +69,17 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 							ReflectionInfo = null!,
 						},
 					],
-					Properties = [],
+					Properties = 
+					[
+						new global::TUnit.Core.SourceGeneratedPropertyInformation
+						{
+							Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
+							Name = "Fixture",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.Bugs._1594.MyTests)o).Fixture,
+							Attributes = [],
+						},
+					],
 				}),
 			};
 

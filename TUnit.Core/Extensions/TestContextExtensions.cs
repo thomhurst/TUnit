@@ -325,7 +325,9 @@ public static class TestContextExtensions
         }
 
         foreach (var property in (properties ?? [])
-                     .Select(x => x.GetValue(obj)))
+                 .Select(x => x.GetMethod?.IsStatic is true
+                     ? x.GetValue(null)
+                     : x.GetValue(obj)))
         {
             foreach (var innerProperty in CollectProperties(property))
             {
