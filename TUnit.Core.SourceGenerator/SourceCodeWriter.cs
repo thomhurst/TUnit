@@ -62,7 +62,9 @@ public class SourceCodeWriter : IDisposable
         // Add newline before opening braces/brackets if not already on a new line
         if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
         {
-            if(_stringBuilder.Length > 0 && _stringBuilder[^1] != '\n')
+            if(_stringBuilder.Length > 0
+               && _stringBuilder[^1] != '\n'
+               && !_endOfStringNewLineTriggerringChars.Contains(_stringBuilder[^1]))
             {
                 _stringBuilder.AppendLine();
             }
