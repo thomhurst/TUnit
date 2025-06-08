@@ -8,6 +8,8 @@ public class TestInitializeEventWrapper(AsyncEvent<TestContext>.Invocation invoc
 
     public Task InitializeAsync()
     {
-        return invocation.InvokeAsync(sender:this, eventArgs: TestContext.Current!).AsTask();
+        var testContext = TestContext.Current!;
+
+        return invocation.InvokeAsync(sender:this, eventArgs: testContext).AsTask();
     }
 }

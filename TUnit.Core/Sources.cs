@@ -19,5 +19,5 @@ internal static class Sources
     public static readonly ConcurrentQueue<ITestSessionHookSource> TestSessionHookSources = [];
     public static readonly ConcurrentQueue<ITestDiscoveryHookSource> TestDiscoveryHookSources = [];
 
-    public static readonly ConcurrentDictionary<Type, PropertyInfo[]> DataGeneratorProperties = new();
+    public static readonly ConcurrentDictionary<Type, PropertyInfo[]> Properties = new();
 }

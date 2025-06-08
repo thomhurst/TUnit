@@ -111,6 +111,6 @@ public class SourceRegistrar
             return;
         }
 
-        Sources.DataGeneratorProperties.TryAdd(typeof(T), properties);
+        Sources.Properties.TryAdd(typeof(T), properties);
     }
 }

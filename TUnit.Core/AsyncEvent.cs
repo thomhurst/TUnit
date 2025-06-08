@@ -1,10 +1,23 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
 public class AsyncEvent<TEventArgs>
 {
-    public int Order { get; set; } = int.MaxValue / 2;
+    public int Order
+    {
+        get;
+        set
+        {
+            field = value;
+
+            if (InvocationList.Count > 0)
+            {
+                InvocationList[^1].Order = field;
+            }
+        }
+    } = int.MaxValue / 2;
 
     internal List<Invocation> InvocationList { get; } = [];
 
@@ -13,7 +26,11 @@ public class AsyncEvent<TEventArgs>
 
     public class Invocation(Func<object, TEventArgs, Task> factory, int order) : IEventReceiver
     {
-        public int Order => order;
+        public int Order
+        {
+            get;
+            internal set;
+        } = order;
 
         public async ValueTask InvokeAsync(object sender, TEventArgs eventArgs)
         {

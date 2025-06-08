@@ -53,7 +53,12 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
         return attributeBaseType.TypeArguments
             .Where(x => x is not ITypeParameterSymbol)
             .OfType<INamedTypeSymbol>()
-            .Where(HasDataGeneratorProperties);
+            .Where(x => HasDataGeneratorProperties(x) || IsAsyncInitializer(x));
+    }
+
+    private static bool IsAsyncInitializer(INamedTypeSymbol namedTypeSymbol)
+    {
+        return namedTypeSymbol.AllInterfaces.Any(x => x.GloballyQualified() == "global::TUnit.Core.Interfaces.IAsyncInitializer");
     }
 
     private static bool HasDataGeneratorProperties(ITypeSymbol type)

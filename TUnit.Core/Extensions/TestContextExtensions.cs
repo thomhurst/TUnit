@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using TUnit.Core.Events;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -115,8 +116,13 @@ public static class TestContextExtensions
     internal static IEnumerable<ITestStartEventReceiver> GetTestStartEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context, EventType.TestStart).OfType<ITestStartEventReceiver>();
 
-    internal static IEnumerable<IAsyncInitializer> GetOnInitializeObjects(this TestContext context) =>
-        GetEventObjects(context, EventType.Initialize).OfType<IAsyncInitializer>();
+    internal static IEnumerable<IAsyncInitializer> GetOnInitializeObjects(this TestContext context)
+    {
+        return GetEventObjects(context, EventType.Initialize)
+            .Distinct()
+            .OfType<IAsyncInitializer>()
+            .OrderBy(x => x is IEventReceiver receiver ? receiver.Order : int.MaxValue);
+    }
 
     internal static IEnumerable<ITestRetryEventReceiver> GetTestRetryEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context, EventType.TestRetry).OfType<ITestRetryEventReceiver>();
@@ -131,7 +137,7 @@ public static class TestContextExtensions
             ..context.TestDetails.Attributes,
             context.InternalDiscoveredTest.ClassConstructor,
             context.TestDetails.ClassInstance,
-            context.Events,
+            GetEventObjects(context, EventType.Dispose),
             context
         ];
 
@@ -163,7 +169,10 @@ public static class TestContextExtensions
 
     private static IEnumerable<object?> GetPossibleEventObjects(this TestContext context, EventType eventType)
     {
-        return GetEventObjects(context, eventType).OfType<IEventReceiver>().OrderBy(x => x.Order);
+        return GetEventObjects(context, eventType)
+            .Distinct()
+            .OfType<IEventReceiver>()
+            .OrderBy(x => x.Order);
     }
 
     private static object?[] GetEventObjects(TestContext context, EventType eventType)
@@ -187,20 +196,21 @@ public static class TestContextExtensions
             EventType.Initialize => contextEvents.OnInitialize?.InvocationList.Select(x => new TestInitializeEventWrapper(x)) ?? [],
             EventType.Dispose => contextEvents.OnDispose?.InvocationList.Select(x => new TestDisposeEventWrapper(x)) ?? [],
             EventType.TestRegistered => contextEvents.OnTestRegistered?.InvocationList.Select(x => new TestRegisteredEventWrapper(x)) ?? [],
-            EventType.TestStart => contextEvents.OnTestStart?.InvocationList ?? [],
-            EventType.TestEnd => contextEvents.OnTestEnd?.InvocationList ?? [],
-            EventType.TestSkipped => contextEvents.OnTestSkipped?.InvocationList ?? [],
-            EventType.LastTestInClass => contextEvents.OnLastTestInClass?.InvocationList ?? [],
-            EventType.LastTestInAssembly => contextEvents.OnLastTestInAssembly?.InvocationList ?? [],
-            EventType.LastTestInTestSession => contextEvents.OnLastTestInTestSession?.InvocationList ?? [],
-            EventType.TestRetry => contextEvents.OnTestRetry?.InvocationList ?? [],
-            EventType.FirstTestInClass => contextEvents.OnFirstTestInClass?.InvocationList ?? [],
-            EventType.FirstTestInAssembly => contextEvents.OnFirstTestInAssembly?.InvocationList ?? [],
-            EventType.FirstTestInTestSession => contextEvents.OnFirstTestInTestSession?.InvocationList ?? [],
+            EventType.TestStart => contextEvents.OnTestStart?.InvocationList.Select(x => new TestStartEventWrapper(x)) ?? [],
+            EventType.TestEnd => contextEvents.OnTestEnd?.InvocationList.Select(x => new TestEndEventWrapper(x)) ?? [],
+            EventType.TestSkipped => contextEvents.OnTestSkipped?.InvocationList.Select(x => new TestSkippedEventWrapper(x)) ?? [],
+            EventType.LastTestInClass => contextEvents.OnLastTestInClass?.InvocationList.Select(x => new LastTestInClassEventWrapper(x)) ?? [],
+            EventType.LastTestInAssembly => contextEvents.OnLastTestInAssembly?.InvocationList.Select(x => new LastTestInAssemblyEventWrapper(x)) ?? [],
+            EventType.LastTestInTestSession => contextEvents.OnLastTestInTestSession?.InvocationList.Select(x => new LastTestInTestSessionEventWrapper(x)) ?? [],
+            EventType.TestRetry => contextEvents.OnTestRetry?.InvocationList.Select(x => new TestRetryEventWrapper(x)) ?? [],
+            EventType.FirstTestInClass => contextEvents.OnFirstTestInClass?.InvocationList.Select(x => new FirstTestInClassEventWrapper(x)) ?? [],
+            EventType.FirstTestInAssembly => contextEvents.OnFirstTestInAssembly?.InvocationList.Select(x => new FirstTestInAssemblyEventWrapper(x)) ?? [],
+            EventType.FirstTestInTestSession => contextEvents.OnFirstTestInTestSession?.InvocationList.Select(x => new FirstTestInTestSessionEventWrapper(x)) ?? [],
             _ => throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null)
         };
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
     private static IEnumerable<object?> CollectProperties(this object? obj)
     {
         if (obj is null)
@@ -208,15 +218,17 @@ public static class TestContextExtensions
             yield break;
         }
 
-        if (!Sources.DataGeneratorProperties.TryGetValue(obj.GetType(), out var properties))
+        if (!Sources.Properties.TryGetValue(obj.GetType(), out var properties))
         {
-            // We assume we are not in a source generator context, so we use reflection to get the properties.
-#pragma warning disable IL2075
-            properties = obj.GetType().GetProperties();
-#pragma warning restore IL2075
+#if NET
+            if (RuntimeFeature.IsDynamicCodeSupported)
+#endif
+            {
+                properties = obj.GetType().GetProperties();
+            }
         }
 
-        foreach (var property in properties
+        foreach (var property in (properties ?? [])
                      .Select(x => x.GetValue(obj))
                      .OfType<IAsyncInitializer>())
         {

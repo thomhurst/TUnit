@@ -242,7 +242,7 @@ internal class ClassDataSources
         {
             var instance = Activator.CreateInstance(type)!;
 
-            if (!Sources.DataGeneratorProperties.TryGetValue(instance.GetType(), out var properties))
+            if (!Sources.Properties.TryGetValue(instance.GetType(), out var properties))
             {
                 properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
             }
@@ -292,7 +292,7 @@ internal class ClassDataSources
                 return;
             }
 
-            if (!Sources.DataGeneratorProperties.TryGetValue(result.GetType(), out var nestedProperties))
+            if (!Sources.Properties.TryGetValue(result.GetType(), out var nestedProperties))
             {
                 nestedProperties = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
             }
@@ -311,7 +311,7 @@ internal class ClassDataSources
         }
     }
 
-    private static void RegisterEvents(object item, DataGeneratorMetadata dataGeneratorMetadata, SharedType sharedType, string? key)
+    public static void RegisterEvents(object? item, DataGeneratorMetadata dataGeneratorMetadata, SharedType sharedType, string? key)
     {
         dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (_, context) =>
             {
@@ -332,13 +332,14 @@ internal class ClassDataSources
                     key,
                     item);
             };
-
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize.Order = -1;
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
             {
                 await Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, item);
             };
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart.Order = -1;
+
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, context) =>
             {
@@ -369,39 +370,6 @@ internal class ClassDataSources
         if (item is ITestEndEventReceiver testEndEventReceiver)
         {
             await testEndEventReceiver.OnTestEnd(context);
-        }
-    }
-
-    /// <summary>
-    /// Registers a nested dependency with proper usage tracking for its shared type.
-    /// </summary>
-    /// <param name="nestedObject">The nested dependency object.</param>
-    /// <param name="sharedType">The shared type of the nested dependency.</param>
-    /// <param name="key">The key for keyed sharing.</param>
-    /// <param name="dataGeneratorMetadata">The data generator metadata.</param>
-    private static void RegisterNestedDependencyWithLifecycle(object nestedObject, SharedType sharedType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        // Increment usage count for the nested dependency based on its shared type
-        // This ensures it gets the same usage tracking as if it were a main ClassDataSource
-        switch (sharedType)
-        {
-            case SharedType.None:
-                // No usage tracking needed for non-shared objects
-                break;
-            case SharedType.PerClass:
-                TestDataContainer.IncrementTestClassUsage(dataGeneratorMetadata.TestClassType, nestedObject.GetType());
-                break;
-            case SharedType.PerAssembly:
-                TestDataContainer.IncrementAssemblyUsage(dataGeneratorMetadata.TestClassType.Assembly, nestedObject.GetType());
-                break;
-            case SharedType.PerTestSession:
-                TestDataContainer.IncrementGlobalUsage(nestedObject.GetType());
-                break;
-            case SharedType.Keyed:
-                TestDataContainer.IncrementKeyUsage(key!, nestedObject.GetType());
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(sharedType));
         }
     }
 }
