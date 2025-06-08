@@ -40,7 +40,7 @@
 
 **🚀 New to TUnit?** Start with our **[Getting Started Guide](https://tunit.dev/docs/getting-started/installation)**
 
-**🔄 Migrating?** See our **[Migration Guides](https://tunit.dev/docs/getting-started/migration-from-xunit)** from xUnit, NUnit, or MSTest
+**🔄 Migrating?** See our **[Migration Guides](https://tunit.dev/docs/getting-started/migration-from-xunit)**
 
 **🎯 Advanced Features?** Explore **[Data-Driven Testing](https://tunit.dev/docs/test-authoring/arguments)**, **[Test Dependencies](https://tunit.dev/docs/test-authoring/depends-on)**, and **[Parallelism Control](https://tunit.dev/docs/parallelism/not-in-parallel)**
 
@@ -311,14 +311,17 @@ TUnit works seamlessly across all major .NET development environments:
 
 ### Visual Studio (2022 17.13+)
 ✅ **Fully supported** - No additional configuration needed for latest versions
+
 ⚙️ **Earlier versions**: Enable "Use testing platform server mode" in Tools > Manage Preview Features
 
 ### JetBrains Rider
 ✅ **Fully supported**
+
 ⚙️ **Setup**: Enable "Testing Platform support" in Settings > Build, Execution, Deployment > Unit Testing > VSTest
 
 ### Visual Studio Code
 ✅ **Fully supported**
+
 ⚙️ **Setup**: Install [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) and enable "Use Testing Platform Protocol"
 
 ### Command Line
