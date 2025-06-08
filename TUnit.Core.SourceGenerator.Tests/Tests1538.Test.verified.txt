@@ -31,7 +31,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
 				Name = "Eight_Args",
 				GenericTypeCount = 0,
@@ -43,82 +43,64 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					new global::TUnit.Core.MethodDataSourceAttribute("EightItems")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-					{
+{
 						Name = "expectedSuccess",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-						{
+{
 							Name = "expectedError",
-							Attributes = 
-							[],
-
+							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-							{
+{
 								Name = "expectedT0",
-								Attributes = 
-								[],
-
+								Attributes = [],
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-								{
+{
 									Name = "expectedT1",
-									Attributes = 
-									[],
-
+									Attributes = [],
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
+{
 										Name = "expectedT2",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 										new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-										{
+{
 											Name = "expectedT3",
-											Attributes = 
-											[],
-
+											Attributes = [],
 												ReflectionInfo = null!,
 											},
 											new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-											{
+{
 												Name = "expectedT4",
-												Attributes = 
-												[],
-
+												Attributes = [],
 													ReflectionInfo = null!,
 												},
 												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-												{
+{
 													Name = "expectedT5",
-													Attributes = 
-													[],
-
+													Attributes = [],
 														ReflectionInfo = null!,
 													},
 												],
 												Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-												{
+{
 													Parent = null,
 													Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
 													Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1538", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-													{
+{
 														Name = "Tests1538",
-														Attributes = 
-														[],
-
+														Attributes = [],
 														}),
 														Name = "Tests",
 														Namespace = "TUnit.TestProject.Bugs._1538",
@@ -126,11 +108,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 														[
 															new EngineTest(Pass)
 														],
-														Parameters = 
-														[],
+														Parameters = [],
 
-															Properties = 
-															[],
+															Properties = [],
 
 															}),
 														}
@@ -236,7 +216,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
 				Name = "SixteenArgs",
 				GenericTypeCount = 0,
@@ -248,146 +228,112 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					new global::TUnit.Core.MethodDataSourceAttribute("SixteenItems")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-					{
+{
 						Name = "expectedSuccess",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-						{
+{
 							Name = "item1",
-							Attributes = 
-							[],
-
+							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-							{
+{
 								Name = "item2",
-								Attributes = 
-								[],
-
+								Attributes = [],
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-								{
+{
 									Name = "item3",
-									Attributes = 
-									[],
-
+									Attributes = [],
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
+{
 										Name = "item4",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 										new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-										{
+{
 											Name = "item5",
-											Attributes = 
-											[],
-
+											Attributes = [],
 												ReflectionInfo = null!,
 											},
 											new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-											{
+{
 												Name = "item6",
-												Attributes = 
-												[],
-
+												Attributes = [],
 													ReflectionInfo = null!,
 												},
 												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-												{
+{
 													Name = "item7",
-													Attributes = 
-													[],
-
+													Attributes = [],
 														ReflectionInfo = null!,
 													},
 													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-													{
+{
 														Name = "item8",
-														Attributes = 
-														[],
-
+														Attributes = [],
 															ReflectionInfo = null!,
 														},
 														new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-														{
+{
 															Name = "item9",
-															Attributes = 
-															[],
-
+															Attributes = [],
 																ReflectionInfo = null!,
 															},
 															new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-															{
+{
 																Name = "item10",
-																Attributes = 
-																[],
-
+																Attributes = [],
 																	ReflectionInfo = null!,
 																},
 																new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																{
+{
 																	Name = "item11",
-																	Attributes = 
-																	[],
-
+																	Attributes = [],
 																		ReflectionInfo = null!,
 																	},
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																	{
+{
 																		Name = "item12",
-																		Attributes = 
-																		[],
-
+																		Attributes = [],
 																			ReflectionInfo = null!,
 																		},
 																		new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																		{
+{
 																			Name = "item13",
-																			Attributes = 
-																			[],
-
+																			Attributes = [],
 																				ReflectionInfo = null!,
 																			},
 																			new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																			{
+{
 																				Name = "item14",
-																				Attributes = 
-																				[],
-
+																				Attributes = [],
 																					ReflectionInfo = null!,
 																				},
 																				new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																				{
+{
 																					Name = "item15",
-																					Attributes = 
-																					[],
-
+																					Attributes = [],
 																						ReflectionInfo = null!,
 																					},
 																				],
 																				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																				{
+{
 																					Parent = null,
 																					Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
 																					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1538", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																					{
+{
 																						Name = "Tests1538",
-																						Attributes = 
-																						[],
-
+																						Attributes = [],
 																						}),
 																						Name = "Tests",
 																						Namespace = "TUnit.TestProject.Bugs._1538",
@@ -395,11 +341,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																						[
 																							new EngineTest(Pass)
 																						],
-																						Parameters = 
-																						[],
+																						Parameters = [],
 
-																							Properties = 
-																							[],
+																							Properties = [],
 
 																							}),
 																						}

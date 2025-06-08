@@ -31,7 +31,7 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.NameOfArgumentTests),
 				Name = "TestName",
 				GenericTypeCount = 0,
@@ -43,26 +43,22 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					new global::TUnit.Core.ArgumentsAttribute("TestName")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "name",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NameOfArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NameOfArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NameOfArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "NameOfArgumentTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "NameOfArgumentTests",
 							Namespace = "TUnit.TestProject",
@@ -70,11 +66,9 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}

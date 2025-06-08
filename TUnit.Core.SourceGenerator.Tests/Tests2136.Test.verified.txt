@@ -38,7 +38,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 				Name = "GenericArgumentsTest",
 				GenericTypeCount = 1,
@@ -58,34 +58,28 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-					{
+{
 						Name = "value",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-						{
+{
 							Name = "expected",
-							Attributes = 
-							[],
-
+							Attributes = [],
 								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
+{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2136", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
+{
 								Name = "Tests2136",
-								Attributes = 
-								[],
-
+								Attributes = [],
 								}),
 								Name = "Tests",
 								Namespace = "TUnit.TestProject.Bugs._2136",
@@ -93,11 +87,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 								[
 									new EngineTest(Pass)
 								],
-								Parameters = 
-								[],
+								Parameters = [],
 
-									Properties = 
-									[],
+									Properties = [],
 
 									}),
 								}
@@ -163,7 +155,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							try
 							{
 								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-								{
+{
 									Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 									Name = "GenericArgumentsTest",
 									GenericTypeCount = 1,
@@ -183,34 +175,28 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 										new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item")
 									],
 									Parameters = 
-									[
+[
 										new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-										{
+{
 											Name = "value",
-											Attributes = 
-											[],
-
+											Attributes = [],
 												ReflectionInfo = null!,
 											},
 											new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-											{
+{
 												Name = "expected",
-												Attributes = 
-												[],
-
+												Attributes = [],
 													ReflectionInfo = null!,
 												},
 											],
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-											{
+{
 												Parent = null,
 												Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2136", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-												{
+{
 													Name = "Tests2136",
-													Attributes = 
-													[],
-
+													Attributes = [],
 													}),
 													Name = "Tests",
 													Namespace = "TUnit.TestProject.Bugs._2136",
@@ -218,11 +204,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 													[
 														new EngineTest(Pass)
 													],
-													Parameters = 
-													[],
+													Parameters = [],
 
-														Properties = 
-														[],
+														Properties = [],
 
 														}),
 													}
@@ -288,7 +272,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 												try
 												{
 													var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-													{
+{
 														Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 														Name = "GenericArgumentsTest",
 														GenericTypeCount = 1,
@@ -308,34 +292,28 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 															new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item")
 														],
 														Parameters = 
-														[
+[
 															new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-															{
+{
 																Name = "value",
-																Attributes = 
-																[],
-
+																Attributes = [],
 																	ReflectionInfo = null!,
 																},
 																new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																{
+{
 																	Name = "expected",
-																	Attributes = 
-																	[],
-
+																	Attributes = [],
 																		ReflectionInfo = null!,
 																	},
 																],
 																Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																{
+{
 																	Parent = null,
 																	Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 																	Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2136", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																	{
+{
 																		Name = "Tests2136",
-																		Attributes = 
-																		[],
-
+																		Attributes = [],
 																		}),
 																		Name = "Tests",
 																		Namespace = "TUnit.TestProject.Bugs._2136",
@@ -343,11 +321,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																		[
 																			new EngineTest(Pass)
 																		],
-																		Parameters = 
-																		[],
+																		Parameters = [],
 
-																			Properties = 
-																			[],
+																			Properties = [],
 
 																			}),
 																		}
@@ -413,7 +389,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																	try
 																	{
 																		var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																		{
+{
 																			Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 																			Name = "GenericArgumentsTest",
 																			GenericTypeCount = 1,
@@ -433,34 +409,28 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																				new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item")
 																			],
 																			Parameters = 
-																			[
+[
 																				new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																				{
+{
 																					Name = "value",
-																					Attributes = 
-																					[],
-
+																					Attributes = [],
 																						ReflectionInfo = null!,
 																					},
 																					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																					{
+{
 																						Name = "expected",
-																						Attributes = 
-																						[],
-
+																						Attributes = [],
 																							ReflectionInfo = null!,
 																						},
 																					],
 																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																					{
+{
 																						Parent = null,
 																						Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2136", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																						{
+{
 																							Name = "Tests2136",
-																							Attributes = 
-																							[],
-
+																							Attributes = [],
 																							}),
 																							Name = "Tests",
 																							Namespace = "TUnit.TestProject.Bugs._2136",
@@ -468,11 +438,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																							[
 																								new EngineTest(Pass)
 																							],
-																							Parameters = 
-																							[],
+																							Parameters = [],
 
-																								Properties = 
-																								[],
+																								Properties = [],
 
 																								}),
 																							}
@@ -538,7 +506,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																						try
 																						{
 																							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																							{
+{
 																								Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 																								Name = "GenericArgumentsTest",
 																								GenericTypeCount = 1,
@@ -558,34 +526,28 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																									new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item")
 																								],
 																								Parameters = 
-																								[
+[
 																									new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																									{
+{
 																										Name = "value",
-																										Attributes = 
-																										[],
-
+																										Attributes = [],
 																											ReflectionInfo = null!,
 																										},
 																										new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																										{
+{
 																											Name = "expected",
-																											Attributes = 
-																											[],
-
+																											Attributes = [],
 																												ReflectionInfo = null!,
 																											},
 																										],
 																										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2136.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																										{
+{
 																											Parent = null,
 																											Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
 																											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2136", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																											{
+{
 																												Name = "Tests2136",
-																												Attributes = 
-																												[],
-
+																												Attributes = [],
 																												}),
 																												Name = "Tests",
 																												Namespace = "TUnit.TestProject.Bugs._2136",
@@ -593,11 +555,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																												[
 																													new EngineTest(Pass)
 																												],
-																												Parameters = 
-																												[],
+																												Parameters = [],
 
-																													Properties = 
-																													[],
+																													Properties = [],
 
 																													}),
 																												}

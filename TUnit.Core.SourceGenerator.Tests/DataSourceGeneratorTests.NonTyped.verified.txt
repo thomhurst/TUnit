@@ -31,7 +31,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.AutoDataTests),
 				Name = "Test1",
 				GenericTypeCount = 0,
@@ -41,61 +41,47 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "value1",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-						{
+{
 							Name = "value2",
-							Attributes = 
-							[],
-
+							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<double>
-							{
+{
 								Name = "value3",
-								Attributes = 
-								[],
-
+								Attributes = [],
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-								{
+{
 									Name = "value4",
-									Attributes = 
-									[],
-
+									Attributes = [],
 										ReflectionInfo = null!,
 									},
 								],
 								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AutoDataTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-								{
+{
 									Parent = null,
 									Type = typeof(global::TUnit.TestProject.AutoDataTests),
 									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-									{
+{
 										Name = "DataSourceGeneratorTests",
-										Attributes = 
-										[],
-
+										Attributes = [],
 										}),
 										Name = "AutoDataTests",
 										Namespace = "TUnit.TestProject",
-										Attributes = 
-										[],
+										Attributes = [],
+											Parameters = [],
 
-											Parameters = 
-											[],
-
-												Properties = 
-												[],
+												Properties = [],
 
 												}),
 											}
@@ -113,37 +99,29 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 												TestBuilderContext = testBuilderContextAccessor,
 												TestInformation = testInformation,
 												MembersToGenerate = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-													{
+{
 														Name = "value1",
-														Attributes = 
-														[],
-
+														Attributes = [],
 															ReflectionInfo = null!,
 														},
 														new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-														{
+{
 															Name = "value2",
-															Attributes = 
-															[],
-
+															Attributes = [],
 																ReflectionInfo = null!,
 															},
 															new global::TUnit.Core.SourceGeneratedParameterInformation<double>
-															{
+{
 																Name = "value3",
-																Attributes = 
-																[],
-
+																Attributes = [],
 																	ReflectionInfo = null!,
 																},
 																new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																{
+{
 																	Name = "value4",
-																	Attributes = 
-																	[],
-
+																	Attributes = [],
 																		ReflectionInfo = null!,
 																	},
 																],

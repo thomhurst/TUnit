@@ -36,7 +36,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 				Name = "Explicit",
 				GenericTypeCount = 0,
@@ -52,37 +52,29 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					new global::TUnit.Core.ArgumentsAttribute(3)
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
-					{
+{
 						Name = "integer",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "ArgumentWithImplicitConverterTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "ArgumentWithImplicitConverterTests",
 							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[],
+							Attributes = [],
+								Parameters = [],
 
-								Parameters = 
-								[],
-
-									Properties = 
-									[],
+									Properties = [],
 
 									}),
 								}
@@ -147,7 +139,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 							try
 							{
 								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-								{
+{
 									Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 									Name = "Explicit",
 									GenericTypeCount = 0,
@@ -163,37 +155,29 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 										new global::TUnit.Core.ArgumentsAttribute(3)
 									],
 									Parameters = 
-									[
+[
 										new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
-										{
+{
 											Name = "integer",
-											Attributes = 
-											[],
-
+											Attributes = [],
 												ReflectionInfo = null!,
 											},
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-										{
+{
 											Parent = null,
 											Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-											{
+{
 												Name = "ArgumentWithImplicitConverterTests",
-												Attributes = 
-												[],
-
+												Attributes = [],
 												}),
 												Name = "ArgumentWithImplicitConverterTests",
 												Namespace = "TUnit.TestProject",
-												Attributes = 
-												[],
+												Attributes = [],
+													Parameters = [],
 
-													Parameters = 
-													[],
-
-														Properties = 
-														[],
+														Properties = [],
 
 														}),
 													}
@@ -258,7 +242,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 												try
 												{
 													var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-													{
+{
 														Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 														Name = "Explicit",
 														GenericTypeCount = 0,
@@ -274,37 +258,29 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 															new global::TUnit.Core.ArgumentsAttribute(3)
 														],
 														Parameters = 
-														[
+[
 															new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
-															{
+{
 																Name = "integer",
-																Attributes = 
-																[],
-
+																Attributes = [],
 																	ReflectionInfo = null!,
 																},
 															],
 															Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-															{
+{
 																Parent = null,
 																Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 																Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																{
+{
 																	Name = "ArgumentWithImplicitConverterTests",
-																	Attributes = 
-																	[],
-
+																	Attributes = [],
 																	}),
 																	Name = "ArgumentWithImplicitConverterTests",
 																	Namespace = "TUnit.TestProject",
-																	Attributes = 
-																	[],
+																	Attributes = [],
+																		Parameters = [],
 
-																		Parameters = 
-																		[],
-
-																			Properties = 
-																			[],
+																			Properties = [],
 
 																			}),
 																		}
@@ -402,7 +378,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 				Name = "Implicit",
 				GenericTypeCount = 0,
@@ -418,37 +394,29 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					new global::TUnit.Core.ArgumentsAttribute(3)
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
-					{
+{
 						Name = "integer",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "ArgumentWithImplicitConverterTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "ArgumentWithImplicitConverterTests",
 							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[],
+							Attributes = [],
+								Parameters = [],
 
-								Parameters = 
-								[],
-
-									Properties = 
-									[],
+									Properties = [],
 
 									}),
 								}
@@ -513,7 +481,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 							try
 							{
 								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-								{
+{
 									Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 									Name = "Implicit",
 									GenericTypeCount = 0,
@@ -529,37 +497,29 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 										new global::TUnit.Core.ArgumentsAttribute(3)
 									],
 									Parameters = 
-									[
+[
 										new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
-										{
+{
 											Name = "integer",
-											Attributes = 
-											[],
-
+											Attributes = [],
 												ReflectionInfo = null!,
 											},
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-										{
+{
 											Parent = null,
 											Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-											{
+{
 												Name = "ArgumentWithImplicitConverterTests",
-												Attributes = 
-												[],
-
+												Attributes = [],
 												}),
 												Name = "ArgumentWithImplicitConverterTests",
 												Namespace = "TUnit.TestProject",
-												Attributes = 
-												[],
+												Attributes = [],
+													Parameters = [],
 
-													Parameters = 
-													[],
-
-														Properties = 
-														[],
+														Properties = [],
 
 														}),
 													}
@@ -624,7 +584,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 												try
 												{
 													var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-													{
+{
 														Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 														Name = "Implicit",
 														GenericTypeCount = 0,
@@ -640,37 +600,29 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 															new global::TUnit.Core.ArgumentsAttribute(3)
 														],
 														Parameters = 
-														[
+[
 															new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
-															{
+{
 																Name = "integer",
-																Attributes = 
-																[],
-
+																Attributes = [],
 																	ReflectionInfo = null!,
 																},
 															],
 															Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-															{
+{
 																Parent = null,
 																Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
 																Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																{
+{
 																	Name = "ArgumentWithImplicitConverterTests",
-																	Attributes = 
-																	[],
-
+																	Attributes = [],
 																	}),
 																	Name = "ArgumentWithImplicitConverterTests",
 																	Namespace = "TUnit.TestProject",
-																	Attributes = 
-																	[],
+																	Attributes = [],
+																		Parameters = [],
 
-																		Parameters = 
-																		[],
-
-																			Properties = 
-																			[],
+																			Properties = [],
 
 																			}),
 																		}

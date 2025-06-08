@@ -31,7 +31,7 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
 				Name = "Test",
 				GenericTypeCount = 0,
@@ -40,19 +40,16 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 				[
 					new global::TUnit.Core.TestAttribute()
 				],
-				Parameters = 
-				[],
+				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "ClassConstructorTest",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "ClassConstructorTest",
 							Namespace = "TUnit.TestProject",
@@ -61,26 +58,22 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 								new global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>()
 							],
 							Parameters = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.DummyReferenceTypeClass>
-								{
+{
 									Name = "dummyReferenceTypeClass",
-									Attributes = 
-									[],
-
+									Attributes = [],
 										ReflectionInfo = null!,
 									},
 								],
 								Properties = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
+{
 										Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
 										Name = "DummyReferenceTypeClass",
 										IsStatic = false,
-										Attributes = 
-										[],
-
+										Attributes = [],
 										},
 									],
 								}),

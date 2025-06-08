@@ -28,7 +28,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 			new global::TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-				{
+{
 					Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
 					Name = "BeforeDiscovery",
 					GenericTypeCount = 0,
@@ -36,36 +36,29 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 					Attributes = 
 					[
 						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
-						{
+{
 							Order = 5,
 						}
 
 
 					],
-					Parameters = 
-					[],
+					Parameters = [],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
+{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
+{
 								Name = "TestDiscoveryHookTests",
-								Attributes = 
-								[],
-
+								Attributes = [],
 								}),
 								Name = "TestDiscoveryHookTests",
 								Namespace = "TUnit.TestProject",
-								Attributes = 
-								[],
+								Attributes = [],
+									Parameters = [],
 
-									Parameters = 
-									[],
-
-										Properties = 
-										[],
+										Properties = [],
 
 										}),
 									}
@@ -128,7 +121,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 			new global::TUnit.Core.Hooks.AfterTestDiscoveryHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-				{
+{
 					Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
 					Name = "AfterDiscovery",
 					GenericTypeCount = 0,
@@ -137,30 +130,23 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 					[
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
 					],
-					Parameters = 
-					[],
+					Parameters = [],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
+{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
+{
 								Name = "TestDiscoveryHookTests",
-								Attributes = 
-								[],
-
+								Attributes = [],
 								}),
 								Name = "TestDiscoveryHookTests",
 								Namespace = "TUnit.TestProject",
-								Attributes = 
-								[],
+								Attributes = [],
+									Parameters = [],
 
-									Parameters = 
-									[],
-
-										Properties = 
-										[],
+										Properties = [],
 
 										}),
 									}

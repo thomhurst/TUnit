@@ -31,7 +31,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 				Name = "DataSource_Class",
 				GenericTypeCount = 0,
@@ -41,26 +41,22 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
-					{
+{
 						Name = "value",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "ClassDataSourceDrivenTestsSharedKeyed",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "ClassDataSourceDrivenTestsSharedKeyed",
 							Namespace = "TUnit.TestProject",
@@ -68,11 +64,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -90,13 +84,11 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
-									{
+{
 										Name = "value",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -105,7 +97,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 									ClassInstanceArguments = classInstanceArguments,
 								};
 								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
-								{
+{
 									Shared = global::TUnit.Core.SharedType.Keyed,
 									Key = "🔑",
 								}
@@ -202,7 +194,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 				Name = "DataSource_Class_Generic",
 				GenericTypeCount = 0,
@@ -212,26 +204,22 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
-					{
+{
 						Name = "value",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "ClassDataSourceDrivenTestsSharedKeyed",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "ClassDataSourceDrivenTestsSharedKeyed",
 							Namespace = "TUnit.TestProject",
@@ -239,11 +227,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -261,13 +247,11 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
-									{
+{
 										Name = "value",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -276,7 +260,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 									ClassInstanceArguments = classInstanceArguments,
 								};
 								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
-								{
+{
 									Shared = global::TUnit.Core.SharedType.Keyed,
 									Key = "🔑",
 								}

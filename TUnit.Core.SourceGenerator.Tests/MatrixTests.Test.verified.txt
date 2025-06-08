@@ -31,7 +31,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "MatrixTest_One",
 				GenericTypeCount = 0,
@@ -41,9 +41,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "str",
 						Attributes = 
 						[
@@ -52,7 +52,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "i",
 						Attributes = 
 						[
@@ -61,7 +61,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-					{
+{
 						Name = "boolean",
 						Attributes = 
 						[
@@ -71,15 +71,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -87,11 +85,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -109,9 +105,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-								{
+{
 									Name = "str",
 									Attributes = 
 									[
@@ -120,7 +116,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "i",
 									Attributes = 
 									[
@@ -129,7 +125,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-								{
+{
 									Name = "boolean",
 									Attributes = 
 									[
@@ -237,7 +233,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "MatrixTest_Two",
 				GenericTypeCount = 0,
@@ -247,9 +243,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "i",
 						Attributes = 
 						[
@@ -258,7 +254,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "i2",
 						Attributes = 
 						[
@@ -267,7 +263,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "i3",
 						Attributes = 
 						[
@@ -276,7 +272,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-					{
+{
 						Name = "boolean",
 						Attributes = 
 						[
@@ -286,15 +282,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -302,11 +296,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -324,9 +316,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "i",
 									Attributes = 
 									[
@@ -335,7 +327,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "i2",
 									Attributes = 
 									[
@@ -344,7 +336,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "i3",
 									Attributes = 
 									[
@@ -353,7 +345,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-								{
+{
 									Name = "boolean",
 									Attributes = 
 									[
@@ -462,7 +454,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "MatrixTest_Enum",
 				GenericTypeCount = 0,
@@ -472,9 +464,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "i",
 						Attributes = 
 						[
@@ -483,7 +475,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
-					{
+{
 						Name = "testEnum",
 						Attributes = 
 						[
@@ -492,24 +484,20 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum?>
-					{
+{
 						Name = "testEnum2",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.MatrixTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "MatrixTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "MatrixTests",
 							Namespace = "TUnit.TestProject",
@@ -517,11 +505,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -539,9 +525,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-									{
+{
 										Name = "i",
 										Attributes = 
 										[
@@ -550,7 +536,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum>
-									{
+{
 										Name = "testEnum",
 										Attributes = 
 										[
@@ -559,11 +545,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.TestEnum?>
-									{
+{
 										Name = "testEnum2",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -666,7 +650,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "AutoGenerateBools",
 				GenericTypeCount = 0,
@@ -676,9 +660,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "str",
 						Attributes = 
 						[
@@ -687,24 +671,20 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-					{
+{
 						Name = "boolean",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.MatrixTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "MatrixTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "MatrixTests",
 							Namespace = "TUnit.TestProject",
@@ -712,11 +692,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -734,9 +712,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
+{
 										Name = "str",
 										Attributes = 
 										[
@@ -745,11 +723,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-									{
+{
 										Name = "boolean",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -851,7 +827,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "AutoGenerateBools2",
 				GenericTypeCount = 0,
@@ -861,9 +837,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "str",
 						Attributes = 
 						[
@@ -872,7 +848,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool?>
-					{
+{
 						Name = "boolean",
 						Attributes = 
 						[
@@ -882,15 +858,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -898,11 +872,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -920,9 +892,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-								{
+{
 									Name = "str",
 									Attributes = 
 									[
@@ -931,7 +903,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool?>
-								{
+{
 									Name = "boolean",
 									Attributes = 
 									[
@@ -1038,7 +1010,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "ImplicitConversion",
 				GenericTypeCount = 0,
@@ -1048,9 +1020,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>
-					{
+{
 						Name = "enum",
 						Attributes = 
 						[
@@ -1059,7 +1031,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-					{
+{
 						Name = "boolean",
 						Attributes = 
 						[
@@ -1069,15 +1041,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -1085,11 +1055,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -1107,9 +1075,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>
-								{
+{
 									Name = "enum",
 									Attributes = 
 									[
@@ -1118,7 +1086,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-								{
+{
 									Name = "boolean",
 									Attributes = 
 									[
@@ -1225,7 +1193,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "ExcludingAutoGeneratedMatrixValues",
 				GenericTypeCount = 0,
@@ -1235,14 +1203,14 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MatrixTests.CountToTenEnum>
-					{
+{
 						Name = "enum",
 						Attributes = 
 						[
 							new global::TUnit.Core.MatrixAttribute<global::TUnit.TestProject.MatrixTests.CountToTenEnum>()
-							{
+{
 								Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven],
 							}
 
@@ -1251,7 +1219,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-					{
+{
 						Name = "boolean",
 						Attributes = 
 						[
@@ -1261,15 +1229,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -1277,11 +1243,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -1299,14 +1263,14 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MatrixTests.CountToTenEnum>
-								{
+{
 									Name = "enum",
 									Attributes = 
 									[
 										new global::TUnit.Core.MatrixAttribute<global::TUnit.TestProject.MatrixTests.CountToTenEnum>()
-										{
+{
 											Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven],
 										}
 
@@ -1315,7 +1279,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-								{
+{
 									Name = "boolean",
 									Attributes = 
 									[
@@ -1422,7 +1386,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "Method1",
 				GenericTypeCount = 0,
@@ -1432,9 +1396,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "item",
 						Attributes = 
 						[
@@ -1444,15 +1408,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -1460,11 +1422,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -1482,9 +1442,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "item",
 									Attributes = 
 									[
@@ -1590,7 +1550,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "Method2",
 				GenericTypeCount = 0,
@@ -1600,9 +1560,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "item",
 						Attributes = 
 						[
@@ -1612,15 +1572,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -1628,11 +1586,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -1650,9 +1606,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "item",
 									Attributes = 
 									[
@@ -1758,7 +1714,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "Method3",
 				GenericTypeCount = 0,
@@ -1768,9 +1724,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "item",
 						Attributes = 
 						[
@@ -1780,15 +1736,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -1796,11 +1750,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -1818,9 +1770,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "item",
 									Attributes = 
 									[
@@ -1926,7 +1878,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "Method4",
 				GenericTypeCount = 0,
@@ -1936,9 +1888,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "item",
 						Attributes = 
 						[
@@ -1948,15 +1900,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -1964,11 +1914,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -1986,9 +1934,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "item",
 									Attributes = 
 									[
@@ -2094,7 +2042,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.MatrixTests),
 				Name = "Exclusion",
 				GenericTypeCount = 0,
@@ -2110,9 +2058,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.MatrixExclusionAttribute(3, 3)
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "item",
 						Attributes = 
 						[
@@ -2121,7 +2069,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "item2",
 						Attributes = 
 						[
@@ -2131,15 +2079,13 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-				{
+{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.MatrixTests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-					{
+{
 						Name = "MatrixTests",
-						Attributes = 
-						[],
-
+						Attributes = [],
 						}),
 						Name = "MatrixTests",
 						Namespace = "TUnit.TestProject",
@@ -2147,11 +2093,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						[
 							new EngineTest(Pass)
 						],
-						Parameters = 
-						[],
+						Parameters = [],
 
-							Properties = 
-							[],
+							Properties = [],
 
 							}),
 						}
@@ -2169,9 +2113,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "item",
 									Attributes = 
 									[
@@ -2180,7 +2124,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "item2",
 									Attributes = 
 									[

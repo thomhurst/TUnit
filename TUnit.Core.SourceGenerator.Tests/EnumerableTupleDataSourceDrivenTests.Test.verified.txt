@@ -35,7 +35,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
 				Name = "DataSource_TupleMethod",
 				GenericTypeCount = 0,
@@ -49,42 +49,34 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "value",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-						{
+{
 							Name = "value2",
-							Attributes = 
-							[],
-
+							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-							{
+{
 								Name = "value3",
-								Attributes = 
-								[],
-
+								Attributes = [],
 									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-							{
+{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-								{
+{
 									Name = "EnumerableTupleDataSourceDrivenTests",
-									Attributes = 
-									[],
-
+									Attributes = [],
 									}),
 									Name = "EnumerableTupleDataSourceDrivenTests",
 									Namespace = "TUnit.TestProject",
@@ -92,11 +84,9 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 									[
 										new EngineTest(Pass)
 									],
-									Parameters = 
-									[],
+									Parameters = [],
 
-										Properties = 
-										[],
+										Properties = [],
 
 										}),
 									}
@@ -169,7 +159,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 								try
 								{
 									var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-									{
+{
 										Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
 										Name = "DataSource_TupleMethod",
 										GenericTypeCount = 0,
@@ -183,42 +173,34 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 											new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 										],
 										Parameters = 
-										[
+[
 											new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-											{
+{
 												Name = "value",
-												Attributes = 
-												[],
-
+												Attributes = [],
 													ReflectionInfo = null!,
 												},
 												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-												{
+{
 													Name = "value2",
-													Attributes = 
-													[],
-
+													Attributes = [],
 														ReflectionInfo = null!,
 													},
 													new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-													{
+{
 														Name = "value3",
-														Attributes = 
-														[],
-
+														Attributes = [],
 															ReflectionInfo = null!,
 														},
 													],
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
+{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
+{
 															Name = "EnumerableTupleDataSourceDrivenTests",
-															Attributes = 
-															[],
-
+															Attributes = [],
 															}),
 															Name = "EnumerableTupleDataSourceDrivenTests",
 															Namespace = "TUnit.TestProject",
@@ -226,11 +208,9 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 															[
 																new EngineTest(Pass)
 															],
-															Parameters = 
-															[],
+															Parameters = [],
 
-																Properties = 
-																[],
+																Properties = [],
 
 																}),
 															}

@@ -35,7 +35,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 				Name = "Base_Derived1",
 				GenericTypeCount = 0,
@@ -44,19 +44,16 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 				[
 					new global::TUnit.Core.TestAttribute()
 				],
-				Parameters = 
-				[],
+				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "ClassDataSourceDrivenTests2",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "ClassDataSourceDrivenTests2",
 							Namespace = "TUnit.TestProject",
@@ -65,18 +62,15 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 								new EngineTest(Pass)
 							],
 							Parameters = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
-								{
+{
 									Name = "base",
-									Attributes = 
-									[],
-
+									Attributes = [],
 										ReflectionInfo = null!,
 									},
 								],
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -94,13 +88,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
-									{
+{
 										Name = "base",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -172,7 +164,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							try
 							{
 								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-								{
+{
 									Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 									Name = "Base_Derived1",
 									GenericTypeCount = 0,
@@ -181,19 +173,16 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 									[
 										new global::TUnit.Core.TestAttribute()
 									],
-									Parameters = 
-									[],
+									Parameters = [],
 
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-										{
+{
 											Parent = null,
 											Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-											{
+{
 												Name = "ClassDataSourceDrivenTests2",
-												Attributes = 
-												[],
-
+												Attributes = [],
 												}),
 												Name = "ClassDataSourceDrivenTests2",
 												Namespace = "TUnit.TestProject",
@@ -202,18 +191,15 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 													new EngineTest(Pass)
 												],
 												Parameters = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
-													{
+{
 														Name = "base",
-														Attributes = 
-														[],
-
+														Attributes = [],
 															ReflectionInfo = null!,
 														},
 													],
-													Properties = 
-													[],
+													Properties = [],
 
 													}),
 												}
@@ -231,13 +217,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 													TestBuilderContext = testBuilderContextAccessor,
 													TestInformation = testInformation,
 													MembersToGenerate = 
-													[
+[
 														new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
-														{
+{
 															Name = "base",
-															Attributes = 
-															[],
-
+															Attributes = [],
 																ReflectionInfo = null!,
 															},
 														],
@@ -341,7 +325,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 				Name = "Base_Derived2",
 				GenericTypeCount = 0,
@@ -350,19 +334,16 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 				[
 					new global::TUnit.Core.TestAttribute()
 				],
-				Parameters = 
-				[],
+				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "ClassDataSourceDrivenTests2",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "ClassDataSourceDrivenTests2",
 							Namespace = "TUnit.TestProject",
@@ -371,18 +352,15 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 								new EngineTest(Pass)
 							],
 							Parameters = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
-								{
+{
 									Name = "base",
-									Attributes = 
-									[],
-
+									Attributes = [],
 										ReflectionInfo = null!,
 									},
 								],
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -400,13 +378,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
-									{
+{
 										Name = "base",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -478,7 +454,7 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 							try
 							{
 								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-								{
+{
 									Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 									Name = "Base_Derived2",
 									GenericTypeCount = 0,
@@ -487,19 +463,16 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 									[
 										new global::TUnit.Core.TestAttribute()
 									],
-									Parameters = 
-									[],
+									Parameters = [],
 
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-										{
+{
 											Parent = null,
 											Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTests2", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-											{
+{
 												Name = "ClassDataSourceDrivenTests2",
-												Attributes = 
-												[],
-
+												Attributes = [],
 												}),
 												Name = "ClassDataSourceDrivenTests2",
 												Namespace = "TUnit.TestProject",
@@ -508,18 +481,15 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 													new EngineTest(Pass)
 												],
 												Parameters = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
-													{
+{
 														Name = "base",
-														Attributes = 
-														[],
-
+														Attributes = [],
 															ReflectionInfo = null!,
 														},
 													],
-													Properties = 
-													[],
+													Properties = [],
 
 													}),
 												}
@@ -537,13 +507,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 													TestBuilderContext = testBuilderContextAccessor,
 													TestInformation = testInformation,
 													MembersToGenerate = 
-													[
+[
 														new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>
-														{
+{
 															Name = "base",
-															Attributes = 
-															[],
-
+															Attributes = [],
 																ReflectionInfo = null!,
 															},
 														],

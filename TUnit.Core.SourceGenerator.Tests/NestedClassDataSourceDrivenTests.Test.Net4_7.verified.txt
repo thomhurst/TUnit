@@ -31,7 +31,7 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
 				Name = "DataSource_Class",
 				GenericTypeCount = 0,
@@ -41,26 +41,22 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-					{
+{
 						Name = "value",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "TestsBase`1",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "NestedClassDataSourceDrivenTests",
 							Namespace = "TUnit.TestProject",
@@ -68,11 +64,9 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -90,13 +84,11 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-									{
+{
 										Name = "value",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -105,7 +97,7 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 									ClassInstanceArguments = classInstanceArguments,
 								};
 								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
-								{
+{
 									Shared = global::TUnit.Core.SharedType.PerClass,
 								}
 
@@ -201,7 +193,7 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
 				Name = "DataSource_Class2",
 				GenericTypeCount = 0,
@@ -213,26 +205,22 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					new global::TUnit.Core.DependsOnAttribute("DataSource_Class")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-					{
+{
 						Name = "value",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "TestsBase`1",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "NestedClassDataSourceDrivenTests",
 							Namespace = "TUnit.TestProject",
@@ -240,11 +228,9 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -262,13 +248,11 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-									{
+{
 										Name = "value",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -277,7 +261,7 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 									ClassInstanceArguments = classInstanceArguments,
 								};
 								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
-								{
+{
 									Shared = global::TUnit.Core.SharedType.PerClass,
 								}
 
@@ -373,7 +357,7 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
 				Name = "DataSource_Class3",
 				GenericTypeCount = 0,
@@ -385,26 +369,22 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					new global::TUnit.Core.DependsOnAttribute("DataSource_Class2")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-					{
+{
 						Name = "value",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "TestsBase`1",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "NestedClassDataSourceDrivenTests",
 							Namespace = "TUnit.TestProject",
@@ -412,11 +392,9 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -434,13 +412,11 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-									{
+{
 										Name = "value",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -449,7 +425,7 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 									ClassInstanceArguments = classInstanceArguments,
 								};
 								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
-								{
+{
 									Shared = global::TUnit.Core.SharedType.PerClass,
 								}
 

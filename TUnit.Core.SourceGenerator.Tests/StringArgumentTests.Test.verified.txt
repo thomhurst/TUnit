@@ -41,7 +41,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 				Name = "Normal",
 				GenericTypeCount = 0,
@@ -71,26 +71,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 )
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "s",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "StringArgumentTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "StringArgumentTests",
 							Namespace = "TUnit.TestProject",
@@ -98,11 +94,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -167,7 +161,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						try
 						{
 							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
+{
 								Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 								Name = "Normal",
 								GenericTypeCount = 0,
@@ -197,26 +191,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 )
 								],
 								Parameters = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
+{
 										Name = "s",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
+{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
+{
 											Name = "StringArgumentTests",
-											Attributes = 
-											[],
-
+											Attributes = [],
 											}),
 											Name = "StringArgumentTests",
 											Namespace = "TUnit.TestProject",
@@ -224,11 +214,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											[
 												new EngineTest(Pass)
 											],
-											Parameters = 
-											[],
+											Parameters = [],
 
-												Properties = 
-												[],
+												Properties = [],
 
 												}),
 											}
@@ -293,7 +281,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										try
 										{
 											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-											{
+{
 												Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 												Name = "Normal",
 												GenericTypeCount = 0,
@@ -323,26 +311,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 )
 												],
 												Parameters = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-													{
+{
 														Name = "s",
-														Attributes = 
-														[],
-
+														Attributes = [],
 															ReflectionInfo = null!,
 														},
 													],
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
+{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
+{
 															Name = "StringArgumentTests",
-															Attributes = 
-															[],
-
+															Attributes = [],
 															}),
 															Name = "StringArgumentTests",
 															Namespace = "TUnit.TestProject",
@@ -350,11 +334,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 															[
 																new EngineTest(Pass)
 															],
-															Parameters = 
-															[],
+															Parameters = [],
 
-																Properties = 
-																[],
+																Properties = [],
 
 																}),
 															}
@@ -419,7 +401,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 														try
 														{
 															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-															{
+{
 																Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																Name = "Normal",
 																GenericTypeCount = 0,
@@ -449,26 +431,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 )
 																],
 																Parameters = 
-																[
+[
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																	{
+{
 																		Name = "s",
-																		Attributes = 
-																		[],
-
+																		Attributes = [],
 																			ReflectionInfo = null!,
 																		},
 																	],
 																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																	{
+{
 																		Parent = null,
 																		Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																		{
+{
 																			Name = "StringArgumentTests",
-																			Attributes = 
-																			[],
-
+																			Attributes = [],
 																			}),
 																			Name = "StringArgumentTests",
 																			Namespace = "TUnit.TestProject",
@@ -476,11 +454,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																			[
 																				new EngineTest(Pass)
 																			],
-																			Parameters = 
-																			[],
+																			Parameters = [],
 
-																				Properties = 
-																				[],
+																				Properties = [],
 
 																				}),
 																			}
@@ -545,7 +521,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																		try
 																		{
 																			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																			{
+{
 																				Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																				Name = "Normal",
 																				GenericTypeCount = 0,
@@ -575,26 +551,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 )
 																				],
 																				Parameters = 
-																				[
+[
 																					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																					{
+{
 																						Name = "s",
-																						Attributes = 
-																						[],
-
+																						Attributes = [],
 																							ReflectionInfo = null!,
 																						},
 																					],
 																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																					{
+{
 																						Parent = null,
 																						Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																						{
+{
 																							Name = "StringArgumentTests",
-																							Attributes = 
-																							[],
-
+																							Attributes = [],
 																							}),
 																							Name = "StringArgumentTests",
 																							Namespace = "TUnit.TestProject",
@@ -602,11 +574,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																							[
 																								new EngineTest(Pass)
 																							],
-																							Parameters = 
-																							[],
+																							Parameters = [],
 
-																								Properties = 
-																								[],
+																								Properties = [],
 
 																								}),
 																							}
@@ -671,7 +641,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																						try
 																						{
 																							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																							{
+{
 																								Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																								Name = "Normal",
 																								GenericTypeCount = 0,
@@ -701,26 +671,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 )
 																								],
 																								Parameters = 
-																								[
+[
 																									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																									{
+{
 																										Name = "s",
-																										Attributes = 
-																										[],
-
+																										Attributes = [],
 																											ReflectionInfo = null!,
 																										},
 																									],
 																									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																									{
+{
 																										Parent = null,
 																										Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																										{
+{
 																											Name = "StringArgumentTests",
-																											Attributes = 
-																											[],
-
+																											Attributes = [],
 																											}),
 																											Name = "StringArgumentTests",
 																											Namespace = "TUnit.TestProject",
@@ -728,11 +694,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																											[
 																												new EngineTest(Pass)
 																											],
-																											Parameters = 
-																											[],
+																											Parameters = [],
 
-																												Properties = 
-																												[],
+																												Properties = [],
 
 																												}),
 																											}
@@ -797,7 +761,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																										try
 																										{
 																											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																											{
+{
 																												Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																												Name = "Normal",
 																												GenericTypeCount = 0,
@@ -827,26 +791,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 )
 																												],
 																												Parameters = 
-																												[
+[
 																													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																													{
+{
 																														Name = "s",
-																														Attributes = 
-																														[],
-
+																														Attributes = [],
 																															ReflectionInfo = null!,
 																														},
 																													],
 																													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																													{
+{
 																														Parent = null,
 																														Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																														{
+{
 																															Name = "StringArgumentTests",
-																															Attributes = 
-																															[],
-
+																															Attributes = [],
 																															}),
 																															Name = "StringArgumentTests",
 																															Namespace = "TUnit.TestProject",
@@ -854,11 +814,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																															[
 																																new EngineTest(Pass)
 																															],
-																															Parameters = 
-																															[],
+																															Parameters = [],
 
-																																Properties = 
-																																[],
+																																Properties = [],
 
 																																}),
 																															}
@@ -923,7 +881,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																														try
 																														{
 																															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																															{
+{
 																																Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																																Name = "Normal",
 																																GenericTypeCount = 0,
@@ -953,26 +911,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 )
 																																],
 																																Parameters = 
-																																[
+[
 																																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																																	{
+{
 																																		Name = "s",
-																																		Attributes = 
-																																		[],
-
+																																		Attributes = [],
 																																			ReflectionInfo = null!,
 																																		},
 																																	],
 																																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																																	{
+{
 																																		Parent = null,
 																																		Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																																		{
+{
 																																			Name = "StringArgumentTests",
-																																			Attributes = 
-																																			[],
-
+																																			Attributes = [],
 																																			}),
 																																			Name = "StringArgumentTests",
 																																			Namespace = "TUnit.TestProject",
@@ -980,11 +934,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																																			[
 																																				new EngineTest(Pass)
 																																			],
-																																			Parameters = 
-																																			[],
+																																			Parameters = [],
 
-																																				Properties = 
-																																				[],
+																																				Properties = [],
 
 																																				}),
 																																			}
@@ -1090,7 +1042,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 				Name = "Nullable",
 				GenericTypeCount = 0,
@@ -1116,26 +1068,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					new global::TUnit.Core.ArgumentsAttribute(null)
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "s",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "StringArgumentTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "StringArgumentTests",
 							Namespace = "TUnit.TestProject",
@@ -1143,11 +1091,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
-								Properties = 
-								[],
+								Properties = [],
 
 								}),
 							}
@@ -1212,7 +1158,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 						try
 						{
 							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
+{
 								Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 								Name = "Nullable",
 								GenericTypeCount = 0,
@@ -1238,26 +1184,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 									new global::TUnit.Core.ArgumentsAttribute(null)
 								],
 								Parameters = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
+{
 										Name = "s",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
+{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
+{
 											Name = "StringArgumentTests",
-											Attributes = 
-											[],
-
+											Attributes = [],
 											}),
 											Name = "StringArgumentTests",
 											Namespace = "TUnit.TestProject",
@@ -1265,11 +1207,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 											[
 												new EngineTest(Pass)
 											],
-											Parameters = 
-											[],
+											Parameters = [],
 
-												Properties = 
-												[],
+												Properties = [],
 
 												}),
 											}
@@ -1334,7 +1274,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 										try
 										{
 											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-											{
+{
 												Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 												Name = "Nullable",
 												GenericTypeCount = 0,
@@ -1360,26 +1300,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 													new global::TUnit.Core.ArgumentsAttribute(null)
 												],
 												Parameters = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-													{
+{
 														Name = "s",
-														Attributes = 
-														[],
-
+														Attributes = [],
 															ReflectionInfo = null!,
 														},
 													],
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
+{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
+{
 															Name = "StringArgumentTests",
-															Attributes = 
-															[],
-
+															Attributes = [],
 															}),
 															Name = "StringArgumentTests",
 															Namespace = "TUnit.TestProject",
@@ -1387,11 +1323,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 															[
 																new EngineTest(Pass)
 															],
-															Parameters = 
-															[],
+															Parameters = [],
 
-																Properties = 
-																[],
+																Properties = [],
 
 																}),
 															}
@@ -1456,7 +1390,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 														try
 														{
 															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-															{
+{
 																Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																Name = "Nullable",
 																GenericTypeCount = 0,
@@ -1482,26 +1416,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																	new global::TUnit.Core.ArgumentsAttribute(null)
 																],
 																Parameters = 
-																[
+[
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																	{
+{
 																		Name = "s",
-																		Attributes = 
-																		[],
-
+																		Attributes = [],
 																			ReflectionInfo = null!,
 																		},
 																	],
 																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																	{
+{
 																		Parent = null,
 																		Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																		{
+{
 																			Name = "StringArgumentTests",
-																			Attributes = 
-																			[],
-
+																			Attributes = [],
 																			}),
 																			Name = "StringArgumentTests",
 																			Namespace = "TUnit.TestProject",
@@ -1509,11 +1439,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																			[
 																				new EngineTest(Pass)
 																			],
-																			Parameters = 
-																			[],
+																			Parameters = [],
 
-																				Properties = 
-																				[],
+																				Properties = [],
 
 																				}),
 																			}
@@ -1578,7 +1506,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																		try
 																		{
 																			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																			{
+{
 																				Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																				Name = "Nullable",
 																				GenericTypeCount = 0,
@@ -1604,26 +1532,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																					new global::TUnit.Core.ArgumentsAttribute(null)
 																				],
 																				Parameters = 
-																				[
+[
 																					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																					{
+{
 																						Name = "s",
-																						Attributes = 
-																						[],
-
+																						Attributes = [],
 																							ReflectionInfo = null!,
 																						},
 																					],
 																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																					{
+{
 																						Parent = null,
 																						Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																						{
+{
 																							Name = "StringArgumentTests",
-																							Attributes = 
-																							[],
-
+																							Attributes = [],
 																							}),
 																							Name = "StringArgumentTests",
 																							Namespace = "TUnit.TestProject",
@@ -1631,11 +1555,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																							[
 																								new EngineTest(Pass)
 																							],
-																							Parameters = 
-																							[],
+																							Parameters = [],
 
-																								Properties = 
-																								[],
+																								Properties = [],
 
 																								}),
 																							}
@@ -1700,7 +1622,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																						try
 																						{
 																							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																							{
+{
 																								Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																								Name = "Nullable",
 																								GenericTypeCount = 0,
@@ -1726,26 +1648,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																									new global::TUnit.Core.ArgumentsAttribute(null)
 																								],
 																								Parameters = 
-																								[
+[
 																									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																									{
+{
 																										Name = "s",
-																										Attributes = 
-																										[],
-
+																										Attributes = [],
 																											ReflectionInfo = null!,
 																										},
 																									],
 																									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																									{
+{
 																										Parent = null,
 																										Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																										{
+{
 																											Name = "StringArgumentTests",
-																											Attributes = 
-																											[],
-
+																											Attributes = [],
 																											}),
 																											Name = "StringArgumentTests",
 																											Namespace = "TUnit.TestProject",
@@ -1753,11 +1671,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																											[
 																												new EngineTest(Pass)
 																											],
-																											Parameters = 
-																											[],
+																											Parameters = [],
 
-																												Properties = 
-																												[],
+																												Properties = [],
 
 																												}),
 																											}
@@ -1822,7 +1738,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																										try
 																										{
 																											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																											{
+{
 																												Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																												Name = "Nullable",
 																												GenericTypeCount = 0,
@@ -1848,26 +1764,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																													new global::TUnit.Core.ArgumentsAttribute(null)
 																												],
 																												Parameters = 
-																												[
+[
 																													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																													{
+{
 																														Name = "s",
-																														Attributes = 
-																														[],
-
+																														Attributes = [],
 																															ReflectionInfo = null!,
 																														},
 																													],
 																													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																													{
+{
 																														Parent = null,
 																														Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																														{
+{
 																															Name = "StringArgumentTests",
-																															Attributes = 
-																															[],
-
+																															Attributes = [],
 																															}),
 																															Name = "StringArgumentTests",
 																															Namespace = "TUnit.TestProject",
@@ -1875,11 +1787,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																															[
 																																new EngineTest(Pass)
 																															],
-																															Parameters = 
-																															[],
+																															Parameters = [],
 
-																																Properties = 
-																																[],
+																																Properties = [],
 
 																																}),
 																															}
@@ -1944,7 +1854,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																														try
 																														{
 																															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																															{
+{
 																																Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																																Name = "Nullable",
 																																GenericTypeCount = 0,
@@ -1970,26 +1880,22 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																																	new global::TUnit.Core.ArgumentsAttribute(null)
 																																],
 																																Parameters = 
-																																[
+[
 																																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																																	{
+{
 																																		Name = "s",
-																																		Attributes = 
-																																		[],
-
+																																		Attributes = [],
 																																			ReflectionInfo = null!,
 																																		},
 																																	],
 																																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																																	{
+{
 																																		Parent = null,
 																																		Type = typeof(global::TUnit.TestProject.StringArgumentTests),
 																																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																																		{
+{
 																																			Name = "StringArgumentTests",
-																																			Attributes = 
-																																			[],
-
+																																			Attributes = [],
 																																			}),
 																																			Name = "StringArgumentTests",
 																																			Namespace = "TUnit.TestProject",
@@ -1997,11 +1903,9 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 																																			[
 																																				new EngineTest(Pass)
 																																			],
-																																			Parameters = 
-																																			[],
+																																			Parameters = [],
 
-																																				Properties = 
-																																				[],
+																																				Properties = [],
 
 																																				}),
 																																			}

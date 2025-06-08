@@ -64,12 +64,20 @@ public class SourceCodeWriter : IDisposable
         {
             if(_stringBuilder.Length > 0
                && _stringBuilder[^1] != '\n'
-               && !_endOfStringNewLineTriggerringChars.Contains(_stringBuilder[^1]))
+               && !_endOfStringNewLineTriggerringChars.Contains(value[^1]))
             {
                 _stringBuilder.AppendLine();
             }
 
-            _shouldIndent = true;
+            if (_stringBuilder.Length > 0
+                && _endOfStringNewLineTriggerringChars.Contains(value[^1]))
+            {
+                _shouldIndent = false;
+            }
+            else
+            {
+                _shouldIndent = true;
+            }
         }
 
         if (_tabLevelDecreasingChars.Contains(value[0]))

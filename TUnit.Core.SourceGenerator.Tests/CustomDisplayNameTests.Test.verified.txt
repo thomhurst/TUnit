@@ -31,7 +31,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 				Name = "Test",
 				GenericTypeCount = 0,
@@ -42,19 +42,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 					new global::TUnit.Core.DisplayNameAttribute("A super important test!")
 				],
-				Parameters = 
-				[],
+				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "CustomDisplayNameTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "CustomDisplayNameTests",
 							Namespace = "TUnit.TestProject",
@@ -62,19 +59,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
 								Properties = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
+{
 										Type = typeof(int),
 										Name = "Order",
 										IsStatic = false,
-										Attributes = 
-										[],
-
+										Attributes = [],
 										},
 									],
 								}),
@@ -166,7 +160,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 				Name = "Test2",
 				GenericTypeCount = 0,
@@ -177,19 +171,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 					new global::TUnit.Core.DisplayNameAttribute("Another super important test!")
 				],
-				Parameters = 
-				[],
+				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "CustomDisplayNameTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "CustomDisplayNameTests",
 							Namespace = "TUnit.TestProject",
@@ -197,19 +188,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
 								Properties = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
+{
 										Type = typeof(int),
 										Name = "Order",
 										IsStatic = false,
-										Attributes = 
-										[],
-
+										Attributes = [],
 										},
 									],
 								}),
@@ -305,7 +293,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 				Name = "Test3",
 				GenericTypeCount = 0,
@@ -321,42 +309,34 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "value1",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-						{
+{
 							Name = "value2",
-							Attributes = 
-							[],
-
+							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-							{
+{
 								Name = "value3",
-								Attributes = 
-								[],
-
+								Attributes = [],
 									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-							{
+{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-								{
+{
 									Name = "CustomDisplayNameTests",
-									Attributes = 
-									[],
-
+									Attributes = [],
 									}),
 									Name = "CustomDisplayNameTests",
 									Namespace = "TUnit.TestProject",
@@ -364,19 +344,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 									[
 										new EngineTest(Pass)
 									],
-									Parameters = 
-									[],
+									Parameters = [],
 
 										Properties = 
-										[
+[
 											new global::TUnit.Core.SourceGeneratedPropertyInformation
-											{
+{
 												Type = typeof(int),
 												Name = "Order",
 												IsStatic = false,
-												Attributes = 
-												[],
-
+												Attributes = [],
 												},
 											],
 										}),
@@ -444,7 +421,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 								try
 								{
 									var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-									{
+{
 										Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 										Name = "Test3",
 										GenericTypeCount = 0,
@@ -460,42 +437,34 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 											new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!")
 										],
 										Parameters = 
-										[
+[
 											new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-											{
+{
 												Name = "value1",
-												Attributes = 
-												[],
-
+												Attributes = [],
 													ReflectionInfo = null!,
 												},
 												new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-												{
+{
 													Name = "value2",
-													Attributes = 
-													[],
-
+													Attributes = [],
 														ReflectionInfo = null!,
 													},
 													new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-													{
+{
 														Name = "value3",
-														Attributes = 
-														[],
-
+														Attributes = [],
 															ReflectionInfo = null!,
 														},
 													],
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
+{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
+{
 															Name = "CustomDisplayNameTests",
-															Attributes = 
-															[],
-
+															Attributes = [],
 															}),
 															Name = "CustomDisplayNameTests",
 															Namespace = "TUnit.TestProject",
@@ -503,19 +472,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 															[
 																new EngineTest(Pass)
 															],
-															Parameters = 
-															[],
+															Parameters = [],
 
 																Properties = 
-																[
+[
 																	new global::TUnit.Core.SourceGeneratedPropertyInformation
-																	{
+{
 																		Type = typeof(int),
 																		Name = "Order",
 																		IsStatic = false,
-																		Attributes = 
-																		[],
-
+																		Attributes = [],
 																		},
 																	],
 																}),
@@ -611,7 +577,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 				Name = "MethodDataSourceTest",
 				GenericTypeCount = 0,
@@ -625,26 +591,22 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.DisplayNameAttribute("Test using MethodDataSource")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "foo",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "CustomDisplayNameTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "CustomDisplayNameTests",
 							Namespace = "TUnit.TestProject",
@@ -652,19 +614,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
 								Properties = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
+{
 										Type = typeof(int),
 										Name = "Order",
 										IsStatic = false,
-										Attributes = 
-										[],
-
+										Attributes = [],
 										},
 									],
 								}),
@@ -757,7 +716,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 				Name = "PasswordTest",
 				GenericTypeCount = 0,
@@ -767,26 +726,22 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "password",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "CustomDisplayNameTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "CustomDisplayNameTests",
 							Namespace = "TUnit.TestProject",
@@ -794,19 +749,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
 								Properties = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
+{
 										Type = typeof(int),
 										Name = "Order",
 										IsStatic = false,
-										Attributes = 
-										[],
-
+										Attributes = [],
 										},
 									],
 								}),
@@ -825,13 +777,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
+{
 										Name = "password",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
@@ -931,7 +881,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 				Name = "SameClassConstantTest",
 				GenericTypeCount = 0,
@@ -942,19 +892,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 					new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
 				],
-				Parameters = 
-				[],
+				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "CustomDisplayNameTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "CustomDisplayNameTests",
 							Namespace = "TUnit.TestProject",
@@ -962,19 +909,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
 								Properties = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
+{
 										Type = typeof(int),
 										Name = "Order",
 										IsStatic = false,
-										Attributes = 
-										[],
-
+										Attributes = [],
 										},
 									],
 								}),
@@ -1066,7 +1010,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 				Name = "DifferentClassConstantTest",
 				GenericTypeCount = 0,
@@ -1077,19 +1021,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 					new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
 				],
-				Parameters = 
-				[],
+				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "CustomDisplayNameTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "CustomDisplayNameTests",
 							Namespace = "TUnit.TestProject",
@@ -1097,19 +1038,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
 								Properties = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
+{
 										Type = typeof(int),
 										Name = "Order",
 										IsStatic = false,
-										Attributes = 
-										[],
-
+										Attributes = [],
 										},
 									],
 								}),
@@ -1201,7 +1139,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 				Name = "NestedClassConstantTest",
 				GenericTypeCount = 0,
@@ -1212,19 +1150,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 					new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
 				],
-				Parameters = 
-				[],
+				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+{
 							Name = "CustomDisplayNameTests",
-							Attributes = 
-							[],
-
+							Attributes = [],
 							}),
 							Name = "CustomDisplayNameTests",
 							Namespace = "TUnit.TestProject",
@@ -1232,19 +1167,16 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 							[
 								new EngineTest(Pass)
 							],
-							Parameters = 
-							[],
+							Parameters = [],
 
 								Properties = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
+{
 										Type = typeof(int),
 										Name = "Order",
 										IsStatic = false,
-										Attributes = 
-										[],
-
+										Attributes = [],
 										},
 									],
 								}),

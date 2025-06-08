@@ -21,11 +21,9 @@ public class AttributeWriter
         if (attributeDatas.Length == 0)
         {
             sourceCodeWriter.Write("[],");
-            sourceCodeWriter.WriteLine();
             return;
         }
 
-        sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write("[");
         for (var index = 0; index < attributeDatas.Length; index++)
         {

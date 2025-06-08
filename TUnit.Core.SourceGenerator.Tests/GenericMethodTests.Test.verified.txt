@@ -35,7 +35,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+{
 				Type = typeof(global::TUnit.TestProject.GenericMethodTests),
 				Name = "AggregateBy_HasExpectedOutput",
 				GenericTypeCount = 3,
@@ -49,66 +49,52 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
 				],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-					{
+{
 						Name = "source",
-						Attributes = 
-						[],
-
+						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-						{
+{
 							Name = "keySelector",
-							Attributes = 
-							[],
-
+							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-							{
+{
 								Name = "seedSelector",
-								Attributes = 
-								[],
-
+								Attributes = [],
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-								{
+{
 									Name = "func",
-									Attributes = 
-									[],
-
+									Attributes = [],
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-									{
+{
 										Name = "comparer",
-										Attributes = 
-										[],
-
+										Attributes = [],
 											ReflectionInfo = null!,
 										},
 										new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-										{
+{
 											Name = "expected",
-											Attributes = 
-											[],
-
+											Attributes = [],
 												ReflectionInfo = null!,
 											},
 										],
 										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-										{
+{
 											Parent = null,
 											Type = typeof(global::TUnit.TestProject.GenericMethodTests),
 											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-											{
+{
 												Name = "GenericMethodTests",
-												Attributes = 
-												[],
-
+												Attributes = [],
 												}),
 												Name = "GenericMethodTests",
 												Namespace = "TUnit.TestProject",
@@ -116,11 +102,9 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 												[
 													new EngineTest(Pass)
 												],
-												Parameters = 
-												[],
+												Parameters = [],
 
-													Properties = 
-													[],
+													Properties = [],
 
 													}),
 												}
@@ -196,7 +180,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 											try
 											{
 												var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-												{
+{
 													Type = typeof(global::TUnit.TestProject.GenericMethodTests),
 													Name = "AggregateBy_HasExpectedOutput",
 													GenericTypeCount = 3,
@@ -210,66 +194,52 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 														new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
 													],
 													Parameters = 
-													[
+[
 														new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-														{
+{
 															Name = "source",
-															Attributes = 
-															[],
-
+															Attributes = [],
 																ReflectionInfo = null!,
 															},
 															new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-															{
+{
 																Name = "keySelector",
-																Attributes = 
-																[],
-
+																Attributes = [],
 																	ReflectionInfo = null!,
 																},
 																new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																{
+{
 																	Name = "seedSelector",
-																	Attributes = 
-																	[],
-
+																	Attributes = [],
 																		ReflectionInfo = null!,
 																	},
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																	{
+{
 																		Name = "func",
-																		Attributes = 
-																		[],
-
+																		Attributes = [],
 																			ReflectionInfo = null!,
 																		},
 																		new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																		{
+{
 																			Name = "comparer",
-																			Attributes = 
-																			[],
-
+																			Attributes = [],
 																				ReflectionInfo = null!,
 																			},
 																			new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																			{
+{
 																				Name = "expected",
-																				Attributes = 
-																				[],
-
+																				Attributes = [],
 																					ReflectionInfo = null!,
 																				},
 																			],
 																			Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																			{
+{
 																				Parent = null,
 																				Type = typeof(global::TUnit.TestProject.GenericMethodTests),
 																				Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																				{
+{
 																					Name = "GenericMethodTests",
-																					Attributes = 
-																					[],
-
+																					Attributes = [],
 																					}),
 																					Name = "GenericMethodTests",
 																					Namespace = "TUnit.TestProject",
@@ -277,11 +247,9 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																					[
 																						new EngineTest(Pass)
 																					],
-																					Parameters = 
-																					[],
+																					Parameters = [],
 
-																						Properties = 
-																						[],
+																						Properties = [],
 
 																						}),
 																					}
