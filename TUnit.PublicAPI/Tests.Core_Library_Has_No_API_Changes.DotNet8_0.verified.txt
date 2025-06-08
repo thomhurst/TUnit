@@ -78,10 +78,15 @@ namespace TUnit.Core
     }
     public class AsyncEvent<TEventArgs>
     {
-        public System.Threading.Tasks.ValueTask InvokeAsync(object sender, TEventArgs eventArgs) { }
-        public void Unregister() { }
+        public AsyncEvent() { }
+        public int Order { get; set; }
         public static TUnit.Core.AsyncEvent<TEventArgs> operator +(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object, TEventArgs, System.Threading.Tasks.Task> callback) { }
-        public static TUnit.Core.AsyncEvent<TEventArgs>? operator -(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object, TEventArgs, System.Threading.Tasks.Task> callback) { }
+        public class Invocation : TUnit.Core.Interfaces.IEventReceiver
+        {
+            public Invocation(System.Func<object, TEventArgs, System.Threading.Tasks.Task> factory, int order) { }
+            public int Order { get; }
+            public System.Threading.Tasks.ValueTask InvokeAsync(object sender, TEventArgs eventArgs) { }
+        }
     }
     public abstract class BaseClassConstructorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.IDataAttribute
     {
@@ -635,6 +640,10 @@ namespace TUnit.Core
         public System.Collections.Generic.IReadOnlyList<string> NotInParallelConstraintKeys { get; init; }
         public int Order { get; set; }
     }
+    public static class ObjectInitializer
+    {
+        public static System.Threading.Tasks.Task InitializeAsync(object? obj, System.Threading.CancellationToken cancellationToken = default) { }
+    }
     public class ParallelGroupAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestDiscoveryEventReceiver
     {
         public ParallelGroupAttribute(string group) { }
@@ -895,10 +904,13 @@ namespace TUnit.Core
         public void AddArtifact(TUnit.Core.Artifact artifact) { }
         public void SuppressReportingResult() { }
     }
-    public class TestContextEvents : System.IAsyncDisposable, System.IEquatable<TUnit.Core.TestContextEvents>, TUnit.Core.Interfaces.IAsyncInitializer, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ILastTestInAssemblyEventReceiver, TUnit.Core.Interfaces.ILastTestInClassEventReceiver, TUnit.Core.Interfaces.ILastTestInTestSessionEventReceiver, TUnit.Core.Interfaces.ITestEndEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver, TUnit.Core.Interfaces.ITestRetryEventReceiver, TUnit.Core.Interfaces.ITestSkippedEventReceiver, TUnit.Core.Interfaces.ITestStartEventReceiver
+    public class TestContextEvents : System.IEquatable<TUnit.Core.TestContextEvents>
     {
         public TestContextEvents() { }
         public TUnit.Core.AsyncEvent<TUnit.Core.TestContext>? OnDispose { get; set; }
+        public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.AssemblyHookContext, TUnit.Core.TestContext>>? OnFirstTestInAssembly { get; set; }
+        public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.ClassHookContext, TUnit.Core.TestContext>>? OnFirstTestInClass { get; set; }
+        public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.TestSessionContext, TUnit.Core.TestContext>>? OnFirstTestInTestSession { get; set; }
         public TUnit.Core.AsyncEvent<TUnit.Core.TestContext>? OnInitialize { get; set; }
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.AssemblyHookContext, TUnit.Core.TestContext>>? OnLastTestInAssembly { get; set; }
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.ClassHookContext, TUnit.Core.TestContext>>? OnLastTestInClass { get; set; }
@@ -911,9 +923,6 @@ namespace TUnit.Core
         public TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.TestContext, int>>? OnTestRetry { get; set; }
         public TUnit.Core.AsyncEvent<TUnit.Core.TestContext>? OnTestSkipped { get; set; }
         public TUnit.Core.AsyncEvent<TUnit.Core.BeforeTestContext>? OnTestStart { get; set; }
-        public int Order { get; }
-        public System.Threading.Tasks.ValueTask DisposeAsync() { }
-        public System.Threading.Tasks.Task InitializeAsync() { }
     }
     public class TestDataAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.IDataAttribute
     {
@@ -1141,6 +1150,105 @@ namespace TUnit.Core.Enums
         Failed = 2,
         Skipped = 3,
         Cancelled = 4,
+    }
+}
+namespace TUnit.Core.Events
+{
+    public enum EventType
+    {
+        Initialize = 0,
+        Dispose = 1,
+        TestRegistered = 2,
+        TestStart = 3,
+        TestEnd = 4,
+        TestSkipped = 5,
+        FirstTestInClass = 6,
+        FirstTestInAssembly = 7,
+        FirstTestInTestSession = 8,
+        LastTestInClass = 9,
+        LastTestInAssembly = 10,
+        LastTestInTestSession = 11,
+        TestRetry = 12,
+    }
+    public class FirstTestInAssemblyEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.IFirstTestInAssemblyEventReceiver
+    {
+        public FirstTestInAssemblyEventWrapper(TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.AssemblyHookContext, TUnit.Core.TestContext>>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnFirstTestInAssembly(TUnit.Core.AssemblyHookContext context, TUnit.Core.TestContext testContext) { }
+    }
+    public class FirstTestInClassEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.IFirstTestInClassEventReceiver
+    {
+        public FirstTestInClassEventWrapper(TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.ClassHookContext, TUnit.Core.TestContext>>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnFirstTestInClass(TUnit.Core.ClassHookContext context, TUnit.Core.TestContext testContext) { }
+    }
+    public class FirstTestInTestSessionEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.IFirstTestInTestSessionEventReceiver
+    {
+        public FirstTestInTestSessionEventWrapper(TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.TestSessionContext, TUnit.Core.TestContext>>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnFirstTestInTestSession(TUnit.Core.TestSessionContext context, TUnit.Core.TestContext testContext) { }
+    }
+    public class LastTestInAssemblyEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ILastTestInAssemblyEventReceiver
+    {
+        public LastTestInAssemblyEventWrapper(TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.AssemblyHookContext, TUnit.Core.TestContext>>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnLastTestInAssembly(TUnit.Core.AssemblyHookContext context, TUnit.Core.TestContext testContext) { }
+    }
+    public class LastTestInClassEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ILastTestInClassEventReceiver
+    {
+        public LastTestInClassEventWrapper(TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.ClassHookContext, TUnit.Core.TestContext>>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnLastTestInClass(TUnit.Core.ClassHookContext context, TUnit.Core.TestContext testContext) { }
+    }
+    public class LastTestInTestSessionEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ILastTestInTestSessionEventReceiver
+    {
+        public LastTestInTestSessionEventWrapper(TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.TestSessionContext, TUnit.Core.TestContext>>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnLastTestInTestSession(TUnit.Core.TestSessionContext context, TUnit.Core.TestContext testContext) { }
+    }
+    public class TestDisposeEventWrapper : System.IAsyncDisposable, TUnit.Core.Interfaces.IEventReceiver
+    {
+        public TestDisposeEventWrapper(TUnit.Core.AsyncEvent<TUnit.Core.TestContext>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+    }
+    public class TestEndEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestEndEventReceiver
+    {
+        public TestEndEventWrapper(TUnit.Core.AsyncEvent<TUnit.Core.AfterTestContext>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestEnd(TUnit.Core.AfterTestContext testContext) { }
+    }
+    public class TestInitializeEventWrapper : TUnit.Core.Interfaces.IAsyncInitializer, TUnit.Core.Interfaces.IEventReceiver
+    {
+        public TestInitializeEventWrapper(TUnit.Core.AsyncEvent<TUnit.Core.TestContext>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.Task InitializeAsync() { }
+    }
+    public class TestRegisteredEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
+    {
+        public TestRegisteredEventWrapper(TUnit.Core.AsyncEvent<TUnit.Core.TestRegisteredContext>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
+    }
+    public class TestRetryEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRetryEventReceiver
+    {
+        public TestRetryEventWrapper([System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                null,
+                "RetryAttempt"})] TUnit.Core.AsyncEvent<System.ValueTuple<TUnit.Core.TestContext, int>>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestRetry(TUnit.Core.TestContext testContext, int retryAttempt) { }
+    }
+    public class TestSkippedEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestSkippedEventReceiver
+    {
+        public TestSkippedEventWrapper(TUnit.Core.AsyncEvent<TUnit.Core.TestContext>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestSkipped(TUnit.Core.TestContext testContext) { }
+    }
+    public class TestStartEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestStartEventReceiver
+    {
+        public TestStartEventWrapper(TUnit.Core.AsyncEvent<TUnit.Core.BeforeTestContext>.Invocation invocation) { }
+        public int Order { get; }
+        public System.Threading.Tasks.ValueTask OnTestStart(TUnit.Core.BeforeTestContext beforeTestContext) { }
     }
 }
 namespace TUnit.Core.Exceptions
