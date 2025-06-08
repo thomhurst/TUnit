@@ -8,10 +8,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -31,21 +34,25 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
 				Name = "MethodDataSource",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.InstanceMethodDataSourceAttribute("DataSource")
-],
+				],
 				Parameters = 
-[
+
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+
+					{
 						Name = "value",
 						Attributes = 
 						[],
@@ -54,11 +61,13 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1821", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+						{
 							Name = "Tests1821",
 							Attributes = 
 							[],
@@ -67,13 +76,16 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							Name = "Tests",
 							Namespace = "TUnit.TestProject.Bugs._1821",
 							Attributes = 
-[
+
+							[
 								new EngineTest(Pass)
-],
+							],
 							Parameters = 
-[
+
+							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1821.MyData>
-{
+
+								{
 									Name = "data",
 									Attributes = 
 									[],
@@ -100,9 +112,11 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-[
+
+								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1821.MyData>
-{
+
+									{
 										Name = "data",
 										Attributes = 
 										[],
@@ -190,10 +204,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -213,33 +230,40 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
 				Name = "MatrixDataSource",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute()
-],
+				],
 				Parameters = 
-[
+
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+
+					{
 						Name = "value",
 						Attributes = 
-[
+
+						[
 							new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
-],
+						],
 						ReflectionInfo = null!,
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+				{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1821", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+					{
 						Name = "Tests1821",
 						Attributes = 
 						[],
@@ -248,13 +272,16 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						Name = "Tests",
 						Namespace = "TUnit.TestProject.Bugs._1821",
 						Attributes = 
-[
+
+						[
 							new EngineTest(Pass)
-],
+						],
 						Parameters = 
-[
+
+						[
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1821.MyData>
-{
+
+							{
 								Name = "data",
 								Attributes = 
 								[],
@@ -281,9 +308,11 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-[
+
+							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1821.MyData>
-{
+
+								{
 									Name = "data",
 									Attributes = 
 									[],
@@ -317,14 +346,17 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 									TestBuilderContext = testBuilderContextAccessor,
 									TestInformation = testInformation,
 									MembersToGenerate = 
-[
+
+									[
 										new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+
+										{
 											Name = "value",
 											Attributes = 
-[
+
+											[
 												new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
-],
+											],
 											ReflectionInfo = null!,
 										},
 									],

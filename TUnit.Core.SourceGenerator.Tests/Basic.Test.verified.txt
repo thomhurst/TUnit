@@ -8,10 +8,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Basic : global::TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{

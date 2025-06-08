@@ -60,10 +60,18 @@ public class SourceCodeWriter : IDisposable
         }
 
         // Add newline before opening braces/brackets if not already on a new line
-        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]) &&
-            _stringBuilder.Length > 0 && _stringBuilder[^1] != '\n')
+        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
         {
-            _stringBuilder.AppendLine();
+            if(_stringBuilder.Length > 0 && _stringBuilder[^1] != '\n')
+            {
+                _stringBuilder.AppendLine();
+            }
+
+            _shouldIndent = true;
+        }
+
+        if (_tabLevelDecreasingChars.Contains(value[0]))
+        {
             _shouldIndent = true;
         }
 

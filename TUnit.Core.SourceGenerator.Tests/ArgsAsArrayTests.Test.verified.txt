@@ -8,10 +8,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -31,21 +34,25 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 				Name = "Params",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
-],
+				],
 				Parameters = 
-[
+
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string[]>
-{
+
+					{
 						Name = "arguments",
 						Attributes = 
 						[],
@@ -54,11 +61,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+						{
 							Name = "ArgsAsArrayTests",
 							Attributes = 
 							[],
@@ -143,10 +152,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -166,21 +178,25 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 				Name = "NonParams",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
-],
+				],
 				Parameters = 
-[
+
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string[]>
-{
+
+					{
 						Name = "arguments",
 						Attributes = 
 						[],
@@ -189,11 +205,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+						{
 							Name = "ArgsAsArrayTests",
 							Attributes = 
 							[],
@@ -278,10 +296,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -301,21 +322,25 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 				Name = "ParamsEnumerable",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
-],
+				],
 				Parameters = 
-[
+
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
-{
+
+					{
 						Name = "arguments",
 						Attributes = 
 						[],
@@ -324,11 +349,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+						{
 							Name = "ArgsAsArrayTests",
 							Attributes = 
 							[],
@@ -413,10 +440,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -436,21 +466,25 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 				Name = "Enumerable",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
-],
+				],
 				Parameters = 
-[
+
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
-{
+
+					{
 						Name = "arguments",
 						Attributes = 
 						[],
@@ -459,11 +493,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+						{
 							Name = "ArgsAsArrayTests",
 							Attributes = 
 							[],
@@ -548,10 +584,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -571,21 +610,25 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 				Name = "Following_Non_Params",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute(1, "arg1", "arg2", "arg3")
-],
+				],
 				Parameters = 
-[
+
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+
+					{
 						Name = "i",
 						Attributes = 
 						[],
@@ -593,7 +636,8 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Collections.Generic.IEnumerable<string>>
-{
+
+						{
 							Name = "arguments",
 							Attributes = 
 							[],
@@ -602,11 +646,13 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "ArgsAsArrayTests",
 								Attributes = 
 								[],

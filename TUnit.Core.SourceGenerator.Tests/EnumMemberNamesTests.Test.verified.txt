@@ -8,10 +8,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -36,13 +39,15 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
 				Name = "SomeTest",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute("A"),
@@ -50,11 +55,13 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					new global::TUnit.Core.ArgumentsAttribute("B"),
 
 					new global::TUnit.Core.ArgumentsAttribute("C")
-],
+				],
 				Parameters = 
-[
+
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+
+					{
 						Name = "value",
 						Attributes = 
 						[],
@@ -63,11 +70,13 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+						{
 							Name = "EnumMemberNamesTests",
 							Attributes = 
 							[],
@@ -76,9 +85,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 							Name = "EnumMemberNamesTests",
 							Namespace = "TUnit.TestProject.Bugs._1432",
 							Attributes = 
-[
+
+							[
 								new EngineTest(Pass)
-],
+							],
 							Parameters = 
 							[],
 
@@ -148,13 +158,15 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 						try
 						{
 							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+							{
 								Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
 								Name = "SomeTest",
 								GenericTypeCount = 0,
 								ReturnType = typeof(void),
 								Attributes = 
-[
+
+								[
 									new global::TUnit.Core.TestAttribute(),
 
 									new global::TUnit.Core.ArgumentsAttribute("A"),
@@ -162,11 +174,13 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 									new global::TUnit.Core.ArgumentsAttribute("B"),
 
 									new global::TUnit.Core.ArgumentsAttribute("C")
-],
+								],
 								Parameters = 
-[
+
+								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+
+									{
 										Name = "value",
 										Attributes = 
 										[],
@@ -175,11 +189,13 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+									{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+										{
 											Name = "EnumMemberNamesTests",
 											Attributes = 
 											[],
@@ -188,9 +204,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 											Name = "EnumMemberNamesTests",
 											Namespace = "TUnit.TestProject.Bugs._1432",
 											Attributes = 
-[
+
+											[
 												new EngineTest(Pass)
-],
+											],
 											Parameters = 
 											[],
 
@@ -260,13 +277,15 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 										try
 										{
 											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+											{
 												Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
 												Name = "SomeTest",
 												GenericTypeCount = 0,
 												ReturnType = typeof(void),
 												Attributes = 
-[
+
+												[
 													new global::TUnit.Core.TestAttribute(),
 
 													new global::TUnit.Core.ArgumentsAttribute("A"),
@@ -274,11 +293,13 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 													new global::TUnit.Core.ArgumentsAttribute("B"),
 
 													new global::TUnit.Core.ArgumentsAttribute("C")
-],
+												],
 												Parameters = 
-[
+
+												[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+
+													{
 														Name = "value",
 														Attributes = 
 														[],
@@ -287,11 +308,13 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 														},
 													],
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+													{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+														{
 															Name = "EnumMemberNamesTests",
 															Attributes = 
 															[],
@@ -300,9 +323,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 															Name = "EnumMemberNamesTests",
 															Namespace = "TUnit.TestProject.Bugs._1432",
 															Attributes = 
-[
+
+															[
 																new EngineTest(Pass)
-],
+															],
 															Parameters = 
 															[],
 

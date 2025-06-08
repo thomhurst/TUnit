@@ -3,6 +3,7 @@
 #pragma warning disable
 file static class AssemblyLoader_Guid
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialize()
 	{

@@ -10,10 +10,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -42,24 +45,28 @@ file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.I
 			new global::TUnit.Core.Hooks.BeforeClassHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
 					Name = "BeforeAll1",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Class)
-],
+					],
 					Parameters = 
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base1", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -112,10 +119,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -145,24 +155,28 @@ file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.I
 			{
 				ClassType = typeof(global::TUnit.TestProject.BeforeTests.Base1),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
 					Name = "BeforeEach1",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-],
+					],
 					Parameters = 
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base1", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -213,10 +227,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -245,24 +262,28 @@ file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.I
 			new global::TUnit.Core.Hooks.BeforeClassHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
 					Name = "BeforeAll2",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Class)
-],
+					],
 					Parameters = 
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -315,10 +336,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -348,24 +372,28 @@ file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.I
 			{
 				ClassType = typeof(global::TUnit.TestProject.BeforeTests.Base2),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
 					Name = "BeforeEach2",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-],
+					],
 					Parameters = 
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -416,10 +444,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -448,24 +479,28 @@ file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.I
 			new global::TUnit.Core.Hooks.BeforeClassHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
 					Name = "BeforeAll3",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Class)
-],
+					],
 					Parameters = 
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base3", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -518,10 +553,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -551,24 +589,28 @@ file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.I
 			{
 				ClassType = typeof(global::TUnit.TestProject.BeforeTests.Base3),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
 					Name = "BeforeEach3",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-],
+					],
 					Parameters = 
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.Base3", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -619,10 +661,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -651,24 +696,28 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 			new global::TUnit.Core.Hooks.BeforeClassHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 					Name = "BeforeAllSetUp",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Class)
-],
+					],
 					Parameters = 
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -721,10 +770,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -753,19 +805,23 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 			new global::TUnit.Core.Hooks.BeforeClassHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 					Name = "BeforeAllSetUpWithContext",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Class)
-],
+					],
 					Parameters = 
-[
+
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.ClassHookContext>
-{
+
+						{
 							Name = "context",
 							Attributes = 
 							[],
@@ -774,11 +830,13 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -831,10 +889,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -863,19 +924,23 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 			new global::TUnit.Core.Hooks.BeforeClassHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 					Name = "BeforeAllSetUp",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Class)
-],
+					],
 					Parameters = 
-[
+
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-{
+
+						{
 							Name = "cancellationToken",
 							Attributes = 
 							[],
@@ -884,11 +949,13 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -941,10 +1008,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -973,19 +1043,23 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 			new global::TUnit.Core.Hooks.BeforeClassHookMethod
 			{
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 					Name = "BeforeAllSetUpWithContext",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Class)
-],
+					],
 					Parameters = 
-[
+
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.ClassHookContext>
-{
+
+						{
 							Name = "context",
 							Attributes = 
 							[],
@@ -993,7 +1067,8 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-{
+
+							{
 								Name = "cancellationToken",
 								Attributes = 
 								[],
@@ -1002,11 +1077,13 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+							{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+								{
 									Name = "BeforeTests",
 									Attributes = 
 									[],
@@ -1059,10 +1136,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -1092,24 +1172,28 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 			{
 				ClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 					Name = "Setup",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-],
+					],
 					Parameters = 
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -1160,10 +1244,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -1193,21 +1280,25 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 			{
 				ClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 					Name = "Setup",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),
 
 						new global::TUnit.Core.TimeoutAttribute(30_000)
-],
+					],
 					Parameters = 
-[
+
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-{
+
+						{
 							Name = "cancellationToken",
 							Attributes = 
 							[],
@@ -1216,11 +1307,13 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -1271,10 +1364,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -1304,19 +1400,23 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 			{
 				ClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 					Name = "SetupWithContext",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-],
+					],
 					Parameters = 
-[
+
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+
+						{
 							Name = "testContext",
 							Attributes = 
 							[],
@@ -1325,11 +1425,13 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+							{
 								Name = "BeforeTests",
 								Attributes = 
 								[],
@@ -1380,10 +1482,13 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -1413,21 +1518,25 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 			{
 				ClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+				{
 					Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 					Name = "SetupWithContext",
 					GenericTypeCount = 0,
 					ReturnType = typeof(global::System.Threading.Tasks.Task),
 					Attributes = 
-[
+
+					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),
 
 						new global::TUnit.Core.TimeoutAttribute(30_000)
-],
+					],
 					Parameters = 
-[
+
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+
+						{
 							Name = "testContext",
 							Attributes = 
 							[],
@@ -1435,7 +1544,8 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-{
+
+							{
 								Name = "cancellationToken",
 								Attributes = 
 								[],
@@ -1444,11 +1554,13 @@ file partial class Hooks_SetupTests : global::TUnit.Core.Interfaces.SourceGenera
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.BeforeTests.SetupTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+							{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BeforeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+								{
 									Name = "BeforeTests",
 									Attributes = 
 									[],

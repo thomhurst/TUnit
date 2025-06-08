@@ -8,10 +8,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -31,13 +34,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
 				Name = "Test",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-[
+
+				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(),
@@ -47,16 +52,18 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(two: "two"),
 
 					new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three: false)
-],
+				],
 				Parameters = 
 				[],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1539.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1539", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+						{
 							Name = "Tests1539",
 							Attributes = 
 							[],
@@ -65,9 +72,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							Name = "Tests",
 							Namespace = "TUnit.TestProject.Bugs._1539",
 							Attributes = 
-[
+
+							[
 								new EngineTest(Pass)
-],
+							],
 							Parameters = 
 							[],
 

@@ -8,10 +8,13 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
+
 [global::System.Diagnostics.StackTraceHidden]
+
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
+
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -37,23 +40,27 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 				Name = "Test1",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-[
+
+				[
 				],
 				Parameters = 
 				[],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+						{
 							Name = "Tests1889",
 							Attributes = 
 							[],
@@ -62,11 +69,12 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 							Name = "DerivedTest",
 							Namespace = "TUnit.TestProject.Bugs._1889",
 							Attributes = 
-[
+
+							[
 								new EngineTest(Pass),
 
 								new global::TUnit.Core.InheritsTestsAttribute()
-],
+							],
 							Parameters = 
 							[],
 
@@ -132,18 +140,22 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 						try
 						{
 							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+							{
 								Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 								Name = "Test2",
 								GenericTypeCount = 0,
 								ReturnType = typeof(void),
 								Attributes = 
-[
+
+								[
 								],
 								Parameters = 
-[
+
+								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+
+									{
 										Name = "condition",
 										Attributes = 
 										[],
@@ -152,11 +164,13 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+									{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+										{
 											Name = "Tests1889",
 											Attributes = 
 											[],
@@ -165,11 +179,12 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 											Name = "DerivedTest",
 											Namespace = "TUnit.TestProject.Bugs._1889",
 											Attributes = 
-[
+
+											[
 												new EngineTest(Pass),
 
 												new global::TUnit.Core.InheritsTestsAttribute()
-],
+											],
 											Parameters = 
 											[],
 
@@ -192,9 +207,11 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 												TestBuilderContext = testBuilderContextAccessor,
 												TestInformation = testInformation,
 												MembersToGenerate = 
-[
+
+												[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+
+													{
 														Name = "condition",
 														Attributes = 
 														[],
@@ -269,18 +286,22 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 											try
 											{
 												var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+												{
 													Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 													Name = "Test3",
 													GenericTypeCount = 0,
 													ReturnType = typeof(void),
 													Attributes = 
-[
+
+													[
 													],
 													Parameters = 
-[
+
+													[
 														new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+
+														{
 															Name = "condition",
 															Attributes = 
 															[],
@@ -289,11 +310,13 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 															},
 														],
 														Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+														{
 															Parent = null,
 															Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 															Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+															{
 																Name = "Tests1889",
 																Attributes = 
 																[],
@@ -302,11 +325,12 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 																Name = "DerivedTest",
 																Namespace = "TUnit.TestProject.Bugs._1889",
 																Attributes = 
-[
+
+																[
 																	new EngineTest(Pass),
 
 																	new global::TUnit.Core.InheritsTestsAttribute()
-],
+																],
 																Parameters = 
 																[],
 
@@ -374,18 +398,22 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 															try
 															{
 																var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+
+																{
 																	Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 																	Name = "Test3",
 																	GenericTypeCount = 0,
 																	ReturnType = typeof(void),
 																	Attributes = 
-[
+
+																	[
 																	],
 																	Parameters = 
-[
+
+																	[
 																		new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+
+																		{
 																			Name = "condition",
 																			Attributes = 
 																			[],
@@ -394,11 +422,13 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 																			},
 																		],
 																		Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+
+																		{
 																			Parent = null,
 																			Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 																			Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+
+																			{
 																				Name = "Tests1889",
 																				Attributes = 
 																				[],
@@ -407,11 +437,12 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 																				Name = "DerivedTest",
 																				Namespace = "TUnit.TestProject.Bugs._1889",
 																				Attributes = 
-[
+
+																				[
 																					new EngineTest(Pass),
 
 																					new global::TUnit.Core.InheritsTestsAttribute()
-],
+																				],
 																				Parameters = 
 																				[],
 
