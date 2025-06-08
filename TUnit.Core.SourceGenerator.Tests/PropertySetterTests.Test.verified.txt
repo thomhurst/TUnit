@@ -21,6 +21,7 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 	{
 		return Tests0(sessionId);
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -330,5 +331,6 @@ var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.Test
 		}
 		return nodes;
 	}
+
 }
 ]

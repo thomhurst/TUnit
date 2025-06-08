@@ -26,6 +26,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 			..Tests2(sessionId),
 		];
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -125,6 +126,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -224,6 +226,7 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -323,5 +326,6 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 		}
 		return nodes;
 	}
+
 }
 ]

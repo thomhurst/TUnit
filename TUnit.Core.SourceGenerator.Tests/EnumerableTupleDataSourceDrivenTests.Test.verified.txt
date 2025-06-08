@@ -25,6 +25,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 			..Tests1(sessionId),
 		];
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -141,6 +142,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -257,5 +259,6 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		}
 		return nodes;
 	}
+
 }
 ]

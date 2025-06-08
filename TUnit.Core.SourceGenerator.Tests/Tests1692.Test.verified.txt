@@ -25,6 +25,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 			..Tests1(sessionId),
 		];
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -122,6 +123,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -219,5 +221,6 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		}
 		return nodes;
 	}
+
 }
 ]

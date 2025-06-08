@@ -21,6 +21,7 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 	{
 		return Tests0(sessionId);
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -116,5 +117,6 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 		}
 		return nodes;
 	}
+
 }
 ]

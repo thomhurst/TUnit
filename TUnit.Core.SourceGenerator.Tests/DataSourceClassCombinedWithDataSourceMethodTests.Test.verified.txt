@@ -32,6 +32,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			..Tests8(sessionId),
 		];
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -145,6 +146,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -258,6 +260,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -371,6 +374,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -484,6 +488,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -597,6 +602,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -710,6 +716,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests6(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -823,6 +830,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests7(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -936,6 +944,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests8(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -1049,5 +1058,6 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		}
 		return nodes;
 	}
+
 }
 ]

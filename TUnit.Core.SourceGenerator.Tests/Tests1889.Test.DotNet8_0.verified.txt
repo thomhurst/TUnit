@@ -27,6 +27,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 			..Tests3(sessionId),
 		];
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -109,6 +110,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -230,6 +232,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -322,6 +325,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -414,5 +418,6 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 		}
 		return nodes;
 	}
+
 }
 ]

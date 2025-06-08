@@ -29,6 +29,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			..Tests5(sessionId),
 		];
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -141,6 +142,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -253,6 +255,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -369,6 +372,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -485,6 +489,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -601,6 +606,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -717,5 +723,6 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		}
 		return nodes;
 	}
+
 }
 ]

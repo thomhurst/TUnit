@@ -27,6 +27,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 			..Tests3(sessionId),
 		];
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -223,6 +224,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -419,6 +421,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -615,6 +618,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		}
 		return nodes;
 	}
+
 	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -811,5 +815,6 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		}
 		return nodes;
 	}
+
 }
 ]

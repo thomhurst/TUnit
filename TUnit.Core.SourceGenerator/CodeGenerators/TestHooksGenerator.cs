@@ -136,6 +136,7 @@ public class TestHooksGenerator : IIncrementalGenerator
                 }
 
                 sourceBuilder.Write("}");
+                sourceBuilder.WriteLine();
 
                 foreach (var hooksGroupedByLevel in groupedByTypeName.GroupBy(x => x.HookLevel))
                 {
@@ -182,6 +183,7 @@ public class TestHooksGenerator : IIncrementalGenerator
 
                             sourceBuilder.Write("];");
                             sourceBuilder.Write("}");
+                            sourceBuilder.WriteLine();
                         }
                     }
                 }

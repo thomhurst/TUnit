@@ -149,6 +149,7 @@ public class TestsGenerator : IIncrementalGenerator
                 }
 
                 sourceBuilder.Write("}");
+                sourceBuilder.WriteLine();
 
                 var index = 0;
                 foreach (var model in classGrouping)
@@ -172,6 +173,7 @@ public class TestsGenerator : IIncrementalGenerator
 
                     sourceBuilder.Write("return nodes;");
                     sourceBuilder.Write("}");
+                    sourceBuilder.WriteLine();
                 }
 
                 sourceBuilder.Write("}");
