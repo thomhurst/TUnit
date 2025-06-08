@@ -82,7 +82,8 @@ public class AttributeWriter
 
         sourceCodeWriter.Write($"new {attributeName}({formattedConstructorArgs})");
 
-        if (formattedProperties.Length == 0)
+        if (formattedProperties.Length == 0
+            && !HasNestedDataGeneratorProperties(attributeData))
         {
             return sourceCodeWriter.ToString();
         }
@@ -99,6 +100,21 @@ public class AttributeWriter
         sourceCodeWriter.Write("}");
 
         return sourceCodeWriter.ToString();
+    }
+
+    private static bool HasNestedDataGeneratorProperties(AttributeData attributeData)
+    {
+        if (attributeData.AttributeClass is not { } attributeClass)
+        {
+            return false;
+        }
+
+        if (attributeClass.GetMembersIncludingBase().OfType<IPropertySymbol>().Any(x => x.GetAttributes().Any(a => a.IsDataSourceAttribute())))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private static void WriteDataSourceGeneratorProperties(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, AttributeData attributeData)

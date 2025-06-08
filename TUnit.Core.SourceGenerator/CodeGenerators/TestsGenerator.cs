@@ -192,6 +192,8 @@ public class TestsGenerator : IIncrementalGenerator
                 isEnabledByDefault: true);
 
             context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));
+
+            throw;
         }
     }
 }

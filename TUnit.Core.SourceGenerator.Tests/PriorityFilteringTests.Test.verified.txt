@@ -17,6 +17,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -125,6 +126,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -233,6 +235,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -341,6 +344,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -449,6 +453,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -557,6 +562,7 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);

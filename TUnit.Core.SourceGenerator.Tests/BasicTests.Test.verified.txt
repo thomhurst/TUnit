@@ -17,6 +17,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new BasicTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -123,6 +124,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new BasicTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -229,6 +231,7 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new BasicTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);

@@ -17,6 +17,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -238,6 +239,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -709,6 +711,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return

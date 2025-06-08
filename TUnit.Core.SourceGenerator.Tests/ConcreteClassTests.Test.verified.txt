@@ -17,6 +17,7 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ConcreteClass2());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -128,6 +129,7 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new Inherited_ConcreteClass2());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -239,6 +241,7 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new Inherited_ConcreteClass1());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);

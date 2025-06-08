@@ -39,6 +39,12 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         var source = File.ReadAllText(inputFile);
 #endif
 
+        runTestOptions.AdditionalFiles =
+        [
+            ..runTestOptions.AdditionalFiles,
+            Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "Attributes", "ExpectedPassEngineTest.cs")
+        ];
+
         string[] additionalSources =
         [
             """

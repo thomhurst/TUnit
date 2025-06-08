@@ -17,6 +17,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgumentWithImplicitConverterTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -338,6 +339,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgumentWithImplicitConverterTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
