@@ -12,20 +12,8 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     public Type ClassType => typeof(T);
     public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return () =>
-        {
-            var item = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
-
-            ClassDataSources.RegisterEvents(
-                item,
-                dataGeneratorMetadata,
-                Shared,
-                Key
-            );
-
-            return item;
-        };
+        yield return () => ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+            .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
     }
 
     public IEnumerable<SharedType> GetSharedTypes() => [Shared];
@@ -119,16 +107,6 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
             {
                 items[i] = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
                     .Get(Shared.ElementAtOrDefault(0), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(0), dataGeneratorMetadata);
-            }
-
-            for (var i = 0; i < items.Length; i++)
-            {
-                var item = items[i];
-
-                ClassDataSources.RegisterEvents(item,
-                    dataGeneratorMetadata,
-                    Shared.ElementAtOrDefault(i),
-                    Keys.ElementAtOrDefault(i));
             }
 
             return items;

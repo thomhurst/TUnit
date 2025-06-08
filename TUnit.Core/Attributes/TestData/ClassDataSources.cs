@@ -1,14 +1,9 @@
-﻿using System.Collections;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
-using TUnit.Core.Logging;
-
-#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace TUnit.Core;
 
@@ -17,11 +12,6 @@ internal class ClassDataSources
     private ClassDataSources()
     {
     }
-
-    public GetOnlyDictionary<Type, Task> GlobalInitializers = new();
-    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, Task>> TestClassTypeInitializers = new();
-    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> AssemblyInitializers = new();
-    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, Task>> KeyedInitializers = new();
 
     public static readonly GetOnlyDictionary<string, ClassDataSources> SourcesPerSession = new();
 
@@ -107,72 +97,6 @@ internal class ClassDataSources
         throw new ArgumentOutOfRangeException();
     }
 
-    public async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string? key, T? item)
-    {
-        switch (shared)
-        {
-            case SharedType.None:
-                break;
-            case SharedType.PerClass:
-                TestDataContainer.IncrementTestClassUsage(testContext.TestDetails.TestClass.Type, typeof(T));
-                break;
-            case SharedType.PerAssembly:
-                TestDataContainer.IncrementAssemblyUsage(testContext.TestDetails.TestClass.Type.Assembly, typeof(T));
-                break;
-            case SharedType.PerTestSession:
-                TestDataContainer.IncrementGlobalUsage(typeof(T));
-                break;
-            case SharedType.Keyed:
-                TestDataContainer.IncrementKeyUsage(key!, typeof(T));
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        if (isStatic)
-        {
-            await ObjectInitializer.InitializeAsync(item);
-        }
-
-        if (item is ITestRegisteredEventReceiver testRegisteredEventReceiver)
-        {
-            await testRegisteredEventReceiver.OnTestRegistered(new TestRegisteredContext(testContext.InternalDiscoveredTest));
-        }
-    }
-
-    public async ValueTask OnDispose<T>(TestContext testContext, SharedType shared, string? key, T? item)
-    {
-        if (shared is SharedType.None)
-        {
-            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(item);
-        }
-
-        if (shared == SharedType.Keyed)
-        {
-            await TestDataContainer.ConsumeKey(key!, typeof(T));
-        }
-
-        if (shared == SharedType.PerClass)
-        {
-            await TestDataContainer.ConsumeTestClassCount(testContext.TestDetails.TestClass.Type, item);
-        }
-
-        if (shared == SharedType.PerAssembly)
-        {
-            await TestDataContainer.ConsumeAssemblyCount(testContext.TestDetails.TestClass.Type.Assembly, item);
-        }
-
-        if (shared == SharedType.PerTestSession)
-        {
-            await TestDataContainer.ConsumeGlobalCount(item);
-        }
-    }
-
-    public static bool IsStaticProperty(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        return dataGeneratorMetadata.MembersToGenerate is [SourceGeneratedPropertyInformation { IsStatic: true }];
-    }
-
     [return: NotNull]
     private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
     {
@@ -241,72 +165,6 @@ internal class ClassDataSources
             }
 
             InitializeDataSourceProperties(dataGeneratorMetadata, result, nestedProperties);
-
-            // Get shared type and key from the attribute if available
-            var sharedDataSourceAttribute = propertyInfo.GetCustomAttributes(true)
-                .OfType<ISharedDataSourceAttribute>()
-                .FirstOrDefault();
-
-            var sharedType = sharedDataSourceAttribute?.GetSharedTypes().ElementAtOrDefault(0) ?? SharedType.None;
-            var keys = sharedDataSourceAttribute?.GetKeys().ElementAtOrDefault(0);
-
-            RegisterEvents(result, dataGeneratorMetadata, sharedType, keys);
-        }
-    }
-
-    public static void RegisterEvents(object? item, DataGeneratorMetadata dataGeneratorMetadata, SharedType sharedType, string? key)
-    {
-        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (_, context) =>
-            {
-                await Get(dataGeneratorMetadata.TestSessionId).OnTestRegistered(
-                    context.TestContext,
-                    IsStaticProperty(dataGeneratorMetadata),
-                    sharedType,
-                    key,
-                    item);
-            };
-
-        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, _) =>
-            {
-                await ObjectInitializer.InitializeAsync(item, CancellationToken.None);
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
-            {
-                await Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, item);
-            };
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart.Order = -1;
-
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, context) =>
-            {
-                await Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, item);
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, context) =>
-            {
-                await Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, sharedType, key, item);
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, context) =>
-            {
-                await Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, sharedType, key, item);
-            };
-    }
-
-    public async Task OnTestStart<T>(BeforeTestContext context, T item)
-    {
-        if (item is ITestStartEventReceiver testStartEventReceiver)
-        {
-            await testStartEventReceiver.OnTestStart(context);
-        }
-    }
-
-    public async Task OnTestEnd<T>(AfterTestContext context, T item)
-    {
-        if (item is ITestEndEventReceiver testEndEventReceiver)
-        {
-            await testEndEventReceiver.OnTestEnd(context);
         }
     }
 }

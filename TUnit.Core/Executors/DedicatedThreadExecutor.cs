@@ -11,7 +11,6 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
             {
                 Initialize();
 
-                // Set a custom SynchronizationContext that keeps all continuations on this thread
                 var previousContext = SynchronizationContext.Current;
                 var dedicatedContext = new DedicatedThreadSynchronizationContext();
                 SynchronizationContext.SetSynchronizationContext(dedicatedContext);

@@ -123,11 +123,14 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector));
 
-        var testRegistrar = Register(new TestRegistrar(instanceTracker));
-
         Disposer = Register(new Disposer(Logger));
 
+        var objectLifetimeManager = Register(new ObjectLifetimeManager(Disposer));
+
+        var testRegistrar = Register(new TestRegistrar(instanceTracker, objectLifetimeManager));
+
         var testInvoker = Register(new TestInvocation(testHookOrchestrator, Disposer));
+
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
 
         var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar, GetCapability<StopExecutionCapability>()));

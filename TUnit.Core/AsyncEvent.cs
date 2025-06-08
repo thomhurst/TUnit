@@ -24,7 +24,7 @@ public class AsyncEvent<TEventArgs>
     private static readonly Lock _newEventLock = new();
     private readonly Lock _locker = new();
 
-    public class Invocation(Func<object, TEventArgs, Task> factory, int order) : IEventReceiver
+    public class Invocation(Func<object, TEventArgs, ValueTask> factory, int order) : IEventReceiver
     {
         public int Order
         {
@@ -39,7 +39,7 @@ public class AsyncEvent<TEventArgs>
     }
 
     public static AsyncEvent<TEventArgs> operator +(
-        AsyncEvent<TEventArgs>? e, Func<object, TEventArgs, Task> callback
+        AsyncEvent<TEventArgs>? e, Func<object, TEventArgs, ValueTask> callback
         )
     {
         if (callback == null)

@@ -111,24 +111,21 @@ public static class TestContextExtensions
     }
 
     internal static IEnumerable<ITestRegisteredEventReceiver> GetTestRegisteredEventsObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.TestRegistered).OfType<ITestRegisteredEventReceiver>();
+        GetEvents(context.Events, EventType.TestRegistered).OfType<ITestRegisteredEventReceiver>();
 
     internal static IEnumerable<ITestStartEventReceiver> GetTestStartEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.TestStart).OfType<ITestStartEventReceiver>();
+        GetEvents(context.Events, EventType.TestStart).OfType<ITestStartEventReceiver>();
 
     internal static IEnumerable<IAsyncInitializer> GetOnInitializeObjects(this TestContext context)
     {
-        return GetEventObjects(context, EventType.Initialize)
-            .Distinct()
-            .OfType<IAsyncInitializer>()
-            .OrderBy(x => x is IEventReceiver receiver ? receiver.Order : int.MaxValue);
+        return GetEvents(context.Events, EventType.Initialize).OfType<IAsyncInitializer>();
     }
 
     internal static IEnumerable<ITestRetryEventReceiver> GetTestRetryEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.TestRetry).OfType<ITestRetryEventReceiver>();
+        GetEvents(context.Events, EventType.TestRetry).OfType<ITestRetryEventReceiver>();
 
     internal static IEnumerable<ITestEndEventReceiver> GetTestEndEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.TestEnd).OfType<ITestEndEventReceiver>();
+        GetEvents(context.Events, EventType.TestEnd).OfType<ITestEndEventReceiver>();
 
     internal static IEnumerable<object> GetOnDisposeObjects(this TestContext context)
     {
@@ -137,7 +134,7 @@ public static class TestContextExtensions
             ..context.TestDetails.Attributes,
             context.InternalDiscoveredTest.ClassConstructor,
             context.TestDetails.ClassInstance,
-            ..GetEventObjects(context, EventType.Dispose),
+            ..GetPossibleEventObjects(context),
             context
         ];
 
@@ -148,41 +145,32 @@ public static class TestContextExtensions
     }
 
     internal static IEnumerable<ITestSkippedEventReceiver> GetTestSkippedEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.TestSkipped).OfType<ITestSkippedEventReceiver>();
+        GetEvents(context.Events, EventType.TestSkipped).OfType<ITestSkippedEventReceiver>();
 
     internal static IEnumerable<ILastTestInClassEventReceiver> GetLastTestInClassEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.LastTestInClass).OfType<ILastTestInClassEventReceiver>();
+        GetEvents(context.Events, EventType.LastTestInClass).OfType<ILastTestInClassEventReceiver>();
 
     internal static IEnumerable<ILastTestInAssemblyEventReceiver> GetLastTestInAssemblyEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.LastTestInAssembly).OfType<ILastTestInAssemblyEventReceiver>();
+        GetEvents(context.Events, EventType.LastTestInAssembly).OfType<ILastTestInAssemblyEventReceiver>();
 
     internal static IEnumerable<ILastTestInTestSessionEventReceiver> GetLastTestInTestSessionEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.LastTestInTestSession).OfType<ILastTestInTestSessionEventReceiver>();
+        GetEvents(context.Events, EventType.LastTestInTestSession).OfType<ILastTestInTestSessionEventReceiver>();
 
     internal static IEnumerable<IFirstTestInClassEventReceiver> GetFirstTestInClassEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.FirstTestInClass).OfType<IFirstTestInClassEventReceiver>();
+        GetEvents(context.Events, EventType.FirstTestInClass).OfType<IFirstTestInClassEventReceiver>();
 
     internal static IEnumerable<IFirstTestInAssemblyEventReceiver> GetFirstTestInAssemblyEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.FirstTestInAssembly).OfType<IFirstTestInAssemblyEventReceiver>();
+        GetEvents(context.Events, EventType.FirstTestInAssembly).OfType<IFirstTestInAssemblyEventReceiver>();
 
     internal static IEnumerable<IFirstTestInTestSessionEventReceiver> GetFirstTestInTestSessionEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context, EventType.FirstTestInTestSession).OfType<IFirstTestInTestSessionEventReceiver>();
+        GetEvents(context.Events, EventType.FirstTestInTestSession).OfType<IFirstTestInTestSessionEventReceiver>();
 
-    private static IEnumerable<object?> GetPossibleEventObjects(this TestContext context, EventType eventType)
-    {
-        return GetEventObjects(context, eventType)
-            .Distinct()
-            .OfType<IEventReceiver>()
-            .OrderBy(x => x.Order);
-    }
-
-    private static object?[] GetEventObjects(TestContext context, EventType eventType)
+    internal static object?[] GetPossibleEventObjects(this TestContext context)
     {
         return
         [
             context.InternalDiscoveredTest.ClassConstructor,
             ..context.TestDetails.Attributes,
-            ..GetEvents(context.Events, eventType),
             ..context.TestDetails.TestClassArguments,
             context.TestDetails.ClassInstance,
             ..context.TestDetails.TestMethodArguments,
@@ -192,23 +180,104 @@ public static class TestContextExtensions
 
     private static IEnumerable<IEventReceiver> GetEvents(TestContextEvents contextEvents, EventType eventType)
     {
-        return eventType switch
+        return GetEventReceiversEnumerable(contextEvents, eventType)
+            .Distinct()
+            .OrderBy(x => x.Order);
+    }
+
+    private static IEnumerable<IEventReceiver> GetEventReceiversEnumerable(TestContextEvents contextEvents, EventType eventType)
+    {
+        if (eventType.HasFlag(EventType.Initialize))
         {
-            EventType.Initialize => contextEvents.OnInitialize?.InvocationList.Select(x => new TestInitializeEventWrapper(x)) ?? [],
-            EventType.Dispose => contextEvents.OnDispose?.InvocationList.Select(x => new TestDisposeEventWrapper(x)) ?? [],
-            EventType.TestRegistered => contextEvents.OnTestRegistered?.InvocationList.Select(x => new TestRegisteredEventWrapper(x)) ?? [],
-            EventType.TestStart => contextEvents.OnTestStart?.InvocationList.Select(x => new TestStartEventWrapper(x)) ?? [],
-            EventType.TestEnd => contextEvents.OnTestEnd?.InvocationList.Select(x => new TestEndEventWrapper(x)) ?? [],
-            EventType.TestSkipped => contextEvents.OnTestSkipped?.InvocationList.Select(x => new TestSkippedEventWrapper(x)) ?? [],
-            EventType.LastTestInClass => contextEvents.OnLastTestInClass?.InvocationList.Select(x => new LastTestInClassEventWrapper(x)) ?? [],
-            EventType.LastTestInAssembly => contextEvents.OnLastTestInAssembly?.InvocationList.Select(x => new LastTestInAssemblyEventWrapper(x)) ?? [],
-            EventType.LastTestInTestSession => contextEvents.OnLastTestInTestSession?.InvocationList.Select(x => new LastTestInTestSessionEventWrapper(x)) ?? [],
-            EventType.TestRetry => contextEvents.OnTestRetry?.InvocationList.Select(x => new TestRetryEventWrapper(x)) ?? [],
-            EventType.FirstTestInClass => contextEvents.OnFirstTestInClass?.InvocationList.Select(x => new FirstTestInClassEventWrapper(x)) ?? [],
-            EventType.FirstTestInAssembly => contextEvents.OnFirstTestInAssembly?.InvocationList.Select(x => new FirstTestInAssemblyEventWrapper(x)) ?? [],
-            EventType.FirstTestInTestSession => contextEvents.OnFirstTestInTestSession?.InvocationList.Select(x => new FirstTestInTestSessionEventWrapper(x)) ?? [],
-            _ => throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null)
-        };
+            foreach (var testInitializeEventWrapper in contextEvents.OnInitialize?.InvocationList.Select(x => new TestInitializeEventWrapper(x)) ?? [])
+            {
+                yield return testInitializeEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.Dispose))
+        {
+            foreach (var testDisposeEventWrapper in contextEvents.OnDispose?.InvocationList.Select(x => new TestDisposeEventWrapper(x)) ?? [])
+            {
+                yield return testDisposeEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.TestRegistered))
+        {
+            foreach (var testRegisteredEventWrapper in contextEvents.OnTestRegistered?.InvocationList.Select(x => new TestRegisteredEventWrapper(x)) ?? [])
+            {
+                yield return testRegisteredEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.TestStart))
+        {
+            foreach (var testStartEventWrapper in contextEvents.OnTestStart?.InvocationList.Select(x => new TestStartEventWrapper(x)) ?? [])
+            {
+                yield return testStartEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.TestEnd))
+        {
+            foreach (var testEndEventWrapper in contextEvents.OnTestEnd?.InvocationList.Select(x => new TestEndEventWrapper(x)) ?? [])
+            {
+                yield return testEndEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.TestSkipped))
+        {
+            foreach (var testSkippedEventWrapper in contextEvents.OnTestSkipped?.InvocationList.Select(x => new TestSkippedEventWrapper(x)) ?? [])
+            {
+                yield return testSkippedEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.LastTestInClass))
+        {
+            foreach (var lastTestInClassEventWrapper in contextEvents.OnLastTestInClass?.InvocationList.Select(x => new LastTestInClassEventWrapper(x)) ?? [])
+            {
+                yield return lastTestInClassEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.LastTestInAssembly))
+        {
+            foreach (var lastTestInAssemblyEventWrapper in contextEvents.OnLastTestInAssembly?.InvocationList.Select(x => new LastTestInAssemblyEventWrapper(x)) ?? [])
+            {
+                yield return lastTestInAssemblyEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.LastTestInTestSession))
+        {
+            foreach (var lastTestInTestSessionEventWrapper in contextEvents.OnLastTestInTestSession?.InvocationList.Select(x => new LastTestInTestSessionEventWrapper(x)) ?? [])
+            {
+                yield return lastTestInTestSessionEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.TestRetry))
+        {
+            foreach (var testRetryEventWrapper in contextEvents.OnTestRetry?.InvocationList.Select(x => new TestRetryEventWrapper(x)) ?? [])
+            {
+                yield return testRetryEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.FirstTestInClass))
+        {
+            foreach (var firstTestInClassEventWrapper in contextEvents.OnFirstTestInClass?.InvocationList.Select(x => new FirstTestInClassEventWrapper(x)) ?? [])
+            {
+                yield return firstTestInClassEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.FirstTestInAssembly))
+        {
+            foreach (var firstTestInAssemblyEventWrapper in contextEvents.OnFirstTestInAssembly?.InvocationList.Select(x => new FirstTestInAssemblyEventWrapper(x)) ?? [])
+            {
+                yield return firstTestInAssemblyEventWrapper;
+            }
+        }
+        if (eventType.HasFlag(EventType.FirstTestInTestSession))
+        {
+            foreach (var firstTestInTestSessionEventWrapper in contextEvents.OnFirstTestInTestSession?.InvocationList.Select(x => new FirstTestInTestSessionEventWrapper(x)) ?? [])
+            {
+                yield return firstTestInTestSessionEventWrapper;
+            }
+        }
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]

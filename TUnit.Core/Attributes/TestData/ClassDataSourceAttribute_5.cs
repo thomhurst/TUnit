@@ -42,41 +42,6 @@ public sealed class ClassDataSourceAttribute<
                         .GetItemForIndex<T5>(4, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata)
                 );
 
-            ClassDataSources.RegisterEvents(
-                itemsWithMetadata.Item1.T,
-                dataGeneratorMetadata,
-                itemsWithMetadata.Item1.SharedType,
-                itemsWithMetadata.Item1.Key
-            );
-
-            ClassDataSources.RegisterEvents(
-                itemsWithMetadata.Item2.T,
-                dataGeneratorMetadata,
-                itemsWithMetadata.Item2.SharedType,
-                itemsWithMetadata.Item2.Key
-            );
-
-            ClassDataSources.RegisterEvents(
-                itemsWithMetadata.Item3.T,
-                dataGeneratorMetadata,
-                itemsWithMetadata.Item3.SharedType,
-                itemsWithMetadata.Item3.Key
-            );
-
-            ClassDataSources.RegisterEvents(
-                itemsWithMetadata.Item4.T,
-                dataGeneratorMetadata,
-                itemsWithMetadata.Item4.SharedType,
-                itemsWithMetadata.Item4.Key
-            );
-
-            ClassDataSources.RegisterEvents(
-                itemsWithMetadata.Item5.T,
-                dataGeneratorMetadata,
-                itemsWithMetadata.Item5.SharedType,
-                itemsWithMetadata.Item5.Key
-            );
-
             return (
                 itemsWithMetadata.Item1.T,
                 itemsWithMetadata.Item2.T,
