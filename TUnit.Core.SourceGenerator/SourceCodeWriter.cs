@@ -27,7 +27,7 @@ public class SourceCodeWriter : IDisposable
     private static char[] _tabLevelDecreasingChars = ['}', ']'];
 
     private static char[] _endOfStringNewLineTriggerringChars = [',', ';', ']'];
-    private static string[] _startOfStringNewLineTriggerringStrings = ["#pragma", "}", "{"];
+    private static string[] _startOfStringNewLineTriggerringStrings = ["#pragma", "}"];
 
     public void WriteLine()
     {
@@ -49,14 +49,14 @@ public class SourceCodeWriter : IDisposable
 
         TabLevel -= tempTabCount;
 
-        if(_startOfStringNewLineTriggerringStrings.Any(value.StartsWith))
-        {
-            _stringBuilder.AppendLine();
-        }
-
         if (_tabLevelDecreasingChars.Contains(value[0]))
         {
             TabLevel--;
+        }
+
+        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
+        {
+            _stringBuilder.AppendLine();
         }
 
         for (var i = 0; i < TabLevel; i++)
@@ -66,8 +66,7 @@ public class SourceCodeWriter : IDisposable
 
         _stringBuilder.Append(value);
 
-        if (_endOfStringNewLineTriggerringChars.Contains(value[^1])
-            || _startOfStringNewLineTriggerringStrings.Any(x => value.StartsWith(x, StringComparison.Ordinal)))
+        if (ShouldAppendNewLineAfterWritingValue(value))
         {
             _stringBuilder.AppendLine();
         }
@@ -79,6 +78,21 @@ public class SourceCodeWriter : IDisposable
         }
 
         TabLevel += tempTabCount;
+    }
+
+    private static bool ShouldAppendNewLineAfterWritingValue(string value)
+    {
+        if (_endOfStringNewLineTriggerringChars.Contains(value[^1]))
+        {
+            return true;
+        }
+
+        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
+        {
+            return true;
+        }
+
+        return _startOfStringNewLineTriggerringStrings.Any(x => value.StartsWith(x, StringComparison.Ordinal));
     }
 
     public override string ToString()
