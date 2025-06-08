@@ -27,4 +27,27 @@ internal class NestedClassDataSourceDrivenTests : TestsBase
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(3);
         });
+
+    [Test]
+    public Task Properties2() => DataPropertiesGenerator.RunTest(Path.Combine(Git.RootDirectory.FullName,
+            "TUnit.TestProject",
+            "NestedClassDataSourceDrivenTests2.cs"),
+        new RunTestOptions
+        {
+            VerifyConfigurator = settingsTask => settingsTask.ScrubLinesContaining("PropertyInitializer_")
+                .UniqueForTargetFrameworkAndVersion()
+        },
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles.Length).IsEqualTo(3);
+        });
+
+    [Test]
+    public Task Test2() => TestsGenerator.RunTest(Path.Combine(Git.RootDirectory.FullName,
+            "TUnit.TestProject",
+            "NestedClassDataSourceDrivenTests2.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
+        });
 }

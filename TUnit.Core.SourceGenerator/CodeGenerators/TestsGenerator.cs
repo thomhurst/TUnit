@@ -128,6 +128,7 @@ public class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.Write("{");
                 sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.Register(new {className}());");
                 sourceBuilder.Write("}");
+                sourceBuilder.WriteLine();
 
                 sourceBuilder.Write(
                     "public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)");
