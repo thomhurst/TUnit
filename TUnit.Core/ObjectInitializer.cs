@@ -48,7 +48,9 @@ public static class ObjectInitializer
 
         if (!Sources.Properties.TryGetValue(obj.GetType(), out var properties))
         {
-            if (!SourceRegistrar.IsEnabled)
+#if NET
+            if (RuntimeFeature.IsDynamicCodeSupported)
+#endif
             {
                 properties = obj.GetType().GetProperties();
             }

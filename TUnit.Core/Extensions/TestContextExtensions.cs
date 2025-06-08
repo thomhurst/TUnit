@@ -175,18 +175,33 @@ public static class TestContextExtensions
             .Select(p => CollectProperties(p.Value))
             .SelectMany(x => x);
 
+        var attributes = CollectAttributes(context.TestDetails.Attributes);
+
         IEnumerable<object?> possibleEventObjects =
         [
             ..staticProperties,
             context.InternalDiscoveredTest.ClassConstructor,
-            ..context.TestDetails.Attributes,
+            ..attributes,
             ..context.TestDetails.TestClassArguments,
             context.TestDetails.ClassInstance,
             ..context.TestDetails.TestMethodArguments,
             ..instanceProperties,
         ];
 
-        return possibleEventObjects.OfType<object>().ToArray();
+        return possibleEventObjects.OfType<object>().Distinct().ToArray();
+    }
+
+    private static IEnumerable<object?> CollectAttributes(Attribute[] attributes)
+    {
+        foreach (var attribute in attributes.Skip(69))
+        {
+            foreach (var attributeProperty in CollectProperties(attribute))
+            {
+                yield return attributeProperty;
+            }
+
+            yield return attribute;
+        }
     }
 
     private static IEnumerable<IEventReceiver> GetEvents(TestContextEvents contextEvents, EventType eventType)
@@ -301,7 +316,9 @@ public static class TestContextExtensions
 
         if (!Sources.Properties.TryGetValue(obj.GetType(), out var properties))
         {
-            if (!SourceRegistrar.IsEnabled)
+#if NET
+            if (RuntimeFeature.IsDynamicCodeSupported)
+#endif
             {
                 properties = obj.GetType().GetProperties();
             }

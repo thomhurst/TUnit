@@ -11,52 +11,80 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
     {
         var classDataSourceClasses = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, _) => node is ClassDeclarationSyntax or RecordDeclarationSyntax or StructDeclarationSyntax,
+                predicate: static (node, _) => node is ClassDeclarationSyntax
+                    or RecordDeclarationSyntax
+                    or StructDeclarationSyntax,
                 transform: GetClassesWithDataSourceProperties)
-            .Where(static s => s != null)
+            .SelectMany(static (s, _) => s)
             .WithComparer(SymbolEqualityComparer.Default);
 
         context.RegisterSourceOutput(classDataSourceClasses, GeneratePropertyInitializer!);
     }
 
-    private static INamedTypeSymbol? GetClassesWithDataSourceProperties(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+    private static IEnumerable<INamedTypeSymbol> GetClassesWithDataSourceProperties(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
         var semanticModel = context.SemanticModel;
 
         if (semanticModel.GetDeclaredSymbol(context.Node) is not INamedTypeSymbol classSymbol)
         {
-            return null;
+            return [];
         }
 
         return CollectClass(classSymbol);
     }
 
-    private static INamedTypeSymbol? CollectClass(INamedTypeSymbol namedTypeSymbol)
+    private static IEnumerable<INamedTypeSymbol> CollectClass(INamedTypeSymbol namedTypeSymbol)
     {
         if (namedTypeSymbol.IsGenericDefinition())
         {
-            return null;
+            yield break;
         }
 
-        return namedTypeSymbol
+        var hashset = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+
+        var nestedTypes = namedTypeSymbol
             .GetMembersIncludingBase()
             .OfType<IPropertySymbol>()
             .Select(x => x.Type)
             .OfType<INamedTypeSymbol>()
-            .Where(IsEvent).Any() ? namedTypeSymbol : null;
+            .Where(x => IsOrHasEvent(x, hashset))
+            .ToArray();
+
+        foreach (var nestedType in nestedTypes)
+        {
+            foreach (var typeSymbol in CollectClass(nestedType))
+            {
+                yield return typeSymbol;
+            }
+        }
+
+        if (nestedTypes.Length > 0)
+        {
+            yield return namedTypeSymbol;
+        }
     }
 
-    private static bool IsEvent(INamedTypeSymbol propertyType)
+    private static bool IsOrHasEvent(INamedTypeSymbol propertyType, HashSet<ITypeSymbol> visitedTypes)
     {
-        if (propertyType.IsGenericDefinition())
+        if (propertyType.IsGenericDefinition() || !visitedTypes.Add(propertyType))
         {
             return false;
         }
 
-        return propertyType.AllInterfaces.Any(p =>
-            p.GloballyQualified() == "global::TUnit.Core.Interfaces.IAsyncInitializer" ||
-            p.GloballyQualified() == "global::System.IAsyncDisposable" ||
-            p.GloballyQualified() == "global::TUnit.Core.Interfaces.IEventReceiver");
+        if (propertyType.AllInterfaces.Any(p =>
+                p.GloballyQualified() == "global::TUnit.Core.Interfaces.IAsyncInitializer" ||
+                p.GloballyQualified() == "global::System.IAsyncDisposable" ||
+                p.GloballyQualified() == "global::TUnit.Core.Interfaces.IEventReceiver"))
+        {
+            return true;
+        }
+
+        return propertyType
+            .GetMembersIncludingBase()
+            .OfType<IPropertySymbol>()
+            .Select(x => x.Type)
+            .OfType<INamedTypeSymbol>()
+            .Any(x => IsOrHasEvent(x, visitedTypes));
     }
 
     private void GeneratePropertyInitializer(SourceProductionContext context, INamedTypeSymbol type)
@@ -111,12 +139,14 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
     {
         sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
 
+        var hashSet = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+
         foreach (var propertySymbol in type
                      .GetMembersIncludingBase()
                      .OfType<IPropertySymbol>()
                      .Select(x => x.Type)
                      .OfType<INamedTypeSymbol>()
-                     .Where(IsEvent))
+                     .Where(x => IsOrHasEvent(x, hashSet)))
         {
                 RegisterProperty(propertySymbol, sourceBuilder);
         }

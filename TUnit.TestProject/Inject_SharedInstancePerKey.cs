@@ -12,9 +12,9 @@ public static class SharedInjectedKeyedContainer
     public static async Task Check(string key, DummyReferenceTypeClass dummyReferenceTypeClass)
     {
         var list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(key, _ => []);
-        
+
         list.Add(dummyReferenceTypeClass);
-        
+
         await Assert.That(list.Distinct()).HasSingleItem();
     }
 }
@@ -24,7 +24,7 @@ public static class SharedInjectedKeyedContainer
 public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
     public static string Key => TestContext.Current!.TestDetails.TestClass.Namespace + "." + TestContext.Current.TestDetails.TestClass.Name  + "_" + TestContext.Current.TestDetails.TestName;
-    
+
     [Test, Repeat(5)]
     public async Task Test1()
     {
@@ -34,28 +34,13 @@ public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass
     [Test, Repeat(5)]
     public async Task Test2()
     {
-                await SharedInjectedKeyedContainer.Check(Key, dummyReferenceTypeClass);
+        await SharedInjectedKeyedContainer.Check(Key, dummyReferenceTypeClass);
     }
 
     [Test, Repeat(5)]
     public async Task Test3()
     {
-        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(Key, out var list)
-            && list.Any())
-        {
-            await Assert.That(list).Contains(dummyReferenceTypeClass);
-        }
-        
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(Key, _ => []);
-        
-        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != Key))
-        {
-            await Assert.That(list!).DoesNotContain(dummyReferenceTypeClass);
-        }
-        
-        list.Add(dummyReferenceTypeClass);
-        
-        await Assert.That(list.Distinct()).HasSingleItem();
+        await SharedInjectedKeyedContainer.Check(Key, dummyReferenceTypeClass);
     }
 }
 
@@ -67,36 +52,19 @@ public class InjectSharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass
     [Test, Repeat(5)]
     public async Task Test1()
     {
-                await SharedInjectedKeyedContainer.Check(Key, dummyReferenceTypeClass);
+        await SharedInjectedKeyedContainer.Check(Key, dummyReferenceTypeClass);
     }
 
     [Test, Repeat(5)]
     public async Task Test2()
     {
-        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(Key, out var list)
-            && list.Any())
-        {
-            await Assert.That(list).Contains(dummyReferenceTypeClass);
-        }
-
-        
-
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(Key, _ => []);
-        
-        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != Key))
-        {
-            await Assert.That(list!).DoesNotContain(dummyReferenceTypeClass);
-        }
-        
-        list.Add(dummyReferenceTypeClass);
-        
-        await Assert.That(list.Distinct()).HasSingleItem();
+        await SharedInjectedKeyedContainer.Check(Key, dummyReferenceTypeClass);
     }
 
     [Test, Repeat(5)]
     public async Task Test3()
     {
-                await SharedInjectedKeyedContainer.Check(Key, dummyReferenceTypeClass);
+        await SharedInjectedKeyedContainer.Check(Key, dummyReferenceTypeClass);
     }
 }
 
