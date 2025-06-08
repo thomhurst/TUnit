@@ -6,5 +6,7 @@ file static class DisableReflectionScanner_Guid
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 		public static void Initialize()
 		{			global::TUnit.Core.SourceRegistrar.IsEnabled = true;
-		}	}
+		}
+	}
+
 ]

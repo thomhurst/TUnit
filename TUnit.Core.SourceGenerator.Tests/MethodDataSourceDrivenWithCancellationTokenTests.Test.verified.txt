@@ -17,7 +17,8 @@ namespace TUnit.SourceGenerated;
 			[global::System.Runtime.CompilerServices.ModuleInitializer]
 				public static void Initialise()
 				{					global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenWithCancellationTokenTests());
-				}				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+				}
+				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 				{					return
 					[						..Tests0(sessionId),
 						..Tests1(sessionId),
@@ -26,7 +27,8 @@ namespace TUnit.SourceGenerated;
 						..Tests4(sessionId),
 						..Tests5(sessionId),
 					];
-				}				private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+				}
+				private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 				{					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 					var classDataIndex = 0;
 					var testMethodDataIndex = 0;
@@ -107,7 +109,8 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 												[],
 
 												}),
-											}											;
+											}
+											;
 
 
 											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -139,7 +142,8 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 											resettableClassFactory = resettableClassFactoryDelegate();
 											testBuilderContext = new();
 											testBuilderContextAccessor.Current = testBuilderContext;
-										}										catch (global::System.Exception exception)
+										}
+										catch (global::System.Exception exception)
 										{											nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 											{												TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 												MethodName = $"MyTest",
@@ -147,8 +151,10 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 												TestFilePath = @"",
 												TestLineNumber = 12,
 											});
-										}										return nodes;
-									}									private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+										}
+										return nodes;
+									}
+									private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 									{										global::System.Collections.Generic.List<TestMetadata> nodes = [];
 										var classDataIndex = 0;
 										var testMethodDataIndex = 0;
@@ -229,7 +235,8 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																	[],
 
 																	}),
-																}																;
+																}
+																;
 
 
 																var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -261,7 +268,8 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																resettableClassFactory = resettableClassFactoryDelegate();
 																testBuilderContext = new();
 																testBuilderContextAccessor.Current = testBuilderContext;
-															}															catch (global::System.Exception exception)
+															}
+															catch (global::System.Exception exception)
 															{																nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 																{																	TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 																	MethodName = $"MyTest",
@@ -269,8 +277,10 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																	TestFilePath = @"",
 																	TestLineNumber = 12,
 																});
-															}															return nodes;
-														}														private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+															}
+															return nodes;
+														}
+														private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 														{															global::System.Collections.Generic.List<TestMetadata> nodes = [];
 															var classDataIndex = 0;
 															var testMethodDataIndex = 0;
@@ -351,7 +361,8 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																						[],
 
 																						}),
-																					}																					;
+																					}
+																					;
 
 
 																					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -385,7 +396,9 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																						resettableClassFactory = resettableClassFactoryDelegate();
 																						testBuilderContext = new();
 																						testBuilderContextAccessor.Current = testBuilderContext;
-																					}																				}																				catch (global::System.Exception exception)
+																					}
+																				}
+																				catch (global::System.Exception exception)
 																				{																					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 																					{																						TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 																						MethodName = $"MyTest",
@@ -393,8 +406,10 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																						TestFilePath = @"",
 																						TestLineNumber = 12,
 																					});
-																				}																				return nodes;
-																			}																			private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
+																				}
+																				return nodes;
+																			}
+																			private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 																			{																				global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																				var classDataIndex = 0;
 																				var testMethodDataIndex = 0;
@@ -475,7 +490,8 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																											[],
 
 																											}),
-																										}																										;
+																										}
+																										;
 
 
 																										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -509,7 +525,9 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																											resettableClassFactory = resettableClassFactoryDelegate();
 																											testBuilderContext = new();
 																											testBuilderContextAccessor.Current = testBuilderContext;
-																										}																									}																									catch (global::System.Exception exception)
+																										}
+																									}
+																									catch (global::System.Exception exception)
 																									{																										nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 																										{																											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 																											MethodName = $"MyTest",
@@ -517,8 +535,10 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																											TestFilePath = @"",
 																											TestLineNumber = 12,
 																										});
-																									}																									return nodes;
-																								}																								private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
+																									}
+																									return nodes;
+																								}
+																								private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
 																								{																									global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																									var classDataIndex = 0;
 																									var testMethodDataIndex = 0;
@@ -599,7 +619,8 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																																[],
 
 																																}),
-																															}																															;
+																															}
+																															;
 
 
 																															var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -633,7 +654,9 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																																resettableClassFactory = resettableClassFactoryDelegate();
 																																testBuilderContext = new();
 																																testBuilderContextAccessor.Current = testBuilderContext;
-																															}																														}																														catch (global::System.Exception exception)
+																															}
+																														}
+																														catch (global::System.Exception exception)
 																														{																															nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 																															{																																TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 																																MethodName = $"MyTest",
@@ -641,8 +664,10 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																																TestFilePath = @"",
 																																TestLineNumber = 12,
 																															});
-																														}																														return nodes;
-																													}																													private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
+																														}
+																														return nodes;
+																													}
+																													private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
 																													{																														global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																														var classDataIndex = 0;
 																														var testMethodDataIndex = 0;
@@ -723,7 +748,8 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																																					[],
 
 																																					}),
-																																				}																																				;
+																																				}
+																																				;
 
 
 																																				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -757,7 +783,9 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																																					resettableClassFactory = resettableClassFactoryDelegate();
 																																					testBuilderContext = new();
 																																					testBuilderContextAccessor.Current = testBuilderContext;
-																																				}																																			}																																			catch (global::System.Exception exception)
+																																				}
+																																			}
+																																			catch (global::System.Exception exception)
 																																			{																																				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
 																																				{																																					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 																																					MethodName = $"MyTest",
@@ -765,6 +793,9 @@ new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribut
 																																					TestFilePath = @"",
 																																					TestLineNumber = 12,
 																																				});
-																																			}																																			return nodes;
-																																		}																																	}
+																																			}
+																																			return nodes;
+																																		}
+																																	}
+
 ]

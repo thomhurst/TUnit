@@ -17,7 +17,8 @@ namespace TUnit.SourceGenerated;
 			[global::System.Runtime.CompilerServices.ModuleInitializer]
 				public static void Initialise()
 				{					global::TUnit.Core.SourceRegistrar.Register(new DataSourceClassCombinedWithDataSourceMethod());
-				}				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+				}
+				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 				{					return
 					[						..Tests0(sessionId),
 						..Tests1(sessionId),
@@ -29,7 +30,8 @@ namespace TUnit.SourceGenerated;
 						..Tests7(sessionId),
 						..Tests8(sessionId),
 					];
-				}				private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+				}
+				private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 				{					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 					var classDataIndex = 0;
 					var testMethodDataIndex = 0;
@@ -107,7 +109,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 											[],
 
 											}),
-										}										;
+										}
+										;
 
 
 										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -140,7 +143,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 										resettableClassFactory = resettableClassFactoryDelegate();
 										testBuilderContext = new();
 										testBuilderContextAccessor.Current = testBuilderContext;
-									}									catch (global::System.Exception exception)
+									}
+									catch (global::System.Exception exception)
 									{										nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 										{											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 											MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -148,8 +152,10 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 											TestFilePath = @"",
 											TestLineNumber = 13,
 										});
-									}									return nodes;
-								}								private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+									}
+									return nodes;
+								}
+								private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 								{									global::System.Collections.Generic.List<TestMetadata> nodes = [];
 									var classDataIndex = 0;
 									var testMethodDataIndex = 0;
@@ -227,7 +233,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 															[],
 
 															}),
-														}														;
+														}
+														;
 
 
 														var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -260,7 +267,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 														resettableClassFactory = resettableClassFactoryDelegate();
 														testBuilderContext = new();
 														testBuilderContextAccessor.Current = testBuilderContext;
-													}													catch (global::System.Exception exception)
+													}
+													catch (global::System.Exception exception)
 													{														nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 														{															TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 															MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -268,8 +276,10 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 															TestFilePath = @"",
 															TestLineNumber = 13,
 														});
-													}													return nodes;
-												}												private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+													}
+													return nodes;
+												}
+												private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 												{													global::System.Collections.Generic.List<TestMetadata> nodes = [];
 													var classDataIndex = 0;
 													var testMethodDataIndex = 0;
@@ -347,7 +357,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																			[],
 
 																			}),
-																		}																		;
+																		}
+																		;
 
 
 																		var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -380,7 +391,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																		resettableClassFactory = resettableClassFactoryDelegate();
 																		testBuilderContext = new();
 																		testBuilderContextAccessor.Current = testBuilderContext;
-																	}																	catch (global::System.Exception exception)
+																	}
+																	catch (global::System.Exception exception)
 																	{																		nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 																		{																			TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 																			MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -388,8 +400,10 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																			TestFilePath = @"",
 																			TestLineNumber = 13,
 																		});
-																	}																	return nodes;
-																}																private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
+																	}
+																	return nodes;
+																}
+																private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 																{																	global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																	var classDataIndex = 0;
 																	var testMethodDataIndex = 0;
@@ -467,7 +481,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																							[],
 
 																							}),
-																						}																						;
+																						}
+																						;
 
 
 																						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -500,7 +515,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																						resettableClassFactory = resettableClassFactoryDelegate();
 																						testBuilderContext = new();
 																						testBuilderContextAccessor.Current = testBuilderContext;
-																					}																					catch (global::System.Exception exception)
+																					}
+																					catch (global::System.Exception exception)
 																					{																						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 																						{																							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 																							MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -508,8 +524,10 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																							TestFilePath = @"",
 																							TestLineNumber = 13,
 																						});
-																					}																					return nodes;
-																				}																				private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
+																					}
+																					return nodes;
+																				}
+																				private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
 																				{																					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																					var classDataIndex = 0;
 																					var testMethodDataIndex = 0;
@@ -587,7 +605,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																											[],
 
 																											}),
-																										}																										;
+																										}
+																										;
 
 
 																										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -620,7 +639,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																										resettableClassFactory = resettableClassFactoryDelegate();
 																										testBuilderContext = new();
 																										testBuilderContextAccessor.Current = testBuilderContext;
-																									}																									catch (global::System.Exception exception)
+																									}
+																									catch (global::System.Exception exception)
 																									{																										nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 																										{																											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 																											MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -628,8 +648,10 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																											TestFilePath = @"",
 																											TestLineNumber = 13,
 																										});
-																									}																									return nodes;
-																								}																								private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
+																									}
+																									return nodes;
+																								}
+																								private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
 																								{																									global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																									var classDataIndex = 0;
 																									var testMethodDataIndex = 0;
@@ -707,7 +729,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																															[],
 
 																															}),
-																														}																														;
+																														}
+																														;
 
 
 																														var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -740,7 +763,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																														resettableClassFactory = resettableClassFactoryDelegate();
 																														testBuilderContext = new();
 																														testBuilderContextAccessor.Current = testBuilderContext;
-																													}																													catch (global::System.Exception exception)
+																													}
+																													catch (global::System.Exception exception)
 																													{																														nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 																														{																															TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 																															MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -748,8 +772,10 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																															TestFilePath = @"",
 																															TestLineNumber = 13,
 																														});
-																													}																													return nodes;
-																												}																												private global::System.Collections.Generic.List<TestMetadata> Tests6(string sessionId)
+																													}
+																													return nodes;
+																												}
+																												private global::System.Collections.Generic.List<TestMetadata> Tests6(string sessionId)
 																												{																													global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																													var classDataIndex = 0;
 																													var testMethodDataIndex = 0;
@@ -827,7 +853,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																			[],
 
 																																			}),
-																																		}																																		;
+																																		}
+																																		;
 
 
 																																		var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -860,7 +887,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																		resettableClassFactory = resettableClassFactoryDelegate();
 																																		testBuilderContext = new();
 																																		testBuilderContextAccessor.Current = testBuilderContext;
-																																	}																																	catch (global::System.Exception exception)
+																																	}
+																																	catch (global::System.Exception exception)
 																																	{																																		nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 																																		{																																			TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 																																			MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -868,8 +896,10 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																			TestFilePath = @"",
 																																			TestLineNumber = 13,
 																																		});
-																																	}																																	return nodes;
-																																}																																private global::System.Collections.Generic.List<TestMetadata> Tests7(string sessionId)
+																																	}
+																																	return nodes;
+																																}
+																																private global::System.Collections.Generic.List<TestMetadata> Tests7(string sessionId)
 																																{																																	global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																																	var classDataIndex = 0;
 																																	var testMethodDataIndex = 0;
@@ -947,7 +977,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																							[],
 
 																																							}),
-																																						}																																						;
+																																						}
+																																						;
 
 
 																																						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -980,7 +1011,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																						resettableClassFactory = resettableClassFactoryDelegate();
 																																						testBuilderContext = new();
 																																						testBuilderContextAccessor.Current = testBuilderContext;
-																																					}																																					catch (global::System.Exception exception)
+																																					}
+																																					catch (global::System.Exception exception)
 																																					{																																						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 																																						{																																							TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 																																							MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -988,8 +1020,10 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																							TestFilePath = @"",
 																																							TestLineNumber = 13,
 																																						});
-																																					}																																					return nodes;
-																																				}																																				private global::System.Collections.Generic.List<TestMetadata> Tests8(string sessionId)
+																																					}
+																																					return nodes;
+																																				}
+																																				private global::System.Collections.Generic.List<TestMetadata> Tests8(string sessionId)
 																																				{																																					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																																					var classDataIndex = 0;
 																																					var testMethodDataIndex = 0;
@@ -1067,7 +1101,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																											[],
 
 																																											}),
-																																										}																																										;
+																																										}
+																																										;
 
 
 																																										var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1100,7 +1135,8 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																										resettableClassFactory = resettableClassFactoryDelegate();
 																																										testBuilderContext = new();
 																																										testBuilderContextAccessor.Current = testBuilderContext;
-																																									}																																									catch (global::System.Exception exception)
+																																									}
+																																									catch (global::System.Exception exception)
 																																									{																																										nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>
 																																										{																																											TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(int).DataSourceClassCombinedWithDataSourceMethodTest(int):0",
 																																											MethodName = $"DataSourceClassCombinedWithDataSourceMethodTest",
@@ -1108,6 +1144,9 @@ new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProjec
 																																											TestFilePath = @"",
 																																											TestLineNumber = 13,
 																																										});
-																																									}																																									return nodes;
-																																								}																																							}
+																																									}
+																																									return nodes;
+																																								}
+																																							}
+
 ]

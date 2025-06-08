@@ -17,9 +17,11 @@ namespace TUnit.SourceGenerated;
 			[global::System.Runtime.CompilerServices.ModuleInitializer]
 				public static void Initialise()
 				{					global::TUnit.Core.SourceRegistrar.Register(new AutoDataTests());
-				}				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+				}
+				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 				{					return Tests0(sessionId);
-				}				private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+				}
+				private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 				{					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 					var classDataIndex = 0;
 					var testMethodDataIndex = 0;
@@ -93,7 +95,8 @@ new global::TUnit.Core.TestAttribute()
 															[],
 
 															}),
-														}														;
+														}
+														;
 
 
 														var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -182,7 +185,9 @@ new global::TUnit.TestProject.Attributes.AutoDataAttribute()																		;
 																			resettableClassFactory = resettableClassFactoryDelegate();
 																			testBuilderContext = new();
 																			testBuilderContextAccessor.Current = testBuilderContext;
-																		}																	}																	catch (global::System.Exception exception)
+																		}
+																	}
+																	catch (global::System.Exception exception)
 																	{																		nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AutoDataTests>
 																		{																			TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
 																			MethodName = $"Test1",
@@ -190,6 +195,9 @@ new global::TUnit.TestProject.Attributes.AutoDataAttribute()																		;
 																			TestFilePath = @"",
 																			TestLineNumber = 8,
 																		});
-																	}																	return nodes;
-																}															}
+																	}
+																	return nodes;
+																}
+															}
+
 ]

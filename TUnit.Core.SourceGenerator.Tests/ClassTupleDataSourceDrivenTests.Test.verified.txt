@@ -17,14 +17,16 @@ namespace TUnit.SourceGenerated;
 			[global::System.Runtime.CompilerServices.ModuleInitializer]
 				public static void Initialise()
 				{					global::TUnit.Core.SourceRegistrar.Register(new ClassTupleDataSourceDrivenTests());
-				}				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+				}
+				public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 				{					return
 					[						..Tests0(sessionId),
 						..Tests1(sessionId),
 						..Tests2(sessionId),
 						..Tests3(sessionId),
 					];
-				}				private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+				}
+				private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 				{					global::System.Collections.Generic.List<TestMetadata> nodes = [];
 					var classDataIndex = 0;
 					var testMethodDataIndex = 0;
@@ -172,7 +174,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																},
 															],
 														}),
-													}													;
+													}
+													;
 
 
 													var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -198,7 +201,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 														Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg1),
 														Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg2),
 														Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg3),
-													}													, sessionId, testBuilderContext);
+													}
+													, sessionId, testBuilderContext);
 													var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -228,7 +232,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																	resettableClassFactory = resettableClassFactoryDelegate();
 																	testBuilderContext = new();
 																	testBuilderContextAccessor.Current = testBuilderContext;
-																}																catch (global::System.Exception exception)
+																}
+																catch (global::System.Exception exception)
 																{																	nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 																	{																		TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 																		MethodName = $"DataSource_TupleMethod",
@@ -236,8 +241,10 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																		TestFilePath = @"",
 																		TestLineNumber = 27,
 																	});
-																}																return nodes;
-															}															private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+																}
+																return nodes;
+															}
+															private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
 															{																global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																var classDataIndex = 0;
 																var testMethodDataIndex = 0;
@@ -385,7 +392,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																											},
 																										],
 																									}),
-																								}																								;
+																								}
+																								;
 
 
 																								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -411,7 +419,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																									Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg1),
 																									Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg2),
 																									Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg3),
-																								}																								, sessionId, testBuilderContext);
+																								}
+																								, sessionId, testBuilderContext);
 																								var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -441,7 +450,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																												resettableClassFactory = resettableClassFactoryDelegate();
 																												testBuilderContext = new();
 																												testBuilderContextAccessor.Current = testBuilderContext;
-																											}																											catch (global::System.Exception exception)
+																											}
+																											catch (global::System.Exception exception)
 																											{																												nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 																												{																													TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 																													MethodName = $"DataSource_TupleMethod",
@@ -449,8 +459,10 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																													TestFilePath = @"",
 																													TestLineNumber = 27,
 																												});
-																											}																											return nodes;
-																										}																										private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+																											}
+																											return nodes;
+																										}
+																										private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
 																										{																											global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																											var classDataIndex = 0;
 																											var testMethodDataIndex = 0;
@@ -598,7 +610,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																						},
 																																					],
 																																				}),
-																																			}																																			;
+																																			}
+																																			;
 
 
 																																			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -624,7 +637,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																				Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg1),
 																																				Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg2),
 																																				Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg3),
-																																			}																																			, sessionId, testBuilderContext);
+																																			}
+																																			, sessionId, testBuilderContext);
 																																			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -654,7 +668,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																							resettableClassFactory = resettableClassFactoryDelegate();
 																																							testBuilderContext = new();
 																																							testBuilderContextAccessor.Current = testBuilderContext;
-																																						}																																						catch (global::System.Exception exception)
+																																						}
+																																						catch (global::System.Exception exception)
 																																						{																																							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 																																							{																																								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 																																								MethodName = $"DataSource_TupleMethod",
@@ -662,8 +677,10 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																								TestFilePath = @"",
 																																								TestLineNumber = 27,
 																																							});
-																																						}																																						return nodes;
-																																					}																																					private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
+																																						}
+																																						return nodes;
+																																					}
+																																					private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
 																																					{																																						global::System.Collections.Generic.List<TestMetadata> nodes = [];
 																																						var classDataIndex = 0;
 																																						var testMethodDataIndex = 0;
@@ -811,7 +828,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																																	},
 																																																],
 																																															}),
-																																														}																																														;
+																																														}
+																																														;
 
 
 																																														var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -837,7 +855,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																															Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<(int, string, bool)>(propertyArg1),
 																																															Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg2),
 																																															Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<(int Number, string Word, bool Flag)>(propertyArg3),
-																																														}																																														, sessionId, testBuilderContext);
+																																														}
+																																														, sessionId, testBuilderContext);
 																																														var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -867,7 +886,8 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																																		resettableClassFactory = resettableClassFactoryDelegate();
 																																																		testBuilderContext = new();
 																																																		testBuilderContextAccessor.Current = testBuilderContext;
-																																																	}																																																	catch (global::System.Exception exception)
+																																																	}
+																																																	catch (global::System.Exception exception)
 																																																	{																																																		nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 																																																		{																																																			TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 																																																			MethodName = $"DataSource_TupleMethod",
@@ -875,6 +895,9 @@ new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																																			TestFilePath = @"",
 																																																			TestLineNumber = 27,
 																																																		});
-																																																	}																																																	return nodes;
-																																																}																																															}
+																																																	}
+																																																	return nodes;
+																																																}
+																																															}
+
 ]

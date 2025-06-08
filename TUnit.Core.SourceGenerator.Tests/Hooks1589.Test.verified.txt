@@ -20,13 +20,16 @@ namespace TUnit.SourceGenerated;
 				public static void Initialise()
 				{					var instance = new Hooks_BaseTests();
 					SourceRegistrar.RegisterTestHookSource(instance);
-				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+				}
+				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
 				{					return
 					[					];
-				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+				}
+				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
 				{					return
 					[					];
-				}				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+				}
+				public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
 				{					return
 					[						new global::TUnit.Core.Hooks.InstanceHookMethod
 						{							ClassType = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<>),
@@ -67,7 +70,8 @@ new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 													[],
 
 													}),
-												}												,
+												}
+												,
 
 												Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod("Setup", []).Invoke(classInstance, [])),
 												HookExecutor = DefaultExecutor.Instance,
@@ -138,15 +142,19 @@ new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 																					},
 																				],
 																			}),
-																		}																		,
+																		}
+																		,
 
 																		Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>)classInstance).Setup()),
 																		HookExecutor = DefaultExecutor.Instance,
 																		Order = 0,
 																	},
 																];
-															}															public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+															}
+															public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
 															{																return
 																[																];
-															}														}
+															}
+														}
+
 ]

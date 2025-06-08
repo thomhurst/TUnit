@@ -17,12 +17,14 @@ namespace TUnit.SourceGenerated;
 			[global::System.Runtime.CompilerServices.ModuleInitializer]
 				public static void Initialise()
 				{					global::TUnit.Core.SourceRegistrar.RegisterDynamic(new Basic());
-				}				public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)
+				}
+				public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)
 				{					try
 					{						var context = new global::TUnit.Core.DynamicTestBuilderContext(@"", 43);
 						new global::TUnit.TestProject.DynamicTests.Basic().BuildTests(context);
 						return context.Tests;
-					}					catch (global::System.Exception exception)
+					}
+					catch (global::System.Exception exception)
 					{						return
 						[							new FailedDynamicTest<global::TUnit.TestProject.DynamicTests.Basic>
 							{								TestId = @"global::TUnit.TestProject.DynamicTests.BasicBuildTests",
@@ -30,6 +32,10 @@ namespace TUnit.SourceGenerated;
 								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Basic.BuildTests failed to initialize", exception),
 								TestFilePath = @"",
 								TestLineNumber = 43,
-							}						];
-					}				}			}
+							}
+						];
+					}
+				}
+			}
+
 ]

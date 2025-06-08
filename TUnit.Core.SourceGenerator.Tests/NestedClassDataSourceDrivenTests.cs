@@ -3,17 +3,26 @@ using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class NestedClassDataSourceDrivenTests : TestsBase<DataGeneratorPropertyGenerator>
+internal class NestedClassDataSourceDrivenTests : TestsBase
 {
     [Test]
-    public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
+    public Task Properties() => DataPropertiesGenerator.RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "NestedClassDataSourceDrivenTests.cs"),
-        new RunTestOptions()
+        new RunTestOptions
         {
             VerifyConfigurator = settingsTask => settingsTask.ScrubLinesContaining("PropertyInitializer_")
                 .UniqueForTargetFrameworkAndVersion()
         },
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles.Length).IsEqualTo(4);
+        });
+
+    [Test]
+    public Task Test() => TestsGenerator.RunTest(Path.Combine(Git.RootDirectory.FullName,
+            "TUnit.TestProject",
+            "NestedClassDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(4);
