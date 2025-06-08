@@ -57,7 +57,7 @@ public static class SourceInformationWriter
         }
 
         sourceCodeWriter.Write("Properties = ");
-        var properties = namedTypeSymbol.GetMembers().OfType<IPropertySymbol>().ToArray();
+        var properties = namedTypeSymbol.GetMembersIncludingBase().OfType<IPropertySymbol>().ToArray();
 
         if(properties.Length == 0)
         {
@@ -66,10 +66,12 @@ public static class SourceInformationWriter
         else
         {
             sourceCodeWriter.Write("[");
-            foreach (var propertySymbol in properties)
+
+            foreach (var propertySymbol in properties.Where(x => x.DeclaredAccessibility == Accessibility.Public))
             {
-                GeneratePropertyInformation(sourceCodeWriter, context, propertySymbol);
+                GeneratePropertyInformation(sourceCodeWriter, context, propertySymbol, namedTypeSymbol);
             }
+
             sourceCodeWriter.Write("],");
         }
 
@@ -131,7 +133,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.WriteLine();
     }
 
-    public static void GenerateMembers(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? property, ArgumentsType argumentsType)
+    public static void GenerateMembers(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? property, ArgumentsType argumentsType)
     {
         if(parameters.Length == 0 && property is null)
         {
@@ -143,7 +145,7 @@ public static class SourceInformationWriter
 
         if (property is not null)
         {
-            GeneratePropertyInformation(sourceCodeWriter, context, property);
+            GeneratePropertyInformation(sourceCodeWriter, context, property, namedTypeSymbol);
         }
 
         foreach (var parameter in parameters)
@@ -155,18 +157,26 @@ public static class SourceInformationWriter
     }
 
     public static void GeneratePropertyInformation(SourceCodeWriter sourceCodeWriter,
-        GeneratorAttributeSyntaxContext context, IPropertySymbol property)
+        GeneratorAttributeSyntaxContext context, IPropertySymbol property, INamedTypeSymbol namedTypeSymbol)
     {
         sourceCodeWriter.Write("new global::TUnit.Core.SourceGeneratedPropertyInformation");
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Type = typeof({property.Type.GloballyQualified()}),");
         sourceCodeWriter.Write($"Name = \"{property.Name}\",");
         sourceCodeWriter.Write($"IsStatic = {property.IsStatic.ToString().ToLower()},");
+        sourceCodeWriter.Write($"Getter = {GetPropertyAccessor(namedTypeSymbol, property)},");
 
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, property.GetAttributes());
 
         sourceCodeWriter.Write("},");
+    }
+
+    private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
+    {
+        return property.IsStatic
+            ? $"_ => {namedTypeSymbol.GloballyQualified()}.{property.Name}"
+            : $"o => (({namedTypeSymbol.GloballyQualified()})o).{property.Name}";
     }
 
     public static void GenerateParameterInformation(SourceCodeWriter sourceCodeWriter,

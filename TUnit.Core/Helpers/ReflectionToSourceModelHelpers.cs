@@ -76,6 +76,7 @@ internal class ReflectionToSourceModelHelpers
             Type = property.PropertyType,
             IsStatic = property.GetMethod?.IsStatic is true
                 || property.SetMethod?.IsStatic is true,
+            Getter = property.GetValue
         };
     }
 

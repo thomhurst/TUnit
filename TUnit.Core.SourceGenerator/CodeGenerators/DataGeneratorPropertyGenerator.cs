@@ -11,7 +11,7 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
     {
         var classDataSourceClasses = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, _) => node is AttributeSyntax,
+                predicate: static (node, _) => node is ClassDeclarationSyntax,
                 transform: GetClassesWithDataSourceProperties)
             .SelectMany(static (symbols, _) => symbols)
             .WithComparer(SymbolEqualityComparer.Default);
@@ -21,56 +21,39 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
 
     private static IEnumerable<INamedTypeSymbol> GetClassesWithDataSourceProperties(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
-        if (context.Node is not AttributeSyntax attributeSyntax)
+        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
         {
             return [];
         }
 
         var semanticModel = context.SemanticModel;
 
-        if(semanticModel.GetSymbolInfo(attributeSyntax).Symbol is not IMethodSymbol attributeConstructorSymbol)
+        if(semanticModel.GetDeclaredSymbol(classDeclarationSyntax) is not INamedTypeSymbol classSymbol)
         {
             return [];
         }
 
-        var attributeClass = attributeConstructorSymbol.ContainingType;
-
-        if (attributeClass == null)
-        {
-            return [];
-        }
-
-        if (!IsDataSourceGeneratorAttribute(attributeClass, out var attributeBaseType))
-        {
-            return [];
-        }
-
-        if (attributeBaseType?.IsGenericType is not true)
-        {
-            return [];
-        }
-
-        return attributeBaseType.TypeArguments
-            .Where(x => x is not ITypeParameterSymbol)
-            .OfType<INamedTypeSymbol>()
-            .Where(x => HasDataGeneratorProperties(x) || IsAsyncInitializer(x));
+        return classSymbol.
+            GetMembersIncludingBase()
+            .OfType<IPropertySymbol>()
+            .Where(x => HasDataGeneratorProperties(x) || IsAsyncInitializer(x.Type))
+            .Select(x => x.Type)
+            .OfType<INamedTypeSymbol>();
     }
 
-    private static bool IsAsyncInitializer(INamedTypeSymbol namedTypeSymbol)
-    {
-        return namedTypeSymbol.AllInterfaces.Any(x => x.GloballyQualified() == "global::TUnit.Core.Interfaces.IAsyncInitializer");
-    }
-
-    private static bool HasDataGeneratorProperties(ITypeSymbol type)
+    private static bool IsAsyncInitializer(ITypeSymbol? type)
     {
         if (type is not INamedTypeSymbol namedTypeSymbol)
         {
             return false;
         }
 
-        return namedTypeSymbol.GetMembers()
-            .OfType<IPropertySymbol>()
-            .Any(property => property.GetAttributes().Any(attr => IsDataSourceGeneratorAttribute(attr.AttributeClass, out _)));
+        return namedTypeSymbol.AllInterfaces.Any(x => x.GloballyQualified() == "global::TUnit.Core.Interfaces.IAsyncInitializer");
+    }
+
+    private static bool HasDataGeneratorProperties(IPropertySymbol property)
+    {
+        return property.GetAttributes().Any(attr => IsDataSourceGeneratorAttribute(attr.AttributeClass, out _));
     }
 
     private static bool IsDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass, out INamedTypeSymbol? attributeBaseType)
@@ -116,7 +99,6 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             sourceBuilder.Write($"file static class {initializerClassName}");
             sourceBuilder.Write("{");
 
-            // Generate the initialization method
             sourceBuilder.Write("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.Write("public static void InitializeProperties()");
             sourceBuilder.Write("{");
@@ -139,6 +121,8 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
                 isEnabledByDefault: true);
 
             context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));
+
+            throw;
         }
     }
 
@@ -146,9 +130,10 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
     {
         sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
 
-        foreach (var propertySymbol in type.GetSelfAndBaseTypes().SelectMany(x => x.GetMembers()).OfType<IPropertySymbol>())
+        foreach (var propertySymbol in type.GetMembersIncludingBase().OfType<IPropertySymbol>())
         {
-            if (!propertySymbol.GetAttributes().Any(x => IsDataSourceGeneratorAttribute(x.AttributeClass, out _)))
+            if (!propertySymbol.GetAttributes().Any(x => IsDataSourceGeneratorAttribute(x.AttributeClass, out _)
+                    || IsAsyncInitializer(x.AttributeClass)))
             {
                 continue;
             }

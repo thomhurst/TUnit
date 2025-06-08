@@ -134,7 +134,7 @@ public static class TestContextExtensions
             ..context.TestDetails.Attributes,
             context.InternalDiscoveredTest.ClassConstructor,
             context.TestDetails.ClassInstance,
-            ..GetPossibleEventObjects(context),
+            ..GetEvents(context.Events, EventType.Dispose),
             context
         ];
 
@@ -167,15 +167,26 @@ public static class TestContextExtensions
 
     internal static object?[] GetPossibleEventObjects(this TestContext context)
     {
-        return
+        var staticProperties = context.TestDetails.TestClass.Properties
+            .Where(x => x.IsStatic)
+            .Select(x => x.Getter(null));
+
+        var instanceProperties = context.TestDetails.TestClassInjectedPropertyArguments
+            .Select(p => CollectProperties(p.Value))
+            .SelectMany(x => x);
+
+        IEnumerable<object?> possibleEventObjects =
         [
+            ..staticProperties,
             context.InternalDiscoveredTest.ClassConstructor,
             ..context.TestDetails.Attributes,
             ..context.TestDetails.TestClassArguments,
             context.TestDetails.ClassInstance,
             ..context.TestDetails.TestMethodArguments,
-            ..context.TestDetails.TestClassInjectedPropertyArguments.Select(p => CollectProperties(p.Value)),
+            ..instanceProperties,
         ];
+
+        return possibleEventObjects.OfType<object>().ToArray();
     }
 
     private static IEnumerable<IEventReceiver> GetEvents(TestContextEvents contextEvents, EventType eventType)
@@ -297,8 +308,7 @@ public static class TestContextExtensions
         }
 
         foreach (var property in (properties ?? [])
-                     .Select(x => x.GetValue(obj))
-                     .OfType<IAsyncInitializer>())
+                     .Select(x => x.GetValue(obj)))
         {
             foreach (var innerProperty in CollectProperties(property))
             {
@@ -307,5 +317,7 @@ public static class TestContextExtensions
 
             yield return property;
         }
+
+        yield return obj;
     }
 }

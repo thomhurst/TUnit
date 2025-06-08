@@ -94,9 +94,8 @@ public abstract record DynamicTest
         {
             Attributes = [], // TODO?
             Name = property.Key,
-#pragma warning disable IL2072
             Type = property.Value?.GetType() ?? typeof(object),
-#pragma warning restore IL2072
+            Getter = _ => property.Value,
             IsStatic = false, // TODO?
         };
     }

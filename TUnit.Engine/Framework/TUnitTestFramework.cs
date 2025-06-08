@@ -44,14 +44,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     public string Version => _extension.Version;
     public string DisplayName => _extension.DisplayName;
     public string Description => _extension.Description;
-    
+
     public Task<CreateTestSessionResult> CreateTestSessionAsync(CreateTestSessionContext context)
     {
         while(Sources.AssemblyLoaders.TryDequeue(out var assemblyLoader))
         {
             TryLoadAssembly(assemblyLoader);
         }
-        
+
         return Task.FromResult(new CreateTestSessionResult
         {
             IsSuccess = true
@@ -67,7 +67,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         var serviceProvider = ServiceProvidersPerSession.GetOrAdd(context.Request.Session.SessionUid.Value,
             _ => new TUnitServiceProvider(_extension, context, context.MessageBus, _frameworkServiceProvider, _capabilities)
         );
-        
+
         _capabilities.GetCapability<StopExecutionCapability>()!
             .OnStopRequested += async (_, _) =>
         {
@@ -75,14 +75,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         };
 
         var stringFilter = serviceProvider.FilterParser.GetTestFilter(context);
-        
+
         foreach (var filterReceiver in _filterReceivers)
         {
             filterReceiver.Filter = stringFilter;
         }
 
         var logger = serviceProvider.Logger;
-        
+
         GlobalContext.Current = new GlobalContext
         {
             TestFilter = stringFilter,
@@ -90,30 +90,30 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             OriginalConsoleOut = StandardOutConsoleInterceptor.DefaultOut,
             OriginalConsoleError = StandardErrorConsoleInterceptor.DefaultError
         };
-        
+
         serviceProvider.StandardOutConsoleInterceptor.Initialize();
         serviceProvider.StandardErrorConsoleInterceptor.Initialize();
-        
-        serviceProvider.Initializer.Initialize();
-        
+
+        await serviceProvider.Initializer.Initialize();
+
         var beforeTestDiscoveryContext = serviceProvider.ContextManager.BeforeTestDiscoveryContext;
 
         var testSessionContext = serviceProvider.ContextManager.TestSessionContext;
-        
+
         try
         {
             serviceProvider.EngineCancellationToken.Initialise(context.CancellationToken);
 
             await serviceProvider.TestDiscoveryHookOrchestrator.RunBeforeTestDiscovery(beforeTestDiscoveryContext);
-            
+
             beforeTestDiscoveryContext.RestoreExecutionContext();
 
             serviceProvider.ContextManager.AfterTestDiscoveryContext.AddTests(
                 serviceProvider.TestDiscoverer.GetTests().Select(x => x.TestContext)
             );
-            
+
             var afterDiscoveryHooks = serviceProvider.TestDiscoveryHookOrchestrator.CollectAfterHooks();
-            
+
             foreach (var afterDiscoveryHook in afterDiscoveryHooks)
             {
                 try
@@ -125,12 +125,12 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     throw new HookFailedException($"Error executing [After(TestDiscovery)] hook: {afterDiscoveryHook.MethodInfo.Type.FullName}.{afterDiscoveryHook.Name}", e);
                 }
             }
-            
+
             testSessionContext.RestoreExecutionContext();
 
             var filteredTests = await serviceProvider.TestDiscoverer
                 .FilterTests(context, serviceProvider.EngineCancellationToken.Token);
-            
+
             switch (context.Request)
             {
                 case DiscoverTestExecutionRequest:
@@ -142,11 +142,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     break;
                 }
                 case RunTestExecutionRequest runTestExecutionRequest:
-                    
+
                     TestSessionContext.Current = testSessionContext;
 
                     await serviceProvider.TestSessionHookOrchestrator.RunBeforeTestSession(testSessionContext, context.CancellationToken);
-                    
+
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context.CancellationToken);
 
@@ -166,7 +166,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                             throw new HookFailedException($"Error executing [After(TestSession)] hook: {afterSessionHook.MethodInfo.Type.FullName}.{afterSessionHook.Name}", e);
                         }
                     }
-                    
+
                     foreach (var artifact in testSessionContext.Artifacts)
                     {
                         await serviceProvider.TUnitMessageBus.SessionArtifact(artifact);
@@ -185,7 +185,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         catch (Exception e)
         {
             await logger.LogErrorAsync(e);
-            
+
             await context.MessageBus.PublishAsync(
                 dataProducer: this,
                 data: new TestNodeUpdateMessage(
@@ -210,7 +210,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         try
         {
             await using var _ = ServiceProvidersPerSession[context.SessionUid.Value];
-            
+
             return new CloseTestSessionResult
             {
                 IsSuccess = true

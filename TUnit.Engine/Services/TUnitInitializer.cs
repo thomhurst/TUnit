@@ -8,7 +8,7 @@ namespace TUnit.Engine.Services;
 
 internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
 {
-    public void Initialize()
+    public async Task Initialize()
     {
         ParseParameters();
         SetUpExceptionListeners();
@@ -16,6 +16,11 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
         {
             TestContext.WorkingDirectory = TestContext.OutputDirectory!;
+        }
+
+        foreach (var globalInitializer in Sources.GlobalInitializers)
+        {
+            await globalInitializer();
         }
     }
 
@@ -30,11 +35,11 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         {
             return;
         }
-        
+
         foreach (var parameter in parameters)
         {
             var split = parameter.Split('=');
-            TestContext.InternalParametersDictionary.Add(split[0], split[1]);   
+            TestContext.InternalParametersDictionary.Add(split[0], split[1]);
         }
     }
 }

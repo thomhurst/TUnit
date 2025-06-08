@@ -33,6 +33,7 @@ public static class GenericTestInvocationWriter
         foreach (var (propertySymbol, argumentsContainer) in testSourceDataModel.PropertyArguments.InnerContainers.Where(c => c.PropertySymbol.IsStatic))
         {
             sourceBuilder.Write($"{fullyQualifiedClassType}.{propertySymbol.Name} = {argumentsContainer.DataVariables.Select(x => x.Name).ElementAt(0)};");
+            sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.RegisterGlobalInitializer(async () => await global::TUnit.Core.ObjectInitializer.InitializeAsync({fullyQualifiedClassType}.{propertySymbol.Name}));");
         }
 
         sourceBuilder.WriteLine();

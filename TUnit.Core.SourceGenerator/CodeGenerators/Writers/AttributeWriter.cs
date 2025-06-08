@@ -121,6 +121,11 @@ public class AttributeWriter
     {
         foreach (var propertySymbol in attributeData.AttributeClass?.GetMembers().OfType<IPropertySymbol>() ?? [])
         {
+            if (propertySymbol.DeclaredAccessibility != Accessibility.Public)
+            {
+                continue;
+            }
+
             if (propertySymbol.GetAttributes().FirstOrDefault(x => x.IsDataSourceAttribute()) is not { } dataSourceAttribute)
             {
                 continue;
@@ -130,7 +135,7 @@ public class AttributeWriter
 
             var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute, sourceCodeWriter.TabLevel);
 
-            sourceCodeWriter.Write(DataSourceGeneratorContainer.GetPropertyAssignmentFromDataSourceGeneratorAttribute(innerAttribute, context, propertySymbol, sourceCodeWriter.TabLevel, true));
+            sourceCodeWriter.Write(DataSourceGeneratorContainer.GetPropertyAssignmentFromDataSourceGeneratorAttribute(innerAttribute, context, attributeData.AttributeClass!, propertySymbol, sourceCodeWriter.TabLevel, true));
         }
     }
 

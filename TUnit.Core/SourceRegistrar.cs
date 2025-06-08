@@ -113,4 +113,9 @@ public class SourceRegistrar
 
         Sources.Properties.TryAdd(typeof(T), properties);
     }
+
+    public static void RegisterGlobalInitializer(Func<Task> initializer)
+    {
+        Sources.GlobalInitializers.Add(initializer);
+    }
 }

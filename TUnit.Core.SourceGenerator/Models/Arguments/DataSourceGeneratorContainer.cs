@@ -39,7 +39,7 @@ public record DataSourceGeneratorContainer(
         sourceCodeWriter.Write("TestInformation = testInformation,");
 
         sourceCodeWriter.Write("MembersToGenerate = ");
-        SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, Parameters, null, ArgumentsType);
+        SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, TestClass, Parameters, null, ArgumentsType);
 
         sourceCodeWriter.Write("TestSessionId = sessionId,");
         sourceCodeWriter.Write("TestClassInstance = classInstance,");
@@ -105,7 +105,7 @@ public record DataSourceGeneratorContainer(
 
             sourceCodeWriter.Write($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
 
-            sourceCodeWriter.Write(GetPropertyAssignmentFromDataSourceGeneratorAttribute(attr.Name, Context, Property, sourceCodeWriter.TabLevel, false));
+            sourceCodeWriter.Write(GetPropertyAssignmentFromDataSourceGeneratorAttribute(attr.Name, Context, TestClass, Property, sourceCodeWriter.TabLevel, false));
             sourceCodeWriter.WriteLine();
             return;
         }
@@ -151,12 +151,12 @@ public record DataSourceGeneratorContainer(
         }
     }
 
-    public static string GetPropertyAssignmentFromDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, IPropertySymbol property, int indentLevel, bool isNested)
+    public static string GetPropertyAssignmentFromDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property, int indentLevel, bool isNested)
     {
         var sourceCodeWriter = new SourceCodeWriter(indentLevel);
 
         sourceCodeWriter.Write($"{attributeVariableName}.GenerateDataSources(");
-        WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, property);
+        WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, namedTypeSymbol, property);
         sourceCodeWriter.Write(").ElementAtOrDefault(0)?.Invoke()");
         if (isNested)
         {
@@ -171,7 +171,7 @@ public record DataSourceGeneratorContainer(
         return sourceCodeWriter.ToString();
     }
 
-    public static void WriteDataGeneratorMetadataProperty(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, IPropertySymbol property)
+    public static void WriteDataGeneratorMetadataProperty(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {
         sourceCodeWriter.Write("new DataGeneratorMetadata");
         sourceCodeWriter.WriteLine();
@@ -181,7 +181,7 @@ public record DataSourceGeneratorContainer(
         sourceCodeWriter.Write("TestInformation = testInformation,");
 
         sourceCodeWriter.Write("MembersToGenerate = ");
-        SourceInformationWriter.GenerateMembers(sourceCodeWriter, context, ImmutableArray<IParameterSymbol>.Empty, property, ArgumentsType.Property);
+        SourceInformationWriter.GenerateMembers(sourceCodeWriter, context, namedTypeSymbol, ImmutableArray<IParameterSymbol>.Empty, property, ArgumentsType.Property);
 
         sourceCodeWriter.Write("TestSessionId = sessionId,");
         sourceCodeWriter.Write("TestClassInstance = classInstance,");

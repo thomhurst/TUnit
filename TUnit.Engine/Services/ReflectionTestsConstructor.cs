@@ -546,7 +546,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
                                 Name = propertyInfo!.Name,
                                 Attributes = propertyInfo.GetCustomAttributes().ToArray(),
                                 Type = propertyInfo.PropertyType,
-                                IsStatic = propertyInfo.GetMethod?.IsStatic ?? false
+                                IsStatic = propertyInfo.GetMethod?.IsStatic ?? false,
+                                Getter = propertyInfo.GetValue
                             }
                         ],
                         _ => throw new ArgumentOutOfRangeException(nameof(dataGeneratorType), dataGeneratorType, null)
