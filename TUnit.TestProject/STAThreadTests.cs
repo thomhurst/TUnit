@@ -6,6 +6,7 @@ namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
 [WindowsOnly]
+[Repeat(100)]
 [UnconditionalSuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
 public class STAThreadTests
 {
