@@ -157,7 +157,7 @@ public record DataSourceGeneratorContainer(
 
         sourceCodeWriter.Write($"{attributeVariableName}.GenerateDataSources(");
         WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, property);
-        sourceCodeWriter.Write(").ElementAtOrDefault(0)()");
+        sourceCodeWriter.Write(").ElementAtOrDefault(0)?.Invoke()");
         sourceCodeWriter.Write(";");
         sourceCodeWriter.WriteLine();
 

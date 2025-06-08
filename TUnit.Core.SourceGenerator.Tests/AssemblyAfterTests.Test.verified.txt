@@ -12,6 +12,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -100,6 +101,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyBase1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -188,6 +190,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -276,6 +279,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyBase2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -364,6 +368,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -452,6 +457,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyBase3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -540,6 +546,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -628,6 +635,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -724,6 +732,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -820,6 +829,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -922,6 +932,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -1010,6 +1021,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -1108,6 +1120,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -1204,6 +1217,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_AssemblyCleanupTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]

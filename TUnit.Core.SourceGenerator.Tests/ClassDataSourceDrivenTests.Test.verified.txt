@@ -10,6 +10,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -17,6 +18,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -61,7 +63,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],
@@ -157,6 +159,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -164,6 +167,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -208,7 +212,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],
@@ -304,6 +308,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -311,6 +316,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -355,7 +361,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],
@@ -451,6 +457,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -458,6 +465,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -508,7 +516,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],
@@ -613,6 +621,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -620,6 +629,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -676,7 +686,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],
@@ -788,6 +798,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -795,6 +806,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -857,7 +869,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],
@@ -976,6 +988,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -983,6 +996,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -1051,7 +1065,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],

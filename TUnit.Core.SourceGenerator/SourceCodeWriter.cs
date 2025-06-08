@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.CodeDom.Compiler;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace TUnit.Core.SourceGenerator;

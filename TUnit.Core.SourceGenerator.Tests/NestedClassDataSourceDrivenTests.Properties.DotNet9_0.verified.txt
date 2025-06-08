@@ -9,6 +9,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void InitializeProperties()
@@ -29,6 +30,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void InitializeProperties()
@@ -49,6 +51,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void InitializeProperties()
@@ -69,6 +72,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void InitializeProperties()

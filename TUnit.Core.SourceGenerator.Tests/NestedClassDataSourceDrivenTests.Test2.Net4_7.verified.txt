@@ -10,6 +10,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -17,6 +18,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new NestedClassDataSourceDrivenTests2());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -61,7 +63,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],
@@ -91,7 +93,29 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 				TestClassInstance = classInstance,
 				ClassInstanceArguments = classInstanceArguments,
 			};
-			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider();
+			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
+			{
+				InnerClass = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>().GenerateDataSources(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedPropertyInformation
+						{
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				).ElementAtOrDefault(0)?.Invoke();
+			};
 
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);

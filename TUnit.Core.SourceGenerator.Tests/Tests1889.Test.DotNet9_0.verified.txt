@@ -10,6 +10,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -17,6 +18,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new Inherited_DerivedTest());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -58,7 +60,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.InheritsTestsAttribute()
 					],
@@ -149,7 +151,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.InheritsTestsAttribute()
 					],
@@ -271,7 +273,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.InheritsTestsAttribute()
 					],
@@ -364,7 +366,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.InheritsTestsAttribute()
 					],

@@ -122,6 +122,7 @@ public class TestHooksGenerator : IIncrementalGenerator
 
                 var distinctHookLevelsForClass = groupedByTypeName.Select(x => x.HookLevel).Distinct().ToList();
 
+                sourceBuilder.Write($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestsGenerator).Assembly.GetName().Version}\")]");
                 sourceBuilder.Write(
                     $"file partial class {className} : {string.Join(", ", distinctHookLevelsForClass.Select(GetInterfaceType))}");
                 sourceBuilder.Write("{");

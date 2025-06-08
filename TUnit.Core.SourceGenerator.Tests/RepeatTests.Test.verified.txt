@@ -10,6 +10,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -17,6 +18,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -59,7 +61,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],
@@ -147,7 +149,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],
@@ -215,6 +217,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -222,6 +225,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -265,7 +269,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],
@@ -353,7 +357,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],
@@ -441,7 +445,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],
@@ -509,6 +513,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -516,6 +521,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -558,7 +564,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],
@@ -644,7 +650,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],
@@ -730,7 +736,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],
@@ -816,7 +822,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.RepeatAttribute(3)
 					],

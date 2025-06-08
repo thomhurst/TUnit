@@ -10,6 +10,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -17,6 +18,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new GenericMethodTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -99,7 +101,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],
@@ -237,7 +239,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass)
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
 					],
 					Parameters = [],
 					Properties = [],

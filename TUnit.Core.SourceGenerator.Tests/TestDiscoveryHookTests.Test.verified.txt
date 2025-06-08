@@ -12,6 +12,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -90,6 +91,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
