@@ -8,13 +8,10 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -34,26 +31,21 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 			{
 				Type = typeof(global::TUnit.TestProject.Bugs._2085.Tests),
 				Name = "Double_SpecialConsts",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-
 				[
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-
 				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<double>
-
 					{
 						Name = "d",
 						Attributes = 
-
 						[
 							new global::TUnit.Core.MatrixAttribute(double.NaN, double.PositiveInfinity, double.NegativeInfinity)
 						],
@@ -61,12 +53,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2085.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 				{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._2085.Tests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2085", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 					{
 						Name = "Tests2085",
 						Attributes = 
@@ -76,7 +66,6 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						Name = "Tests",
 						Namespace = "TUnit.TestProject.Bugs._2085",
 						Attributes = 
-
 						[
 							new EngineTest(Pass)
 						],
@@ -102,14 +91,11 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-
 							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<double>
-
 								{
 									Name = "d",
 									Attributes = 
-
 									[
 										new global::TUnit.Core.MatrixAttribute(double.NaN, double.PositiveInfinity, double.NegativeInfinity)
 									],
@@ -190,13 +176,10 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -216,26 +199,21 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 			{
 				Type = typeof(global::TUnit.TestProject.Bugs._2085.Tests),
 				Name = "Float_SpecialConsts",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-
 				[
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-
 				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<float>
-
 					{
 						Name = "d",
 						Attributes = 
-
 						[
 							new global::TUnit.Core.MatrixAttribute(float.NaN, float.PositiveInfinity, float.NegativeInfinity)
 						],
@@ -243,12 +221,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					},
 				],
 				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2085.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 				{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._2085.Tests),
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2085", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 					{
 						Name = "Tests2085",
 						Attributes = 
@@ -258,7 +234,6 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						Name = "Tests",
 						Namespace = "TUnit.TestProject.Bugs._2085",
 						Attributes = 
-
 						[
 							new EngineTest(Pass)
 						],
@@ -284,14 +259,11 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 							TestBuilderContext = testBuilderContextAccessor,
 							TestInformation = testInformation,
 							MembersToGenerate = 
-
 							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<float>
-
 								{
 									Name = "d",
 									Attributes = 
-
 									[
 										new global::TUnit.Core.MatrixAttribute(float.NaN, float.PositiveInfinity, float.NegativeInfinity)
 									],

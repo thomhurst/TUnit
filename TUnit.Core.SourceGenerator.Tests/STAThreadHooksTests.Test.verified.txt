@@ -10,13 +10,10 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -46,14 +43,12 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 			{
 				ClassType = typeof(global::TUnit.TestProject.STAThreadTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 				{
 					Type = typeof(global::TUnit.TestProject.STAThreadTests),
 					Name = "BeforeTest",
 					GenericTypeCount = 0,
 					ReturnType = typeof(void),
 					Attributes = 
-
 					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),
 
@@ -63,12 +58,10 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.STAThreadTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.STAThreadTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("STAThreadHooksTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 							{
 								Name = "STAThreadHooksTests",
 								Attributes = 
@@ -78,7 +71,6 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 								Name = "STAThreadTests",
 								Namespace = "TUnit.TestProject",
 								Attributes = 
-
 								[
 									new EngineTest(Pass),
 
@@ -126,13 +118,10 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -169,14 +158,12 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 			{
 				ClassType = typeof(global::TUnit.TestProject.STAThreadTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 				{
 					Type = typeof(global::TUnit.TestProject.STAThreadTests),
 					Name = "AfterTest",
 					GenericTypeCount = 0,
 					ReturnType = typeof(void),
 					Attributes = 
-
 					[
 						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Test),
 
@@ -186,12 +173,10 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.STAThreadTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.STAThreadTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("STAThreadHooksTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 							{
 								Name = "STAThreadHooksTests",
 								Attributes = 
@@ -201,7 +186,6 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 								Name = "STAThreadTests",
 								Namespace = "TUnit.TestProject",
 								Attributes = 
-
 								[
 									new EngineTest(Pass),
 

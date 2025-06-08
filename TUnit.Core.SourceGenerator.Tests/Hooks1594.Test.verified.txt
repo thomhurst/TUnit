@@ -10,13 +10,10 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -46,14 +43,12 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 			{
 				ClassType = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 				{
 					Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
 					Name = "SetupMyTests",
 					GenericTypeCount = 0,
 					ReturnType = typeof(void),
 					Attributes = 
-
 					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 					],
@@ -61,12 +56,10 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.MyTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 							{
 								Name = "Hooks1594",
 								Attributes = 
@@ -76,15 +69,12 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 								Name = "MyTests",
 								Namespace = "TUnit.TestProject.Bugs._1594",
 								Attributes = 
-
 								[
 									new EngineTest(Pass)
 								],
 								Parameters = 
-
 								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
-
 									{
 										Name = "myFixture",
 										Attributes = 
@@ -130,13 +120,10 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -166,14 +153,12 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 			{
 				ClassType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<>),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 				{
 					Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<>),
 					Name = "SetupParentTests",
 					GenericTypeCount = 0,
 					ReturnType = typeof(void),
 					Attributes = 
-
 					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 					],
@@ -181,12 +166,10 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.ParentTests<>", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<>),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 							{
 								Name = "Hooks1594",
 								Attributes = 
@@ -217,14 +200,12 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 								{
 									ClassType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
 									MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 									{
 										Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
 										Name = "SetupParentTests",
 										GenericTypeCount = 0,
 										ReturnType = typeof(void),
 										Attributes = 
-
 										[
 											new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 										],
@@ -232,12 +213,10 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 										[],
 
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 											{
 												Parent = null,
 												Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 												{
 													Name = "Hooks1594",
 													Attributes = 
@@ -250,10 +229,8 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 													[],
 
 														Parameters = 
-
 														[
 															new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
-
 															{
 																Name = "fixture",
 																Attributes = 
@@ -299,13 +276,10 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -335,14 +309,12 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 			{
 				ClassType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<>),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 				{
 					Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<>),
 					Name = "SetupBase",
 					GenericTypeCount = 0,
 					ReturnType = typeof(void),
 					Attributes = 
-
 					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 					],
@@ -350,12 +322,10 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.GrandParentTests<>", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<>),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 							{
 								Name = "Hooks1594",
 								Attributes = 
@@ -386,14 +356,12 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 								{
 									ClassType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
 									MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 									{
 										Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
 										Name = "SetupBase",
 										GenericTypeCount = 0,
 										ReturnType = typeof(void),
 										Attributes = 
-
 										[
 											new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 										],
@@ -401,12 +369,10 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 										[],
 
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 											{
 												Parent = null,
 												Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 												{
 													Name = "Hooks1594",
 													Attributes = 
@@ -419,10 +385,8 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 													[],
 
 														Parameters = 
-
 														[
 															new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1594.MyFixture>
-
 															{
 																Name = "fixture",
 																Attributes = 
@@ -432,10 +396,8 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 																},
 															],
 															Properties = 
-
 															[
 																new global::TUnit.Core.SourceGeneratedPropertyInformation
-
 																{
 																	Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
 																	Name = "Fixture",

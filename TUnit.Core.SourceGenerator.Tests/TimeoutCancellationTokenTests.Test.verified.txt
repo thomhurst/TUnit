@@ -8,13 +8,10 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -34,24 +31,20 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 			{
 				Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				Name = "DefaultTest",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-
 				[
 					new global::TUnit.Core.TestAttribute(),
 
 					new EngineTest(Pass)
 				],
 				Parameters = 
-
 				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-
 					{
 						Name = "cancellationToken",
 						Attributes = 
@@ -61,12 +54,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 						{
 							Name = "TimeoutCancellationTokenTests",
 							Attributes = 
@@ -76,17 +67,14 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							Name = "TimeoutCancellationTokenTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
 
 								new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
 							],
 							Parameters = 
-
 							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 								{
 									Name = "value",
 									Attributes = 
@@ -165,13 +153,10 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -191,14 +176,12 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 			{
 				Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				Name = "BasicTest",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-
 				[
 					new global::TUnit.Core.TestAttribute(),
 
@@ -209,10 +192,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					new EngineTest(Failure)
 				],
 				Parameters = 
-
 				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-
 					{
 						Name = "cancellationToken",
 						Attributes = 
@@ -222,12 +203,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 						{
 							Name = "TimeoutCancellationTokenTests",
 							Attributes = 
@@ -237,17 +216,14 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							Name = "TimeoutCancellationTokenTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
 
 								new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
 							],
 							Parameters = 
-
 							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 								{
 									Name = "value",
 									Attributes = 
@@ -326,13 +302,10 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -352,14 +325,12 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 			{
 				Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				Name = "InheritedTimeoutAttribute",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-
 				[
 					new global::TUnit.Core.TestAttribute(),
 
@@ -368,10 +339,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					new EngineTest(Failure)
 				],
 				Parameters = 
-
 				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-
 					{
 						Name = "cancellationToken",
 						Attributes = 
@@ -381,12 +350,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 						{
 							Name = "TimeoutCancellationTokenTests",
 							Attributes = 
@@ -396,17 +363,14 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							Name = "TimeoutCancellationTokenTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
 
 								new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
 							],
 							Parameters = 
-
 							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 								{
 									Name = "value",
 									Attributes = 
@@ -485,13 +449,10 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -511,14 +472,12 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 			{
 				Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				Name = "DataTest",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-
 				[
 					new global::TUnit.Core.TestAttribute(),
 
@@ -529,10 +488,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					new EngineTest(Failure)
 				],
 				Parameters = 
-
 				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 					{
 						Name = "value",
 						Attributes = 
@@ -541,7 +498,6 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-
 						{
 							Name = "cancellationToken",
 							Attributes = 
@@ -551,12 +507,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 							{
 								Name = "TimeoutCancellationTokenTests",
 								Attributes = 
@@ -566,17 +520,14 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 								Name = "TimeoutCancellationTokenTests",
 								Namespace = "TUnit.TestProject",
 								Attributes = 
-
 								[
 									new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
 
 									new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
 								],
 								Parameters = 
-
 								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 									{
 										Name = "value",
 										Attributes = 
@@ -657,13 +608,10 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -683,14 +631,12 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 			{
 				Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				Name = "DataSourceTest",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-
 				[
 					new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
 
@@ -701,10 +647,8 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = 
-
 				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 					{
 						Name = "value",
 						Attributes = 
@@ -713,7 +657,6 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-
 						{
 							Name = "cancellationToken",
 							Attributes = 
@@ -723,12 +666,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 							{
 								Name = "TimeoutCancellationTokenTests",
 								Attributes = 
@@ -738,17 +679,14 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 								Name = "TimeoutCancellationTokenTests",
 								Namespace = "TUnit.TestProject",
 								Attributes = 
-
 								[
 									new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
 
 									new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
 								],
 								Parameters = 
-
 								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 									{
 										Name = "value",
 										Attributes = 
@@ -828,13 +766,10 @@ using global::TUnit.Core.Extensions;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -854,14 +789,12 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 			{
 				Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				Name = "MatrixTest",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-
 				[
 					new global::TUnit.Core.TestAttribute(),
 
@@ -872,21 +805,17 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					new global::TUnit.Core.CategoryAttribute("Blah")
 				],
 				Parameters = 
-
 				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 					{
 						Name = "value",
 						Attributes = 
-
 						[
 							new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 						],
 						ReflectionInfo = null!,
 					},
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-
 					{
 						Name = "cancellationToken",
 						Attributes = 
@@ -896,12 +825,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 						{
 							Name = "TimeoutCancellationTokenTests",
 							Attributes = 
@@ -911,17 +838,14 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 							Name = "TimeoutCancellationTokenTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-
 							[
 								new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
 
 								new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
 							],
 							Parameters = 
-
 							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 								{
 									Name = "value",
 									Attributes = 
@@ -949,14 +873,11 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-
 								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-
 									{
 										Name = "value",
 										Attributes = 
-
 										[
 											new global::TUnit.Core.MatrixAttribute(1, 2, 3)
 										],

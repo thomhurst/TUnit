@@ -10,13 +10,10 @@ using global::TUnit.Core.Interfaces;
 
 namespace TUnit.SourceGenerated;
 
-
 [global::System.Diagnostics.StackTraceHidden]
-
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
-
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
@@ -46,14 +43,12 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 			{
 				ClassType = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<>),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 				{
 					Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<>),
 					Name = "Setup",
 					GenericTypeCount = 0,
 					ReturnType = typeof(void),
 					Attributes = 
-
 					[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 					],
@@ -61,12 +56,10 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 					[],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.BaseTests<>", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<>),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 							{
 								Name = "Hooks1589",
 								Attributes = 
@@ -97,14 +90,12 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 								{
 									ClassType = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>),
 									MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-
 									{
 										Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>),
 										Name = "Setup",
 										GenericTypeCount = 0,
 										ReturnType = typeof(void),
 										Attributes = 
-
 										[
 											new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
 										],
@@ -112,12 +103,10 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 										[],
 
 											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>", () => new global::TUnit.Core.SourceGeneratedClassInformation
-
 											{
 												Parent = null,
 												Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>),
 												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-
 												{
 													Name = "Hooks1589",
 													Attributes = 
@@ -130,10 +119,8 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 													[],
 
 														Parameters = 
-
 														[
 															new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
-
 															{
 																Name = "fixture",
 																Attributes = 
@@ -143,10 +130,8 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 																},
 															],
 															Properties = 
-
 															[
 																new global::TUnit.Core.SourceGeneratedPropertyInformation
-
 																{
 																	Type = typeof(global::TUnit.TestProject.Bugs._1589.MyFixture),
 																	Name = "Fixture",
@@ -156,7 +141,6 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 
 																	},
 																	new global::TUnit.Core.SourceGeneratedPropertyInformation
-
 																	{
 																		Type = typeof(int),
 																		Name = "MyProp",
