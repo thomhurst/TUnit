@@ -12,7 +12,7 @@ public class SourceCodeWriter : IDisposable
     }
 
     private readonly StringBuilder _stringBuilder = new();
-    private bool _shouldIndentOnFirstWrite;
+    private bool _shouldIndent = true;
 
     public SourceCodeWriter(int tabLevel = 0, char lastCharacter = ' ')
     {
@@ -25,7 +25,7 @@ public class SourceCodeWriter : IDisposable
         }
         else
         {
-            _shouldIndentOnFirstWrite = true;
+            _shouldIndent = false;
         }
     }
 
@@ -68,7 +68,7 @@ public class SourceCodeWriter : IDisposable
 
         for (var i = 0; i < TabLevel; i++)
         {
-            if(!_shouldIndentOnFirstWrite)
+            if(_shouldIndent)
             {
                 _stringBuilder.Append('\t');
             }
@@ -95,7 +95,7 @@ public class SourceCodeWriter : IDisposable
             _stringBuilder.AppendLine();
         }
 
-        _shouldIndentOnFirstWrite = false;
+        _shouldIndent = true;
     }
 
     private static bool ShouldAppendNewLineAfterWritingValue(string value)
