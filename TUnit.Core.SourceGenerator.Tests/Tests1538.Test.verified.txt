@@ -101,7 +101,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1538", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "Tests1538",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._1538",
@@ -326,7 +329,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1538", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "Tests1538",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "Tests",
 					Namespace = "TUnit.TestProject.Bugs._1538",

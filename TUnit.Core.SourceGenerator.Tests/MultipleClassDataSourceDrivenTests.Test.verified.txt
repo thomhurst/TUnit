@@ -49,7 +49,10 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "MultipleClassDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "MultipleClassDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -255,7 +258,10 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "MultipleClassDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "MultipleClassDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",

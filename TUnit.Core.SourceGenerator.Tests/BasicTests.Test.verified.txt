@@ -49,7 +49,10 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "BasicTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "BasicTests",
 					Namespace = "TUnit.TestProject",
@@ -157,7 +160,10 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "BasicTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "BasicTests",
 					Namespace = "TUnit.TestProject",
@@ -265,7 +271,10 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "BasicTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "BasicTests",
 					Namespace = "TUnit.TestProject",

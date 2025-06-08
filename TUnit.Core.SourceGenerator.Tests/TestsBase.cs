@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators;
+using TUnit.Core.SourceGenerator.Tests.Extensions;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -39,10 +40,17 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         var source = File.ReadAllText(inputFile);
 #endif
 
+        var customAttributes = Sourcy.Git.RootDirectory
+            .GetDirectory("TUnit.TestProject")
+            .GetDirectory("Attributes")
+            .GetFiles("*.cs")
+            .Select(x => x.FullName)
+            .ToArray();
+
         runTestOptions.AdditionalFiles =
         [
             ..runTestOptions.AdditionalFiles,
-            Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "Attributes", "ExpectedPassEngineTest.cs")
+            ..customAttributes
         ];
 
         string[] additionalSources =

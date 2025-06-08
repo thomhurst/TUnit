@@ -61,7 +61,10 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalBase1",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -150,7 +153,10 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalBase2",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -239,7 +245,10 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalBase3",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -328,7 +337,10 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalSetUpTests",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -427,7 +439,10 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalSetUpTests",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -524,7 +539,10 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalSetUpTests",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -629,7 +647,10 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalSetUpTests",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -710,7 +731,10 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalBase1",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -807,7 +831,10 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalBase2",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -904,7 +931,10 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalBase3",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -1001,7 +1031,10 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalSetUpTests",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -1104,7 +1137,10 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalSetUpTests",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -1201,7 +1237,10 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalSetUpTests",
 						Namespace = "TUnit.TestProject.BeforeTests",
@@ -1304,7 +1343,10 @@ file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "GlobalStaticBeforeEachTests",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GlobalSetUpTests",
 						Namespace = "TUnit.TestProject.BeforeTests",

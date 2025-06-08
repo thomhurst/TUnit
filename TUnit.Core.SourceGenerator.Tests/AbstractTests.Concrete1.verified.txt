@@ -49,7 +49,10 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "AbstractTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConcreteClass1",
 					Namespace = "TUnit.TestProject.AbstractTests",

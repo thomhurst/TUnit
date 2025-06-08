@@ -71,7 +71,10 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TupleDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "TupleDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",

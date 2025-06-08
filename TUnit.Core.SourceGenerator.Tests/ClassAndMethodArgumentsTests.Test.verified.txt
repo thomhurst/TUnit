@@ -53,7 +53,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -149,7 +152,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -290,7 +296,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -400,7 +409,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -510,7 +522,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -620,7 +635,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -763,7 +781,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -873,7 +894,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -983,7 +1007,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -1093,7 +1120,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassAndMethodArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassAndMethodArgumentsTests",
 					Namespace = "TUnit.TestProject",

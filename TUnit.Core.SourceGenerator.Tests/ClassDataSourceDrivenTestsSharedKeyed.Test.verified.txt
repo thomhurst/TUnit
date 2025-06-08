@@ -57,7 +57,10 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassDataSourceDrivenTestsSharedKeyed",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassDataSourceDrivenTestsSharedKeyed",
 					Namespace = "TUnit.TestProject",
@@ -210,7 +213,10 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassDataSourceDrivenTestsSharedKeyed",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassDataSourceDrivenTestsSharedKeyed",
 					Namespace = "TUnit.TestProject",

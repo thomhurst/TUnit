@@ -61,7 +61,10 @@ file partial class Hooks_BaseClass : global::TUnit.Core.Interfaces.SourceGenerat
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1899", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "Tests1899",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "BaseClass",
 						Namespace = "TUnit.TestProject.Library.Bugs._1899",

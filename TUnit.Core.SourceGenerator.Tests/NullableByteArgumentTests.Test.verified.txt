@@ -65,7 +65,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NullableByteArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NullableByteArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -163,7 +166,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NullableByteArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NullableByteArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -298,7 +304,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NullableByteArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NullableByteArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -403,7 +412,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NullableByteArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NullableByteArgumentTests",
 					Namespace = "TUnit.TestProject",

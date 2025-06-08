@@ -59,7 +59,10 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "EnumerableDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "EnumerableDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -185,7 +188,10 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "EnumerableDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "EnumerableDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -311,7 +317,10 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "EnumerableDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "EnumerableDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",

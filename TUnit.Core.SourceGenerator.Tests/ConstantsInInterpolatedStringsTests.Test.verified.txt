@@ -59,7 +59,10 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantsInInterpolatedStringsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantsInInterpolatedStringsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantsInInterpolatedStringsTests",
 					Namespace = "TUnit.TestProject.Bugs._1432",

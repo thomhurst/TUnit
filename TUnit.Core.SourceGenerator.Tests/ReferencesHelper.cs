@@ -17,6 +17,7 @@ internal class ReferencesHelper
                 MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
                 MetadataReference.CreateFromFile("TUnit.TestProject.Library.dll"),
                 MetadataReference.CreateFromFile("TUnit.Core.dll"),
+                MetadataReference.CreateFromFile(typeof(UnconditionalSuppressMessageAttribute).Assembly.Location),
             ])
             .ToList();
 }

@@ -51,7 +51,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
@@ -173,7 +176,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
@@ -323,7 +329,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
@@ -446,7 +455,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
@@ -582,7 +594,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
@@ -711,7 +726,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
@@ -863,7 +881,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
@@ -985,7 +1006,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",
@@ -1107,7 +1131,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "CustomDisplayNameTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "CustomDisplayNameTests",
 					Namespace = "TUnit.TestProject",

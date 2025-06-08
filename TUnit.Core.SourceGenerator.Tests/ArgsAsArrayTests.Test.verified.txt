@@ -59,7 +59,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgsAsArrayTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgsAsArrayTests",
 					Namespace = "TUnit.TestProject",
@@ -179,7 +182,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgsAsArrayTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgsAsArrayTests",
 					Namespace = "TUnit.TestProject",
@@ -299,7 +305,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgsAsArrayTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgsAsArrayTests",
 					Namespace = "TUnit.TestProject",
@@ -419,7 +428,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgsAsArrayTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgsAsArrayTests",
 					Namespace = "TUnit.TestProject",
@@ -545,7 +557,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgsAsArrayTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgsAsArrayTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgsAsArrayTests",
 					Namespace = "TUnit.TestProject",

@@ -68,7 +68,10 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgumentWithImplicitConverterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgumentWithImplicitConverterTests",
 					Namespace = "TUnit.TestProject",
@@ -165,7 +168,10 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgumentWithImplicitConverterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgumentWithImplicitConverterTests",
 					Namespace = "TUnit.TestProject",
@@ -262,7 +268,10 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgumentWithImplicitConverterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgumentWithImplicitConverterTests",
 					Namespace = "TUnit.TestProject",
@@ -391,7 +400,10 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgumentWithImplicitConverterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgumentWithImplicitConverterTests",
 					Namespace = "TUnit.TestProject",
@@ -488,7 +500,10 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgumentWithImplicitConverterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgumentWithImplicitConverterTests",
 					Namespace = "TUnit.TestProject",
@@ -585,7 +600,10 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgumentWithImplicitConverterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgumentWithImplicitConverterTests",
 					Namespace = "TUnit.TestProject",

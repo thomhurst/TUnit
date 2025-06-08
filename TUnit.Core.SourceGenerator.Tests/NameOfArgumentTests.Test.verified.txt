@@ -59,7 +59,10 @@ file partial class NameOfArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NameOfArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NameOfArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NameOfArgumentTests",
 					Namespace = "TUnit.TestProject",

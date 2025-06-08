@@ -49,7 +49,10 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "InheritedTestsFromDifferentProjectTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "InheritedTestsFromDifferentProjectTests",
 					Namespace = "TUnit.TestProject",
@@ -172,7 +175,10 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "InheritedTestsFromDifferentProjectTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "InheritedTestsFromDifferentProjectTests",
 					Namespace = "TUnit.TestProject",
@@ -296,7 +302,10 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "InheritedTestsFromDifferentProjectTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "InheritedTestsFromDifferentProjectTests",
 					Namespace = "TUnit.TestProject",
@@ -410,7 +419,10 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::T
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedTestsFromDifferentProjectTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "InheritedTestsFromDifferentProjectTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "InheritedTestsFromDifferentProjectTests",
 					Namespace = "TUnit.TestProject",

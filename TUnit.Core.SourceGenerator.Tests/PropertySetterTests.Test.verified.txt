@@ -10,6 +10,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -17,6 +18,7 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new PropertySetterTests());
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
@@ -47,13 +49,16 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "PropertySetterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "PropertySetterTests",
 					Namespace = "TUnit.TestProject",
 					Attributes = 
 					[
-						new EngineTest(Pass),
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
 
 						new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
 					],
@@ -113,10 +118,7 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 							Type = typeof(string),
 							Name = "Property7",
 							IsStatic = false,
-							Attributes = 
-							[
-								new DataSourceGeneratorTests.AutoFixtureGenerator<string>()
-							],
+							Attributes = [],
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
@@ -161,7 +163,7 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassInstance = classInstance,
 				ClassInstanceArguments = classInstanceArguments,
 			}
-			).ElementAtOrDefault(0)();
+			).ElementAtOrDefault(0)?.Invoke();
 
 var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 			{
@@ -189,7 +191,7 @@ var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<glo
 				TestClassInstance = classInstance,
 				ClassInstanceArguments = classInstanceArguments,
 			}
-			).ElementAtOrDefault(0)();
+			).ElementAtOrDefault(0)?.Invoke();
 
 var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 			{
@@ -217,7 +219,7 @@ var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<glo
 				TestClassInstance = classInstance,
 				ClassInstanceArguments = classInstanceArguments,
 			}
-			).ElementAtOrDefault(0)();
+			).ElementAtOrDefault(0)?.Invoke();
 
 var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 			{
@@ -246,16 +248,41 @@ var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<glo
 				TestClassInstance = classInstance,
 				ClassInstanceArguments = classInstanceArguments,
 			}
-			).ElementAtOrDefault(0)();
+			).ElementAtOrDefault(0)?.Invoke();
 
-var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
-			{
-				Shared = global::TUnit.Core.SharedType.PerTestSession,
-			};
+var propertyDataAttribute6 = new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<string>();
 
 			testBuilderContext.DataAttributes.Add(propertyDataAttribute6);
 
 			var propertyArg6 = propertyDataAttribute6.GenerateDataSources(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedPropertyInformation
+					{
+						Type = typeof(string),
+						Name = "Property7",
+						IsStatic = false,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			).ElementAtOrDefault(0)?.Invoke();
+
+var propertyDataAttribute7 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerTestSession,
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute7);
+
+			var propertyArg7 = propertyDataAttribute7.GenerateDataSources(new DataGeneratorMetadata
 			{
 				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
 				TestBuilderContext = testBuilderContextAccessor,
@@ -274,7 +301,7 @@ var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<glo
 				TestClassInstance = classInstance,
 				ClassInstanceArguments = classInstanceArguments,
 			}
-			).ElementAtOrDefault(0)();
+			).ElementAtOrDefault(0)?.Invoke();
 
 
 var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PropertySetterTests>(() => new global::TUnit.TestProject.PropertySetterTests()
@@ -285,10 +312,11 @@ var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.Test
 				Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg3),
 				Property5 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg4),
 				Property6 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg5),
+				Property7 = global::TUnit.Core.Helpers.CastHelper.Cast<string>(propertyArg6),
 			}
 			, sessionId, testBuilderContext);
 			var resettableClassFactory = resettableClassFactoryDelegate();
-			global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;
+			global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg7;
 
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.PropertySetterTests>
@@ -304,6 +332,7 @@ var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.Test
 					["Property4"] = propertyArg3,
 					["Property5"] = propertyArg4,
 					["Property6"] = propertyArg5,
+					["Property7"] = propertyArg6,
 				},
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,

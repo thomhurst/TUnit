@@ -74,7 +74,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",
@@ -188,7 +191,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",
@@ -302,7 +308,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",
@@ -416,7 +425,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",
@@ -530,7 +542,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",
@@ -644,7 +659,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",
@@ -758,7 +776,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",
@@ -872,7 +893,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",
@@ -986,7 +1010,10 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceClassCombinedWithDataSourceMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataSourceClassCombinedWithDataSourceMethod",
 					Namespace = "TUnit.TestProject",

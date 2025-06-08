@@ -51,7 +51,10 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "PriorityFilteringTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "PriorityFilteringTests",
 					Namespace = "TUnit.TestProject",
@@ -161,7 +164,10 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "PriorityFilteringTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "PriorityFilteringTests",
 					Namespace = "TUnit.TestProject",
@@ -271,7 +277,10 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "PriorityFilteringTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "PriorityFilteringTests",
 					Namespace = "TUnit.TestProject",
@@ -381,7 +390,10 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "PriorityFilteringTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "PriorityFilteringTests",
 					Namespace = "TUnit.TestProject",
@@ -491,7 +503,10 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "PriorityFilteringTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "PriorityFilteringTests",
 					Namespace = "TUnit.TestProject",
@@ -601,7 +616,10 @@ file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "PriorityFilteringTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "PriorityFilteringTests",
 					Namespace = "TUnit.TestProject",

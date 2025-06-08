@@ -9,7 +9,7 @@ public class NestedClassDataSourceDrivenTests2
 {
     [Test]
     [MyDataProvider]
-    public async Task DataSource_Class3(SomeClass1 value)
+    public async Task DataSource_Class(SomeClass1 value)
     {
         Console.WriteLine(value);
 

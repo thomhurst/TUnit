@@ -59,7 +59,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TimeoutCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "TimeoutCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -195,7 +198,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TimeoutCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "TimeoutCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -329,7 +335,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TimeoutCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "TimeoutCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -471,7 +480,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TimeoutCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "TimeoutCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -615,7 +627,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TimeoutCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "TimeoutCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -761,7 +776,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TimeoutCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "TimeoutCancellationTokenTests",
 					Namespace = "TUnit.TestProject",

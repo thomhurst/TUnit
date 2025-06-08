@@ -87,7 +87,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -201,7 +204,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -315,7 +321,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -429,7 +438,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -543,7 +555,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -657,7 +672,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -771,7 +789,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -885,7 +906,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -1035,7 +1059,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -1145,7 +1172,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -1255,7 +1285,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -1365,7 +1398,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -1475,7 +1511,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -1585,7 +1624,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -1695,7 +1737,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -1805,7 +1850,10 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("StringArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "StringArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "StringArgumentTests",
 					Namespace = "TUnit.TestProject",

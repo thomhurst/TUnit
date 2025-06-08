@@ -61,7 +61,10 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "Hooks1594",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "MyTests",
 						Namespace = "TUnit.TestProject.Bugs._1594",
@@ -161,7 +164,10 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "Hooks1594",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "ParentTests",
 						Namespace = "TUnit.TestProject.Bugs._1594",
@@ -197,7 +203,10 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "Hooks1594",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "ParentTests",
 						Namespace = "TUnit.TestProject.Bugs._1594",
@@ -294,7 +303,10 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "Hooks1594",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GrandParentTests",
 						Namespace = "TUnit.TestProject.Bugs._1594",
@@ -330,7 +342,10 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1594", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "Hooks1594",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "GrandParentTests",
 						Namespace = "TUnit.TestProject.Bugs._1594",

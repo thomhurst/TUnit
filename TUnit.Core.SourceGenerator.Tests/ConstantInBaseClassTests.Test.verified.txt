@@ -59,7 +59,10 @@ file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.Sour
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantInBaseClassTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantInBaseClassTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantInBaseClassTests",
 					Namespace = "TUnit.TestProject.Bugs._1432",

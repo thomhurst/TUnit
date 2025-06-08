@@ -49,7 +49,10 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassConstructorTest",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassConstructorTest",
 					Namespace = "TUnit.TestProject",

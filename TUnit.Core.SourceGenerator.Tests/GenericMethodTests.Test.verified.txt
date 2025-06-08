@@ -95,7 +95,10 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "GenericMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "GenericMethodTests",
 					Namespace = "TUnit.TestProject",
@@ -233,7 +236,10 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "GenericMethodTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "GenericMethodTests",
 					Namespace = "TUnit.TestProject",

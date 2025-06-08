@@ -59,7 +59,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -182,7 +185,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -305,7 +311,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -428,7 +437,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -551,7 +563,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -674,7 +689,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",
@@ -797,7 +815,10 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ConstantArgumentsTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ConstantArgumentsTests",
 					Namespace = "TUnit.TestProject",

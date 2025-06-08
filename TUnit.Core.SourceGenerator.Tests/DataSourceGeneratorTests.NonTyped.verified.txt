@@ -75,7 +75,10 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataSourceGeneratorTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "AutoDataTests",
 					Namespace = "TUnit.TestProject",

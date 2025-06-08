@@ -68,7 +68,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -168,7 +171,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -268,7 +274,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -406,7 +415,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -513,7 +525,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -620,7 +635,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -753,7 +771,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -853,7 +874,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -953,7 +977,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -1076,7 +1103,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -1199,7 +1229,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -1322,7 +1355,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -1454,7 +1490,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -1554,7 +1593,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -1654,7 +1696,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -1777,7 +1822,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -1900,7 +1948,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -2023,7 +2074,10 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "DataDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DataDrivenTests",
 					Namespace = "TUnit.TestProject",

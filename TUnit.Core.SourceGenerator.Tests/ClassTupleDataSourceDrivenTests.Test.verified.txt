@@ -79,7 +79,10 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassTupleDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassTupleDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -276,7 +279,10 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassTupleDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassTupleDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -473,7 +479,10 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassTupleDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassTupleDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -670,7 +679,10 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ClassTupleDataSourceDrivenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ClassTupleDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",

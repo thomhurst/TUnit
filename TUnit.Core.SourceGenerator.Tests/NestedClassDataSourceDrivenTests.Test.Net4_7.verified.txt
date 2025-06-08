@@ -57,7 +57,10 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TestsBase`1",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NestedClassDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -211,7 +214,10 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TestsBase`1",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NestedClassDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",
@@ -365,7 +371,10 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TestsBase`1",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NestedClassDataSourceDrivenTests",
 					Namespace = "TUnit.TestProject",

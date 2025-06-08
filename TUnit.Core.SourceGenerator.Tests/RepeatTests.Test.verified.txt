@@ -55,7 +55,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",
@@ -143,7 +146,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",
@@ -263,7 +269,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",
@@ -351,7 +360,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",
@@ -439,7 +451,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",
@@ -558,7 +573,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",
@@ -644,7 +662,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",
@@ -730,7 +751,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",
@@ -816,7 +840,10 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "RepeatTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "RepeatTests",
 					Namespace = "TUnit.TestProject",

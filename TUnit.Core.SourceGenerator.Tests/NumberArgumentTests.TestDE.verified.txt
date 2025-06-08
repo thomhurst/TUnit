@@ -59,7 +59,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NumberArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -182,7 +185,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NumberArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -305,7 +311,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NumberArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -428,7 +437,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NumberArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -551,7 +563,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NumberArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",
@@ -674,7 +689,10 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "NumberArgumentTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NumberArgumentTests",
 					Namespace = "TUnit.TestProject",

@@ -68,7 +68,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "EnumMemberNamesTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "EnumMemberNamesTests",
 					Namespace = "TUnit.TestProject.Bugs._1432",
@@ -168,7 +171,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "EnumMemberNamesTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "EnumMemberNamesTests",
 					Namespace = "TUnit.TestProject.Bugs._1432",
@@ -268,7 +274,10 @@ file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGe
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumMemberNamesTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "EnumMemberNamesTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "EnumMemberNamesTests",
 					Namespace = "TUnit.TestProject.Bugs._1432",
