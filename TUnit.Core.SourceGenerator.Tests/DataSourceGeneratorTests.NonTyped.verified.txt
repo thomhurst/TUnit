@@ -30,20 +30,20 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.AutoDataTests),
 				Name = "Test1",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-				[
+[
 					new global::TUnit.Core.TestAttribute()
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "value1",
 						Attributes = 
 						[],
@@ -51,7 +51,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-						{
+{
 							Name = "value2",
 							Attributes = 
 							[],
@@ -59,7 +59,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<double>
-							{
+{
 								Name = "value3",
 								Attributes = 
 								[],
@@ -67,7 +67,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-								{
+{
 									Name = "value4",
 									Attributes = 
 									[],
@@ -75,12 +75,12 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 										ReflectionInfo = null!,
 									},
 								],
-								Class = 								global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AutoDataTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-								{
+								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AutoDataTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 									Parent = null,
 									Type = typeof(global::TUnit.TestProject.AutoDataTests),
-									Assembly = 									global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-									{
+									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 										Name = "DataSourceGeneratorTests",
 										Attributes = 
 										[],
@@ -113,9 +113,9 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 												TestBuilderContext = testBuilderContextAccessor,
 												TestInformation = testInformation,
 												MembersToGenerate = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-													{
+{
 														Name = "value1",
 														Attributes = 
 														[],
@@ -123,7 +123,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 															ReflectionInfo = null!,
 														},
 														new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-														{
+{
 															Name = "value2",
 															Attributes = 
 															[],
@@ -131,7 +131,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 																ReflectionInfo = null!,
 															},
 															new global::TUnit.Core.SourceGeneratedParameterInformation<double>
-															{
+{
 																Name = "value3",
 																Attributes = 
 																[],
@@ -139,7 +139,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 																	ReflectionInfo = null!,
 																},
 																new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																{
+{
 																	Name = "value4",
 																	Attributes = 
 																	[],
@@ -151,7 +151,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 																TestClassInstance = classInstance,
 																ClassInstanceArguments = classInstanceArguments,
 															};
-															var methodDataAttribute = 															new global::TUnit.TestProject.Attributes.AutoDataAttribute()															;
+															var methodDataAttribute = new global::TUnit.TestProject.Attributes.AutoDataAttribute();
 
 
 															testBuilderContext.DataAttributes.Add(methodDataAttribute);
@@ -168,7 +168,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 																int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
 																double methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<double>(methodArgGeneratedData[2]);
 																bool methodArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[3]);
-																var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AutoDataTests>(() => 																new global::TUnit.TestProject.AutoDataTests()																, sessionId, testBuilderContext);
+																var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AutoDataTests>(() => new global::TUnit.TestProject.AutoDataTests(), sessionId, testBuilderContext);
 																var resettableClassFactory = resettableClassFactoryDelegate();
 
 

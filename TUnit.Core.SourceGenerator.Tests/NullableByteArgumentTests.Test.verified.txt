@@ -34,24 +34,24 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
 				Name = "Test",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
-					new global::TUnit.Core.ArgumentsAttribute((byte)1)					,
+					new global::TUnit.Core.ArgumentsAttribute((byte)1),
 
 					new global::TUnit.Core.ArgumentsAttribute(null)
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
-					{
+{
 						Name = "someByte",
 						Attributes = 
 						[],
@@ -59,12 +59,12 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "NullableByteArgumentTests",
 							Attributes = 
 							[],
@@ -73,9 +73,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 							Name = "NullableByteArgumentTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -96,7 +96,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 
 							byte? methodArg = (byte)1;
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 							new global::TUnit.TestProject.NullableByteArgumentTests()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -144,24 +144,24 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 						var testMethodDataIndex = 0;
 						try
 						{
-							var testInformation = 							new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
+							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 								Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
 								Name = "Test",
 								GenericTypeCount = 0,
 								ReturnType = typeof(void),
 								Attributes = 
-								[
-									new global::TUnit.Core.TestAttribute()									,
+[
+									new global::TUnit.Core.TestAttribute(),
 
-									new global::TUnit.Core.ArgumentsAttribute((byte)1)									,
+									new global::TUnit.Core.ArgumentsAttribute((byte)1),
 
 									new global::TUnit.Core.ArgumentsAttribute(null)
-								],
+],
 								Parameters = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
-									{
+{
 										Name = "someByte",
 										Attributes = 
 										[],
@@ -169,12 +169,12 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 											ReflectionInfo = null!,
 										},
 									],
-									Class = 									global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
+									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-										Assembly = 										global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
+										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 											Name = "NullableByteArgumentTests",
 											Attributes = 
 											[],
@@ -183,9 +183,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 											Name = "NullableByteArgumentTests",
 											Namespace = "TUnit.TestProject",
 											Attributes = 
-											[
+[
 												new EngineTest(Pass)
-											],
+],
 											Parameters = 
 											[],
 
@@ -206,7 +206,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 
 											byte? methodArg = null;
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 											new global::TUnit.TestProject.NullableByteArgumentTests()											, sessionId, testBuilderContext);
+											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
 											var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -286,24 +286,24 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
 				Name = "Test2",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
-					new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1)					,
+					new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1),
 
 					new global::TUnit.Core.ArgumentsAttribute((byte)1, null)
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<byte>
-					{
+{
 						Name = "byte1",
 						Attributes = 
 						[],
@@ -311,7 +311,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
-						{
+{
 							Name = "byte2",
 							Attributes = 
 							[],
@@ -319,12 +319,12 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 								ReflectionInfo = null!,
 							},
 						],
-						Class = 						global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
+						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-							Assembly = 							global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
+							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 								Name = "NullableByteArgumentTests",
 								Attributes = 
 								[],
@@ -333,9 +333,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 								Name = "NullableByteArgumentTests",
 								Namespace = "TUnit.TestProject",
 								Attributes = 
-								[
+[
 									new EngineTest(Pass)
-								],
+],
 								Parameters = 
 								[],
 
@@ -357,7 +357,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 								byte methodArg = (byte)1;
 								byte? methodArg1 = (byte)1;
 
-								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 								new global::TUnit.TestProject.NullableByteArgumentTests()								, sessionId, testBuilderContext);
+								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -405,24 +405,24 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 							var testMethodDataIndex = 0;
 							try
 							{
-								var testInformation = 								new global::TUnit.Core.SourceGeneratedMethodInformation
-								{
+								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 									Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
 									Name = "Test2",
 									GenericTypeCount = 0,
 									ReturnType = typeof(void),
 									Attributes = 
-									[
-										new global::TUnit.Core.TestAttribute()										,
+[
+										new global::TUnit.Core.TestAttribute(),
 
-										new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1)										,
+										new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1),
 
 										new global::TUnit.Core.ArgumentsAttribute((byte)1, null)
-									],
+],
 									Parameters = 
-									[
+[
 										new global::TUnit.Core.SourceGeneratedParameterInformation<byte>
-										{
+{
 											Name = "byte1",
 											Attributes = 
 											[],
@@ -430,7 +430,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 												ReflectionInfo = null!,
 											},
 											new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
-											{
+{
 												Name = "byte2",
 												Attributes = 
 												[],
@@ -438,12 +438,12 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 													ReflectionInfo = null!,
 												},
 											],
-											Class = 											global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-											{
+											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 												Parent = null,
 												Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-												Assembly = 												global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-												{
+												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 													Name = "NullableByteArgumentTests",
 													Attributes = 
 													[],
@@ -452,9 +452,9 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 													Name = "NullableByteArgumentTests",
 													Namespace = "TUnit.TestProject",
 													Attributes = 
-													[
+[
 														new EngineTest(Pass)
-													],
+],
 													Parameters = 
 													[],
 
@@ -476,7 +476,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 													byte methodArg = (byte)1;
 													byte? methodArg1 = (byte?)(null);
 
-													var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 													new global::TUnit.TestProject.NullableByteArgumentTests()													, sessionId, testBuilderContext);
+													var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
 													var resettableClassFactory = resettableClassFactoryDelegate();
 
 

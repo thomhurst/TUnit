@@ -34,24 +34,24 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.GenericMethodTests),
 				Name = "AggregateBy_HasExpectedOutput",
 				GenericTypeCount = 3,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
-					new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData")					,
+					new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData"),
 
 					new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-					{
+{
 						Name = "source",
 						Attributes = 
 						[],
@@ -59,7 +59,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-						{
+{
 							Name = "keySelector",
 							Attributes = 
 							[],
@@ -67,7 +67,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-							{
+{
 								Name = "seedSelector",
 								Attributes = 
 								[],
@@ -75,7 +75,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 									ReflectionInfo = null!,
 								},
 								new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-								{
+{
 									Name = "func",
 									Attributes = 
 									[],
@@ -83,7 +83,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-									{
+{
 										Name = "comparer",
 										Attributes = 
 										[],
@@ -91,7 +91,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 											ReflectionInfo = null!,
 										},
 										new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-										{
+{
 											Name = "expected",
 											Attributes = 
 											[],
@@ -99,12 +99,12 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 												ReflectionInfo = null!,
 											},
 										],
-										Class = 										global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-										{
+										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 											Parent = null,
 											Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-											Assembly = 											global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-											{
+											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 												Name = "GenericMethodTests",
 												Attributes = 
 												[],
@@ -113,9 +113,9 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 												Name = "GenericMethodTests",
 												Namespace = "TUnit.TestProject",
 												Attributes = 
-												[
+[
 													new EngineTest(Pass)
-												],
+],
 												Parameters = 
 												[],
 
@@ -145,7 +145,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 													global::System.Func<int, int, int> methodArg3 = methodArgTuples.Item4;
 													global::System.Collections.Generic.IEqualityComparer<int> methodArg4 = methodArgTuples.Item5;
 													global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>> methodArg5 = methodArgTuples.Item6;
-													var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 													new global::TUnit.TestProject.GenericMethodTests()													, sessionId, testBuilderContext);
+													var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => new global::TUnit.TestProject.GenericMethodTests(), sessionId, testBuilderContext);
 													var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -195,24 +195,24 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 											var testMethodDataIndex = 0;
 											try
 											{
-												var testInformation = 												new global::TUnit.Core.SourceGeneratedMethodInformation
-												{
+												var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 													Type = typeof(global::TUnit.TestProject.GenericMethodTests),
 													Name = "AggregateBy_HasExpectedOutput",
 													GenericTypeCount = 3,
 													ReturnType = typeof(void),
 													Attributes = 
-													[
-														new global::TUnit.Core.TestAttribute()														,
+[
+														new global::TUnit.Core.TestAttribute(),
 
-														new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData")														,
+														new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData"),
 
 														new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
-													],
+],
 													Parameters = 
-													[
+[
 														new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-														{
+{
 															Name = "source",
 															Attributes = 
 															[],
@@ -220,7 +220,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																ReflectionInfo = null!,
 															},
 															new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-															{
+{
 																Name = "keySelector",
 																Attributes = 
 																[],
@@ -228,7 +228,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																	ReflectionInfo = null!,
 																},
 																new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																{
+{
 																	Name = "seedSelector",
 																	Attributes = 
 																	[],
@@ -236,7 +236,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																		ReflectionInfo = null!,
 																	},
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																	{
+{
 																		Name = "func",
 																		Attributes = 
 																		[],
@@ -244,7 +244,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																			ReflectionInfo = null!,
 																		},
 																		new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																		{
+{
 																			Name = "comparer",
 																			Attributes = 
 																			[],
@@ -252,7 +252,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																				ReflectionInfo = null!,
 																			},
 																			new global::TUnit.Core.SourceGeneratedParameterInformation<object>
-																			{
+{
 																				Name = "expected",
 																				Attributes = 
 																				[],
@@ -260,12 +260,12 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																					ReflectionInfo = null!,
 																				},
 																			],
-																			Class = 																			global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																			{
+																			Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																				Parent = null,
 																				Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-																				Assembly = 																				global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																				{
+																				Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GenericMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																					Name = "GenericMethodTests",
 																					Attributes = 
 																					[],
@@ -274,9 +274,9 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																					Name = "GenericMethodTests",
 																					Namespace = "TUnit.TestProject",
 																					Attributes = 
-																					[
+[
 																						new EngineTest(Pass)
-																					],
+],
 																					Parameters = 
 																					[],
 
@@ -306,7 +306,7 @@ file partial class GenericMethodTests : global::TUnit.Core.Interfaces.SourceGene
 																						global::System.Func<string, string, string> methodArg3 = methodArgTuples.Item4;
 																						global::System.Collections.Generic.IEqualityComparer<string> methodArg4 = methodArgTuples.Item5;
 																						global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>> methodArg5 = methodArgTuples.Item6;
-																						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => 																						new global::TUnit.TestProject.GenericMethodTests()																						, sessionId, testBuilderContext);
+																						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.GenericMethodTests>(() => new global::TUnit.TestProject.GenericMethodTests(), sessionId, testBuilderContext);
 																						var resettableClassFactory = resettableClassFactoryDelegate();
 
 

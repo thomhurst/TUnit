@@ -30,20 +30,20 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 				Name = "DataSource_Class",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
+[
 					new global::TUnit.Core.TestAttribute()
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
-					{
+{
 						Name = "value",
 						Attributes = 
 						[],
@@ -51,12 +51,12 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "ClassDataSourceDrivenTestsSharedKeyed",
 							Attributes = 
 							[],
@@ -65,9 +65,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							Name = "ClassDataSourceDrivenTestsSharedKeyed",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -90,9 +90,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
-									{
+{
 										Name = "value",
 										Attributes = 
 										[],
@@ -104,13 +104,13 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 									TestClassInstance = classInstance,
 									ClassInstanceArguments = classInstanceArguments,
 								};
-								var methodDataAttribute = 								new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
-								{
+								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
+{
 									Shared = global::TUnit.Core.SharedType.Keyed,
 									Key = "🔑",
 								}
 
-								;
+;
 
 
 								testBuilderContext.DataAttributes.Add(methodDataAttribute);
@@ -123,7 +123,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 									classInstanceArguments = [];
 
 									var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(() => 									new global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed()									, sessionId, testBuilderContext);
+									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed(), sessionId, testBuilderContext);
 									var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -201,20 +201,20 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
 				Name = "DataSource_Class_Generic",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
+[
 					new global::TUnit.Core.TestAttribute()
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
-					{
+{
 						Name = "value",
 						Attributes = 
 						[],
@@ -222,12 +222,12 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassDataSourceDrivenTestsSharedKeyed", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "ClassDataSourceDrivenTestsSharedKeyed",
 							Attributes = 
 							[],
@@ -236,9 +236,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 							Name = "ClassDataSourceDrivenTestsSharedKeyed",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -261,9 +261,9 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>
-									{
+{
 										Name = "value",
 										Attributes = 
 										[],
@@ -275,13 +275,13 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 									TestClassInstance = classInstance,
 									ClassInstanceArguments = classInstanceArguments,
 								};
-								var methodDataAttribute = 								new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
-								{
+								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
+{
 									Shared = global::TUnit.Core.SharedType.Keyed,
 									Key = "🔑",
 								}
 
-								;
+;
 
 
 								testBuilderContext.DataAttributes.Add(methodDataAttribute);
@@ -294,7 +294,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 									classInstanceArguments = [];
 
 									var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(() => 									new global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed()									, sessionId, testBuilderContext);
+									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed(), sessionId, testBuilderContext);
 									var resettableClassFactory = resettableClassFactoryDelegate();
 
 

@@ -30,22 +30,22 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
 				Name = "DataSource_TupleMethod",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "value",
 						Attributes = 
 						[],
@@ -53,7 +53,7 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-						{
+{
 							Name = "value2",
 							Attributes = 
 							[],
@@ -61,7 +61,7 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-							{
+{
 								Name = "value3",
 								Attributes = 
 								[],
@@ -69,12 +69,12 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 									ReflectionInfo = null!,
 								},
 							],
-							Class = 							global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-							{
+							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
-								Assembly = 								global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-								{
+								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 									Name = "TupleDataSourceDrivenTests",
 									Attributes = 
 									[],
@@ -83,9 +83,9 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 									Name = "TupleDataSourceDrivenTests",
 									Namespace = "TUnit.TestProject",
 									Attributes = 
-									[
+[
 										new EngineTest(Pass)
-									],
+],
 									Parameters = 
 									[],
 
@@ -108,7 +108,7 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 									int methodArg = methodArgTuples.Item1;
 									string methodArg1 = methodArgTuples.Item2;
 									bool methodArg2 = methodArgTuples.Item3;
-									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TupleDataSourceDrivenTests>(() => 									new global::TUnit.TestProject.TupleDataSourceDrivenTests()									, sessionId, testBuilderContext);
+									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TupleDataSourceDrivenTests>(() => new global::TUnit.TestProject.TupleDataSourceDrivenTests(), sessionId, testBuilderContext);
 									var resettableClassFactory = resettableClassFactoryDelegate();
 
 

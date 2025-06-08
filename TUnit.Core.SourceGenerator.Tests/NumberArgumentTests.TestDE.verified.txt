@@ -30,22 +30,22 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 				Name = "Int",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute(1)
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "i",
 						Attributes = 
 						[],
@@ -53,12 +53,12 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "NumberArgumentTests",
 							Attributes = 
 							[],
@@ -67,9 +67,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							Name = "NumberArgumentTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -90,7 +90,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 							int methodArg = 1;
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => 							new global::TUnit.TestProject.NumberArgumentTests()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => new global::TUnit.TestProject.NumberArgumentTests(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -166,22 +166,22 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 				Name = "Double",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute(1.1)
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<double>
-					{
+{
 						Name = "d",
 						Attributes = 
 						[],
@@ -189,12 +189,12 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "NumberArgumentTests",
 							Attributes = 
 							[],
@@ -203,9 +203,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							Name = "NumberArgumentTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -226,7 +226,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 							double methodArg = 1.1;
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => 							new global::TUnit.TestProject.NumberArgumentTests()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => new global::TUnit.TestProject.NumberArgumentTests(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -302,22 +302,22 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 				Name = "Float",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute(1.1f)
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<float>
-					{
+{
 						Name = "f",
 						Attributes = 
 						[],
@@ -325,12 +325,12 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "NumberArgumentTests",
 							Attributes = 
 							[],
@@ -339,9 +339,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							Name = "NumberArgumentTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -362,7 +362,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 							float methodArg = 1.1f;
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => 							new global::TUnit.TestProject.NumberArgumentTests()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => new global::TUnit.TestProject.NumberArgumentTests(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -438,22 +438,22 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 				Name = "Long",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute(1L)
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<long>
-					{
+{
 						Name = "l",
 						Attributes = 
 						[],
@@ -461,12 +461,12 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "NumberArgumentTests",
 							Attributes = 
 							[],
@@ -475,9 +475,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							Name = "NumberArgumentTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -498,7 +498,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 							long methodArg = 1L;
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => 							new global::TUnit.TestProject.NumberArgumentTests()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => new global::TUnit.TestProject.NumberArgumentTests(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -574,22 +574,22 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 				Name = "ULong",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute(1UL)
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<ulong>
-					{
+{
 						Name = "l",
 						Attributes = 
 						[],
@@ -597,12 +597,12 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "NumberArgumentTests",
 							Attributes = 
 							[],
@@ -611,9 +611,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							Name = "NumberArgumentTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -634,7 +634,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 							ulong methodArg = 1UL;
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => 							new global::TUnit.TestProject.NumberArgumentTests()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => new global::TUnit.TestProject.NumberArgumentTests(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -710,22 +710,22 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
 				Name = "UInt",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.ArgumentsAttribute(1U)
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<uint>
-					{
+{
 						Name = "i",
 						Attributes = 
 						[],
@@ -733,12 +733,12 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NumberArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "NumberArgumentTests",
 							Attributes = 
 							[],
@@ -747,9 +747,9 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 							Name = "NumberArgumentTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -770,7 +770,7 @@ file partial class NumberArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 
 							uint methodArg = 1U;
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => 							new global::TUnit.TestProject.NumberArgumentTests()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NumberArgumentTests>(() => new global::TUnit.TestProject.NumberArgumentTests(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 

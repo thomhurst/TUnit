@@ -34,25 +34,25 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 				Name = "Simple",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-				[
+[
 					new global::TUnit.Core.TestAttribute()
-				],
+],
 				Parameters = 
 				[],
 
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "ClassAndMethodArgumentsTests",
 							Attributes = 
 							[],
@@ -61,15 +61,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							Name = "ClassAndMethodArgumentsTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
-								new global::TUnit.Core.ArgumentsAttribute("1")								,
+[
+								new global::TUnit.Core.ArgumentsAttribute("1"),
 
 								new global::TUnit.Core.ArgumentsAttribute("2")
-							],
+],
 							Parameters = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-								{
+{
 									Name = "arg1",
 									Attributes = 
 									[],
@@ -94,7 +94,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 							classInstanceArguments = [classArg];
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 							new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -142,25 +142,25 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						var testMethodDataIndex = 0;
 						try
 						{
-							var testInformation = 							new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
+							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 								Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 								Name = "Simple",
 								GenericTypeCount = 0,
 								ReturnType = typeof(global::System.Threading.Tasks.Task),
 								Attributes = 
-								[
+[
 									new global::TUnit.Core.TestAttribute()
-								],
+],
 								Parameters = 
 								[],
 
-									Class = 									global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
+									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-										Assembly = 										global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
+										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 											Name = "ClassAndMethodArgumentsTests",
 											Attributes = 
 											[],
@@ -169,15 +169,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 											Name = "ClassAndMethodArgumentsTests",
 											Namespace = "TUnit.TestProject",
 											Attributes = 
-											[
-												new global::TUnit.Core.ArgumentsAttribute("1")												,
+[
+												new global::TUnit.Core.ArgumentsAttribute("1"),
 
 												new global::TUnit.Core.ArgumentsAttribute("2")
-											],
+],
 											Parameters = 
-											[
+[
 												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-												{
+{
 													Name = "arg1",
 													Attributes = 
 													[],
@@ -202,7 +202,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 											classInstanceArguments = [classArg];
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 											new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)											, sessionId, testBuilderContext);
+											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 											var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -284,24 +284,24 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 				Name = "WithMethodLevel",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
-					new global::TUnit.Core.ArgumentsAttribute("3")					,
+					new global::TUnit.Core.ArgumentsAttribute("3"),
 
 					new global::TUnit.Core.ArgumentsAttribute("4")
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "arg2",
 						Attributes = 
 						[],
@@ -309,12 +309,12 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "ClassAndMethodArgumentsTests",
 							Attributes = 
 							[],
@@ -323,15 +323,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							Name = "ClassAndMethodArgumentsTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
-								new global::TUnit.Core.ArgumentsAttribute("1")								,
+[
+								new global::TUnit.Core.ArgumentsAttribute("1"),
 
 								new global::TUnit.Core.ArgumentsAttribute("2")
-							],
+],
 							Parameters = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-								{
+{
 									Name = "arg1",
 									Attributes = 
 									[],
@@ -358,7 +358,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 							string methodArg = "3";
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 							new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -406,24 +406,24 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						var testMethodDataIndex = 0;
 						try
 						{
-							var testInformation = 							new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
+							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 								Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 								Name = "WithMethodLevel",
 								GenericTypeCount = 0,
 								ReturnType = typeof(global::System.Threading.Tasks.Task),
 								Attributes = 
-								[
-									new global::TUnit.Core.TestAttribute()									,
+[
+									new global::TUnit.Core.TestAttribute(),
 
-									new global::TUnit.Core.ArgumentsAttribute("3")									,
+									new global::TUnit.Core.ArgumentsAttribute("3"),
 
 									new global::TUnit.Core.ArgumentsAttribute("4")
-								],
+],
 								Parameters = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
+{
 										Name = "arg2",
 										Attributes = 
 										[],
@@ -431,12 +431,12 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 											ReflectionInfo = null!,
 										},
 									],
-									Class = 									global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
+									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-										Assembly = 										global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
+										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 											Name = "ClassAndMethodArgumentsTests",
 											Attributes = 
 											[],
@@ -445,15 +445,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 											Name = "ClassAndMethodArgumentsTests",
 											Namespace = "TUnit.TestProject",
 											Attributes = 
-											[
-												new global::TUnit.Core.ArgumentsAttribute("1")												,
+[
+												new global::TUnit.Core.ArgumentsAttribute("1"),
 
 												new global::TUnit.Core.ArgumentsAttribute("2")
-											],
+],
 											Parameters = 
-											[
+[
 												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-												{
+{
 													Name = "arg1",
 													Attributes = 
 													[],
@@ -480,7 +480,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 											string methodArg = "3";
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 											new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)											, sessionId, testBuilderContext);
+											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 											var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -528,24 +528,24 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 										var testMethodDataIndex = 0;
 										try
 										{
-											var testInformation = 											new global::TUnit.Core.SourceGeneratedMethodInformation
-											{
+											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 												Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 												Name = "WithMethodLevel",
 												GenericTypeCount = 0,
 												ReturnType = typeof(global::System.Threading.Tasks.Task),
 												Attributes = 
-												[
-													new global::TUnit.Core.TestAttribute()													,
+[
+													new global::TUnit.Core.TestAttribute(),
 
-													new global::TUnit.Core.ArgumentsAttribute("3")													,
+													new global::TUnit.Core.ArgumentsAttribute("3"),
 
 													new global::TUnit.Core.ArgumentsAttribute("4")
-												],
+],
 												Parameters = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-													{
+{
 														Name = "arg2",
 														Attributes = 
 														[],
@@ -553,12 +553,12 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 															ReflectionInfo = null!,
 														},
 													],
-													Class = 													global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
+													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-														Assembly = 														global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
+														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 															Name = "ClassAndMethodArgumentsTests",
 															Attributes = 
 															[],
@@ -567,15 +567,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 															Name = "ClassAndMethodArgumentsTests",
 															Namespace = "TUnit.TestProject",
 															Attributes = 
-															[
-																new global::TUnit.Core.ArgumentsAttribute("1")																,
+[
+																new global::TUnit.Core.ArgumentsAttribute("1"),
 
 																new global::TUnit.Core.ArgumentsAttribute("2")
-															],
+],
 															Parameters = 
-															[
+[
 																new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																{
+{
 																	Name = "arg1",
 																	Attributes = 
 																	[],
@@ -602,7 +602,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 															string methodArg = "4";
 
-															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 															new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)															, sessionId, testBuilderContext);
+															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 															var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -650,24 +650,24 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 														var testMethodDataIndex = 0;
 														try
 														{
-															var testInformation = 															new global::TUnit.Core.SourceGeneratedMethodInformation
-															{
+															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 																Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 																Name = "WithMethodLevel",
 																GenericTypeCount = 0,
 																ReturnType = typeof(global::System.Threading.Tasks.Task),
 																Attributes = 
-																[
-																	new global::TUnit.Core.TestAttribute()																	,
+[
+																	new global::TUnit.Core.TestAttribute(),
 
-																	new global::TUnit.Core.ArgumentsAttribute("3")																	,
+																	new global::TUnit.Core.ArgumentsAttribute("3"),
 
 																	new global::TUnit.Core.ArgumentsAttribute("4")
-																],
+],
 																Parameters = 
-																[
+[
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																	{
+{
 																		Name = "arg2",
 																		Attributes = 
 																		[],
@@ -675,12 +675,12 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 																			ReflectionInfo = null!,
 																		},
 																	],
-																	Class = 																	global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																	{
+																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																		Parent = null,
 																		Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-																		Assembly = 																		global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																		{
+																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																			Name = "ClassAndMethodArgumentsTests",
 																			Attributes = 
 																			[],
@@ -689,15 +689,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 																			Name = "ClassAndMethodArgumentsTests",
 																			Namespace = "TUnit.TestProject",
 																			Attributes = 
-																			[
-																				new global::TUnit.Core.ArgumentsAttribute("1")																				,
+[
+																				new global::TUnit.Core.ArgumentsAttribute("1"),
 
 																				new global::TUnit.Core.ArgumentsAttribute("2")
-																			],
+],
 																			Parameters = 
-																			[
+[
 																				new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																				{
+{
 																					Name = "arg1",
 																					Attributes = 
 																					[],
@@ -724,7 +724,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 																			string methodArg = "4";
 
-																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 																			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)																			, sessionId, testBuilderContext);
+																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 																			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -806,24 +806,24 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 				Name = "IgnoreParameters",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
-					new global::TUnit.Core.ArgumentsAttribute("3")					,
+					new global::TUnit.Core.ArgumentsAttribute("3"),
 
 					new global::TUnit.Core.ArgumentsAttribute("4")
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-					{
+{
 						Name = "arg2",
 						Attributes = 
 						[],
@@ -831,12 +831,12 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "ClassAndMethodArgumentsTests",
 							Attributes = 
 							[],
@@ -845,15 +845,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 							Name = "ClassAndMethodArgumentsTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
-								new global::TUnit.Core.ArgumentsAttribute("1")								,
+[
+								new global::TUnit.Core.ArgumentsAttribute("1"),
 
 								new global::TUnit.Core.ArgumentsAttribute("2")
-							],
+],
 							Parameters = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-								{
+{
 									Name = "arg1",
 									Attributes = 
 									[],
@@ -880,7 +880,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 							string methodArg = "3";
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 							new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -928,24 +928,24 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 						var testMethodDataIndex = 0;
 						try
 						{
-							var testInformation = 							new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
+							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 								Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 								Name = "IgnoreParameters",
 								GenericTypeCount = 0,
 								ReturnType = typeof(global::System.Threading.Tasks.Task),
 								Attributes = 
-								[
-									new global::TUnit.Core.TestAttribute()									,
+[
+									new global::TUnit.Core.TestAttribute(),
 
-									new global::TUnit.Core.ArgumentsAttribute("3")									,
+									new global::TUnit.Core.ArgumentsAttribute("3"),
 
 									new global::TUnit.Core.ArgumentsAttribute("4")
-								],
+],
 								Parameters = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
+{
 										Name = "arg2",
 										Attributes = 
 										[],
@@ -953,12 +953,12 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 											ReflectionInfo = null!,
 										},
 									],
-									Class = 									global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
+									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-										Assembly = 										global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
+										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 											Name = "ClassAndMethodArgumentsTests",
 											Attributes = 
 											[],
@@ -967,15 +967,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 											Name = "ClassAndMethodArgumentsTests",
 											Namespace = "TUnit.TestProject",
 											Attributes = 
-											[
-												new global::TUnit.Core.ArgumentsAttribute("1")												,
+[
+												new global::TUnit.Core.ArgumentsAttribute("1"),
 
 												new global::TUnit.Core.ArgumentsAttribute("2")
-											],
+],
 											Parameters = 
-											[
+[
 												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-												{
+{
 													Name = "arg1",
 													Attributes = 
 													[],
@@ -1002,7 +1002,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 											string methodArg = "3";
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 											new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)											, sessionId, testBuilderContext);
+											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 											var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -1050,24 +1050,24 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 										var testMethodDataIndex = 0;
 										try
 										{
-											var testInformation = 											new global::TUnit.Core.SourceGeneratedMethodInformation
-											{
+											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 												Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 												Name = "IgnoreParameters",
 												GenericTypeCount = 0,
 												ReturnType = typeof(global::System.Threading.Tasks.Task),
 												Attributes = 
-												[
-													new global::TUnit.Core.TestAttribute()													,
+[
+													new global::TUnit.Core.TestAttribute(),
 
-													new global::TUnit.Core.ArgumentsAttribute("3")													,
+													new global::TUnit.Core.ArgumentsAttribute("3"),
 
 													new global::TUnit.Core.ArgumentsAttribute("4")
-												],
+],
 												Parameters = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-													{
+{
 														Name = "arg2",
 														Attributes = 
 														[],
@@ -1075,12 +1075,12 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 															ReflectionInfo = null!,
 														},
 													],
-													Class = 													global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
+													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-														Assembly = 														global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
+														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 															Name = "ClassAndMethodArgumentsTests",
 															Attributes = 
 															[],
@@ -1089,15 +1089,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 															Name = "ClassAndMethodArgumentsTests",
 															Namespace = "TUnit.TestProject",
 															Attributes = 
-															[
-																new global::TUnit.Core.ArgumentsAttribute("1")																,
+[
+																new global::TUnit.Core.ArgumentsAttribute("1"),
 
 																new global::TUnit.Core.ArgumentsAttribute("2")
-															],
+],
 															Parameters = 
-															[
+[
 																new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																{
+{
 																	Name = "arg1",
 																	Attributes = 
 																	[],
@@ -1124,7 +1124,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 															string methodArg = "4";
 
-															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 															new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)															, sessionId, testBuilderContext);
+															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 															var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -1172,24 +1172,24 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 														var testMethodDataIndex = 0;
 														try
 														{
-															var testInformation = 															new global::TUnit.Core.SourceGeneratedMethodInformation
-															{
+															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 																Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 																Name = "IgnoreParameters",
 																GenericTypeCount = 0,
 																ReturnType = typeof(global::System.Threading.Tasks.Task),
 																Attributes = 
-																[
-																	new global::TUnit.Core.TestAttribute()																	,
+[
+																	new global::TUnit.Core.TestAttribute(),
 
-																	new global::TUnit.Core.ArgumentsAttribute("3")																	,
+																	new global::TUnit.Core.ArgumentsAttribute("3"),
 
 																	new global::TUnit.Core.ArgumentsAttribute("4")
-																],
+],
 																Parameters = 
-																[
+[
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																	{
+{
 																		Name = "arg2",
 																		Attributes = 
 																		[],
@@ -1197,12 +1197,12 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 																			ReflectionInfo = null!,
 																		},
 																	],
-																	Class = 																	global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																	{
+																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																		Parent = null,
 																		Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-																		Assembly = 																		global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																		{
+																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																			Name = "ClassAndMethodArgumentsTests",
 																			Attributes = 
 																			[],
@@ -1211,15 +1211,15 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 																			Name = "ClassAndMethodArgumentsTests",
 																			Namespace = "TUnit.TestProject",
 																			Attributes = 
-																			[
-																				new global::TUnit.Core.ArgumentsAttribute("1")																				,
+[
+																				new global::TUnit.Core.ArgumentsAttribute("1"),
 
 																				new global::TUnit.Core.ArgumentsAttribute("2")
-																			],
+],
 																			Parameters = 
-																			[
+[
 																				new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																				{
+{
 																					Name = "arg1",
 																					Attributes = 
 																					[],
@@ -1246,7 +1246,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 																			string methodArg = "4";
 
-																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 																			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)																			, sessionId, testBuilderContext);
+																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg), sessionId, testBuilderContext);
 																			var resettableClassFactory = resettableClassFactoryDelegate();
 
 

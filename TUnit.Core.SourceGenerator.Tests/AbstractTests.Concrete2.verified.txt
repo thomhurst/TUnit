@@ -30,25 +30,25 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
 				Name = "SecondTest",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
+[
 					new global::TUnit.Core.TestAttribute()
-				],
+],
 				Parameters = 
 				[],
 
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "AbstractTests",
 							Attributes = 
 							[],
@@ -57,11 +57,11 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 							Name = "ConcreteClass2",
 							Namespace = "TUnit.TestProject.AbstractTests",
 							Attributes = 
-							[
-								new global::TUnit.Core.InheritsTestsAttribute()								,
+[
+								new global::TUnit.Core.InheritsTestsAttribute(),
 
 								new global::TUnit.Core.InheritsTestsAttribute()
-							],
+],
 							Parameters = 
 							[],
 
@@ -80,7 +80,7 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 							object?[]? classInstanceArguments = null;
 							classInstanceArguments = [];
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 							new global::TUnit.TestProject.AbstractTests.ConcreteClass2()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => new global::TUnit.TestProject.AbstractTests.ConcreteClass2(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -156,25 +156,25 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
 				Name = "AssertClassName",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-				[
+[
 					new global::TUnit.Core.TestAttribute()
-				],
+],
 				Parameters = 
 				[],
 
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "AbstractTests",
 							Attributes = 
 							[],
@@ -183,11 +183,11 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 							Name = "ConcreteClass2",
 							Namespace = "TUnit.TestProject.AbstractTests",
 							Attributes = 
-							[
-								new global::TUnit.Core.InheritsTestsAttribute()								,
+[
+								new global::TUnit.Core.InheritsTestsAttribute(),
 
 								new global::TUnit.Core.InheritsTestsAttribute()
-							],
+],
 							Parameters = 
 							[],
 
@@ -206,7 +206,7 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 							object?[]? classInstanceArguments = null;
 							classInstanceArguments = [];
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => 							new global::TUnit.TestProject.AbstractTests.ConcreteClass2()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => new global::TUnit.TestProject.AbstractTests.ConcreteClass2(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -282,25 +282,25 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
 				Name = "AssertClassName",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-				[
+[
 					new global::TUnit.Core.TestAttribute()
-				],
+],
 				Parameters = 
 				[],
 
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass1", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AbstractTests.ConcreteClass1", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AbstractTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "AbstractTests",
 							Attributes = 
 							[],
@@ -309,9 +309,9 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 							Name = "ConcreteClass1",
 							Namespace = "TUnit.TestProject.AbstractTests",
 							Attributes = 
-							[
+[
 								new global::TUnit.Core.InheritsTestsAttribute()
-							],
+],
 							Parameters = 
 							[],
 
@@ -330,7 +330,7 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 							object?[]? classInstanceArguments = null;
 							classInstanceArguments = [];
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => 							new global::TUnit.TestProject.AbstractTests.ConcreteClass1()							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => new global::TUnit.TestProject.AbstractTests.ConcreteClass1(), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 

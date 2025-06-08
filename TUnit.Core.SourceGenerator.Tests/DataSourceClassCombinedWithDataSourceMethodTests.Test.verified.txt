@@ -41,26 +41,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 				Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
-					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")					,
+					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")					,
+					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "i",
 						Attributes = 
 						[],
@@ -68,12 +68,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 							Attributes = 
 							[],
@@ -82,19 +82,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							Name = "DataSourceClassCombinedWithDataSourceMethod",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
-								new EngineTest(Pass)								,
+[
+								new EngineTest(Pass),
 
-								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")								,
+								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")								,
+								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-							],
+],
 							Parameters = 
-							[
+[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
+{
 									Name = "i",
 									Attributes = 
 									[],
@@ -119,7 +119,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 							classInstanceArguments = [classArg];
 
 							int methodArg = global::TUnit.TestProject.CommonTestData.One();
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 							new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)							, sessionId, testBuilderContext);
+							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -167,26 +167,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 						var testMethodDataIndex = 0;
 						try
 						{
-							var testInformation = 							new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
+							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 								Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 								Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 								GenericTypeCount = 0,
 								ReturnType = typeof(void),
 								Attributes = 
-								[
-									new global::TUnit.Core.TestAttribute()									,
+[
+									new global::TUnit.Core.TestAttribute(),
 
-									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")									,
+									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")									,
+									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-								],
+],
 								Parameters = 
-								[
+[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-									{
+{
 										Name = "i",
 										Attributes = 
 										[],
@@ -194,12 +194,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											ReflectionInfo = null!,
 										},
 									],
-									Class = 									global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
+									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-										Assembly = 										global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
+										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 											Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 											Attributes = 
 											[],
@@ -208,19 +208,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											Name = "DataSourceClassCombinedWithDataSourceMethod",
 											Namespace = "TUnit.TestProject",
 											Attributes = 
-											[
-												new EngineTest(Pass)												,
+[
+												new EngineTest(Pass),
 
-												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")												,
+												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")												,
+												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-											],
+],
 											Parameters = 
-											[
+[
 												new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-												{
+{
 													Name = "i",
 													Attributes = 
 													[],
@@ -245,7 +245,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 											classInstanceArguments = [classArg];
 
 											int methodArg = global::TUnit.TestProject.CommonTestData.One();
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 											new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)											, sessionId, testBuilderContext);
+											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 											var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -293,26 +293,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 										var testMethodDataIndex = 0;
 										try
 										{
-											var testInformation = 											new global::TUnit.Core.SourceGeneratedMethodInformation
-											{
+											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 												Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 												Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 												GenericTypeCount = 0,
 												ReturnType = typeof(void),
 												Attributes = 
-												[
-													new global::TUnit.Core.TestAttribute()													,
+[
+													new global::TUnit.Core.TestAttribute(),
 
-													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")													,
+													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")													,
+													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-												],
+],
 												Parameters = 
-												[
+[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-													{
+{
 														Name = "i",
 														Attributes = 
 														[],
@@ -320,12 +320,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 															ReflectionInfo = null!,
 														},
 													],
-													Class = 													global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
+													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-														Assembly = 														global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
+														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 															Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 															Attributes = 
 															[],
@@ -334,19 +334,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 															Name = "DataSourceClassCombinedWithDataSourceMethod",
 															Namespace = "TUnit.TestProject",
 															Attributes = 
-															[
-																new EngineTest(Pass)																,
+[
+																new EngineTest(Pass),
 
-																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																,
+																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																,
+																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-															],
+],
 															Parameters = 
-															[
+[
 																new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																{
+{
 																	Name = "i",
 																	Attributes = 
 																	[],
@@ -371,7 +371,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 															classInstanceArguments = [classArg];
 
 															int methodArg = global::TUnit.TestProject.CommonTestData.One();
-															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 															new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)															, sessionId, testBuilderContext);
+															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 															var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -419,26 +419,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 														var testMethodDataIndex = 0;
 														try
 														{
-															var testInformation = 															new global::TUnit.Core.SourceGeneratedMethodInformation
-															{
+															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 																Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 																Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 																GenericTypeCount = 0,
 																ReturnType = typeof(void),
 																Attributes = 
-																[
-																	new global::TUnit.Core.TestAttribute()																	,
+[
+																	new global::TUnit.Core.TestAttribute(),
 
-																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																	,
+																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																	,
+																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																],
+],
 																Parameters = 
-																[
+[
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																	{
+{
 																		Name = "i",
 																		Attributes = 
 																		[],
@@ -446,12 +446,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																			ReflectionInfo = null!,
 																		},
 																	],
-																	Class = 																	global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																	{
+																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																		Parent = null,
 																		Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-																		Assembly = 																		global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																		{
+																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																			Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 																			Attributes = 
 																			[],
@@ -460,19 +460,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																			Name = "DataSourceClassCombinedWithDataSourceMethod",
 																			Namespace = "TUnit.TestProject",
 																			Attributes = 
-																			[
-																				new EngineTest(Pass)																				,
+[
+																				new EngineTest(Pass),
 
-																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																				,
+																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																				,
+																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																			],
+],
 																			Parameters = 
-																			[
+[
 																				new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																				{
+{
 																					Name = "i",
 																					Attributes = 
 																					[],
@@ -497,7 +497,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																			classInstanceArguments = [classArg];
 
 																			int methodArg = global::TUnit.TestProject.CommonTestData.Two();
-																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 																			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)																			, sessionId, testBuilderContext);
+																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 																			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -545,26 +545,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																		var testMethodDataIndex = 0;
 																		try
 																		{
-																			var testInformation = 																			new global::TUnit.Core.SourceGeneratedMethodInformation
-																			{
+																			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 																				Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 																				Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 																				GenericTypeCount = 0,
 																				ReturnType = typeof(void),
 																				Attributes = 
-																				[
-																					new global::TUnit.Core.TestAttribute()																					,
+[
+																					new global::TUnit.Core.TestAttribute(),
 
-																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																					,
+																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																					,
+																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																				],
+],
 																				Parameters = 
-																				[
+[
 																					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																					{
+{
 																						Name = "i",
 																						Attributes = 
 																						[],
@@ -572,12 +572,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																							ReflectionInfo = null!,
 																						},
 																					],
-																					Class = 																					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																					{
+																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																						Parent = null,
 																						Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-																						Assembly = 																						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																						{
+																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																							Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 																							Attributes = 
 																							[],
@@ -586,19 +586,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																							Name = "DataSourceClassCombinedWithDataSourceMethod",
 																							Namespace = "TUnit.TestProject",
 																							Attributes = 
-																							[
-																								new EngineTest(Pass)																								,
+[
+																								new EngineTest(Pass),
 
-																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																								,
+																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																								,
+																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																							],
+],
 																							Parameters = 
-																							[
+[
 																								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																								{
+{
 																									Name = "i",
 																									Attributes = 
 																									[],
@@ -623,7 +623,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																							classInstanceArguments = [classArg];
 
 																							int methodArg = global::TUnit.TestProject.CommonTestData.Two();
-																							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 																							new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)																							, sessionId, testBuilderContext);
+																							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 																							var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -671,26 +671,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																						var testMethodDataIndex = 0;
 																						try
 																						{
-																							var testInformation = 																							new global::TUnit.Core.SourceGeneratedMethodInformation
-																							{
+																							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 																								Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 																								Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 																								GenericTypeCount = 0,
 																								ReturnType = typeof(void),
 																								Attributes = 
-																								[
-																									new global::TUnit.Core.TestAttribute()																									,
+[
+																									new global::TUnit.Core.TestAttribute(),
 
-																									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																									,
+																									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																									,
+																									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																									new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																								],
+],
 																								Parameters = 
-																								[
+[
 																									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																									{
+{
 																										Name = "i",
 																										Attributes = 
 																										[],
@@ -698,12 +698,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																											ReflectionInfo = null!,
 																										},
 																									],
-																									Class = 																									global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																									{
+																									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																										Parent = null,
 																										Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-																										Assembly = 																										global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																										{
+																										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																											Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 																											Attributes = 
 																											[],
@@ -712,19 +712,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																											Name = "DataSourceClassCombinedWithDataSourceMethod",
 																											Namespace = "TUnit.TestProject",
 																											Attributes = 
-																											[
-																												new EngineTest(Pass)																												,
+[
+																												new EngineTest(Pass),
 
-																												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																												,
+																												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																												,
+																												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																												new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																											],
+],
 																											Parameters = 
-																											[
+[
 																												new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																												{
+{
 																													Name = "i",
 																													Attributes = 
 																													[],
@@ -749,7 +749,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																											classInstanceArguments = [classArg];
 
 																											int methodArg = global::TUnit.TestProject.CommonTestData.Two();
-																											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 																											new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)																											, sessionId, testBuilderContext);
+																											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 																											var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -797,26 +797,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																										var testMethodDataIndex = 0;
 																										try
 																										{
-																											var testInformation = 																											new global::TUnit.Core.SourceGeneratedMethodInformation
-																											{
+																											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 																												Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 																												Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 																												GenericTypeCount = 0,
 																												ReturnType = typeof(void),
 																												Attributes = 
-																												[
-																													new global::TUnit.Core.TestAttribute()																													,
+[
+																													new global::TUnit.Core.TestAttribute(),
 
-																													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																													,
+																													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																													,
+																													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																													new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																												],
+],
 																												Parameters = 
-																												[
+[
 																													new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																													{
+{
 																														Name = "i",
 																														Attributes = 
 																														[],
@@ -824,12 +824,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																															ReflectionInfo = null!,
 																														},
 																													],
-																													Class = 																													global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																													{
+																													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																														Parent = null,
 																														Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-																														Assembly = 																														global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																														{
+																														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																															Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 																															Attributes = 
 																															[],
@@ -838,19 +838,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																															Name = "DataSourceClassCombinedWithDataSourceMethod",
 																															Namespace = "TUnit.TestProject",
 																															Attributes = 
-																															[
-																																new EngineTest(Pass)																																,
+[
+																																new EngineTest(Pass),
 
-																																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																																,
+																																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																																,
+																																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																																new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																															],
+],
 																															Parameters = 
-																															[
+[
 																																new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																																{
+{
 																																	Name = "i",
 																																	Attributes = 
 																																	[],
@@ -875,7 +875,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																															classInstanceArguments = [classArg];
 
 																															int methodArg = global::TUnit.TestProject.CommonTestData.Three();
-																															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 																															new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)																															, sessionId, testBuilderContext);
+																															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 																															var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -923,26 +923,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																														var testMethodDataIndex = 0;
 																														try
 																														{
-																															var testInformation = 																															new global::TUnit.Core.SourceGeneratedMethodInformation
-																															{
+																															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 																																Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 																																Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 																																GenericTypeCount = 0,
 																																ReturnType = typeof(void),
 																																Attributes = 
-																																[
-																																	new global::TUnit.Core.TestAttribute()																																	,
+[
+																																	new global::TUnit.Core.TestAttribute(),
 
-																																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																																	,
+																																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																																	,
+																																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																																	new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																																],
+],
 																																Parameters = 
-																																[
+[
 																																	new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																																	{
+{
 																																		Name = "i",
 																																		Attributes = 
 																																		[],
@@ -950,12 +950,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																																			ReflectionInfo = null!,
 																																		},
 																																	],
-																																	Class = 																																	global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																																	{
+																																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																																		Parent = null,
 																																		Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-																																		Assembly = 																																		global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																																		{
+																																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																																			Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 																																			Attributes = 
 																																			[],
@@ -964,19 +964,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																																			Name = "DataSourceClassCombinedWithDataSourceMethod",
 																																			Namespace = "TUnit.TestProject",
 																																			Attributes = 
-																																			[
-																																				new EngineTest(Pass)																																				,
+[
+																																				new EngineTest(Pass),
 
-																																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																																				,
+																																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																																				,
+																																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																																				new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																																			],
+],
 																																			Parameters = 
-																																			[
+[
 																																				new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																																				{
+{
 																																					Name = "i",
 																																					Attributes = 
 																																					[],
@@ -1001,7 +1001,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																																			classInstanceArguments = [classArg];
 
 																																			int methodArg = global::TUnit.TestProject.CommonTestData.Three();
-																																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 																																			new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)																																			, sessionId, testBuilderContext);
+																																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 																																			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -1049,26 +1049,26 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																																		var testMethodDataIndex = 0;
 																																		try
 																																		{
-																																			var testInformation = 																																			new global::TUnit.Core.SourceGeneratedMethodInformation
-																																			{
+																																			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 																																				Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
 																																				Name = "DataSourceClassCombinedWithDataSourceMethodTest",
 																																				GenericTypeCount = 0,
 																																				ReturnType = typeof(void),
 																																				Attributes = 
-																																				[
-																																					new global::TUnit.Core.TestAttribute()																																					,
+[
+																																					new global::TUnit.Core.TestAttribute(),
 
-																																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																																					,
+																																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																																					,
+																																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																																					new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																																				],
+],
 																																				Parameters = 
-																																				[
+[
 																																					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																																					{
+{
 																																						Name = "i",
 																																						Attributes = 
 																																						[],
@@ -1076,12 +1076,12 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																																							ReflectionInfo = null!,
 																																						},
 																																					],
-																																					Class = 																																					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																																					{
+																																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 																																						Parent = null,
 																																						Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-																																						Assembly = 																																						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																																						{
+																																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceClassCombinedWithDataSourceMethodTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 																																							Name = "DataSourceClassCombinedWithDataSourceMethodTests",
 																																							Attributes = 
 																																							[],
@@ -1090,19 +1090,19 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																																							Name = "DataSourceClassCombinedWithDataSourceMethod",
 																																							Namespace = "TUnit.TestProject",
 																																							Attributes = 
-																																							[
-																																								new EngineTest(Pass)																																								,
+[
+																																								new EngineTest(Pass),
 
-																																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")																																								,
+																																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
 
-																																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two")																																								,
+																																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
 
 																																								new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-																																							],
+],
 																																							Parameters = 
-																																							[
+[
 																																								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																																								{
+{
 																																									Name = "i",
 																																									Attributes = 
 																																									[],
@@ -1127,7 +1127,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 																																							classInstanceArguments = [classArg];
 
 																																							int methodArg = global::TUnit.TestProject.CommonTestData.Three();
-																																							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => 																																							new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg)																																							, sessionId, testBuilderContext);
+																																							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod>(() => new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(classArg), sessionId, testBuilderContext);
 																																							var resettableClassFactory = resettableClassFactoryDelegate();
 
 

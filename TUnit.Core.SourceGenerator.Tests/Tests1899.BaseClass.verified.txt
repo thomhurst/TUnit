@@ -42,25 +42,25 @@ file partial class Hooks_BaseClass : global::TUnit.Core.Interfaces.SourceGenerat
 			new global::TUnit.Core.Hooks.InstanceHookMethod
 			{
 				ClassType = typeof(global::TUnit.TestProject.Library.Bugs._1899.BaseClass<>),
-				MethodInfo = 				new global::TUnit.Core.SourceGeneratedMethodInformation
-				{
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 					Type = typeof(global::TUnit.TestProject.Library.Bugs._1899.BaseClass<>),
 					Name = "Setup",
 					GenericTypeCount = 0,
 					ReturnType = typeof(void),
 					Attributes = 
-					[
+[
 						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
-					],
+],
 					Parameters = 
 					[],
 
-						Class = 						global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Library.Bugs._1899.BaseClass<>", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
+						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Library.Bugs._1899.BaseClass<>", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.Library.Bugs._1899.BaseClass<>),
-							Assembly = 							global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1899", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
+							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1899", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 								Name = "Tests1899",
 								Attributes = 
 								[],

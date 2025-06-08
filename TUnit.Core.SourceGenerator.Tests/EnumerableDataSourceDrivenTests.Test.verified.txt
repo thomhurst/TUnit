@@ -30,22 +30,22 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
 				Name = "DataSource_Method",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "value",
 						Attributes = 
 						[],
@@ -53,12 +53,12 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "EnumerableDataSourceDrivenTests",
 							Attributes = 
 							[],
@@ -67,9 +67,9 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Name = "EnumerableDataSourceDrivenTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -92,7 +92,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 								classInstanceArguments = [];
 
 								var methodData = methodDataAccessor;
-								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 								new global::TUnit.TestProject.EnumerableDataSourceDrivenTests()								, sessionId, testBuilderContext);
+								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => new global::TUnit.TestProject.EnumerableDataSourceDrivenTests(), sessionId, testBuilderContext);
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -170,22 +170,22 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
 				Name = "DataSource_Method2",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-					{
+{
 						Name = "value",
 						Attributes = 
 						[],
@@ -193,12 +193,12 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "EnumerableDataSourceDrivenTests",
 							Attributes = 
 							[],
@@ -207,9 +207,9 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Name = "EnumerableDataSourceDrivenTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -232,7 +232,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 								classInstanceArguments = [];
 
 								var methodData = methodDataAccessor;
-								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 								new global::TUnit.TestProject.EnumerableDataSourceDrivenTests()								, sessionId, testBuilderContext);
+								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => new global::TUnit.TestProject.EnumerableDataSourceDrivenTests(), sessionId, testBuilderContext);
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
 
@@ -310,22 +310,22 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = 			new global::TUnit.Core.SourceGeneratedMethodInformation
-			{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+{
 				Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
 				Name = "DataSource_WithBaseReturn",
 				GenericTypeCount = 0,
 				ReturnType = typeof(void),
 				Attributes = 
-				[
-					new global::TUnit.Core.TestAttribute()					,
+[
+					new global::TUnit.Core.TestAttribute(),
 
 					new global::TUnit.Core.MethodDataSourceAttribute("MethodWithBaseReturn")
-				],
+],
 				Parameters = 
-				[
+[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue>
-					{
+{
 						Name = "value",
 						Attributes = 
 						[],
@@ -333,12 +333,12 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 							ReflectionInfo = null!,
 						},
 					],
-					Class = 					global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-					{
+					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
-						Assembly = 						global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
+						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("EnumerableDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
 							Name = "EnumerableDataSourceDrivenTests",
 							Attributes = 
 							[],
@@ -347,9 +347,9 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 							Name = "EnumerableDataSourceDrivenTests",
 							Namespace = "TUnit.TestProject",
 							Attributes = 
-							[
+[
 								new EngineTest(Pass)
-							],
+],
 							Parameters = 
 							[],
 
@@ -372,7 +372,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 								classInstanceArguments = [];
 
 								var methodData = methodDataAccessor();
-								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => 								new global::TUnit.TestProject.EnumerableDataSourceDrivenTests()								, sessionId, testBuilderContext);
+								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>(() => new global::TUnit.TestProject.EnumerableDataSourceDrivenTests(), sessionId, testBuilderContext);
 								var resettableClassFactory = resettableClassFactoryDelegate();
 
 
