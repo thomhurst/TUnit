@@ -117,7 +117,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				}
-				).ElementAtOrDefault(0)?.Invoke();
+				).ElementAtOrDefault(0)?.Invoke(),
 			};
 
 

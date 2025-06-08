@@ -105,7 +105,7 @@ public record DataSourceGeneratorContainer(
 
             sourceCodeWriter.Write($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
 
-            sourceCodeWriter.Write(GetPropertyAssignmentFromDataSourceGeneratorAttribute(attr.Name, Context, Property, sourceCodeWriter.TabLevel));
+            sourceCodeWriter.Write(GetPropertyAssignmentFromDataSourceGeneratorAttribute(attr.Name, Context, Property, sourceCodeWriter.TabLevel, false));
             sourceCodeWriter.WriteLine();
             return;
         }
@@ -151,14 +151,21 @@ public record DataSourceGeneratorContainer(
         }
     }
 
-    public static string GetPropertyAssignmentFromDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, IPropertySymbol property, int indentLevel)
+    public static string GetPropertyAssignmentFromDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, IPropertySymbol property, int indentLevel, bool isNested)
     {
         var sourceCodeWriter = new SourceCodeWriter(indentLevel);
 
         sourceCodeWriter.Write($"{attributeVariableName}.GenerateDataSources(");
         WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, property);
         sourceCodeWriter.Write(").ElementAtOrDefault(0)?.Invoke()");
-        sourceCodeWriter.Write(";");
+        if (isNested)
+        {
+            sourceCodeWriter.Write(",");
+        }
+        else
+        {
+            sourceCodeWriter.Write(";");
+        }
         sourceCodeWriter.WriteLine();
 
         return sourceCodeWriter.ToString();

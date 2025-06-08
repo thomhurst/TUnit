@@ -54,7 +54,10 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "Tests1889",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DerivedTest",
 					Namespace = "TUnit.TestProject.Bugs._1889",
@@ -145,7 +148,10 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "Tests1889",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DerivedTest",
 					Namespace = "TUnit.TestProject.Bugs._1889",
@@ -267,7 +273,10 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "Tests1889",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DerivedTest",
 					Namespace = "TUnit.TestProject.Bugs._1889",
@@ -360,7 +369,10 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1889", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "Tests1889",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "DerivedTest",
 					Namespace = "TUnit.TestProject.Bugs._1889",

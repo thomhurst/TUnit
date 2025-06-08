@@ -34,7 +34,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
 			{
 				Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2),
-				Name = "DataSource_Class3",
+				Name = "DataSource_Class",
 				GenericTypeCount = 0,
 				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				Attributes = 
@@ -57,7 +57,10 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "TestsBase`1",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "NestedClassDataSourceDrivenTests2",
 					Namespace = "TUnit.TestProject",
@@ -114,7 +117,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 					TestClassInstance = classInstance,
 					ClassInstanceArguments = classInstanceArguments,
 				}
-				).ElementAtOrDefault(0)?.Invoke();
+				).ElementAtOrDefault(0)?.Invoke(),
 			};
 
 
@@ -134,7 +137,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 				{
-					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class3(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):0",
+					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArgGeneratedData],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -143,7 +146,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class3(methodArgGeneratedData)),
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class(methodArgGeneratedData)),
 					TestFilePath = @"",
 					TestLineNumber = 10,
 					TestMethod = testInformation,
@@ -158,9 +161,9 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 			{
-				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class3(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):0",
-				MethodName = $"DataSource_Class3",
-				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests2.DataSource_Class3 failed to initialize", exception),
+				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):0",
+				MethodName = $"DataSource_Class",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests2.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",
 				TestLineNumber = 10,
 			});

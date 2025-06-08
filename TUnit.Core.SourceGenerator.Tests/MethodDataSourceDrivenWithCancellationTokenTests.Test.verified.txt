@@ -83,7 +83,10 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -196,7 +199,10 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -309,7 +315,10 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -426,7 +435,10 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -543,7 +555,10 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
@@ -660,7 +675,10 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
 					Namespace = "TUnit.TestProject",
