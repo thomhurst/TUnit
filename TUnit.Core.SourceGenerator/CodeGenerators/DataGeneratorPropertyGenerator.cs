@@ -30,29 +30,27 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             return [];
         }
 
-        return CollectClass(classSymbol);
+        return CollectClass(classSymbol, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
     }
 
-    private static IEnumerable<INamedTypeSymbol> CollectClass(INamedTypeSymbol namedTypeSymbol)
+    private static IEnumerable<INamedTypeSymbol> CollectClass(INamedTypeSymbol namedTypeSymbol, HashSet<ITypeSymbol> hashSet)
     {
         if (namedTypeSymbol.IsGenericDefinition())
         {
             yield break;
         }
 
-        var hashset = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-
         var nestedTypes = namedTypeSymbol
             .GetMembersIncludingBase()
             .OfType<IPropertySymbol>()
             .Select(x => x.Type)
             .OfType<INamedTypeSymbol>()
-            .Where(x => IsOrHasEvent(x, hashset))
+            .Where(x => IsOrHasEvent(x, hashSet))
             .ToArray();
 
         foreach (var nestedType in nestedTypes)
         {
-            foreach (var typeSymbol in CollectClass(nestedType))
+            foreach (var typeSymbol in CollectClass(nestedType, hashSet))
             {
                 yield return typeSymbol;
             }
@@ -66,13 +64,13 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
 
     private static bool IsOrHasEvent(INamedTypeSymbol propertyType, HashSet<ITypeSymbol> visitedTypes)
     {
-        if (propertyType.IsGenericDefinition() || !visitedTypes.Add(propertyType))
+        if (propertyType.SpecialType is not SpecialType.None
+            and not SpecialType.System_IDisposable)
         {
             return false;
         }
 
-        if (propertyType.SpecialType is not SpecialType.None
-            and not SpecialType.System_IDisposable)
+        if (propertyType.IsGenericDefinition() || !visitedTypes.Add(propertyType))
         {
             return false;
         }
@@ -119,7 +117,7 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             sourceBuilder.Write("public static void InitializeProperties()");
             sourceBuilder.Write("{");
 
-            RegisterProperty(type, sourceBuilder);
+            RegisterProperty(type, sourceBuilder, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
 
             sourceBuilder.Write("}");
             sourceBuilder.Write("}");
@@ -142,20 +140,23 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
         }
     }
 
-    private static void RegisterProperty(INamedTypeSymbol type, SourceCodeWriter sourceBuilder)
+    private static void RegisterProperty(INamedTypeSymbol type, SourceCodeWriter sourceBuilder, HashSet<ITypeSymbol> visitedTypes)
     {
-        sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
+        if (!visitedTypes.Add(type))
+        {
+            return;
+        }
 
-        var hashSet = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+        sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
 
         foreach (var propertySymbol in type
                      .GetMembersIncludingBase()
                      .OfType<IPropertySymbol>()
                      .Select(x => x.Type)
                      .OfType<INamedTypeSymbol>()
-                     .Where(x => IsOrHasEvent(x, hashSet)))
+                     .Where(x => IsOrHasEvent(x, visitedTypes)))
         {
-                RegisterProperty(propertySymbol, sourceBuilder);
+                RegisterProperty(propertySymbol, sourceBuilder, visitedTypes);
         }
     }
 }
