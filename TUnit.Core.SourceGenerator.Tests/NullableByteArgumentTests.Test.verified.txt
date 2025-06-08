@@ -17,7 +17,6 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new NullableByteArgumentTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -26,7 +25,6 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 			..Tests1(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -54,190 +52,174 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					{
 						Name = "someByte",
 						Attributes = [],
-							ReflectionInfo = null!,
-						},
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "NullableByteArgumentTests",
+						Attributes = [],
+					}),
+					Name = "NullableByteArgumentTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
 					],
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			byte? methodArg = (byte)1;
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test(methodArg)),
+				TestFilePath = @"",
+				TestLineNumber = 8,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
+				MethodName = $"Test",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 8,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
+				Name = "Test",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.ArgumentsAttribute((byte)1),
+
+					new global::TUnit.Core.ArgumentsAttribute(null)
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "NullableByteArgumentTests",
-							Attributes = [],
-							}),
-							Name = "NullableByteArgumentTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new EngineTest(Pass)
-							],
-							Parameters = [],
-
-								Properties = [],
-
-								}),
-							}
-
-							;
-
-
-							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-							global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
-							object?[]? classInstanceArguments = null;
-							classInstanceArguments = [];
-
-							byte? methodArg = (byte)1;
-
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
-							var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-							nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
-							{
-								TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
-								TestClassArguments = [],
-								TestMethodArguments = [methodArg],
-								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-								{
-								},
-								CurrentRepeatAttempt = 0,
-								RepeatLimit = 0,
-								ResettableClassFactory = resettableClassFactory,
-								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test(methodArg)),
-								TestFilePath = @"",
-								TestLineNumber = 8,
-								TestMethod = testInformation,
-								TestBuilderContext = testBuilderContext,
-							});
-							resettableClassFactory = resettableClassFactoryDelegate();
-							testBuilderContext = new();
-							testBuilderContextAccessor.Current = testBuilderContext;
-						}
-
-						catch (global::System.Exception exception)
-						{
-							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
-							{
-								TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
-								MethodName = $"Test",
-								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
-								TestFilePath = @"",
-								TestLineNumber = 8,
-							});
-						}
-
-						return nodes;
-					}
-
-					private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+						Name = "someByte",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						global::System.Collections.Generic.List<TestMetadata> nodes = [];
-						var classDataIndex = 0;
-						var testMethodDataIndex = 0;
-						try
-						{
-							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
-								Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-								Name = "Test",
-								GenericTypeCount = 0,
-								ReturnType = typeof(void),
-								Attributes = 
-								[
-									new global::TUnit.Core.TestAttribute(),
-
-									new global::TUnit.Core.ArgumentsAttribute((byte)1),
-
-									new global::TUnit.Core.ArgumentsAttribute(null)
-								],
-								Parameters = 
-								[
-									new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
-									{
-										Name = "someByte",
-										Attributes = [],
-											ReflectionInfo = null!,
-										},
-									],
-									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
-										Parent = null,
-										Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
-											Name = "NullableByteArgumentTests",
-											Attributes = [],
-											}),
-											Name = "NullableByteArgumentTests",
-											Namespace = "TUnit.TestProject",
-											Attributes = 
-											[
-												new EngineTest(Pass)
-											],
-											Parameters = [],
-
-												Properties = [],
-
-												}),
-											}
-
-											;
+						Name = "NullableByteArgumentTests",
+						Attributes = [],
+					}),
+					Name = "NullableByteArgumentTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-											global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
-											object?[]? classInstanceArguments = null;
-											classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-											byte? methodArg = null;
+			byte? methodArg = null;
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
-											var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-											nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
-											{
-												TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
-												TestClassArguments = [],
-												TestMethodArguments = [methodArg],
-												TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-												{
-												},
-												CurrentRepeatAttempt = 0,
-												RepeatLimit = 0,
-												ResettableClassFactory = resettableClassFactory,
-												TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test(methodArg)),
-												TestFilePath = @"",
-												TestLineNumber = 8,
-												TestMethod = testInformation,
-												TestBuilderContext = testBuilderContext,
-											});
-											resettableClassFactory = resettableClassFactoryDelegate();
-											testBuilderContext = new();
-											testBuilderContextAccessor.Current = testBuilderContext;
-										}
-
-										catch (global::System.Exception exception)
-										{
-											nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
-											{
-												TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
-												MethodName = $"Test",
-												Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
-												TestFilePath = @"",
-												TestLineNumber = 8,
-											});
-										}
-
-										return nodes;
-									}
-
-								}
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test(methodArg)),
+				TestFilePath = @"",
+				TestLineNumber = 8,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test(byte?):0",
+				MethodName = $"Test",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 8,
+			});
+		}
+		return nodes;
+	}
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -257,7 +239,6 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new NullableByteArgumentTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -266,7 +247,6 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 			..Tests1(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -294,202 +274,186 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 					{
 						Name = "byte1",
 						Attributes = [],
-							ReflectionInfo = null!,
-						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
-						{
-							Name = "byte2",
-							Attributes = [],
-								ReflectionInfo = null!,
-							},
-						],
-						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
-							Parent = null,
-							Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
-								Name = "NullableByteArgumentTests",
-								Attributes = [],
-								}),
-								Name = "NullableByteArgumentTests",
-								Namespace = "TUnit.TestProject",
-								Attributes = 
-								[
-									new EngineTest(Pass)
-								],
-								Parameters = [],
-
-									Properties = [],
-
-									}),
-								}
-
-								;
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
+					{
+						Name = "byte2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "NullableByteArgumentTests",
+						Attributes = [],
+					}),
+					Name = "NullableByteArgumentTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-								global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
-								object?[]? classInstanceArguments = null;
-								classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-								byte methodArg = (byte)1;
-								byte? methodArg1 = (byte)1;
+			byte methodArg = (byte)1;
+			byte? methodArg1 = (byte)1;
 
-								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
-								var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-								nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
-								{
-									TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
-									TestClassArguments = [],
-									TestMethodArguments = [methodArg, methodArg1],
-									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-									{
-									},
-									CurrentRepeatAttempt = 0,
-									RepeatLimit = 0,
-									ResettableClassFactory = resettableClassFactory,
-									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg, methodArg1)),
-									TestFilePath = @"",
-									TestLineNumber = 15,
-									TestMethod = testInformation,
-									TestBuilderContext = testBuilderContext,
-								});
-								resettableClassFactory = resettableClassFactoryDelegate();
-								testBuilderContext = new();
-								testBuilderContextAccessor.Current = testBuilderContext;
-							}
-
-							catch (global::System.Exception exception)
-							{
-								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
-								{
-									TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
-									MethodName = $"Test2",
-									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
-									TestFilePath = @"",
-									TestLineNumber = 15,
-								});
-							}
-
-							return nodes;
-						}
-
-						private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
-						{
-							global::System.Collections.Generic.List<TestMetadata> nodes = [];
-							var classDataIndex = 0;
-							var testMethodDataIndex = 0;
-							try
-							{
-								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-								{
-									Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-									Name = "Test2",
-									GenericTypeCount = 0,
-									ReturnType = typeof(void),
-									Attributes = 
-									[
-										new global::TUnit.Core.TestAttribute(),
-
-										new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1),
-
-										new global::TUnit.Core.ArgumentsAttribute((byte)1, null)
-									],
-									Parameters = 
-									[
-										new global::TUnit.Core.SourceGeneratedParameterInformation<byte>
-										{
-											Name = "byte1",
-											Attributes = [],
-												ReflectionInfo = null!,
-											},
-											new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
-											{
-												Name = "byte2",
-												Attributes = [],
-													ReflectionInfo = null!,
-												},
-											],
-											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-											{
-												Parent = null,
-												Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-												{
-													Name = "NullableByteArgumentTests",
-													Attributes = [],
-													}),
-													Name = "NullableByteArgumentTests",
-													Namespace = "TUnit.TestProject",
-													Attributes = 
-													[
-														new EngineTest(Pass)
-													],
-													Parameters = [],
-
-														Properties = [],
-
-														}),
-													}
-
-													;
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-													var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-													var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-													global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
-													object?[]? classInstanceArguments = null;
-													classInstanceArguments = [];
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg, methodArg1],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg, methodArg1)),
+				TestFilePath = @"",
+				TestLineNumber = 15,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
+				MethodName = $"Test2",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 15,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
+				Name = "Test2",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
 
-													byte methodArg = (byte)1;
-													byte? methodArg1 = (byte?)(null);
+					new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1),
 
-													var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
-													var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-													nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
-													{
-														TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
-														TestClassArguments = [],
-														TestMethodArguments = [methodArg, methodArg1],
-														TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-														{
-														},
-														CurrentRepeatAttempt = 0,
-														RepeatLimit = 0,
-														ResettableClassFactory = resettableClassFactory,
-														TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg, methodArg1)),
-														TestFilePath = @"",
-														TestLineNumber = 15,
-														TestMethod = testInformation,
-														TestBuilderContext = testBuilderContext,
-													});
-													resettableClassFactory = resettableClassFactoryDelegate();
-													testBuilderContext = new();
-													testBuilderContextAccessor.Current = testBuilderContext;
-												}
-
-												catch (global::System.Exception exception)
-												{
-													nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
-													{
-														TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
-														MethodName = $"Test2",
-														Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
-														TestFilePath = @"",
-														TestLineNumber = 15,
-													});
-												}
-
-												return nodes;
-											}
-
-										}
+					new global::TUnit.Core.ArgumentsAttribute((byte)1, null)
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<byte>
+					{
+						Name = "byte1",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<byte?>
+					{
+						Name = "byte2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("NullableByteArgumentTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "NullableByteArgumentTests",
+						Attributes = [],
+					}),
+					Name = "NullableByteArgumentTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.NullableByteArgumentTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			byte methodArg = (byte)1;
+			byte? methodArg1 = (byte?)(null);
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => new global::TUnit.TestProject.NullableByteArgumentTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg, methodArg1],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg, methodArg1)),
+				TestFilePath = @"",
+				TestLineNumber = 15,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NullableByteArgumentTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test2(byte,byte?):0",
+				MethodName = $"Test2",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NullableByteArgumentTests.Test2 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 15,
+			});
+		}
+		return nodes;
+	}
+}
 ]

@@ -17,7 +17,6 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenWithCancellationTokenTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -30,7 +29,6 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			..Tests5(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -66,706 +64,658 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					{
 						Name = "value",
 						Attributes = [],
-							ReflectionInfo = null!,
-						},
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-						{
-							Name = "cancellationToken",
-							Attributes = [],
-								ReflectionInfo = null!,
-							},
-						],
-						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
-							Parent = null,
-							Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
-								Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-								Attributes = [],
-								}),
-								Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-								Namespace = "TUnit.TestProject",
-								Attributes = 
-								[
-									new EngineTest(Pass),
-
-									new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-								],
-								Parameters = [],
-
-									Properties = [],
-
-									}),
-								}
-
-								;
-
-
-								var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-								var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-								global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
-								object?[]? classInstanceArguments = null;
-								classInstanceArguments = [];
-
-								int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T();
-								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
-								var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-								nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-								{
-									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-									TestClassArguments = [],
-									TestMethodArguments = [methodArg],
-									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-									{
-									},
-									CurrentRepeatAttempt = 0,
-									RepeatLimit = 0,
-									ResettableClassFactory = resettableClassFactory,
-									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodArg, cancellationToken)),
-									TestFilePath = @"",
-									TestLineNumber = 12,
-									TestMethod = testInformation,
-									TestBuilderContext = testBuilderContext,
-								});
-								resettableClassFactory = resettableClassFactoryDelegate();
-								testBuilderContext = new();
-								testBuilderContextAccessor.Current = testBuilderContext;
-							}
-
-							catch (global::System.Exception exception)
-							{
-								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-								{
-									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-									MethodName = $"MyTest",
-									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
-									TestFilePath = @"",
-									TestLineNumber = 12,
-								});
-							}
-
-							return nodes;
-						}
-
-						private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
-						{
-							global::System.Collections.Generic.List<TestMetadata> nodes = [];
-							var classDataIndex = 0;
-							var testMethodDataIndex = 0;
-							try
-							{
-								var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-								{
-									Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-									Name = "MyTest",
-									GenericTypeCount = 0,
-									ReturnType = typeof(void),
-									Attributes = 
-									[
-										new global::TUnit.Core.TestAttribute(),
-
-										new global::TUnit.Core.MethodDataSourceAttribute("T"),
-
-										new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
-
-										new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
-
-										new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
-
-										new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
-
-										new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-									],
-									Parameters = 
-									[
-										new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-										{
-											Name = "value",
-											Attributes = [],
-												ReflectionInfo = null!,
-											},
-											new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-											{
-												Name = "cancellationToken",
-												Attributes = [],
-													ReflectionInfo = null!,
-												},
-											],
-											Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-											{
-												Parent = null,
-												Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-												Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-												{
-													Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-													Attributes = [],
-													}),
-													Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-													Namespace = "TUnit.TestProject",
-													Attributes = 
-													[
-														new EngineTest(Pass),
-
-														new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-													],
-													Parameters = [],
-
-														Properties = [],
-
-														}),
-													}
-
-													;
-
-
-													var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-													var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-													global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
-													object?[]? classInstanceArguments = null;
-													classInstanceArguments = [];
-
-													int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()();
-													var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
-													var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-													nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-													{
-														TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-														TestClassArguments = [],
-														TestMethodArguments = [methodArg],
-														TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-														{
-														},
-														CurrentRepeatAttempt = 0,
-														RepeatLimit = 0,
-														ResettableClassFactory = resettableClassFactory,
-														TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodArg, cancellationToken)),
-														TestFilePath = @"",
-														TestLineNumber = 12,
-														TestMethod = testInformation,
-														TestBuilderContext = testBuilderContext,
-													});
-													resettableClassFactory = resettableClassFactoryDelegate();
-													testBuilderContext = new();
-													testBuilderContextAccessor.Current = testBuilderContext;
-												}
-
-												catch (global::System.Exception exception)
-												{
-													nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-													{
-														TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-														MethodName = $"MyTest",
-														Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
-														TestFilePath = @"",
-														TestLineNumber = 12,
-													});
-												}
-
-												return nodes;
-											}
-
-											private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
-											{
-												global::System.Collections.Generic.List<TestMetadata> nodes = [];
-												var classDataIndex = 0;
-												var testMethodDataIndex = 0;
-												try
-												{
-													var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-													{
-														Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-														Name = "MyTest",
-														GenericTypeCount = 0,
-														ReturnType = typeof(void),
-														Attributes = 
-														[
-															new global::TUnit.Core.TestAttribute(),
-
-															new global::TUnit.Core.MethodDataSourceAttribute("T"),
-
-															new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
-
-															new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
-
-															new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
-
-															new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
-
-															new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-														],
-														Parameters = 
-														[
-															new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-															{
-																Name = "value",
-																Attributes = [],
-																	ReflectionInfo = null!,
-																},
-																new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-																{
-																	Name = "cancellationToken",
-																	Attributes = [],
-																		ReflectionInfo = null!,
-																	},
-																],
-																Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																{
-																	Parent = null,
-																	Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-																	Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																	{
-																		Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-																		Attributes = [],
-																		}),
-																		Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-																		Namespace = "TUnit.TestProject",
-																		Attributes = 
-																		[
-																			new EngineTest(Pass),
-
-																			new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-																		],
-																		Parameters = [],
-
-																			Properties = [],
-
-																			}),
-																		}
-
-																		;
-
-
-																		var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-																		var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-																		global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
-																		object?[]? classInstanceArguments = null;
-																		foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT())
-																		{
-																			testMethodDataIndex++;
-																			classInstanceArguments = [];
-
-																			var methodData = methodDataAccessor;
-																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
-																			var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-																			nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-																			{
-																				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-																				TestClassArguments = [],
-																				TestMethodArguments = [methodData],
-																				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																				{
-																				},
-																				CurrentRepeatAttempt = 0,
-																				RepeatLimit = 0,
-																				ResettableClassFactory = resettableClassFactory,
-																				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
-																				TestFilePath = @"",
-																				TestLineNumber = 12,
-																				TestMethod = testInformation,
-																				TestBuilderContext = testBuilderContext,
-																			});
-																			resettableClassFactory = resettableClassFactoryDelegate();
-																			testBuilderContext = new();
-																			testBuilderContextAccessor.Current = testBuilderContext;
-																		}
-
-																	}
-
-																	catch (global::System.Exception exception)
-																	{
-																		nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-																		{
-																			TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-																			MethodName = $"MyTest",
-																			Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
-																			TestFilePath = @"",
-																			TestLineNumber = 12,
-																		});
-																	}
-
-																	return nodes;
-																}
-
-																private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
-																{
-																	global::System.Collections.Generic.List<TestMetadata> nodes = [];
-																	var classDataIndex = 0;
-																	var testMethodDataIndex = 0;
-																	try
-																	{
-																		var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																		{
-																			Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-																			Name = "MyTest",
-																			GenericTypeCount = 0,
-																			ReturnType = typeof(void),
-																			Attributes = 
-																			[
-																				new global::TUnit.Core.TestAttribute(),
-
-																				new global::TUnit.Core.MethodDataSourceAttribute("T"),
-
-																				new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
-
-																				new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
-
-																				new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
-
-																				new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
-
-																				new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-																			],
-																			Parameters = 
-																			[
-																				new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																				{
-																					Name = "value",
-																					Attributes = [],
-																						ReflectionInfo = null!,
-																					},
-																					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-																					{
-																						Name = "cancellationToken",
-																						Attributes = [],
-																							ReflectionInfo = null!,
-																						},
-																					],
-																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																					{
-																						Parent = null,
-																						Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																						{
-																							Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-																							Attributes = [],
-																							}),
-																							Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-																							Namespace = "TUnit.TestProject",
-																							Attributes = 
-																							[
-																								new EngineTest(Pass),
-
-																								new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-																							],
-																							Parameters = [],
-
-																								Properties = [],
-
-																								}),
-																							}
-
-																							;
-
-
-																							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-																							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-																							global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
-																							object?[]? classInstanceArguments = null;
-																							foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT())
-																							{
-																								testMethodDataIndex++;
-																								classInstanceArguments = [];
-
-																								var methodData = methodDataAccessor();
-																								var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
-																								var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-																								nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-																								{
-																									TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-																									TestClassArguments = [],
-																									TestMethodArguments = [methodData],
-																									TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																									{
-																									},
-																									CurrentRepeatAttempt = 0,
-																									RepeatLimit = 0,
-																									ResettableClassFactory = resettableClassFactory,
-																									TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
-																									TestFilePath = @"",
-																									TestLineNumber = 12,
-																									TestMethod = testInformation,
-																									TestBuilderContext = testBuilderContext,
-																								});
-																								resettableClassFactory = resettableClassFactoryDelegate();
-																								testBuilderContext = new();
-																								testBuilderContextAccessor.Current = testBuilderContext;
-																							}
-
-																						}
-
-																						catch (global::System.Exception exception)
-																						{
-																							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-																							{
-																								TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-																								MethodName = $"MyTest",
-																								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
-																								TestFilePath = @"",
-																								TestLineNumber = 12,
-																							});
-																						}
-
-																						return nodes;
-																					}
-
-																					private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
-																					{
-																						global::System.Collections.Generic.List<TestMetadata> nodes = [];
-																						var classDataIndex = 0;
-																						var testMethodDataIndex = 0;
-																						try
-																						{
-																							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																							{
-																								Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-																								Name = "MyTest",
-																								GenericTypeCount = 0,
-																								ReturnType = typeof(void),
-																								Attributes = 
-																								[
-																									new global::TUnit.Core.TestAttribute(),
-
-																									new global::TUnit.Core.MethodDataSourceAttribute("T"),
-
-																									new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
-
-																									new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
-
-																									new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
-
-																									new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
-
-																									new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-																								],
-																								Parameters = 
-																								[
-																									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																									{
-																										Name = "value",
-																										Attributes = [],
-																											ReflectionInfo = null!,
-																										},
-																										new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-																										{
-																											Name = "cancellationToken",
-																											Attributes = [],
-																												ReflectionInfo = null!,
-																											},
-																										],
-																										Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																										{
-																											Parent = null,
-																											Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-																											Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																											{
-																												Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-																												Attributes = [],
-																												}),
-																												Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-																												Namespace = "TUnit.TestProject",
-																												Attributes = 
-																												[
-																													new EngineTest(Pass),
-
-																													new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-																												],
-																												Parameters = [],
-
-																													Properties = [],
-
-																													}),
-																												}
-
-																												;
-
-
-																												var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-																												var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-																												global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
-																												object?[]? classInstanceArguments = null;
-																												foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT())
-																												{
-																													testMethodDataIndex++;
-																													classInstanceArguments = [];
-
-																													var methodData = methodDataAccessor;
-																													var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
-																													var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-																													nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-																													{
-																														TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-																														TestClassArguments = [],
-																														TestMethodArguments = [methodData],
-																														TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																														{
-																														},
-																														CurrentRepeatAttempt = 0,
-																														RepeatLimit = 0,
-																														ResettableClassFactory = resettableClassFactory,
-																														TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
-																														TestFilePath = @"",
-																														TestLineNumber = 12,
-																														TestMethod = testInformation,
-																														TestBuilderContext = testBuilderContext,
-																													});
-																													resettableClassFactory = resettableClassFactoryDelegate();
-																													testBuilderContext = new();
-																													testBuilderContextAccessor.Current = testBuilderContext;
-																												}
-
-																											}
-
-																											catch (global::System.Exception exception)
-																											{
-																												nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-																												{
-																													TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-																													MethodName = $"MyTest",
-																													Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
-																													TestFilePath = @"",
-																													TestLineNumber = 12,
-																												});
-																											}
-
-																											return nodes;
-																										}
-
-																										private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
-																										{
-																											global::System.Collections.Generic.List<TestMetadata> nodes = [];
-																											var classDataIndex = 0;
-																											var testMethodDataIndex = 0;
-																											try
-																											{
-																												var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																												{
-																													Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-																													Name = "MyTest",
-																													GenericTypeCount = 0,
-																													ReturnType = typeof(void),
-																													Attributes = 
-																													[
-																														new global::TUnit.Core.TestAttribute(),
-
-																														new global::TUnit.Core.MethodDataSourceAttribute("T"),
-
-																														new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
-
-																														new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
-
-																														new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
-
-																														new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
-
-																														new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-																													],
-																													Parameters = 
-																													[
-																														new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																														{
-																															Name = "value",
-																															Attributes = [],
-																																ReflectionInfo = null!,
-																															},
-																															new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-																															{
-																																Name = "cancellationToken",
-																																Attributes = [],
-																																	ReflectionInfo = null!,
-																																},
-																															],
-																															Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																															{
-																																Parent = null,
-																																Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-																																Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																																{
-																																	Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-																																	Attributes = [],
-																																	}),
-																																	Name = "MethodDataSourceDrivenWithCancellationTokenTests",
-																																	Namespace = "TUnit.TestProject",
-																																	Attributes = 
-																																	[
-																																		new EngineTest(Pass),
-
-																																		new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-																																	],
-																																	Parameters = [],
-
-																																		Properties = [],
-
-																																		}),
-																																	}
-
-																																	;
-
-
-																																	var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-																																	var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-																																	global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
-																																	object?[]? classInstanceArguments = null;
-																																	foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT())
-																																	{
-																																		testMethodDataIndex++;
-																																		classInstanceArguments = [];
-
-																																		var methodData = methodDataAccessor();
-																																		var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
-																																		var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-																																		nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-																																		{
-																																			TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-																																			TestClassArguments = [],
-																																			TestMethodArguments = [methodData],
-																																			TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																																			{
-																																			},
-																																			CurrentRepeatAttempt = 0,
-																																			RepeatLimit = 0,
-																																			ResettableClassFactory = resettableClassFactory,
-																																			TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
-																																			TestFilePath = @"",
-																																			TestLineNumber = 12,
-																																			TestMethod = testInformation,
-																																			TestBuilderContext = testBuilderContext,
-																																		});
-																																		resettableClassFactory = resettableClassFactoryDelegate();
-																																		testBuilderContext = new();
-																																		testBuilderContextAccessor.Current = testBuilderContext;
-																																	}
-
-																																}
-
-																																catch (global::System.Exception exception)
-																																{
-																																	nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-																																	{
-																																		TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
-																																		MethodName = $"MyTest",
-																																		Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
-																																		TestFilePath = @"",
-																																		TestLineNumber = 12,
-																																	});
-																																}
-
-																																return nodes;
-																															}
-
-																														}
-
-
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					{
+						Name = "cancellationToken",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+						Attributes = [],
+					}),
+					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
+
+						new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T();
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodArg, cancellationToken)),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+				MethodName = $"MyTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+				Name = "MyTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("T"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					{
+						Name = "cancellationToken",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+						Attributes = [],
+					}),
+					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
+
+						new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			int methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()();
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodArg, cancellationToken)),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+				MethodName = $"MyTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+				Name = "MyTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("T"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					{
+						Name = "cancellationToken",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+						Attributes = [],
+					}),
+					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
+
+						new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT())
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
+
+				var methodData = methodDataAccessor;
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodData],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
+					TestFilePath = @"",
+					TestLineNumber = 12,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+				MethodName = $"MyTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+				Name = "MyTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("T"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					{
+						Name = "cancellationToken",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+						Attributes = [],
+					}),
+					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
+
+						new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT())
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
+
+				var methodData = methodDataAccessor();
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodData],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
+					TestFilePath = @"",
+					TestLineNumber = 12,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+				MethodName = $"MyTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+				Name = "MyTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("T"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					{
+						Name = "cancellationToken",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+						Attributes = [],
+					}),
+					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
+
+						new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT())
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
+
+				var methodData = methodDataAccessor;
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodData],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
+					TestFilePath = @"",
+					TestLineNumber = 12,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+				MethodName = $"MyTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+				Name = "MyTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("T"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+					{
+						Name = "cancellationToken",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MethodDataSourceDrivenWithCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+						Attributes = [],
+					}),
+					Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
+
+						new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT())
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
+
+				var methodData = methodDataAccessor();
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(() => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodData],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
+					TestFilePath = @"",
+					TestLineNumber = 12,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
+				MethodName = $"MyTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MethodDataSourceDrivenWithCancellationTokenTests.MyTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+}
 ]

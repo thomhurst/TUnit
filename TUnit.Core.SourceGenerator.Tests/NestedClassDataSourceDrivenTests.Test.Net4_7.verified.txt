@@ -17,12 +17,10 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new NestedClassDataSourceDrivenTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -46,120 +44,108 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					{
 						Name = "value",
 						Attributes = [],
-							ReflectionInfo = null!,
-						},
-					],
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "TestsBase`1",
-							Attributes = [],
-							}),
-							Name = "NestedClassDataSourceDrivenTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new EngineTest(Pass)
-							],
-							Parameters = [],
-
-								Properties = [],
-
-								}),
-							}
-
-							;
+						Name = "TestsBase`1",
+						Attributes = [],
+					}),
+					Name = "NestedClassDataSourceDrivenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-							global::TUnit.TestProject.NestedClassDataSourceDrivenTests? classInstance = null;
-							object?[]? classInstanceArguments = null;
-							var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-							{
-								Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-								TestBuilderContext = testBuilderContextAccessor,
-								TestInformation = testInformation,
-								MembersToGenerate = 
-								[
-									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-									{
-										Name = "value",
-										Attributes = [],
-											ReflectionInfo = null!,
-										},
-									],
-									TestSessionId = sessionId,
-									TestClassInstance = classInstance,
-									ClassInstanceArguments = classInstanceArguments,
-								};
-								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
-								{
-									Shared = global::TUnit.Core.SharedType.PerClass,
-								}
-
-;
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.NestedClassDataSourceDrivenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerClass,
+			};
 
 
-								testBuilderContext.DataAttributes.Add(methodDataAttribute);
+			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-								var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-								foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-								{
-									testMethodDataIndex++;
-									classInstanceArguments = [];
+			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
 
-									var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.NestedClassDataSourceDrivenTests(), sessionId, testBuilderContext);
-									var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-									nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
-									{
-										TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
-										TestClassArguments = [],
-										TestMethodArguments = [methodArgGeneratedData],
-										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-										{
-										},
-										CurrentRepeatAttempt = 0,
-										RepeatLimit = 0,
-										ResettableClassFactory = resettableClassFactory,
-										TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class(methodArgGeneratedData)),
-										TestFilePath = @"",
-										TestLineNumber = 11,
-										TestMethod = testInformation,
-										TestBuilderContext = testBuilderContext,
-									});
-									resettableClassFactory = resettableClassFactoryDelegate();
-									testBuilderContext = new();
-									testBuilderContextAccessor.Current = testBuilderContext;
-								}
-
-							}
-
-							catch (global::System.Exception exception)
-							{
-								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
-								{
-									TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
-									MethodName = $"DataSource_Class",
-									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests.DataSource_Class failed to initialize", exception),
-									TestFilePath = @"",
-									TestLineNumber = 11,
-								});
-							}
-
-							return nodes;
-						}
-
-					}
+				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.NestedClassDataSourceDrivenTests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
 
 
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
+				{
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArgGeneratedData],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class(methodArgGeneratedData)),
+					TestFilePath = @"",
+					TestLineNumber = 11,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
+			{
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
+				MethodName = $"DataSource_Class",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests.DataSource_Class failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 11,
+			});
+		}
+		return nodes;
+	}
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -179,12 +165,10 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new NestedClassDataSourceDrivenTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -210,120 +194,108 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					{
 						Name = "value",
 						Attributes = [],
-							ReflectionInfo = null!,
-						},
-					],
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "TestsBase`1",
-							Attributes = [],
-							}),
-							Name = "NestedClassDataSourceDrivenTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new EngineTest(Pass)
-							],
-							Parameters = [],
-
-								Properties = [],
-
-								}),
-							}
-
-							;
+						Name = "TestsBase`1",
+						Attributes = [],
+					}),
+					Name = "NestedClassDataSourceDrivenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-							global::TUnit.TestProject.NestedClassDataSourceDrivenTests? classInstance = null;
-							object?[]? classInstanceArguments = null;
-							var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-							{
-								Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-								TestBuilderContext = testBuilderContextAccessor,
-								TestInformation = testInformation,
-								MembersToGenerate = 
-								[
-									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-									{
-										Name = "value",
-										Attributes = [],
-											ReflectionInfo = null!,
-										},
-									],
-									TestSessionId = sessionId,
-									TestClassInstance = classInstance,
-									ClassInstanceArguments = classInstanceArguments,
-								};
-								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
-								{
-									Shared = global::TUnit.Core.SharedType.PerClass,
-								}
-
-;
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.NestedClassDataSourceDrivenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerClass,
+			};
 
 
-								testBuilderContext.DataAttributes.Add(methodDataAttribute);
+			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-								var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-								foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-								{
-									testMethodDataIndex++;
-									classInstanceArguments = [];
+			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
 
-									var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.NestedClassDataSourceDrivenTests(), sessionId, testBuilderContext);
-									var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-									nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
-									{
-										TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class2(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
-										TestClassArguments = [],
-										TestMethodArguments = [methodArgGeneratedData],
-										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-										{
-										},
-										CurrentRepeatAttempt = 0,
-										RepeatLimit = 0,
-										ResettableClassFactory = resettableClassFactory,
-										TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class2(methodArgGeneratedData)),
-										TestFilePath = @"",
-										TestLineNumber = 26,
-										TestMethod = testInformation,
-										TestBuilderContext = testBuilderContext,
-									});
-									resettableClassFactory = resettableClassFactoryDelegate();
-									testBuilderContext = new();
-									testBuilderContextAccessor.Current = testBuilderContext;
-								}
-
-							}
-
-							catch (global::System.Exception exception)
-							{
-								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
-								{
-									TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class2(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
-									MethodName = $"DataSource_Class2",
-									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests.DataSource_Class2 failed to initialize", exception),
-									TestFilePath = @"",
-									TestLineNumber = 26,
-								});
-							}
-
-							return nodes;
-						}
-
-					}
+				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.NestedClassDataSourceDrivenTests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
 
 
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
+				{
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class2(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArgGeneratedData],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class2(methodArgGeneratedData)),
+					TestFilePath = @"",
+					TestLineNumber = 26,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
+			{
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class2(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
+				MethodName = $"DataSource_Class2",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests.DataSource_Class2 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 26,
+			});
+		}
+		return nodes;
+	}
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -343,12 +315,10 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new NestedClassDataSourceDrivenTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -374,118 +344,106 @@ file partial class NestedClassDataSourceDrivenTests : global::TUnit.Core.Interfa
 					{
 						Name = "value",
 						Attributes = [],
-							ReflectionInfo = null!,
-						},
-					],
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.NestedClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "TestsBase`1",
-							Attributes = [],
-							}),
-							Name = "NestedClassDataSourceDrivenTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new EngineTest(Pass)
-							],
-							Parameters = [],
-
-								Properties = [],
-
-								}),
-							}
-
-							;
+						Name = "TestsBase`1",
+						Attributes = [],
+					}),
+					Name = "NestedClassDataSourceDrivenTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-							global::TUnit.TestProject.NestedClassDataSourceDrivenTests? classInstance = null;
-							object?[]? classInstanceArguments = null;
-							var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-							{
-								Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-								TestBuilderContext = testBuilderContextAccessor,
-								TestInformation = testInformation,
-								MembersToGenerate = 
-								[
-									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
-									{
-										Name = "value",
-										Attributes = [],
-											ReflectionInfo = null!,
-										},
-									],
-									TestSessionId = sessionId,
-									TestClassInstance = classInstance,
-									ClassInstanceArguments = classInstanceArguments,
-								};
-								var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
-								{
-									Shared = global::TUnit.Core.SharedType.PerClass,
-								}
-
-;
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.NestedClassDataSourceDrivenTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerClass,
+			};
 
 
-								testBuilderContext.DataAttributes.Add(methodDataAttribute);
+			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-								var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-								foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-								{
-									testMethodDataIndex++;
-									classInstanceArguments = [];
+			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
 
-									var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.NestedClassDataSourceDrivenTests(), sessionId, testBuilderContext);
-									var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-									nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
-									{
-										TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class3(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
-										TestClassArguments = [],
-										TestMethodArguments = [methodArgGeneratedData],
-										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-										{
-										},
-										CurrentRepeatAttempt = 0,
-										RepeatLimit = 0,
-										ResettableClassFactory = resettableClassFactory,
-										TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class3(methodArgGeneratedData)),
-										TestFilePath = @"",
-										TestLineNumber = 42,
-										TestMethod = testInformation,
-										TestBuilderContext = testBuilderContext,
-									});
-									resettableClassFactory = resettableClassFactoryDelegate();
-									testBuilderContext = new();
-									testBuilderContextAccessor.Current = testBuilderContext;
-								}
-
-							}
-
-							catch (global::System.Exception exception)
-							{
-								nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
-								{
-									TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class3(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
-									MethodName = $"DataSource_Class3",
-									Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests.DataSource_Class3 failed to initialize", exception),
-									TestFilePath = @"",
-									TestLineNumber = 42,
-								});
-							}
-
-							return nodes;
-						}
-
-					}
+				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.NestedClassDataSourceDrivenTests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
 
 
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
+				{
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class3(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArgGeneratedData],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class3(methodArgGeneratedData)),
+					TestFilePath = @"",
+					TestLineNumber = 42,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests>
+			{
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests.DataSource_Class3(TUnit.TestProject.NestedClassDataSourceDrivenTests.SomeClass1):0",
+				MethodName = $"DataSource_Class3",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests.DataSource_Class3 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 42,
+			});
+		}
+		return nodes;
+	}
+}
 ]

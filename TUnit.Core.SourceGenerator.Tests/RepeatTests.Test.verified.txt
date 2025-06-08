@@ -17,7 +17,6 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -26,7 +25,6 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			..Tests1(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -47,179 +45,161 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.RepeatAttribute(1)
 				],
 				Parameters = [],
-
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.RepeatTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "RepeatTests",
-							Attributes = [],
-							}),
-							Name = "RepeatTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new EngineTest(Pass),
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
 
-								new global::TUnit.Core.RepeatAttribute(3)
-							],
-							Parameters = [],
-
-								Properties = [],
-
-								}),
-							}
-
-							;
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-							global::TUnit.TestProject.RepeatTests? classInstance = null;
-							object?[]? classInstanceArguments = null;
-							classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-							var resettableClassFactory = resettableClassFactoryDelegate();
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-							nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-							{
-								TestId = $"TUnit.TestProject.RepeatTests.One:0",
-								TestClassArguments = [],
-								TestMethodArguments = [],
-								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-								{
-								},
-								CurrentRepeatAttempt = 0,
-								RepeatLimit = 1,
-								ResettableClassFactory = resettableClassFactory,
-								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.One()),
-								TestFilePath = @"",
-								TestLineNumber = 9,
-								TestMethod = testInformation,
-								TestBuilderContext = testBuilderContext,
-							});
-							resettableClassFactory = resettableClassFactoryDelegate();
-							testBuilderContext = new();
-							testBuilderContextAccessor.Current = testBuilderContext;
-						}
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.One:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 1,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.One()),
+				TestFilePath = @"",
+				TestLineNumber = 9,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.One:0",
+				MethodName = $"One",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.One failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 9,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.RepeatTests),
+				Name = "One",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
 
-						catch (global::System.Exception exception)
-						{
-							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-							{
-								TestId = $"TUnit.TestProject.RepeatTests.One:0",
-								MethodName = $"One",
-								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.One failed to initialize", exception),
-								TestFilePath = @"",
-								TestLineNumber = 9,
-							});
-						}
-
-						return nodes;
-					}
-
-					private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+					new global::TUnit.Core.RepeatAttribute(1)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						global::System.Collections.Generic.List<TestMetadata> nodes = [];
-						var classDataIndex = 0;
-						var testMethodDataIndex = 0;
-						try
-						{
-							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
-								Type = typeof(global::TUnit.TestProject.RepeatTests),
-								Name = "One",
-								GenericTypeCount = 0,
-								ReturnType = typeof(void),
-								Attributes = 
-								[
-									new global::TUnit.Core.TestAttribute(),
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
 
-									new global::TUnit.Core.RepeatAttribute(1)
-								],
-								Parameters = [],
-
-									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
-										Parent = null,
-										Type = typeof(global::TUnit.TestProject.RepeatTests),
-										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
-											Name = "RepeatTests",
-											Attributes = [],
-											}),
-											Name = "RepeatTests",
-											Namespace = "TUnit.TestProject",
-											Attributes = 
-											[
-												new EngineTest(Pass),
-
-												new global::TUnit.Core.RepeatAttribute(3)
-											],
-											Parameters = [],
-
-												Properties = [],
-
-												}),
-											}
-
-											;
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-											global::TUnit.TestProject.RepeatTests? classInstance = null;
-											object?[]? classInstanceArguments = null;
-											classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-											var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-											nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-											{
-												TestId = $"TUnit.TestProject.RepeatTests.One:1",
-												TestClassArguments = [],
-												TestMethodArguments = [],
-												TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-												{
-												},
-												CurrentRepeatAttempt = 1,
-												RepeatLimit = 1,
-												ResettableClassFactory = resettableClassFactory,
-												TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.One()),
-												TestFilePath = @"",
-												TestLineNumber = 9,
-												TestMethod = testInformation,
-												TestBuilderContext = testBuilderContext,
-											});
-											resettableClassFactory = resettableClassFactoryDelegate();
-											testBuilderContext = new();
-											testBuilderContextAccessor.Current = testBuilderContext;
-										}
-
-										catch (global::System.Exception exception)
-										{
-											nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-											{
-												TestId = $"TUnit.TestProject.RepeatTests.One:1",
-												MethodName = $"One",
-												Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.One failed to initialize", exception),
-												TestFilePath = @"",
-												TestLineNumber = 9,
-											});
-										}
-
-										return nodes;
-									}
-
-								}
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.One:1",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 1,
+				RepeatLimit = 1,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.One()),
+				TestFilePath = @"",
+				TestLineNumber = 9,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.One:1",
+				MethodName = $"One",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.One failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 9,
+			});
+		}
+		return nodes;
+	}
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -239,7 +219,6 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -249,7 +228,6 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			..Tests2(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -270,274 +248,248 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.RepeatAttribute(2)
 				],
 				Parameters = [],
-
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.RepeatTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "RepeatTests",
-							Attributes = [],
-							}),
-							Name = "RepeatTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new EngineTest(Pass),
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
 
-								new global::TUnit.Core.RepeatAttribute(3)
-							],
-							Parameters = [],
-
-								Properties = [],
-
-								}),
-							}
-
-							;
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-							global::TUnit.TestProject.RepeatTests? classInstance = null;
-							object?[]? classInstanceArguments = null;
-							classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-							var resettableClassFactory = resettableClassFactoryDelegate();
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-							nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-							{
-								TestId = $"TUnit.TestProject.RepeatTests.Two:0",
-								TestClassArguments = [],
-								TestMethodArguments = [],
-								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-								{
-								},
-								CurrentRepeatAttempt = 0,
-								RepeatLimit = 2,
-								ResettableClassFactory = resettableClassFactory,
-								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Two()),
-								TestFilePath = @"",
-								TestLineNumber = 16,
-								TestMethod = testInformation,
-								TestBuilderContext = testBuilderContext,
-							});
-							resettableClassFactory = resettableClassFactoryDelegate();
-							testBuilderContext = new();
-							testBuilderContextAccessor.Current = testBuilderContext;
-						}
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Two:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 2,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Two()),
+				TestFilePath = @"",
+				TestLineNumber = 16,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Two:0",
+				MethodName = $"Two",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 16,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.RepeatTests),
+				Name = "Two",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
 
-						catch (global::System.Exception exception)
-						{
-							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-							{
-								TestId = $"TUnit.TestProject.RepeatTests.Two:0",
-								MethodName = $"Two",
-								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
-								TestFilePath = @"",
-								TestLineNumber = 16,
-							});
-						}
-
-						return nodes;
-					}
-
-					private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+					new global::TUnit.Core.RepeatAttribute(2)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						global::System.Collections.Generic.List<TestMetadata> nodes = [];
-						var classDataIndex = 0;
-						var testMethodDataIndex = 0;
-						try
-						{
-							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
-								Type = typeof(global::TUnit.TestProject.RepeatTests),
-								Name = "Two",
-								GenericTypeCount = 0,
-								ReturnType = typeof(void),
-								Attributes = 
-								[
-									new global::TUnit.Core.TestAttribute(),
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
 
-									new global::TUnit.Core.RepeatAttribute(2)
-								],
-								Parameters = [],
-
-									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
-										Parent = null,
-										Type = typeof(global::TUnit.TestProject.RepeatTests),
-										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
-											Name = "RepeatTests",
-											Attributes = [],
-											}),
-											Name = "RepeatTests",
-											Namespace = "TUnit.TestProject",
-											Attributes = 
-											[
-												new EngineTest(Pass),
-
-												new global::TUnit.Core.RepeatAttribute(3)
-											],
-											Parameters = [],
-
-												Properties = [],
-
-												}),
-											}
-
-											;
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-											global::TUnit.TestProject.RepeatTests? classInstance = null;
-											object?[]? classInstanceArguments = null;
-											classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-											var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-											nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-											{
-												TestId = $"TUnit.TestProject.RepeatTests.Two:1",
-												TestClassArguments = [],
-												TestMethodArguments = [],
-												TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-												{
-												},
-												CurrentRepeatAttempt = 1,
-												RepeatLimit = 2,
-												ResettableClassFactory = resettableClassFactory,
-												TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Two()),
-												TestFilePath = @"",
-												TestLineNumber = 16,
-												TestMethod = testInformation,
-												TestBuilderContext = testBuilderContext,
-											});
-											resettableClassFactory = resettableClassFactoryDelegate();
-											testBuilderContext = new();
-											testBuilderContextAccessor.Current = testBuilderContext;
-										}
-
-										catch (global::System.Exception exception)
-										{
-											nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-											{
-												TestId = $"TUnit.TestProject.RepeatTests.Two:1",
-												MethodName = $"Two",
-												Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
-												TestFilePath = @"",
-												TestLineNumber = 16,
-											});
-										}
-
-										return nodes;
-									}
-
-									private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
-									{
-										global::System.Collections.Generic.List<TestMetadata> nodes = [];
-										var classDataIndex = 0;
-										var testMethodDataIndex = 0;
-										try
-										{
-											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-											{
-												Type = typeof(global::TUnit.TestProject.RepeatTests),
-												Name = "Two",
-												GenericTypeCount = 0,
-												ReturnType = typeof(void),
-												Attributes = 
-												[
-													new global::TUnit.Core.TestAttribute(),
-
-													new global::TUnit.Core.RepeatAttribute(2)
-												],
-												Parameters = [],
-
-													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
-														Parent = null,
-														Type = typeof(global::TUnit.TestProject.RepeatTests),
-														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
-															Name = "RepeatTests",
-															Attributes = [],
-															}),
-															Name = "RepeatTests",
-															Namespace = "TUnit.TestProject",
-															Attributes = 
-															[
-																new EngineTest(Pass),
-
-																new global::TUnit.Core.RepeatAttribute(3)
-															],
-															Parameters = [],
-
-																Properties = [],
-
-																}),
-															}
-
-															;
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-															var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-															var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-															global::TUnit.TestProject.RepeatTests? classInstance = null;
-															object?[]? classInstanceArguments = null;
-															classInstanceArguments = [];
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Two:1",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 1,
+				RepeatLimit = 2,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Two()),
+				TestFilePath = @"",
+				TestLineNumber = 16,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Two:1",
+				MethodName = $"Two",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 16,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.RepeatTests),
+				Name = "Two",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
 
-															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-															var resettableClassFactory = resettableClassFactoryDelegate();
+					new global::TUnit.Core.RepeatAttribute(2)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
+
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-															nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-															{
-																TestId = $"TUnit.TestProject.RepeatTests.Two:2",
-																TestClassArguments = [],
-																TestMethodArguments = [],
-																TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																{
-																},
-																CurrentRepeatAttempt = 2,
-																RepeatLimit = 2,
-																ResettableClassFactory = resettableClassFactory,
-																TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Two()),
-																TestFilePath = @"",
-																TestLineNumber = 16,
-																TestMethod = testInformation,
-																TestBuilderContext = testBuilderContext,
-															});
-															resettableClassFactory = resettableClassFactoryDelegate();
-															testBuilderContext = new();
-															testBuilderContextAccessor.Current = testBuilderContext;
-														}
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-														catch (global::System.Exception exception)
-														{
-															nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-															{
-																TestId = $"TUnit.TestProject.RepeatTests.Two:2",
-																MethodName = $"Two",
-																Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
-																TestFilePath = @"",
-																TestLineNumber = 16,
-															});
-														}
-
-														return nodes;
-													}
-
-												}
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Two:2",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 2,
+				RepeatLimit = 2,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Two()),
+				TestFilePath = @"",
+				TestLineNumber = 16,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Two:2",
+				MethodName = $"Two",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Two failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 16,
+			});
+		}
+		return nodes;
+	}
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -557,7 +509,6 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -568,7 +519,6 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 			..Tests3(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -587,361 +537,327 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = [],
-
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.RepeatTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "RepeatTests",
-							Attributes = [],
-							}),
-							Name = "RepeatTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new EngineTest(Pass),
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
 
-								new global::TUnit.Core.RepeatAttribute(3)
-							],
-							Parameters = [],
-
-								Properties = [],
-
-								}),
-							}
-
-							;
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-							global::TUnit.TestProject.RepeatTests? classInstance = null;
-							object?[]? classInstanceArguments = null;
-							classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-							var resettableClassFactory = resettableClassFactoryDelegate();
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-							nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-							{
-								TestId = $"TUnit.TestProject.RepeatTests.Three:0",
-								TestClassArguments = [],
-								TestMethodArguments = [],
-								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-								{
-								},
-								CurrentRepeatAttempt = 0,
-								RepeatLimit = 3,
-								ResettableClassFactory = resettableClassFactory,
-								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Three()),
-								TestFilePath = @"",
-								TestLineNumber = 23,
-								TestMethod = testInformation,
-								TestBuilderContext = testBuilderContext,
-							});
-							resettableClassFactory = resettableClassFactoryDelegate();
-							testBuilderContext = new();
-							testBuilderContextAccessor.Current = testBuilderContext;
-						}
-
-						catch (global::System.Exception exception)
-						{
-							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-							{
-								TestId = $"TUnit.TestProject.RepeatTests.Three:0",
-								MethodName = $"Three",
-								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
-								TestFilePath = @"",
-								TestLineNumber = 23,
-							});
-						}
-
-						return nodes;
-					}
-
-					private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Three:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 3,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Three()),
+				TestFilePath = @"",
+				TestLineNumber = 23,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Three:0",
+				MethodName = $"Three",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 23,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.RepeatTests),
+				Name = "Three",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						global::System.Collections.Generic.List<TestMetadata> nodes = [];
-						var classDataIndex = 0;
-						var testMethodDataIndex = 0;
-						try
-						{
-							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-							{
-								Type = typeof(global::TUnit.TestProject.RepeatTests),
-								Name = "Three",
-								GenericTypeCount = 0,
-								ReturnType = typeof(void),
-								Attributes = 
-								[
-									new global::TUnit.Core.TestAttribute()
-								],
-								Parameters = [],
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
 
-									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-									{
-										Parent = null,
-										Type = typeof(global::TUnit.TestProject.RepeatTests),
-										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-										{
-											Name = "RepeatTests",
-											Attributes = [],
-											}),
-											Name = "RepeatTests",
-											Namespace = "TUnit.TestProject",
-											Attributes = 
-											[
-												new EngineTest(Pass),
-
-												new global::TUnit.Core.RepeatAttribute(3)
-											],
-											Parameters = [],
-
-												Properties = [],
-
-												}),
-											}
-
-											;
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-											global::TUnit.TestProject.RepeatTests? classInstance = null;
-											object?[]? classInstanceArguments = null;
-											classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-											var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-											var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-											nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-											{
-												TestId = $"TUnit.TestProject.RepeatTests.Three:1",
-												TestClassArguments = [],
-												TestMethodArguments = [],
-												TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-												{
-												},
-												CurrentRepeatAttempt = 1,
-												RepeatLimit = 3,
-												ResettableClassFactory = resettableClassFactory,
-												TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Three()),
-												TestFilePath = @"",
-												TestLineNumber = 23,
-												TestMethod = testInformation,
-												TestBuilderContext = testBuilderContext,
-											});
-											resettableClassFactory = resettableClassFactoryDelegate();
-											testBuilderContext = new();
-											testBuilderContextAccessor.Current = testBuilderContext;
-										}
-
-										catch (global::System.Exception exception)
-										{
-											nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-											{
-												TestId = $"TUnit.TestProject.RepeatTests.Three:1",
-												MethodName = $"Three",
-												Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
-												TestFilePath = @"",
-												TestLineNumber = 23,
-											});
-										}
-
-										return nodes;
-									}
-
-									private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
-									{
-										global::System.Collections.Generic.List<TestMetadata> nodes = [];
-										var classDataIndex = 0;
-										var testMethodDataIndex = 0;
-										try
-										{
-											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-											{
-												Type = typeof(global::TUnit.TestProject.RepeatTests),
-												Name = "Three",
-												GenericTypeCount = 0,
-												ReturnType = typeof(void),
-												Attributes = 
-												[
-													new global::TUnit.Core.TestAttribute()
-												],
-												Parameters = [],
-
-													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-													{
-														Parent = null,
-														Type = typeof(global::TUnit.TestProject.RepeatTests),
-														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-														{
-															Name = "RepeatTests",
-															Attributes = [],
-															}),
-															Name = "RepeatTests",
-															Namespace = "TUnit.TestProject",
-															Attributes = 
-															[
-																new EngineTest(Pass),
-
-																new global::TUnit.Core.RepeatAttribute(3)
-															],
-															Parameters = [],
-
-																Properties = [],
-
-																}),
-															}
-
-															;
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-															var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-															var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-															global::TUnit.TestProject.RepeatTests? classInstance = null;
-															object?[]? classInstanceArguments = null;
-															classInstanceArguments = [];
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Three:1",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 1,
+				RepeatLimit = 3,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Three()),
+				TestFilePath = @"",
+				TestLineNumber = 23,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Three:1",
+				MethodName = $"Three",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 23,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.RepeatTests),
+				Name = "Three",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
 
-															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-															var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-															nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-															{
-																TestId = $"TUnit.TestProject.RepeatTests.Three:2",
-																TestClassArguments = [],
-																TestMethodArguments = [],
-																TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																{
-																},
-																CurrentRepeatAttempt = 2,
-																RepeatLimit = 3,
-																ResettableClassFactory = resettableClassFactory,
-																TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Three()),
-																TestFilePath = @"",
-																TestLineNumber = 23,
-																TestMethod = testInformation,
-																TestBuilderContext = testBuilderContext,
-															});
-															resettableClassFactory = resettableClassFactoryDelegate();
-															testBuilderContext = new();
-															testBuilderContextAccessor.Current = testBuilderContext;
-														}
-
-														catch (global::System.Exception exception)
-														{
-															nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-															{
-																TestId = $"TUnit.TestProject.RepeatTests.Three:2",
-																MethodName = $"Three",
-																Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
-																TestFilePath = @"",
-																TestLineNumber = 23,
-															});
-														}
-
-														return nodes;
-													}
-
-													private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
-													{
-														global::System.Collections.Generic.List<TestMetadata> nodes = [];
-														var classDataIndex = 0;
-														var testMethodDataIndex = 0;
-														try
-														{
-															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-															{
-																Type = typeof(global::TUnit.TestProject.RepeatTests),
-																Name = "Three",
-																GenericTypeCount = 0,
-																ReturnType = typeof(void),
-																Attributes = 
-																[
-																	new global::TUnit.Core.TestAttribute()
-																],
-																Parameters = [],
-
-																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																	{
-																		Parent = null,
-																		Type = typeof(global::TUnit.TestProject.RepeatTests),
-																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																		{
-																			Name = "RepeatTests",
-																			Attributes = [],
-																			}),
-																			Name = "RepeatTests",
-																			Namespace = "TUnit.TestProject",
-																			Attributes = 
-																			[
-																				new EngineTest(Pass),
-
-																				new global::TUnit.Core.RepeatAttribute(3)
-																			],
-																			Parameters = [],
-
-																				Properties = [],
-
-																				}),
-																			}
-
-																			;
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-																			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-																			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-																			global::TUnit.TestProject.RepeatTests? classInstance = null;
-																			object?[]? classInstanceArguments = null;
-																			classInstanceArguments = [];
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
 
-																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
-																			var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-																			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
-																			{
-																				TestId = $"TUnit.TestProject.RepeatTests.Three:3",
-																				TestClassArguments = [],
-																				TestMethodArguments = [],
-																				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																				{
-																				},
-																				CurrentRepeatAttempt = 3,
-																				RepeatLimit = 3,
-																				ResettableClassFactory = resettableClassFactory,
-																				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Three()),
-																				TestFilePath = @"",
-																				TestLineNumber = 23,
-																				TestMethod = testInformation,
-																				TestBuilderContext = testBuilderContext,
-																			});
-																			resettableClassFactory = resettableClassFactoryDelegate();
-																			testBuilderContext = new();
-																			testBuilderContextAccessor.Current = testBuilderContext;
-																		}
-
-																		catch (global::System.Exception exception)
-																		{
-																			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
-																			{
-																				TestId = $"TUnit.TestProject.RepeatTests.Three:3",
-																				MethodName = $"Three",
-																				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
-																				TestFilePath = @"",
-																				TestLineNumber = 23,
-																			});
-																		}
-
-																		return nodes;
-																	}
-
-																}
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Three:2",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 2,
+				RepeatLimit = 3,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Three()),
+				TestFilePath = @"",
+				TestLineNumber = 23,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Three:2",
+				MethodName = $"Three",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 23,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.RepeatTests),
+				Name = "Three",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.RepeatTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "RepeatTests",
+						Attributes = [],
+					}),
+					Name = "RepeatTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass),
+
+						new global::TUnit.Core.RepeatAttribute(3)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.RepeatTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.RepeatTests>(() => new global::TUnit.TestProject.RepeatTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Three:3",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 3,
+				RepeatLimit = 3,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Three()),
+				TestFilePath = @"",
+				TestLineNumber = 23,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.RepeatTests>
+			{
+				TestId = $"TUnit.TestProject.RepeatTests.Three:3",
+				MethodName = $"Three",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("RepeatTests.Three failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 23,
+			});
+		}
+		return nodes;
+	}
+}
 ]

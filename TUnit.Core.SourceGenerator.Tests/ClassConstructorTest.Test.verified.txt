@@ -17,12 +17,10 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ClassConstructorTest());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return Tests0(sessionId);
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -41,95 +39,87 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 					new global::TUnit.Core.TestAttribute()
 				],
 				Parameters = [],
-
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+						Name = "ClassConstructorTest",
+						Attributes = [],
+					}),
+					Name = "ClassConstructorTest",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>()
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.DummyReferenceTypeClass>
 						{
-							Name = "ClassConstructorTest",
+							Name = "dummyReferenceTypeClass",
 							Attributes = [],
-							}),
-							Name = "ClassConstructorTest",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>()
-							],
-							Parameters = 
-							[
-								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.DummyReferenceTypeClass>
-								{
-									Name = "dummyReferenceTypeClass",
-									Attributes = [],
-										ReflectionInfo = null!,
-									},
-								],
-								Properties = 
-								[
-									new global::TUnit.Core.SourceGeneratedPropertyInformation
-									{
-										Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
-										Name = "DummyReferenceTypeClass",
-										IsStatic = false,
-										Attributes = [],
-										},
-									],
-								}),
-							}
-
-							;
-
-
-							var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-							var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-							global::TUnit.TestProject.ClassConstructorTest? classInstance = null;
-							object?[]? classInstanceArguments = null;
-							classInstanceArguments = [];
-
-							var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DependencyInjectionClassConstructor, global::TUnit.TestProject.ClassConstructorTest>(sessionId, testBuilderContext);
-							var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-							nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassConstructorTest>
-							{
-								TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
-								TestClassArguments = [],
-								TestMethodArguments = [],
-								TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-								{
-								},
-								CurrentRepeatAttempt = 0,
-								RepeatLimit = 0,
-								ResettableClassFactory = resettableClassFactory,
-								TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
-								TestFilePath = @"",
-								TestLineNumber = 8,
-								TestMethod = testInformation,
-								TestBuilderContext = testBuilderContext,
-							});
-							resettableClassFactory = resettableClassFactoryDelegate();
-							testBuilderContext = new();
-							testBuilderContextAccessor.Current = testBuilderContext;
-						}
-
-						catch (global::System.Exception exception)
+							ReflectionInfo = null!,
+						},
+					],
+					Properties = 
+					[
+						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
-							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassConstructorTest>
-							{
-								TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
-								MethodName = $"Test",
-								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassConstructorTest.Test failed to initialize", exception),
-								TestFilePath = @"",
-								TestLineNumber = 8,
-							});
-						}
-
-						return nodes;
-					}
-
-				}
+							Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
+							Name = "DummyReferenceTypeClass",
+							IsStatic = false,
+							Attributes = [],
+						},
+					],
+				}),
+			};
 
 
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.ClassConstructorTest? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DependencyInjectionClassConstructor, global::TUnit.TestProject.ClassConstructorTest>(sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassConstructorTest>
+			{
+				TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
+				TestFilePath = @"",
+				TestLineNumber = 8,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassConstructorTest>
+			{
+				TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
+				MethodName = $"Test",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassConstructorTest.Test failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 8,
+			});
+		}
+		return nodes;
+	}
+}
 ]

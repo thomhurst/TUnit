@@ -13,6 +13,7 @@ public class SourceCodeWriter : IDisposable
 
     private readonly StringBuilder _stringBuilder = new();
     private bool _shouldIndent = true;
+    private bool _appendLineOnNextWrite;
 
     public SourceCodeWriter(int tabLevel = 0)
     {
@@ -47,20 +48,29 @@ public class SourceCodeWriter : IDisposable
             return;
         }
 
+        var firstChar = value[0];
+
+        if (_appendLineOnNextWrite && firstChar != ';')
+        {
+            _stringBuilder.AppendLine();
+
+            _appendLineOnNextWrite = false;
+        }
+
         var tempTabCount = 0;
-        if (value.Length > 0 && value[0] == '\t')
+        if (value.Length > 0 && firstChar == '\t')
         {
             tempTabCount = value.TakeWhile(c => c == '\t').Count();
         }
 
         TabLevel -= tempTabCount;
-        if (_tabLevelDecreasingChars.Contains(value[0]))
+        if (_tabLevelDecreasingChars.Contains(firstChar))
         {
             TabLevel--;
         }
 
         // Add newline before opening braces/brackets if not already on a new line
-        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
+        if (_startOfStringTabLevelIncreasingChars.Contains(firstChar))
         {
             if(_stringBuilder.Length > 0
                && _stringBuilder[^1] != '\n'
@@ -80,9 +90,14 @@ public class SourceCodeWriter : IDisposable
             }
         }
 
-        if (_tabLevelDecreasingChars.Contains(value[0]))
+        if (_tabLevelDecreasingChars.Contains(firstChar))
         {
             _shouldIndent = true;
+        }
+
+        if (firstChar == ';')
+        {
+            _shouldIndent = false;
         }
 
         for (var i = 0; i < TabLevel; i++)
@@ -97,7 +112,7 @@ public class SourceCodeWriter : IDisposable
 
         if (ShouldAppendNewLineAfterWritingValue(value))
         {
-            _stringBuilder.AppendLine();
+            _appendLineOnNextWrite = true;
             _shouldIndent = true;
         }
         else
@@ -105,19 +120,13 @@ public class SourceCodeWriter : IDisposable
             _shouldIndent = false;
         }
 
-        if (_startOfStringTabLevelIncreasingChars.Contains(value[0])
-            && !_tabLevelDecreasingChars.Contains(value[^1]))
+        if (_startOfStringTabLevelIncreasingChars.Contains(firstChar)
+            && !_tabLevelDecreasingChars.Any(value.Contains))
         {
             TabLevel++;
         }
 
         TabLevel += tempTabCount;
-
-        if (value is ['}'])
-        {
-            // Append new line again after block to space methods apart
-            _stringBuilder.AppendLine();
-        }
     }
 
     private static bool ShouldAppendNewLineAfterWritingValue(string value)

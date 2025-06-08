@@ -17,7 +17,6 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -26,7 +25,6 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			..Tests1(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -50,376 +48,358 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "DataSourceGeneratorTests",
+						Attributes = [],
+					}),
+					Name = "DataSourceGeneratorTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value2",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+
+
+			testBuilderContext.DataAttributes.Add(classDataAttribute);
+
+			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+
+			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			{
+				classDataIndex++;
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
 						{
-							Name = "DataSourceGeneratorTests",
+							Name = "value",
 							Attributes = [],
-							}),
-							Name = "DataSourceGeneratorTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = 
-							[
-								new EngineTest(Pass)
-							],
-							Parameters = 
-							[
-								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-								{
-									Name = "value",
-									Attributes = [],
-										ReflectionInfo = null!,
-									},
-									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-									{
-										Name = "value2",
-										Attributes = [],
-											ReflectionInfo = null!,
-										},
-										new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-										{
-											Name = "value3",
-											Attributes = [],
-												ReflectionInfo = null!,
-											},
-										],
-										Properties = [],
-
-										}),
-									}
-
-									;
+							ReflectionInfo = null!,
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				};
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
 
 
-									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-									global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
-									object?[]? classInstanceArguments = null;
-									var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-									{
-										Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-										TestBuilderContext = testBuilderContextAccessor,
-										TestInformation = testInformation,
-										MembersToGenerate = 
-										[
-											new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-											{
-												Name = "value",
-												Attributes = [],
-													ReflectionInfo = null!,
-												},
-												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-												{
-													Name = "value2",
-													Attributes = [],
-														ReflectionInfo = null!,
-													},
-													new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-													{
-														Name = "value3",
-														Attributes = [],
-															ReflectionInfo = null!,
-														},
-													],
-													TestSessionId = sessionId,
-													TestClassInstance = classInstance,
-													ClassInstanceArguments = classInstanceArguments,
-												};
-												var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
+
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+					var classArgGeneratedData = classArgGeneratedDataAccessor();
+					int classArg = classArgGeneratedData.Item1;
+					string classArg1 = classArgGeneratedData.Item2;
+					bool classArg2 = classArgGeneratedData.Item3;
+
+					classInstanceArguments = [classArg, classArg1, classArg2];
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
+					var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-												testBuilderContext.DataAttributes.Add(classDataAttribute);
-
-												var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
-
-												foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
-												{
-													classDataIndex++;
-													var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-													{
-														Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-														TestBuilderContext = testBuilderContextAccessor,
-														TestInformation = testInformation,
-														MembersToGenerate = 
-														[
-															new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-															{
-																Name = "value",
-																Attributes = [],
-																	ReflectionInfo = null!,
-																},
-															],
-															TestSessionId = sessionId,
-															TestClassInstance = classInstance,
-															ClassInstanceArguments = classInstanceArguments,
-														};
-														var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
-
-
-														testBuilderContext.DataAttributes.Add(methodDataAttribute);
-
-														var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-														foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-														{
-															testMethodDataIndex++;
-															var classArgGeneratedData = classArgGeneratedDataAccessor();
-															int classArg = classArgGeneratedData.Item1;
-															string classArg1 = classArgGeneratedData.Item2;
-															bool classArg2 = classArgGeneratedData.Item3;
-
-															classInstanceArguments = [classArg, classArg1, classArg2];
-
-															var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-															var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
-															var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-															nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-															{
-																TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
-																TestClassArguments = [classArg, classArg1, classArg2],
-																TestMethodArguments = [methodArgGeneratedData],
-																TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																{
-																},
-																CurrentRepeatAttempt = 0,
-																RepeatLimit = 0,
-																ResettableClassFactory = resettableClassFactory,
-																TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method(methodArgGeneratedData)),
-																TestFilePath = @"",
-																TestLineNumber = 12,
-																TestMethod = testInformation,
-																TestBuilderContext = testBuilderContext,
-															});
-															resettableClassFactory = resettableClassFactoryDelegate();
-															testBuilderContext = new();
-															testBuilderContextAccessor.Current = testBuilderContext;
-														}
-
-													}
-
-												}
-
-												catch (global::System.Exception exception)
-												{
-													nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-													{
-														TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
-														MethodName = $"GeneratedData_Method",
-														Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
-														TestFilePath = @"",
-														TestLineNumber = 12,
-													});
-												}
-
-												return nodes;
-											}
-
-											private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
-											{
-												global::System.Collections.Generic.List<TestMetadata> nodes = [];
-												var classDataIndex = 0;
-												var testMethodDataIndex = 0;
-												try
-												{
-													var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-													{
-														Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-														Name = "GeneratedData_Method",
-														GenericTypeCount = 0,
-														ReturnType = typeof(void),
-														Attributes = 
-														[
-															new global::TUnit.Core.TestAttribute()
-														],
-														Parameters = 
-														[
-															new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-															{
-																Name = "value",
-																Attributes = [],
-																	ReflectionInfo = null!,
-																},
-															],
-															Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-															{
-																Parent = null,
-																Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-																Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																{
-																	Name = "DataSourceGeneratorTests",
-																	Attributes = [],
-																	}),
-																	Name = "DataSourceGeneratorTests",
-																	Namespace = "TUnit.TestProject",
-																	Attributes = 
-																	[
-																		new EngineTest(Pass)
-																	],
-																	Parameters = 
-																	[
-																		new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																		{
-																			Name = "value",
-																			Attributes = [],
-																				ReflectionInfo = null!,
-																			},
-																			new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																			{
-																				Name = "value2",
-																				Attributes = [],
-																					ReflectionInfo = null!,
-																				},
-																				new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																				{
-																					Name = "value3",
-																					Attributes = [],
-																						ReflectionInfo = null!,
-																					},
-																				],
-																				Properties = [],
-
-																				}),
-																			}
-
-																			;
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+					{
+						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+						TestClassArguments = [classArg, classArg1, classArg2],
+						TestMethodArguments = [methodArgGeneratedData],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method(methodArgGeneratedData)),
+						TestFilePath = @"",
+						TestLineNumber = 12,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+			{
+				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+				MethodName = $"GeneratedData_Method",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+				Name = "GeneratedData_Method",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "DataSourceGeneratorTests",
+						Attributes = [],
+					}),
+					Name = "DataSourceGeneratorTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value2",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Properties = [],
+				}),
+			};
 
 
-																			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-																			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-																			global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
-																			object?[]? classInstanceArguments = null;
-																			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-																			{
-																				Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-																				TestBuilderContext = testBuilderContextAccessor,
-																				TestInformation = testInformation,
-																				MembersToGenerate = 
-																				[
-																					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																					{
-																						Name = "value",
-																						Attributes = [],
-																							ReflectionInfo = null!,
-																						},
-																						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																						{
-																							Name = "value2",
-																							Attributes = [],
-																								ReflectionInfo = null!,
-																							},
-																							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																							{
-																								Name = "value3",
-																								Attributes = [],
-																									ReflectionInfo = null!,
-																								},
-																							],
-																							TestSessionId = sessionId,
-																							TestClassInstance = classInstance,
-																							ClassInstanceArguments = classInstanceArguments,
-																						};
-																						var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
 
-																						testBuilderContext.DataAttributes.Add(classDataAttribute);
+			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-																						var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
-																						foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
-																						{
-																							classDataIndex++;
-																							var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-																							{
-																								Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-																								TestBuilderContext = testBuilderContextAccessor,
-																								TestInformation = testInformation,
-																								MembersToGenerate = 
-																								[
-																									new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																									{
-																										Name = "value",
-																										Attributes = [],
-																											ReflectionInfo = null!,
-																										},
-																									],
-																									TestSessionId = sessionId,
-																									TestClassInstance = classInstance,
-																									ClassInstanceArguments = classInstanceArguments,
-																								};
-																								var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
-
-
-																								testBuilderContext.DataAttributes.Add(methodDataAttribute);
-
-																								var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-																								foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-																								{
-																									testMethodDataIndex++;
-																									var classArgGeneratedData = classArgGeneratedDataAccessor();
-																									int classArg = classArgGeneratedData.Item1;
-																									string classArg1 = classArgGeneratedData.Item2;
-																									bool classArg2 = classArgGeneratedData.Item3;
-
-																									classInstanceArguments = [classArg, classArg1, classArg2];
-
-																									var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-																									var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
-																									var resettableClassFactory = resettableClassFactoryDelegate();
+			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			{
+				classDataIndex++;
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				};
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>();
 
 
-																									nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																									{
-																										TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
-																										TestClassArguments = [classArg, classArg1, classArg2],
-																										TestMethodArguments = [methodArgGeneratedData],
-																										TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																										{
-																										},
-																										CurrentRepeatAttempt = 0,
-																										RepeatLimit = 0,
-																										ResettableClassFactory = resettableClassFactory,
-																										TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method(methodArgGeneratedData)),
-																										TestFilePath = @"",
-																										TestLineNumber = 12,
-																										TestMethod = testInformation,
-																										TestBuilderContext = testBuilderContext,
-																									});
-																									resettableClassFactory = resettableClassFactoryDelegate();
-																									testBuilderContext = new();
-																									testBuilderContextAccessor.Current = testBuilderContext;
-																								}
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-																							}
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-																						}
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+					var classArgGeneratedData = classArgGeneratedDataAccessor();
+					int classArg = classArgGeneratedData.Item1;
+					string classArg1 = classArgGeneratedData.Item2;
+					bool classArg2 = classArgGeneratedData.Item3;
 
-																						catch (global::System.Exception exception)
-																						{
-																							nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																							{
-																								TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
-																								MethodName = $"GeneratedData_Method",
-																								Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
-																								TestFilePath = @"",
-																								TestLineNumber = 12,
-																							});
-																						}
+					classInstanceArguments = [classArg, classArg1, classArg2];
 
-																						return nodes;
-																					}
-
-																				}
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
+					var resettableClassFactory = resettableClassFactoryDelegate();
 
 
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+					{
+						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+						TestClassArguments = [classArg, classArg1, classArg2],
+						TestMethodArguments = [methodArgGeneratedData],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method(methodArgGeneratedData)),
+						TestFilePath = @"",
+						TestLineNumber = 12,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+			{
+				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+				MethodName = $"GeneratedData_Method",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -439,7 +419,6 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -448,7 +427,6 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			..Tests1(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -472,432 +450,414 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "DataSourceGeneratorTests",
+						Attributes = [],
+					}),
+					Name = "DataSourceGeneratorTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-								ReflectionInfo = null!,
-							},
-							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-							{
-								Name = "value3",
-								Attributes = [],
-									ReflectionInfo = null!,
-								},
-							],
-							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-							{
-								Parent = null,
-								Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-								{
-									Name = "DataSourceGeneratorTests",
-									Attributes = [],
-									}),
-									Name = "DataSourceGeneratorTests",
-									Namespace = "TUnit.TestProject",
-									Attributes = 
-									[
-										new EngineTest(Pass)
-									],
-									Parameters = 
-									[
-										new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-										{
-											Name = "value",
-											Attributes = [],
-												ReflectionInfo = null!,
-											},
-											new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-											{
-												Name = "value2",
-												Attributes = [],
-													ReflectionInfo = null!,
-												},
-												new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-												{
-													Name = "value3",
-													Attributes = [],
-														ReflectionInfo = null!,
-													},
-												],
-												Properties = [],
-
-												}),
-											}
-
-											;
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Properties = [],
+				}),
+			};
 
 
-											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-											global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
-											object?[]? classInstanceArguments = null;
-											var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-											{
-												Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-												TestBuilderContext = testBuilderContextAccessor,
-												TestInformation = testInformation,
-												MembersToGenerate = 
-												[
-													new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-													{
-														Name = "value",
-														Attributes = [],
-															ReflectionInfo = null!,
-														},
-														new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-														{
-															Name = "value2",
-															Attributes = [],
-																ReflectionInfo = null!,
-															},
-															new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-															{
-																Name = "value3",
-																Attributes = [],
-																	ReflectionInfo = null!,
-																},
-															],
-															TestSessionId = sessionId,
-															TestClassInstance = classInstance,
-															ClassInstanceArguments = classInstanceArguments,
-														};
-														var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
 
-														testBuilderContext.DataAttributes.Add(classDataAttribute);
+			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-														var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
-														foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
-														{
-															classDataIndex++;
-															var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-															{
-																Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-																TestBuilderContext = testBuilderContextAccessor,
-																TestInformation = testInformation,
-																MembersToGenerate = 
-																[
-																	new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																	{
-																		Name = "value",
-																		Attributes = [],
-																			ReflectionInfo = null!,
-																		},
-																		new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																		{
-																			Name = "value2",
-																			Attributes = [],
-																				ReflectionInfo = null!,
-																			},
-																			new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																			{
-																				Name = "value3",
-																				Attributes = [],
-																					ReflectionInfo = null!,
-																				},
-																			],
-																			TestSessionId = sessionId,
-																			TestClassInstance = classInstance,
-																			ClassInstanceArguments = classInstanceArguments,
-																		};
-																		var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
-
-
-																		testBuilderContext.DataAttributes.Add(methodDataAttribute);
-
-																		var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-																		foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-																		{
-																			testMethodDataIndex++;
-																			var classArgGeneratedData = classArgGeneratedDataAccessor();
-																			int classArg = classArgGeneratedData.Item1;
-																			string classArg1 = classArgGeneratedData.Item2;
-																			bool classArg2 = classArgGeneratedData.Item3;
-
-																			classInstanceArguments = [classArg, classArg1, classArg2];
-
-																			var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-																			int methodArg = methodArgGeneratedData.Item1;
-																			string methodArg1 = methodArgGeneratedData.Item2;
-																			bool methodArg2 = methodArgGeneratedData.Item3;
-
-																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
-																			var resettableClassFactory = resettableClassFactoryDelegate();
+			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			{
+				classDataIndex++;
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value2",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				};
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
 
-																			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																			{
-																				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
-																				TestClassArguments = [classArg, classArg1, classArg2],
-																				TestMethodArguments = [methodArg, methodArg1, methodArg2],
-																				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																				{
-																				},
-																				CurrentRepeatAttempt = 0,
-																				RepeatLimit = 0,
-																				ResettableClassFactory = resettableClassFactory,
-																				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method2(methodArg, methodArg1, methodArg2)),
-																				TestFilePath = @"",
-																				TestLineNumber = 20,
-																				TestMethod = testInformation,
-																				TestBuilderContext = testBuilderContext,
-																			});
-																			resettableClassFactory = resettableClassFactoryDelegate();
-																			testBuilderContext = new();
-																			testBuilderContextAccessor.Current = testBuilderContext;
-																		}
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-																	}
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-																}
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+					var classArgGeneratedData = classArgGeneratedDataAccessor();
+					int classArg = classArgGeneratedData.Item1;
+					string classArg1 = classArgGeneratedData.Item2;
+					bool classArg2 = classArgGeneratedData.Item3;
 
-																catch (global::System.Exception exception)
-																{
-																	nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																	{
-																		TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
-																		MethodName = $"GeneratedData_Method2",
-																		Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
-																		TestFilePath = @"",
-																		TestLineNumber = 20,
-																	});
-																}
+					classInstanceArguments = [classArg, classArg1, classArg2];
 
-																return nodes;
-															}
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = methodArgGeneratedData.Item1;
+					string methodArg1 = methodArgGeneratedData.Item2;
+					bool methodArg2 = methodArgGeneratedData.Item3;
 
-															private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
-															{
-																global::System.Collections.Generic.List<TestMetadata> nodes = [];
-																var classDataIndex = 0;
-																var testMethodDataIndex = 0;
-																try
-																{
-																	var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																	{
-																		Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-																		Name = "GeneratedData_Method2",
-																		GenericTypeCount = 0,
-																		ReturnType = typeof(void),
-																		Attributes = 
-																		[
-																			new global::TUnit.Core.TestAttribute()
-																		],
-																		Parameters = 
-																		[
-																			new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																			{
-																				Name = "value",
-																				Attributes = [],
-																					ReflectionInfo = null!,
-																				},
-																				new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																				{
-																					Name = "value2",
-																					Attributes = [],
-																						ReflectionInfo = null!,
-																					},
-																					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																					{
-																						Name = "value3",
-																						Attributes = [],
-																							ReflectionInfo = null!,
-																						},
-																					],
-																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																					{
-																						Parent = null,
-																						Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																						{
-																							Name = "DataSourceGeneratorTests",
-																							Attributes = [],
-																							}),
-																							Name = "DataSourceGeneratorTests",
-																							Namespace = "TUnit.TestProject",
-																							Attributes = 
-																							[
-																								new EngineTest(Pass)
-																							],
-																							Parameters = 
-																							[
-																								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																								{
-																									Name = "value",
-																									Attributes = [],
-																										ReflectionInfo = null!,
-																									},
-																									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																									{
-																										Name = "value2",
-																										Attributes = [],
-																											ReflectionInfo = null!,
-																										},
-																										new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																										{
-																											Name = "value3",
-																											Attributes = [],
-																												ReflectionInfo = null!,
-																											},
-																										],
-																										Properties = [],
-
-																										}),
-																									}
-
-																									;
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
+					var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-																									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-																									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-																									global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
-																									object?[]? classInstanceArguments = null;
-																									var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-																									{
-																										Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-																										TestBuilderContext = testBuilderContextAccessor,
-																										TestInformation = testInformation,
-																										MembersToGenerate = 
-																										[
-																											new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																											{
-																												Name = "value",
-																												Attributes = [],
-																													ReflectionInfo = null!,
-																												},
-																												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																												{
-																													Name = "value2",
-																													Attributes = [],
-																														ReflectionInfo = null!,
-																													},
-																													new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																													{
-																														Name = "value3",
-																														Attributes = [],
-																															ReflectionInfo = null!,
-																														},
-																													],
-																													TestSessionId = sessionId,
-																													TestClassInstance = classInstance,
-																													ClassInstanceArguments = classInstanceArguments,
-																												};
-																												var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+					{
+						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+						TestClassArguments = [classArg, classArg1, classArg2],
+						TestMethodArguments = [methodArg, methodArg1, methodArg2],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method2(methodArg, methodArg1, methodArg2)),
+						TestFilePath = @"",
+						TestLineNumber = 20,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+			{
+				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+				MethodName = $"GeneratedData_Method2",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 20,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+				Name = "GeneratedData_Method2",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "DataSourceGeneratorTests",
+						Attributes = [],
+					}),
+					Name = "DataSourceGeneratorTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value2",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Properties = [],
+				}),
+			};
 
 
-																												testBuilderContext.DataAttributes.Add(classDataAttribute);
-
-																												var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
-
-																												foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
-																												{
-																													classDataIndex++;
-																													var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-																													{
-																														Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-																														TestBuilderContext = testBuilderContextAccessor,
-																														TestInformation = testInformation,
-																														MembersToGenerate = 
-																														[
-																															new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																															{
-																																Name = "value",
-																																Attributes = [],
-																																	ReflectionInfo = null!,
-																																},
-																																new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																																{
-																																	Name = "value2",
-																																	Attributes = [],
-																																		ReflectionInfo = null!,
-																																	},
-																																	new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																																	{
-																																		Name = "value3",
-																																		Attributes = [],
-																																			ReflectionInfo = null!,
-																																		},
-																																	],
-																																	TestSessionId = sessionId,
-																																	TestClassInstance = classInstance,
-																																	ClassInstanceArguments = classInstanceArguments,
-																																};
-																																var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
 
-																																testBuilderContext.DataAttributes.Add(methodDataAttribute);
+			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-																																var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
-																																foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-																																{
-																																	testMethodDataIndex++;
-																																	var classArgGeneratedData = classArgGeneratedDataAccessor();
-																																	int classArg = classArgGeneratedData.Item1;
-																																	string classArg1 = classArgGeneratedData.Item2;
-																																	bool classArg2 = classArgGeneratedData.Item3;
-
-																																	classInstanceArguments = [classArg, classArg1, classArg2];
-
-																																	var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-																																	int methodArg = methodArgGeneratedData.Item1;
-																																	string methodArg1 = methodArgGeneratedData.Item2;
-																																	bool methodArg2 = methodArgGeneratedData.Item3;
-
-																																	var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
-																																	var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-																																	nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																																	{
-																																		TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
-																																		TestClassArguments = [classArg, classArg1, classArg2],
-																																		TestMethodArguments = [methodArg, methodArg1, methodArg2],
-																																		TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																																		{
-																																		},
-																																		CurrentRepeatAttempt = 0,
-																																		RepeatLimit = 0,
-																																		ResettableClassFactory = resettableClassFactory,
-																																		TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method2(methodArg, methodArg1, methodArg2)),
-																																		TestFilePath = @"",
-																																		TestLineNumber = 20,
-																																		TestMethod = testInformation,
-																																		TestBuilderContext = testBuilderContext,
-																																	});
-																																	resettableClassFactory = resettableClassFactoryDelegate();
-																																	testBuilderContext = new();
-																																	testBuilderContextAccessor.Current = testBuilderContext;
-																																}
-
-																															}
-
-																														}
-
-																														catch (global::System.Exception exception)
-																														{
-																															nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																															{
-																																TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
-																																MethodName = $"GeneratedData_Method2",
-																																Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
-																																TestFilePath = @"",
-																																TestLineNumber = 20,
-																															});
-																														}
-
-																														return nodes;
-																													}
-
-																												}
+			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			{
+				classDataIndex++;
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value2",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				};
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
 
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
+
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+					var classArgGeneratedData = classArgGeneratedDataAccessor();
+					int classArg = classArgGeneratedData.Item1;
+					string classArg1 = classArgGeneratedData.Item2;
+					bool classArg2 = classArgGeneratedData.Item3;
+
+					classInstanceArguments = [classArg, classArg1, classArg2];
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = methodArgGeneratedData.Item1;
+					string methodArg1 = methodArgGeneratedData.Item2;
+					bool methodArg2 = methodArgGeneratedData.Item3;
+
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+					{
+						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+						TestClassArguments = [classArg, classArg1, classArg2],
+						TestMethodArguments = [methodArg, methodArg1, methodArg2],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method2(methodArg, methodArg1, methodArg2)),
+						TestFilePath = @"",
+						TestLineNumber = 20,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+			{
+				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+				MethodName = $"GeneratedData_Method2",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 20,
+			});
+		}
+		return nodes;
+	}
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -917,7 +877,6 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
-
 	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
 	{
 		return
@@ -926,7 +885,6 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 			..Tests1(sessionId),
 		];
 	}
-
 	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
@@ -950,430 +908,412 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 					{
 						Name = "value",
 						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "DataSourceGeneratorTests",
+						Attributes = [],
+					}),
+					Name = "DataSourceGeneratorTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
 						{
 							Name = "value2",
 							Attributes = [],
-								ReflectionInfo = null!,
-							},
-							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-							{
-								Name = "value3",
-								Attributes = [],
-									ReflectionInfo = null!,
-								},
-							],
-							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-							{
-								Parent = null,
-								Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-								{
-									Name = "DataSourceGeneratorTests",
-									Attributes = [],
-									}),
-									Name = "DataSourceGeneratorTests",
-									Namespace = "TUnit.TestProject",
-									Attributes = 
-									[
-										new EngineTest(Pass)
-									],
-									Parameters = 
-									[
-										new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-										{
-											Name = "value",
-											Attributes = [],
-												ReflectionInfo = null!,
-											},
-											new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-											{
-												Name = "value2",
-												Attributes = [],
-													ReflectionInfo = null!,
-												},
-												new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-												{
-													Name = "value3",
-													Attributes = [],
-														ReflectionInfo = null!,
-													},
-												],
-												Properties = [],
-
-												}),
-											}
-
-											;
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Properties = [],
+				}),
+			};
 
 
-											var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-											var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-											global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
-											object?[]? classInstanceArguments = null;
-											var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-											{
-												Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-												TestBuilderContext = testBuilderContextAccessor,
-												TestInformation = testInformation,
-												MembersToGenerate = 
-												[
-													new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-													{
-														Name = "value",
-														Attributes = [],
-															ReflectionInfo = null!,
-														},
-														new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-														{
-															Name = "value2",
-															Attributes = [],
-																ReflectionInfo = null!,
-															},
-															new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-															{
-																Name = "value3",
-																Attributes = [],
-																	ReflectionInfo = null!,
-																},
-															],
-															TestSessionId = sessionId,
-															TestClassInstance = classInstance,
-															ClassInstanceArguments = classInstanceArguments,
-														};
-														var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>();
 
 
-														testBuilderContext.DataAttributes.Add(classDataAttribute);
+			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-														var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
-														foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
-														{
-															classDataIndex++;
-															var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-															{
-																Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-																TestBuilderContext = testBuilderContextAccessor,
-																TestInformation = testInformation,
-																MembersToGenerate = 
-																[
-																	new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																	{
-																		Name = "value",
-																		Attributes = [],
-																			ReflectionInfo = null!,
-																		},
-																		new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																		{
-																			Name = "value2",
-																			Attributes = [],
-																				ReflectionInfo = null!,
-																			},
-																			new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																			{
-																				Name = "value3",
-																				Attributes = [],
-																					ReflectionInfo = null!,
-																				},
-																			],
-																			TestSessionId = sessionId,
-																			TestClassInstance = classInstance,
-																			ClassInstanceArguments = classInstanceArguments,
-																		};
-																		var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
-
-
-																		testBuilderContext.DataAttributes.Add(methodDataAttribute);
-
-																		var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
-
-																		foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-																		{
-																			testMethodDataIndex++;
-																			var classArgGeneratedData = classArgGeneratedDataAccessor();
-																			int classArg = classArgGeneratedData.Item1;
-																			string classArg1 = classArgGeneratedData.Item2;
-																			bool classArg2 = classArgGeneratedData.Item3;
-
-																			classInstanceArguments = [classArg, classArg1, classArg2];
-
-																			var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-																			int methodArg = methodArgGeneratedData.Item1;
-																			string methodArg1 = methodArgGeneratedData.Item2;
-																			bool methodArg2 = methodArgGeneratedData.Item3;
-
-																			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
-																			var resettableClassFactory = resettableClassFactoryDelegate();
+			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			{
+				classDataIndex++;
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value2",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				};
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
 
-																			nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																			{
-																				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
-																				TestClassArguments = [classArg, classArg1, classArg2],
-																				TestMethodArguments = [methodArg, methodArg1, methodArg2],
-																				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																				{
-																				},
-																				CurrentRepeatAttempt = 0,
-																				RepeatLimit = 0,
-																				ResettableClassFactory = resettableClassFactory,
-																				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method3(methodArg, methodArg1, methodArg2)),
-																				TestFilePath = @"",
-																				TestLineNumber = 27,
-																				TestMethod = testInformation,
-																				TestBuilderContext = testBuilderContext,
-																			});
-																			resettableClassFactory = resettableClassFactoryDelegate();
-																			testBuilderContext = new();
-																			testBuilderContextAccessor.Current = testBuilderContext;
-																		}
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-																	}
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-																}
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+					var classArgGeneratedData = classArgGeneratedDataAccessor();
+					int classArg = classArgGeneratedData.Item1;
+					string classArg1 = classArgGeneratedData.Item2;
+					bool classArg2 = classArgGeneratedData.Item3;
 
-																catch (global::System.Exception exception)
-																{
-																	nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																	{
-																		TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
-																		MethodName = $"GeneratedData_Method3",
-																		Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
-																		TestFilePath = @"",
-																		TestLineNumber = 27,
-																	});
-																}
+					classInstanceArguments = [classArg, classArg1, classArg2];
 
-																return nodes;
-															}
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = methodArgGeneratedData.Item1;
+					string methodArg1 = methodArgGeneratedData.Item2;
+					bool methodArg2 = methodArgGeneratedData.Item3;
 
-															private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
-															{
-																global::System.Collections.Generic.List<TestMetadata> nodes = [];
-																var classDataIndex = 0;
-																var testMethodDataIndex = 0;
-																try
-																{
-																	var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-																	{
-																		Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-																		Name = "GeneratedData_Method3",
-																		GenericTypeCount = 0,
-																		ReturnType = typeof(void),
-																		Attributes = 
-																		[
-																			new global::TUnit.Core.TestAttribute()
-																		],
-																		Parameters = 
-																		[
-																			new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																			{
-																				Name = "value",
-																				Attributes = [],
-																					ReflectionInfo = null!,
-																				},
-																				new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																				{
-																					Name = "value2",
-																					Attributes = [],
-																						ReflectionInfo = null!,
-																					},
-																					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																					{
-																						Name = "value3",
-																						Attributes = [],
-																							ReflectionInfo = null!,
-																						},
-																					],
-																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-																					{
-																						Parent = null,
-																						Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-																						{
-																							Name = "DataSourceGeneratorTests",
-																							Attributes = [],
-																							}),
-																							Name = "DataSourceGeneratorTests",
-																							Namespace = "TUnit.TestProject",
-																							Attributes = 
-																							[
-																								new EngineTest(Pass)
-																							],
-																							Parameters = 
-																							[
-																								new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																								{
-																									Name = "value",
-																									Attributes = [],
-																										ReflectionInfo = null!,
-																									},
-																									new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																									{
-																										Name = "value2",
-																										Attributes = [],
-																											ReflectionInfo = null!,
-																										},
-																										new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																										{
-																											Name = "value3",
-																											Attributes = [],
-																												ReflectionInfo = null!,
-																											},
-																										],
-																										Properties = [],
-
-																										}),
-																									}
-
-																									;
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
+					var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-																									var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-																									var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-																									global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
-																									object?[]? classInstanceArguments = null;
-																									var classArgDataGeneratorMetadata = new DataGeneratorMetadata
-																									{
-																										Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
-																										TestBuilderContext = testBuilderContextAccessor,
-																										TestInformation = testInformation,
-																										MembersToGenerate = 
-																										[
-																											new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																											{
-																												Name = "value",
-																												Attributes = [],
-																													ReflectionInfo = null!,
-																												},
-																												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																												{
-																													Name = "value2",
-																													Attributes = [],
-																														ReflectionInfo = null!,
-																													},
-																													new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																													{
-																														Name = "value3",
-																														Attributes = [],
-																															ReflectionInfo = null!,
-																														},
-																													],
-																													TestSessionId = sessionId,
-																													TestClassInstance = classInstance,
-																													ClassInstanceArguments = classInstanceArguments,
-																												};
-																												var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+					{
+						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+						TestClassArguments = [classArg, classArg1, classArg2],
+						TestMethodArguments = [methodArg, methodArg1, methodArg2],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method3(methodArg, methodArg1, methodArg2)),
+						TestFilePath = @"",
+						TestLineNumber = 27,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+			{
+				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+				MethodName = $"GeneratedData_Method3",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 27,
+			});
+		}
+		return nodes;
+	}
+	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+				Name = "GeneratedData_Method3",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "DataSourceGeneratorTests",
+						Attributes = [],
+					}),
+					Name = "DataSourceGeneratorTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new EngineTest(Pass)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value2",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Properties = [],
+				}),
+			};
 
 
-																												testBuilderContext.DataAttributes.Add(classDataAttribute);
-
-																												var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
-
-																												foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
-																												{
-																													classDataIndex++;
-																													var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-																													{
-																														Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-																														TestBuilderContext = testBuilderContextAccessor,
-																														TestInformation = testInformation,
-																														MembersToGenerate = 
-																														[
-																															new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-																															{
-																																Name = "value",
-																																Attributes = [],
-																																	ReflectionInfo = null!,
-																																},
-																																new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-																																{
-																																	Name = "value2",
-																																	Attributes = [],
-																																		ReflectionInfo = null!,
-																																	},
-																																	new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-																																	{
-																																		Name = "value3",
-																																		Attributes = [],
-																																			ReflectionInfo = null!,
-																																		},
-																																	],
-																																	TestSessionId = sessionId,
-																																	TestClassInstance = classInstance,
-																																	ClassInstanceArguments = classInstanceArguments,
-																																};
-																																var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.DataSourceGeneratorTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+					{
+						Name = "value",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+					{
+						Name = "value3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
 
-																																testBuilderContext.DataAttributes.Add(methodDataAttribute);
+			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-																																var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
-																																foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-																																{
-																																	testMethodDataIndex++;
-																																	var classArgGeneratedData = classArgGeneratedDataAccessor();
-																																	int classArg = classArgGeneratedData.Item1;
-																																	string classArg1 = classArgGeneratedData.Item2;
-																																	bool classArg2 = classArgGeneratedData.Item3;
-
-																																	classInstanceArguments = [classArg, classArg1, classArg2];
-
-																																	var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-																																	int methodArg = methodArgGeneratedData.Item1;
-																																	string methodArg1 = methodArgGeneratedData.Item2;
-																																	bool methodArg2 = methodArgGeneratedData.Item3;
-
-																																	var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
-																																	var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-																																	nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																																	{
-																																		TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
-																																		TestClassArguments = [classArg, classArg1, classArg2],
-																																		TestMethodArguments = [methodArg, methodArg1, methodArg2],
-																																		TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-																																		{
-																																		},
-																																		CurrentRepeatAttempt = 0,
-																																		RepeatLimit = 0,
-																																		ResettableClassFactory = resettableClassFactory,
-																																		TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method3(methodArg, methodArg1, methodArg2)),
-																																		TestFilePath = @"",
-																																		TestLineNumber = 27,
-																																		TestMethod = testInformation,
-																																		TestBuilderContext = testBuilderContext,
-																																	});
-																																	resettableClassFactory = resettableClassFactoryDelegate();
-																																	testBuilderContext = new();
-																																	testBuilderContextAccessor.Current = testBuilderContext;
-																																}
-
-																															}
-
-																														}
-
-																														catch (global::System.Exception exception)
-																														{
-																															nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
-																															{
-																																TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
-																																MethodName = $"GeneratedData_Method3",
-																																Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
-																																TestFilePath = @"",
-																																TestLineNumber = 27,
-																															});
-																														}
-
-																														return nodes;
-																													}
-
-																												}
+			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			{
+				classDataIndex++;
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+						{
+							Name = "value",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value2",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+						{
+							Name = "value3",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				};
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute();
 
 
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
+
+				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+
+				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+					var classArgGeneratedData = classArgGeneratedDataAccessor();
+					int classArg = classArgGeneratedData.Item1;
+					string classArg1 = classArgGeneratedData.Item2;
+					bool classArg2 = classArgGeneratedData.Item3;
+
+					classInstanceArguments = [classArg, classArg1, classArg2];
+
+					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					int methodArg = methodArgGeneratedData.Item1;
+					string methodArg1 = methodArgGeneratedData.Item2;
+					bool methodArg2 = methodArgGeneratedData.Item3;
+
+					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataSourceGeneratorTests>(() => new global::TUnit.TestProject.DataSourceGeneratorTests(classArg, classArg1, classArg2), sessionId, testBuilderContext);
+					var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+					{
+						TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+						TestClassArguments = [classArg, classArg1, classArg2],
+						TestMethodArguments = [methodArg, methodArg1, methodArg2],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.GeneratedData_Method3(methodArg, methodArg1, methodArg2)),
+						TestFilePath = @"",
+						TestLineNumber = 27,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
+			{
+				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+				MethodName = $"GeneratedData_Method3",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 27,
+			});
+		}
+		return nodes;
+	}
+}
 ]

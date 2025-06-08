@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
-using System.Reflection;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 
@@ -12,7 +10,6 @@ public static class SourceInformationWriter
     public static void GenerateClassInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
     {
         sourceCodeWriter.Write($"global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd(\"{namedTypeSymbol.GloballyQualified()}\", () => new global::TUnit.Core.SourceGeneratedClassInformation");
-        sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write("{");
 
         var parent = namedTypeSymbol.ContainingType;
@@ -45,11 +42,9 @@ public static class SourceInformationWriter
         if (parameters.Length == 0)
         {
             sourceCodeWriter.Write("[],");
-            sourceCodeWriter.WriteLine();
         }
         else
         {
-            sourceCodeWriter.WriteLine();
             sourceCodeWriter.Write("[");
 
             foreach (var parameter in parameters)
@@ -67,11 +62,9 @@ public static class SourceInformationWriter
         if(properties.Length == 0)
         {
             sourceCodeWriter.Write("[],");
-            sourceCodeWriter.WriteLine();
         }
         else
         {
-            sourceCodeWriter.WriteLine();
             sourceCodeWriter.Write("[");
             foreach (var propertySymbol in properties)
             {
@@ -87,7 +80,6 @@ public static class SourceInformationWriter
     {
         sourceCodeWriter.Write(
             $"global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd(\"{assembly.Name}\", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation");
-        sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Name = \"{assembly.Name}\",");
 
@@ -102,7 +94,6 @@ public static class SourceInformationWriter
         IDictionary<string, string>? genericSubstitutions, char suffix)
     {
         sourceCodeWriter.Write("new global::TUnit.Core.SourceGeneratedMethodInformation");
-        sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
         sourceCodeWriter.Write($"Name = \"{methodSymbol.Name}\",");
@@ -118,11 +109,9 @@ public static class SourceInformationWriter
         if (parameters.Length == 0)
         {
             sourceCodeWriter.Write("[],");
-            sourceCodeWriter.WriteLine();
         }
         else
         {
-            sourceCodeWriter.WriteLine();
             sourceCodeWriter.Write("[");
 
             foreach (var parameter in parameters)
@@ -147,11 +136,9 @@ public static class SourceInformationWriter
         if(parameters.Length == 0 && property is null)
         {
             sourceCodeWriter.Write("[],");
-            sourceCodeWriter.WriteLine();
             return;
         }
 
-        sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write("[");
 
         if (property is not null)
@@ -171,7 +158,6 @@ public static class SourceInformationWriter
         GeneratorAttributeSyntaxContext context, IPropertySymbol property)
     {
         sourceCodeWriter.Write("new global::TUnit.Core.SourceGeneratedPropertyInformation");
-        sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Type = typeof({property.Type.GloballyQualified()}),");
         sourceCodeWriter.Write($"Name = \"{property.Name}\",");
@@ -196,7 +182,6 @@ public static class SourceInformationWriter
         }
 
         sourceCodeWriter.Write($"new global::TUnit.Core.SourceGeneratedParameterInformation<{type}>");
-        sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Name = \"{parameter.Name}\",");
 

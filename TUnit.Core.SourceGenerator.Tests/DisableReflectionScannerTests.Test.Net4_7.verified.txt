@@ -8,8 +8,5 @@ file static class DisableReflectionScanner_Guid
 	{
 		global::TUnit.Core.SourceRegistrar.IsEnabled = true;
 	}
-
 }
-
-
 ]
