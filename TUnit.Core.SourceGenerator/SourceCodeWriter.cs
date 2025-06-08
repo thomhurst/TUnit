@@ -23,11 +23,11 @@ public class SourceCodeWriter : IDisposable
         }
     }
 
-    private static char[] _startOfStringTabLevelIncreasingChars = ['{', '['];
-    private static char[] _tabLevelDecreasingChars = ['}', ']'];
+    private static readonly char[] _startOfStringTabLevelIncreasingChars = ['{', '['];
+    private static readonly char[] _tabLevelDecreasingChars = ['}', ']'];
 
-    private static char[] _endOfStringNewLineTriggerringChars = [',', ';', ']'];
-    private static string[] _startOfStringNewLineTriggerringStrings = ["#pragma", "}"];
+    private static readonly char[] _endOfStringNewLineTriggerringChars = [',', ';', ']'];
+    private static readonly string[] _startOfStringNewLineTriggerringStrings = ["#pragma", "}"];
 
     public void WriteLine()
     {
@@ -48,13 +48,14 @@ public class SourceCodeWriter : IDisposable
         }
 
         TabLevel -= tempTabCount;
-
         if (_tabLevelDecreasingChars.Contains(value[0]))
         {
             TabLevel--;
         }
 
-        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
+        // Add newline before opening braces/brackets if not already on a new line
+        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]) &&
+            _stringBuilder.Length > 0 && _stringBuilder[^1] != '\n')
         {
             _stringBuilder.AppendLine();
         }
@@ -78,6 +79,12 @@ public class SourceCodeWriter : IDisposable
         }
 
         TabLevel += tempTabCount;
+
+        if (value is ['}'])
+        {
+            // Append new line again after block to space methods apart
+            _stringBuilder.AppendLine();
+        }
     }
 
     private static bool ShouldAppendNewLineAfterWritingValue(string value)
@@ -87,7 +94,7 @@ public class SourceCodeWriter : IDisposable
             return true;
         }
 
-        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
+        if (_startOfStringTabLevelIncreasingChars.Contains(value[^1]))
         {
             return true;
         }
