@@ -2,7 +2,7 @@
 
 namespace TUnit.TestProject.Bugs._2067;
 
-public class DataClass : 
+public class DataClass :
     IAsyncInitializer,
     ITestRegisteredEventReceiver,
     ITestStartEventReceiver,

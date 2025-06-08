@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
+using TUnit.TestProject.Models;
 
 namespace TUnit.TestProject;
 
@@ -9,13 +9,17 @@ public class NestedClassDataSourceDrivenTests2
 {
     [Test]
     [MyDataProvider]
+    [Repeat(5)]
     public async Task DataSource_Class(SomeClass1 value)
     {
         Console.WriteLine(value);
 
         await Assert.That(value.IsInitialized).IsTrue();
+        await Assert.That(value.InitializedCount).IsEqualTo(1);
         await Assert.That(value.InnerClass.IsInitialized).IsTrue();
+        await Assert.That(value.InnerClass.InitializedCount).IsEqualTo(1);
         await Assert.That(value.InnerClass.InnerClass.IsInitialized).IsTrue();
+        await Assert.That(value.InnerClass.InnerClass.InitializedCount).IsEqualTo(1);
 
         await Assert.That(value.IsDisposed).IsFalse();
         await Assert.That(value.InnerClass.IsDisposed).IsFalse();
@@ -34,78 +38,29 @@ public class NestedClassDataSourceDrivenTests2
         }
     }
 
-    public record SomeClass1 : IAsyncInitializer, IAsyncDisposable
+    public record SomeClass1 : InitialisableClass
     {
         [ClassDataSource<SomeClass2>(Shared = SharedType.PerAssembly)]
         public required SomeClass2 InnerClass { get; init; }
 
-        public async Task InitializeAsync()
+        public override async Task InitializeAsync()
         {
             await Assert.That(InnerClass.IsInitialized).IsTrue();
-            IsInitialized = true;
+            await base.InitializeAsync();
         }
-
-        public bool IsInitialized
-        {
-            get;
-            private set;
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            IsDisposed = true;
-            return default;
-        }
-
-        public bool IsDisposed { get; set; }
     }
 
-    public record SomeClass2 : IAsyncInitializer, IAsyncDisposable
+    public record SomeClass2 : InitialisableClass
     {
         [ClassDataSource<SomeClass3>(Shared = SharedType.PerAssembly)]
         public required SomeClass3 InnerClass { get; init; }
 
-        public async Task InitializeAsync()
+        public override async Task InitializeAsync()
         {
             await Assert.That(InnerClass.IsInitialized).IsTrue();
-            IsInitialized = true;
+            await base.InitializeAsync();
         }
-
-        public bool IsInitialized
-        {
-            get;
-            private set;
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            IsDisposed = true;
-            return default;
-        }
-
-        public bool IsDisposed { get; set; }
     }
 
-    public record SomeClass3 : IAsyncInitializer, IAsyncDisposable
-    {
-        public Task InitializeAsync()
-        {
-            IsInitialized = true;
-            return Task.CompletedTask;
-        }
-
-        public bool IsInitialized
-        {
-            get;
-            private set;
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            IsDisposed = true;
-            return default;
-        }
-
-        public bool IsDisposed { get; set; }
-    }
+    public record SomeClass3 : InitialisableClass;
 }

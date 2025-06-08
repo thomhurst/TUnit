@@ -315,16 +315,7 @@ internal static class TestDataContainer
     /// <param name="childKey">The key of the child object (for keyed sharing).</param>
     internal static void RegisterNestedDependency(object parentObject, object childObject, SharedType childSharedType, string? childKey)
     {
-        // For now, we'll track the dependency relationship directly without scope managers
-        // since the current scope managers don't have a unified interface that supports all scenarios
-        // The new dependency tracker will handle disposal ordering properly
-
-        // Create a simple disposable reference that just disposes the child directly
-        var disposableRef = new DirectDisposableReference(childObject);
         DependencyTracker.RegisterDependency(parentObject, childObject, new DirectScopeManager());
-
-        // Don't increment usage counts here - they're already managed by the main ClassDataSource attribute logic
-        // We only track the relationship for proper disposal ordering
     }
 
     /// <summary>
@@ -338,46 +329,7 @@ internal static class TestDataContainer
         public Task<bool> TryDisposeAsync<T>(T item)
         {
             // Always dispose directly since this is for nested dependencies
-            return DisposeHelper.DisposeAsync(item).AsTask().ContinueWith(_ => true);
-        }
-    }
-
-    /// <summary>
-    /// A direct disposable reference implementation.
-    /// </summary>
-    private class DirectDisposableReference
-    {
-        private readonly object _instance;
-
-        public DirectDisposableReference(object instance)
-        {
-            _instance = instance;
-        }
-
-        public async Task DisposeAsync()
-        {
-            await DisposeHelper.DisposeAsync(_instance);
-        }
-    }
-
-    /// <summary>
-    /// Helper class for disposing objects (duplicate of the one in GlobalScopeManager for internal use).
-    /// </summary>
-    private static class DisposeHelper
-    {
-        public static async ValueTask DisposeAsync(object? obj)
-        {
-            switch (obj)
-            {
-                case null:
-                    return;
-                case IAsyncDisposable asyncDisposable:
-                    await asyncDisposable.DisposeAsync();
-                    break;
-                case IDisposable disposable:
-                    disposable.Dispose();
-                    break;
-            }
+            return Disposer.DisposeAsync(item).AsTask().ContinueWith(_ => true);
         }
     }
 }

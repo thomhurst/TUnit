@@ -109,12 +109,7 @@ internal class ClassDataSources
 
     public Task InitializeObject(object? item)
     {
-        if (item is IAsyncInitializer asyncInitializer)
-        {
-            return asyncInitializer.InitializeAsync();
-        }
-
-        return Task.CompletedTask;
+        return ObjectInitializer.InitializeAsync(item, CancellationToken.None);
     }
 
     public async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string? key, T? item)
@@ -280,48 +275,85 @@ internal class ClassDataSources
                 continue;
             }
 
-            var resultDelegateArray = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata with
+            if (propertyInfo.GetValue(instance) is not {} result)
             {
-                Type = DataGeneratorType.Property,
-                MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
-            });
-
-            var result = resultDelegateArray.FirstOrDefault()?.Invoke()?.FirstOrDefault();
-
-            propertyInfo.SetValue(instance, result);
-
-            if (result is not null && dataSourceGeneratorAttribute.GetType().IsAssignableTo(typeof(IDataSourceGeneratorAttribute)))
-            {
-                SharedType sharedType;
-                string? key;
-                if (dataSourceGeneratorAttribute is ISharedDataSourceAttribute sharedDataSourceAttribute)
+                var resultDelegateArray = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata with
                 {
-                    sharedType = sharedDataSourceAttribute.GetSharedTypes().FirstOrDefault();
-                    key = sharedDataSourceAttribute.GetKeys().FirstOrDefault();
-                }
-                else
-                {
-                    sharedType = SharedType.None;
-                    key = null;
-                }
+                    Type = DataGeneratorType.Property, MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
+                });
 
-                TestDataContainer.RegisterNestedDependency(instance, result, sharedType, key);
+                result = resultDelegateArray.FirstOrDefault()?.Invoke()?.FirstOrDefault();
 
-                // Register the nested dependency with the test lifecycle - this is the key fix!
-                // We need to register it as if it were a main ClassDataSource so it gets proper usage tracking
-                RegisterNestedDependencyWithLifecycle(result, sharedType, key, dataGeneratorMetadata);
+                propertyInfo.SetValue(instance, result);
             }
 
-            if (result is not null)
+            if (result is null || !dataSourceGeneratorAttribute.GetType().IsAssignableTo(typeof(IDataSourceGeneratorAttribute)))
             {
-                if (!Sources.DataGeneratorProperties.TryGetValue(result.GetType(), out var nestedProperties))
-                {
-                    nestedProperties = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-                }
-
-                InitializeDataSourceProperties(dataGeneratorMetadata, result, nestedProperties);
+                return;
             }
+
+            if (!Sources.DataGeneratorProperties.TryGetValue(result.GetType(), out var nestedProperties))
+            {
+                nestedProperties = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+            }
+
+            InitializeDataSourceProperties(dataGeneratorMetadata, result, nestedProperties);
+
+            // Get shared type and key from the attribute if available
+            var sharedDataSourceAttribute = propertyInfo.GetCustomAttributes(true)
+                .OfType<ISharedDataSourceAttribute>()
+                .FirstOrDefault();
+
+            var sharedType = sharedDataSourceAttribute?.GetSharedTypes().ElementAtOrDefault(0) ?? SharedType.None;
+            var keys = sharedDataSourceAttribute?.GetKeys().ElementAtOrDefault(0);
+
+            RegisterEvents(result, dataGeneratorMetadata, sharedType, keys);
         }
+    }
+
+    private static void RegisterEvents(object item, DataGeneratorMetadata dataGeneratorMetadata, SharedType sharedType, string? key)
+    {
+        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (_, context) =>
+            {
+                await Get(dataGeneratorMetadata.TestSessionId).OnTestRegistered(
+                    context.TestContext,
+                    IsStaticProperty(dataGeneratorMetadata),
+                    sharedType,
+                    key,
+                    item);
+            };
+
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, context) =>
+            {
+                await Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
+                    context,
+                    IsStaticProperty(dataGeneratorMetadata),
+                    sharedType,
+                    key,
+                    item);
+            };
+
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize.Order = -1;
+
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
+            {
+                await Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, item);
+            };
+
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, context) =>
+            {
+                await Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, item);
+            };
+
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, context) =>
+            {
+                await Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, sharedType, key, item);
+            };
+
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, context) =>
+            {
+                await Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, sharedType, key, item);
+            };
     }
 
     public async Task OnTestStart<T>(BeforeTestContext context, T item)

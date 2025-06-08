@@ -21,7 +21,7 @@ namespace TUnit.Engine.Services;
 internal class SingleTestExecutor(
     IExtension extension,
     InstanceTracker instanceTracker,
-    TestInvoker testInvoker,
+    TestInvocation testInvocation,
     ParallelLimitLockProvider parallelLimitLockProvider,
     AssemblyHookOrchestrator assemblyHookOrchestrator,
     ClassHookOrchestrator classHookOrchestrator,
@@ -446,7 +446,7 @@ internal class SingleTestExecutor(
 
     private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
-        return Task.Run(() => testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions), cancellationToken);
+        return Task.Run(() => testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions), cancellationToken);
     }
 
     private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)

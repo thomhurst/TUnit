@@ -8,7 +8,7 @@ using TUnit.Engine.Hooks;
 
 namespace TUnit.Engine.Services;
 
-internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer disposer)
+internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Disposer disposer)
 {
     private readonly SemaphoreSlim _consoleStandardOutLock = new(1, 1);
 
@@ -18,21 +18,21 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
         {
             foreach (var onInitializeObject in discoveredTest.TestContext.GetOnInitializeObjects())
             {
-                await onInitializeObject.InitializeAsync();
+                await ObjectInitializer.InitializeAsync(onInitializeObject, cancellationToken);
             }
 
             await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken);
-            
+
             discoveredTest.TestContext.RestoreExecutionContext();
-            
+
             foreach (var testStartEventsObject in discoveredTest.TestContext.GetTestStartEventObjects())
             {
                 await testStartEventsObject.OnTestStart(new BeforeTestContext(discoveredTest));
             }
-            
+
             await Timings.Record("Test Body", discoveredTest.TestContext,
                 () => discoveredTest.ExecuteTest(cancellationToken));
-            
+
             discoveredTest.TestContext.SetResult(null);
         }
         catch (Exception ex)
@@ -45,11 +45,11 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
             await DisposeTest(discoveredTest.TestContext, cleanupExceptions);
         }
     }
-    
+
     private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
     {
         var afterHooks = testHookOrchestrator.CollectAfterHooks(testContext.TestDetails.ClassInstance, testContext.InternalDiscoveredTest, cleanUpExceptions);
-            
+
         foreach (var executableHook in afterHooks)
         {
             await Timings.Record($"After(Test): {executableHook.Name}", testContext, () =>
@@ -64,19 +64,19 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
                 }
             });
         }
-        
+
         foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
         {
             await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(new AfterTestContext(testContext.InternalDiscoveredTest)),
                 cleanUpExceptions);
         }
-        
+
         foreach (var disposableObject in testContext.GetOnDisposeObjects())
         {
             await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(disposableObject),
                 cleanUpExceptions);
         }
-        
+
         await _consoleStandardOutLock.WaitAsync();
 
         try
