@@ -23,7 +23,7 @@ public class SourceCodeWriter : IDisposable
         }
     }
 
-    private static char[] _startOfStringTabLevelIncreasingChars = ['{', '['];
+    private static char[] _tabLevelDecreasingChars = ['{', '['];
     private static char[] _startOfStringTabLevelDecreasingChars = ['}', ']'];
 
     private static char[] _endOfStringNewLineTriggerringChars = [',', ';', ']'];
@@ -50,7 +50,7 @@ public class SourceCodeWriter : IDisposable
 
         TabLevel -= tempTabCount;
 
-        if(_startOfStringTabLevelIncreasingChars.Contains(value[0]))
+        if(_tabLevelDecreasingChars.Contains(value[0]))
         {
             _stringBuilder.AppendLine();
         }
@@ -73,7 +73,8 @@ public class SourceCodeWriter : IDisposable
             _stringBuilder.AppendLine();
         }
 
-        if (_startOfStringTabLevelIncreasingChars.Contains(value[0]))
+        if (_tabLevelDecreasingChars.Contains(value[0])
+            && !_tabLevelDecreasingChars.Contains(value[^1]))
         {
             TabLevel++;
         }

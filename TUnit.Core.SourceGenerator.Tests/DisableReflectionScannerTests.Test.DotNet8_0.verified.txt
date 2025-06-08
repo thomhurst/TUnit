@@ -3,10 +3,10 @@
 #pragma warning disable
 file static class DisableReflectionScanner_Guid
 {
-	[global::System.Runtime.CompilerServices.ModuleInitializer]
-		public static void Initialize()
-		{			global::TUnit.Core.SourceRegistrar.IsEnabled = true;
-		}
-	}
+[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialize()
+	{	global::TUnit.Core.SourceRegistrar.IsEnabled = true;
+}
+}
 
 ]
