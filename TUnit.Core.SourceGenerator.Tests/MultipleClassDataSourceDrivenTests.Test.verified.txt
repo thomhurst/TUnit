@@ -31,7 +31,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
 				Name = "Test1",
 				GenericTypeCount = 0,
@@ -43,11 +43,11 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "MultipleClassDataSourceDrivenTests",
 							Attributes = [],
 							}),
@@ -58,33 +58,33 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 								new EngineTest(Pass)
 							],
 							Parameters = 
-[
+							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
-{
+								{
 									Name = "inject1",
 									Attributes = [],
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
-{
+									{
 										Name = "inject2",
 										Attributes = [],
 											ReflectionInfo = null!,
 										},
 										new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
-{
+										{
 											Name = "inject3",
 											Attributes = [],
 												ReflectionInfo = null!,
 											},
 											new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
-{
+											{
 												Name = "inject4",
 												Attributes = [],
 													ReflectionInfo = null!,
 												},
 												new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
-{
+												{
 													Name = "inject5",
 													Attributes = [],
 														ReflectionInfo = null!,
@@ -108,33 +108,33 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 												TestBuilderContext = testBuilderContextAccessor,
 												TestInformation = testInformation,
 												MembersToGenerate = 
-[
+												[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
-{
+													{
 														Name = "inject1",
 														Attributes = [],
 															ReflectionInfo = null!,
 														},
 														new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
-{
+														{
 															Name = "inject2",
 															Attributes = [],
 																ReflectionInfo = null!,
 															},
 															new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
-{
+															{
 																Name = "inject3",
 																Attributes = [],
 																	ReflectionInfo = null!,
 																},
 																new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
-{
+																{
 																	Name = "inject4",
 																	Attributes = [],
 																		ReflectionInfo = null!,
 																	},
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
-{
+																	{
 																		Name = "inject5",
 																		Attributes = [],
 																			ReflectionInfo = null!,
@@ -145,7 +145,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 																	ClassInstanceArguments = classInstanceArguments,
 																};
 																var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
-{
+																{
 																	Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
 																}
 
@@ -247,7 +247,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
 				Name = "Test2",
 				GenericTypeCount = 0,
@@ -259,11 +259,11 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MultipleClassDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "MultipleClassDataSourceDrivenTests",
 							Attributes = [],
 							}),
@@ -274,33 +274,33 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 								new EngineTest(Pass)
 							],
 							Parameters = 
-[
+							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
-{
+								{
 									Name = "inject1",
 									Attributes = [],
 										ReflectionInfo = null!,
 									},
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
-{
+									{
 										Name = "inject2",
 										Attributes = [],
 											ReflectionInfo = null!,
 										},
 										new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
-{
+										{
 											Name = "inject3",
 											Attributes = [],
 												ReflectionInfo = null!,
 											},
 											new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
-{
+											{
 												Name = "inject4",
 												Attributes = [],
 													ReflectionInfo = null!,
 												},
 												new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
-{
+												{
 													Name = "inject5",
 													Attributes = [],
 														ReflectionInfo = null!,
@@ -324,33 +324,33 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 												TestBuilderContext = testBuilderContextAccessor,
 												TestInformation = testInformation,
 												MembersToGenerate = 
-[
+												[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>
-{
+													{
 														Name = "inject1",
 														Attributes = [],
 															ReflectionInfo = null!,
 														},
 														new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>
-{
+														{
 															Name = "inject2",
 															Attributes = [],
 																ReflectionInfo = null!,
 															},
 															new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>
-{
+															{
 																Name = "inject3",
 																Attributes = [],
 																	ReflectionInfo = null!,
 																},
 																new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>
-{
+																{
 																	Name = "inject4",
 																	Attributes = [],
 																		ReflectionInfo = null!,
 																	},
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>
-{
+																	{
 																		Name = "inject5",
 																		Attributes = [],
 																			ReflectionInfo = null!,
@@ -361,7 +361,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 																	ClassInstanceArguments = classInstanceArguments,
 																};
 																var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
-{
+																{
 																	Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
 																}
 

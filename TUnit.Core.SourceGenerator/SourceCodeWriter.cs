@@ -70,7 +70,7 @@ public class SourceCodeWriter : IDisposable
             }
 
             if (_stringBuilder.Length > 0
-                && _endOfStringNewLineTriggerringChars.Contains(value[^1]))
+                && _stringBuilder[^1] != '\n')
             {
                 _shouldIndent = false;
             }

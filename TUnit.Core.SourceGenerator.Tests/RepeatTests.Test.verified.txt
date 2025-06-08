@@ -35,7 +35,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.RepeatTests),
 				Name = "One",
 				GenericTypeCount = 0,
@@ -49,11 +49,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.RepeatTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "RepeatTests",
 							Attributes = [],
 							}),
@@ -130,7 +130,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						try
 						{
 							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+							{
 								Type = typeof(global::TUnit.TestProject.RepeatTests),
 								Name = "One",
 								GenericTypeCount = 0,
@@ -144,11 +144,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								Parameters = [],
 
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+									{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.RepeatTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+										{
 											Name = "RepeatTests",
 											Attributes = [],
 											}),
@@ -258,7 +258,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.RepeatTests),
 				Name = "Two",
 				GenericTypeCount = 0,
@@ -272,11 +272,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.RepeatTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "RepeatTests",
 							Attributes = [],
 							}),
@@ -353,7 +353,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						try
 						{
 							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+							{
 								Type = typeof(global::TUnit.TestProject.RepeatTests),
 								Name = "Two",
 								GenericTypeCount = 0,
@@ -367,11 +367,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								Parameters = [],
 
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+									{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.RepeatTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+										{
 											Name = "RepeatTests",
 											Attributes = [],
 											}),
@@ -448,7 +448,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 										try
 										{
 											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+											{
 												Type = typeof(global::TUnit.TestProject.RepeatTests),
 												Name = "Two",
 												GenericTypeCount = 0,
@@ -462,11 +462,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 												Parameters = [],
 
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+													{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.RepeatTests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+														{
 															Name = "RepeatTests",
 															Attributes = [],
 															}),
@@ -577,7 +577,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.RepeatTests),
 				Name = "Three",
 				GenericTypeCount = 0,
@@ -589,11 +589,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.RepeatTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "RepeatTests",
 							Attributes = [],
 							}),
@@ -670,7 +670,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 						try
 						{
 							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+							{
 								Type = typeof(global::TUnit.TestProject.RepeatTests),
 								Name = "Three",
 								GenericTypeCount = 0,
@@ -682,11 +682,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 								Parameters = [],
 
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+									{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.RepeatTests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+										{
 											Name = "RepeatTests",
 											Attributes = [],
 											}),
@@ -763,7 +763,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 										try
 										{
 											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+											{
 												Type = typeof(global::TUnit.TestProject.RepeatTests),
 												Name = "Three",
 												GenericTypeCount = 0,
@@ -775,11 +775,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 												Parameters = [],
 
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+													{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.RepeatTests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+														{
 															Name = "RepeatTests",
 															Attributes = [],
 															}),
@@ -856,7 +856,7 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 														try
 														{
 															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+															{
 																Type = typeof(global::TUnit.TestProject.RepeatTests),
 																Name = "Three",
 																GenericTypeCount = 0,
@@ -868,11 +868,11 @@ file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 																Parameters = [],
 
 																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.RepeatTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+																	{
 																		Parent = null,
 																		Type = typeof(global::TUnit.TestProject.RepeatTests),
 																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("RepeatTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+																		{
 																			Name = "RepeatTests",
 																			Attributes = [],
 																			}),

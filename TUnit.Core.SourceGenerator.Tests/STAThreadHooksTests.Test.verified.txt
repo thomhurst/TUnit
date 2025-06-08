@@ -43,7 +43,7 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 			{
 				ClassType = typeof(global::TUnit.TestProject.STAThreadTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.STAThreadTests),
 					Name = "BeforeTest",
 					GenericTypeCount = 0,
@@ -57,11 +57,11 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 					Parameters = [],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.STAThreadTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.STAThreadTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("STAThreadHooksTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "STAThreadHooksTests",
 								Attributes = [],
 								}),
@@ -153,7 +153,7 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 			{
 				ClassType = typeof(global::TUnit.TestProject.STAThreadTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.STAThreadTests),
 					Name = "AfterTest",
 					GenericTypeCount = 0,
@@ -167,11 +167,11 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 					Parameters = [],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.STAThreadTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.STAThreadTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("STAThreadHooksTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "STAThreadHooksTests",
 								Attributes = [],
 								}),

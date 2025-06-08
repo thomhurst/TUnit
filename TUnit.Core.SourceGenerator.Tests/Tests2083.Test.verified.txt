@@ -39,7 +39,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 				Name = "MyTest",
 				GenericTypeCount = 0,
@@ -61,20 +61,20 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 					new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L)
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<long>
-{
+					{
 						Name = "value",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2083", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "Tests2083",
 							Attributes = [],
 							}),
@@ -151,7 +151,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 						try
 						{
 							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+							{
 								Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 								Name = "MyTest",
 								GenericTypeCount = 0,
@@ -173,20 +173,20 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 									new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L)
 								],
 								Parameters = 
-[
+								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<long>
-{
+									{
 										Name = "value",
 										Attributes = [],
 											ReflectionInfo = null!,
 										},
 									],
 									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+									{
 										Parent = null,
 										Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2083", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+										{
 											Name = "Tests2083",
 											Attributes = [],
 											}),
@@ -263,7 +263,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 										try
 										{
 											var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+											{
 												Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 												Name = "MyTest",
 												GenericTypeCount = 0,
@@ -285,20 +285,20 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 													new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L)
 												],
 												Parameters = 
-[
+												[
 													new global::TUnit.Core.SourceGeneratedParameterInformation<long>
-{
+													{
 														Name = "value",
 														Attributes = [],
 															ReflectionInfo = null!,
 														},
 													],
 													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+													{
 														Parent = null,
 														Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2083", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+														{
 															Name = "Tests2083",
 															Attributes = [],
 															}),
@@ -375,7 +375,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 														try
 														{
 															var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+															{
 																Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 																Name = "MyTest",
 																GenericTypeCount = 0,
@@ -397,20 +397,20 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																	new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L)
 																],
 																Parameters = 
-[
+																[
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<long>
-{
+																	{
 																		Name = "value",
 																		Attributes = [],
 																			ReflectionInfo = null!,
 																		},
 																	],
 																	Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+																	{
 																		Parent = null,
 																		Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 																		Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2083", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+																		{
 																			Name = "Tests2083",
 																			Attributes = [],
 																			}),
@@ -487,7 +487,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																		try
 																		{
 																			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+																			{
 																				Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 																				Name = "MyTest",
 																				GenericTypeCount = 0,
@@ -509,20 +509,20 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																					new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L)
 																				],
 																				Parameters = 
-[
+																				[
 																					new global::TUnit.Core.SourceGeneratedParameterInformation<long>
-{
+																					{
 																						Name = "value",
 																						Attributes = [],
 																							ReflectionInfo = null!,
 																						},
 																					],
 																					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+																					{
 																						Parent = null,
 																						Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 																						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2083", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+																						{
 																							Name = "Tests2083",
 																							Attributes = [],
 																							}),
@@ -599,7 +599,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																						try
 																						{
 																							var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+																							{
 																								Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 																								Name = "MyTest",
 																								GenericTypeCount = 0,
@@ -621,20 +621,20 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 																									new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L)
 																								],
 																								Parameters = 
-[
+																								[
 																									new global::TUnit.Core.SourceGeneratedParameterInformation<long>
-{
+																									{
 																										Name = "value",
 																										Attributes = [],
 																											ReflectionInfo = null!,
 																										},
 																									],
 																									Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._2083.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+																									{
 																										Parent = null,
 																										Type = typeof(global::TUnit.TestProject.Bugs._2083.Tests),
 																										Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests2083", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+																										{
 																											Name = "Tests2083",
 																											Attributes = [],
 																											}),

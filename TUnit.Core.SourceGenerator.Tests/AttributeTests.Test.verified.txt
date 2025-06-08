@@ -31,7 +31,7 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.AttributeTests),
 				Name = "MyTest",
 				GenericTypeCount = 0,
@@ -49,28 +49,28 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 					new global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: "Foo"),
 
 					new global::TUnit.TestProject.AttributeTests.MixedAttribute()
-{
+					{
 						Property = "Foo",
 					}
 
 ,
 
 					new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo")
-{
+					{
 						Property = "Bar",
 					}
 
 ,
 
 					new global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: "Foo")
-{
+					{
 						Property = "Bar",
 					}
 
 ,
 
 					new global::TUnit.TestProject.AttributeTests.MixedAttribute()
-{
+					{
 						Property = "Foo",
 						Property2 = 1,
 					}
@@ -80,11 +80,11 @@ file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerato
 				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AttributeTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.AttributeTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("AttributeTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "AttributeTests",
 							Attributes = [],
 							}),

@@ -31,7 +31,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),
 				Name = "Test1",
 				GenericTypeCount = 0,
@@ -43,11 +43,11 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 				Parameters = [],
 
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.MyTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "Tests1589",
 							Attributes = [],
 							}),
@@ -58,9 +58,9 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 								new EngineTest(Pass)
 							],
 							Parameters = 
-[
+							[
 								new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
-{
+								{
 									Name = "myFixture",
 									Attributes = [],
 										ReflectionInfo = null!,
@@ -84,9 +84,9 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 								TestBuilderContext = testBuilderContextAccessor,
 								TestInformation = testInformation,
 								MembersToGenerate = 
-[
+								[
 									new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
-{
+									{
 										Name = "myFixture",
 										Attributes = [],
 											ReflectionInfo = null!,
@@ -97,7 +97,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 									ClassInstanceArguments = classInstanceArguments,
 								};
 								var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
-{
+								{
 									Shared = global::TUnit.Core.SharedType.None,
 								}
 

@@ -31,7 +31,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 				Name = "String1",
 				GenericTypeCount = 0,
@@ -43,20 +43,20 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.ArgumentsAttribute("123")
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+					{
 						Name = "dummy",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "ConstantArgumentsTests",
 							Attributes = [],
 							}),
@@ -161,7 +161,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 				Name = "Int",
 				GenericTypeCount = 0,
@@ -173,20 +173,20 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.ArgumentsAttribute(123)
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+					{
 						Name = "dummy",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "ConstantArgumentsTests",
 							Attributes = [],
 							}),
@@ -291,7 +291,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 				Name = "Double",
 				GenericTypeCount = 0,
@@ -303,20 +303,20 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.ArgumentsAttribute(1.23)
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<double>
-{
+					{
 						Name = "dummy",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "ConstantArgumentsTests",
 							Attributes = [],
 							}),
@@ -421,7 +421,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 				Name = "Float",
 				GenericTypeCount = 0,
@@ -433,20 +433,20 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.ArgumentsAttribute(1.23F)
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<float>
-{
+					{
 						Name = "dummy",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "ConstantArgumentsTests",
 							Attributes = [],
 							}),
@@ -551,7 +551,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 				Name = "Long",
 				GenericTypeCount = 0,
@@ -563,20 +563,20 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.ArgumentsAttribute(123L)
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<long>
-{
+					{
 						Name = "dummy",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "ConstantArgumentsTests",
 							Attributes = [],
 							}),
@@ -681,7 +681,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 				Name = "UInt",
 				GenericTypeCount = 0,
@@ -693,20 +693,20 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.ArgumentsAttribute(123U)
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<uint>
-{
+					{
 						Name = "dummy",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "ConstantArgumentsTests",
 							Attributes = [],
 							}),
@@ -811,7 +811,7 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 				Name = "ULong",
 				GenericTypeCount = 0,
@@ -823,20 +823,20 @@ file partial class ConstantArgumentsTests : global::TUnit.Core.Interfaces.Source
 					new global::TUnit.Core.ArgumentsAttribute(123UL)
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<ulong>
-{
+					{
 						Name = "dummy",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 					],
 					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+					{
 						Parent = null,
 						Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ConstantArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+						{
 							Name = "ConstantArgumentsTests",
 							Attributes = [],
 							}),

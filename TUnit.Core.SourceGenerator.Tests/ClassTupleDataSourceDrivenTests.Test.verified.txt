@@ -37,7 +37,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 				Name = "DataSource_TupleMethod",
 				GenericTypeCount = 0,
@@ -51,32 +51,32 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+					{
 						Name = "value",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+						{
 							Name = "value2",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+							{
 								Name = "value3",
 								Attributes = [],
 									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+							{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+								{
 									Name = "ClassTupleDataSourceDrivenTests",
 									Attributes = [],
 									}),
@@ -91,30 +91,30 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 										new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 									],
 									Parameters = 
-[
+									[
 										new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+										{
 											Name = "value",
 											Attributes = [],
 												ReflectionInfo = null!,
 											},
 											new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+											{
 												Name = "value2",
 												Attributes = [],
 													ReflectionInfo = null!,
 												},
 												new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+												{
 													Name = "value3",
 													Attributes = [],
 														ReflectionInfo = null!,
 													},
 												],
 												Properties = 
-[
+												[
 													new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+													{
 														Type = typeof((int, string, bool)),
 														Name = "Property1",
 														IsStatic = false,
@@ -124,7 +124,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 														],
 													},
 													new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+													{
 														Type = typeof((int, string, bool)),
 														Name = "Property2",
 														IsStatic = false,
@@ -134,7 +134,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 														],
 													},
 													new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+													{
 														Type = typeof((int Number, string Word, bool Flag)),
 														Name = "Property3",
 														IsStatic = false,
@@ -144,7 +144,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 														],
 													},
 													new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+													{
 														Type = typeof((int Number, string Word, bool Flag)),
 														Name = "Property4",
 														IsStatic = false,
@@ -239,7 +239,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 													try
 													{
 														var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+														{
 															Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 															Name = "DataSource_TupleMethod",
 															GenericTypeCount = 0,
@@ -253,32 +253,32 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 															],
 															Parameters = 
-[
+															[
 																new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+																{
 																	Name = "value",
 																	Attributes = [],
 																		ReflectionInfo = null!,
 																	},
 																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+																	{
 																		Name = "value2",
 																		Attributes = [],
 																			ReflectionInfo = null!,
 																		},
 																		new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+																		{
 																			Name = "value3",
 																			Attributes = [],
 																				ReflectionInfo = null!,
 																			},
 																		],
 																		Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+																		{
 																			Parent = null,
 																			Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 																			Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+																			{
 																				Name = "ClassTupleDataSourceDrivenTests",
 																				Attributes = [],
 																				}),
@@ -293,30 +293,30 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																					new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																				],
 																				Parameters = 
-[
+																				[
 																					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+																					{
 																						Name = "value",
 																						Attributes = [],
 																							ReflectionInfo = null!,
 																						},
 																						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+																						{
 																							Name = "value2",
 																							Attributes = [],
 																								ReflectionInfo = null!,
 																							},
 																							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+																							{
 																								Name = "value3",
 																								Attributes = [],
 																									ReflectionInfo = null!,
 																								},
 																							],
 																							Properties = 
-[
+																							[
 																								new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																								{
 																									Type = typeof((int, string, bool)),
 																									Name = "Property1",
 																									IsStatic = false,
@@ -326,7 +326,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																									],
 																								},
 																								new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																								{
 																									Type = typeof((int, string, bool)),
 																									Name = "Property2",
 																									IsStatic = false,
@@ -336,7 +336,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																									],
 																								},
 																								new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																								{
 																									Type = typeof((int Number, string Word, bool Flag)),
 																									Name = "Property3",
 																									IsStatic = false,
@@ -346,7 +346,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																									],
 																								},
 																								new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																								{
 																									Type = typeof((int Number, string Word, bool Flag)),
 																									Name = "Property4",
 																									IsStatic = false,
@@ -441,7 +441,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																								try
 																								{
 																									var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+																									{
 																										Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 																										Name = "DataSource_TupleMethod",
 																										GenericTypeCount = 0,
@@ -455,32 +455,32 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																											new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																										],
 																										Parameters = 
-[
+																										[
 																											new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+																											{
 																												Name = "value",
 																												Attributes = [],
 																													ReflectionInfo = null!,
 																												},
 																												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+																												{
 																													Name = "value2",
 																													Attributes = [],
 																														ReflectionInfo = null!,
 																													},
 																													new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+																													{
 																														Name = "value3",
 																														Attributes = [],
 																															ReflectionInfo = null!,
 																														},
 																													],
 																													Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+																													{
 																														Parent = null,
 																														Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 																														Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+																														{
 																															Name = "ClassTupleDataSourceDrivenTests",
 																															Attributes = [],
 																															}),
@@ -495,30 +495,30 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																															],
 																															Parameters = 
-[
+																															[
 																																new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+																																{
 																																	Name = "value",
 																																	Attributes = [],
 																																		ReflectionInfo = null!,
 																																	},
 																																	new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+																																	{
 																																		Name = "value2",
 																																		Attributes = [],
 																																			ReflectionInfo = null!,
 																																		},
 																																		new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+																																		{
 																																			Name = "value3",
 																																			Attributes = [],
 																																				ReflectionInfo = null!,
 																																			},
 																																		],
 																																		Properties = 
-[
+																																		[
 																																			new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																																			{
 																																				Type = typeof((int, string, bool)),
 																																				Name = "Property1",
 																																				IsStatic = false,
@@ -528,7 +528,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																				],
 																																			},
 																																			new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																																			{
 																																				Type = typeof((int, string, bool)),
 																																				Name = "Property2",
 																																				IsStatic = false,
@@ -538,7 +538,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																				],
 																																			},
 																																			new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																																			{
 																																				Type = typeof((int Number, string Word, bool Flag)),
 																																				Name = "Property3",
 																																				IsStatic = false,
@@ -548,7 +548,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																				],
 																																			},
 																																			new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																																			{
 																																				Type = typeof((int Number, string Word, bool Flag)),
 																																				Name = "Property4",
 																																				IsStatic = false,
@@ -643,7 +643,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																			try
 																																			{
 																																				var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+																																				{
 																																					Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 																																					Name = "DataSource_TupleMethod",
 																																					GenericTypeCount = 0,
@@ -657,32 +657,32 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																						new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																					],
 																																					Parameters = 
-[
+																																					[
 																																						new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+																																						{
 																																							Name = "value",
 																																							Attributes = [],
 																																								ReflectionInfo = null!,
 																																							},
 																																							new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+																																							{
 																																								Name = "value2",
 																																								Attributes = [],
 																																									ReflectionInfo = null!,
 																																								},
 																																								new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+																																								{
 																																									Name = "value3",
 																																									Attributes = [],
 																																										ReflectionInfo = null!,
 																																									},
 																																								],
 																																								Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+																																								{
 																																									Parent = null,
 																																									Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
 																																									Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassTupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+																																									{
 																																										Name = "ClassTupleDataSourceDrivenTests",
 																																										Attributes = [],
 																																										}),
@@ -697,30 +697,30 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																											new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
 																																										],
 																																										Parameters = 
-[
+																																										[
 																																											new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+																																											{
 																																												Name = "value",
 																																												Attributes = [],
 																																													ReflectionInfo = null!,
 																																												},
 																																												new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+																																												{
 																																													Name = "value2",
 																																													Attributes = [],
 																																														ReflectionInfo = null!,
 																																													},
 																																													new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+																																													{
 																																														Name = "value3",
 																																														Attributes = [],
 																																															ReflectionInfo = null!,
 																																														},
 																																													],
 																																													Properties = 
-[
+																																													[
 																																														new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																																														{
 																																															Type = typeof((int, string, bool)),
 																																															Name = "Property1",
 																																															IsStatic = false,
@@ -730,7 +730,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																															],
 																																														},
 																																														new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																																														{
 																																															Type = typeof((int, string, bool)),
 																																															Name = "Property2",
 																																															IsStatic = false,
@@ -740,7 +740,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																															],
 																																														},
 																																														new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																																														{
 																																															Type = typeof((int Number, string Word, bool Flag)),
 																																															Name = "Property3",
 																																															IsStatic = false,
@@ -750,7 +750,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 																																															],
 																																														},
 																																														new global::TUnit.Core.SourceGeneratedPropertyInformation
-{
+																																														{
 																																															Type = typeof((int Number, string Word, bool Flag)),
 																																															Name = "Property4",
 																																															IsStatic = false,

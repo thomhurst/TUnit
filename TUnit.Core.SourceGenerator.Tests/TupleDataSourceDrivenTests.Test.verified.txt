@@ -31,7 +31,7 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		try
 		{
 			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+			{
 				Type = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
 				Name = "DataSource_TupleMethod",
 				GenericTypeCount = 0,
@@ -43,32 +43,32 @@ file partial class TupleDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 					new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
 				],
 				Parameters = 
-[
+				[
 					new global::TUnit.Core.SourceGeneratedParameterInformation<int>
-{
+					{
 						Name = "value",
 						Attributes = [],
 							ReflectionInfo = null!,
 						},
 						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
-{
+						{
 							Name = "value2",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
-{
+							{
 								Name = "value3",
 								Attributes = [],
 									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+							{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.TupleDataSourceDrivenTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TupleDataSourceDrivenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+								{
 									Name = "TupleDataSourceDrivenTests",
 									Attributes = [],
 									}),

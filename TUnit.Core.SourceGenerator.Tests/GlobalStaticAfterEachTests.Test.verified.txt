@@ -50,7 +50,7 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 			{
 				ClassType = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
 					Name = "AfterEach1",
 					GenericTypeCount = 0,
@@ -62,11 +62,11 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 					Parameters = [],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalBase1", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -144,7 +144,7 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 			{
 				ClassType = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
 					Name = "AfterEach2",
 					GenericTypeCount = 0,
@@ -156,11 +156,11 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 					Parameters = [],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalBase2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -238,7 +238,7 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 			{
 				ClassType = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
 					Name = "AfterEach3",
 					GenericTypeCount = 0,
@@ -250,11 +250,11 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 					Parameters = [],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalBase3", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -332,7 +332,7 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 			{
 				ClassType = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 					Name = "CleanUp",
 					GenericTypeCount = 0,
@@ -344,11 +344,11 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 					Parameters = [],
 
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -426,7 +426,7 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 			{
 				ClassType = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 					Name = "CleanUp",
 					GenericTypeCount = 0,
@@ -438,20 +438,20 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 						new global::TUnit.Core.TimeoutAttribute(30_000)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-{
+						{
 							Name = "cancellationToken",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -529,7 +529,7 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 			{
 				ClassType = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 					Name = "CleanUpWithContext",
 					GenericTypeCount = 0,
@@ -539,20 +539,20 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 						new global::TUnit.Core.AfterAttribute(global::TUnit.Core.HookType.Test)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "testContext",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -630,7 +630,7 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 			{
 				ClassType = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 					Name = "CleanUpWithContext",
 					GenericTypeCount = 0,
@@ -642,26 +642,26 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 						new global::TUnit.Core.TimeoutAttribute(30_000)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "testContext",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-{
+							{
 								Name = "cancellationToken",
 								Attributes = [],
 									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+							{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+								{
 									Name = "GlobalStaticAfterEachTests",
 									Attributes = [],
 									}),
@@ -723,7 +723,7 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 		[
 			new global::TUnit.Core.Hooks.AfterTestHookMethod
 			{ MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
 					Name = "AfterAll1",
 					GenericTypeCount = 0,
@@ -733,20 +733,20 @@ file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGener
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.Test)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "context",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalBase1", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -824,7 +824,7 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 		[
 			new global::TUnit.Core.Hooks.AfterTestHookMethod
 			{ MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
 					Name = "AfterAll2",
 					GenericTypeCount = 0,
@@ -834,20 +834,20 @@ file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGener
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.Test)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "context",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalBase2", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -925,7 +925,7 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 		[
 			new global::TUnit.Core.Hooks.AfterTestHookMethod
 			{ MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
 					Name = "AfterAll3",
 					GenericTypeCount = 0,
@@ -935,20 +935,20 @@ file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGener
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.Test)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "context",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalBase3", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -1026,7 +1026,7 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.AfterTestHookMethod
 			{ MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 					Name = "AfterAllCleanUp",
 					GenericTypeCount = 0,
@@ -1036,20 +1036,20 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.Test)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "context",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -1127,7 +1127,7 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.AfterTestHookMethod
 			{ MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 					Name = "AfterAllCleanUp",
 					GenericTypeCount = 0,
@@ -1137,26 +1137,26 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.Test)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "context",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-{
+							{
 								Name = "cancellationToken",
 								Attributes = [],
 									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+							{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+								{
 									Name = "GlobalStaticAfterEachTests",
 									Attributes = [],
 									}),
@@ -1234,7 +1234,7 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.AfterTestHookMethod
 			{ MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 					Name = "AfterAllCleanUpWithContext",
 					GenericTypeCount = 0,
@@ -1244,20 +1244,20 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.Test)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "context",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 						],
 						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+						{
 							Parent = null,
 							Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+							{
 								Name = "GlobalStaticAfterEachTests",
 								Attributes = [],
 								}),
@@ -1335,7 +1335,7 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 		[
 			new global::TUnit.Core.Hooks.AfterTestHookMethod
 			{ MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation
-{
+				{
 					Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 					Name = "AfterAllCleanUpWithContext",
 					GenericTypeCount = 0,
@@ -1345,26 +1345,26 @@ file partial class Hooks_GlobalCleanUpTests : global::TUnit.Core.Interfaces.Sour
 						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.Test)
 					],
 					Parameters = 
-[
+					[
 						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.Core.TestContext>
-{
+						{
 							Name = "context",
 							Attributes = [],
 								ReflectionInfo = null!,
 							},
 							new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
-{
+							{
 								Name = "cancellationToken",
 								Attributes = [],
 									ReflectionInfo = null!,
 								},
 							],
 							Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-{
+							{
 								Parent = null,
 								Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
 								Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("GlobalStaticAfterEachTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-{
+								{
 									Name = "GlobalStaticAfterEachTests",
 									Attributes = [],
 									}),
