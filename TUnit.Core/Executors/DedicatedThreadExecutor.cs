@@ -2,21 +2,19 @@
 
 public class DedicatedThreadExecutor : GenericAbstractExecutor
 {
-    protected override sealed async ValueTask ExecuteAsync(Func<ValueTask> action)
+    protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
-        var tcs = new TaskCompletionSource<object?>();
-
-        var thread = new Thread(() =>
+        var tcs = new TaskCompletionSource<object?>();        var thread = new Thread(() =>
         {
             try
             {
                 Initialize();
 
                 var valueTask = action();
-                
+
                 if (!valueTask.IsCompletedSuccessfully)
                 {
-                    valueTask.AsTask().GetAwaiter().GetResult();
+                    valueTask.GetAwaiter().GetResult();
                 }
 
                 tcs.SetResult(null);
@@ -32,7 +30,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
         });
 
         ConfigureThread(thread);
-        
+
         thread.Start();
 
         await tcs.Task;
@@ -41,7 +39,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
     protected virtual void ConfigureThread(Thread thread)
     {
     }
-    
+
     protected virtual void Initialize()
     {
     }

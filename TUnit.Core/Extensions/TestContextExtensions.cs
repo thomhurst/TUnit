@@ -143,6 +143,7 @@ public static class TestContextExtensions
 
         return disposableObjects
             .Where(x => x is IDisposable or IAsyncDisposable)
+            .Distinct()
             .OfType<object>();
     }
 
@@ -220,9 +221,7 @@ public static class TestContextExtensions
 
         if (!Sources.Properties.TryGetValue(obj.GetType(), out var properties))
         {
-#if NET
-            if (RuntimeFeature.IsDynamicCodeSupported)
-#endif
+            if (!SourceRegistrar.IsEnabled)
             {
                 properties = obj.GetType().GetProperties();
             }
