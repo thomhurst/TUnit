@@ -1,6 +1,8 @@
-﻿namespace TUnit.Core.Events;
+﻿using TUnit.Core.Interfaces;
 
-public class TestDisposeEventWrapper(AsyncEvent<TestContext>.Invocation invocation) : IAsyncDisposable
+namespace TUnit.Core.Events;
+
+public class TestDisposeEventWrapper(AsyncEvent<TestContext>.Invocation invocation) : IAsyncDisposable, IEventReceiver
 {
     public int Order => invocation.Order;
 

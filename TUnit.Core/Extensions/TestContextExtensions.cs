@@ -182,11 +182,11 @@ public static class TestContextExtensions
 
     private static IEnumerable<IEventReceiver> GetEvents(TestContextEvents contextEvents, EventType eventType)
     {
-        IEnumerable<IAsyncEventInvocation> events = eventType switch
+        return eventType switch
         {
-            EventType.Initialize => contextEvents.OnInitialize?.InvocationList ?? [],
-            EventType.Dispose => contextEvents.OnDispose?.InvocationList ?? [],
-            EventType.TestRegistered => contextEvents.OnTestRegistered?.InvocationList ?? [],
+            EventType.Initialize => contextEvents.OnInitialize?.InvocationList.Select(x => new TestInitializeEventWrapper(x)) ?? [],
+            EventType.Dispose => contextEvents.OnDispose?.InvocationList.Select(x => new TestDisposeEventWrapper(x)) ?? [],
+            EventType.TestRegistered => contextEvents.OnTestRegistered?.InvocationList.Select(x => new TestRegisteredEventWrapper(x)) ?? [],
             EventType.TestStart => contextEvents.OnTestStart?.InvocationList ?? [],
             EventType.TestEnd => contextEvents.OnTestEnd?.InvocationList ?? [],
             EventType.TestSkipped => contextEvents.OnTestSkipped?.InvocationList ?? [],

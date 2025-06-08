@@ -2,10 +2,10 @@
 
 namespace TUnit.Core.Events;
 
-public class TestInitializeEventWrapper(AsyncEvent<TestContext>.Invocation invocation) : IAsyncInitializer
+public class TestInitializeEventWrapper(AsyncEvent<TestContext>.Invocation invocation) : IAsyncInitializer, IEventReceiver
 {
     public int Order => invocation.Order;
-    
+
     public Task InitializeAsync()
     {
         return invocation.InvokeAsync(sender:this, eventArgs: TestContext.Current!).AsTask();
