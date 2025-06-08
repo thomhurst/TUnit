@@ -325,19 +325,19 @@ public static class TestContextExtensions
         }
 
         foreach (var property in (properties ?? [])
-                 .Where(x => x.GetIndexParameters().Length == 0)
-                 .Select(x => x.GetMethod?.IsStatic is true
-                     ? x.GetValue(null)
-                     : x.GetValue(obj)))
+                 .Where(x => x.GetIndexParameters().Length == 0))
         {
-            foreach (var innerProperty in CollectProperties(property))
+            // Optionally skip properties on generic parameter types
+            if (property.DeclaringType is { IsGenericParameter: true })
             {
-                yield return innerProperty;
+                continue;
             }
 
-            yield return property;
-        }
+            var value = property.GetMethod?.IsStatic == true
+                ? property.GetValue(null)
+                : property.GetValue(obj);
 
-        yield return obj;
+            yield return value;
+        }
     }
 }
