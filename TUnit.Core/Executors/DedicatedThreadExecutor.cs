@@ -13,7 +13,9 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
 
                 var previousContext = SynchronizationContext.Current;
                 var dedicatedContext = new DedicatedThreadSynchronizationContext();
+
                 SynchronizationContext.SetSynchronizationContext(dedicatedContext);
+                TestContext.Current!.SynchronizationContext = dedicatedContext;
 
                 try
                 {

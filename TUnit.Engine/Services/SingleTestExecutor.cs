@@ -48,7 +48,8 @@ internal class SingleTestExecutor(
 
     private static Task CreateTaskOnCurrentContext(Func<ValueTask> action)
     {
-        var context = SynchronizationContext.Current;
+        var context = SynchronizationContext.Current ?? TestContext.Current?.SynchronizationContext;
+
         if (context == null)
         {
             // No synchronization context, use Task.Run as fallback
@@ -469,31 +470,11 @@ internal class SingleTestExecutor(
         var timeout = discoveredTest.TestDetails.Timeout;
 
         await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token, cleanupExceptions), timeout, cancellationToken);
-    }    private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
+    }
+
+    private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
-        var context = SynchronizationContext.Current;
-        if (context == null)
-        {
-            // No synchronization context, use Task.Run as fallback
-            return Task.Run(() => testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions), cancellationToken);
-        }
-
-        var tcs = new TaskCompletionSource<object?>();
-
-        context.Post(async _ =>
-        {
-            try
-            {
-                await testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions).ConfigureAwait(true);
-                tcs.SetResult(null);
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-        }, null);
-
-        return tcs.Task;
+        return CreateTaskOnCurrentContext(async () => await testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions));
     }
 
     private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)
