@@ -137,7 +137,7 @@ public static class TestContextExtensions
             ..context.TestDetails.Attributes,
             context.InternalDiscoveredTest.ClassConstructor,
             context.TestDetails.ClassInstance,
-            GetEventObjects(context, EventType.Dispose),
+            ..GetEventObjects(context, EventType.Dispose),
             context
         ];
 
@@ -182,9 +182,9 @@ public static class TestContextExtensions
             context.InternalDiscoveredTest.ClassConstructor,
             ..context.TestDetails.Attributes,
             ..GetEvents(context.Events, eventType),
-            context.TestDetails.TestClassArguments,
+            ..context.TestDetails.TestClassArguments,
             context.TestDetails.ClassInstance,
-            context.TestDetails.TestMethodArguments,
+            ..context.TestDetails.TestMethodArguments,
             ..context.TestDetails.TestClassInjectedPropertyArguments.Select(p => CollectProperties(p.Value)),
         ];
     }

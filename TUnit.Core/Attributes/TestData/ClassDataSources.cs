@@ -107,11 +107,6 @@ internal class ClassDataSources
         throw new ArgumentOutOfRangeException();
     }
 
-    public Task InitializeObject(object? item)
-    {
-        return ObjectInitializer.InitializeAsync(item, CancellationToken.None);
-    }
-
     public async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string? key, T? item)
     {
         switch (shared)
@@ -136,65 +131,13 @@ internal class ClassDataSources
 
         if (isStatic)
         {
-            await Initialize(testContext, shared, key!, item);
+            await ObjectInitializer.InitializeAsync(item);
         }
 
         if (item is ITestRegisteredEventReceiver testRegisteredEventReceiver)
         {
             await testRegisteredEventReceiver.OnTestRegistered(new TestRegisteredContext(testContext.InternalDiscoveredTest));
         }
-    }
-
-    public async ValueTask OnInitialize<T>(TestContext testContext, bool isStatic, SharedType shared, string? key, T? item)
-    {
-        if (isStatic)
-        {
-            // Done already before test start
-            return;
-        }
-
-        await Initialize(testContext, shared, key, item);
-    }
-
-    public Task Initialize<T>(TestContext testContext, SharedType shared, string? key, T? item)
-    {
-        if (shared == SharedType.PerTestSession)
-        {
-            return GlobalInitializers.GetOrAdd(typeof(T), _ => InitializeObject(item));
-        }
-
-        if (shared == SharedType.None)
-        {
-            return InitializeObject(item);
-        }
-
-        if (shared == SharedType.PerClass)
-        {
-            var innerDictionary = TestClassTypeInitializers.GetOrAdd(typeof(T),
-                _ => new GetOnlyDictionary<Type, Task>());
-
-            return innerDictionary.GetOrAdd(testContext.TestDetails.TestClass.Type,
-                _ => InitializeObject(item));
-        }
-
-        if (shared == SharedType.PerAssembly)
-        {
-            var innerDictionary = AssemblyInitializers.GetOrAdd(typeof(T),
-                _ => new GetOnlyDictionary<Assembly, Task>());
-
-            return innerDictionary.GetOrAdd(testContext.TestDetails.TestClass.Type.Assembly,
-                _ => InitializeObject(item));
-        }
-
-        if (shared == SharedType.Keyed)
-        {
-            var innerDictionary = KeyedInitializers.GetOrAdd(typeof(T),
-                _ => new GetOnlyDictionary<string, Task>());
-
-            return innerDictionary.GetOrAdd(key!, _ => InitializeObject(item));
-        }
-
-        throw new ArgumentOutOfRangeException(nameof(shared));
     }
 
     public async ValueTask OnDispose<T>(TestContext testContext, SharedType shared, string? key, T? item)
@@ -323,16 +266,10 @@ internal class ClassDataSources
                     item);
             };
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, context) =>
+        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, _) =>
             {
-                await Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
-                    context,
-                    IsStaticProperty(dataGeneratorMetadata),
-                    sharedType,
-                    key,
-                    item);
+                await ObjectInitializer.InitializeAsync(item, CancellationToken.None);
             };
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize.Order = -1;
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
             {

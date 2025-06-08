@@ -121,63 +121,15 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
                     .Get(Shared.ElementAtOrDefault(0), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(0), dataGeneratorMetadata);
             }
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (obj, context) =>
+            for (var i = 0; i < items.Length; i++)
             {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestRegistered(
-                        context.TestContext,
-                        ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
-                        Shared.ElementAtOrDefault(0),
-                        Keys.ElementAtOrDefault(0),
-                        item);
-                }
-            };
+                var item = items[i];
 
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
-                        context,
-                        ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
-                        Shared.ElementAtOrDefault(0),
-                        Keys.ElementAtOrDefault(0),
-                        item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared.ElementAtOrDefault(0), Keys.ElementAtOrDefault(0), item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared.ElementAtOrDefault(0), Keys.ElementAtOrDefault(0), item);
-                }
-            };
+                ClassDataSources.RegisterEvents(item,
+                    dataGeneratorMetadata,
+                    Shared.ElementAtOrDefault(i),
+                    Keys.ElementAtOrDefault(i));
+            }
 
             return items;
         };
