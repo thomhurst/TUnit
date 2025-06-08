@@ -10,18 +10,6 @@ namespace TUnit.TestProject;
 [UnconditionalSuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
 public class STAThreadTests
 {
-    [Before(Test)]
-    [HookExecutor<STAThreadExecutor>]
-    public void BeforeTest()
-    {
-    }
-
-    [After(Test)]
-    [HookExecutor<STAThreadExecutor>]
-    public void AfterTest()
-    {
-    }
-
     [Test, STAThreadExecutor]
     public async Task With_STA()
     {
