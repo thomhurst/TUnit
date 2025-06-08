@@ -16,7 +16,7 @@ internal class NestedClassDataSourceDrivenTests : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(5);
+            await Assert.That(generatedFiles.Length).IsEqualTo(2);
         });
 
     [Test]
@@ -35,7 +35,14 @@ internal class NestedClassDataSourceDrivenTests : TestsBase
         new RunTestOptions
         {
             VerifyConfigurator = settingsTask => settingsTask.ScrubLinesContaining("PropertyInitializer_")
-                .UniqueForTargetFrameworkAndVersion()
+                .UniqueForTargetFrameworkAndVersion(),
+            AdditionalFiles =
+            [
+                Path.Combine(Sourcy.DotNet.Projects.TUnit_TestProject.FullName,
+                    "TUnit.TestProject",
+                    "Models",
+                    "InitialisableClass.cs")
+            ]
         },
         async generatedFiles =>
         {
