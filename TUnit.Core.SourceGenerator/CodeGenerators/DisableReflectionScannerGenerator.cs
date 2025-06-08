@@ -19,7 +19,6 @@ public class DisableReflectionScannerGenerator : IIncrementalGenerator
     {
         var sourceBuilder = new SourceCodeWriter();
 
-        sourceBuilder.Write("#pragma warning disable");
 
         sourceBuilder.Write("file static class DisableReflectionScanner_" + Guid.NewGuid().ToString("N"));
         sourceBuilder.Write("{");

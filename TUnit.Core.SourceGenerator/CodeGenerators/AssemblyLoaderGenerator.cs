@@ -54,7 +54,6 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         }
 
         var sourceBuilder = new SourceCodeWriter();
-        sourceBuilder.Write("#pragma warning disable");
         sourceBuilder.Write("file static class AssemblyLoader" + Guid.NewGuid().ToString("N"));
         sourceBuilder.Write("{");
         sourceBuilder.Write("[global::System.Runtime.CompilerServices.ModuleInitializer]");

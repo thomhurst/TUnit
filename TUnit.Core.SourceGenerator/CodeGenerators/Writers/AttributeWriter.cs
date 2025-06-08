@@ -51,13 +51,13 @@ public class AttributeWriter
     public static void WriteAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData)
     {
-        sourceCodeWriter.Write(GetAttributeObjectInitializer(context, attributeData));
+        sourceCodeWriter.Write(GetAttributeObjectInitializer(context, attributeData, sourceCodeWriter.TabLevel));
     }
 
     public static string GetAttributeObjectInitializer(GeneratorAttributeSyntaxContext context,
-        AttributeData attributeData)
+        AttributeData attributeData, int indentLevel)
     {
-        var sourceCodeWriter = new SourceCodeWriter();
+        var sourceCodeWriter = new SourceCodeWriter(indentLevel);
 
         var syntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
 
@@ -114,9 +114,9 @@ public class AttributeWriter
 
             sourceCodeWriter.Write($"{propertySymbol.Name} = ");
 
-            var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute);
+            var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute, sourceCodeWriter.TabLevel);
 
-            sourceCodeWriter.Write(DataSourceGeneratorContainer.GetPropertyAssignmentFromDataSourceGeneratorAttribute(innerAttribute, context, propertySymbol));
+            sourceCodeWriter.Write(DataSourceGeneratorContainer.GetPropertyAssignmentFromDataSourceGeneratorAttribute(innerAttribute, context, propertySymbol, sourceCodeWriter.TabLevel));
         }
     }
 

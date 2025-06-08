@@ -49,7 +49,6 @@ public class DynamicTestsGenerator : IIncrementalGenerator
 
             using var sourceBuilder = new SourceCodeWriter();
 
-            sourceBuilder.Write("#pragma warning disable");
             sourceBuilder.Write("using global::System.Linq;");
             sourceBuilder.Write("using global::System.Reflection;");
             sourceBuilder.Write("using global::TUnit.Core;");

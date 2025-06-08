@@ -96,7 +96,6 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
         {
             using var sourceBuilder = new SourceCodeWriter();
 
-            sourceBuilder.Write("#pragma warning disable");
             sourceBuilder.Write("using global::System;");
             sourceBuilder.Write("using global::System.Collections.Generic;");
             sourceBuilder.Write("using global::TUnit.Core;");
