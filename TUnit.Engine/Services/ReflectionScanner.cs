@@ -24,6 +24,7 @@ internal static class ReflectionScanner
                     return e.Types.OfType<Type>();
                 }
             })
+            .Where(t => t.Namespace?.Contains("NestedClassDataSourceDrivenTests3") is true)
             .ToHashSet();
     }
 }

@@ -238,9 +238,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             return;
         }
 
-        foreach (var property in obj.GetType()
-                     .GetProperties()
-                     .Where(p => p.SetMethod != null))
+        foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
         {
             if (property.GetValue(obj) is not {} propertyValue)
             {
@@ -263,14 +261,17 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     false);
 
                 propertyValue = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata).FirstOrDefault()?.Invoke()?[0];
+
+                property.SetValue(obj, propertyValue);
             }
 
-            property.SetValue(obj, propertyValue);
-
-            testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
+            if(propertyValue is IAsyncInitializer)
             {
-                await reflectionDataInitializer.Initialize(propertyValue, []);
-            };
+                testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
+                {
+                    await reflectionDataInitializer.Initialize(propertyValue, []);
+                };
+            }
 
             if (propertyValue is not null)
             {
