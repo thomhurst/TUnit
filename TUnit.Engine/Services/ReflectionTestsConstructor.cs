@@ -229,12 +229,16 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
         }
-    }    private void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
+    }
+
+    private void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
     {
         if (!visited.Add(obj))
         {
             return;
-        }        foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
+        }
+
+        foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
         {
             if (property.GetValue(obj) is not {} propertyValue)
             {
