@@ -113,7 +113,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 tests.Select(x => x.TestContext)
             );
 
-            await serviceProvider.DataInitializer.Initialize(tests);
+            await serviceProvider.ReflectionDataInitializer.InitializePending();
 
             var afterDiscoveryHooks = serviceProvider.TestDiscoveryHookOrchestrator.CollectAfterHooks();
 

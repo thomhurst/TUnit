@@ -26,6 +26,7 @@ namespace TUnit.Engine.Services;
 internal class ReflectionTestsConstructor(IExtension extension,
     DependencyCollector dependencyCollector,
     ContextManager contextManager,
+    ReflectionDataInitializer reflectionDataInitializer,
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
 {
     protected override DiscoveredTest[] DiscoverTests()
@@ -85,7 +86,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
     }
 
-    private static IEnumerable<DynamicTest> Build(Type type, MethodInfo[] testMethods)
+    private IEnumerable<DynamicTest> Build(Type type, MethodInfo[] testMethods)
     {
         var testsBuilderDynamicTests = new List<DynamicTest>();
 
@@ -125,7 +126,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         return testsBuilderDynamicTests;
     }
 
-    private static void BuildTests(Type type, Func<object?[]> classInstanceArguments, IDataAttribute typeDataAttribute, MethodInfo testMethod, IDataAttribute testDataAttribute,
+    private void BuildTests(Type type, Func<object?[]> classInstanceArguments, IDataAttribute typeDataAttribute, MethodInfo testMethod, IDataAttribute testDataAttribute,
         List<DynamicTest> testsBuilderDynamicTests, BaseTestAttribute testAttribute, TestBuilderContextAccessor testBuilderContextAccessor)
     {
         try
@@ -149,7 +150,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                              testBuilderContextAccessor))
                 {
                     var propertyArgs = GetPropertyArgs(type, invokedClassInstanceArguments, testInformation, testBuilderContextAccessor)
-                        .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
+                        .ToDictionary(p => p.PropertyInfo, p => p.Args().ElementAtOrDefault(0));
 
                     if (typeDataAttribute is not ClassConstructorAttribute)
                     {
@@ -191,8 +192,18 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         TestClassArguments = invokedClassInstanceArguments ??= classInstanceArguments(),
                         TestFilePath = testAttribute.File,
                         TestLineNumber = testAttribute.Line,
-                        Properties = propertyArgs
+                        Properties = propertyArgs.ToDictionary(x => x.Key.Name, x => x.Value),
                     });
+
+                    testBuilderContextAccessor.Current.Events.OnInitialize += async (_, context) =>
+                    {
+                        await reflectionDataInitializer.Initialize(context);
+                    };
+
+                    foreach (var (key, value) in propertyArgs.Where(x => x.Value is IAsyncInitializer && x.Key.GetMethod is { IsStatic: true }))
+                    {
+                        reflectionDataInitializer.RegisterForInitialize(value);
+                    }
 
                     testBuilderContextAccessor.Current = new TestBuilderContext();
 
@@ -213,7 +224,9 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
         }
-    }    private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
+    }
+
+    private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
     {
         if (!methodInfo.IsGenericMethodDefinition)
         {
@@ -228,7 +241,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         var typeParameterMap = new Dictionary<Type, Type>();
 
         // First pass: map type parameters that directly correspond to parameter types
-        for (int i = 0; i < parameters.Length && i < argumentsTypes.Length; i++)
+        for (var i = 0; i < parameters.Length && i < argumentsTypes.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
             var argumentType = argumentsTypes[i];
@@ -251,7 +264,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             {
                 // If we can't map the type parameter, try to infer it from the parameter position
                 var parameterIndex = -1;
-                for (int i = 0; i < parameters.Length; i++)
+                for (var i = 0; i < parameters.Length; i++)
                 {
                     if (parameters[i].ParameterType == typeArgument ||
                         (parameters[i].ParameterType.IsGenericType &&
@@ -306,7 +319,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 var parameterTypeArgs = parameterType.GetGenericArguments();
                 var argumentTypeArgs = argumentType.GetGenericArguments();
 
-                for (int i = 0; i < Math.Min(parameterTypeArgs.Length, argumentTypeArgs.Length); i++)
+                for (var i = 0; i < Math.Min(parameterTypeArgs.Length, argumentTypeArgs.Length); i++)
                 {
                     MapTypeParameters(parameterTypeArgs[i], argumentTypeArgs[i], typeParameterMap);
                 }
@@ -446,7 +459,9 @@ internal class ReflectionTestsConstructor(IExtension extension,
         foreach (var propertyInfo in properties)
         {
             var dataAttributes = GetDataAttributes(propertyInfo)[0];
+
             var args = GetArguments(type, null, propertyInfo, dataAttributes, DataGeneratorType.Property, () => classInstanceArguments, testInformation, testBuilderContextAccessor).ToArray();
+
             yield return (propertyInfo, args[0]);
         }
     }
