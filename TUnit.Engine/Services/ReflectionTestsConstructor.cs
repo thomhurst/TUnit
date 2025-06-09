@@ -154,7 +154,7 @@ internal class ReflectionTestsConstructor(
                 ..testInformation.Class.Assembly.Attributes
             ];
 
-            foreach (var attribute in allAttributes)
+            foreach (var attribute in allAttributes.Where(a => !DotNetAssemblyHelper.IsInDotNetCoreLibrary(a.GetType())))
             {
                 CreateNestedDataGenerators(attribute, testInformation, testBuilderContextAccessor, []);
             }
