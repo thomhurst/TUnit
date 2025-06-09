@@ -135,9 +135,9 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             Attribute[] allAttributes =
             [
-                ..testMethod.GetCustomAttributes(),
-                ..type.GetCustomAttributes(),
-                ..type.Assembly.GetCustomAttributes()
+                ..testInformation.Attributes,
+                ..testInformation.Class.Attributes,
+                ..testInformation.Class.Assembly.Attributes
             ];
 
             foreach (var attribute in allAttributes)
