@@ -241,7 +241,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
     }
 
-    // Represents a nested property for recursive property creation
     private class NestedProperty
     {
         public PropertyInfo Property { get; }
@@ -253,20 +252,31 @@ internal class ReflectionTestsConstructor(IExtension extension,
             Children = new List<NestedProperty>();
         }
 
-        public object? CreateValue(object parentInstance)
+        public object? CreateValue()
         {
+            var childValues = new List<(NestedProperty child, object? value)>();
+
+            foreach (var child in Children)
+            {
+                var childValue = child.CreateValue();
+                childValues.Add((child, childValue));
+            }
+
             var propertyType = Property.PropertyType;
 
             var value = Activator.CreateInstance(propertyType);
 
-            // Recursively create values for child properties
-            foreach (var child in Children)
+            foreach (var (child, childValue) in childValues)
             {
-                child.CreateValue(value);
+                child.SetValue(value, childValue);
             }
 
-            Property.SetValue(parentInstance, value);
             return value;
+        }
+
+        public void SetValue(object parentInstance, object? value)
+        {
+            Property.SetValue(parentInstance, value);
         }
     }
 
@@ -281,10 +291,8 @@ internal class ReflectionTestsConstructor(IExtension extension,
         var parameters = methodInfo.GetParameters();
         var argumentsTypes = arguments.Select(x => x?.GetType()).ToArray();
 
-        // Create a mapping from type parameters to concrete types
         var typeParameterMap = new Dictionary<Type, Type>();
 
-        // First pass: map type parameters that directly correspond to parameter types
         for (var i = 0; i < parameters.Length && i < argumentsTypes.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
@@ -296,7 +304,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
             }
         }
 
-        // Second pass: resolve any remaining unmapped type parameters
         List<Type> substituteTypes = [];
         foreach (var typeArgument in typeArguments)
         {
@@ -306,7 +313,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
             }
             else
             {
-                // If we can't map the type parameter, try to infer it from the parameter position
                 var parameterIndex = -1;
                 for (var i = 0; i < parameters.Length; i++)
                 {
@@ -323,7 +329,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 {
                     var inferredType = argumentsTypes[parameterIndex]!;
 
-                    // Handle nullable types
                     if (parameters[parameterIndex].ParameterType.IsGenericType &&
                         parameters[parameterIndex].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
@@ -346,7 +351,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
     {
         if (parameterType.IsGenericParameter)
         {
-            // Direct mapping: T -> int, T -> string, etc.
             if (!typeParameterMap.ContainsKey(parameterType))
             {
                 typeParameterMap[parameterType] = argumentType;
@@ -354,7 +358,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (parameterType.IsGenericType && argumentType.IsGenericType)
         {
-            // Handle generic types: List<T> -> List<int>, Dictionary<T, U> -> Dictionary<string, int>, etc.
             var parameterGenericDef = parameterType.GetGenericTypeDefinition();
             var argumentGenericDef = argumentType.GetGenericTypeDefinition();
 
@@ -371,7 +374,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
-            // Handle nullable types: T? -> int, T? -> int?
             var underlyingParameterType = parameterType.GetGenericArguments()[0];
             var underlyingArgumentType = Nullable.GetUnderlyingType(argumentType) ?? argumentType;
             MapTypeParameters(underlyingParameterType, underlyingArgumentType, typeParameterMap);
@@ -426,7 +428,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
             if (parameters.LastOrDefault()?.Type == typeof(CancellationToken)
                 && arguments.LastOrDefault() is not CancellationToken)
             {
-                // We'll add this later
                 return;
             }
 
@@ -455,7 +456,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         typedArray.SetValue(CastHelper.Cast(underlyingType, argumentsAfterParams[i]), i);
                     }
 
-                    // We have a params argument, so we can just add the rest of the arguments
                     arguments = [
                         ..argumentsBeforeParams,
                         typedArray
