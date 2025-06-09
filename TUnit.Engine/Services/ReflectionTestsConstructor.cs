@@ -244,9 +244,7 @@ internal class ReflectionTestsConstructor(
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
         }
-    }
-
-    private void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor,
+    }    private void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor,
         HashSet<object> visited)
     {
         if (!visited.Add(obj))
@@ -254,19 +252,72 @@ internal class ReflectionTestsConstructor(
             return;
         }
 
+        // Phase 1: Create basic nested instances first without calling data generation methods
+        // This ensures that objects exist before data generation methods that might depend on them are called
+        PopulateBasicNestedProperties(obj, methodInformation, testBuilderContextAccessor, visited);
+
+        // Phase 2: Now call data generation methods after all basic objects are created
+        PopulateDataGeneratedProperties(obj, methodInformation, testBuilderContextAccessor, visited);
+    }
+
+    private void PopulateBasicNestedProperties(object obj, SourceGeneratedMethodInformation methodInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
+    {
         foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
         {
-            if (property.GetValue(obj) is not { } propertyValue)
+            if (property.GetValue(obj) is not null)
             {
-                // Try to generate value using existing data generation logic
-                propertyValue = CreatePropertyValue(obj.GetType(), property, methodInformation, testBuilderContextAccessor);
-
-                if (propertyValue != null)
+                // Property already has a value, recursively populate its nested properties
+                var propertyValue = property.GetValue(obj);
+                if (propertyValue is not null)
                 {
-                    property.SetValue(obj, propertyValue);
+                    PopulateBasicNestedProperties(propertyValue, methodInformation, testBuilderContextAccessor, visited);
+                }
+                continue;
+            }
+
+            // Only create basic nested instances (no data generation yet)
+            if (ShouldCreateNestedInstance(property.PropertyType))
+            {
+                try
+                {
+                    var nestedInstance = Activator.CreateInstance(property.PropertyType);
+                    if (nestedInstance is not null)
+                    {
+                        property.SetValue(obj, nestedInstance);
+
+                        // Recursively populate the nested instance's basic properties
+                        PopulateBasicNestedProperties(nestedInstance, methodInformation, testBuilderContextAccessor, visited);
+                    }
+                }
+                catch
+                {
+                    // Ignore failures to create nested instances - they might require specific constructors
+                }
+            }
+        }
+    }
+
+    private void PopulateDataGeneratedProperties(object obj, SourceGeneratedMethodInformation methodInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
+    {
+        foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
+        {
+            var propertyValue = property.GetValue(obj);
+
+            // If the property has data attributes, try to generate value using data generation logic
+            var dataAttributes = GetDataAttributes(property);
+            if (dataAttributes.Any())
+            {
+                var generatedValue = CreatePropertyValue(obj.GetType(), property, methodInformation, testBuilderContextAccessor);
+                if (generatedValue != null)
+                {
+                    property.SetValue(obj, generatedValue);
+                    propertyValue = generatedValue;
                 }
             }
 
+            // Handle async initialization
             if (propertyValue is IAsyncInitializer)
             {
                 testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
@@ -275,9 +326,10 @@ internal class ReflectionTestsConstructor(
                 };
             }
 
+            // Recursively process nested objects
             if (propertyValue is not null)
             {
-                CreateNestedDataGenerators(propertyValue, methodInformation, testBuilderContextAccessor, visited);
+                PopulateDataGeneratedProperties(propertyValue, methodInformation, testBuilderContextAccessor, visited);
             }
         }
     }
@@ -569,9 +621,14 @@ internal class ReflectionTestsConstructor(
 
         foreach (var propertyInfo in properties)
         {
-            var dataAttributes = GetDataAttributes(propertyInfo)[0];
+            var dataAttribute = GetDataAttributes(propertyInfo).ElementAtOrDefault(0);
 
-            var args = GetArguments(type, null, propertyInfo, dataAttributes, DataGeneratorType.Property, () => classInstanceArguments, testInformation,
+            if (dataAttribute is null)
+            {
+                continue;
+            }
+
+            var args = GetArguments(type, null, propertyInfo, dataAttribute, DataGeneratorType.Property, () => classInstanceArguments, testInformation,
                 testBuilderContextAccessor).ToArray();
 
             yield return (propertyInfo, args[0]);
@@ -883,6 +940,11 @@ internal class ReflectionTestsConstructor(
         }
 
         return dataAttributes;
+    }
+
+    private static IEnumerable<IDataAttribute> GetDataAttributes(PropertyInfo property)
+    {
+        return property.GetCustomAttributes().OfType<IDataAttribute>();
     }
 
     private bool IsTest(MethodInfo arg)

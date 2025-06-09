@@ -40,6 +40,7 @@ TUnit operates in two distinct execution modes that must maintain behavioral par
 - Maintain consistent spacing between methods and logical code blocks
 - Use expression-bodied members for simple properties and methods
 - Follow standard .NET naming conventions (PascalCase for public members, _camelCase for private fields)
+- Don't pollute code with unnecessary comments; use meaningful names instead
 
 ### Performance Considerations
 - **Critical**: TUnit may be used by millions of developers - performance is paramount
