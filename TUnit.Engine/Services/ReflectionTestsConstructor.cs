@@ -51,7 +51,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         foreach (var type in allTypes.Where(x => x is { IsClass: true, IsAbstract: false }))
         {
             var testMethods = type.GetMethods()
-                .Where(x => !x.IsAbstract && IsTest(x))
+                .Where(x => !x.IsAbstract && x.IsDefined(typeof(TestAttribute)))
                 .ToArray();
 
             foreach (var dynamicTest in Build(type, testMethods))
@@ -238,46 +238,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             return;
         }
 
-        foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
-        {
-            if (property.GetValue(obj) is not {} propertyValue)
-            {
-                var dataSourceGeneratorAttribute = property.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().FirstOrDefault();
 
-                if (dataSourceGeneratorAttribute is null)
-                {
-                    continue;
-                }
-
-                var dataGeneratorMetadata = CreateDataGeneratorMetadata(obj.GetType(),
-                    null,
-                    property,
-                    dataSourceGeneratorAttribute,
-                    DataGeneratorType.Property,
-                    () => [],
-                    methodInformation,
-                    testBuilderContextAccessor,
-                    [],
-                    false);
-
-                propertyValue = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata).FirstOrDefault()?.Invoke()?[0];
-
-                property.SetValue(obj, propertyValue);
-            }
-
-            if(propertyValue is IAsyncInitializer)
-            {
-                testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
-                {
-                    await reflectionDataInitializer.Initialize(propertyValue, []);
-                };
-            }
-
-            if (propertyValue is not null)
-            {
-                CreateNestedDataGenerators(propertyValue, methodInformation, testBuilderContextAccessor, visited);
-            }
-        }
     }
 
     private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
@@ -827,17 +788,5 @@ internal class ReflectionTestsConstructor(IExtension extension,
         return dataAttributes;
     }
 
-    private bool IsTest(MethodInfo arg)
-    {
-        try
-        {
-            return arg.GetCustomAttributes()
-                .OfType<TestAttribute>()
-                .Any();
-        }
-        catch
-        {
-            return false;
-        }
-    }
+
 }

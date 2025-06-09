@@ -1,10 +1,11 @@
+using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
+
 namespace TUnit.Core;
 
-public class DedicatedThreadExecutor : GenericAbstractExecutor
+public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredEventReceiver
 {
     private static readonly DedicatedThreadTaskScheduler _dedicatedThreadTaskScheduler = new();
-
-    public override TaskScheduler GetTaskScheduler() => _dedicatedThreadTaskScheduler;
 
     protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
@@ -196,5 +197,12 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
         }
 
         public override int MaximumConcurrencyLevel => 1;
+    }
+
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    {
+        context.SetTaskScheduler(_dedicatedThreadTaskScheduler);
+        context.SetParallelLimiter(new ProcessorCountParallelLimit());
+        return default;
     }
 }

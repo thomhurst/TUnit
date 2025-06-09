@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core.Interfaces;
+﻿using TUnit.Core.Helpers;
+
+namespace TUnit.Core.Interfaces;
 
 /// <summary>
 /// Defines an interface for specifying the maximum degree of parallelism during test execution.
@@ -23,7 +25,7 @@
 /// </para>
 /// </remarks>
 /// <seealso cref="ParallelLimiterAttribute`1"/>
-/// <seealso cref="Helpers.DefaultParallelLimit"/>
+/// <seealso cref="ProcessorCountParallelLimit"/>
 /// <seealso cref="IParallelConstraint"/>
 public interface IParallelLimit
 {

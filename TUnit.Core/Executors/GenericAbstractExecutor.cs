@@ -2,10 +2,8 @@
 
 namespace TUnit.Core;
 
-public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor, ITestStartEventReceiver
+public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor
 {
-    public virtual TaskScheduler GetTaskScheduler() => TaskScheduler.Default;
-
     protected abstract ValueTask ExecuteAsync(Func<ValueTask> action);
 
     public ValueTask ExecuteBeforeTestDiscoveryHook(SourceGeneratedMethodInformation hookMethodInfo, BeforeTestDiscoveryContext context,
@@ -62,12 +60,6 @@ public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor, IT
     public ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
-    }
-
-    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
-    {
-        beforeTestContext.TestContext.TaskScheduler = GetTaskScheduler();
-        return default;
     }
 
     public int Order => 0;
