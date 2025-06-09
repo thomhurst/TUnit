@@ -51,7 +51,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         foreach (var type in allTypes.Where(x => x is { IsClass: true, IsAbstract: false }))
         {
             var testMethods = type.GetMethods()
-                .Where(x => !x.IsAbstract && x.IsDefined(typeof(TestAttribute)))
+                .Where(x => !x.IsAbstract && IsTest(x))
                 .ToArray();
 
             foreach (var dynamicTest in Build(type, testMethods))
@@ -229,55 +229,84 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
         }
-    }
-
-    private void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
+    }    private void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
     {
         if (!visited.Add(obj))
         {
             return;
-        }
+        }        foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
+        {
+            if (property.GetValue(obj) is not {} propertyValue)
+            {
+                // Try to generate value using existing data generation logic
+                propertyValue = CreatePropertyValue(obj.GetType(), property, methodInformation, testBuilderContextAccessor);
 
+                if (propertyValue != null)
+                {
+                    property.SetValue(obj, propertyValue);
+                }
+            }
 
+            if(propertyValue is IAsyncInitializer)
+            {
+                testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
+                {
+                    await reflectionDataInitializer.Initialize(propertyValue, []);
+                };
+            }
+
+            if (propertyValue is not null)
+            {
+                CreateNestedDataGenerators(propertyValue, methodInformation, testBuilderContextAccessor, visited);
+            }        }
+    }    private static IEnumerable<PropertyInfo> CollectSettableProperties(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor)
+    {
+        var type = obj.GetType();
+
+        return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.CanWrite &&
+                   (p.GetCustomAttributes().OfType<IDataAttribute>().Any() ||
+                    ShouldCreateNestedInstance(p.PropertyType)));
     }
 
-    private class NestedProperty
+    private static bool ShouldCreateNestedInstance(Type propertyType)
     {
-        public PropertyInfo Property { get; }
-        public List<NestedProperty> Children { get; }
+        // Create nested instances for complex types that have default constructors
+        // but skip basic types, strings, and value types
+        return propertyType.IsClass &&
+               propertyType != typeof(string) &&
+               !propertyType.IsAbstract &&
+               !propertyType.IsInterface &&
+               propertyType.GetConstructor(Type.EmptyTypes) != null;
+    }
 
-        public NestedProperty(PropertyInfo property)
+    private object? CreatePropertyValue(Type type, PropertyInfo property, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor)
+    {
+        var dataAttributes = GetDataAttributes(property);
+
+        foreach (var dataAttribute in dataAttributes)
         {
-            Property = property;
-            Children = new List<NestedProperty>();
-        }
+            // Reuse the existing GetArguments logic for property data generation
+            var argumentGenerators = GetArguments(
+                type,
+                null,
+                property,
+                dataAttribute,
+                DataGeneratorType.Property,
+                () => [],
+                methodInformation,
+                testBuilderContextAccessor
+            );
 
-        public object? CreateValue()
-        {
-            var childValues = new List<(NestedProperty child, object? value)>();
-
-            foreach (var child in Children)
+            var firstArgumentGenerator = argumentGenerators.FirstOrDefault();
+            if (firstArgumentGenerator != null)
             {
-                var childValue = child.CreateValue();
-                childValues.Add((child, childValue));
+                var arguments = firstArgumentGenerator();
+                return arguments?.FirstOrDefault();
             }
-
-            var propertyType = Property.PropertyType;
-
-            var value = Activator.CreateInstance(propertyType);
-
-            foreach (var (child, childValue) in childValues)
-            {
-                child.SetValue(value, childValue);
-            }
-
-            return value;
         }
 
-        public void SetValue(object parentInstance, object? value)
-        {
-            Property.SetValue(parentInstance, value);
-        }
+        return null;
     }
 
     private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
@@ -291,8 +320,10 @@ internal class ReflectionTestsConstructor(IExtension extension,
         var parameters = methodInfo.GetParameters();
         var argumentsTypes = arguments.Select(x => x?.GetType()).ToArray();
 
+        // Create a mapping from type parameters to concrete types
         var typeParameterMap = new Dictionary<Type, Type>();
 
+        // First pass: map type parameters that directly correspond to parameter types
         for (var i = 0; i < parameters.Length && i < argumentsTypes.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
@@ -304,6 +335,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             }
         }
 
+        // Second pass: resolve any remaining unmapped type parameters
         List<Type> substituteTypes = [];
         foreach (var typeArgument in typeArguments)
         {
@@ -313,6 +345,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             }
             else
             {
+                // If we can't map the type parameter, try to infer it from the parameter position
                 var parameterIndex = -1;
                 for (var i = 0; i < parameters.Length; i++)
                 {
@@ -329,6 +362,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 {
                     var inferredType = argumentsTypes[parameterIndex]!;
 
+                    // Handle nullable types
                     if (parameters[parameterIndex].ParameterType.IsGenericType &&
                         parameters[parameterIndex].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
@@ -351,6 +385,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
     {
         if (parameterType.IsGenericParameter)
         {
+            // Direct mapping: T -> int, T -> string, etc.
             if (!typeParameterMap.ContainsKey(parameterType))
             {
                 typeParameterMap[parameterType] = argumentType;
@@ -358,6 +393,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (parameterType.IsGenericType && argumentType.IsGenericType)
         {
+            // Handle generic types: List<T> -> List<int>, Dictionary<T, U> -> Dictionary<string, int>, etc.
             var parameterGenericDef = parameterType.GetGenericTypeDefinition();
             var argumentGenericDef = argumentType.GetGenericTypeDefinition();
 
@@ -374,6 +410,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
+            // Handle nullable types: T? -> int, T? -> int?
             var underlyingParameterType = parameterType.GetGenericArguments()[0];
             var underlyingArgumentType = Nullable.GetUnderlyingType(argumentType) ?? argumentType;
             MapTypeParameters(underlyingParameterType, underlyingArgumentType, typeParameterMap);
@@ -428,6 +465,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             if (parameters.LastOrDefault()?.Type == typeof(CancellationToken)
                 && arguments.LastOrDefault() is not CancellationToken)
             {
+                // We'll add this later
                 return;
             }
 
@@ -456,6 +494,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         typedArray.SetValue(CastHelper.Cast(underlyingType, argumentsAfterParams[i]), i);
                     }
 
+                    // We have a params argument, so we can just add the rest of the arguments
                     arguments = [
                         ..argumentsBeforeParams,
                         typedArray
@@ -817,5 +856,17 @@ internal class ReflectionTestsConstructor(IExtension extension,
         return dataAttributes;
     }
 
-
+    private bool IsTest(MethodInfo arg)
+    {
+        try
+        {
+            return arg.GetCustomAttributes()
+                .OfType<TestAttribute>()
+                .Any();
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
