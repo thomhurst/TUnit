@@ -42,36 +42,19 @@ internal class SingleTestExecutor(
     {
         lock (Lock)
         {
-            return test.TestContext.TestTask ??= CreateTaskOnCurrentContext(() => ExecuteTestInternalAsync(test, filter, isStartedAsDependencyForAnotherTest));
+            return test.TestContext.TestTask ??= CreateTaskOnCurrentContext(test.TestContext, async () => await ExecuteTestInternalAsync(test, filter, isStartedAsDependencyForAnotherTest));
         }
     }
 
-    private static Task CreateTaskOnCurrentContext(Func<ValueTask> action)
+    private static Task CreateTaskOnCurrentContext(TestContext testContext, Func<Task> action)
     {
-        var context = SynchronizationContext.Current ?? TestContext.Current?.SynchronizationContext;
+     var taskScheduler = testContext.TaskScheduler ?? TaskScheduler.Current;
 
-        if (context == null)
-        {
-            // No synchronization context, use Task.Run as fallback
-            return Task.Run(async () => await action());
-        }
-
-        var tcs = new TaskCompletionSource<object?>();
-
-        context.Post(async _ =>
-        {
-            try
-            {
-                await action();
-                tcs.SetResult(null);
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-        }, null);
-
-        return tcs.Task;
+        return Task.Factory.StartNew(action,
+            CancellationToken.None,
+            TaskCreationOptions.AttachedToParent,
+            taskScheduler)
+            .Unwrap();
     }
 
     private async ValueTask ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter,
@@ -474,7 +457,7 @@ internal class SingleTestExecutor(
 
     private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
-        return CreateTaskOnCurrentContext(async () => await testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions));
+        return CreateTaskOnCurrentContext(discoveredTest.TestContext, async () => await testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions));
     }
 
     private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)

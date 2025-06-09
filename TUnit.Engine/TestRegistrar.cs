@@ -15,12 +15,12 @@ internal class TestRegistrar(InstanceTracker instanceTracker, ObjectLifetimeMana
 
 			testContext.IsRegistered = true;
 
-			var testRegisteredEventsObjects = testContext.GetTestRegisteredEventsObjects();
-
 			var classType = testContext.TestDetails.TestClass.Type;
 
 			RegisterTestContext(classType);
             RegisterObjects(testContext);
+
+            var testRegisteredEventsObjects = testContext.GetTestRegisteredEventsObjects();
 
 			foreach (var testRegisteredEventsObject in testRegisteredEventsObjects)
 			{

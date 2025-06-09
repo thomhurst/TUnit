@@ -66,7 +66,7 @@ public partial class TestContext : Context
     /// </summary>
     public bool IsRegistered { get; internal set; }
 
-    public SynchronizationContext? SynchronizationContext { get; internal set; }
+    public TaskScheduler? TaskScheduler { get; set; }
 
     /// <summary>
     /// Gets or sets the start time of the test.

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 

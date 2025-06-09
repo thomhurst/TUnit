@@ -2,6 +2,10 @@ namespace TUnit.Core;
 
 public class DedicatedThreadExecutor : GenericAbstractExecutor
 {
+    private static readonly DedicatedThreadTaskScheduler _dedicatedThreadTaskScheduler = new();
+
+    public override TaskScheduler GetTaskScheduler() => _dedicatedThreadTaskScheduler;
+
     protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
         var tcs = new TaskCompletionSource<object?>();
@@ -14,25 +18,14 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
             {
                 Initialize();
 
-                var previousContext = SynchronizationContext.Current;
-                var dedicatedContext = new DedicatedThreadSynchronizationContext();
-                var taskScheduler = new DedicatedThreadTaskScheduler();
-
-                SynchronizationContext.SetSynchronizationContext(dedicatedContext);
-                TestContext.Current!.SynchronizationContext = dedicatedContext;
-
                 try
                 {
                     // Execute the action using our STA-safe async runner
-                    ExecuteAsyncActionWithMessagePump(action, dedicatedContext, taskScheduler, tcs);
+                    ExecuteAsyncActionWithMessagePump(action, _dedicatedThreadTaskScheduler, tcs);
                 }
                 catch (Exception e)
                 {
                     capturedException = e;
-                }
-                finally
-                {
-                    SynchronizationContext.SetSynchronizationContext(previousContext);
                 }
             }
             catch (Exception e)
@@ -55,29 +48,29 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
         thread.Start();
 
         await tcs.Task;
-    }    private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, DedicatedThreadSynchronizationContext context, DedicatedThreadTaskScheduler taskScheduler, TaskCompletionSource<object?> tcs)
+        // Removed WaitForAllWork from here; message pump now handles all work on the dedicated thread
+    }
+
+    private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, DedicatedThreadTaskScheduler taskScheduler, TaskCompletionSource<object?> tcs)
     {
         try
         {
-            // Start the async action
             var valueTask = action();
-            
+
             if (valueTask.IsCompletedSuccessfully)
             {
-                // Already completed synchronously
                 tcs.SetResult(null);
+                taskScheduler.ProcessPendingTasks();
                 return;
             }
 
-            // Convert to Task and continue on our dedicated thread
             var task = valueTask.AsTask();
-            
-            // Use ContinueWith to ensure the continuation runs on our thread
+
             task.ContinueWith(t =>
             {
                 if (t.IsFaulted)
                 {
-                    tcs.SetException(t.Exception?.InnerException ?? t.Exception!);
+                    tcs.SetException(t.Exception);
                 }
                 else if (t.IsCanceled)
                 {
@@ -89,15 +82,14 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
                 }
             }, CancellationToken.None, TaskContinuationOptions.None, taskScheduler);
 
-            // Message pump: process pending work until our task completes
+            // Message pump: process pending work until both the main task and all work items are complete
             while (!tcs.Task.IsCompleted)
             {
-                context.ProcessPendingWork();
                 taskScheduler.ProcessPendingTasks();
-                
-                // Small delay to prevent excessive CPU usage
                 Thread.Sleep(1);
             }
+
+            taskScheduler.ProcessPendingTasks();
         }
         catch (Exception ex)
         {
@@ -115,101 +107,6 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
 
     protected virtual void CleanUp()
     {
-    }
-
-    internal sealed class DedicatedThreadSynchronizationContext : SynchronizationContext
-    {
-        private readonly Thread _dedicatedThread;
-        private readonly Queue<(SendOrPostCallback callback, object? state)> _workQueue = new();
-        private readonly object _queueLock = new object();
-
-        public DedicatedThreadSynchronizationContext()
-        {
-            _dedicatedThread = Thread.CurrentThread;
-        }
-
-        public override void Post(SendOrPostCallback d, object? state)
-        {
-            lock (_queueLock)
-            {
-                _workQueue.Enqueue((d, state));
-            }
-        }
-
-        public override void Send(SendOrPostCallback d, object? state)
-        {
-            if (Thread.CurrentThread == _dedicatedThread)
-            {
-                // We're on the correct thread, execute immediately
-                d(state);
-            }
-            else
-            {
-                // We're on a different thread, queue the work and wait
-                var waitHandle = new ManualResetEventSlim(false);
-                Exception? exception = null;
-
-                Post((s) =>
-                {
-                    try
-                    {
-                        d(state);
-                    }
-                    catch (Exception ex)
-                    {
-                        exception = ex;
-                    }
-                    finally
-                    {
-                        waitHandle.Set();
-                    }
-                }, null);
-
-                waitHandle.Wait();
-
-                if (exception != null)
-                {
-                    throw exception;
-                }
-            }
-        }
-
-        public void ProcessPendingWork()
-        {
-            // Only the dedicated thread should call this
-            if (Thread.CurrentThread != _dedicatedThread)
-            {
-                return;
-            }
-
-            while (true)
-            {
-                (SendOrPostCallback callback, object? state) work;
-
-                lock (_queueLock)
-                {
-                    if (_workQueue.Count == 0)
-                    {
-                        break;
-                    }
-
-                    work = _workQueue.Dequeue();
-                }
-
-                try
-                {
-                    work.callback(work.state);
-                }
-                catch
-                {
-                    // Ignore exceptions in async continuations during processing
-                    // The actual exception will be handled by the task
-                }
-            }
-        }        public override SynchronizationContext CreateCopy()
-        {
-            return this; // Return the same instance to ensure continuity
-        }
     }
 
     internal sealed class DedicatedThreadTaskScheduler : TaskScheduler

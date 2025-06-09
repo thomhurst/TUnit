@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Events;
 using TUnit.Core.Helpers;
@@ -13,8 +11,6 @@ namespace TUnit.Core.Extensions;
 /// </summary>
 public static class TestContextExtensions
 {
-    private static readonly char[] ClassTypeNameSplitter = { '.' };
-
     /// <summary>
     /// Gets the tests for the specified test name.
     /// </summary>
@@ -111,21 +107,21 @@ public static class TestContextExtensions
     }
 
     internal static IEnumerable<ITestRegisteredEventReceiver> GetTestRegisteredEventsObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.TestRegistered).OfType<ITestRegisteredEventReceiver>();
+        GetEvents(context, EventType.TestRegistered).OfType<ITestRegisteredEventReceiver>();
 
     internal static IEnumerable<ITestStartEventReceiver> GetTestStartEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.TestStart).OfType<ITestStartEventReceiver>();
+        GetEvents(context, EventType.TestStart).OfType<ITestStartEventReceiver>();
 
     internal static IEnumerable<IAsyncInitializer> GetOnInitializeObjects(this TestContext context)
     {
-        return GetEvents(context.Events, EventType.Initialize).OfType<IAsyncInitializer>();
+        return GetEvents(context, EventType.Initialize).OfType<IAsyncInitializer>();
     }
 
     internal static IEnumerable<ITestRetryEventReceiver> GetTestRetryEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.TestRetry).OfType<ITestRetryEventReceiver>();
+        GetEvents(context, EventType.TestRetry).OfType<ITestRetryEventReceiver>();
 
     internal static IEnumerable<ITestEndEventReceiver> GetTestEndEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.TestEnd).OfType<ITestEndEventReceiver>();
+        GetEvents(context, EventType.TestEnd).OfType<ITestEndEventReceiver>();
 
     internal static IEnumerable<object> GetOnDisposeObjects(this TestContext context)
     {
@@ -134,7 +130,7 @@ public static class TestContextExtensions
             ..context.TestDetails.Attributes,
             context.InternalDiscoveredTest.ClassConstructor,
             context.TestDetails.ClassInstance,
-            ..GetEvents(context.Events, EventType.Dispose),
+            ..GetEvents(context, EventType.Dispose),
             context
         ];
 
@@ -145,25 +141,25 @@ public static class TestContextExtensions
     }
 
     internal static IEnumerable<ITestSkippedEventReceiver> GetTestSkippedEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.TestSkipped).OfType<ITestSkippedEventReceiver>();
+        GetEvents(context, EventType.TestSkipped).OfType<ITestSkippedEventReceiver>();
 
     internal static IEnumerable<ILastTestInClassEventReceiver> GetLastTestInClassEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.LastTestInClass).OfType<ILastTestInClassEventReceiver>();
+        GetEvents(context, EventType.LastTestInClass).OfType<ILastTestInClassEventReceiver>();
 
     internal static IEnumerable<ILastTestInAssemblyEventReceiver> GetLastTestInAssemblyEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.LastTestInAssembly).OfType<ILastTestInAssemblyEventReceiver>();
+        GetEvents(context, EventType.LastTestInAssembly).OfType<ILastTestInAssemblyEventReceiver>();
 
     internal static IEnumerable<ILastTestInTestSessionEventReceiver> GetLastTestInTestSessionEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.LastTestInTestSession).OfType<ILastTestInTestSessionEventReceiver>();
+        GetEvents(context, EventType.LastTestInTestSession).OfType<ILastTestInTestSessionEventReceiver>();
 
     internal static IEnumerable<IFirstTestInClassEventReceiver> GetFirstTestInClassEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.FirstTestInClass).OfType<IFirstTestInClassEventReceiver>();
+        GetEvents(context, EventType.FirstTestInClass).OfType<IFirstTestInClassEventReceiver>();
 
     internal static IEnumerable<IFirstTestInAssemblyEventReceiver> GetFirstTestInAssemblyEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.FirstTestInAssembly).OfType<IFirstTestInAssemblyEventReceiver>();
+        GetEvents(context, EventType.FirstTestInAssembly).OfType<IFirstTestInAssemblyEventReceiver>();
 
     internal static IEnumerable<IFirstTestInTestSessionEventReceiver> GetFirstTestInTestSessionEventObjects(this TestContext context) =>
-        GetEvents(context.Events, EventType.FirstTestInTestSession).OfType<IFirstTestInTestSessionEventReceiver>();
+        GetEvents(context, EventType.FirstTestInTestSession).OfType<IFirstTestInTestSessionEventReceiver>();
 
     internal static object?[] GetPossibleEventObjects(this TestContext context)
     {
@@ -181,6 +177,8 @@ public static class TestContextExtensions
         [
             ..staticProperties,
             context.InternalDiscoveredTest.ClassConstructor,
+            context.InternalDiscoveredTest.HookExecutor,
+            context.InternalDiscoveredTest.TestExecutor,
             ..attributes,
             ..context.TestDetails.TestClassArguments,
             context.TestDetails.ClassInstance,
@@ -193,7 +191,7 @@ public static class TestContextExtensions
 
     private static IEnumerable<object?> CollectAttributes(Attribute[] attributes)
     {
-        foreach (var attribute in attributes.Skip(69))
+        foreach (var attribute in attributes)
         {
             foreach (var attributeProperty in CollectProperties(attribute))
             {
@@ -204,9 +202,11 @@ public static class TestContextExtensions
         }
     }
 
-    private static IEnumerable<IEventReceiver> GetEvents(TestContextEvents contextEvents, EventType eventType)
+    private static IEnumerable<IEventReceiver> GetEvents(TestContext context, EventType eventType)
     {
-        return GetEventReceiversEnumerable(contextEvents, eventType)
+        return GetPossibleEventObjects(context)
+            .OfType<IEventReceiver>()
+            .Concat(GetEventReceiversEnumerable(context.Events, eventType))
             .Distinct()
             .OrderBy(x => x.Order);
     }

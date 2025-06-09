@@ -1,6 +1,4 @@
-﻿using TUnit.Core.Interfaces;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public abstract class DependencyInjectionDataSourceAttribute<TScope> : NonTypedDataSourceGeneratorAttribute
 {

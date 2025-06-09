@@ -1,6 +1,4 @@
-﻿using TUnit.Core.Interfaces;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 /// <summary>
 /// Represents the events for a test context.
