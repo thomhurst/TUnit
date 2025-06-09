@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Events;
 using TUnit.Core.Helpers;
@@ -165,7 +166,17 @@ public static class TestContextExtensions
     {
         var staticProperties = context.TestDetails.TestClass.Properties
             .Where(x => x.IsStatic)
-            .Select(x => x.Getter(null));
+            .Select(x =>
+            {
+                try
+                {
+                    return x.Getter(null);
+                }
+                catch
+                {
+                    return null;
+                }
+            });
 
         var instanceProperties = context.TestDetails.TestClassInjectedPropertyArguments
             .Select(p => CollectProperties(p.Value))
@@ -332,11 +343,26 @@ public static class TestContextExtensions
                 continue;
             }
 
-            var value = property.GetMethod?.IsStatic == true
-                ? property.GetValue(null)
-                : property.GetValue(obj);
+            var value = GetValue(property);
 
-            yield return value;
+            if (value is not null)
+            {
+                yield return value;
+            }
+        }
+
+        object? GetValue(PropertyInfo property)
+        {
+            try
+            {
+                return property.GetMethod?.IsStatic == true
+                    ? property.GetValue(null)
+                    : property.GetValue(obj);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

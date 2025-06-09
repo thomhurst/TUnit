@@ -52,7 +52,7 @@ internal class SingleTestExecutor(
 
         return Task.Factory.StartNew(action,
             CancellationToken.None,
-            TaskCreationOptions.AttachedToParent,
+            TaskCreationOptions.None,
             taskScheduler)
             .Unwrap();
     }
