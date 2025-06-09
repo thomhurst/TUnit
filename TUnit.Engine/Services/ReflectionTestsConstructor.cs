@@ -241,6 +241,35 @@ internal class ReflectionTestsConstructor(IExtension extension,
 
     }
 
+    // Represents a nested property for recursive property creation
+    private class NestedProperty
+    {
+        public PropertyInfo Property { get; }
+        public List<NestedProperty> Children { get; }
+
+        public NestedProperty(PropertyInfo property)
+        {
+            Property = property;
+            Children = new List<NestedProperty>();
+        }
+
+        public object? CreateValue(object parentInstance)
+        {
+            var propertyType = Property.PropertyType;
+
+            var value = Activator.CreateInstance(propertyType);
+
+            // Recursively create values for child properties
+            foreach (var child in Children)
+            {
+                child.CreateValue(value);
+            }
+
+            Property.SetValue(parentInstance, value);
+            return value;
+        }
+    }
+
     private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
     {
         if (!methodInfo.IsGenericMethodDefinition)
