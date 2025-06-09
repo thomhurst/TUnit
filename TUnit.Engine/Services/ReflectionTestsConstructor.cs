@@ -113,7 +113,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             }
             catch (Exception e)
             {
-                testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest
+                testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest(testMethod)
                 {
                     MethodName = testMethod.Name,
                     TestFilePath = testAttribute.File,
@@ -139,6 +139,11 @@ internal class ReflectionTestsConstructor(IExtension extension,
                 ..type.GetCustomAttributes(),
                 ..type.Assembly.GetCustomAttributes()
             ];
+
+            foreach (var attribute in allAttributes)
+            {
+                CreateNestedDataGenerators(attribute, testInformation, testBuilderContextAccessor, []);
+            }
 
             var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
@@ -200,7 +205,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
                         await reflectionDataInitializer.Initialize(context);
                     };
 
-                    foreach (var (key, value) in propertyArgs.Where(x => x.Value is IAsyncInitializer && x.Key.GetMethod is { IsStatic: true }))
+                    foreach (var (_, value) in propertyArgs.Where(x => x.Value is IAsyncInitializer && x.Key.GetMethod is { IsStatic: true }))
                     {
                         reflectionDataInitializer.RegisterForInitialize(value);
                     }
@@ -213,7 +218,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         catch (Exception e)
         {
-            testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest
+            testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest(testMethod)
             {
                 MethodName = testMethod.Name,
                 TestFilePath = testAttribute.File,
@@ -223,6 +228,54 @@ internal class ReflectionTestsConstructor(IExtension extension,
             });
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
+        }
+    }
+
+    private void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
+    {
+        if (!visited.Add(obj))
+        {
+            return;
+        }
+
+        foreach (var property in obj.GetType()
+                     .GetProperties()
+                     .Where(p => p.SetMethod != null))
+        {
+            if (property.GetValue(obj) is not {} propertyValue)
+            {
+                var dataSourceGeneratorAttribute = property.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().FirstOrDefault();
+
+                if (dataSourceGeneratorAttribute is null)
+                {
+                    continue;
+                }
+
+                var dataGeneratorMetadata = CreateDataGeneratorMetadata(obj.GetType(),
+                    null,
+                    property,
+                    dataSourceGeneratorAttribute,
+                    DataGeneratorType.Property,
+                    () => [],
+                    methodInformation,
+                    testBuilderContextAccessor,
+                    [],
+                    false);
+
+                propertyValue = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata).FirstOrDefault()?.Invoke()?[0];
+            }
+
+            property.SetValue(obj, propertyValue);
+
+            testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
+            {
+                await reflectionDataInitializer.Initialize(propertyValue, []);
+            };
+
+            if (propertyValue is not null)
+            {
+                CreateNestedDataGenerators(propertyValue, methodInformation, testBuilderContextAccessor, visited);
+            }
         }
     }
 
@@ -355,7 +408,6 @@ internal class ReflectionTestsConstructor(IExtension extension,
                     ..arguments.Take(arguments.Length - 1),
                     typedArray
                 ];
-                return;
             }
 
             return;
@@ -532,45 +584,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
             var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
 
             var invoke = dataSourceGeneratorAttribute.GetType().GetMethod("GenerateDataSources")!.Invoke(testDataAttribute, [
-                new DataGeneratorMetadata
-                {
-                    Type = dataGeneratorType,
-                    TestInformation = testInformation,
-                    ClassInstanceArguments = classInstanceArgumentsInvoked,
-                    MembersToGenerate = dataGeneratorType switch
-                    {
-                        DataGeneratorType.TestParameters => method!.GetParameters()
-                            .Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
-                            {
-                                Name = x.Name!,
-                                Attributes = x.GetCustomAttributes().ToArray(),
-                                ReflectionInfo = x,
-                            }).ToArray<SourceGeneratedMemberInformation>(),
-                        DataGeneratorType.ClassParameters => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?
-                            .GetParameters()
-                            .Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
-                            {
-                                Name = x.Name!,
-                                Attributes = x.GetCustomAttributes().ToArray(),
-                                ReflectionInfo = x,
-                            }).ToArray<SourceGeneratedMemberInformation>() ?? [],
-                        DataGeneratorType.Property =>
-                        [
-                            new SourceGeneratedPropertyInformation
-                            {
-                                Name = propertyInfo!.Name,
-                                Attributes = propertyInfo.GetCustomAttributes().ToArray(),
-                                Type = propertyInfo.PropertyType,
-                                IsStatic = propertyInfo.GetMethod?.IsStatic ?? false,
-                                Getter = propertyInfo.GetValue
-                            }
-                        ],
-                        _ => throw new ArgumentOutOfRangeException(nameof(dataGeneratorType), dataGeneratorType, null)
-                    },
-                    TestBuilderContext = testBuilderContextAccessor,
-                    TestClassInstance = needsInstance ? CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out _) : null,
-                    TestSessionId = string.Empty,
-                }
+                CreateDataGeneratorMetadata(type, method, propertyInfo, testDataAttribute, dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor, classInstanceArgumentsInvoked, needsInstance)
             ]) as IEnumerable;
 
             var funcEnumerable = invoke?.Cast<object>() ?? [];
@@ -601,7 +615,7 @@ internal class ReflectionTestsConstructor(IExtension extension,
         }
         else if (testDataAttribute is InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute)
         {
-            var instance = CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out var exception);
+            var instance = CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out _);
 
             var methodDataSourceType = instanceMethodDataSourceAttribute.ClassProvidingDataSource ?? type;
 
@@ -733,6 +747,56 @@ internal class ReflectionTestsConstructor(IExtension extension,
             throw new ArgumentOutOfRangeException(nameof(testDataAttribute));
         }
     }
+
+    private static DataGeneratorMetadata CreateDataGeneratorMetadata(Type type,
+        MethodInfo? method,
+        PropertyInfo? propertyInfo,
+        IDataAttribute testDataAttribute,
+        DataGeneratorType dataGeneratorType,
+        Func<object?[]> classInstanceArguments,
+        SourceGeneratedMethodInformation testInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor,
+        object?[]? classInstanceArgumentsInvoked,
+        bool needsInstance) =>
+        new()
+        {
+            Type = dataGeneratorType,
+            TestInformation = testInformation,
+            ClassInstanceArguments = classInstanceArgumentsInvoked,
+            MembersToGenerate = dataGeneratorType switch
+            {
+                DataGeneratorType.TestParameters => method!.GetParameters()
+                    .Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
+                    {
+                        Name = x.Name!,
+                        Attributes = x.GetCustomAttributes().ToArray(),
+                        ReflectionInfo = x,
+                    }).ToArray<SourceGeneratedMemberInformation>(),
+                DataGeneratorType.ClassParameters => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?
+                    .GetParameters()
+                    .Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
+                    {
+                        Name = x.Name!,
+                        Attributes = x.GetCustomAttributes().ToArray(),
+                        ReflectionInfo = x,
+                    }).ToArray<SourceGeneratedMemberInformation>() ?? [],
+                DataGeneratorType.Property =>
+                [
+                    new SourceGeneratedPropertyInformation
+                    {
+                        Name = propertyInfo!.Name,
+                        Attributes = propertyInfo.GetCustomAttributes().ToArray(),
+                        Type = propertyInfo.PropertyType,
+                        IsStatic = propertyInfo.GetMethod?.IsStatic ?? false,
+                        Getter = propertyInfo.GetValue
+                    }
+                ],
+                _ => throw new ArgumentOutOfRangeException(nameof(dataGeneratorType), dataGeneratorType, null)
+            },
+            TestBuilderContext = testBuilderContextAccessor,
+            TestClassInstance = needsInstance ? CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out _) : null,
+            TestSessionId = string.Empty,
+        };
 
     private static object InvokeMethodDataSource(Type methodDataSourceType, MethodDataSourceAttribute methodDataSourceAttribute)
     {

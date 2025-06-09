@@ -56,7 +56,7 @@ internal class ReflectionDataInitializer
             }
         }
 
-        foreach (var propertyInfo in type.GetProperties())
+        foreach (var propertyInfo in type.GetProperties().Where(p => p.GetMethod != null))
         {
             if (propertyInfo.GetIndexParameters().Length == 0)
             {
