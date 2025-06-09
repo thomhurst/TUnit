@@ -2,8 +2,6 @@ namespace TUnit.Core;
 
 public class DedicatedThreadExecutor : GenericAbstractExecutor
 {
-    private SpinWait _spinWait = new();
-
     protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
         var tcs = new TaskCompletionSource<object?>();
@@ -18,6 +16,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
 
                 var previousContext = SynchronizationContext.Current;
                 var dedicatedContext = new DedicatedThreadSynchronizationContext();
+                var taskScheduler = new DedicatedThreadTaskScheduler();
 
                 SynchronizationContext.SetSynchronizationContext(dedicatedContext);
                 TestContext.Current!.SynchronizationContext = dedicatedContext;
@@ -25,7 +24,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
                 try
                 {
                     // Execute the action using our STA-safe async runner
-                    ExecuteAsyncActionWithMessagePump(action, dedicatedContext, tcs);
+                    ExecuteAsyncActionWithMessagePump(action, dedicatedContext, taskScheduler, tcs);
                 }
                 catch (Exception e)
                 {
@@ -56,47 +55,57 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor
         thread.Start();
 
         await tcs.Task;
-    }
-
-    private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, DedicatedThreadSynchronizationContext context, TaskCompletionSource<object?> tcs)
+    }    private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, DedicatedThreadSynchronizationContext context, DedicatedThreadTaskScheduler taskScheduler, TaskCompletionSource<object?> tcs)
     {
         try
         {
-            var taskScheduler = new DedicatedThreadTaskScheduler();
-
-            // Execute the action with our custom task scheduler
-            var task = Task.Factory.StartNew(async () =>
+            // Start the async action
+            var valueTask = action();
+            
+            if (valueTask.IsCompletedSuccessfully)
             {
-                try
-                {
-                    await action().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    tcs.SetException(ex);
-                    return;
-                }
-
+                // Already completed synchronously
                 tcs.SetResult(null);
-            }, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Unwrap();
+                return;
+            }
 
-            // Run a message pump to handle async continuations on this thread
-            while (!task.IsCompleted)
+            // Convert to Task and continue on our dedicated thread
+            var task = valueTask.AsTask();
+            
+            // Use ContinueWith to ensure the continuation runs on our thread
+            task.ContinueWith(t =>
             {
-                // Process any pending work on this synchronization context
+                if (t.IsFaulted)
+                {
+                    tcs.SetException(t.Exception?.InnerException ?? t.Exception!);
+                }
+                else if (t.IsCanceled)
+                {
+                    tcs.SetCanceled();
+                }
+                else
+                {
+                    tcs.SetResult(null);
+                }
+            }, CancellationToken.None, TaskContinuationOptions.None, taskScheduler);
+
+            // Message pump: process pending work until our task completes
+            while (!tcs.Task.IsCompleted)
+            {
                 context.ProcessPendingWork();
-
-                // Process any pending tasks in our task scheduler
                 taskScheduler.ProcessPendingTasks();
-
-                _spinWait.SpinOnce();
+                
+                // Small delay to prevent excessive CPU usage
+                Thread.Sleep(1);
             }
         }
         catch (Exception ex)
         {
             tcs.SetException(ex);
         }
-    }protected virtual void ConfigureThread(Thread thread)
+    }
+
+    protected virtual void ConfigureThread(Thread thread)
     {
     }
 
