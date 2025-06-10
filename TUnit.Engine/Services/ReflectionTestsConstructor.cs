@@ -14,20 +14,20 @@ using TUnit.Engine.Helpers;
 namespace TUnit.Engine.Services;
 
 [UnconditionalSuppressMessage("Trimming",
-    "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
 [UnconditionalSuppressMessage("Trimming",
-    "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
 [UnconditionalSuppressMessage("Trimming",
-    "IL2067:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
-[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The parameter of method does not have matching annotations.")]
+[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
 [UnconditionalSuppressMessage("Trimming",
-    "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
+    "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code")]
 [UnconditionalSuppressMessage("Trimming",
-    "IL2070:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
+    "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The parameter of method does not have matching annotations.")]
 [UnconditionalSuppressMessage("Trimming",
-    "IL2055:Either the type on which the MakeGenericType is called can\'t be statically determined, or the type parameters to be used for generic arguments can\'t be statically determined.")]
+    "IL2055:Either the type on which the MakeGenericType is called can't be statically determined, or the type parameters to be used for generic arguments can't be statically determined.")]
 [UnconditionalSuppressMessage("Trimming",
-    "IL2060:MakeGenericMethod call does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    "IL2060:MakeGenericMethod call does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
 [UnconditionalSuppressMessage("Trimming", "IL2111:Reflection")]
 internal class ReflectionTestsConstructor(
     IExtension extension,
@@ -259,7 +259,6 @@ internal class ReflectionTestsConstructor(
             .Reverse()
             .ToArray();
 
-        // Process properties in reverse order to handle nested dependencies
         foreach (var property in properties)
         {
 
@@ -271,14 +270,11 @@ internal class ReflectionTestsConstructor(
             {
                 try
                 {
-                    // Create an instance of the data source generator attribute type
                     var attributeInstance = Activator.CreateInstance(dataSourceGeneratorAttribute.GetType());
                     if (attributeInstance != null)
                     {
-                        // Recursively process nested properties on the attribute instance first
                         CreateNestedDataGenerators(attributeInstance, methodInformation, testBuilderContextAccessor, visited);
 
-                        // Now generate data using the attribute instance
                         var dataGeneratorMetadata = CreateDataGeneratorMetadata(
                             type,
                             null,
@@ -310,7 +306,6 @@ internal class ReflectionTestsConstructor(
                 }
                 catch (Exception)
                 {
-                    // Silently continue on error
                 }
             }
             else
@@ -327,7 +322,6 @@ internal class ReflectionTestsConstructor(
 
         foreach (var dataAttribute in dataAttributes)
         {
-            // Reuse the existing GetArguments logic for property data generation
             var argumentGenerators = GetArguments(
                 type,
                 null,
@@ -361,10 +355,8 @@ internal class ReflectionTestsConstructor(
         var parameters = methodInfo.GetParameters();
         var argumentsTypes = arguments.Select(x => x?.GetType()).ToArray();
 
-        // Create a mapping from type parameters to concrete types
         var typeParameterMap = new Dictionary<Type, Type>();
 
-        // First pass: map type parameters that directly correspond to parameter types
         for (var i = 0; i < parameters.Length && i < argumentsTypes.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
@@ -376,7 +368,6 @@ internal class ReflectionTestsConstructor(
             }
         }
 
-        // Second pass: resolve any remaining unmapped type parameters
         List<Type> substituteTypes = [];
         foreach (var typeArgument in typeArguments)
         {
@@ -386,7 +377,6 @@ internal class ReflectionTestsConstructor(
             }
             else
             {
-                // If we can't map the type parameter, try to infer it from the parameter position
                 var parameterIndex = -1;
                 for (var i = 0; i < parameters.Length; i++)
                 {
@@ -403,7 +393,6 @@ internal class ReflectionTestsConstructor(
                 {
                     var inferredType = argumentsTypes[parameterIndex]!;
 
-                    // Handle nullable types
                     if (parameters[parameterIndex].ParameterType.IsGenericType &&
                         parameters[parameterIndex].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
@@ -426,7 +415,6 @@ internal class ReflectionTestsConstructor(
     {
         if (parameterType.IsGenericParameter)
         {
-            // Direct mapping: T -> int, T -> string, etc.
             if (!typeParameterMap.ContainsKey(parameterType))
             {
                 typeParameterMap[parameterType] = argumentType;
@@ -434,7 +422,6 @@ internal class ReflectionTestsConstructor(
         }
         else if (parameterType.IsGenericType && argumentType.IsGenericType)
         {
-            // Handle generic types: List<T> -> List<int>, Dictionary<T, U> -> Dictionary<string, int>, etc.
             var parameterGenericDef = parameterType.GetGenericTypeDefinition();
             var argumentGenericDef = argumentType.GetGenericTypeDefinition();
 
@@ -451,7 +438,6 @@ internal class ReflectionTestsConstructor(
         }
         else if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
-            // Handle nullable types: T? -> int, T? -> int?
             var underlyingParameterType = parameterType.GetGenericArguments()[0];
             var underlyingArgumentType = Nullable.GetUnderlyingType(argumentType) ?? argumentType;
             MapTypeParameters(underlyingParameterType, underlyingArgumentType, typeParameterMap);
@@ -509,7 +495,6 @@ internal class ReflectionTestsConstructor(
             if (parameters.LastOrDefault()?.Type == typeof(CancellationToken)
                 && arguments.LastOrDefault() is not CancellationToken)
             {
-                // We'll add this later
                 return;
             }
 
@@ -538,7 +523,6 @@ internal class ReflectionTestsConstructor(
                         typedArray.SetValue(CastHelper.Cast(underlyingType, argumentsAfterParams[i]), i);
                     }
 
-                    // We have a params argument, so we can just add the rest of the arguments
                     arguments =
                     [
                         ..argumentsBeforeParams,
@@ -660,7 +644,7 @@ internal class ReflectionTestsConstructor(
                 DataGeneratorType.Property => [],
                 _ => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?.GetParameters().SelectMany(x => x.GetCustomAttributes()) ?? []
             };
-            var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData); // Initialize nested data generators before generating data sources
+            var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
             CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, []);
 
             var invoke = dataSourceGeneratorAttribute.GetType().GetMethod("GenerateDataSources")!.Invoke(testDataAttribute, [
