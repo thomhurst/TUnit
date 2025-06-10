@@ -63,7 +63,7 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <PackageReference Include="Microsoft.CSharp" />
         <PackageReference Include="System.Text.Json" VersionOverride="8.0.5" />
-        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="8.0.0" />
+        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="9.0.6" />
     </ItemGroup>
     <ItemGroup>
       <Compile Remove="IClassDataSourceAttribute.cs" />
