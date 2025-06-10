@@ -429,7 +429,7 @@ dotnet add package TUnit --prerelease
 
 ```
 
-BenchmarkDotNet v0.15.0, macOS Sonoma 14.7.6 (23H626) [Darwin 23.6.0]
+BenchmarkDotNet v0.15.1, macOS Sonoma 14.7.6 (23H626) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), Arm64 RyuJIT AdvSIMD
@@ -438,12 +438,12 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 Job=.NET 9.0  Runtime=.NET 9.0  
 
 ```
-| Method       | Mean     | Error    | StdDev   |
-|------------- |---------:|---------:|---------:|
-| Build_TUnit  | 972.7 ms | 19.45 ms | 52.59 ms |
-| Build_NUnit  | 801.8 ms | 13.16 ms | 10.99 ms |
-| Build_xUnit  | 758.2 ms |  8.36 ms |  7.82 ms |
-| Build_MSTest | 822.4 ms | 12.42 ms | 11.01 ms |
+| Method       | Mean       | Error    | StdDev    | Median     |
+|------------- |-----------:|---------:|----------:|-----------:|
+| Build_TUnit  | 1,095.9 ms | 55.61 ms | 160.46 ms | 1,033.7 ms |
+| Build_NUnit  |   839.2 ms | 16.76 ms |  25.09 ms |   838.6 ms |
+| Build_xUnit  |   809.8 ms | 15.37 ms |  22.53 ms |   808.3 ms |
+| Build_MSTest |   810.8 ms | 16.01 ms |  38.04 ms |   792.5 ms |
 
 
 
@@ -451,7 +451,7 @@ Job=.NET 9.0  Runtime=.NET 9.0
 
 ```
 
-BenchmarkDotNet v0.15.0, Linux Ubuntu 24.04.2 LTS (Noble Numbat)
+BenchmarkDotNet v0.15.1, Linux Ubuntu 24.04.2 LTS (Noble Numbat)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX2
@@ -462,10 +462,10 @@ Job=.NET 9.0  Runtime=.NET 9.0
 ```
 | Method       | Mean    | Error    | StdDev   |
 |------------- |--------:|---------:|---------:|
-| Build_TUnit  | 1.904 s | 0.0305 s | 0.0385 s |
-| Build_NUnit  | 1.470 s | 0.0107 s | 0.0084 s |
-| Build_xUnit  | 1.468 s | 0.0153 s | 0.0136 s |
-| Build_MSTest | 1.487 s | 0.0156 s | 0.0138 s |
+| Build_TUnit  | 1.882 s | 0.0363 s | 0.0544 s |
+| Build_NUnit  | 1.468 s | 0.0227 s | 0.0212 s |
+| Build_xUnit  | 1.469 s | 0.0290 s | 0.0415 s |
+| Build_MSTest | 1.476 s | 0.0292 s | 0.0312 s |
 
 
 
@@ -473,7 +473,7 @@ Job=.NET 9.0  Runtime=.NET 9.0
 
 ```
 
-BenchmarkDotNet v0.15.0, Windows 10 (10.0.20348.3561) (Hyper-V)
+BenchmarkDotNet v0.15.1, Windows 10 (10.0.20348.3561) (Hyper-V)
 AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX2
@@ -484,10 +484,10 @@ Job=.NET 9.0  Runtime=.NET 9.0
 ```
 | Method       | Mean    | Error    | StdDev   |
 |------------- |--------:|---------:|---------:|
-| Build_TUnit  | 1.959 s | 0.0380 s | 0.0558 s |
-| Build_NUnit  | 1.539 s | 0.0186 s | 0.0165 s |
-| Build_xUnit  | 1.511 s | 0.0191 s | 0.0169 s |
-| Build_MSTest | 1.563 s | 0.0213 s | 0.0166 s |
+| Build_TUnit  | 1.934 s | 0.0378 s | 0.0652 s |
+| Build_NUnit  | 1.512 s | 0.0116 s | 0.0097 s |
+| Build_xUnit  | 1.492 s | 0.0173 s | 0.0162 s |
+| Build_MSTest | 1.539 s | 0.0167 s | 0.0157 s |
 
 
 ### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
@@ -496,7 +496,7 @@ Job=.NET 9.0  Runtime=.NET 9.0
 
 ```
 
-BenchmarkDotNet v0.15.0, macOS Sonoma 14.7.6 (23H626) [Darwin 23.6.0]
+BenchmarkDotNet v0.15.1, macOS Sonoma 14.7.6 (23H626) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), Arm64 RyuJIT AdvSIMD
@@ -507,11 +507,11 @@ Job=.NET 9.0  Runtime=.NET 9.0
 ```
 | Method    | Mean      | Error     | StdDev    | Median    |
 |---------- |----------:|----------:|----------:|----------:|
-| TUnit_AOT |  75.32 ms |  1.499 ms |  2.924 ms |  73.75 ms |
-| TUnit     | 473.15 ms |  5.178 ms |  4.844 ms | 474.40 ms |
-| NUnit     | 701.63 ms |  9.631 ms |  8.043 ms | 700.83 ms |
-| xUnit     | 795.79 ms | 31.570 ms | 93.085 ms | 765.82 ms |
-| MSTest    | 629.60 ms | 11.939 ms |  9.969 ms | 629.06 ms |
+| TUnit_AOT |  70.87 ms |  1.358 ms |  1.718 ms |  70.50 ms |
+| TUnit     | 483.73 ms |  9.135 ms | 16.704 ms | 478.81 ms |
+| NUnit     | 721.73 ms | 14.373 ms | 37.612 ms | 704.97 ms |
+| xUnit     | 728.46 ms | 10.863 ms | 10.668 ms | 729.08 ms |
+| MSTest    | 619.42 ms |  8.239 ms |  7.304 ms | 617.74 ms |
 
 
 
@@ -519,7 +519,7 @@ Job=.NET 9.0  Runtime=.NET 9.0
 
 ```
 
-BenchmarkDotNet v0.15.0, Linux Ubuntu 24.04.2 LTS (Noble Numbat)
+BenchmarkDotNet v0.15.1, Linux Ubuntu 24.04.2 LTS (Noble Numbat)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX2
@@ -530,11 +530,11 @@ Job=.NET 9.0  Runtime=.NET 9.0
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    27.18 ms |  0.659 ms |  1.943 ms |
-| TUnit     |   817.55 ms | 16.244 ms | 21.121 ms |
-| NUnit     | 1,277.83 ms | 10.672 ms |  9.983 ms |
-| xUnit     | 1,323.87 ms | 12.666 ms | 11.228 ms |
-| MSTest    | 1,122.21 ms |  7.072 ms |  6.270 ms |
+| TUnit_AOT |    27.94 ms |  0.584 ms |  1.713 ms |
+| TUnit     |   837.56 ms | 16.433 ms | 20.783 ms |
+| NUnit     | 1,314.99 ms | 17.786 ms | 16.637 ms |
+| xUnit     | 1,381.22 ms | 14.792 ms | 13.113 ms |
+| MSTest    | 1,176.63 ms | 23.003 ms | 21.517 ms |
 
 
 
@@ -542,7 +542,7 @@ Job=.NET 9.0  Runtime=.NET 9.0
 
 ```
 
-BenchmarkDotNet v0.15.0, Windows 10 (10.0.20348.3561) (Hyper-V)
+BenchmarkDotNet v0.15.1, Windows 10 (10.0.20348.3561) (Hyper-V)
 AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX2
@@ -553,11 +553,11 @@ Job=.NET 9.0  Runtime=.NET 9.0
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    58.71 ms |  2.257 ms |  6.655 ms |
-| TUnit     |   866.34 ms | 16.713 ms | 19.246 ms |
-| NUnit     | 1,292.67 ms |  9.379 ms |  8.773 ms |
-| xUnit     | 1,337.74 ms | 10.441 ms |  9.256 ms |
-| MSTest    | 1,155.92 ms | 17.057 ms | 15.955 ms |
+| TUnit_AOT |    58.50 ms |  1.780 ms |  5.250 ms |
+| TUnit     |   865.35 ms | 17.209 ms | 25.225 ms |
+| NUnit     | 1,288.20 ms | 10.914 ms | 10.209 ms |
+| xUnit     | 1,328.49 ms | 14.863 ms | 13.903 ms |
+| MSTest    | 1,141.89 ms |  9.761 ms |  8.653 ms |
 
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
@@ -566,7 +566,7 @@ Job=.NET 9.0  Runtime=.NET 9.0
 
 ```
 
-BenchmarkDotNet v0.15.0, macOS Sonoma 14.7.6 (23H626) [Darwin 23.6.0]
+BenchmarkDotNet v0.15.1, macOS Sonoma 14.7.6 (23H626) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), Arm64 RyuJIT AdvSIMD
@@ -577,11 +577,11 @@ Job=.NET 9.0  Runtime=.NET 9.0
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    239.1 ms |  12.32 ms |  36.32 ms |
-| TUnit     |    648.3 ms |  22.27 ms |  65.67 ms |
-| NUnit     | 13,968.2 ms | 276.20 ms | 687.83 ms |
-| xUnit     | 14,400.7 ms | 283.70 ms | 651.84 ms |
-| MSTest    | 14,141.8 ms | 282.63 ms | 544.54 ms |
+| TUnit_AOT |    243.3 ms |  14.80 ms |  43.65 ms |
+| TUnit     |    683.3 ms |  23.02 ms |  67.88 ms |
+| NUnit     | 14,069.9 ms | 279.44 ms | 545.03 ms |
+| xUnit     | 14,244.1 ms | 284.06 ms | 416.37 ms |
+| MSTest    | 14,242.6 ms | 282.94 ms | 502.93 ms |
 
 
 
@@ -589,7 +589,7 @@ Job=.NET 9.0  Runtime=.NET 9.0
 
 ```
 
-BenchmarkDotNet v0.15.0, Linux Ubuntu 24.04.2 LTS (Noble Numbat)
+BenchmarkDotNet v0.15.1, Linux Ubuntu 24.04.2 LTS (Noble Numbat)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX2
@@ -600,11 +600,11 @@ Job=.NET 9.0  Runtime=.NET 9.0
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    76.47 ms |  1.472 ms |  1.305 ms |
-| TUnit     |   908.68 ms | 17.412 ms | 21.384 ms |
-| NUnit     | 6,315.33 ms | 14.113 ms | 13.201 ms |
-| xUnit     | 6,498.17 ms | 29.039 ms | 27.163 ms |
-| MSTest    | 6,327.06 ms | 13.970 ms | 13.068 ms |
+| TUnit_AOT |    74.83 ms |  1.459 ms |  1.622 ms |
+| TUnit     |   891.96 ms | 17.616 ms | 24.695 ms |
+| NUnit     | 6,261.05 ms | 10.030 ms |  8.892 ms |
+| xUnit     | 6,408.39 ms |  7.017 ms |  6.564 ms |
+| MSTest    | 6,229.08 ms | 13.224 ms | 11.723 ms |
 
 
 
@@ -612,7 +612,7 @@ Job=.NET 9.0  Runtime=.NET 9.0
 
 ```
 
-BenchmarkDotNet v0.15.0, Windows 10 (10.0.20348.3561) (Hyper-V)
+BenchmarkDotNet v0.15.1, Windows 10 (10.0.20348.3695) (Hyper-V)
 AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.300
   [Host]   : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX2
@@ -623,11 +623,11 @@ Job=.NET 9.0  Runtime=.NET 9.0
 ```
 | Method    | Mean       | Error    | StdDev   |
 |---------- |-----------:|---------:|---------:|
-| TUnit_AOT |   113.4 ms |  2.25 ms |  4.05 ms |
-| TUnit     |   981.7 ms | 18.95 ms | 23.96 ms |
-| NUnit     | 7,539.7 ms | 38.21 ms | 33.88 ms |
-| xUnit     | 7,612.3 ms | 19.19 ms | 17.01 ms |
-| MSTest    | 7,497.1 ms | 21.68 ms | 20.28 ms |
+| TUnit_AOT |   111.5 ms |  2.23 ms |  1.86 ms |
+| TUnit     |   947.5 ms | 18.94 ms | 25.29 ms |
+| NUnit     | 7,488.4 ms | 13.25 ms | 11.06 ms |
+| xUnit     | 7,553.0 ms | 11.64 ms |  9.09 ms |
+| MSTest    | 7,442.2 ms | 43.09 ms | 40.31 ms |
 
 
 
