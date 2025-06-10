@@ -49,5 +49,22 @@ public partial class Throws
 
             await Assert.That(sut).ThrowsNothing();
         }
+
+        private void ThrowsArgumentException() => throw new ArgumentException("Just for testing");
+
+  [Test]
+  public async Task ThrowsAsync_DoesNotCheckType()
+  {
+      await Assert.That(async () =>
+          await Assert.ThrowsAsync<OverflowException>(LocalTestFunction)
+      ).Throws<AssertionException>();
+      return;
+
+    Task LocalTestFunction()
+    {
+      ThrowsArgumentException();
+      return Task.CompletedTask;
+    }
+  }
     }
 }
