@@ -8,7 +8,6 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 #pragma warning disable TUnitWIP0001
 
@@ -244,116 +243,81 @@ internal class ReflectionTestsConstructor(
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
         }
-    }    private void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor,
+    }
+
+    private static void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor,
         HashSet<object> visited)
     {
         if (!visited.Add(obj))
         {
             return;
         }
+        var type = obj.GetType();
 
-        // Phase 1: Create basic nested instances first without calling data generation methods
-        // This ensures that objects exist before data generation methods that might depend on them are called
-        PopulateBasicNestedProperties(obj, methodInformation, testBuilderContextAccessor, visited);
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
+            .Where(p => p.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().Any())
+            .Reverse()
+            .ToArray();
 
-        // Phase 2: Now call data generation methods after all basic objects are created
-        PopulateDataGeneratedProperties(obj, methodInformation, testBuilderContextAccessor, visited);
-    }
-
-    private void PopulateBasicNestedProperties(object obj, SourceGeneratedMethodInformation methodInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
-    {
-        foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
+        // Process properties in reverse order to handle nested dependencies
+        foreach (var property in properties)
         {
-            if (property.GetValue(obj) is not null)
+
+            if (property.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().FirstOrDefault() is not { } dataSourceGeneratorAttribute)
             {
-                // Property already has a value, recursively populate its nested properties
-                var propertyValue = property.GetValue(obj);
-                if (propertyValue is not null)
-                {
-                    PopulateBasicNestedProperties(propertyValue, methodInformation, testBuilderContextAccessor, visited);
-                }
                 continue;
             }
-
-            // Only create basic nested instances (no data generation yet)
-            if (ShouldCreateNestedInstance(property.PropertyType))
+            if (property.GetValue(obj) is null)
             {
                 try
                 {
-                    var nestedInstance = Activator.CreateInstance(property.PropertyType);
-                    if (nestedInstance is not null)
+                    // Create an instance of the data source generator attribute type
+                    var attributeInstance = Activator.CreateInstance(dataSourceGeneratorAttribute.GetType());
+                    if (attributeInstance != null)
                     {
-                        property.SetValue(obj, nestedInstance);
+                        // Recursively process nested properties on the attribute instance first
+                        CreateNestedDataGenerators(attributeInstance, methodInformation, testBuilderContextAccessor, visited);
 
-                        // Recursively populate the nested instance's basic properties
-                        PopulateBasicNestedProperties(nestedInstance, methodInformation, testBuilderContextAccessor, visited);
+                        // Now generate data using the attribute instance
+                        var dataGeneratorMetadata = CreateDataGeneratorMetadata(
+                            type,
+                            null,
+                            property,
+                            (IDataSourceGeneratorAttribute) attributeInstance,
+                            DataGeneratorType.Property,
+                            () => [],
+                            methodInformation,
+                            testBuilderContextAccessor,
+                            null,
+                            false
+                        );
+
+                        var invoke = attributeInstance.GetType().GetMethod("GenerateDataSources")!.Invoke(attributeInstance, [dataGeneratorMetadata]) as IEnumerable;
+                        var funcEnumerable = invoke?.Cast<object>() ?? [];
+                        var firstFunc = funcEnumerable.FirstOrDefault();
+
+                        if (firstFunc != null)
+                        {
+                            var funcResult = FuncHelper.InvokeFunc(firstFunc);
+                            var result = funcResult is object?[] objectArray ? objectArray.FirstOrDefault() : funcResult;
+
+                            if (result != null)
+                            {
+                                property.SetValue(obj, result);
+                            }
+                        }
                     }
                 }
-                catch
+                catch (Exception)
                 {
-                    // Ignore failures to create nested instances - they might require specific constructors
+                    // Silently continue on error
                 }
             }
-        }
-    }
-
-    private void PopulateDataGeneratedProperties(object obj, SourceGeneratedMethodInformation methodInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor, HashSet<object> visited)
-    {
-        foreach (var property in CollectSettableProperties(obj, methodInformation, testBuilderContextAccessor))
-        {
-            var propertyValue = property.GetValue(obj);
-
-            // If the property has data attributes, try to generate value using data generation logic
-            var dataAttributes = GetDataAttributes(property);
-            if (dataAttributes.Any())
+            else
             {
-                var generatedValue = CreatePropertyValue(obj.GetType(), property, methodInformation, testBuilderContextAccessor);
-                if (generatedValue != null)
-                {
-                    property.SetValue(obj, generatedValue);
-                    propertyValue = generatedValue;
-                }
-            }
-
-            // Handle async initialization
-            if (propertyValue is IAsyncInitializer)
-            {
-                testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
-                {
-                    await reflectionDataInitializer.Initialize(propertyValue, []);
-                };
-            }
-
-            // Recursively process nested objects
-            if (propertyValue is not null)
-            {
-                PopulateDataGeneratedProperties(propertyValue, methodInformation, testBuilderContextAccessor, visited);
+                CreateNestedDataGenerators(property.GetValue(obj)!, methodInformation, testBuilderContextAccessor, visited);
             }
         }
-    }
-
-    private static IEnumerable<PropertyInfo> CollectSettableProperties(object obj, SourceGeneratedMethodInformation methodInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor)
-    {
-        var type = obj.GetType();
-
-        return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.CanWrite &&
-                (p.GetCustomAttributes().OfType<IDataAttribute>().Any() ||
-                    ShouldCreateNestedInstance(p.PropertyType)));
-    }
-
-    private static bool ShouldCreateNestedInstance(Type propertyType)
-    {
-        // Create nested instances for complex types that have default constructors
-        // but skip basic types, strings, and value types
-        return propertyType.IsClass &&
-            propertyType != typeof(string) &&
-            !propertyType.IsAbstract &&
-            !propertyType.IsInterface &&
-            propertyType.GetConstructor(Type.EmptyTypes) != null;
     }
 
     private object? CreatePropertyValue(Type type, PropertyInfo property, SourceGeneratedMethodInformation methodInformation,
@@ -696,8 +660,8 @@ internal class ReflectionTestsConstructor(
                 DataGeneratorType.Property => [],
                 _ => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?.GetParameters().SelectMany(x => x.GetCustomAttributes()) ?? []
             };
-
-            var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
+            var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData); // Initialize nested data generators before generating data sources
+            CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, []);
 
             var invoke = dataSourceGeneratorAttribute.GetType().GetMethod("GenerateDataSources")!.Invoke(testDataAttribute, [
                 CreateDataGeneratorMetadata(type, method, propertyInfo, testDataAttribute, dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
