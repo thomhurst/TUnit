@@ -21,7 +21,7 @@ public static class ThrowsExtensions
     public static ThrowsException<object?, Exception> Throws(this IDelegateSource delegateSource, Type type, [CallerArgumentExpression("type")] string? doNotPopulateThisValue = null)
     {
         return new ThrowsException<object?, Exception>(
-            delegateSource.RegisterAssertion(new ThrowsOfTypeAssertCondition<object?, Exception>(), [doNotPopulateThisValue]),
+            delegateSource.RegisterAssertion(new ThrowsOfTypeAssertCondition(type), [doNotPopulateThisValue]),
             delegateSource,
             e => e);
     }

@@ -7,9 +7,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.0" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="CliWrap" Version="3.8.2" />
+    <PackageVersion Include="CliWrap" Version="3.9.0" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="2.1.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageVersion Include="FSharp.Core" Version="9.0.300" />
@@ -18,7 +18,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.5" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.5" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.6" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.8" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.7.0" />
@@ -31,22 +31,22 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.52.0" />
-    <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="9.0.300" />
+    <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="9.0.301" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="1.7.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="1.7.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.7.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.7.1" />
-    <PackageVersion Include="Microsoft.Testing.Platform" Version="1.7.1" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="1.7.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="1.7.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.7.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.7.2" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="1.7.2" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.3" />
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.44.45" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.44.45" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.44.45" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.1" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.9.1" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.2" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.9.2" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="NuGet.Protocol" Version="6.14.0" />
     <PackageVersion Include="NUnit" Version="4.3.2" />
@@ -54,7 +54,7 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
-    <PackageVersion Include="Polly" Version="8.5.2" />
+    <PackageVersion Include="Polly" Version="8.6.0" />
     <PackageVersion Include="Polyfill" Version="7.33.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.18" />
@@ -68,7 +68,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="StreamJsonRpc" Version="2.22.11" />
-    <PackageVersion Include="System.Collections.Immutable" Version="9.0.5" />
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.6" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.5" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
@@ -83,8 +83,8 @@
     <PackageVersion Include="Vogen" Version="7.0.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.0" />
-    <PackageVersion Include="xunit.v3.assert" Version="2.0.2" />
-    <PackageVersion Include="xunit.v3.extensibility.core" Version="2.0.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.1" />
+    <PackageVersion Include="xunit.v3.assert" Version="2.0.3" />
+    <PackageVersion Include="xunit.v3.extensibility.core" Version="2.0.3" />
   </ItemGroup>
 </Project>
