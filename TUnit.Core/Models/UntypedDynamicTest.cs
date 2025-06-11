@@ -7,12 +7,12 @@ namespace TUnit.Core;
 
 [RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
-public record UntypedDynamicTest : DynamicTest 
+public record UntypedDynamicTest : DynamicTest
 {
     public UntypedDynamicTest(MethodInfo testBody) : this(testBody.ReflectedType ?? testBody.DeclaringType!, testBody)
     {
     }
-    
+
     public UntypedDynamicTest(Type testClassType, MethodInfo testBody)
     {
         TestId = GetTestId(testBody);
@@ -21,7 +21,7 @@ public record UntypedDynamicTest : DynamicTest
     }
 
     private static readonly ConcurrentDictionary<string, Counter> DynamicTestCounter = new();
-    
+
     public override string TestId
     {
         get;
@@ -32,15 +32,15 @@ public record UntypedDynamicTest : DynamicTest
         get;
     }
 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
-        | DynamicallyAccessedMemberTypes.PublicMethods 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType
     {
         get;
     }
-    
+
     public TestBuilderContext TestBuilderContext
     {
         get;
@@ -62,19 +62,20 @@ public record UntypedDynamicTest : DynamicTest
             TestLineNumber = TestLineNumber,
             TestMethodArguments = TestMethodArguments,
             DynamicAttributes = Attributes,
+            DiscoveryException = Exception
         };
     }
 
     private static string GetTestId(MethodInfo testBody)
     {
         var typeName = (testBody.ReflectedType ?? testBody.DeclaringType!).FullName;
-        
+
         var typeAndTestName = typeName + "_" + testBody.Name;
-        
+
         var count = DynamicTestCounter
             .GetOrAdd(typeAndTestName, _ => new Counter())
             .Increment();
-        
+
         return $"{typeAndTestName}_{count}";
     }
 }
