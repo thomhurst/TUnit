@@ -270,10 +270,10 @@ internal class ReflectionTestsConstructor(
             return;
         }
 
-        foreach (var propertyInfo in obj.GetType().GetProperties().Where(p => p.HasAttribute<IDataAttribute>()))
-        {
-            var property = ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo);
+        var classInformation = ReflectionToSourceModelHelpers.GenerateClass(obj.GetType());
 
+        foreach (var property in classInformation.Properties.Where(p => p.HasAttribute<IDataAttribute>()))
+        {
             var generator = property.Attributes.OfType<IDataAttribute>().First();
 
             CreateNestedDataGenerators(generator, methodInformation, testBuilderContextAccessor, visited, initializationOrder);

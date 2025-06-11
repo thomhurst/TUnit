@@ -26,10 +26,10 @@ internal static class ReflectionExtensions
     {
         if (typeof(T).IsAssignableTo(typeof(Attribute)))
         {
-            return member.IsDefined(typeof(T), true);
+            return member.IsDefined(typeof(T), inherit);
         }
 
-        return member.GetCustomAttributes(true)
+        return member.GetCustomAttributes(inherit)
             .Any(x => x.GetType().IsAssignableTo(typeof(T)));
     }
 }
