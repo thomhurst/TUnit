@@ -252,96 +252,75 @@ internal class ReflectionTestsConstructor(
         {
             return;
         }
-        var type = obj.GetType();
 
-        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
-            .Where(p => p.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().Any())
-            .Reverse()
-            .ToArray();
-
-        foreach (var property in properties)
+        var dependencyChain = new NestedDependency
         {
-
-            if (property.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().FirstOrDefault() is not { } dataSourceGeneratorAttribute)
+            Instance = obj,
+            Property = null,
+            Parent = null,
+            Type = obj.GetType(),
+            TestBuilderContextAccessor = testBuilderContextAccessor,
+            DataGeneratorMetadata = new DataGeneratorMetadata
             {
-                continue;
-            }
-            if (property.GetValue(obj) is null)
-            {
-                try
-                {
-                    var attributeInstance = Activator.CreateInstance(dataSourceGeneratorAttribute.GetType());
-                    if (attributeInstance != null)
-                    {
-                        CreateNestedDataGenerators(attributeInstance, methodInformation, testBuilderContextAccessor, visited);
+                Type = DataGeneratorType.Property,
+                TestInformation = methodInformation,
+                ClassInstanceArguments = [],
+                MembersToGenerate = [],
+                TestBuilderContext = testBuilderContextAccessor,
+                TestClassInstance = null,
+                TestSessionId = string.Empty,
+            },
+            Children = obj.GetType()
+                .GetProperties()
+                .Where(x => x.IsDefined(typeof(IDataAttribute)))
+                .Select(x => CreateDependencyChain(x, methodInformation, testBuilderContextAccessor))
+                .ToList(),
+        };
 
-                        var dataGeneratorMetadata = CreateDataGeneratorMetadata(
-                            type,
-                            null,
-                            property,
-                            (IDataSourceGeneratorAttribute) attributeInstance,
-                            DataGeneratorType.Property,
-                            () => [],
-                            methodInformation,
-                            testBuilderContextAccessor,
-                            null,
-                            false
-                        );
-
-                        var invoke = attributeInstance.GetType().GetMethod("GenerateDataSources")!.Invoke(attributeInstance, [dataGeneratorMetadata]) as IEnumerable;
-                        var funcEnumerable = invoke?.Cast<object>() ?? [];
-                        var firstFunc = funcEnumerable.FirstOrDefault();
-
-                        if (firstFunc != null)
-                        {
-                            var funcResult = FuncHelper.InvokeFunc(firstFunc);
-                            var result = funcResult is object?[] objectArray ? objectArray.FirstOrDefault() : funcResult;
-
-                            if (result != null)
-                            {
-                                property.SetValue(obj, result);
-                            }
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                }
-            }
-            else
-            {
-                CreateNestedDataGenerators(property.GetValue(obj)!, methodInformation, testBuilderContextAccessor, visited);
-            }
+        foreach (var nestedDependency in GetMostNestedDependencies(dependencyChain))
+        {
+            _ = nestedDependency.Instance;
         }
     }
 
-    private object? CreatePropertyValue(Type type, PropertyInfo property, SourceGeneratedMethodInformation methodInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor)
+    private static IEnumerable<NestedDependency> GetMostNestedDependencies(NestedDependency dependency)
     {
-        var dataAttributes = GetDataAttributes(property);
-
-        foreach (var dataAttribute in dataAttributes)
+        if (dependency.Children.Count == 0)
         {
-            var argumentGenerators = GetArguments(
-                type,
-                null,
-                property,
-                dataAttribute,
-                DataGeneratorType.Property,
-                () => [],
-                methodInformation,
-                testBuilderContextAccessor
-            );
-
-            var firstArgumentGenerator = argumentGenerators.FirstOrDefault();
-            if (firstArgumentGenerator != null)
-            {
-                var arguments = firstArgumentGenerator();
-                return arguments?.FirstOrDefault();
-            }
+            yield return dependency;
+            yield break;
         }
 
-        return null;
+        foreach (var nestedDependency in dependency.Children.SelectMany(GetMostNestedDependencies))
+        {
+            yield return nestedDependency;
+        }
+    }
+
+    private static NestedDependency CreateDependencyChain(PropertyInfo property, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor)
+    {
+        return new NestedDependency
+        {
+            Property = null,
+            Parent = null,
+            Type = property.PropertyType,
+            TestBuilderContextAccessor = testBuilderContextAccessor,
+            DataGeneratorMetadata = new DataGeneratorMetadata
+            {
+                Type = DataGeneratorType.Property,
+                TestInformation = methodInformation,
+                ClassInstanceArguments = [],
+                MembersToGenerate = [],
+                TestBuilderContext = testBuilderContextAccessor,
+                TestClassInstance = null,
+                TestSessionId = string.Empty,
+            },
+            Children = property.PropertyType
+                .GetProperties()
+                .Where(x => x.IsDefined(typeof(IDataAttribute)))
+                .Select(x => CreateDependencyChain(x, methodInformation, testBuilderContextAccessor))
+                .ToList(),
+        };
     }
 
     private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
@@ -911,58 +890,70 @@ internal class ReflectionTestsConstructor(
 
     public class NestedDependency
     {
+        private object? _instance;
         public required DataGeneratorMetadata DataGeneratorMetadata { get; init; }
-        public List<NestedDependency> Children { get; } = [];
+        public List<NestedDependency> Children { get; init; } = [];
         public required NestedDependency? Parent { get; set; }
-        public required PropertyInfo Property { get; init; }
+        public required PropertyInfo? Property { get; init; }
         public required Type Type { get; init; }
+        public required TestBuilderContextAccessor TestBuilderContextAccessor { get; init; }
 
-        public IDataAttribute? DataAttribute => field ??= Property.GetCustomAttributes().OfType<IDataAttribute>().FirstOrDefault();
+        public IDataAttribute? DataAttribute => field ??= Property?.GetCustomAttributes().OfType<IDataAttribute>().FirstOrDefault();
 
         public object? Instance
         {
-            get => field ??= CreateInstance();
-            init;
+            get => _instance ??= CreateInstance();
+            init => _instance = value;
         }
 
         public object? CreateInstance()
         {
-            if (Property.GetValue(Parent?.Instance) is {} value)
+            if (_instance != null)
             {
-                return value;
+                return _instance;
             }
 
-            if (DataAttribute is null)
+            if (DataAttribute is null || Property is null)
             {
                 return null;
             }
 
-            switch (DataAttribute)
+            _instance ??= DataAttribute switch
             {
-                case ArgumentsAttribute argumentsAttribute:
-                    return argumentsAttribute.Values.ElementAtOrDefault(0);
-                case ClassConstructorAttribute classConstructorAttribute:
-                    return ((IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)).Create(Property.PropertyType,
-                        new ClassConstructorMetadata
-                        {
-                            TestBuilderContext = DataGeneratorMetadata.TestBuilderContext.Current, TestSessionId = DataGeneratorMetadata.TestSessionId
-                        });
-                case IDataSourceGeneratorAttribute dataSourceGeneratorAttribute:
-                    return dataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0);
-                case InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute:
-                    Parent?.Instance?.GetType().GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource,
-                        BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)!.Invoke(Parent?.Instance, instanceMethodDataSourceAttribute.Arguments);
-                    break;
-                case MethodDataSourceAttribute methodDataSourceAttribute:
-                    (methodDataSourceAttribute.ClassProvidingDataSource ?? Parent?.Type)
-                        !.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                        !.Invoke(null, methodDataSourceAttribute.Arguments);
-                    break;
-                case NoOpDataAttribute noOpDataAttribute:
-                    return null;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(DataAttribute));
-            }
+                ArgumentsAttribute argumentsAttribute => argumentsAttribute.Values.ElementAtOrDefault(0),
+                ClassConstructorAttribute classConstructorAttribute => ((IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!).Create(
+                    Property.PropertyType, new ClassConstructorMetadata
+                    {
+                        TestBuilderContext = DataGeneratorMetadata.TestBuilderContext.Current, TestSessionId = DataGeneratorMetadata.TestSessionId
+                    }),
+                IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata)
+                    .ElementAtOrDefault(0)
+                    ?.Invoke()
+                    ?.ElementAtOrDefault(0),
+                InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute => Parent?.Instance?.GetType()
+                    .GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)!
+                    .Invoke(Parent?.Instance, instanceMethodDataSourceAttribute.Arguments),
+                MethodDataSourceAttribute methodDataSourceAttribute => (methodDataSourceAttribute.ClassProvidingDataSource ?? Parent?.Type) !.GetMethod(
+                    methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy) !.Invoke(null,
+                    methodDataSourceAttribute.Arguments),
+                NoOpDataAttribute => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(DataAttribute))
+            };
+
+            TestBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
+            {
+                await ObjectInitializer.InitializeAsync(_instance);
+
+                var parent = Parent;
+
+                while (parent?.Instance != null)
+                {
+                    await ObjectInitializer.InitializeAsync(parent);
+                    parent = Parent?.Parent;
+                }
+            };
+
+            return _instance;
         }
     }
 }

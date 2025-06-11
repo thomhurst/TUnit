@@ -24,7 +24,7 @@ internal static class TestExtensions
                 }),
                 new TestMethodIdentifierProperty(
                     Namespace: testDetails.TestClass.Type.Namespace ?? "GlobalNamespace",
-                    AssemblyFullName: testDetails.TestClass.Type.Assembly.FullName,
+                    AssemblyFullName: testDetails.TestClass.Type.Assembly.FullName ?? "UnknownAssembly",
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
