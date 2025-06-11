@@ -21,7 +21,6 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
                 try
                 {
-                    // Execute the action using our STA-safe async runner
                     ExecuteAsyncActionWithMessagePump(action, _dedicatedThreadTaskScheduler, tcs);
                 }
                 catch (Exception e)
@@ -37,7 +36,6 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             {
                 CleanUp();
 
-                // Set result if not already set
                 if (capturedException != null && !tcs.Task.IsCompleted)
                 {
                     tcs.SetException(capturedException);
@@ -49,7 +47,6 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         thread.Start();
 
         await tcs.Task;
-        // Removed WaitForAllWork from here; message pump now handles all work on the dedicated thread
     }
 
     private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, DedicatedThreadTaskScheduler taskScheduler, TaskCompletionSource<object?> tcs)
@@ -71,7 +68,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             {
                 if (t.IsFaulted)
                 {
-                    tcs.SetException(t.Exception);
+                    tcs.SetException(t.Exception!);
                 }
                 else if (t.IsCanceled)
                 {
@@ -112,20 +109,15 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
     internal sealed class DedicatedThreadTaskScheduler : TaskScheduler
     {
-        private readonly Thread _dedicatedThread;
-        private readonly Queue<Task> _taskQueue = new();
+        private readonly Thread _dedicatedThread = Thread.CurrentThread;
+        private readonly List<Task> _taskQueue = new();
         private readonly Lock _queueLock = new();
-
-        public DedicatedThreadTaskScheduler()
-        {
-            _dedicatedThread = Thread.CurrentThread;
-        }
 
         protected override void QueueTask(Task task)
         {
             lock (_queueLock)
             {
-                _taskQueue.Enqueue(task);
+                _taskQueue.Add(task);
             }
         }
 
@@ -137,24 +129,13 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 return false;
             }
 
-            // If the task was previously queued, remove it from the queue
             if (taskWasPreviouslyQueued)
             {
                 lock (_queueLock)
                 {
-                    // Try to remove from queue (may not be there anymore)
-                    var tempQueue = new Queue<Task>();
-                    while (_taskQueue.Count > 0)
+                    if (_taskQueue.Contains(task))
                     {
-                        var queuedTask = _taskQueue.Dequeue();
-                        if (queuedTask != task)
-                        {
-                            tempQueue.Enqueue(queuedTask);
-                        }
-                    }
-                    while (tempQueue.Count > 0)
-                    {
-                        _taskQueue.Enqueue(tempQueue.Dequeue());
+                        _taskQueue.Remove(task);
                     }
                 }
             }
@@ -189,7 +170,8 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                         break;
                     }
 
-                    task = _taskQueue.Dequeue();
+                    task = _taskQueue[0];
+                    _taskQueue.RemoveAt(0);
                 }
 
                 TryExecuteTask(task);
@@ -203,6 +185,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     {
         context.SetTaskScheduler(_dedicatedThreadTaskScheduler);
         context.SetParallelLimiter(new ProcessorCountParallelLimit());
+
         return default;
     }
 }
