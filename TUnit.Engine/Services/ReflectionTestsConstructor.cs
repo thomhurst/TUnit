@@ -298,7 +298,7 @@ internal class ReflectionTestsConstructor(
                         TestBuilderContext = testBuilderContextAccessor.Current,
                         TestSessionId = string.Empty
                     }),
-                IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0),
+                IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0),
                 MethodDataSourceAttribute methodDataSourceAttribute => (methodDataSourceAttribute.ClassProvidingDataSource ?? obj.GetType()).GetMethod(
                     methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy) !.Invoke(null,
                     methodDataSourceAttribute.Arguments),
@@ -618,7 +618,7 @@ internal class ReflectionTestsConstructor(
             var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
             CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, [], 0);
 
-            var funcEnumerable = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute,
+            var funcEnumerable = dataSourceGeneratorAttribute.Generate(CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute,
                 dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
                 classInstanceArgumentsInvoked, needsInstance));
 

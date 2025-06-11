@@ -3,6 +3,10 @@
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 public abstract class NonTypedDataSourceGeneratorAttribute : TestDataAttribute, INonTypedDataSourceGeneratorAttribute
 {
-    public abstract IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
-    IEnumerable<Func<object?[]?>> IDataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata dataGeneratorMetadata) => GenerateDataSources(dataGeneratorMetadata);
+    protected abstract IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
+
+    public IEnumerable<Func<object?[]?>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        return GenerateDataSources(dataGeneratorMetadata);
+    }
 }

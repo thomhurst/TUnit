@@ -144,7 +144,7 @@ internal class ClassDataSources
 
             if (propertyInfo.GetValue(instance) is not {} result)
             {
-                var resultDelegateArray = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata with
+                var resultDelegateArray = dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata with
                 {
                     Type = DataGeneratorType.Property, MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
                 });

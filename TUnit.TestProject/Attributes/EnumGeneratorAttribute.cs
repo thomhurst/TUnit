@@ -2,7 +2,7 @@
 
 public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
 {
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.MembersToGenerate is not [SourceGeneratedParameterInformation sourceGeneratedParameterInformation])
         {
@@ -19,7 +19,7 @@ public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
         foreach (var enumValue in Enum.GetValuesAsUnderlyingType(parameterType))
         {
             yield return () => [enumValue];
-        }       
+        }
 #else
         foreach (var enumValue in Enum.GetValues(parameterType))
         {

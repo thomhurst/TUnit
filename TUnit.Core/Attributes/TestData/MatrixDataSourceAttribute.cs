@@ -5,7 +5,7 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
 {
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var parameterInformation = dataGeneratorMetadata
             .MembersToGenerate
@@ -17,17 +17,17 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
         {
             throw new Exception("[MatrixDataSource] only supports parameterised tests");
         }
-        
+
         var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
         ? dataGeneratorMetadata.TestInformation.Attributes : dataGeneratorMetadata.TestInformation.Class.Attributes);
-        
+
         foreach (var row in GetMatrixValues(parameterInformation.Select(p => GetAllArguments(dataGeneratorMetadata, p))))
         {
             if (exclusions.Any(e => e.SequenceEqual(row)))
             {
                 continue;
             }
-            
+
             yield return () => row.ToArray();
         }
     }
@@ -67,7 +67,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
             {
                 throw new InvalidOperationException("Do not exclude values from a boolean.");
             }
-            
+
             return underlyingType is null ? [true, false] : [true, false, null];
         }
 
@@ -95,7 +95,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 #endif
                .ToArray();
     }
-    
+
     private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];
 
     private IEnumerable<IEnumerable<object?>> GetMatrixValues(IEnumerable<IReadOnlyList<object?>> elements)

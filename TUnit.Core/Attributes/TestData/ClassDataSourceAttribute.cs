@@ -10,7 +10,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     public SharedType Shared { get; set; } = SharedType.None;
     public string Key { get; set; } = string.Empty;
     public Type ClassType => typeof(T);
-    public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
             .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
@@ -97,7 +97,7 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
     public string[] Keys { get; set; } = [];
 
     [UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.")]
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () =>
         {

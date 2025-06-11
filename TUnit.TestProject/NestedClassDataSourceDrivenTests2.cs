@@ -32,7 +32,7 @@ public class NestedClassDataSourceDrivenTests2
         [ClassDataSource<SomeClass1>]
         public required SomeClass1 InnerClass { get; init; }
 
-        public override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        protected override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
             yield return () => InnerClass;
         }

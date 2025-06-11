@@ -62,7 +62,7 @@ public record DataSourceGeneratorContainer(
         sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
         sourceCodeWriter.WriteLine();
 
-        sourceCodeWriter.Write($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName});");
+        sourceCodeWriter.Write($"var {arrayVariableName} = {dataAttr.Name}.Generate({dataGeneratorMetadataVariableName});");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write($"foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
         sourceCodeWriter.Write("{");
@@ -155,7 +155,7 @@ public record DataSourceGeneratorContainer(
     {
         var sourceCodeWriter = new SourceCodeWriter(indentLevel);
 
-        sourceCodeWriter.Write($"{attributeVariableName}.GenerateDataSources(");
+        sourceCodeWriter.Write($"{attributeVariableName}.Generate(");
         WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, namedTypeSymbol, property);
         sourceCodeWriter.Write(").ElementAtOrDefault(0)?.Invoke()");
         if (isNested)

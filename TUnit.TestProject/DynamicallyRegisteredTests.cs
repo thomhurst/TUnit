@@ -22,7 +22,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => new Random().Next();
     }
@@ -42,7 +42,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
     public async ValueTask OnTestEnd(AfterTestContext afterTestContext)
     {
         var testContext = afterTestContext.TestContext;
-        
+
         if (testContext.Result?.Status == Status.Failed)
         {
             await _cancellationTokenSource.CancelAsync();

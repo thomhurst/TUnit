@@ -33,7 +33,7 @@ public class NestedClassDataSourceDrivenTests3
         [MyDataProvider1]
         public required SomeClass1 InnerClass { get; init; }
 
-        public override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        protected override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
             yield return () => InnerClass;
         }
@@ -60,7 +60,7 @@ public class NestedClassDataSourceDrivenTests3
         [MyDataProvider2]
         public required SomeClass2 InnerClass { get; init; }
 
-        public override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        protected override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
             yield return () =>
             {
@@ -99,7 +99,7 @@ public class NestedClassDataSourceDrivenTests3
         [MyDataProvider3]
         public required SomeClass3 InnerClass { get; init; }
 
-        public override IEnumerable<Func<SomeClass2>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        protected override IEnumerable<Func<SomeClass2>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
             yield return () =>
             {
@@ -129,7 +129,7 @@ public class NestedClassDataSourceDrivenTests3
         [ClassDataSource<SomeClass3>(Shared = SharedType.PerTestSession)]
         public required SomeClass3 InnerClass { get; init; }
 
-        public override IEnumerable<Func<SomeClass3>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        protected override IEnumerable<Func<SomeClass3>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
             yield return () => new SomeClass3();
         }
