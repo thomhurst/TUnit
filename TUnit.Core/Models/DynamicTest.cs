@@ -93,6 +93,7 @@ public abstract record DynamicTest
         return new SourceGeneratedPropertyInformation
         {
             Attributes = [], // TODO?
+            ReflectionInfo = null!, // TODO?
             Name = property.Key,
             Type = property.Value?.GetType() ?? typeof(object),
             Getter = _ => property.Value,

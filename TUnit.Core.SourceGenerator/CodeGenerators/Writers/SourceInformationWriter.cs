@@ -161,6 +161,7 @@ public static class SourceInformationWriter
     {
         sourceCodeWriter.Write("new global::TUnit.Core.SourceGeneratedPropertyInformation");
         sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"ReflectionInfo = typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\"),");
         sourceCodeWriter.Write($"Type = typeof({property.Type.GloballyQualified()}),");
         sourceCodeWriter.Write($"Name = \"{property.Name}\",");
         sourceCodeWriter.Write($"IsStatic = {property.IsStatic.ToString().ToLower()},");

@@ -72,6 +72,7 @@ internal class ReflectionToSourceModelHelpers
         return new SourceGeneratedPropertyInformation
         {
             Attributes = property.GetCustomAttributes().ToArray(),
+            ReflectionInfo = property,
             Name = property.Name,
             Type = property.PropertyType,
             IsStatic = property.GetMethod?.IsStatic is true

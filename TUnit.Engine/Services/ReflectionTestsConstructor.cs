@@ -315,7 +315,7 @@ internal class ReflectionTestsConstructor(
     {
         var nestedDependency = new NestedDependency
         {
-            Property = property,
+            Property = ReflectionToSourceModelHelpers.GenerateProperty(property),
             Parent = parent,
             Type = property.PropertyType,
             TestBuilderContextAccessor = testBuilderContextAccessor,
@@ -842,6 +842,7 @@ internal class ReflectionTestsConstructor(
                     new SourceGeneratedPropertyInformation
                     {
                         Name = propertyInfo!.Name,
+                        ReflectionInfo = propertyInfo,
                         Attributes = propertyInfo.GetCustomAttributes().ToArray(),
                         Type = propertyInfo.PropertyType,
                         IsStatic = propertyInfo.GetMethod?.IsStatic ?? false,
@@ -911,11 +912,11 @@ internal class ReflectionTestsConstructor(
         public required DataGeneratorMetadata DataGeneratorMetadata { get; init; }
         public List<NestedDependency> Children { get; } = [];
         public required NestedDependency? Parent { get; set; }
-        public required PropertyInfo? Property { get; init; }
+        public required SourceGeneratedPropertyInformation? Property { get; init; }
         public required Type Type { get; init; }
         public required TestBuilderContextAccessor TestBuilderContextAccessor { get; init; }
 
-        public IDataAttribute? DataAttribute => field ??= Property?.GetCustomAttributes().OfType<IDataAttribute>().FirstOrDefault();
+        public IDataAttribute? DataAttribute => field ??= Property?.Attributes.OfType<IDataAttribute>().FirstOrDefault();
 
         public object? Instance
         {
@@ -930,7 +931,7 @@ internal class ReflectionTestsConstructor(
                 throw new InvalidOperationException("Cannot add to parent when there is no parent.");
             }
 
-            Property?.SetValue(Parent?.Instance, Instance);
+            Property?.ReflectionInfo.SetValue(Parent?.Instance, Instance);
         }
 
         public object? CreateInstance()
@@ -949,13 +950,13 @@ internal class ReflectionTestsConstructor(
             {
                 ArgumentsAttribute argumentsAttribute => argumentsAttribute.Values.ElementAtOrDefault(0),
                 ClassConstructorAttribute classConstructorAttribute => ((IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!).Create(
-                    Property.PropertyType, new ClassConstructorMetadata
+                    Property.Type, new ClassConstructorMetadata
                     {
                         TestBuilderContext = DataGeneratorMetadata.TestBuilderContext.Current, TestSessionId = DataGeneratorMetadata.TestSessionId
                     }),
                 IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata with
                     {
-                        MembersToGenerate = [ ReflectionToSourceModelHelpers.GenerateProperty(Property) ]
+                        MembersToGenerate = [ Property ]
                     })
                     .ElementAtOrDefault(0)
                     ?.Invoke()
