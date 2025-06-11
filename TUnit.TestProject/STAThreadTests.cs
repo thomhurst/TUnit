@@ -30,6 +30,7 @@ public class STAThreadTests
 
         // After a simple delay
         await Task.Delay(10);
+
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
     }
 

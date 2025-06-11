@@ -5,8 +5,6 @@ namespace TUnit.Core;
 
 public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredEventReceiver
 {
-    private static readonly DedicatedThreadTaskScheduler _dedicatedThreadTaskScheduler = new();
-
     protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
         var tcs = new TaskCompletionSource<object?>();
@@ -21,7 +19,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
                 try
                 {
-                    ExecuteAsyncActionWithMessagePump(action, _dedicatedThreadTaskScheduler, tcs);
+                    ExecuteAsyncActionWithMessagePump(action, new DedicatedThreadTaskScheduler(), tcs);
                 }
                 catch (Exception e)
                 {
@@ -53,32 +51,39 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     {
         try
         {
-            var valueTask = action();
-
-            if (valueTask.IsCompletedSuccessfully)
-            {
-                tcs.SetResult(null);
-                taskScheduler.ProcessPendingTasks();
-                return;
-            }
-
-            var task = valueTask.AsTask();
-
-            task.ContinueWith(t =>
-            {
-                if (t.IsFaulted)
+            Task.Factory.StartNew(
+                () =>
                 {
-                    tcs.SetException(t.Exception!);
-                }
-                else if (t.IsCanceled)
-                {
-                    tcs.SetCanceled();
-                }
-                else
-                {
-                    tcs.SetResult(null);
-                }
-            }, CancellationToken.None, TaskContinuationOptions.None, taskScheduler);
+                    var valueTask = action();
+
+                    if (valueTask.IsCompletedSuccessfully)
+                    {
+                        tcs.SetResult(null);
+                        taskScheduler.ProcessPendingTasks();
+                        return;
+                    }
+
+                    var task = valueTask.AsTask();
+
+                    task.ContinueWith(t =>
+                    {
+                        if (t.IsFaulted)
+                        {
+                            tcs.SetException(t.Exception!);
+                        }
+                        else if (t.IsCanceled)
+                        {
+                            tcs.SetCanceled();
+                        }
+                        else
+                        {
+                            tcs.SetResult(null);
+                        }
+                    }, CancellationToken.None, TaskContinuationOptions.None, taskScheduler);
+                },
+                CancellationToken.None,
+                TaskCreationOptions.None,
+                taskScheduler);
 
             // Message pump: process pending work until both the main task and all work items are complete
             while (!tcs.Task.IsCompleted)
@@ -183,7 +188,6 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        context.SetTaskScheduler(_dedicatedThreadTaskScheduler);
         context.SetParallelLimiter(new ProcessorCountParallelLimit());
 
         return default;

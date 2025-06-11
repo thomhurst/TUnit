@@ -28,9 +28,4 @@ public class TestRegisteredContext : BeforeTestContext
     {
         DiscoveredTest.TestContext.SkipReason = reason;
     }
-
-    public void SetTaskScheduler(TaskScheduler taskScheduler)
-    {
-        DiscoveredTest.TestContext.TaskScheduler = taskScheduler;
-    }
 }

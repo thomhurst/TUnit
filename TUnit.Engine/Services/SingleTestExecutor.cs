@@ -42,18 +42,16 @@ internal class SingleTestExecutor(
     {
         lock (Lock)
         {
-            return test.TestContext.TestTask ??= CreateTaskOnCurrentContext(test.TestContext, async () => await ExecuteTestInternalAsync(test, filter, isStartedAsDependencyForAnotherTest));
+            return test.TestContext.TestTask ??= CreateTaskOnCurrentContext(async () => await ExecuteTestInternalAsync(test, filter, isStartedAsDependencyForAnotherTest));
         }
     }
 
-    private static Task CreateTaskOnCurrentContext(TestContext testContext, Func<Task> action)
+    private static Task CreateTaskOnCurrentContext(Func<Task> action)
     {
-     var taskScheduler = testContext.TaskScheduler ?? TaskScheduler.Current;
-
         return Task.Factory.StartNew(action,
             CancellationToken.None,
             TaskCreationOptions.None,
-            taskScheduler)
+            TaskScheduler.Current)
             .Unwrap();
     }
 
@@ -457,7 +455,7 @@ internal class SingleTestExecutor(
 
     private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
-        return CreateTaskOnCurrentContext(discoveredTest.TestContext, async () => await testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions));
+        return CreateTaskOnCurrentContext(async () => await testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions));
     }
 
     private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)
