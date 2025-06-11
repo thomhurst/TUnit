@@ -13,12 +13,12 @@ public record TestBuilderContext
 
     public List<IDataAttribute> DataAttributes { get; } = [];
 
-    private List<object?>? _initializedObjects;
-    public List<object?> InitializedObjects => _initializedObjects ??= [];
+    private List<object?>? _initializableObjects;
+    public List<object?> InitializableObjects => _initializableObjects ??= [];
 
     public async Task InitializeAsync(object? obj)
     {
-        foreach (var initializedObject in _initializedObjects ?? [])
+        foreach (var initializedObject in _initializableObjects ?? [])
         {
             await ObjectInitializer.InitializeAsync(initializedObject);
         }
