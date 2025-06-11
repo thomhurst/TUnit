@@ -183,6 +183,7 @@ public record DynamicTest<
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 DynamicAttributes = Attributes,
+                DiscoveryException = Exception
             };
         }
     }

@@ -17,7 +17,12 @@ internal static class ReflectionExtensions
 
     }
 
-    public static bool HasAttribute<T>(this MemberInfo member)
+    public static bool HasExactAttribute<T>(this MemberInfo member)
+    {
+        return HasAttribute<T>(member, false);
+    }
+
+    public static bool HasAttribute<T>(this MemberInfo member, bool inherit = true)
     {
         if (typeof(T).IsAssignableTo(typeof(Attribute)))
         {

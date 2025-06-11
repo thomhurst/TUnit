@@ -280,34 +280,7 @@ internal class ReflectionTestsConstructor(
             .Select(x => CreateDependencyChain(x, dependencyChain, methodInformation, testBuilderContextAccessor))
             .ToList());
 
-        foreach (var nestedDependency in GetMostNestedDependencies(dependencyChain))
-        {
-            NestedDependency? lastProcessedDependency = null;
-            var dependency = nestedDependency;
-            while (dependency != null)
-            {
-                dependency.CreateInstance();
-
-                lastProcessedDependency?.AddToParent();
-                lastProcessedDependency = dependency;
-
-                dependency = dependency.Parent;
-            }
-        }
-    }
-
-    private static IEnumerable<NestedDependency> GetMostNestedDependencies(NestedDependency dependency)
-    {
-        if (dependency.Children.Count == 0)
-        {
-            yield return dependency;
-            yield break;
-        }
-
-        foreach (var nestedDependency in dependency.Children.SelectMany(GetMostNestedDependencies))
-        {
-            yield return nestedDependency;
-        }
+        dependencyChain.CreateInstance();
     }
 
     private static NestedDependency CreateDependencyChain(PropertyInfo property, NestedDependency parent, SourceGeneratedMethodInformation methodInformation,
@@ -894,51 +867,37 @@ internal class ReflectionTestsConstructor(
 
     private bool IsTest(MethodInfo arg)
     {
-        try
-        {
-            return arg.GetCustomAttributes()
-                .OfType<TestAttribute>()
-                .Any();
-        }
-        catch
-        {
-            return false;
-        }
+        return arg.HasExactAttribute<TestAttribute>();
     }
 
     public class NestedDependency
     {
-        private object? _instance;
         public required DataGeneratorMetadata DataGeneratorMetadata { get; init; }
         public List<NestedDependency> Children { get; } = [];
-        public required NestedDependency? Parent { get; set; }
+        public required NestedDependency? Parent { get; init; }
         public required SourceGeneratedPropertyInformation? Property { get; init; }
         public required Type Type { get; init; }
         public required TestBuilderContextAccessor TestBuilderContextAccessor { get; init; }
 
         public IDataAttribute? DataAttribute => field ??= Property?.Attributes.OfType<IDataAttribute>().FirstOrDefault();
 
-        public object? Instance
-        {
-            get => _instance ??= CreateInstance();
-            init => _instance = value;
-        }
+        public object? Instance { get; set; }
 
-        public void AddToParent()
+        public object? CreateInstance(int initializationOrder = -1_000_000)
         {
-            if (Parent is null)
+            foreach (var child in Children)
             {
-                throw new InvalidOperationException("Cannot add to parent when there is no parent.");
+                child.CreateInstance();
             }
 
-            Property?.ReflectionInfo.SetValue(Parent?.Instance, Instance);
-        }
-
-        public object? CreateInstance()
-        {
-            if (_instance != null)
+            if (Instance != null)
             {
-                return _instance;
+                foreach (var child in Children)
+                {
+                    child.SetProperty(Instance);
+                }
+
+                return Instance;
             }
 
             if (DataAttribute is null || Property is null)
@@ -946,7 +905,7 @@ internal class ReflectionTestsConstructor(
                 return null;
             }
 
-            _instance ??= DataAttribute switch
+            Instance ??= DataAttribute switch
             {
                 ArgumentsAttribute argumentsAttribute => argumentsAttribute.Values.ElementAtOrDefault(0),
                 ClassConstructorAttribute classConstructorAttribute => ((IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!).Create(
@@ -973,7 +932,7 @@ internal class ReflectionTestsConstructor(
 
             TestBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
             {
-                await ObjectInitializer.InitializeAsync(_instance);
+                await ObjectInitializer.InitializeAsync(Instance);
 
                 var parent = Parent;
 
@@ -983,9 +942,24 @@ internal class ReflectionTestsConstructor(
                     parent = Parent?.Parent;
                 }
             };
-            TestBuilderContextAccessor.Current.Events.OnInitialize.Order = int.MinValue;
+            TestBuilderContextAccessor.Current.Events.OnInitialize.Order = initializationOrder;
 
-            return _instance;
+            foreach (var child in Children)
+            {
+                child.SetProperty(Instance);
+            }
+
+            return Instance;
+        }
+
+        private void SetProperty(object? parent)
+        {
+            if (Property is null || Instance is null)
+            {
+                return;
+            }
+
+            Property.ReflectionInfo.SetValue(parent, Instance);
         }
 
         public override string ToString()
