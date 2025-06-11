@@ -16,7 +16,7 @@ public record TestBuilderContext
     private List<object?>? _initializableObjects;
     public List<object?> InitializableObjects => _initializableObjects ??= [];
 
-    public async Task InitializeAsync(object? obj)
+    public async Task InitializeAsync()
     {
         foreach (var initializedObject in _initializableObjects ?? [])
         {
