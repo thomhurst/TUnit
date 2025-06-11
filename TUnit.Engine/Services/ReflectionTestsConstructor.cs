@@ -618,12 +618,9 @@ internal class ReflectionTestsConstructor(
             var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
             CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, [], 0);
 
-            var invoke = dataSourceGeneratorAttribute.GetType().GetMethod("GenerateDataSources")!.Invoke(testDataAttribute, [
-                CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute, dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
-                    classInstanceArgumentsInvoked, needsInstance)
-            ]) as IEnumerable;
-
-            var funcEnumerable = invoke?.Cast<object>() ?? [];
+            var funcEnumerable = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute,
+                dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
+                classInstanceArgumentsInvoked, needsInstance));
 
             foreach (var func in funcEnumerable)
             {
