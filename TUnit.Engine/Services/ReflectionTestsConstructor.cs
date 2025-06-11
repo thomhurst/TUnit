@@ -331,11 +331,11 @@ internal class ReflectionTestsConstructor(
             }
         };
 
-        nestedDependency.Children.AddRange(property.PropertyType
+        nestedDependency.Children.AddRange(nestedDependency.DataAttribute?.GetType()
             .GetProperties()
             .Where(x => x.HasAttribute<IDataAttribute>())
             .Select(x => CreateDependencyChain(x, nestedDependency, methodInformation, testBuilderContextAccessor))
-            .ToList());
+            .ToList() ?? []);
 
         return nestedDependency;
     }
