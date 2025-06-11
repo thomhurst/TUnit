@@ -19,7 +19,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
                 try
                 {
-                    ExecuteAsyncActionWithMessagePump(action, new DedicatedThreadTaskScheduler(), tcs);
+                    ExecuteAsyncActionWithMessagePump(action, tcs);
                 }
                 catch (Exception e)
                 {
@@ -47,52 +47,69 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         await tcs.Task;
     }
 
-    private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, DedicatedThreadTaskScheduler taskScheduler, TaskCompletionSource<object?> tcs)
+    private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, TaskCompletionSource<object?> tcs)
     {
         try
         {
-            Task.Factory.StartNew(
-                () =>
-                {
-                    var valueTask = action();
+            var taskScheduler = new DedicatedThreadTaskScheduler();
 
-                    if (valueTask.IsCompletedSuccessfully)
+            var previousContext = SynchronizationContext.Current;
+            var dedicatedContext = new DedicatedThreadSynchronizationContext();
+
+            SynchronizationContext.SetSynchronizationContext(dedicatedContext);
+
+            try
+            {
+                Task.Factory.StartNew(
+                    () =>
                     {
-                        tcs.SetResult(null);
-                        taskScheduler.ProcessPendingTasks();
-                        return;
-                    }
+                        SynchronizationContext.SetSynchronizationContext(dedicatedContext);
 
-                    var task = valueTask.AsTask();
+                        var valueTask = action();
 
-                    task.ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            tcs.SetException(t.Exception!);
-                        }
-                        else if (t.IsCanceled)
-                        {
-                            tcs.SetCanceled();
-                        }
-                        else
+                        if (valueTask.IsCompletedSuccessfully)
                         {
                             tcs.SetResult(null);
+                            return;
                         }
-                    }, CancellationToken.None, TaskContinuationOptions.None, taskScheduler);
-                },
-                CancellationToken.None,
-                TaskCreationOptions.None,
-                taskScheduler);
 
-            // Message pump: process pending work until both the main task and all work items are complete
-            while (!tcs.Task.IsCompleted)
-            {
+                        var task = valueTask.AsTask();
+
+                        task.ContinueWith(t =>
+                        {
+                            if (t.IsFaulted)
+                            {
+                                tcs.SetException(t.Exception!);
+                            }
+                            else if (t.IsCanceled)
+                            {
+                                tcs.SetCanceled();
+                            }
+                            else
+                            {
+                                tcs.SetResult(null);
+                            }
+                        }, CancellationToken.None, TaskContinuationOptions.None, taskScheduler);
+                    },
+                    CancellationToken.None,
+                    TaskCreationOptions.None,
+                    taskScheduler);
+
+                // Message pump: process pending work until both the main task and all work items are complete
+                while (!tcs.Task.IsCompleted)
+                {
+                    taskScheduler.ProcessPendingTasks();
+                    dedicatedContext.ProcessPendingWork();
+                    Thread.Sleep(1);
+                }
+
                 taskScheduler.ProcessPendingTasks();
-                Thread.Sleep(1);
+                dedicatedContext.ProcessPendingWork();
             }
-
-            taskScheduler.ProcessPendingTasks();
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previousContext);
+            }
         }
         catch (Exception ex)
         {
@@ -128,7 +145,6 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
         protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
         {
-            // Only execute inline if we're on the dedicated thread
             if (Thread.CurrentThread != _dedicatedThread)
             {
                 return false;
@@ -158,10 +174,9 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
         public void ProcessPendingTasks()
         {
-            // Only the dedicated thread should call this
             if (Thread.CurrentThread != _dedicatedThread)
             {
-                return;
+                throw new InvalidOperationException("ProcessPendingTasks can only be called from the dedicated thread.");
             }
 
             while (true)
@@ -184,6 +199,105 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         }
 
         public override int MaximumConcurrencyLevel => 1;
+    }
+
+    internal sealed class DedicatedThreadSynchronizationContext : SynchronizationContext
+    {
+        private readonly Thread _dedicatedThread;
+        private readonly Queue<(SendOrPostCallback callback, object? state)> _workQueue = new();
+        private readonly Lock _queueLock = new();
+
+        public DedicatedThreadSynchronizationContext()
+        {
+            _dedicatedThread = Thread.CurrentThread;
+        }
+
+        public override void Post(SendOrPostCallback d, object? state)
+        {
+            if (Thread.CurrentThread == _dedicatedThread)
+            {
+                // We're already on the dedicated thread, execute immediately
+                d(state);
+            }
+            else
+            {
+                // Queue the work to be executed on the dedicated thread
+                lock (_queueLock)
+                {
+                    _workQueue.Enqueue((d, state));
+                }
+            }
+        }
+
+        public override void Send(SendOrPostCallback d, object? state)
+        {
+            if (Thread.CurrentThread == _dedicatedThread)
+            {
+                // We're already on the dedicated thread, execute immediately
+                d(state);
+            }
+            else
+            {
+                // For Send, we need to block until completion
+                // This is less ideal but necessary for the Send semantics
+                var tcs = new TaskCompletionSource<object?>();
+
+                Post(_ =>
+                {
+                    try
+                    {
+                        d(state);
+                        tcs.SetResult(null);
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                    }
+                }, null);
+
+                // Wait for completion (this will block)
+                tcs.Task.GetAwaiter().GetResult();
+            }
+        }
+
+        public void ProcessPendingWork()
+        {
+            // Only the dedicated thread should call this
+            if (Thread.CurrentThread != _dedicatedThread)
+            {
+                return;
+            }
+
+            while (true)
+            {
+                (SendOrPostCallback callback, object? state) workItem;
+
+                lock (_queueLock)
+                {
+                    if (_workQueue.Count == 0)
+                    {
+                        break;
+                    }
+
+                    workItem = _workQueue.Dequeue();
+                }
+
+                try
+                {
+                    workItem.callback(workItem.state);
+                }
+                catch
+                {
+                    // Swallow exceptions in work items to avoid crashing the message pump
+                    // The exception will be handled by the async machinery
+                }
+            }
+        }
+
+        public override SynchronizationContext CreateCopy()
+        {
+            return this; // Return the same instance to maintain thread affinity
+        }
     }
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)
