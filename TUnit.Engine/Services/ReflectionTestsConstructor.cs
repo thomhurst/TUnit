@@ -908,4 +908,61 @@ internal class ReflectionTestsConstructor(
             return false;
         }
     }
+
+    public class NestedDependency
+    {
+        public required DataGeneratorMetadata DataGeneratorMetadata { get; init; }
+        public List<NestedDependency> Children { get; } = [];
+        public required NestedDependency? Parent { get; set; }
+        public required PropertyInfo Property { get; init; }
+        public required Type Type { get; init; }
+
+        public IDataAttribute? DataAttribute => field ??= Property.GetCustomAttributes().OfType<IDataAttribute>().FirstOrDefault();
+
+        public object? Instance
+        {
+            get => field ??= CreateInstance();
+            init;
+        }
+
+        public object? CreateInstance()
+        {
+            if (Property.GetValue(Parent?.Instance) is {} value)
+            {
+                return value;
+            }
+
+            if (DataAttribute is null)
+            {
+                return null;
+            }
+
+            switch (DataAttribute)
+            {
+                case ArgumentsAttribute argumentsAttribute:
+                    return argumentsAttribute.Values.ElementAtOrDefault(0);
+                case ClassConstructorAttribute classConstructorAttribute:
+                    return ((IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)).Create(Property.PropertyType,
+                        new ClassConstructorMetadata
+                        {
+                            TestBuilderContext = DataGeneratorMetadata.TestBuilderContext.Current, TestSessionId = DataGeneratorMetadata.TestSessionId
+                        });
+                case IDataSourceGeneratorAttribute dataSourceGeneratorAttribute:
+                    return dataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0);
+                case InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute:
+                    Parent?.Instance?.GetType().GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource,
+                        BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)!.Invoke(Parent?.Instance, instanceMethodDataSourceAttribute.Arguments);
+                    break;
+                case MethodDataSourceAttribute methodDataSourceAttribute:
+                    (methodDataSourceAttribute.ClassProvidingDataSource ?? Parent?.Type)
+                        !.GetMethod(methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                        !.Invoke(null, methodDataSourceAttribute.Arguments);
+                    break;
+                case NoOpDataAttribute noOpDataAttribute:
+                    return null;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(DataAttribute));
+            }
+        }
+    }
 }
