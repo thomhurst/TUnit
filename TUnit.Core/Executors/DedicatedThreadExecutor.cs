@@ -51,60 +51,47 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     {
         try
         {
-            var taskScheduler = new DedicatedThreadTaskScheduler();
-
             var previousContext = SynchronizationContext.Current;
-            var dedicatedContext = new DedicatedThreadSynchronizationContext();
+            var taskScheduler = new DedicatedThreadTaskScheduler();
+            var dedicatedContext = new DedicatedThreadSynchronizationContext(taskScheduler);
 
             SynchronizationContext.SetSynchronizationContext(dedicatedContext);
 
             try
             {
-                Task.Factory.StartNew(
-                    () =>
-                    {
-                        SynchronizationContext.SetSynchronizationContext(dedicatedContext);
-
-                        var valueTask = action();
-
-                        if (valueTask.IsCompletedSuccessfully)
-                        {
-                            tcs.SetResult(null);
-                            return;
-                        }
-
-                        var task = valueTask.AsTask();
-
-                        task.ContinueWith(t =>
-                        {
-                            if (t.IsFaulted)
-                            {
-                                tcs.SetException(t.Exception!);
-                            }
-                            else if (t.IsCanceled)
-                            {
-                                tcs.SetCanceled();
-                            }
-                            else
-                            {
-                                tcs.SetResult(null);
-                            }
-                        }, CancellationToken.None, TaskContinuationOptions.None, taskScheduler);
-                    },
-                    CancellationToken.None,
-                    TaskCreationOptions.None,
-                    taskScheduler);
-
-                // Message pump: process pending work until both the main task and all work items are complete
-                while (!tcs.Task.IsCompleted)
+                var task = Task.Factory.StartNew(async () =>
                 {
-                    taskScheduler.ProcessPendingTasks();
+                    // Inside this task, TaskScheduler.Current will be our scheduler
+                    await action();
+                }, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Unwrap();
+
+                // Pump messages until the task completes
+                var deadline = DateTime.UtcNow.AddMinutes(5);
+
+                while (!task.IsCompleted && DateTime.UtcNow < deadline)
+                {
                     dedicatedContext.ProcessPendingWork();
+
+                    taskScheduler.ProcessPendingTasks();
+
                     Thread.Sleep(1);
                 }
 
-                taskScheduler.ProcessPendingTasks();
-                dedicatedContext.ProcessPendingWork();
+                if (!task.IsCompleted)
+                {
+                    tcs.SetException(new TimeoutException("Async operation timed out after 5 minutes"));
+                    return;
+                }
+
+                try
+                {
+                    task.GetAwaiter().GetResult();
+                    tcs.SetResult(null);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
             }
             finally
             {
@@ -145,23 +132,30 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
         protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
         {
-            if (Thread.CurrentThread != _dedicatedThread)
+            // ALWAYS execute inline if we're on the dedicated thread, regardless of context
+            // This is crucial for capturing continuations that would otherwise escape
+            if (Thread.CurrentThread == _dedicatedThread)
             {
-                return false;
-            }
-
-            if (taskWasPreviouslyQueued)
-            {
-                lock (_queueLock)
+                if (taskWasPreviouslyQueued)
                 {
-                    if (_taskQueue.Contains(task))
+                    lock (_queueLock)
                     {
-                        _taskQueue.Remove(task);
+                        if (_taskQueue.Contains(task))
+                        {
+                            _taskQueue.Remove(task);
+                        }
                     }
                 }
+
+                return TryExecuteTask(task);
             }
 
-            return TryExecuteTask(task);
+            // If we're not on the dedicated thread, queue it to be executed later
+            if (!taskWasPreviouslyQueued)
+            {
+                QueueTask(task);
+            }
+            return false;
         }
 
         protected override IEnumerable<Task> GetScheduledTasks()
@@ -204,28 +198,22 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     internal sealed class DedicatedThreadSynchronizationContext : SynchronizationContext
     {
         private readonly Thread _dedicatedThread;
+        private readonly DedicatedThreadTaskScheduler _taskScheduler;
         private readonly Queue<(SendOrPostCallback callback, object? state)> _workQueue = new();
         private readonly Lock _queueLock = new();
 
-        public DedicatedThreadSynchronizationContext()
+        public DedicatedThreadSynchronizationContext(DedicatedThreadTaskScheduler taskScheduler)
         {
             _dedicatedThread = Thread.CurrentThread;
+            _taskScheduler = taskScheduler;
         }
 
         public override void Post(SendOrPostCallback d, object? state)
         {
-            if (Thread.CurrentThread == _dedicatedThread)
+            // Always queue the work to ensure it runs on the dedicated thread
+            lock (_queueLock)
             {
-                // We're already on the dedicated thread, execute immediately
-                d(state);
-            }
-            else
-            {
-                // Queue the work to be executed on the dedicated thread
-                lock (_queueLock)
-                {
-                    _workQueue.Enqueue((d, state));
-                }
+                _workQueue.Enqueue((d, state));
             }
         }
 

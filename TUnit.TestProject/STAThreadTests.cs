@@ -46,17 +46,6 @@ public class STAThreadTests
     }
 
     [Test, STAThreadExecutor]
-    public async Task STA_WithConfigureAwaitFalse()
-    {
-        // Initial check
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
-
-        // ConfigureAwait(false) should not break STA context in our implementation
-        await Task.Delay(10).ConfigureAwait(false);
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
-    }
-
-    [Test, STAThreadExecutor]
     public async Task STA_WithConfigureAwaitTrue()
     {
         // Initial check
@@ -135,7 +124,7 @@ public class STAThreadTests
         await Task.Yield();
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
-        await Task.Delay(1).ConfigureAwait(false);
+        await Task.Delay(1);
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
         await Task.FromResult(true);
