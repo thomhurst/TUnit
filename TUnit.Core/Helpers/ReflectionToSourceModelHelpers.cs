@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Extensions;
 
@@ -8,22 +9,33 @@ namespace TUnit.Core.Helpers;
 [RequiresUnreferencedCode("Reflection")]
 internal class ReflectionToSourceModelHelpers
 {
+    private static readonly ConcurrentDictionary<Assembly, SourceGeneratedAssemblyInformation> _assemblyCache = new();
+    private static readonly ConcurrentDictionary<Type, SourceGeneratedClassInformation> _classCache = new();
+    private static readonly ConcurrentDictionary<MethodInfo, SourceGeneratedMethodInformation> _methodCache = new();
+    private static readonly ConcurrentDictionary<PropertyInfo, SourceGeneratedPropertyInformation> _propertyCache = new();
+    private static readonly ConcurrentDictionary<ParameterInfo, SourceGeneratedParameterInformation> _parameterCache = new();
+
     public static SourceGeneratedMethodInformation BuildTestMethod([DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType, MethodInfo methodInfo, string? testName)
     {
-        return new SourceGeneratedMethodInformation
+        return BuildTestMethod(GenerateClass(testClassType), methodInfo, testName);
+    }
+
+    public static SourceGeneratedMethodInformation BuildTestMethod(SourceGeneratedClassInformation classInformation, MethodInfo methodInfo, string? testName)
+    {
+        return _methodCache.GetOrAdd(methodInfo, _ => new SourceGeneratedMethodInformation
         {
             Attributes = methodInfo.GetCustomAttributes().ToArray(),
-            Class = GenerateClass(testClassType),
+            Class = classInformation,
             Name = testName ?? methodInfo.Name,
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
             Parameters = GetParameters(methodInfo.GetParameters()),
-            Type = testClassType,
+            Type = classInformation.Type,
             ReflectionInformation = methodInfo,
             ReturnType = methodInfo.ReturnType
-        };
+        });
     }
 
     public static SourceGeneratedClassInformation? GetParent(
@@ -44,7 +56,7 @@ internal class ReflectionToSourceModelHelpers
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType)
     {
-        return new SourceGeneratedClassInformation
+        return _classCache.GetOrAdd(testClassType, _ => new SourceGeneratedClassInformation
         {
             Parent = GetParent(testClassType),
             Assembly = GenerateAssembly(testClassType),
@@ -54,22 +66,22 @@ internal class ReflectionToSourceModelHelpers
             Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
             Properties = testClassType.GetProperties().Select(GenerateProperty).ToArray(),
             Type = testClassType
-        };
+        });
     }
 
     public static SourceGeneratedAssemblyInformation GenerateAssembly(Type testClassType)
     {
-        return new SourceGeneratedAssemblyInformation
+        return _assemblyCache.GetOrAdd(testClassType.Assembly, _ => new SourceGeneratedAssemblyInformation
         {
             Attributes = testClassType.Assembly.GetCustomAttributes().ToArray(),
             Name = testClassType.Assembly.GetName().Name ??
                    testClassType.Assembly.GetName().FullName,
-        };
+        });
     }
 
     public static SourceGeneratedPropertyInformation GenerateProperty(PropertyInfo property)
     {
-        return new SourceGeneratedPropertyInformation
+        return _propertyCache.GetOrAdd(property, _ => new SourceGeneratedPropertyInformation
         {
             Attributes = property.GetCustomAttributes().ToArray(),
             ReflectionInfo = property,
@@ -78,7 +90,7 @@ internal class ReflectionToSourceModelHelpers
             IsStatic = property.GetMethod?.IsStatic is true
                 || property.SetMethod?.IsStatic is true,
             Getter = property.GetValue
-        };
+        });
     }
 
     public static SourceGeneratedParameterInformation[] GetParameters(ParameterInfo[] parameters)
@@ -88,11 +100,11 @@ internal class ReflectionToSourceModelHelpers
 
     public static SourceGeneratedParameterInformation GenerateParameter(ParameterInfo parameter)
     {
-        return new SourceGeneratedParameterInformation(parameter.ParameterType)
+        return _parameterCache.GetOrAdd(parameter, _ => new SourceGeneratedParameterInformation(parameter.ParameterType)
         {
             Attributes = parameter.GetCustomAttributes().ToArray(),
             Name = parameter.Name ?? string.Empty,
             ReflectionInfo = parameter,
-        };
+        });
     }
 }

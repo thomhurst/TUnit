@@ -60,10 +60,12 @@ internal class ReflectionTestsConstructor(
         foreach (var type in allTypes.Where(x => x is { IsClass: true, IsAbstract: false }))
         {
             var testMethods = type.GetMethods()
-                .Where(x => !x.IsAbstract && IsTest(x))
+                .Where(x => !x.IsAbstract && x.HasExactAttribute<TestAttribute>())
                 .ToArray();
 
-            foreach (var dynamicTest in Build(type, testMethods))
+            var classInformation = ReflectionToSourceModelHelpers.GenerateClass(type);
+
+            foreach (var dynamicTest in Build(classInformation, testMethods.Select(x => ReflectionToSourceModelHelpers.BuildTestMethod(classInformation, x, x.Name)).ToArray()))
             {
                 yield return dynamicTest;
             }
@@ -95,25 +97,23 @@ internal class ReflectionTestsConstructor(
         }
     }
 
-    private IEnumerable<DynamicTest> Build(Type type, MethodInfo[] testMethods)
+    private IEnumerable<DynamicTest> Build(SourceGeneratedClassInformation type, SourceGeneratedMethodInformation[] testMethods)
     {
         var testsBuilderDynamicTests = new List<DynamicTest>();
 
-        foreach (var testMethod in testMethods)
+        foreach (var testInformation in testMethods)
         {
-            var testAttribute = testMethod.GetCustomAttribute<TestAttribute>()!;
+            var testAttribute = testInformation.Attributes.OfType<TestAttribute>().First();
 
             try
             {
                 foreach (var typeDataAttribute in GetDataAttributes(type))
                 {
-                    var testInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, testMethod, testMethod.Name);
-
-                    foreach (var testDataAttribute in GetDataAttributes(testMethod))
+                    foreach (var testDataAttribute in GetDataAttributes(testInformation))
                     {
                         var testBuilderContextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
 
-                        foreach (var classInstanceArguments in GetArguments(type, testMethod, null, typeDataAttribute, DataGeneratorType.ClassParameters, () => [],
+                        foreach (var classInstanceArguments in GetArguments(type, testInformation, null, typeDataAttribute, DataGeneratorType.ClassParameters, () => [],
                                      testInformation, testBuilderContextAccessor))
                         {
                             BuildTests(testInformation, classInstanceArguments, typeDataAttribute, testDataAttribute, testsBuilderDynamicTests, testBuilderContextAccessor);
@@ -123,26 +123,36 @@ internal class ReflectionTestsConstructor(
             }
             catch (Exception e)
             {
-                testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest(testMethod)
+                testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest(testInformation.ReflectionInformation)
                 {
-                    MethodName = testMethod.Name,
+                    MethodName = testInformation.Name,
                     TestFilePath = testAttribute.File,
                     TestLineNumber = testAttribute.Line,
                     Exception = e,
-                    TestClassType = type,
+                    TestClassType = type.Type,
                 });
             }
         }
         return testsBuilderDynamicTests;
     }
 
+    private IEnumerable<IDataAttribute> GetDataAttributes(SourceGeneratedMemberInformation memberInformation)
+    {
+        var attributes = memberInformation.Attributes.OfType<IDataAttribute>().ToArray();
+
+        if(attributes.Length == 0)
+        {
+            return NoOpDataAttribute.Array;
+        }
+
+        return attributes;
+    }
+
     private void BuildTests(SourceGeneratedMethodInformation testInformation, Func<object?[]> classInstanceArguments, IDataAttribute typeDataAttribute,
         IDataAttribute testDataAttribute,
         List<DynamicTest> testsBuilderDynamicTests, TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        var testMethod = testInformation.ReflectionInformation;
-
-        var type = testInformation.Class.Type;
+        var classInformation = testInformation.Class;
 
         var testAttribute = testInformation.Attributes.OfType<BaseTestAttribute>().First();
 
@@ -155,10 +165,10 @@ internal class ReflectionTestsConstructor(
                 ..testInformation.Class.Assembly.Attributes
             ];
 
-            foreach (var attribute in allAttributes.Where(x => x is IDataSourceGeneratorAttribute)
+            foreach (var attribute in allAttributes.OfType<IDataSourceGeneratorAttribute>()
                          .Where(a => !DotNetAssemblyHelper.IsInDotNetCoreLibrary(a.GetType())))
             {
-                CreateNestedDataGenerators(attribute, testInformation, testBuilderContextAccessor, []);
+                CreateNestedDataGenerators(attribute, testInformation, testBuilderContextAccessor, [], 0);
             }
 
             var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
@@ -167,12 +177,12 @@ internal class ReflectionTestsConstructor(
             {
                 var invokedClassInstanceArguments = classInstanceArguments();
 
-                foreach (var testArguments in GetArguments(type, testMethod, null, testDataAttribute, DataGeneratorType.TestParameters, () => invokedClassInstanceArguments,
+                foreach (var testArguments in GetArguments(classInformation, testInformation, null, testDataAttribute, DataGeneratorType.TestParameters, () => invokedClassInstanceArguments,
                              testInformation,
                              testBuilderContextAccessor))
                 {
-                    var propertyArgs = GetPropertyArgs(type, invokedClassInstanceArguments, testInformation, testBuilderContextAccessor)
-                        .ToDictionary(p => p.PropertyInfo, p => p.Args().ElementAtOrDefault(0));
+                    var propertyArgs = GetPropertyArgs(classInformation, invokedClassInstanceArguments, testInformation, testBuilderContextAccessor)
+                        .ToDictionary(p => p.PropertyInformation, p => p.Args().ElementAtOrDefault(0));
 
                     if (typeDataAttribute is not ClassConstructorAttribute)
                     {
@@ -183,34 +193,38 @@ internal class ReflectionTestsConstructor(
 
                     MapImplicitParameters(ref testMethodArguments, testInformation.Parameters);
 
-                    if (type.ContainsGenericParameters)
+                    if (classInformation.Type.ContainsGenericParameters)
                     {
                         var classParametersTypes = testInformation.Class.Parameters.Select(p => p.Type).ToList();
 
-                        var substitutedTypes = type.GetGenericArguments()
+                        var substitutedTypes = classInformation.Type.GetGenericArguments()
                             .Select(pc => classParametersTypes.FindIndex(pt => pt == pc))
                             .Select(i => invokedClassInstanceArguments[i]!.GetType())
                             .ToArray();
 
-                        type = type.MakeGenericType(substitutedTypes);
+                        classInformation = ReflectionToSourceModelHelpers.GenerateClass(classInformation.Type.MakeGenericType(substitutedTypes));
 
-                        testMethod = type.GetMembers()
-                            .OfType<MethodInfo>()
-                            .First(x => x.Name == testMethod.Name
-                                && x.GetParameters().Length == testMethod.GetParameters().Length);
+                        testInformation = ReflectionToSourceModelHelpers.BuildTestMethod(
+                            classInformation,
+                            classInformation.Type.GetMembers()
+                                .OfType<MethodInfo>()
+                                .First(x => x.Name == testInformation.Name
+                                    && x.GetParameters().Length == testInformation.Parameters.Length),
+                            testInformation.Name
+                        );
                     }
 
-                    if (testMethod.ContainsGenericParameters)
+                    if (testInformation.ReflectionInformation.ContainsGenericParameters)
                     {
-                        testMethod = GetRuntimeMethod(testMethod, testMethodArguments);
+                        testInformation = GetRuntimeMethod(testInformation, testMethodArguments);
                     }
 
-                    testsBuilderDynamicTests.Add(new UntypedDynamicTest(type, testMethod)
+                    testsBuilderDynamicTests.Add(new UntypedDynamicTest(classInformation.Type, testInformation.ReflectionInformation)
                     {
                         TestBuilderContext = testBuilderContextAccessor.Current,
                         TestMethodArguments = testMethodArguments,
                         Attributes = allAttributes,
-                        TestName = testMethod.Name,
+                        TestName = testInformation.Name,
                         TestClassArguments = invokedClassInstanceArguments ??= classInstanceArguments(),
                         TestFilePath = testAttribute.File,
                         TestLineNumber = testAttribute.Line,
@@ -222,7 +236,7 @@ internal class ReflectionTestsConstructor(
                         await reflectionDataInitializer.Initialize(context);
                     };
 
-                    foreach (var (_, value) in propertyArgs.Where(x => x.Value is IAsyncInitializer && x.Key.GetMethod is { IsStatic: true }))
+                    foreach (var (_, value) in propertyArgs.Where(x => x.Value is IAsyncInitializer && x.Key.ReflectionInfo.GetMethod is { IsStatic: true }))
                     {
                         reflectionDataInitializer.RegisterForInitialize(value);
                     }
@@ -235,100 +249,93 @@ internal class ReflectionTestsConstructor(
         }
         catch (Exception e)
         {
-            testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest(testMethod)
+            testsBuilderDynamicTests.Add(new UntypedFailedDynamicTest(testInformation.ReflectionInformation)
             {
-                MethodName = testMethod.Name,
+                MethodName = testInformation.Name,
                 TestFilePath = testAttribute.File,
                 TestLineNumber = testAttribute.Line,
                 Exception = e,
-                TestClassType = type,
+                TestClassType = classInformation.Type,
             });
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
         }
     }
 
-    private static void CreateNestedDataGenerators(object obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor,
-        HashSet<object> visited)
+    private static void CreateNestedDataGenerators(object? obj, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor,
+        HashSet<object> visited, int initializationOrder)
     {
-        if (!visited.Add(obj))
+        if (obj is null || !visited.Add(obj))
         {
             return;
         }
 
-        var dependencyChain = new NestedDependency
+        foreach (var propertyInfo in obj.GetType().GetProperties().Where(p => p.HasAttribute<IDataAttribute>()))
         {
-            Instance = obj,
-            Property = null,
-            Parent = null,
-            Type = obj.GetType(),
-            TestBuilderContextAccessor = testBuilderContextAccessor,
-            DataGeneratorMetadata = new DataGeneratorMetadata
+            var property = ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo);
+
+            var generator = property.Attributes.OfType<IDataAttribute>().First();
+
+            CreateNestedDataGenerators(generator, methodInformation, testBuilderContextAccessor, visited, initializationOrder);
+
+            var dataGeneratorMetadata = new DataGeneratorMetadata
             {
                 Type = DataGeneratorType.Property,
                 TestInformation = methodInformation,
                 ClassInstanceArguments = [],
-                MembersToGenerate = [],
+                MembersToGenerate = [property],
                 TestBuilderContext = testBuilderContextAccessor,
                 TestClassInstance = null,
                 TestSessionId = string.Empty,
-            },
-        };
-        dependencyChain.Children.AddRange(obj.GetType()
-            .GetProperties()
-            .Where(x => x.HasAttribute<IDataAttribute>())
-            .Select(x => CreateDependencyChain(x, dependencyChain, methodInformation, testBuilderContextAccessor))
-            .ToList());
+            };
 
-        dependencyChain.CreateInstance();
-    }
-
-    private static NestedDependency CreateDependencyChain(PropertyInfo property, NestedDependency parent, SourceGeneratedMethodInformation methodInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor)
-    {
-        var nestedDependency = new NestedDependency
-        {
-            Property = ReflectionToSourceModelHelpers.GenerateProperty(property),
-            Parent = parent,
-            Type = property.PropertyType,
-            TestBuilderContextAccessor = testBuilderContextAccessor,
-            DataGeneratorMetadata = new DataGeneratorMetadata
+            var value = generator switch
             {
-                Type = DataGeneratorType.Property,
-                TestInformation = methodInformation,
-                ClassInstanceArguments = [],
-                MembersToGenerate = [],
-                TestBuilderContext = testBuilderContextAccessor,
-                TestClassInstance = null,
-                TestSessionId = string.Empty,
+                ArgumentsAttribute argumentsAttribute => argumentsAttribute.Values.ElementAtOrDefault(0),
+                ClassConstructorAttribute classConstructorAttribute => ((IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!).Create(
+                    property.Type, new ClassConstructorMetadata
+                    {
+                        TestBuilderContext = testBuilderContextAccessor.Current,
+                        TestSessionId = string.Empty
+                    }),
+                IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0),
+                MethodDataSourceAttribute methodDataSourceAttribute => (methodDataSourceAttribute.ClassProvidingDataSource ?? obj.GetType()).GetMethod(
+                    methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy) !.Invoke(null,
+                    methodDataSourceAttribute.Arguments),
+                NoOpDataAttribute => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(generator), generator, null)
+            };
+
+            // Set up initialization for async initializable instances
+            if (value is not null)
+            {
+                property.ReflectionInfo.SetValue(obj, value);
+
+                testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
+                {
+                    await ObjectInitializer.InitializeAsync(value);
+                };
+                testBuilderContextAccessor.Current.Events.OnInitialize.Order = initializationOrder;
             }
-        };
-
-        nestedDependency.Children.AddRange(nestedDependency.DataAttribute?.GetType()
-            .GetProperties()
-            .Where(x => x.HasAttribute<IDataAttribute>())
-            .Select(x => CreateDependencyChain(x, nestedDependency, methodInformation, testBuilderContextAccessor))
-            .ToList() ?? []);
-
-        return nestedDependency;
+        }
     }
 
-    private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
+    private static SourceGeneratedMethodInformation GetRuntimeMethod(SourceGeneratedMethodInformation methodInfo, object?[] arguments)
     {
-        if (!methodInfo.IsGenericMethodDefinition)
+        if (!methodInfo.ReflectionInformation.IsGenericMethodDefinition)
         {
             return methodInfo;
         }
 
-        var typeArguments = methodInfo.GetGenericArguments();
-        var parameters = methodInfo.GetParameters();
+        var typeArguments = methodInfo.ReflectionInformation.GetGenericArguments();
+        var parameters = methodInfo.Parameters;
         var argumentsTypes = arguments.Select(x => x?.GetType()).ToArray();
 
         var typeParameterMap = new Dictionary<Type, Type>();
 
         for (var i = 0; i < parameters.Length && i < argumentsTypes.Length; i++)
         {
-            var parameterType = parameters[i].ParameterType;
+            var parameterType = parameters[i].Type;
             var argumentType = argumentsTypes[i];
 
             if (argumentType != null)
@@ -349,9 +356,9 @@ internal class ReflectionTestsConstructor(
                 var parameterIndex = -1;
                 for (var i = 0; i < parameters.Length; i++)
                 {
-                    if (parameters[i].ParameterType == typeArgument ||
-                        (parameters[i].ParameterType.IsGenericType &&
-                            parameters[i].ParameterType.GetGenericArguments().Contains(typeArgument)))
+                    if (parameters[i].Type == typeArgument ||
+                        (parameters[i].Type.IsGenericType &&
+                            parameters[i].Type.GetGenericArguments().Contains(typeArgument)))
                     {
                         parameterIndex = i;
                         break;
@@ -362,8 +369,8 @@ internal class ReflectionTestsConstructor(
                 {
                     var inferredType = argumentsTypes[parameterIndex]!;
 
-                    if (parameters[parameterIndex].ParameterType.IsGenericType &&
-                        parameters[parameterIndex].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    if (parameters[parameterIndex].Type.IsGenericType &&
+                        parameters[parameterIndex].Type.GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
                         inferredType = Nullable.GetUnderlyingType(inferredType) ?? inferredType;
                     }
@@ -377,7 +384,7 @@ internal class ReflectionTestsConstructor(
             }
         }
 
-        return methodInfo.MakeGenericMethod(substituteTypes.ToArray());
+        return ReflectionToSourceModelHelpers.BuildTestMethod(methodInfo.Class, methodInfo.ReflectionInformation.MakeGenericMethod(substituteTypes.ToArray()), methodInfo.Name);
     }
 
     private static void MapTypeParameters(Type parameterType, Type argumentType, Dictionary<Type, Type> typeParameterMap)
@@ -529,30 +536,28 @@ internal class ReflectionTestsConstructor(
         }
     }
 
-    private static IEnumerable<(PropertyInfo PropertyInfo, Func<object?[]> Args)> GetPropertyArgs(Type type, object?[] classInstanceArguments,
+    private static IEnumerable<(SourceGeneratedPropertyInformation PropertyInformation, Func<object?[]> Args)> GetPropertyArgs(SourceGeneratedClassInformation type, object?[] classInstanceArguments,
         SourceGeneratedMethodInformation testInformation, TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        var properties = type.GetProperties()
-            .Where(p => p.GetCustomAttributes().OfType<IDataAttribute>().Any())
-            .ToArray();
+        var properties = testInformation.Class.Properties;
 
-        foreach (var propertyInfo in properties)
+        foreach (var propertyInformation in properties)
         {
-            var dataAttribute = GetDataAttributes(propertyInfo).ElementAtOrDefault(0);
+            var dataAttribute = propertyInformation.Attributes.OfType<IDataAttribute>().ElementAtOrDefault(0);
 
             if (dataAttribute is null)
             {
                 continue;
             }
 
-            var args = GetArguments(type, null, propertyInfo, dataAttribute, DataGeneratorType.Property, () => classInstanceArguments, testInformation,
+            var args = GetArguments(type, testInformation, propertyInformation, dataAttribute, DataGeneratorType.Property, () => classInstanceArguments, testInformation,
                 testBuilderContextAccessor).ToArray();
 
-            yield return (propertyInfo, args[0]);
+            yield return (propertyInformation, args[0]);
         }
     }
 
-    private static object? CreateInstance(IDataAttribute typeDataAttribute, Type type, object?[] classInstanceArguments, SourceGeneratedMethodInformation testInformation,
+    private static object? CreateInstance(IDataAttribute typeDataAttribute, SourceGeneratedClassInformation classInformation, object?[] classInstanceArguments, SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor,
         out Exception? exception)
     {
@@ -562,13 +567,13 @@ internal class ReflectionTestsConstructor(
         {
             if (typeDataAttribute is ClassConstructorAttribute classConstructorAttribute)
             {
-                return CreateByClassConstructor(type, classConstructorAttribute);
+                return CreateByClassConstructor(classInformation.Type, classConstructorAttribute);
             }
 
             var args = classInstanceArguments.Select((x, i) => CastHelper.Cast(testInformation.Class.Parameters[i].Type, x)).ToArray();
 
-            var propertyArgs = GetPropertyArgs(type, args, testInformation, testBuilderContextAccessor)
-                .ToDictionary(p => p.PropertyInfo.Name, p => p.Args().ElementAtOrDefault(0));
+            var propertyArgs = GetPropertyArgs(classInformation, args, testInformation, testBuilderContextAccessor)
+                .ToDictionary(p => p.PropertyInformation.Name, p => p.Args().ElementAtOrDefault(0));
 
             return InstanceHelper.CreateInstance(testInformation.Class, args, propertyArgs, testBuilderContextAccessor.Current);
         }
@@ -595,11 +600,8 @@ internal class ReflectionTestsConstructor(
         return instance!;
     }
 
-    private static IEnumerable<Func<object?[]>> GetArguments([DynamicallyAccessedMembers(
-            DynamicallyAccessedMemberTypes.PublicConstructors
-            | DynamicallyAccessedMemberTypes.PublicMethods
-            | DynamicallyAccessedMemberTypes.NonPublicMethods)]
-        Type type, MethodInfo? method, PropertyInfo? propertyInfo, IDataAttribute testDataAttribute, DataGeneratorType dataGeneratorType, Func<object?[]> classInstanceArguments,
+    private static IEnumerable<Func<object?[]>> GetArguments(
+        SourceGeneratedClassInformation classInformation, SourceGeneratedMethodInformation method, SourceGeneratedPropertyInformation? propertyInfo, IDataAttribute testDataAttribute, DataGeneratorType dataGeneratorType, Func<object?[]> classInstanceArguments,
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
@@ -609,15 +611,15 @@ internal class ReflectionTestsConstructor(
         {
             var memberAttributes = dataGeneratorType switch
             {
-                DataGeneratorType.TestParameters => method!.GetParameters().SelectMany(x => x.GetCustomAttributes()),
-                DataGeneratorType.Property => [],
-                _ => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?.GetParameters().SelectMany(x => x.GetCustomAttributes()) ?? []
+                DataGeneratorType.TestParameters => method.Parameters.SelectMany(x => x.Attributes),
+                DataGeneratorType.Property => propertyInfo?.Attributes ?? [],
+                _ => classInformation.Parameters.SelectMany(x => x.Attributes)
             };
             var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
-            CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, []);
+            CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, [], 0);
 
             var invoke = dataSourceGeneratorAttribute.GetType().GetMethod("GenerateDataSources")!.Invoke(testDataAttribute, [
-                CreateDataGeneratorMetadata(type, method, propertyInfo, testDataAttribute, dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
+                CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute, dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
                     classInstanceArgumentsInvoked, needsInstance)
             ]) as IEnumerable;
 
@@ -649,9 +651,9 @@ internal class ReflectionTestsConstructor(
         }
         else if (testDataAttribute is InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute)
         {
-            var instance = CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out _);
+            var instance = CreateInstance(testDataAttribute, classInformation, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out _);
 
-            var methodDataSourceType = instanceMethodDataSourceAttribute.ClassProvidingDataSource ?? type;
+            var methodDataSourceType = instanceMethodDataSourceAttribute.ClassProvidingDataSource ?? classInformation.Type;
 
             var result = methodDataSourceType.GetMethod(
                     name: instanceMethodDataSourceAttribute.MethodNameProvidingDataSource,
@@ -666,7 +668,7 @@ internal class ReflectionTestsConstructor(
             {
                 yield return () =>
                 {
-                    var parameterType = method?.GetParameters().ElementAtOrDefault(0)?.ParameterType;
+                    var parameterType = method.Parameters.ElementAtOrDefault(0)?.Type;
 
                     if (methodResult?.GetType().IsAssignableTo(parameterType) is true)
                     {
@@ -714,7 +716,7 @@ internal class ReflectionTestsConstructor(
         }
         else if (testDataAttribute is MethodDataSourceAttribute methodDataSourceAttribute)
         {
-            var methodDataSourceType = methodDataSourceAttribute.ClassProvidingDataSource ?? type;
+            var methodDataSourceType = methodDataSourceAttribute.ClassProvidingDataSource ?? classInformation.Type;
 
             var result = InvokeMethodDataSource(methodDataSourceType, methodDataSourceAttribute);
 
@@ -726,7 +728,7 @@ internal class ReflectionTestsConstructor(
             {
                 yield return () =>
                 {
-                    var parameterType = method?.GetParameters().ElementAtOrDefault(0)?.ParameterType;
+                    var parameterType = method.Parameters.ElementAtOrDefault(0)?.Type;
 
                     if (methodResult?.GetType().IsAssignableTo(parameterType) is true)
                     {
@@ -782,9 +784,9 @@ internal class ReflectionTestsConstructor(
         }
     }
 
-    private static DataGeneratorMetadata CreateDataGeneratorMetadata(Type type,
-        MethodInfo? method,
-        PropertyInfo? propertyInfo,
+    private static DataGeneratorMetadata CreateDataGeneratorMetadata(SourceGeneratedClassInformation type,
+        SourceGeneratedMethodInformation method,
+        SourceGeneratedPropertyInformation? property,
         IDataAttribute testDataAttribute,
         DataGeneratorType dataGeneratorType,
         Func<object?[]> classInstanceArguments,
@@ -799,29 +801,9 @@ internal class ReflectionTestsConstructor(
             ClassInstanceArguments = classInstanceArgumentsInvoked,
             MembersToGenerate = dataGeneratorType switch
             {
-                DataGeneratorType.TestParameters => method!.GetParameters()
-                    .Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
-                    {
-                        Name = x.Name!, Attributes = x.GetCustomAttributes().ToArray(), ReflectionInfo = x,
-                    }).ToArray<SourceGeneratedMemberInformation>(),
-                DataGeneratorType.ClassParameters => type.GetConstructors().FirstOrDefault(x => !x.IsStatic)?
-                    .GetParameters()
-                    .Select(x => new SourceGeneratedParameterInformation(x.ParameterType)
-                    {
-                        Name = x.Name!, Attributes = x.GetCustomAttributes().ToArray(), ReflectionInfo = x,
-                    }).ToArray<SourceGeneratedMemberInformation>() ?? [],
-                DataGeneratorType.Property =>
-                [
-                    new SourceGeneratedPropertyInformation
-                    {
-                        Name = propertyInfo!.Name,
-                        ReflectionInfo = propertyInfo,
-                        Attributes = propertyInfo.GetCustomAttributes().ToArray(),
-                        Type = propertyInfo.PropertyType,
-                        IsStatic = propertyInfo.GetMethod?.IsStatic ?? false,
-                        Getter = propertyInfo.GetValue
-                    }
-                ],
+                DataGeneratorType.TestParameters => method.Parameters.ToArray<SourceGeneratedMemberInformation>(),
+                DataGeneratorType.ClassParameters => type.Parameters.ToArray<SourceGeneratedMemberInformation>(),
+                DataGeneratorType.Property => property is null ? [] : [property],
                 _ => throw new ArgumentOutOfRangeException(nameof(dataGeneratorType), dataGeneratorType, null)
             },
             TestBuilderContext = testBuilderContextAccessor,
@@ -844,132 +826,5 @@ internal class ReflectionTestsConstructor(
                 modifiers: null
             )!
             .Invoke(null, methodDataSourceAttribute.Arguments) ?? Array.Empty<object>();
-    }
-
-    private static IDataAttribute[] GetDataAttributes(MemberInfo memberInfo)
-    {
-        var dataAttributes = memberInfo.GetCustomAttributes()
-            .OfType<IDataAttribute>()
-            .ToArray();
-
-        if (dataAttributes.Length == 0)
-        {
-            return NoOpDataAttribute.Array;
-        }
-
-        return dataAttributes;
-    }
-
-    private static IEnumerable<IDataAttribute> GetDataAttributes(PropertyInfo property)
-    {
-        return property.GetCustomAttributes().OfType<IDataAttribute>();
-    }
-
-    private bool IsTest(MethodInfo arg)
-    {
-        return arg.HasExactAttribute<TestAttribute>();
-    }
-
-    public class NestedDependency
-    {
-        public required DataGeneratorMetadata DataGeneratorMetadata { get; init; }
-        public List<NestedDependency> Children { get; } = [];
-        public required NestedDependency? Parent { get; init; }
-        public required SourceGeneratedPropertyInformation? Property { get; init; }
-        public required Type Type { get; init; }
-        public required TestBuilderContextAccessor TestBuilderContextAccessor { get; init; }
-
-        public IDataAttribute? DataAttribute => field ??= Property?.Attributes.OfType<IDataAttribute>().FirstOrDefault();
-
-        public object? Instance { get; set; }
-
-        public object? CreateInstance(int initializationOrder = -1_000_000)
-        {
-            foreach (var child in Children)
-            {
-                child.CreateInstance();
-            }
-
-            if (Instance != null)
-            {
-                foreach (var child in Children)
-                {
-                    child.SetProperty(Instance);
-                }
-
-                return Instance;
-            }
-
-            if (DataAttribute is null || Property is null)
-            {
-                return null;
-            }
-
-            Instance ??= DataAttribute switch
-            {
-                ArgumentsAttribute argumentsAttribute => argumentsAttribute.Values.ElementAtOrDefault(0),
-                ClassConstructorAttribute classConstructorAttribute => ((IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!).Create(
-                    Property.Type, new ClassConstructorMetadata
-                    {
-                        TestBuilderContext = DataGeneratorMetadata.TestBuilderContext.Current, TestSessionId = DataGeneratorMetadata.TestSessionId
-                    }),
-                IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata with
-                    {
-                        MembersToGenerate = [ Property ]
-                    })
-                    .ElementAtOrDefault(0)
-                    ?.Invoke()
-                    ?.ElementAtOrDefault(0),
-                InstanceMethodDataSourceAttribute instanceMethodDataSourceAttribute => Parent?.Instance?.GetType()
-                    .GetMethod(instanceMethodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)!
-                    .Invoke(Parent?.Instance, instanceMethodDataSourceAttribute.Arguments),
-                MethodDataSourceAttribute methodDataSourceAttribute => (methodDataSourceAttribute.ClassProvidingDataSource ?? Parent?.Type) !.GetMethod(
-                    methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy) !.Invoke(null,
-                    methodDataSourceAttribute.Arguments),
-                NoOpDataAttribute => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(DataAttribute))
-            };
-
-            TestBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
-            {
-                await ObjectInitializer.InitializeAsync(Instance);
-
-                var parent = Parent;
-
-                while (parent?.Instance != null)
-                {
-                    await ObjectInitializer.InitializeAsync(parent);
-                    parent = Parent?.Parent;
-                }
-            };
-            TestBuilderContextAccessor.Current.Events.OnInitialize.Order = initializationOrder;
-
-            foreach (var child in Children)
-            {
-                child.SetProperty(Instance);
-            }
-
-            return Instance;
-        }
-
-        private void SetProperty(object? parent)
-        {
-            if (Property is null || Instance is null)
-            {
-                return;
-            }
-
-            Property.ReflectionInfo.SetValue(parent, Instance);
-        }
-
-        public override string ToString()
-        {
-            if (Property is null)
-            {
-                return $"{Type.Name}";
-            }
-
-            return $"{Parent}.{Property.Name}";
-        }
     }
 }
