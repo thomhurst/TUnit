@@ -38,8 +38,7 @@ internal class NestedClassDataSourceDrivenTests : TestsBase
                 .UniqueForTargetFrameworkAndVersion(),
             AdditionalFiles =
             [
-                Path.Combine(Sourcy.DotNet.Projects.TUnit_TestProject.FullName,
-                    "TUnit.TestProject",
+                Path.Combine(Sourcy.DotNet.Projects.TUnit_TestProject.DirectoryName!,
                     "Models",
                     "InitialisableClass.cs")
             ]
