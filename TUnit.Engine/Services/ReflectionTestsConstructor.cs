@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -6,6 +7,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Helpers;
@@ -153,7 +155,8 @@ internal class ReflectionTestsConstructor(
                 ..testInformation.Class.Assembly.Attributes
             ];
 
-            foreach (var attribute in allAttributes.Where(a => !DotNetAssemblyHelper.IsInDotNetCoreLibrary(a.GetType())))
+            foreach (var attribute in allAttributes.Where(x => x is IDataSourceGeneratorAttribute)
+                         .Where(a => !DotNetAssemblyHelper.IsInDotNetCoreLibrary(a.GetType())))
             {
                 CreateNestedDataGenerators(attribute, testInformation, testBuilderContextAccessor, []);
             }
@@ -270,16 +273,26 @@ internal class ReflectionTestsConstructor(
                 TestClassInstance = null,
                 TestSessionId = string.Empty,
             },
-            Children = obj.GetType()
-                .GetProperties()
-                .Where(x => x.IsDefined(typeof(IDataAttribute)))
-                .Select(x => CreateDependencyChain(x, methodInformation, testBuilderContextAccessor))
-                .ToList(),
         };
+        dependencyChain.Children.AddRange(obj.GetType()
+            .GetProperties()
+            .Where(x => x.HasAttribute<IDataAttribute>())
+            .Select(x => CreateDependencyChain(x, dependencyChain, methodInformation, testBuilderContextAccessor))
+            .ToList());
 
         foreach (var nestedDependency in GetMostNestedDependencies(dependencyChain))
         {
-            _ = nestedDependency.Instance;
+            NestedDependency? lastProcessedDependency = null;
+            var dependency = nestedDependency;
+            while (dependency != null)
+            {
+                dependency.CreateInstance();
+
+                lastProcessedDependency?.AddToParent();
+                lastProcessedDependency = dependency;
+
+                dependency = dependency.Parent;
+            }
         }
     }
 
@@ -297,12 +310,13 @@ internal class ReflectionTestsConstructor(
         }
     }
 
-    private static NestedDependency CreateDependencyChain(PropertyInfo property, SourceGeneratedMethodInformation methodInformation, TestBuilderContextAccessor testBuilderContextAccessor)
+    private static NestedDependency CreateDependencyChain(PropertyInfo property, NestedDependency parent, SourceGeneratedMethodInformation methodInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        return new NestedDependency
+        var nestedDependency = new NestedDependency
         {
-            Property = null,
-            Parent = null,
+            Property = property,
+            Parent = parent,
             Type = property.PropertyType,
             TestBuilderContextAccessor = testBuilderContextAccessor,
             DataGeneratorMetadata = new DataGeneratorMetadata
@@ -314,13 +328,16 @@ internal class ReflectionTestsConstructor(
                 TestBuilderContext = testBuilderContextAccessor,
                 TestClassInstance = null,
                 TestSessionId = string.Empty,
-            },
-            Children = property.PropertyType
-                .GetProperties()
-                .Where(x => x.IsDefined(typeof(IDataAttribute)))
-                .Select(x => CreateDependencyChain(x, methodInformation, testBuilderContextAccessor))
-                .ToList(),
+            }
         };
+
+        nestedDependency.Children.AddRange(property.PropertyType
+            .GetProperties()
+            .Where(x => x.HasAttribute<IDataAttribute>())
+            .Select(x => CreateDependencyChain(x, nestedDependency, methodInformation, testBuilderContextAccessor))
+            .ToList());
+
+        return nestedDependency;
     }
 
     private static MethodInfo GetRuntimeMethod(MethodInfo methodInfo, object?[] arguments)
@@ -892,7 +909,7 @@ internal class ReflectionTestsConstructor(
     {
         private object? _instance;
         public required DataGeneratorMetadata DataGeneratorMetadata { get; init; }
-        public List<NestedDependency> Children { get; init; } = [];
+        public List<NestedDependency> Children { get; } = [];
         public required NestedDependency? Parent { get; set; }
         public required PropertyInfo? Property { get; init; }
         public required Type Type { get; init; }
@@ -904,6 +921,16 @@ internal class ReflectionTestsConstructor(
         {
             get => _instance ??= CreateInstance();
             init => _instance = value;
+        }
+
+        public void AddToParent()
+        {
+            if (Parent is null)
+            {
+                throw new InvalidOperationException("Cannot add to parent when there is no parent.");
+            }
+
+            Property?.SetValue(Parent?.Instance, Instance);
         }
 
         public object? CreateInstance()
@@ -926,7 +953,10 @@ internal class ReflectionTestsConstructor(
                     {
                         TestBuilderContext = DataGeneratorMetadata.TestBuilderContext.Current, TestSessionId = DataGeneratorMetadata.TestSessionId
                     }),
-                IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata)
+                IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata with
+                    {
+                        MembersToGenerate = [ ReflectionToSourceModelHelpers.GenerateProperty(Property) ]
+                    })
                     .ElementAtOrDefault(0)
                     ?.Invoke()
                     ?.ElementAtOrDefault(0),
@@ -952,8 +982,19 @@ internal class ReflectionTestsConstructor(
                     parent = Parent?.Parent;
                 }
             };
+            TestBuilderContextAccessor.Current.Events.OnInitialize.Order = int.MinValue;
 
             return _instance;
+        }
+
+        public override string ToString()
+        {
+            if (Property is null)
+            {
+                return $"{Type.Name}";
+            }
+
+            return $"{Parent}.{Property.Name}";
         }
     }
 }

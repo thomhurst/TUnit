@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 
@@ -104,7 +105,7 @@ public class SourceRegistrar
     public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.Interfaces)] T>()
     {
         var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite && p.IsDefined(typeof(IDataSourceGeneratorAttribute), true))
+            .Where(p => p.CanWrite && p.HasAttribute<IDataSourceGeneratorAttribute>())
             .Where(p => IsEvent(p.PropertyType))
             .ToArray();
 
