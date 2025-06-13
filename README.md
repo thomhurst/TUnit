@@ -40,7 +40,7 @@
 
 **🚀 New to TUnit?** Start with our **[Getting Started Guide](https://tunit.dev/docs/getting-started/installation)**
 
-**🔄 Migrating?** See our **[Migration Guides](https://tunit.dev/docs/getting-started/migration-from-xunit)**
+**🔄 Migrating?** See our **[Migration Guides](https://tunit.dev/docs/migration/xunit)**
 
 **🎯 Advanced Features?** Explore **[Data-Driven Testing](https://tunit.dev/docs/test-authoring/arguments)**, **[Test Dependencies](https://tunit.dev/docs/test-authoring/depends-on)**, and **[Parallelism Control](https://tunit.dev/docs/parallelism/not-in-parallel)**
 
@@ -351,7 +351,7 @@ TUnit works seamlessly across all major .NET development environments:
 public async Task Modern_TUnit_Test(string value) { }
 ```
 
-📖 **Need help migrating?** Check our detailed **[Migration Guides](https://tunit.dev/docs/getting-started/migration-from-xunit)** with step-by-step instructions for xUnit, NUnit, and MSTest.
+📖 **Need help migrating?** Check our detailed **[Migration Guides](https://tunit.dev/docs/migration/xunit)** with step-by-step instructions for xUnit, NUnit, and MSTest.
 
 
 ## 💡 Current Status
