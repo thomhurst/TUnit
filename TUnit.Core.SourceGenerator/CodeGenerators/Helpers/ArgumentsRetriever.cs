@@ -89,6 +89,38 @@ public static class ArgumentsRetriever
                         propertyName,
                         false);
                 }
+
+                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                        .AsyncDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                {
+                    yield return AsyncDataSourceGeneratorRetriever.Parse(context, 
+                        testClass, 
+                        testMethod, 
+                        parameters, 
+                        property, 
+                        parameterOrPropertyTypes, 
+                        dataAttribute, 
+                        argumentsType,
+                        index, 
+                        propertyName, 
+                        true);
+                }
+                
+                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                        .AsyncNonTypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                {
+                    yield return AsyncDataSourceGeneratorRetriever.Parse(context, 
+                        testClass, 
+                        testMethod, 
+                        parameters, 
+                        property, 
+                        parameterOrPropertyTypes, 
+                        dataAttribute, 
+                        argumentsType,
+                        index, 
+                        propertyName,
+                        false);
+                }
             }
         }
     }

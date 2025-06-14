@@ -132,22 +132,20 @@ public class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine();
 
                 sourceBuilder.Write(
-                    "public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)");
+                    "public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)");
                 sourceBuilder.Write("{");
                 if (count == 1)
                 {
-                    sourceBuilder.Write("return Tests0(sessionId);");
+                    sourceBuilder.Write("return await Tests0(sessionId);");
                 }
                 else
                 {
-                    sourceBuilder.Write("return");
-                    sourceBuilder.Write("[");
+                    sourceBuilder.Write("var results = new global::System.Collections.Generic.List<TestMetadata>();");
                     for (var i = 0; i < count; i++)
                     {
-                        sourceBuilder.Write($"..Tests{i}(sessionId),");
+                        sourceBuilder.Write($"results.AddRange(await Tests{i}(sessionId));");
                     }
-
-                    sourceBuilder.Write("];");
+                    sourceBuilder.Write("return results;");
                 }
 
                 sourceBuilder.Write("}");
@@ -157,7 +155,7 @@ public class TestsGenerator : IIncrementalGenerator
                 foreach (var model in classGrouping)
                 {
                     sourceBuilder.Write(
-                        $"private global::System.Collections.Generic.List<TestMetadata> Tests{index++}(string sessionId)");
+                        $"private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests{index++}(string sessionId)");
                     sourceBuilder.Write("{");
                     sourceBuilder.Write(
                         "global::System.Collections.Generic.List<TestMetadata> nodes = [];");

@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -6,7 +6,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-public static class DataSourceGeneratorRetriever
+public static class AsyncDataSourceGeneratorRetriever
 {
     public static ArgumentsContainer Parse(GeneratorAttributeSyntaxContext context,
         INamedTypeSymbol testClass,
@@ -20,7 +20,7 @@ public static class DataSourceGeneratorRetriever
         string? propertyName,
         bool isStronglyTyped)
     {
-        return new DataSourceGeneratorContainer
+        return new AsyncDataSourceGeneratorContainer
         (
             Context: context,
             AttributeData: attributeData,
@@ -58,8 +58,6 @@ public static class DataSourceGeneratorRetriever
 
     private static bool HasGeneratorInterface(ITypeSymbol t)
     {
-        var interfaces = t.Interfaces.Select(i => i.GloballyQualified()).ToList();
-        return interfaces.Contains(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute.WithGlobalPrefix) ||
-               interfaces.Contains(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute.WithGlobalPrefix);
+        return t.Interfaces.Select(i => i.GloballyQualified()).Contains(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute.WithGlobalPrefix);
     }
 }
