@@ -236,6 +236,15 @@ internal class ReflectionTestsConstructor(
                         await reflectionDataInitializer.Initialize(context);
                     };
 
+                    // Initialize test method arguments
+                    foreach (var arg in testMethodArguments.Where(a => a is not null))
+                    {
+                        testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
+                        {
+                            await ObjectInitializer.InitializeAsync(arg);
+                        };
+                    }
+
                     foreach (var (_, value) in propertyArgs.Where(x => x.Value is IAsyncInitializer && x.Key.ReflectionInfo.GetMethod is { IsStatic: true }))
                     {
                         reflectionDataInitializer.RegisterForInitialize(value);

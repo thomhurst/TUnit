@@ -40,6 +40,7 @@ internal class ClassDataSources
 
     public async Task<T> GetAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
+#pragma warning disable CS8603 // Possible null reference return.
         if (sharedType == SharedType.None)
         {
             return await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false);
@@ -47,23 +48,24 @@ internal class ClassDataSources
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return (T)await TestDataContainer.GetGlobalInstanceAsync(typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
+            return (T)(await TestDataContainer.GetGlobalInstanceAsync(typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return (T)await TestDataContainer.GetInstanceForClassAsync(testClassType, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
+            return (T)(await TestDataContainer.GetInstanceForClassAsync(testClassType, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return (T)await TestDataContainer.GetInstanceForKeyAsync(key, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
+            return (T)(await TestDataContainer.GetInstanceForKeyAsync(key, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return (T)await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
+            return (T)(await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
         }
+#pragma warning restore CS8603 // Possible null reference return.
 
         throw new ArgumentOutOfRangeException();
     }
@@ -179,5 +181,21 @@ internal class ClassDataSources
                 await asyncInitializer.InitializeAsync().ConfigureAwait(false);
             }
         }
+    }
+
+    // Synchronous wrapper methods for backward compatibility
+    public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
+    {
+        return Task.Run(async () => await GetItemForIndexAsync<T>(index, testClassType, sharedTypes, keys, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
+    }
+
+    public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        return Task.Run(async () => await GetAsync<T>(sharedType, testClassType, key, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
+    }
+
+    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        return Task.Run(async () => await GetAsync(sharedType, type, testClassType, key, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
     }
 }

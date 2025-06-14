@@ -68,14 +68,25 @@ internal static class AsyncDataSourceHelper
             IAsyncDataSourceGeneratorAttribute asyncGen => WrapAsyncEnumerable(asyncGen, dataGeneratorMetadata, cancellationToken),
             IDataSourceGeneratorAttribute syncGen => ToAsyncEnumerable(syncGen, dataGeneratorMetadata, cancellationToken),
             ArgumentsAttribute args => CreateFromArguments(args),
-            _ => AsyncEnumerable.Empty<Func<Task<object?[]?>>>()
+            _ => EmptyAsyncEnumerable()
         };
+    }
+
+    /// <summary>
+    /// Creates an empty async enumerable.
+    /// </summary>
+    private static async IAsyncEnumerable<Func<Task<object?[]?>>> EmptyAsyncEnumerable()
+    {
+        await Task.CompletedTask;
+        yield break;
     }
 
     /// <summary>
     /// Creates an async enumerable from ArgumentsAttribute.
     /// </summary>
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private static async IAsyncEnumerable<Func<Task<object?[]?>>> CreateFromArguments(ArgumentsAttribute argumentsAttribute)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         yield return async () => await Task.FromResult(argumentsAttribute.Values).ConfigureAwait(false);
     }

@@ -5,6 +5,16 @@ namespace TUnit.Core.Helpers;
 
 internal static class ReflectionValueCreator
 {
+    // Synchronous version for backward compatibility
+    public static object? CreatePropertyValue(SourceGeneratedClassInformation classInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor,
+        IDataAttribute generator,
+        SourceGeneratedPropertyInformation property,
+        DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        return Task.Run(async () => await CreatePropertyValueAsync(classInformation, testBuilderContextAccessor, generator, property, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
+    }
+
     public static async Task<object?> CreatePropertyValueAsync(SourceGeneratedClassInformation classInformation,
         TestBuilderContextAccessor testBuilderContextAccessor,
         IDataAttribute generator,
