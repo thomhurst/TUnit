@@ -9,14 +9,12 @@ public abstract class AsyncDataSourceGeneratorAttribute<T> : TestDataAttribute, 
 
     public async IAsyncEnumerable<Func<Task<T>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        // Initialize the data generator attribute itself (and its injected properties)
+        await ObjectInitializer.InitializeAsync(this);
+        
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
-            yield return async () =>
-            {
-                var result = await generateDataSource();
-                await ObjectInitializer.InitializeAsync(result);
-                return result;
-            };
+            yield return generateDataSource;
         }
     }
 
@@ -36,15 +34,12 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2> : TestDataAttrib
 
     public async IAsyncEnumerable<Func<Task<(T1, T2)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        // Initialize the data generator attribute itself (and its injected properties)
+        await ObjectInitializer.InitializeAsync(this);
+        
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
-            yield return async () =>
-            {
-                var result = await generateDataSource();
-                await ObjectInitializer.InitializeAsync(result.Item1);
-                await ObjectInitializer.InitializeAsync(result.Item2);
-                return result;
-            };
+            yield return generateDataSource;
         }
     }
 
@@ -64,16 +59,12 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3> : TestDataAt
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        // Initialize the data generator attribute itself (and its injected properties)
+        await ObjectInitializer.InitializeAsync(this);
+        
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
-            yield return async () =>
-            {
-                var result = await generateDataSource();
-                await ObjectInitializer.InitializeAsync(result.Item1);
-                await ObjectInitializer.InitializeAsync(result.Item2);
-                await ObjectInitializer.InitializeAsync(result.Item3);
-                return result;
-            };
+            yield return generateDataSource;
         }
     }
 
@@ -93,17 +84,12 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4> : TestDa
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        // Initialize the data generator attribute itself (and its injected properties)
+        await ObjectInitializer.InitializeAsync(this);
+        
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
-            yield return async () =>
-            {
-                var result = await generateDataSource();
-                await ObjectInitializer.InitializeAsync(result.Item1);
-                await ObjectInitializer.InitializeAsync(result.Item2);
-                await ObjectInitializer.InitializeAsync(result.Item3);
-                await ObjectInitializer.InitializeAsync(result.Item4);
-                return result;
-            };
+            yield return generateDataSource;
         }
     }
 
@@ -123,18 +109,12 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : Te
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        // Initialize the data generator attribute itself (and its injected properties)
+        await ObjectInitializer.InitializeAsync(this);
+        
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
-            yield return async () =>
-            {
-                var result = await generateDataSource();
-                await ObjectInitializer.InitializeAsync(result.Item1);
-                await ObjectInitializer.InitializeAsync(result.Item2);
-                await ObjectInitializer.InitializeAsync(result.Item3);
-                await ObjectInitializer.InitializeAsync(result.Item4);
-                await ObjectInitializer.InitializeAsync(result.Item5);
-                return result;
-            };
+            yield return generateDataSource;
         }
     }
 
