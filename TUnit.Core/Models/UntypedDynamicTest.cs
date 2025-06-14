@@ -34,7 +34,7 @@ public record UntypedDynamicTest : DynamicTest
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType
     {

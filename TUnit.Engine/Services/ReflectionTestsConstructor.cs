@@ -289,23 +289,7 @@ internal class ReflectionTestsConstructor(
                 TestSessionId = string.Empty,
             };
 
-            var value = generator switch
-            {
-                ArgumentsAttribute argumentsAttribute => argumentsAttribute.Values.ElementAtOrDefault(0),
-                ClassConstructorAttribute classConstructorAttribute => ((IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!).Create(
-                    property.Type, new ClassConstructorMetadata
-                    {
-                        TestBuilderContext = testBuilderContextAccessor.Current,
-                        TestSessionId = string.Empty
-                    }),
-                IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute => GetFirstAsyncValue(asyncDataSourceGeneratorAttribute.GenerateAsync(dataGeneratorMetadata)),
-                IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0),
-                MethodDataSourceAttribute methodDataSourceAttribute => (methodDataSourceAttribute.ClassProvidingDataSource ?? obj.GetType()).GetMethod(
-                    methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy) !.Invoke(null,
-                    methodDataSourceAttribute.Arguments),
-                NoOpDataAttribute => null,
-                _ => throw new ArgumentOutOfRangeException(nameof(generator), generator, null)
-            };
+            var value = ReflectionValueCreator.CreatePropertyValue(classInformation, testBuilderContextAccessor, generator, property, dataGeneratorMetadata);
 
             // Set up initialization for async initializable instances
             if (value is not null)
@@ -576,7 +560,7 @@ internal class ReflectionTestsConstructor(
             var propertyArgs = GetPropertyArgs(classInformation, args, testInformation, testBuilderContextAccessor)
                 .ToDictionary(p => p.PropertyInformation.Name, p => p.Args().ElementAtOrDefault(0));
 
-            return InstanceHelper.CreateInstance(testInformation.Class, args, propertyArgs, testBuilderContextAccessor.Current);
+            return InstanceHelper.CreateInstance(testInformation, args, propertyArgs, testBuilderContextAccessor.Current);
         }
         catch (Exception e)
         {
@@ -661,7 +645,7 @@ internal class ReflectionTestsConstructor(
             // We need to enumerate the async enumerable synchronously for now
             var asyncEnumerable = asyncDataSourceGeneratorAttribute.GenerateAsync(metadata);
             var enumerator = asyncEnumerable.GetAsyncEnumerator();
-            
+
             try
             {
                 while (enumerator.MoveNextAsync().GetAwaiter().GetResult())

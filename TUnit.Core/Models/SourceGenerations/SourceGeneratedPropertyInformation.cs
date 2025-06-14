@@ -10,7 +10,8 @@ public record SourceGeneratedPropertyInformation : SourceGeneratedMemberInformat
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override required Type Type { get; init; }
 
     public required PropertyInfo ReflectionInfo { get; init; }

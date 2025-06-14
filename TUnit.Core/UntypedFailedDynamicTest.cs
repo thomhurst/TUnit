@@ -9,7 +9,7 @@ public record UntypedFailedDynamicTest(MethodInfo TestMethod)
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicProperties)]
     public required Type TestClassType { get; init; }
     public required string MethodName { get; init; }
