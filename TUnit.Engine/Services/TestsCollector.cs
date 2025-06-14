@@ -4,11 +4,12 @@ namespace TUnit.Engine.Services;
 
 internal class TestsCollector(string sessionId)
 {
-    public IEnumerable<TestMetadata> GetTests()
+    public async IAsyncEnumerable<TestMetadata> GetTestsAsync()
     {
         while (Sources.TestSources.TryDequeue(out var testSource))
         {
-            foreach (var testMetadata in testSource.CollectTests(sessionId))
+            var tests = await testSource.CollectTestsAsync(sessionId);
+            foreach (var testMetadata in tests)
             {
                 yield return testMetadata;
             }

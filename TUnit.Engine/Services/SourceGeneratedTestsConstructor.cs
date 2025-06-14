@@ -18,7 +18,16 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
 {
     protected override DiscoveredTest[] DiscoverTests()
     {
-        var testMetadatas = testsCollector.GetTests();
+        return DiscoverTestsAsync().GetAwaiter().GetResult();
+    }
+
+    private async Task<DiscoveredTest[]> DiscoverTestsAsync()
+    {
+        var testMetadatas = new List<TestMetadata>();
+        await foreach (var testMetadata in testsCollector.GetTestsAsync())
+        {
+            testMetadatas.Add(testMetadata);
+        }
         
         var dynamicTests = testsCollector.GetDynamicTests();
 

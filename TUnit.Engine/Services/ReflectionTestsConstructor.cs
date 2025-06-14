@@ -298,6 +298,7 @@ internal class ReflectionTestsConstructor(
                         TestBuilderContext = testBuilderContextAccessor.Current,
                         TestSessionId = string.Empty
                     }),
+                IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute => GetFirstAsyncValue(asyncDataSourceGeneratorAttribute.GenerateAsync(dataGeneratorMetadata)),
                 IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0),
                 MethodDataSourceAttribute methodDataSourceAttribute => (methodDataSourceAttribute.ClassProvidingDataSource ?? obj.GetType()).GetMethod(
                     methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy) !.Invoke(null,
@@ -642,6 +643,54 @@ internal class ReflectionTestsConstructor(
                 };
             }
         }
+        else if (testDataAttribute is IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute)
+        {
+            var memberAttributes = dataGeneratorType switch
+            {
+                DataGeneratorType.TestParameters => method.Parameters.SelectMany(x => x.Attributes),
+                DataGeneratorType.Property => propertyInfo?.Attributes ?? [],
+                _ => classInformation.Parameters.SelectMany(x => x.Attributes)
+            };
+            var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
+            CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, [], 0);
+
+            var metadata = CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute,
+                dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
+                classInstanceArgumentsInvoked, needsInstance);
+
+            // We need to enumerate the async enumerable synchronously for now
+            var asyncEnumerable = asyncDataSourceGeneratorAttribute.GenerateAsync(metadata);
+            var enumerator = asyncEnumerable.GetAsyncEnumerator();
+            
+            try
+            {
+                while (enumerator.MoveNextAsync().GetAwaiter().GetResult())
+                {
+                    var func = enumerator.Current;
+                    yield return () =>
+                    {
+                        var task = func();
+                        var funcResult = task.GetAwaiter().GetResult();
+
+                        if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var objectArray2))
+                        {
+                            return objectArray2;
+                        }
+
+                        if (funcResult is object?[] objectArray)
+                        {
+                            return objectArray;
+                        }
+
+                        return [funcResult];
+                    };
+                }
+            }
+            finally
+            {
+                enumerator.DisposeAsync().GetAwaiter().GetResult();
+            }
+        }
         else if (testDataAttribute is ArgumentsAttribute argumentsAttribute)
         {
             yield return () => argumentsAttribute.Values;
@@ -823,5 +872,25 @@ internal class ReflectionTestsConstructor(
                 modifiers: null
             )!
             .Invoke(null, methodDataSourceAttribute.Arguments) ?? Array.Empty<object>();
+    }
+
+    private static object? GetFirstAsyncValue(IAsyncEnumerable<Func<Task<object?[]?>>> asyncEnumerable)
+    {
+        var enumerator = asyncEnumerable.GetAsyncEnumerator();
+        try
+        {
+            if (enumerator.MoveNextAsync().GetAwaiter().GetResult())
+            {
+                var func = enumerator.Current;
+                var task = func();
+                var result = task.GetAwaiter().GetResult();
+                return result?.ElementAtOrDefault(0);
+            }
+            return null;
+        }
+        finally
+        {
+            enumerator.DisposeAsync().GetAwaiter().GetResult();
+        }
     }
 }
