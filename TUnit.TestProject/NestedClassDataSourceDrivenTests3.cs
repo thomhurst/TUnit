@@ -131,7 +131,7 @@ public class NestedClassDataSourceDrivenTests3
 
         protected override IEnumerable<Func<SomeClass3>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            yield return () => new SomeClass3();
+            yield return () => InnerClass;
         }
 
         public async Task InitializeAsync()

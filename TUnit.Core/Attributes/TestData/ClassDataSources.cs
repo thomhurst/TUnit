@@ -117,7 +117,7 @@ internal class ClassDataSources
 
             InitializeDataSourceProperties(dataGeneratorMetadata, instance, properties);
 
-            // Initialize the instance if it implements IAsyncInitializer
+            // Initialize the instance after all its properties have been set and initialized
             if (instance is IAsyncInitializer asyncInitializer)
             {
                 asyncInitializer.InitializeAsync().GetAwaiter().GetResult();
@@ -161,9 +161,9 @@ internal class ClassDataSources
                 propertyInfo.SetValue(instance, result);
             }
 
-            if (result is null || !dataSourceGeneratorAttribute.GetType().IsAssignableTo(typeof(IDataSourceGeneratorAttribute)))
+            if (result is null)
             {
-                return;
+                continue;
             }
 
             if (!Sources.Properties.TryGetValue(result.GetType(), out var nestedProperties))
@@ -172,6 +172,12 @@ internal class ClassDataSources
             }
 
             InitializeDataSourceProperties(dataGeneratorMetadata, result, nestedProperties);
+
+            // Initialize the nested object after its properties have been set and initialized
+            if (result is IAsyncInitializer asyncInitializer)
+            {
+                asyncInitializer.InitializeAsync().GetAwaiter().GetResult();
+            }
         }
     }
 }
