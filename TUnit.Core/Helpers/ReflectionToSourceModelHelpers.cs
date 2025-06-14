@@ -18,7 +18,8 @@ internal class ReflectionToSourceModelHelpers
     public static SourceGeneratedMethodInformation BuildTestMethod([DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType, MethodInfo methodInfo, string? testName)
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType, MethodInfo methodInfo, string? testName)
     {
         return BuildTestMethod(GenerateClass(testClassType), methodInfo, testName);
     }
@@ -41,7 +42,7 @@ internal class ReflectionToSourceModelHelpers
     public static SourceGeneratedClassInformation? GetParent(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
-            | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type)
+            | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         if (type.DeclaringType is null)
         {
@@ -54,7 +55,8 @@ internal class ReflectionToSourceModelHelpers
     public static SourceGeneratedClassInformation GenerateClass(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType)
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType)
     {
         return _classCache.GetOrAdd(testClassType, _ => new SourceGeneratedClassInformation
         {

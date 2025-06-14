@@ -5,15 +5,16 @@ namespace TUnit.Core;
 
 public abstract record SourceGeneratedMemberInformation
 {
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)]
     public abstract Type Type { get; init; }
 
     public required string Name { get; init; }
 
     public required Attribute[] Attributes { get; init; }
-    
+
     protected virtual bool PrintMembers(StringBuilder stringBuilder)
     {
         stringBuilder.Append($"Type = {Type.Name}, ");
@@ -36,7 +37,7 @@ public abstract record SourceGeneratedMemberInformation
 
         return Type == other.Type && Name == other.Name;
     }
-    
+
     public override int GetHashCode()
     {
         unchecked

@@ -17,7 +17,7 @@ public abstract record DynamicTest
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
                                 | DynamicallyAccessedMemberTypes.PublicMethods
-                                | DynamicallyAccessedMemberTypes.NonPublicMethods
+                                | DynamicallyAccessedMemberTypes.PublicProperties
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public abstract Type TestClassType { get; }
 
@@ -136,7 +136,7 @@ public record DynamicTest<
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
                                 | DynamicallyAccessedMemberTypes.PublicMethods
-                                | DynamicallyAccessedMemberTypes.NonPublicMethods
+                                | DynamicallyAccessedMemberTypes.PublicProperties
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType { get; } = typeof(TClass);
 
@@ -163,7 +163,7 @@ public record DynamicTest<
                 RepeatLimit = repeatLimit,
                 TestMethod = sourceGeneratedMethodInformation,
                 ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
-                        sourceGeneratedMethodInformation.Class,
+                        sourceGeneratedMethodInformation,
                         TestClassArguments, Properties, testBuilderContext),
                     TestSessionContext.Current?.Id ?? "Unknown",
                     testBuilderContext),

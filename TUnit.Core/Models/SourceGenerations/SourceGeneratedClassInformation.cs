@@ -8,7 +8,7 @@ namespace TUnit.Core;
 public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
 {
     private static readonly ConcurrentDictionary<string, SourceGeneratedClassInformation> Cache = [];
-    
+
     public static SourceGeneratedClassInformation GetOrAdd(string name, Func<SourceGeneratedClassInformation> factory)
     {
         return Cache.GetOrAdd(name, _ => factory());
@@ -27,13 +27,14 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override required Type Type { get; init; }
 
     public required string? Namespace { get; init;}
     public required SourceGeneratedAssemblyInformation Assembly { get; init; }
     public required SourceGeneratedParameterInformation[] Parameters { get; init; }
-    
+
     public required SourceGeneratedPropertyInformation[] Properties { get; init; }
     public required SourceGeneratedClassInformation? Parent { get; init; }
 }

@@ -78,7 +78,7 @@ public static class RobustParameterInfoRetriever
     /// <returns>The ParameterInfo for the specified parameter</returns>
     /// <exception cref="InvalidOperationException">Thrown when no suitable method is found</exception>
     public static ParameterInfo GetMethodParameterInfo(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type type,
         string methodName,
         int parameterIndex,
         Type[] parameterTypes,

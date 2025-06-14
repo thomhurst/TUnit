@@ -9,12 +9,7 @@ public abstract class DataSourceGeneratorAttribute<T> : TestDataAttribute, IData
 
     public IEnumerable<Func<T>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        foreach (var generateDataSource in GenerateDataSources(dataGeneratorMetadata))
-        {
-            // TODO: Async
-            dataGeneratorMetadata.TestBuilderContext.Current.InitializeAsync().GetAwaiter().GetResult();
-            yield return generateDataSource;
-        }
+        return GenerateDataSources(dataGeneratorMetadata);
     }
 
     IEnumerable<Func<object?[]?>> IDataSourceGeneratorAttribute.Generate(DataGeneratorMetadata dataGeneratorMetadata)
