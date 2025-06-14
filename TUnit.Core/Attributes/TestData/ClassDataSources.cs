@@ -18,14 +18,14 @@ internal class ClassDataSources
 
     public static ClassDataSources Get(string sessionId) => SourcesPerSession.GetOrAdd(sessionId, _ => new());
 
-    public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
+    public async Task<(T, SharedType, string)> GetItemForIndexAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
         var shared = sharedTypes.ElementAtOrDefault(index);
         var key = shared == SharedType.Keyed ? GetKey(index, sharedTypes, keys) : string.Empty;
 
         return
         (
-            Get<T>(shared, testClassType, key, dataGeneratorMetadata),
+            await GetAsync<T>(shared, testClassType, key, dataGeneratorMetadata).ConfigureAwait(false),
             shared,
             key
         );
@@ -38,73 +38,73 @@ internal class ClassDataSources
         return keys.ElementAtOrDefault(keyedIndex) ?? throw new ArgumentException($"Key at index {keyedIndex} not found");
     }
 
-    public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
+    public async Task<T> GetAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (sharedType == SharedType.None)
         {
-            return Create<T>(dataGeneratorMetadata);
+            return await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return (T)TestDataContainer.GetGlobalInstance(typeof(T), () => Create<T>(dataGeneratorMetadata));
+            return (T)await TestDataContainer.GetGlobalInstanceAsync(typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return (T)TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create<T>(dataGeneratorMetadata));
+            return (T)await TestDataContainer.GetInstanceForClassAsync(testClassType, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return (T)TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create<T>(dataGeneratorMetadata));
+            return (T)await TestDataContainer.GetInstanceForKeyAsync(key, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return (T)TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create<T>(dataGeneratorMetadata));
+            return (T)await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         throw new ArgumentOutOfRangeException();
     }
 
-    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
+    public async Task<object> GetAsync(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (sharedType == SharedType.None)
         {
-            return Create(type, dataGeneratorMetadata);
+            return await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return TestDataContainer.GetGlobalInstance(type, () => Create(type, dataGeneratorMetadata));
+            return await TestDataContainer.GetGlobalInstanceAsync(type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return TestDataContainer.GetInstanceForClass(testClassType, type, () => Create(type, dataGeneratorMetadata));
+            return await TestDataContainer.GetInstanceForClassAsync(testClassType, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return TestDataContainer.GetInstanceForKey(key!, type, () => Create(type, dataGeneratorMetadata));
+            return await TestDataContainer.GetInstanceForKeyAsync(key!, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, () => Create(type, dataGeneratorMetadata));
+            return await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         throw new ArgumentOutOfRangeException();
     }
 
     [return: NotNull]
-    private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
+    private static async Task<T> CreateAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return ((T)Create(typeof(T), dataGeneratorMetadata))!;
+        return ((T)(await CreateAsync(typeof(T), dataGeneratorMetadata).ConfigureAwait(false)))!;
     }
 
-    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
+    private static async Task<object> CreateAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
     {
         try
         {
@@ -115,12 +115,12 @@ internal class ClassDataSources
                 properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
             }
 
-            InitializeDataSourceProperties(dataGeneratorMetadata, instance, properties);
+            await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, instance, properties).ConfigureAwait(false);
 
             // Initialize the instance after all its properties have been set and initialized
             if (instance is IAsyncInitializer asyncInitializer)
             {
-                asyncInitializer.InitializeAsync().GetAwaiter().GetResult();
+                await asyncInitializer.InitializeAsync().ConfigureAwait(false);
             }
 
             return instance;
@@ -140,7 +140,7 @@ internal class ClassDataSources
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static void InitializeDataSourceProperties(DataGeneratorMetadata dataGeneratorMetadata, object instance, PropertyInfo[] properties)
+    private static async Task InitializeDataSourcePropertiesAsync(DataGeneratorMetadata dataGeneratorMetadata, object instance, PropertyInfo[] properties)
     {
         foreach (var propertyInfo in properties)
         {
@@ -171,12 +171,12 @@ internal class ClassDataSources
                 nestedProperties = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
             }
 
-            InitializeDataSourceProperties(dataGeneratorMetadata, result, nestedProperties);
+            await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, result, nestedProperties).ConfigureAwait(false);
 
             // Initialize the nested object after its properties have been set and initialized
             if (result is IAsyncInitializer asyncInitializer)
             {
-                asyncInitializer.InitializeAsync().GetAwaiter().GetResult();
+                await asyncInitializer.InitializeAsync().ConfigureAwait(false);
             }
         }
     }

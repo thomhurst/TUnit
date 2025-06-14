@@ -5,7 +5,7 @@ namespace TUnit.Core.Helpers;
 
 internal static class ReflectionValueCreator
 {
-    public static object? CreatePropertyValue(SourceGeneratedClassInformation classInformation,
+    public static async Task<object?> CreatePropertyValueAsync(SourceGeneratedClassInformation classInformation,
         TestBuilderContextAccessor testBuilderContextAccessor,
         IDataAttribute generator,
         SourceGeneratedPropertyInformation property,
@@ -19,8 +19,8 @@ internal static class ReflectionValueCreator
                     TestBuilderContext = testBuilderContextAccessor.Current,
                     TestSessionId = string.Empty
                 }),
-            IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute => GetFirstAsyncValueWithInit(asyncDataSourceGeneratorAttribute, dataGeneratorMetadata),
-            IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => GetFirstValueWithInit(dataSourceGeneratorAttribute, dataGeneratorMetadata),
+            IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute => await GetFirstAsyncValueWithInitAsync(asyncDataSourceGeneratorAttribute, dataGeneratorMetadata).ConfigureAwait(false),
+            IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => await GetFirstValueWithInitAsync(dataSourceGeneratorAttribute, dataGeneratorMetadata).ConfigureAwait(false),
             MethodDataSourceAttribute methodDataSourceAttribute => (methodDataSourceAttribute.ClassProvidingDataSource ?? classInformation.Type).GetMethod(
                 methodDataSourceAttribute.MethodNameProvidingDataSource, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy) !.Invoke(null,
                 methodDataSourceAttribute.Arguments),
@@ -28,45 +28,45 @@ internal static class ReflectionValueCreator
             _ => throw new ArgumentOutOfRangeException(nameof(generator), generator, null)
         };
     
-    private static object? GetFirstValueWithInit(IDataSourceGeneratorAttribute dataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
+    private static async Task<object?> GetFirstValueWithInitAsync(IDataSourceGeneratorAttribute dataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Initialize the data generator if it implements IAsyncInitializer
         if (dataSourceGeneratorAttribute is IAsyncInitializer asyncInitializer)
         {
-            asyncInitializer.InitializeAsync().GetAwaiter().GetResult();
+            await asyncInitializer.InitializeAsync().ConfigureAwait(false);
         }
         
         return dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0);
     }
     
-    private static object? GetFirstAsyncValueWithInit(IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
+    private static async Task<object?> GetFirstAsyncValueWithInitAsync(IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Initialize the data generator if it implements IAsyncInitializer
         if (asyncDataSourceGeneratorAttribute is IAsyncInitializer asyncInitializer)
         {
-            asyncInitializer.InitializeAsync().GetAwaiter().GetResult();
+            await asyncInitializer.InitializeAsync().ConfigureAwait(false);
         }
         
-        return GetFirstAsyncValue(asyncDataSourceGeneratorAttribute.GenerateAsync(dataGeneratorMetadata));
+        return await GetFirstAsyncValueAsync(asyncDataSourceGeneratorAttribute.GenerateAsync(dataGeneratorMetadata)).ConfigureAwait(false);
     }
     
-    private static object? GetFirstAsyncValue(IAsyncEnumerable<Func<Task<object?[]?>>> asyncEnumerable)
+    private static async Task<object?> GetFirstAsyncValueAsync(IAsyncEnumerable<Func<Task<object?[]?>>> asyncEnumerable)
     {
         var enumerator = asyncEnumerable.GetAsyncEnumerator();
         try
         {
-            if (enumerator.MoveNextAsync().GetAwaiter().GetResult())
+            if (await enumerator.MoveNextAsync().ConfigureAwait(false))
             {
                 var func = enumerator.Current;
                 var task = func();
-                var result = task.GetAwaiter().GetResult();
+                var result = await task.ConfigureAwait(false);
                 return result?.ElementAtOrDefault(0);
             }
             return null;
         }
         finally
         {
-            enumerator.DisposeAsync().GetAwaiter().GetResult();
+            await enumerator.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

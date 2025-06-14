@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Logging;
@@ -19,7 +20,12 @@ internal static class TestDataContainer
     // Improved dependency tracking
     private static readonly Data.DependencyTracker DependencyTracker = new();
 
-    private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);    /// <summary>
+    private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);
+
+    // Cache for async instances to avoid creating multiple instances while one is being created
+    private static readonly ConcurrentDictionary<string, Task<object>> _asyncInstanceCache = new();
+
+    /// <summary>
     /// Gets an instance for the specified class.
     /// </summary>
     /// <param name="testClass">The test class type.</param>
@@ -119,7 +125,122 @@ internal static class TestDataContainer
     {
         var scopedInstance = KeyContainer.GetOrCreate(key, type, func);
         return scopedInstance.Instance;
-    }    /// <summary>
+    }
+
+    // Async versions of the get methods
+
+    /// <summary>
+    /// Gets an instance for the specified class asynchronously.
+    /// </summary>
+    /// <param name="testClass">The test class type.</param>
+    /// <param name="type">The type of object to retrieve</param>
+    /// <param name="func">The async function to create the instance.</param>
+    /// <returns>The instance.</returns>
+    public static async Task<object> GetInstanceForClassAsync(Type testClass, Type type, Func<Task<object>> func)
+    {
+        var cacheKey = $"Class:{testClass.FullName}:{type.FullName}";
+        
+        var task = _asyncInstanceCache.GetOrAdd(cacheKey, async _ =>
+        {
+            var instance = await func().ConfigureAwait(false);
+            var scopedInstance = ClassContainer.GetOrCreate(testClass, type, () => instance);
+            return scopedInstance.Instance;
+        });
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _asyncInstanceCache.TryRemove(cacheKey, out _);
+        }
+    }
+
+    /// <summary>
+    /// Gets an instance for the specified assembly asynchronously.
+    /// </summary>
+    /// <param name="assembly">The assembly.</param>
+    /// <param name="type">The type of object to retrieve</param>
+    /// <param name="func">The async function to create the instance.</param>
+    /// <returns>The instance.</returns>
+    public static async Task<object> GetInstanceForAssemblyAsync(Assembly assembly, Type type, Func<Task<object>> func)
+    {
+        var cacheKey = $"Assembly:{assembly.FullName}:{type.FullName}";
+        
+        var task = _asyncInstanceCache.GetOrAdd(cacheKey, async _ =>
+        {
+            var instance = await func().ConfigureAwait(false);
+            var scopedInstance = AssemblyContainer.GetOrCreate(assembly, type, () => instance);
+            return scopedInstance.Instance;
+        });
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _asyncInstanceCache.TryRemove(cacheKey, out _);
+        }
+    }
+
+    /// <summary>
+    /// Gets a global instance of the specified type asynchronously.
+    /// </summary>
+    /// <param name="type">The type of object to retrieve</param>
+    /// <param name="func">The async function to create the instance.</param>
+    /// <returns>The instance.</returns>
+    public static async Task<object> GetGlobalInstanceAsync(Type type, Func<Task<object>> func)
+    {
+        var cacheKey = $"Global:{type.FullName}";
+        
+        var task = _asyncInstanceCache.GetOrAdd(cacheKey, async _ =>
+        {
+            var instance = await func().ConfigureAwait(false);
+            var scopedInstance = GlobalContainer.GetOrCreate(typeof(object).FullName!, type, () => instance);
+            return scopedInstance.Instance;
+        });
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _asyncInstanceCache.TryRemove(cacheKey, out _);
+        }
+    }
+
+    /// <summary>
+    /// Gets an instance for the specified key asynchronously.
+    /// </summary>
+    /// <param name="key">The key.</param>
+    /// <param name="type">The type of object to retrieve</param>
+    /// <param name="func">The async function to create the instance.</param>
+    /// <returns>The instance.</returns>
+    public static async Task<object> GetInstanceForKeyAsync(string key, Type type, Func<Task<object>> func)
+    {
+        var cacheKey = $"Key:{key}:{type.FullName}";
+        
+        var task = _asyncInstanceCache.GetOrAdd(cacheKey, async _ =>
+        {
+            var instance = await func().ConfigureAwait(false);
+            var scopedInstance = KeyContainer.GetOrCreate(key, type, () => instance);
+            return scopedInstance.Instance;
+        });
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _asyncInstanceCache.TryRemove(cacheKey, out _);
+        }
+    }
+
+    /// <summary>
     /// Consumes the count for the specified key and type.
     /// </summary>
     /// <param name="key">The key.</param>

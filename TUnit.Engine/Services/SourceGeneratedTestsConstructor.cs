@@ -18,6 +18,8 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
 {
     protected override DiscoveredTest[] DiscoverTests()
     {
+        // TODO: This is a blocking call due to the synchronous base class constraint.
+        // Future refactoring should make the entire discovery pipeline async.
         return DiscoverTestsAsync().GetAwaiter().GetResult();
     }
 
