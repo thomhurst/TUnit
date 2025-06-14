@@ -236,15 +236,6 @@ internal class ReflectionTestsConstructor(
                         await reflectionDataInitializer.Initialize(context);
                     };
 
-                    // Initialize test method arguments
-                    foreach (var arg in testMethodArguments.Where(a => a is not null))
-                    {
-                        testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
-                        {
-                            await ObjectInitializer.InitializeAsync(arg);
-                        };
-                    }
-
                     foreach (var (_, value) in propertyArgs.Where(x => x.Value is IAsyncInitializer && x.Key.ReflectionInfo.GetMethod is { IsStatic: true }))
                     {
                         reflectionDataInitializer.RegisterForInitialize(value);
@@ -623,14 +614,30 @@ internal class ReflectionTestsConstructor(
                 {
                     var funcResult = FuncHelper.InvokeFunc(func);
 
+                    // Initialize the returned objects immediately
+                    Task.Run(async () =>
+                    {
+                        if (funcResult is object?[] objectArray)
+                        {
+                            foreach (var obj in objectArray.Where(o => o is not null))
+                            {
+                                await ObjectInitializer.InitializeAsync(obj).ConfigureAwait(false);
+                            }
+                        }
+                        else if (funcResult is not null)
+                        {
+                            await ObjectInitializer.InitializeAsync(funcResult).ConfigureAwait(false);
+                        }
+                    }).GetAwaiter().GetResult();
+
                     if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var objectArray2))
                     {
                         return objectArray2;
                     }
 
-                    if (funcResult is object?[] objectArray)
+                    if (funcResult is object?[] objectArray3)
                     {
-                        return objectArray;
+                        return objectArray3;
                     }
 
                     return [funcResult];
@@ -666,14 +673,30 @@ internal class ReflectionTestsConstructor(
                         var task = func();
                         var funcResult = task.GetAwaiter().GetResult();
 
+                        // Initialize the returned objects immediately
+                        Task.Run(async () =>
+                        {
+                            if (funcResult is object?[] objectArray)
+                            {
+                                foreach (var obj in objectArray.Where(o => o is not null))
+                                {
+                                    await ObjectInitializer.InitializeAsync(obj).ConfigureAwait(false);
+                                }
+                            }
+                            else if (funcResult is not null)
+                            {
+                                await ObjectInitializer.InitializeAsync(funcResult).ConfigureAwait(false);
+                            }
+                        }).GetAwaiter().GetResult();
+
                         if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var objectArray2))
                         {
                             return objectArray2;
                         }
 
-                        if (funcResult is object?[] objectArray)
+                        if (funcResult is object?[] objectArray3)
                         {
-                            return objectArray;
+                            return objectArray3;
                         }
 
                         return [funcResult];

@@ -120,10 +120,7 @@ internal class ClassDataSources
             await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, instance, properties).ConfigureAwait(false);
 
             // Initialize the instance after all its properties have been set and initialized
-            if (instance is IAsyncInitializer asyncInitializer)
-            {
-                await asyncInitializer.InitializeAsync().ConfigureAwait(false);
-            }
+            await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
 
             return instance;
         }
@@ -176,10 +173,7 @@ internal class ClassDataSources
             await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, result, nestedProperties).ConfigureAwait(false);
 
             // Initialize the nested object after its properties have been set and initialized
-            if (result is IAsyncInitializer asyncInitializer)
-            {
-                await asyncInitializer.InitializeAsync().ConfigureAwait(false);
-            }
+            await ObjectInitializer.InitializeAsync(result).ConfigureAwait(false);
         }
     }
 
