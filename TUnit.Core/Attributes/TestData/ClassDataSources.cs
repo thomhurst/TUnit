@@ -4,6 +4,7 @@ using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -115,6 +116,12 @@ internal class ClassDataSources
             }
 
             InitializeDataSourceProperties(dataGeneratorMetadata, instance, properties);
+
+            // Initialize the instance if it implements IAsyncInitializer
+            if (instance is IAsyncInitializer asyncInitializer)
+            {
+                asyncInitializer.InitializeAsync().GetAwaiter().GetResult();
+            }
 
             return instance;
         }

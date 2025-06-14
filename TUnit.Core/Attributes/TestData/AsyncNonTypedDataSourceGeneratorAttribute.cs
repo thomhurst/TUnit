@@ -7,9 +7,6 @@ public abstract class AsyncNonTypedDataSourceGeneratorAttribute : TestDataAttrib
 
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Initialize the data generator attribute itself (and its injected properties)
-        await ObjectInitializer.InitializeAsync(this);
-        
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;

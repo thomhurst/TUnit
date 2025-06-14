@@ -276,6 +276,7 @@ internal class ReflectionTestsConstructor(
         {
             var generator = property.Attributes.OfType<IDataAttribute>().First();
 
+            // First, recursively process the generator's properties
             CreateNestedDataGenerators(generator, methodInformation, testBuilderContextAccessor, visited, initializationOrder);
 
             var dataGeneratorMetadata = new DataGeneratorMetadata
