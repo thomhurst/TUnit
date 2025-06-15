@@ -62,7 +62,7 @@ public record AsyncDataSourceGeneratorContainer(
         sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
         sourceCodeWriter.WriteLine();
 
-        sourceCodeWriter.Write($"var {arrayVariableName} = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){dataAttr.Name}).GenerateAsync({dataGeneratorMetadataVariableName});");
+        sourceCodeWriter.Write($"var {arrayVariableName} = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){dataAttr.Name}), {dataGeneratorMetadataVariableName});");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write($"await foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
         sourceCodeWriter.Write("{");

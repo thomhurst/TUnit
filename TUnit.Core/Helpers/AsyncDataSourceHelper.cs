@@ -12,7 +12,7 @@ public static class AsyncDataSourceHelper
     /// <summary>
     /// Wraps an async data source generator, ensuring proper initialization.
     /// </summary>
-    internal static async IAsyncEnumerable<Func<Task<object?[]?>>> WrapAsyncEnumerable(
+    public static async IAsyncEnumerable<Func<Task<object?[]?>>> WrapAsyncEnumerable(
         IAsyncDataSourceGeneratorAttribute asyncDataSourceGenerator,
         DataGeneratorMetadata dataGeneratorMetadata,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
