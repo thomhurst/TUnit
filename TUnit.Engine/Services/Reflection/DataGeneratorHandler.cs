@@ -4,7 +4,6 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using Polyfills;
 
@@ -16,7 +15,7 @@ namespace TUnit.Engine.Services.Reflection;
 [UnconditionalSuppressMessage("AOT", "IL3050")]
 internal static class DataGeneratorHandler
 {
-    public static IDataAttribute PrepareDataGeneratorInstance(
+    public static async Task<IDataAttribute> PrepareDataGeneratorInstanceAsync(
         IDataAttribute dataAttribute,
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
@@ -28,23 +27,68 @@ internal static class DataGeneratorHandler
         }
 
         var instance = (IDataAttribute)Activator.CreateInstance(dataAttribute.GetType())!;
-        InitializeNestedDataGenerators(instance, testInformation, testBuilderContextAccessor);
+        await InitializeNestedDataGeneratorsAsync(instance, testInformation, testBuilderContextAccessor);
 
         if (instance is IAsyncInitializer asyncInitializer)
         {
-            AsyncToSyncHelper.RunSync(() => asyncInitializer.InitializeAsync());
+            await asyncInitializer.InitializeAsync();
         }
 
         return instance;
     }
 
-    public static void InitializeNestedDataGenerators(
+    public static async Task InitializeNestedDataGeneratorsAsync(
         object? obj,
         SourceGeneratedMethodInformation methodInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var visited = new HashSet<object>();
-        InitializeNestedDataGeneratorsInternal(obj, methodInformation, testBuilderContextAccessor, visited);
+        await InitializeNestedDataGeneratorsInternalAsync(obj, methodInformation, testBuilderContextAccessor, visited);
+    }
+    
+    private static async Task InitializeNestedDataGeneratorsInternalAsync(
+        object? obj,
+        SourceGeneratedMethodInformation methodInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor,
+        HashSet<object> visited)
+    {
+        if (obj is null || !visited.Add(obj))
+        {
+            return;
+        }
+
+        var classInformation = ReflectionToSourceModelHelpers.GenerateClass(obj.GetType());
+
+        foreach (var property in classInformation.Properties.Where(p => p.HasAttribute<IDataAttribute>()))
+        {
+            var generator = property.Attributes.OfType<IDataAttribute>().First();
+            
+            await InitializeNestedDataGeneratorsInternalAsync(generator, methodInformation, testBuilderContextAccessor, visited);
+
+            var dataGeneratorMetadata = new DataGeneratorMetadata
+            {
+                Type = DataGeneratorType.Property,
+                TestInformation = methodInformation,
+                ClassInstanceArguments = [],
+                MembersToGenerate = [property],
+                TestBuilderContext = testBuilderContextAccessor,
+                TestClassInstance = null,
+                TestSessionId = string.Empty,
+            };
+
+            var value = await ReflectionValueCreator.CreatePropertyValueAsync(
+                classInformation, 
+                testBuilderContextAccessor, 
+                generator, 
+                property, 
+                dataGeneratorMetadata);
+
+            if (value is not null)
+            {
+                property.ReflectionInfo.SetValue(obj, value);
+                await ObjectInitializer.InitializeAsync(value);
+            }
+        }
     }
 
     private static void InitializeNestedDataGeneratorsInternal(
@@ -87,25 +131,62 @@ internal static class DataGeneratorHandler
             if (value is not null)
             {
                 property.ReflectionInfo.SetValue(obj, value);
-                AsyncToSyncHelper.RunSync(() => ObjectInitializer.InitializeAsync(value));
+                Task.Run(async () => await ObjectInitializer.InitializeAsync(value)).GetAwaiter().GetResult();
             }
         }
     }
 
-    public static IEnumerable<Func<object?[]>> GetArgumentsFromDataAttribute(
+    public static async IAsyncEnumerable<Func<object?[]>> GetArgumentsFromDataAttributeAsync(
         IDataAttribute dataAttribute,
         DataGeneratorContext context)
     {
-        return dataAttribute switch
+        switch (dataAttribute)
         {
-            IDataSourceGeneratorAttribute sync => GetArgumentsFromSyncGenerator(sync, context),
-            IAsyncDataSourceGeneratorAttribute async => GetArgumentsFromAsyncGenerator(async, context),
-            ArgumentsAttribute args => GetArgumentsFromArgumentsAttribute(args),
-            InstanceMethodDataSourceAttribute instance => GetArgumentsFromInstanceMethod(instance, context),
-            MethodDataSourceAttribute method => GetArgumentsFromMethod(method, context),
-            NoOpDataAttribute or ClassConstructorAttribute => [() => []],
-            _ => throw new ArgumentOutOfRangeException(nameof(dataAttribute), dataAttribute, null)
-        };
+            case IDataSourceGeneratorAttribute sync:
+                foreach (var item in GetArgumentsFromSyncGenerator(sync, context))
+                    yield return item;
+                break;
+            case IAsyncDataSourceGeneratorAttribute async:
+                await foreach (var item in GetArgumentsFromAsyncGeneratorAsync(async, context))
+                    yield return item;
+                break;
+            case ArgumentsAttribute args:
+                foreach (var item in GetArgumentsFromArgumentsAttribute(args))
+                    yield return item;
+                break;
+            case InstanceMethodDataSourceAttribute instance:
+                foreach (var item in GetArgumentsFromInstanceMethod(instance, context))
+                    yield return item;
+                break;
+            case MethodDataSourceAttribute method:
+                foreach (var item in GetArgumentsFromMethod(method, context))
+                    yield return item;
+                break;
+            case NoOpDataAttribute or ClassConstructorAttribute:
+                yield return () => [];
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(dataAttribute), dataAttribute, null);
+        }
+    }
+    
+    private static async IAsyncEnumerable<Func<object?[]>> GetArgumentsFromAsyncGeneratorAsync(
+        IAsyncDataSourceGeneratorAttribute generator,
+        DataGeneratorContext context)
+    {
+        var generatorToUse = PrepareGeneratorIfNeeded(generator, context);
+        var metadata = context.CreateMetadata();
+        var asyncEnumerable = generatorToUse.GenerateAsync(metadata);
+
+        await foreach (var func in asyncEnumerable)
+        {
+            yield return () =>
+            {
+                var task = func();
+                var funcResult = task.GetAwaiter().GetResult();
+                return ProcessDataGeneratorResult(funcResult);
+            };
+        }
     }
 
     private static IEnumerable<Func<object?[]>> GetArgumentsFromSyncGenerator(
@@ -133,18 +214,20 @@ internal static class DataGeneratorHandler
 
         try
         {
-            foreach (var func in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
+            while (enumerator.MoveNextAsync().GetAwaiter().GetResult())
             {
+                var func = enumerator.Current;
                 yield return () =>
                 {
-                    var funcResult = AsyncToSyncHelper.RunSync(func);
+                    var task = func();
+                    var funcResult = task.GetAwaiter().GetResult();
                     return ProcessDataGeneratorResult(funcResult);
                 };
             }
         }
         finally
         {
-            // EnumerateSync handles disposal internally
+            enumerator.DisposeAsync().GetAwaiter().GetResult();
         }
     }
 
@@ -172,8 +255,8 @@ internal static class DataGeneratorHandler
         // Handle async instance methods
         if (TryGetAsyncTask(result, out var asyncTask))
         {
-            // Since we're in test discovery which is synchronous, we need to block
-            var unwrappedResult = AsyncToSyncHelper.RunSync(() => asyncTask);
+            // Block on the async result - this is in a sync enumerable context
+            var unwrappedResult = asyncTask.GetAwaiter().GetResult();
             return ProcessMethodResults(unwrappedResult, context);
         }
 
@@ -227,7 +310,8 @@ internal static class DataGeneratorHandler
 
     private static object?[] ProcessDataGeneratorResult(object? funcResult)
     {
-        InitializeResult(funcResult);
+        // Note: Object initialization should be done at execution time, not discovery time
+        // InitializeResultAsync(funcResult);
 
         if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var objectArray))
         {
@@ -242,18 +326,18 @@ internal static class DataGeneratorHandler
         return [funcResult];
     }
 
-    private static void InitializeResult(object? funcResult)
+    private static async Task InitializeResultAsync(object? funcResult)
     {
         if (funcResult is object?[] objectArray)
         {
             foreach (var obj in objectArray.Where(o => o is not null))
             {
-                AsyncToSyncHelper.RunSync(() => ObjectInitializer.InitializeAsync(obj));
+                await ObjectInitializer.InitializeAsync(obj);
             }
         }
         else if (funcResult is not null)
         {
-            AsyncToSyncHelper.RunSync(() => ObjectInitializer.InitializeAsync(funcResult));
+            await ObjectInitializer.InitializeAsync(funcResult);
         }
     }
 
@@ -339,7 +423,7 @@ internal static class DataGeneratorHandler
         {
             // For async methods, we need to await the result before processing
             // Note: This follows the same pattern as async data generators - test discovery is synchronous
-            var unwrappedResult = AsyncToSyncHelper.RunSync(() => asyncTask);
+            var unwrappedResult = asyncTask.GetAwaiter().GetResult();
 
             // Now process the unwrapped result normally
             foreach (var item in ProcessMethodResults(unwrappedResult, context))
@@ -424,10 +508,6 @@ internal static class DataGeneratorHandler
         });
     }
 
-    private static object? UnwrapAsyncResult(object? result)
-    {
-        return AsyncToSyncHelper.UnwrapTaskResult(result);
-    }
 
     private static bool IsAssignableTo(Type? source, Type? target)
     {

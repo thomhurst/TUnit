@@ -71,7 +71,7 @@ internal class TestBuilder
             NeedsInstance = false
         };
 
-        foreach (var classInstanceArguments in DataGeneratorHandler.GetArgumentsFromDataAttribute(
+        await foreach (var classInstanceArguments in DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(
             classDataAttribute, classArgumentsContext))
         {
             await BuildSingleTestAsync(testMethod, classInstanceArguments, classDataAttribute, 
@@ -96,9 +96,8 @@ internal class TestBuilder
             var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
             // Prepare the data generator instance once, outside the repeat loop
-            var testDataAttributeInstance = await Task.Run(() =>
-                DataGeneratorHandler.PrepareDataGeneratorInstance(
-                    testDataAttribute, testInformation, testBuilderContextAccessor));
+            var testDataAttributeInstance = await DataGeneratorHandler.PrepareDataGeneratorInstanceAsync(
+                testDataAttribute, testInformation, testBuilderContextAccessor);
 
             for (var index = 0; index < repeatCount + 1; index++)
             {
@@ -140,7 +139,7 @@ internal class TestBuilder
                 .Any(x => x is IAccessesInstanceData)
         };
 
-        foreach (var testArguments in DataGeneratorHandler.GetArgumentsFromDataAttribute(
+        await foreach (var testArguments in DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(
             testDataAttributeInstance, testArgumentsContext))
         {
             var test = await CreateTestAsync(testInformation, invokedClassInstanceArguments, typeDataAttribute,
