@@ -35,7 +35,6 @@ internal class ReflectionTestsConstructor(
     IExtension extension,
     DependencyCollector dependencyCollector,
     ContextManager contextManager,
-    ReflectionDataInitializer reflectionDataInitializer,
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
 {
     protected override DiscoveredTest[] DiscoverTests()
@@ -165,19 +164,27 @@ internal class ReflectionTestsConstructor(
                 ..testInformation.Class.Assembly.Attributes
             ];
 
-            foreach (var attribute in allAttributes.OfType<IDataSourceGeneratorAttribute>()
-                         .Where(a => !DotNetAssemblyHelper.IsInDotNetCoreLibrary(a.GetType())))
-            {
-                CreateNestedDataGenerators(attribute, testInformation, testBuilderContextAccessor, [], 0);
-            }
-
             var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
             for (var index = 0; index < repeatCount + 1; index++)
             {
+                // Create a new instance of the test data attribute for each test execution to avoid shared state
+                var testDataAttributeInstance = testDataAttribute;
+                if (testDataAttribute is IDataSourceGeneratorAttribute && !DotNetAssemblyHelper.IsInDotNetCoreLibrary(testDataAttribute.GetType()))
+                {
+                    testDataAttributeInstance = (IDataAttribute)Activator.CreateInstance(testDataAttribute.GetType())!;
+                    CreateNestedDataGenerators(testDataAttributeInstance, testInformation, testBuilderContextAccessor, [], 0);
+                    
+                    // Initialize the data generator attribute itself after its properties have been set
+                    if (testDataAttributeInstance is IAsyncInitializer asyncInitializer)
+                    {
+                        Task.Run(async () => await asyncInitializer.InitializeAsync().ConfigureAwait(false)).GetAwaiter().GetResult();
+                    }
+                }
+
                 var invokedClassInstanceArguments = classInstanceArguments();
 
-                foreach (var testArguments in GetArguments(classInformation, testInformation, null, testDataAttribute, DataGeneratorType.TestParameters, () => invokedClassInstanceArguments,
+                foreach (var testArguments in GetArguments(classInformation, testInformation, null, testDataAttributeInstance, DataGeneratorType.TestParameters, () => invokedClassInstanceArguments,
                              testInformation,
                              testBuilderContextAccessor))
                 {
@@ -231,15 +238,6 @@ internal class ReflectionTestsConstructor(
                         Properties = propertyArgs.ToDictionary(x => x.Key.Name, x => x.Value),
                     });
 
-                    testBuilderContextAccessor.Current.Events.OnInitialize += async (_, context) =>
-                    {
-                        await reflectionDataInitializer.Initialize(context);
-                    };
-
-                    foreach (var (_, value) in propertyArgs.Where(x => x.Value is IAsyncInitializer && x.Key.ReflectionInfo.GetMethod is { IsStatic: true }))
-                    {
-                        reflectionDataInitializer.RegisterForInitialize(value);
-                    }
 
                     testBuilderContextAccessor.Current = new TestBuilderContext();
 
@@ -297,11 +295,9 @@ internal class ReflectionTestsConstructor(
             {
                 property.ReflectionInfo.SetValue(obj, value);
 
-                testBuilderContextAccessor.Current.Events.OnInitialize += async (_, _) =>
-                {
-                    await ObjectInitializer.InitializeAsync(value);
-                };
-                testBuilderContextAccessor.Current.Events.OnInitialize.Order = initializationOrder;
+                // Initialize the value immediately since data generators need their properties initialized
+                // before their GenerateDataSources method is called
+                Task.Run(async () => await ObjectInitializer.InitializeAsync(value).ConfigureAwait(false)).GetAwaiter().GetResult();
             }
         }
     }
@@ -602,9 +598,16 @@ internal class ReflectionTestsConstructor(
                 _ => classInformation.Parameters.SelectMany(x => x.Attributes)
             };
             var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
-            CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, [], 0);
+            
+            // For property-level generators, create a new instance to avoid modifying shared attributes
+            IDataSourceGeneratorAttribute generatorToUse = dataSourceGeneratorAttribute;
+            if (dataGeneratorType == DataGeneratorType.Property && !DotNetAssemblyHelper.IsInDotNetCoreLibrary(testDataAttribute.GetType()))
+            {
+                generatorToUse = (IDataSourceGeneratorAttribute)Activator.CreateInstance(testDataAttribute.GetType())!;
+                CreateNestedDataGenerators(generatorToUse, testInformation, testBuilderContextAccessor, [], 0);
+            }
 
-            var funcEnumerable = dataSourceGeneratorAttribute.Generate(CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute,
+            var funcEnumerable = generatorToUse.Generate(CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute,
                 dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
                 classInstanceArgumentsInvoked, needsInstance));
 
@@ -653,14 +656,21 @@ internal class ReflectionTestsConstructor(
                 _ => classInformation.Parameters.SelectMany(x => x.Attributes)
             };
             var needsInstance = memberAttributes.Any(x => x is IAccessesInstanceData);
-            CreateNestedDataGenerators(testDataAttribute, testInformation, testBuilderContextAccessor, [], 0);
+            
+            // For property-level generators, create a new instance to avoid modifying shared attributes
+            IAsyncDataSourceGeneratorAttribute generatorToUse = asyncDataSourceGeneratorAttribute;
+            if (dataGeneratorType == DataGeneratorType.Property && !DotNetAssemblyHelper.IsInDotNetCoreLibrary(testDataAttribute.GetType()))
+            {
+                generatorToUse = (IAsyncDataSourceGeneratorAttribute)Activator.CreateInstance(testDataAttribute.GetType())!;
+                CreateNestedDataGenerators(generatorToUse, testInformation, testBuilderContextAccessor, [], 0);
+            }
 
             var metadata = CreateDataGeneratorMetadata(classInformation, method, propertyInfo, testDataAttribute,
                 dataGeneratorType, classInstanceArguments, testInformation, testBuilderContextAccessor,
                 classInstanceArgumentsInvoked, needsInstance);
 
             // We need to enumerate the async enumerable synchronously for now
-            var asyncEnumerable = asyncDataSourceGeneratorAttribute.GenerateAsync(metadata);
+            var asyncEnumerable = generatorToUse.GenerateAsync(metadata);
             var enumerator = asyncEnumerable.GetAsyncEnumerator();
 
             try

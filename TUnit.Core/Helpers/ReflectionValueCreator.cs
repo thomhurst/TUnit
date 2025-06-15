@@ -40,23 +40,14 @@ internal static class ReflectionValueCreator
     
     private static async Task<object?> GetFirstValueWithInitAsync(IDataSourceGeneratorAttribute dataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Initialize the data generator if it implements IAsyncInitializer
-        if (dataSourceGeneratorAttribute is IAsyncInitializer asyncInitializer)
-        {
-            await asyncInitializer.InitializeAsync().ConfigureAwait(false);
-        }
-        
+        // Don't initialize here - initialization happens after properties are set in CreateNestedDataGenerators
+        await Task.CompletedTask.ConfigureAwait(false); // Avoid CS1998 warning
         return dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0);
     }
     
     private static async Task<object?> GetFirstAsyncValueWithInitAsync(IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Initialize the data generator if it implements IAsyncInitializer
-        if (asyncDataSourceGeneratorAttribute is IAsyncInitializer asyncInitializer)
-        {
-            await asyncInitializer.InitializeAsync().ConfigureAwait(false);
-        }
-        
+        // Don't initialize here - initialization happens after properties are set in CreateNestedDataGenerators
         return await GetFirstAsyncValueAsync(asyncDataSourceGeneratorAttribute.GenerateAsync(dataGeneratorMetadata)).ConfigureAwait(false);
     }
     

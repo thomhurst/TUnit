@@ -91,7 +91,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions);
 
-        ReflectionDataInitializer = Register(new ReflectionDataInitializer());
 
         HooksCollector = Register<HooksCollectorBase>
         (
@@ -107,7 +106,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testsConstructor = Register<BaseTestsConstructor>
         (
             isReflectionScannerEnabled
-                ? new ReflectionTestsConstructor(extension, dependencyCollector, ContextManager, ReflectionDataInitializer, this)
+                ? new ReflectionTestsConstructor(extension, dependencyCollector, ContextManager, this)
                 : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, ContextManager, this)
         );
 
@@ -153,7 +152,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }
 
-    public ReflectionDataInitializer ReflectionDataInitializer { get; }
 
     public IDynamicTestRegistrar DynamicTestRegistrar { get; }
 

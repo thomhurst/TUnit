@@ -182,7 +182,9 @@ public static class TestContextExtensions
             .Select(p => CollectProperties(p.Value))
             .SelectMany(x => x);
 
-        var attributes = CollectAttributes(context.TestDetails.Attributes);
+        // Filter out data generator attributes since they are initialized during test discovery
+        var attributes = CollectAttributes(context.TestDetails.Attributes)
+            .Where(attr => attr is not IDataSourceGeneratorAttribute && attr is not IAsyncDataSourceGeneratorAttribute);
 
         IEnumerable<object?> possibleEventObjects =
         [
