@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Enums;
+﻿using TUnit.Core.Data;
+using TUnit.Core.Enums;
 
 namespace TUnit.Core;
 
@@ -12,4 +13,5 @@ public record DataGeneratorMetadata
     public required string TestSessionId { get; init; }
     public required object? TestClassInstance { get; init; }
     public required object?[]? ClassInstanceArguments { get; init; }
+    public DataSourceContext? DataSourceContext { get; init; }
 }

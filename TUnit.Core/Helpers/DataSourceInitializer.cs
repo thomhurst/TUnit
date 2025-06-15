@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Data;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
@@ -21,11 +22,13 @@ internal static class DataSourceInitializer
     /// <param name="instance">The instance to initialize</param>
     /// <param name="dataGeneratorMetadata">Metadata for data generation</param>
     /// <param name="testBuilderContextAccessor">Optional test builder context (used by engine)</param>
+    /// <param name="dataSourceContext">Optional context for tracking dependencies</param>
     /// <returns>A task representing the asynchronous operation</returns>
     public static async Task InitializeAsync(
         object instance, 
         DataGeneratorMetadata dataGeneratorMetadata,
-        TestBuilderContextAccessor? testBuilderContextAccessor = null)
+        TestBuilderContextAccessor? testBuilderContextAccessor = null,
+        DataSourceContext? dataSourceContext = null)
     {
         if (instance is null)
         {
@@ -33,7 +36,7 @@ internal static class DataSourceInitializer
         }
 
         // Initialize nested data generators first
-        await InitializeNestedDataGeneratorsAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor).ConfigureAwait(false);
+        await InitializeNestedDataGeneratorsAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, dataSourceContext).ConfigureAwait(false);
         
         // Then initialize the object itself
         await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
@@ -45,16 +48,18 @@ internal static class DataSourceInitializer
     private static async Task InitializeNestedDataGeneratorsAsync(
         object instance,
         DataGeneratorMetadata dataGeneratorMetadata,
-        TestBuilderContextAccessor? testBuilderContextAccessor)
+        TestBuilderContextAccessor? testBuilderContextAccessor,
+        DataSourceContext? dataSourceContext)
     {
         var visited = new HashSet<object>();
-        await InitializeNestedDataGeneratorsInternalAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, visited).ConfigureAwait(false);
+        await InitializeNestedDataGeneratorsInternalAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, dataSourceContext, visited).ConfigureAwait(false);
     }
 
     private static async Task InitializeNestedDataGeneratorsInternalAsync(
         object? obj,
         DataGeneratorMetadata dataGeneratorMetadata,
         TestBuilderContextAccessor? testBuilderContextAccessor,
+        DataSourceContext? dataSourceContext,
         HashSet<object> visited)
     {
         if (obj is null || !visited.Add(obj))
@@ -82,18 +87,29 @@ internal static class DataSourceInitializer
             // First, recursively initialize the data attribute itself if needed
             if (dataAttribute is IAsyncDataSourceGeneratorAttribute)
             {
-                await InitializeNestedDataGeneratorsInternalAsync(dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor, visited).ConfigureAwait(false);
+                await InitializeNestedDataGeneratorsInternalAsync(dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor, dataSourceContext, visited).ConfigureAwait(false);
             }
 
             // Create value for the property
-            var value = await CreatePropertyValueAsync(obj, propertyInfo, dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor).ConfigureAwait(false);
+            var value = await CreatePropertyValueAsync(obj, propertyInfo, dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor, dataSourceContext).ConfigureAwait(false);
 
             if (value is not null)
             {
                 propertyInfo.SetValue(obj, value);
                 
+                // Track dependency if context is provided
+                if (dataSourceContext?.DependencyTracker != null && dataAttribute is ISharedDataSourceAttribute sharedDataSource)
+                {
+                    var sharedTypes = sharedDataSource.GetSharedTypes().ToArray();
+                    var keys = sharedDataSource.GetKeys().ToArray();
+                    if (sharedTypes.Any())
+                    {
+                        dataSourceContext.RegisterDependency(value, sharedTypes[0], keys.FirstOrDefault());
+                    }
+                }
+                
                 // Recursively initialize the created value
-                await InitializeNestedDataGeneratorsInternalAsync(value, dataGeneratorMetadata, testBuilderContextAccessor, visited).ConfigureAwait(false);
+                await InitializeNestedDataGeneratorsInternalAsync(value, dataGeneratorMetadata, testBuilderContextAccessor, dataSourceContext, visited).ConfigureAwait(false);
                 
                 // Initialize the value itself
                 await ObjectInitializer.InitializeAsync(value).ConfigureAwait(false);
@@ -106,7 +122,8 @@ internal static class DataSourceInitializer
         PropertyInfo propertyInfo,
         IDataAttribute dataAttribute,
         DataGeneratorMetadata dataGeneratorMetadata,
-        TestBuilderContextAccessor? testBuilderContextAccessor)
+        TestBuilderContextAccessor? testBuilderContextAccessor,
+        DataSourceContext? dataSourceContext)
     {
         // For engine context (with TestBuilderContextAccessor), use ReflectionValueCreator
         if (testBuilderContextAccessor is not null)

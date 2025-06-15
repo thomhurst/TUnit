@@ -17,8 +17,7 @@ internal static class TestDataContainer
     private static readonly ScopedContainer<Assembly> AssemblyContainer = new();
     private static readonly ScopedContainer<string> KeyContainer = new();
 
-    // Improved dependency tracking
-    private static readonly Data.DependencyTracker DependencyTracker = new();
+    // Note: Dependency tracking has been moved to the framework level
 
     private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);
 
@@ -375,7 +374,7 @@ internal static class TestDataContainer
             ClassScopedInstances = (int)classDiagnostics["TotalInstances"],
             AssemblyScopedInstances = (int)assemblyDiagnostics["TotalInstances"],
             KeyScopedInstances = (int)keyDiagnostics["TotalInstances"],
-            NestedDependencies = DependencyTracker.GetDependencyCount(),
+            NestedDependencies = 0, // Dependency tracking moved to framework level
             Details = new Dictionary<string, object>
             {
                 ["Global"] = globalDiagnostics,
@@ -411,7 +410,7 @@ internal static class TestDataContainer
 
         return sb.ToString();
     }    /// <summary>
-    /// Disposes an object and all its nested dependencies using the new dependency tracker.
+    /// Disposes an object.
     /// </summary>
     /// <param name="item">The item to dispose.</param>
     private static async ValueTask DisposeWithNestedDependencies<T>(T? item)
@@ -421,35 +420,6 @@ internal static class TestDataContainer
             return;
         }
 
-        // First, dispose nested dependencies using the new dependency tracker
-        await DependencyTracker.DisposeNestedDependenciesAsync(item);
-
-        // Then dispose the item itself
+        // Dispose the item (dependency disposal is handled at framework level)
         await Disposer.DisposeAsync(item);
-    }    /// <summary>
-    /// Registers a nested dependency relationship between a parent and child object using the new dependency tracker.
-    /// </summary>
-    /// <param name="parentObject">The parent object that depends on the child.</param>
-    /// <param name="childObject">The child object that the parent depends on.</param>
-    /// <param name="childSharedType">The shared type of the child object.</param>
-    /// <param name="childKey">The key of the child object (for keyed sharing).</param>
-    internal static void RegisterNestedDependency(object parentObject, object childObject, SharedType childSharedType, string? childKey)
-    {
-        DependencyTracker.RegisterDependency(parentObject, childObject, new DirectScopeManager());
-    }
-
-    /// <summary>
-    /// A simple scope manager that directly disposes objects without additional scope logic.
-    /// This is used for nested dependency tracking where we just want disposal ordering.
-    /// </summary>
-    private class DirectScopeManager : IScopeManager
-    {
-        public T GetOrCreate<T>(Func<T> factory) => factory();
-        public void IncrementUsage<T>() { /* No-op for direct disposal */ }
-        public Task<bool> TryDisposeAsync<T>(T item)
-        {
-            // Always dispose directly since this is for nested dependencies
-            return Disposer.DisposeAsync(item).AsTask().ContinueWith(_ => true);
-        }
-    }
-}
+    }}

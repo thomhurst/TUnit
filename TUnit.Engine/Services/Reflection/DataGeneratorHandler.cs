@@ -42,7 +42,7 @@ internal static class DataGeneratorHandler
             TestSessionId = string.Empty,
         };
         
-        await DataSourceInitializer.InitializeAsync(instance, metadata, testBuilderContextAccessor);
+        await DataSourceInitializer.InitializeAsync(instance, metadata, testBuilderContextAccessor, null);
 
         return instance;
     }
@@ -186,7 +186,7 @@ internal static class DataGeneratorHandler
             TestSessionId = string.Empty,
         };
         
-        await DataSourceInitializer.InitializeAsync(instance, metadata, context.TestBuilderContextAccessor);
+        await DataSourceInitializer.InitializeAsync(instance, metadata, context.TestBuilderContextAccessor, null);
         return instance;
     }
 
@@ -230,7 +230,7 @@ internal static class DataGeneratorHandler
         // Initialize each result object
         foreach (var obj in results.Where(o => o is not null))
         {
-            await DataSourceInitializer.InitializeAsync(obj!, metadata, context.TestBuilderContextAccessor);
+            await DataSourceInitializer.InitializeAsync(obj!, metadata, context.TestBuilderContextAccessor, null);
         }
     }
 

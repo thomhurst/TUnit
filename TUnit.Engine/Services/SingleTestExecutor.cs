@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Data;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
@@ -455,7 +456,34 @@ internal class SingleTestExecutor(
 
     private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
-        return CreateTaskOnCurrentContext(async () => await testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions));
+        return CreateTaskOnCurrentContext(async () =>
+        {
+            // Set up data source context with dependency tracker from service provider
+            DataSourceContext? dataSourceContext = null;
+            try
+            {
+                var dependencyTracker = discoveredTest.TestContext.GetService<IDependencyTracker>();
+                if (dependencyTracker != null)
+                {
+                    dataSourceContext = new DataSourceContext
+                    {
+                        DependencyTracker = dependencyTracker,
+                        ParentObject = null, // Will be set when objects are created
+                        Metadata = null
+                    };
+                }
+            }
+            catch
+            {
+                // Dependency tracker may not be registered
+            }
+            
+            // Execute test with ambient context
+            await DataSourceExecutionContext.RunWithContextAsync(dataSourceContext, async () =>
+            {
+                await testInvocation.Invoke(discoveredTest, cancellationToken, cleanupExceptions);
+            });
+        });
     }
 
     private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)
