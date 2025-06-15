@@ -62,7 +62,7 @@ public record DataSourceGeneratorContainer(
         sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
         sourceCodeWriter.WriteLine();
 
-        sourceCodeWriter.Write($"var {arrayVariableName} = {dataAttr.Name}.Generate({dataGeneratorMetadataVariableName});");
+        sourceCodeWriter.Write($"var {arrayVariableName} = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){dataAttr.Name}).GenerateAsync({dataGeneratorMetadataVariableName}));");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write($"foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
         sourceCodeWriter.Write("{");
@@ -101,7 +101,9 @@ public record DataSourceGeneratorContainer(
             sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({attr.Name});");
             sourceCodeWriter.WriteLine();
 
-            var dataSourceVariable = GenerateVariable("var", string.Empty, ref variableIndex);
+            // Use the property type instead of var to avoid CS0815
+            var propertyType = Property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var dataSourceVariable = GenerateVariable(propertyType, string.Empty, ref variableIndex);
 
             sourceCodeWriter.Write($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
 
@@ -112,7 +114,7 @@ public record DataSourceGeneratorContainer(
 
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
 
-        sourceCodeWriter.Write($"var {generatedDataVariableName} = {generatedDataVariableName}Accessor();");
+        sourceCodeWriter.Write($"var {generatedDataVariableName} = await {generatedDataVariableName}Accessor();");
 
         if (GenericArguments.Length == 0)
         {
@@ -135,19 +137,28 @@ public record DataSourceGeneratorContainer(
             for (var i = 0; i < GenericArguments.Length; i++)
             {
                 var refIndex = i;
-                sourceCodeWriter.Write(GenerateVariable(GenericArguments[i], $"{generatedDataVariableName}.Item{i + 1}", ref refIndex).ToString());
+                sourceCodeWriter.Write(GenerateVariable(GenericArguments[i], $"global::TUnit.Core.Helpers.CastHelper.Cast<{GenericArguments[i]}>({generatedDataVariableName}[{i}])", ref refIndex).ToString());
             }
 
             sourceCodeWriter.WriteLine();
         }
         else
         {
-            DataVariables.Add(new Variable
+            // For single generic argument, extract the first element
+            if (GenericArguments.Length == 1)
             {
-                Type = "var",
-                Name = $"{generatedDataVariableName}",
-                Value = string.Empty
-            });
+                var refIndex = 0;
+                sourceCodeWriter.Write(GenerateVariable(GenericArguments[0], $"global::TUnit.Core.Helpers.CastHelper.Cast<{GenericArguments[0]}>({generatedDataVariableName}[0])", ref refIndex).ToString());
+            }
+            else
+            {
+                DataVariables.Add(new Variable
+                {
+                    Type = "var",
+                    Name = $"{generatedDataVariableName}",
+                    Value = string.Empty
+                });
+            }
         }
     }
 
@@ -155,9 +166,25 @@ public record DataSourceGeneratorContainer(
     {
         var sourceCodeWriter = new SourceCodeWriter(indentLevel);
 
-        sourceCodeWriter.Write($"{attributeVariableName}.Generate(");
-        WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, namedTypeSymbol, property);
-        sourceCodeWriter.Write(").ElementAtOrDefault(0)?.Invoke()");
+        // Note: This is used in attribute object initializers which must be synchronous
+        // The framework will initialize these properties asynchronously after creation
+        
+        // Use null! for non-nullable reference types to indicate framework will initialize
+        var isReferenceType = property.Type.IsReferenceType;
+        var isNullable = property.Type.NullableAnnotation == NullableAnnotation.Annotated;
+        
+        if (isReferenceType && !isNullable)
+        {
+            sourceCodeWriter.Write("null! /* async initialization */");
+        }
+        else if (property.Type.IsValueType && !isNullable)
+        {
+            sourceCodeWriter.Write($"default({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}) /* async initialization */");
+        }
+        else
+        {
+            sourceCodeWriter.Write("null /* async initialization */");
+        }
         if (isNested)
         {
             sourceCodeWriter.Write(",");

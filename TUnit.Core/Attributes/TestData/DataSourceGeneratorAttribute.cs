@@ -1,5 +1,4 @@
 ﻿using TUnit.Core.Extensions;
-using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -16,14 +15,6 @@ public abstract class DataSourceGeneratorAttribute<T> : AsyncDataSourceGenerator
         await Task.CompletedTask;
     }
 
-    public IEnumerable<Func<T>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
-        {
-            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
-        }
-    }
 
 }
 
@@ -40,14 +31,6 @@ public abstract class DataSourceGeneratorAttribute<T1, T2> : AsyncDataSourceGene
         await Task.CompletedTask;
     }
 
-    public IEnumerable<Func<(T1, T2)>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
-        {
-            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
-        }
-    }
 
 }
 
@@ -64,14 +47,6 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : AsyncDataSource
         await Task.CompletedTask;
     }
 
-    public IEnumerable<Func<(T1, T2, T3)>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
-        {
-            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
-        }
-    }
 
 }
 
@@ -88,14 +63,6 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : AsyncDataSo
         await Task.CompletedTask;
     }
 
-    public IEnumerable<Func<(T1, T2, T3, T4)>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
-        {
-            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
-        }
-    }
 
 }
 
@@ -112,13 +79,5 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : AsyncDa
         await Task.CompletedTask;
     }
 
-    public IEnumerable<Func<(T1, T2, T3, T4, T5)>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
-        {
-            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
-        }
-    }
 
 }

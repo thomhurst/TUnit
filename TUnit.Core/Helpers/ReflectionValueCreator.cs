@@ -9,14 +9,6 @@ namespace TUnit.Core.Helpers;
 [SuppressMessage("Trimming", "IL2070:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
 internal static class ReflectionValueCreator
 {
-    public static object? CreatePropertyValue(SourceGeneratedClassInformation classInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor,
-        IDataAttribute generator,
-        SourceGeneratedPropertyInformation property,
-        DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        return AsyncToSyncHelper.RunSync(() => CreatePropertyValueAsync(classInformation, testBuilderContextAccessor, generator, property, dataGeneratorMetadata));
-    }
 
     public static async Task<object?> CreatePropertyValueAsync(SourceGeneratedClassInformation classInformation,
         TestBuilderContextAccessor testBuilderContextAccessor,
@@ -33,7 +25,7 @@ internal static class ReflectionValueCreator
                     TestSessionId = string.Empty
                 }),
             IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute => await GetFirstAsyncValueWithInitAsync(asyncDataSourceGeneratorAttribute, dataGeneratorMetadata).ConfigureAwait(false),
-            MethodDataSourceAttribute methodDataSourceAttribute => InvokeMethodDataSource(methodDataSourceAttribute, classInformation.Type),
+            MethodDataSourceAttribute methodDataSourceAttribute => await InvokeMethodDataSourceAsync(methodDataSourceAttribute, classInformation.Type).ConfigureAwait(false),
             NoOpDataAttribute => null,
             _ => throw new ArgumentOutOfRangeException(nameof(generator), generator, null)
         };
@@ -64,7 +56,7 @@ internal static class ReflectionValueCreator
         }
     }
 
-    private static object? InvokeMethodDataSource(MethodDataSourceAttribute methodDataSourceAttribute, Type classType)
+    private static async Task<object?> InvokeMethodDataSourceAsync(MethodDataSourceAttribute methodDataSourceAttribute, Type classType)
     {
         var methodDataSourceType = methodDataSourceAttribute.ClassProvidingDataSource ?? classType;
 
@@ -83,9 +75,7 @@ internal static class ReflectionValueCreator
         // If the method returns a Task or ValueTask, we need to unwrap it
         if (IsAsyncResult(result))
         {
-            // Since we're in a sync context (property value creation), we need to block
-            // This is acceptable here as it's during test setup, not execution
-            return UnwrapAsyncResult(result);
+            return await UnwrapAsyncResultAsync(result).ConfigureAwait(false);
         }
 
         // For collections, return the first element
@@ -106,23 +96,19 @@ internal static class ReflectionValueCreator
         return typeof(Task).IsAssignableFrom(type) || type.Name.StartsWith("ValueTask");
     }
 
-    private static object? UnwrapAsyncResult(object? result)
+    private static async Task<object?> UnwrapAsyncResultAsync(object? result)
     {
         if (result is Task task)
         {
-            // Use AsyncToSyncHelper to properly handle the async operation
-            return AsyncToSyncHelper.RunSync(async () =>
-            {
-                await task.ConfigureAwait(false);
+            await task.ConfigureAwait(false);
 
-                var taskType = task.GetType();
-                if (taskType.IsGenericType)
-                {
-                    var resultProperty = taskType.GetProperty("Result");
-                    return resultProperty?.GetValue(task);
-                }
-                return null;
-            });
+            var taskType = task.GetType();
+            if (taskType.IsGenericType)
+            {
+                var resultProperty = taskType.GetProperty("Result");
+                return resultProperty?.GetValue(task);
+            }
+            return null;
         }
 
         // Handle ValueTask
@@ -133,14 +119,11 @@ internal static class ReflectionValueCreator
             var asTaskMethod = valueTaskType.GetMethod("AsTask");
             var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
 
-            return AsyncToSyncHelper.RunSync(async () =>
-            {
-                await convertedTask.ConfigureAwait(false);
+            await convertedTask.ConfigureAwait(false);
 
-                var taskType = convertedTask.GetType();
-                var resultProperty = taskType.GetProperty("Result");
-                return resultProperty?.GetValue(convertedTask);
-            });
+            var taskType = convertedTask.GetType();
+            var resultProperty = taskType.GetProperty("Result");
+            return resultProperty?.GetValue(convertedTask);
         }
         else
         {
@@ -148,10 +131,7 @@ internal static class ReflectionValueCreator
             var asTaskMethod = valueTaskType.GetMethod("AsTask");
             var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
 
-            AsyncToSyncHelper.RunSync(async () =>
-            {
-                await convertedTask.ConfigureAwait(false);
-            });
+            await convertedTask.ConfigureAwait(false);
 
             return null;
         }

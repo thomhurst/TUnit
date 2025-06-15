@@ -1,6 +1,4 @@
-﻿using TUnit.Core.Helpers;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 public abstract class UntypedDataSourceGeneratorAttribute : AsyncUntypedDataSourceGeneratorAttribute
@@ -16,12 +14,4 @@ public abstract class UntypedDataSourceGeneratorAttribute : AsyncUntypedDataSour
         await Task.CompletedTask;
     }
 
-    public IEnumerable<Func<object?[]?>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
-        {
-            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
-        }
-    }
 }

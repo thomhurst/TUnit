@@ -8,7 +8,7 @@ public sealed class ClassDataSourceAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T2,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T3,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T4>
-    : DataSourceGeneratorAttribute<T1, T2, T3, T4>, ISharedDataSourceAttribute
+    : AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>, ISharedDataSourceAttribute
     where T1 : new()
     where T2 : new()
     where T3 : new()
@@ -17,32 +17,21 @@ public sealed class ClassDataSourceAttribute<
     public SharedType[] Shared { get; set; } = [SharedType.None, SharedType.None, SharedType.None, SharedType.None, SharedType.None];
     public string[] Keys { get; set; } = [string.Empty, string.Empty, string.Empty, string.Empty, string.Empty];
 
-    protected override IEnumerable<Func<(T1, T2, T3, T4)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return () =>
+        await Task.CompletedTask;
+        yield return async () =>
         {
-            (
-                (T1 T, SharedType SharedType, string Key),
-                (T2 T, SharedType SharedType, string Key),
-                (T3 T, SharedType SharedType, string Key),
-                (T4 T, SharedType SharedType, string Key)
-                ) itemsWithMetadata = (
-                    ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                        .GetItemForIndex<T1>(0, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata),
-                    ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                        .GetItemForIndex<T2>(1, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata),
-                    ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                        .GetItemForIndex<T3>(2, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata),
-                    ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                        .GetItemForIndex<T4>(3, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata)
-                );
+            var item1 = await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+                .GetItemForIndexAsync<T1>(0, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
+            var item2 = await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+                .GetItemForIndexAsync<T2>(1, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
+            var item3 = await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+                .GetItemForIndexAsync<T3>(2, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
+            var item4 = await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+                .GetItemForIndexAsync<T4>(3, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
 
-            return (
-                itemsWithMetadata.Item1.T,
-                itemsWithMetadata.Item2.T,
-                itemsWithMetadata.Item3.T,
-                itemsWithMetadata.Item4.T
-            );
+            return (item1.Item1, item2.Item1, item3.Item1, item4.Item1);
         };
     }
 

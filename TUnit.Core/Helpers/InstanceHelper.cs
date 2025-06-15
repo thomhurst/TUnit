@@ -16,13 +16,23 @@ internal static class InstanceHelper
         var classInformation = methodInformation.Class;
         var instance = CreateObject(classInformation, args, testClassProperties, testBuilderContext);
 
+        // Properties with data attributes are handled separately after instance creation
+        // to support async initialization
+
+        return instance;
+    }
+
+    public static async Task InitializePropertiesAsync(object instance, SourceGeneratedMethodInformation methodInformation, TestBuilderContext testBuilderContext)
+    {
+        var classInformation = methodInformation.Class;
+        
         foreach (var propertyInformation in classInformation.Properties)
         {
             foreach (var dataAttribute in propertyInformation.Attributes.OfType<IDataAttribute>())
             {
                 var testBuilderContextAccessor = new TestBuilderContextAccessor(testBuilderContext);
 
-                var value = ReflectionValueCreator.CreatePropertyValue(
+                var value = await ReflectionValueCreator.CreatePropertyValueAsync(
                     classInformation,
                     testBuilderContextAccessor,
                     dataAttribute,
@@ -36,13 +46,11 @@ internal static class InstanceHelper
                     TestBuilderContext = testBuilderContextAccessor,
                     TestClassInstance = instance,
                     TestSessionId = string.Empty,
-                });
+                }).ConfigureAwait(false);
 
                 propertyInformation.ReflectionInfo.SetValue(instance, value);
             }
         }
-
-        return instance;
     }
 
     private static object CreateObject(SourceGeneratedClassInformation classInformation, object?[]? args, IDictionary<string, object?>? testClassProperties, TestBuilderContext testBuilderContext)

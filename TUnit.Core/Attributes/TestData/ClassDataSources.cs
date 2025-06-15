@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
 using TUnit.Core.Enums;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -127,18 +126,4 @@ internal class ClassDataSources
     }
 
 
-    public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
-    {
-        return AsyncToSyncHelper.RunSync(() => GetItemForIndexAsync<T>(index, testClassType, sharedTypes, keys, dataGeneratorMetadata));
-    }
-
-    public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        return AsyncToSyncHelper.RunSync(() => GetAsync<T>(sharedType, testClassType, key, dataGeneratorMetadata));
-    }
-
-    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        return AsyncToSyncHelper.RunSync(() => GetAsync(sharedType, type, testClassType, key, dataGeneratorMetadata));
-    }
 }

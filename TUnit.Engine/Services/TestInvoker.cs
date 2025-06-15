@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -23,7 +24,38 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
             
             foreach (var onInitializeObject in discoveredTest.TestContext.GetOnInitializeObjects())
             {
-                await ObjectInitializer.InitializeAsync(onInitializeObject, cancellationToken);
+                // For objects with [ClassDataSource] properties, ensure they are populated first
+                if (onInitializeObject == testInstance)
+                {
+                    // The test instance needs its data source properties populated before initialization
+                    var testDetails = discoveredTest.TestContext.TestDetails;
+                    var methodInfo = testDetails.TestMethod;
+                    
+                    // Create metadata for property initialization
+                    var dataGeneratorMetadata = new DataGeneratorMetadata
+                    {
+                        Type = DataGeneratorType.Property,
+                        TestInformation = methodInfo,
+                        ClassInstanceArguments = testDetails.TestClassArguments ?? [],
+                        MembersToGenerate = [],
+                        TestBuilderContext = null!,
+                        TestClassInstance = testInstance,
+                        TestSessionId = TestSessionContext.Current?.Id ?? string.Empty
+                    };
+                    
+                    // Initialize properties with data sources before calling InitializeAsync
+                    await DataSourceInitializer.InitializeAsync(
+                        testInstance,
+                        dataGeneratorMetadata,
+                        null,
+                        obj => dataSourceObjectRegistrar.RegisterExistingDataSourceObjects(obj)
+                    ).ConfigureAwait(false);
+                }
+                else
+                {
+                    // For other objects, just initialize them normally
+                    await ObjectInitializer.InitializeAsync(onInitializeObject, cancellationToken);
+                }
             }
 
             await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken);

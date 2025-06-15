@@ -52,6 +52,13 @@ internal static class InstanceCreator
 
             var instance = InstanceHelper.CreateInstance(testInformation, args, propertyArgs, 
                 testBuilderContextAccessor.Current);
+            
+            if (!skipPropertyInitialization)
+            {
+                await InstanceHelper.InitializePropertiesAsync(instance, testInformation, 
+                    testBuilderContextAccessor.Current).ConfigureAwait(false);
+            }
+            
             return (instance, null);
         }
         catch (Exception e)

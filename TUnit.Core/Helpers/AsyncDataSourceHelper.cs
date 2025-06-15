@@ -6,19 +6,28 @@ namespace TUnit.Core.Helpers;
 /// <summary>
 /// Provides helper methods for working with async data sources without blocking threads.
 /// </summary>
-internal static class AsyncDataSourceHelper
+public static class AsyncDataSourceHelper
 {
 
     /// <summary>
     /// Wraps an async data source generator, ensuring proper initialization.
     /// </summary>
-    public static async IAsyncEnumerable<Func<Task<object?[]?>>> WrapAsyncEnumerable(
+    internal static async IAsyncEnumerable<Func<Task<object?[]?>>> WrapAsyncEnumerable(
         IAsyncDataSourceGeneratorAttribute asyncDataSourceGenerator,
         DataGeneratorMetadata dataGeneratorMetadata,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        // Initialize the data generator
-        await ObjectInitializer.InitializeAsync(asyncDataSourceGenerator).ConfigureAwait(false);
+        // If the generator has properties with data sources, populate them first
+        if (asyncDataSourceGenerator is object generatorObj)
+        {
+            // Use DataSourceInitializer to populate any [ClassDataSource] properties
+            await DataSourceInitializer.InitializeAsync(
+                generatorObj,
+                dataGeneratorMetadata,
+                dataGeneratorMetadata.TestBuilderContext,
+                obj => { /* Object registration handled elsewhere */ }
+            ).ConfigureAwait(false);
+        }
 
         var asyncEnumerable = asyncDataSourceGenerator.GenerateAsync(dataGeneratorMetadata);
         
@@ -31,7 +40,7 @@ internal static class AsyncDataSourceHelper
     /// <summary>
     /// Creates an async enumerable from any data attribute.
     /// </summary>
-    public static IAsyncEnumerable<Func<Task<object?[]?>>> CreateAsyncEnumerable(
+    internal static IAsyncEnumerable<Func<Task<object?[]?>>> CreateAsyncEnumerable(
         IDataAttribute dataAttribute,
         DataGeneratorMetadata dataGeneratorMetadata,
         CancellationToken cancellationToken = default)
@@ -91,9 +100,18 @@ internal static class AsyncDataSourceHelper
         await foreach (var func in asyncEnumerable.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             var result = await func().ConfigureAwait(false);
-            return result?.ElementAtOrDefault(0);
+            var value = result?.ElementAtOrDefault(0);
+            
+            // Initialize the value if it implements IAsyncInitializer
+            if (value != null)
+            {
+                await ObjectInitializer.InitializeAsync(value, cancellationToken).ConfigureAwait(false);
+            }
+            
+            return value;
         }
         
         return null;
     }
+    
 }
