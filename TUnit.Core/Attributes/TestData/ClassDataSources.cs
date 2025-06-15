@@ -119,7 +119,6 @@ internal class ClassDataSources
 
             await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, instance, properties).ConfigureAwait(false);
 
-            // Initialize the instance after all its properties have been set and initialized
             await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
 
             return instance;
@@ -172,12 +171,10 @@ internal class ClassDataSources
 
             await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, result, nestedProperties).ConfigureAwait(false);
 
-            // Initialize the nested object after its properties have been set and initialized
             await ObjectInitializer.InitializeAsync(result).ConfigureAwait(false);
         }
     }
 
-    // Synchronous wrapper methods for backward compatibility
     public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
         return Task.Run(async () => await GetItemForIndexAsync<T>(index, testClassType, sharedTypes, keys, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();

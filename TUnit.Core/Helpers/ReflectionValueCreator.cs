@@ -5,7 +5,6 @@ namespace TUnit.Core.Helpers;
 
 internal static class ReflectionValueCreator
 {
-    // Synchronous version for backward compatibility
     public static object? CreatePropertyValue(SourceGeneratedClassInformation classInformation,
         TestBuilderContextAccessor testBuilderContextAccessor,
         IDataAttribute generator,
@@ -40,14 +39,12 @@ internal static class ReflectionValueCreator
     
     private static async Task<object?> GetFirstValueWithInitAsync(IDataSourceGeneratorAttribute dataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Don't initialize here - initialization happens after properties are set in CreateNestedDataGenerators
-        await Task.CompletedTask.ConfigureAwait(false); // Avoid CS1998 warning
+        await Task.CompletedTask.ConfigureAwait(false);
         return dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0);
     }
     
     private static async Task<object?> GetFirstAsyncValueWithInitAsync(IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Don't initialize here - initialization happens after properties are set in CreateNestedDataGenerators
         return await GetFirstAsyncValueAsync(asyncDataSourceGeneratorAttribute.GenerateAsync(dataGeneratorMetadata)).ConfigureAwait(false);
     }
     
