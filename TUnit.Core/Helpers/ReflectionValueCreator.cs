@@ -33,17 +33,11 @@ internal static class ReflectionValueCreator
                     TestSessionId = string.Empty
                 }),
             IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute => await GetFirstAsyncValueWithInitAsync(asyncDataSourceGeneratorAttribute, dataGeneratorMetadata).ConfigureAwait(false),
-            IDataSourceGeneratorAttribute dataSourceGeneratorAttribute => await GetFirstValueWithInitAsync(dataSourceGeneratorAttribute, dataGeneratorMetadata).ConfigureAwait(false),
             MethodDataSourceAttribute methodDataSourceAttribute => InvokeMethodDataSource(methodDataSourceAttribute, classInformation.Type),
             NoOpDataAttribute => null,
             _ => throw new ArgumentOutOfRangeException(nameof(generator), generator, null)
         };
 
-    private static async Task<object?> GetFirstValueWithInitAsync(IDataSourceGeneratorAttribute dataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        await Task.CompletedTask.ConfigureAwait(false);
-        return dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata).ElementAtOrDefault(0)?.Invoke()?.ElementAtOrDefault(0);
-    }
 
     private static async Task<object?> GetFirstAsyncValueWithInitAsync(IAsyncDataSourceGeneratorAttribute asyncDataSourceGeneratorAttribute, DataGeneratorMetadata dataGeneratorMetadata)
     {

@@ -184,7 +184,7 @@ public static class TestContextExtensions
 
         // Filter out data generator attributes since they are initialized during test discovery
         var attributes = CollectAttributes(context.TestDetails.Attributes)
-            .Where(attr => attr is not IDataSourceGeneratorAttribute && attr is not IAsyncDataSourceGeneratorAttribute);
+            .Where(attr => attr is not IAsyncDataSourceGeneratorAttribute);
 
         IEnumerable<object?> possibleEventObjects =
         [

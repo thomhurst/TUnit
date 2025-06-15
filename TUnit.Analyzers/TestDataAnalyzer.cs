@@ -144,8 +144,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 CheckMethodDataSource(context, attribute, testClassType, types);
             }
             
-            if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithoutGlobalPrefix))) == true
-                && attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IUntypedDataSourceGeneratorAttribute.WithoutGlobalPrefix))) != true)
+            if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IAsyncDataSourceGeneratorAttribute.WithoutGlobalPrefix))) == true
+                && attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IAsyncUntypedDataSourceGeneratorAttribute.WithoutGlobalPrefix))) != true)
             {
                 CheckDataGenerator(context, attribute, types);
             }
@@ -561,7 +561,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         var selfAndBaseTypes = attribute.AttributeClass?.GetSelfAndBaseTypes() ?? [];
             
         var baseGeneratorAttribute = selfAndBaseTypes
-            .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithGlobalPrefix));
+            .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IAsyncDataSourceGeneratorAttribute.WithGlobalPrefix));
 
         if (baseGeneratorAttribute is null)
         {

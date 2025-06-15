@@ -142,19 +142,25 @@ internal class ClassDataSources
     {
         foreach (var propertyInfo in properties)
         {
-            if (propertyInfo.GetCustomAttributes().OfType<IDataSourceGeneratorAttribute>().FirstOrDefault() is not { } dataSourceGeneratorAttribute)
+            if (propertyInfo.GetCustomAttributes().OfType<IAsyncDataSourceGeneratorAttribute>().FirstOrDefault() is not { } asyncDataSourceGeneratorAttribute)
             {
                 continue;
             }
 
             if (propertyInfo.GetValue(instance) is not {} result)
             {
-                var resultDelegateArray = dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata with
+                var asyncEnumerable = asyncDataSourceGeneratorAttribute.GenerateAsync(dataGeneratorMetadata with
                 {
                     Type = DataGeneratorType.Property, MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
                 });
 
-                result = resultDelegateArray.FirstOrDefault()?.Invoke()?.FirstOrDefault();
+                await using var enumerator = asyncEnumerable.GetAsyncEnumerator();
+                if (await enumerator.MoveNextAsync().ConfigureAwait(false))
+                {
+                    var func = enumerator.Current;
+                    var resultArray = await func().ConfigureAwait(false);
+                    result = resultArray?.FirstOrDefault();
+                }
 
                 propertyInfo.SetValue(instance, result);
             }

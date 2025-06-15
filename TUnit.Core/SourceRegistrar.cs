@@ -105,7 +105,7 @@ public class SourceRegistrar
     public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.Interfaces)] T>()
     {
         var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite && p.HasAttribute<IDataSourceGeneratorAttribute>())
+            .Where(p => p.CanWrite && p.HasAttribute<IAsyncDataSourceGeneratorAttribute>())
             .Where(p => IsEvent(p.PropertyType))
             .ToArray();
 

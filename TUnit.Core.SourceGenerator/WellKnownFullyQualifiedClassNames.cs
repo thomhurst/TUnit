@@ -40,7 +40,7 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName CancellationToken = "System.Threading.CancellationToken";
     
     public static readonly FullyQualifiedTypeName IDataAttribute = "TUnit.Core.IDataAttribute";
-    public static readonly FullyQualifiedTypeName IDataSourceGeneratorAttribute = "TUnit.Core.IDataSourceGeneratorAttribute";
+    public static readonly FullyQualifiedTypeName IAsyncDataSourceGeneratorAttribute = "TUnit.Core.IAsyncDataSourceGeneratorAttribute";
     public static readonly FullyQualifiedTypeName IAsyncDataSourceGeneratorAttribute = "TUnit.Core.IAsyncDataSourceGeneratorAttribute";
     public static readonly FullyQualifiedTypeName AsyncDataSourceGeneratorAttribute = "TUnit.Core.AsyncDataSourceGeneratorAttribute";
     public static readonly FullyQualifiedTypeName AsyncUntypedDataSourceGeneratorAttribute = "TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute";

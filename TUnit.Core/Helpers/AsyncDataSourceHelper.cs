@@ -8,27 +8,6 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 internal static class AsyncDataSourceHelper
 {
-    /// <summary>
-    /// Converts a synchronous data source generator to an async enumerable.
-    /// </summary>
-    public static async IAsyncEnumerable<Func<Task<object?[]?>>> ToAsyncEnumerable(
-        IDataSourceGeneratorAttribute dataSourceGenerator,
-        DataGeneratorMetadata dataGeneratorMetadata,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        // Initialize the data generator
-        await ObjectInitializer.InitializeAsync(dataSourceGenerator).ConfigureAwait(false);
-
-        var syncEnumerable = dataSourceGenerator.Generate(dataGeneratorMetadata);
-        
-        foreach (var func in syncEnumerable)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            
-            // Convert synchronous function to async
-            yield return async () => await Task.FromResult(func()).ConfigureAwait(false);
-        }
-    }
 
     /// <summary>
     /// Wraps an async data source generator, ensuring proper initialization.
@@ -60,7 +39,6 @@ internal static class AsyncDataSourceHelper
         return dataAttribute switch
         {
             IAsyncDataSourceGeneratorAttribute asyncGen => WrapAsyncEnumerable(asyncGen, dataGeneratorMetadata, cancellationToken),
-            IDataSourceGeneratorAttribute syncGen => ToAsyncEnumerable(syncGen, dataGeneratorMetadata, cancellationToken),
             ArgumentsAttribute args => CreateFromArguments(args),
             _ => EmptyAsyncEnumerable()
         };

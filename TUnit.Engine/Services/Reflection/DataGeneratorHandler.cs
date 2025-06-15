@@ -21,7 +21,7 @@ internal static class DataGeneratorHandler
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        if (dataAttribute is not IDataSourceGeneratorAttribute ||
+        if (dataAttribute is not (IDataSourceGeneratorAttribute or IAsyncDataSourceGeneratorAttribute) ||
             DotNetAssemblyHelper.IsInDotNetCoreLibrary(dataAttribute.GetType()))
         {
             return dataAttribute;
@@ -104,10 +104,6 @@ internal static class DataGeneratorHandler
     {
         switch (dataAttribute)
         {
-            case IDataSourceGeneratorAttribute sync:
-                await foreach (var item in GetArgumentsFromSyncGeneratorAsync(sync, context))
-                    yield return item;
-                break;
             case IAsyncDataSourceGeneratorAttribute async:
                 await foreach (var item in GetArgumentsFromAsyncGeneratorAsync(async, context))
                     yield return item;
@@ -150,19 +146,6 @@ internal static class DataGeneratorHandler
         }
     }
 
-    private static async IAsyncEnumerable<Func<Task<object?[]>>> GetArgumentsFromSyncGeneratorAsync(
-        IDataSourceGeneratorAttribute generator,
-        DataGeneratorContext context)
-    {
-        var generatorToUse = await PrepareGeneratorIfNeededAsync(generator, context);
-        var metadata = await context.CreateMetadataAsync();
-        var funcEnumerable = generatorToUse.Generate(metadata);
-
-        foreach (var func in funcEnumerable)
-        {
-            yield return async () => await Task.FromResult(ProcessDataGeneratorResult(FuncHelper.InvokeFunc(func)));
-        }
-    }
 
 
     private static IEnumerable<Func<object?[]>> GetArgumentsFromArgumentsAttribute(ArgumentsAttribute args)
@@ -215,22 +198,6 @@ internal static class DataGeneratorHandler
     }
 
 
-    private static async Task<IDataSourceGeneratorAttribute> PrepareGeneratorIfNeededAsync(
-        IDataSourceGeneratorAttribute generator,
-        DataGeneratorContext context)
-    {
-        // Don't prepare generators from core libraries or if not for properties
-        if (context.DataGeneratorType != DataGeneratorType.Property ||
-            DotNetAssemblyHelper.IsInDotNetCoreLibrary(generator.GetType()))
-        {
-            return generator;
-        }
-
-        // For property generators, we need a fresh instance that's properly initialized
-        var instance = (IDataSourceGeneratorAttribute)Activator.CreateInstance(generator.GetType())!;
-        await InitializeNestedDataGenerators(instance, context.TestInformation, context.TestBuilderContextAccessor);
-        return instance;
-    }
 
     private static async Task<IAsyncDataSourceGeneratorAttribute> PrepareGeneratorIfNeededAsync(
         IAsyncDataSourceGeneratorAttribute generator,

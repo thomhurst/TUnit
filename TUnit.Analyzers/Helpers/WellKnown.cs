@@ -35,8 +35,8 @@ public static class WellKnown
         public static readonly FullyQualifiedTypeName DependsOnAttribute = GetTypeName("DependsOnAttribute");
         
         public static readonly FullyQualifiedTypeName IDataAttribute = GetTypeName("IDataAttribute");
-        public static readonly FullyQualifiedTypeName IDataSourceGeneratorAttribute = GetTypeName("IDataSourceGeneratorAttribute");
-        public static readonly FullyQualifiedTypeName IUntypedDataSourceGeneratorAttribute = GetTypeName("IUntypedDataSourceGeneratorAttribute");
+        public static readonly FullyQualifiedTypeName IAsyncDataSourceGeneratorAttribute = GetTypeName("IAsyncDataSourceGeneratorAttribute");
+        public static readonly FullyQualifiedTypeName IAsyncUntypedDataSourceGeneratorAttribute = GetTypeName("IAsyncUntypedDataSourceGeneratorAttribute");
 
         public static readonly FullyQualifiedTypeName CancellationToken = new("System.Threading.CancellationToken");
 
