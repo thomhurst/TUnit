@@ -4,6 +4,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using Polyfills;
 
@@ -136,7 +137,7 @@ internal static class DataGeneratorHandler
         DataGeneratorContext context)
     {
         var generatorToUse = await PrepareGeneratorIfNeededAsync(generator, context);
-        var metadata = context.CreateMetadata();
+        var metadata = await context.CreateMetadataAsync();
         var asyncEnumerable = generatorToUse.GenerateAsync(metadata);
 
         await foreach (var func in asyncEnumerable)
@@ -154,7 +155,7 @@ internal static class DataGeneratorHandler
         DataGeneratorContext context)
     {
         var generatorToUse = await PrepareGeneratorIfNeededAsync(generator, context);
-        var metadata = context.CreateMetadata();
+        var metadata = await context.CreateMetadataAsync();
         var funcEnumerable = generatorToUse.Generate(metadata);
 
         foreach (var func in funcEnumerable)
@@ -173,13 +174,17 @@ internal static class DataGeneratorHandler
         InstanceMethodDataSourceAttribute attribute,
         DataGeneratorContext context)
     {
-        var instance = InstanceCreator.CreateInstance(
+        var (instance, error) = await InstanceCreator.CreateInstanceAsync(
             context.TypeDataAttribute,
             context.ClassInformation,
             context.ClassInstanceArgumentsInvoked ?? context.ClassInstanceArguments(),
             context.TestInformation,
-            context.TestBuilderContextAccessor,
-            out _);
+            context.TestBuilderContextAccessor);
+            
+        if (error != null)
+        {
+            throw error;
+        }
 
         var methodDataSourceType = attribute.ClassProvidingDataSource ?? context.ClassInformation.Type;
         var result = InvokeMethod(methodDataSourceType, attribute.MethodNameProvidingDataSource,
@@ -473,8 +478,25 @@ internal class DataGeneratorContext
     public required object?[]? ClassInstanceArgumentsInvoked { get; init; }
     public required bool NeedsInstance { get; init; }
 
-    public DataGeneratorMetadata CreateMetadata()
+    public async Task<DataGeneratorMetadata> CreateMetadataAsync()
     {
+        object? testClassInstance = null;
+        
+        if (NeedsInstance)
+        {
+            var (instance, error) = await InstanceCreator.CreateInstanceAsync(
+                TestDataAttribute, ClassInformation,
+                ClassInstanceArgumentsInvoked ?? ClassInstanceArguments(),
+                TestInformation, TestBuilderContextAccessor, true);
+                
+            if (error != null)
+            {
+                throw error;
+            }
+            
+            testClassInstance = instance;
+        }
+        
         return new DataGeneratorMetadata
         {
             Type = DataGeneratorType,
@@ -488,11 +510,7 @@ internal class DataGeneratorContext
                 _ => throw new ArgumentOutOfRangeException(nameof(DataGeneratorType), DataGeneratorType, null)
             },
             TestBuilderContext = TestBuilderContextAccessor,
-            TestClassInstance = NeedsInstance
-                ? InstanceCreator.CreateInstance(TestDataAttribute, ClassInformation,
-                    ClassInstanceArgumentsInvoked ?? ClassInstanceArguments(),
-                    TestInformation, TestBuilderContextAccessor, true, out _)
-                : null,
+            TestClassInstance = testClassInstance,
             TestSessionId = string.Empty,
         };
     }

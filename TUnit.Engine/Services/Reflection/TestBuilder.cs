@@ -204,11 +204,16 @@ internal class TestBuilder
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        return await Task.Run(() => 
-            InstanceCreator.GetPropertyArgumentsEnumerable(
-                    classInformation, classInstanceArguments, testInformation, testBuilderContextAccessor)
-                .ToDictionary(p => p.PropertyInformation.Name, p => p.Args().ElementAtOrDefault(0))
-        );
+        var propertyArgs = new Dictionary<string, object?>();
+        
+        await foreach (var (propertyInformation, argsFunc) in InstanceCreator.GetPropertyArgumentsEnumerableAsync(
+            classInformation, classInstanceArguments, testInformation, testBuilderContextAccessor))
+        {
+            var args = await argsFunc();
+            propertyArgs[propertyInformation.Name] = args.ElementAtOrDefault(0);
+        }
+        
+        return propertyArgs;
     }
 
     private static Attribute[] CollectAllAttributes(SourceGeneratedMethodInformation testInformation)

@@ -15,6 +15,7 @@ namespace TUnit.Engine.Services.Reflection;
 [UnconditionalSuppressMessage("AOT", "IL3050")]
 internal static class InstanceCreator
 {
+    // Synchronous wrapper for backward compatibility
     public static object? CreateInstance(
         IDataAttribute typeDataAttribute,
         SourceGeneratedClassInformation classInformation,
@@ -26,7 +27,8 @@ internal static class InstanceCreator
         return CreateInstance(typeDataAttribute, classInformation, classInstanceArguments, 
             testInformation, testBuilderContextAccessor, false, out exception);
     }
-
+    
+    // Synchronous wrapper for backward compatibility
     public static object? CreateInstance(
         IDataAttribute typeDataAttribute,
         SourceGeneratedClassInformation classInformation,
@@ -36,13 +38,36 @@ internal static class InstanceCreator
         bool skipPropertyInitialization,
         out Exception? exception)
     {
-        exception = null;
+        var (instance, error) = CreateInstanceAsync(typeDataAttribute, classInformation, classInstanceArguments,
+            testInformation, testBuilderContextAccessor, skipPropertyInitialization).GetAwaiter().GetResult();
+        exception = error;
+        return instance;
+    }
 
+    public static async Task<(object? Instance, Exception? Exception)> CreateInstanceAsync(
+        IDataAttribute typeDataAttribute,
+        SourceGeneratedClassInformation classInformation,
+        object?[] classInstanceArguments,
+        SourceGeneratedMethodInformation testInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor)
+    {
+        return await CreateInstanceAsync(typeDataAttribute, classInformation, classInstanceArguments, 
+            testInformation, testBuilderContextAccessor, false);
+    }
+
+    public static async Task<(object? Instance, Exception? Exception)> CreateInstanceAsync(
+        IDataAttribute typeDataAttribute,
+        SourceGeneratedClassInformation classInformation,
+        object?[] classInstanceArguments,
+        SourceGeneratedMethodInformation testInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor,
+        bool skipPropertyInitialization)
+    {
         try
         {
             if (typeDataAttribute is ClassConstructorAttribute classConstructorAttribute)
             {
-                return CreateByClassConstructor(classInformation.Type, classConstructorAttribute);
+                return (CreateByClassConstructor(classInformation.Type, classConstructorAttribute), null);
             }
 
             var args = classInstanceArguments
@@ -51,15 +76,15 @@ internal static class InstanceCreator
 
             var propertyArgs = skipPropertyInitialization
                 ? new Dictionary<string, object?>()
-                : GetPropertyArguments(classInformation, args, testInformation, testBuilderContextAccessor);
+                : await GetPropertyArgumentsAsync(classInformation, args, testInformation, testBuilderContextAccessor);
 
-            return InstanceHelper.CreateInstance(testInformation, args, propertyArgs, 
+            var instance = InstanceHelper.CreateInstance(testInformation, args, propertyArgs, 
                 testBuilderContextAccessor.Current);
+            return (instance, null);
         }
         catch (Exception e)
         {
-            exception = e;
-            return null;
+            return (null, e);
         }
     }
 
@@ -81,18 +106,26 @@ internal static class InstanceCreator
         return createMethod.Invoke(classConstructor, [metadata])!;
     }
 
-    private static Dictionary<string, object?> GetPropertyArguments(
+    private static async Task<Dictionary<string, object?>> GetPropertyArgumentsAsync(
         SourceGeneratedClassInformation classInformation,
         object?[] args,
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        return GetPropertyArgumentsEnumerable(classInformation, args, testInformation, testBuilderContextAccessor)
-            .ToDictionary(p => p.PropertyInformation.Name, p => p.Args().ElementAtOrDefault(0));
+        var propertyArgs = new Dictionary<string, object?>();
+        
+        await foreach (var (propertyInformation, argsFunc) in GetPropertyArgumentsEnumerableAsync(
+            classInformation, args, testInformation, testBuilderContextAccessor))
+        {
+            var propArgs = await argsFunc();
+            propertyArgs[propertyInformation.Name] = propArgs.ElementAtOrDefault(0);
+        }
+        
+        return propertyArgs;
     }
 
-    public static IEnumerable<(SourceGeneratedPropertyInformation PropertyInformation, Func<object?[]> Args)> 
-        GetPropertyArgumentsEnumerable(
+    public static async IAsyncEnumerable<(SourceGeneratedPropertyInformation PropertyInformation, Func<Task<object?[]>> Args)> 
+        GetPropertyArgumentsEnumerableAsync(
             SourceGeneratedClassInformation type,
             object?[] classInstanceArguments,
             SourceGeneratedMethodInformation testInformation,
@@ -126,21 +159,10 @@ internal static class InstanceCreator
                 NeedsInstance = false
             };
 
-            // Note: For now, we need to block on the async enumerable since this method is synchronous
-            // This should be refactored to be fully async in the future
-            var asyncEnumerable = DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(dataAttribute, context);
-            var enumerator = asyncEnumerable.GetAsyncEnumerator();
-            try
+            await foreach (var func in DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(dataAttribute, context))
             {
-                if (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
-                {
-                    var func = enumerator.Current;
-                    yield return (propertyInformation, () => func().GetAwaiter().GetResult());
-                }
-            }
-            finally
-            {
-                enumerator.DisposeAsync().AsTask().GetAwaiter().GetResult();
+                yield return (propertyInformation, func);
+                break; // Only take the first one
             }
         }
     }
