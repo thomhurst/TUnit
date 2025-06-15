@@ -172,7 +172,7 @@ internal class TestBuilder
                 testInformation.Class.Parameters);
         }
 
-        var testMethodArguments = testArguments();
+        var testMethodArguments = await testArguments();
         ParameterMapper.MapImplicitParameters(ref testMethodArguments, testInformation.Parameters);
 
         // Handle generic types

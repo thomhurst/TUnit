@@ -126,9 +126,22 @@ internal static class InstanceCreator
                 NeedsInstance = false
             };
 
-            var args = DataGeneratorHandler.GetArgumentsFromDataAttribute(dataAttribute, context).ToArray();
-
-            yield return (propertyInformation, args[0]);
+            // Note: For now, we need to block on the async enumerable since this method is synchronous
+            // This should be refactored to be fully async in the future
+            var asyncEnumerable = DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(dataAttribute, context);
+            var enumerator = asyncEnumerable.GetAsyncEnumerator();
+            try
+            {
+                if (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
+                {
+                    var func = enumerator.Current;
+                    yield return (propertyInformation, () => func().GetAwaiter().GetResult());
+                }
+            }
+            finally
+            {
+                enumerator.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            }
         }
     }
 }

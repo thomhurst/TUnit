@@ -47,7 +47,7 @@ internal class ReflectionTestsConstructor(
 
     private async Task<List<DynamicTest>> DiscoverStandardTestsAsync(HashSet<Type> allTypes)
     {
-        return await Task.Run(() =>
+        return await Task.Run(async () =>
         {
             var results = new List<DynamicTest>();
             var testClasses = allTypes.Where(IsTestClass);
