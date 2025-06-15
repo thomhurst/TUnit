@@ -19,22 +19,21 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		global::TUnit.Core.SourceRegistrar.Register(new StringArgumentTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return
-		[
-			..Tests0(sessionId),
-			..Tests1(sessionId),
-			..Tests2(sessionId),
-			..Tests3(sessionId),
-			..Tests4(sessionId),
-			..Tests5(sessionId),
-			..Tests6(sessionId),
-			..Tests7(sessionId),
-		];
+		var results = new global::System.Collections.Generic.List<TestMetadata>();
+		results.AddRange(await Tests0(sessionId));
+		results.AddRange(await Tests1(sessionId));
+		results.AddRange(await Tests2(sessionId));
+		results.AddRange(await Tests3(sessionId));
+		results.AddRange(await Tests4(sessionId));
+		results.AddRange(await Tests5(sessionId));
+		results.AddRange(await Tests6(sessionId));
+		results.AddRange(await Tests7(sessionId));
+		return results;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -151,7 +150,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -268,7 +267,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests2(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -385,7 +384,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests3(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -502,7 +501,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests4(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -619,7 +618,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests5(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -736,7 +735,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests6(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests6(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -853,7 +852,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests7(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests7(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -995,22 +994,21 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		global::TUnit.Core.SourceRegistrar.Register(new StringArgumentTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return
-		[
-			..Tests0(sessionId),
-			..Tests1(sessionId),
-			..Tests2(sessionId),
-			..Tests3(sessionId),
-			..Tests4(sessionId),
-			..Tests5(sessionId),
-			..Tests6(sessionId),
-			..Tests7(sessionId),
-		];
+		var results = new global::System.Collections.Generic.List<TestMetadata>();
+		results.AddRange(await Tests0(sessionId));
+		results.AddRange(await Tests1(sessionId));
+		results.AddRange(await Tests2(sessionId));
+		results.AddRange(await Tests3(sessionId));
+		results.AddRange(await Tests4(sessionId));
+		results.AddRange(await Tests5(sessionId));
+		results.AddRange(await Tests6(sessionId));
+		results.AddRange(await Tests7(sessionId));
+		return results;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -1123,7 +1121,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -1236,7 +1234,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests2(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -1349,7 +1347,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests3(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -1462,7 +1460,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests4(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests4(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -1575,7 +1573,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests5(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests5(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -1688,7 +1686,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests6(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests6(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -1801,7 +1799,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests7(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests7(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;

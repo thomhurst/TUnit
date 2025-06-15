@@ -1343,6 +1343,12 @@ namespace TUnit.Assertions.Extensions
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<object> IsTypeOf(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource, System.Type type) { }
         public static TUnit.Assertions.AssertionBuilders.CastedAssertionBuilder<object, TExpected> IsTypeOf<TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource) { }
     }
+    public static class GenericIsInExtensions
+    {
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, System.Collections.Generic.IEnumerable<TActual> expected) { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, params TActual[] expected) { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, System.Collections.Generic.IEnumerable<TActual> expected, System.Collections.Generic.IEqualityComparer<TActual> equalityComparer) { }
+    }
     public static class GenericIsNotExtensions
     {
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsDefault<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource) { }

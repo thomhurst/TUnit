@@ -121,6 +121,7 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 						[
 							new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>).GetProperty("Fixture"),
 								Type = typeof(global::TUnit.TestProject.Bugs._1589.MyFixture),
 								Name = "Fixture",
 								IsStatic = false,
@@ -129,6 +130,7 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 							},
 							new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>).GetProperty("MyProp"),
 								Type = typeof(int),
 								Name = "MyProp",
 								IsStatic = false,

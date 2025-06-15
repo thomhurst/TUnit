@@ -19,12 +19,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -101,30 +101,31 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+				var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(methodArgGeneratedData[0]);
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests(), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 					TestClassArguments = [],
-					TestMethodArguments = [methodArgGeneratedData],
+					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 					{
 					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class(methodArgGeneratedData)),
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class(methodArg)),
 					TestFilePath = @"",
 					TestLineNumber = 11,
 					TestMethod = testInformation,
@@ -139,7 +140,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 				MethodName = $"DataSource_Class",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",
@@ -171,12 +172,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -253,30 +254,31 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+				var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(methodArgGeneratedData[0]);
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests(), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 					TestClassArguments = [],
-					TestMethodArguments = [methodArgGeneratedData],
+					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 					{
 					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class_Generic(methodArgGeneratedData)),
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Class_Generic(methodArg)),
 					TestFilePath = @"",
 					TestLineNumber = 18,
 					TestMethod = testInformation,
@@ -291,7 +293,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 				MethodName = $"DataSource_Class_Generic",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.DataSource_Class_Generic failed to initialize", exception),
 				TestFilePath = @"",
@@ -323,12 +325,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -405,30 +407,31 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+				var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[0]);
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests(), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.Library.Models.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.Library.Models.InitializableClass):0",
 					TestClassArguments = [],
-					TestMethodArguments = [methodArgGeneratedData],
+					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 					{
 					},
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
 					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.IsInitialized_With_1_ClassDataSource(methodArgGeneratedData)),
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.IsInitialized_With_1_ClassDataSource(methodArg)),
 					TestFilePath = @"",
 					TestLineNumber = 25,
 					TestMethod = testInformation,
@@ -443,7 +446,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.Library.Models.InitializableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.Library.Models.InitializableClass):0",
 				MethodName = $"IsInitialized_With_1_ClassDataSource",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource failed to initialize", exception),
 				TestFilePath = @"",
@@ -475,12 +478,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -569,16 +572,16 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = methodArgGeneratedData.Item1;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
+				var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[0]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[1]);
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests(), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
@@ -586,7 +589,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -610,7 +613,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 				MethodName = $"IsInitialized_With_2_ClassDataSources",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources failed to initialize", exception),
 				TestFilePath = @"",
@@ -642,12 +645,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -748,17 +751,17 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = methodArgGeneratedData.Item1;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
+				var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[0]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[1]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[2]);
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests(), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
@@ -766,7 +769,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -790,7 +793,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 				MethodName = $"IsInitialized_With_3_ClassDataSources",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources failed to initialize", exception),
 				TestFilePath = @"",
@@ -822,12 +825,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -940,18 +943,18 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = methodArgGeneratedData.Item1;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg3 = methodArgGeneratedData.Item4;
+				var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[0]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[1]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[2]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[3]);
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests(), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
@@ -959,7 +962,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -983,7 +986,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 				MethodName = $"IsInitialized_With_4_ClassDataSources",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources failed to initialize", exception),
 				TestFilePath = @"",
@@ -1015,12 +1018,12 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -1145,19 +1148,19 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
 
-				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = methodArgGeneratedData.Item1;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = methodArgGeneratedData.Item2;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = methodArgGeneratedData.Item3;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg3 = methodArgGeneratedData.Item4;
-				global::TUnit.TestProject.Library.Models.InitializableClass methodArg4 = methodArgGeneratedData.Item5;
+				var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[0]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[1]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[2]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[3]);
+				global::TUnit.TestProject.Library.Models.InitializableClass methodArg4 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(methodArgGeneratedData[4]);
 
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests(), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
@@ -1165,7 +1168,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1189,7 +1192,7 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass, global::TUnit.TestProject.Library.Models.InitializableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass,TUnit.TestProject.Library.Models.InitializableClass):0",
 				MethodName = $"IsInitialized_With_5_ClassDataSources",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources failed to initialize", exception),
 				TestFilePath = @"",

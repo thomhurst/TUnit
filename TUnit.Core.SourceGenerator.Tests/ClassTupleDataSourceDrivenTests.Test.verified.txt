@@ -19,18 +19,17 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		global::TUnit.Core.SourceRegistrar.Register(new ClassTupleDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return
-		[
-			..Tests0(sessionId),
-			..Tests1(sessionId),
-			..Tests2(sessionId),
-			..Tests3(sessionId),
-		];
+		var results = new global::System.Collections.Generic.List<TestMetadata>();
+		results.AddRange(await Tests0(sessionId));
+		results.AddRange(await Tests1(sessionId));
+		results.AddRange(await Tests2(sessionId));
+		results.AddRange(await Tests3(sessionId));
+		return results;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -119,6 +118,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					[
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property1"),
 							Type = typeof((int, string, bool)),
 							Name = "Property1",
 							IsStatic = false,
@@ -130,6 +130,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property2"),
 							Type = typeof((int, string, bool)),
 							Name = "Property2",
 							IsStatic = false,
@@ -141,6 +142,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property3"),
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property3",
 							IsStatic = false,
@@ -152,6 +154,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property4"),
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property4",
 							IsStatic = false,
@@ -234,7 +237,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests1(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -323,6 +326,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					[
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property1"),
 							Type = typeof((int, string, bool)),
 							Name = "Property1",
 							IsStatic = false,
@@ -334,6 +338,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property2"),
 							Type = typeof((int, string, bool)),
 							Name = "Property2",
 							IsStatic = false,
@@ -345,6 +350,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property3"),
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property3",
 							IsStatic = false,
@@ -356,6 +362,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property4"),
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property4",
 							IsStatic = false,
@@ -438,7 +445,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests2(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -527,6 +534,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					[
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property1"),
 							Type = typeof((int, string, bool)),
 							Name = "Property1",
 							IsStatic = false,
@@ -538,6 +546,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property2"),
 							Type = typeof((int, string, bool)),
 							Name = "Property2",
 							IsStatic = false,
@@ -549,6 +558,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property3"),
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property3",
 							IsStatic = false,
@@ -560,6 +570,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property4"),
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property4",
 							IsStatic = false,
@@ -642,7 +653,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		return nodes;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests3(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests3(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -731,6 +742,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 					[
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property1"),
 							Type = typeof((int, string, bool)),
 							Name = "Property1",
 							IsStatic = false,
@@ -742,6 +754,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property2"),
 							Type = typeof((int, string, bool)),
 							Name = "Property2",
 							IsStatic = false,
@@ -753,6 +766,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property3"),
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property3",
 							IsStatic = false,
@@ -764,6 +778,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 						},
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property4"),
 							Type = typeof((int Number, string Word, bool Flag)),
 							Name = "Property4",
 							IsStatic = false,
