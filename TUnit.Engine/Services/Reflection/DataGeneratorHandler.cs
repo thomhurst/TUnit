@@ -171,9 +171,10 @@ internal static class DataGeneratorHandler
             attribute.Arguments, instance);
 
         // Handle async instance methods
-        if (IsAsyncResult(result))
+        if (TryGetAsyncTask(result, out var asyncTask))
         {
-            var unwrappedResult = UnwrapAsyncResult(result);
+            // Since we're in test discovery which is synchronous, we need to block
+            var unwrappedResult = AsyncToSyncHelper.RunSync(() => asyncTask);
             return ProcessMethodResults(unwrappedResult, context);
         }
 
@@ -335,11 +336,11 @@ internal static class DataGeneratorHandler
         var result = method.Invoke(null, attribute.Arguments);
         
         // If the method returns a Task or ValueTask, we need to handle it
-        if (IsAsyncResult(result))
+        if (TryGetAsyncTask(result, out var asyncTask))
         {
             // For async methods, we need to await the result before processing
             // Note: This follows the same pattern as async data generators - test discovery is synchronous
-            var unwrappedResult = UnwrapAsyncResult(result);
+            var unwrappedResult = AsyncToSyncHelper.RunSync(() => asyncTask);
             
             // Now process the unwrapped result normally
             foreach (var item in ProcessMethodResults(unwrappedResult, context))
@@ -364,6 +365,70 @@ internal static class DataGeneratorHandler
             
         var type = result.GetType();
         return typeof(Task).IsAssignableFrom(type) || type.Name.StartsWith("ValueTask");
+    }
+    
+    private static bool TryGetAsyncTask(object? result, out Task<object?> task)
+    {
+        task = null!;
+        
+        if (result is null)
+            return false;
+            
+        var type = result.GetType();
+        
+        // Handle Task<T>
+        if (result is Task taskResult)
+        {
+            if (type.IsGenericType)
+            {
+                // Create a Task<object?> that wraps the original task
+                task = CreateObjectTask(taskResult, type);
+                return true;
+            }
+            else
+            {
+                // Non-generic Task, wrap it as Task<object?>
+                task = taskResult.ContinueWith(_ => (object?)null);
+                return true;
+            }
+        }
+        
+        // Handle ValueTask<T>
+        if (type.Name.StartsWith("ValueTask"))
+        {
+            // Convert ValueTask to Task first
+            var asTaskMethod = type.GetMethod("AsTask");
+            var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
+            
+            if (type.IsGenericType)
+            {
+                task = CreateObjectTask(convertedTask, convertedTask.GetType());
+                return true;
+            }
+            else
+            {
+                task = convertedTask.ContinueWith(_ => (object?)null);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    private static Task<object?> CreateObjectTask(Task task, Type taskType)
+    {
+        // Use ContinueWith to extract the result and cast to object?
+        return task.ContinueWith(t =>
+        {
+            if (t.IsFaulted)
+                throw t.Exception!.InnerException!;
+                
+            if (t.IsCanceled)
+                throw new TaskCanceledException();
+                
+            var resultProperty = taskType.GetProperty("Result");
+            return resultProperty?.GetValue(t);
+        });
     }
     
     private static object? UnwrapAsyncResult(object? result)
