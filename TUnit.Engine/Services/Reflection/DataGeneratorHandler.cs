@@ -33,9 +33,7 @@ internal static class DataGeneratorHandler
         
         if (instance is IAsyncInitializer asyncInitializer)
         {
-            Task.Run(async () => await asyncInitializer.InitializeAsync().ConfigureAwait(false))
-                .GetAwaiter()
-                .GetResult();
+            AsyncToSyncHelper.RunSync(() => asyncInitializer.InitializeAsync());
         }
 
         return instance;
@@ -90,9 +88,7 @@ internal static class DataGeneratorHandler
             if (value is not null)
             {
                 property.ReflectionInfo.SetValue(obj, value);
-                Task.Run(async () => await ObjectInitializer.InitializeAsync(value).ConfigureAwait(false))
-                    .GetAwaiter()
-                    .GetResult();
+                AsyncToSyncHelper.RunSync(() => ObjectInitializer.InitializeAsync(value));
             }
         }
     }
@@ -138,20 +134,18 @@ internal static class DataGeneratorHandler
 
         try
         {
-            while (enumerator.MoveNextAsync().GetAwaiter().GetResult())
+            foreach (var func in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
             {
-                var func = enumerator.Current;
                 yield return () =>
                 {
-                    var task = func();
-                    var funcResult = task.GetAwaiter().GetResult();
+                    var funcResult = AsyncToSyncHelper.RunSync(func);
                     return ProcessDataGeneratorResult(funcResult);
                 };
             }
         }
         finally
         {
-            enumerator.DisposeAsync().GetAwaiter().GetResult();
+            // EnumerateSync handles disposal internally
         }
     }
 
@@ -176,6 +170,13 @@ internal static class DataGeneratorHandler
         var result = InvokeMethod(methodDataSourceType, attribute.MethodNameProvidingDataSource, 
             attribute.Arguments, instance);
 
+        // Handle async instance methods
+        if (IsAsyncResult(result))
+        {
+            var unwrappedResult = UnwrapAsyncResult(result);
+            return ProcessMethodResults(unwrappedResult, context);
+        }
+
         return ProcessMethodResults(result, context);
     }
 
@@ -184,9 +185,10 @@ internal static class DataGeneratorHandler
         DataGeneratorContext context)
     {
         var methodDataSourceType = attribute.ClassProvidingDataSource ?? context.ClassInformation.Type;
-        var result = InvokeStaticMethod(methodDataSourceType, attribute);
-
-        return ProcessMethodResults(result, context);
+        
+        // We need to handle async methods here, but since this method returns IEnumerable<Func<object?[]>>,
+        // we'll wrap the async call in a synchronous context that can be executed later
+        return ProcessMethodResultsAsync(methodDataSourceType, attribute, context);
     }
 
     private static IDataSourceGeneratorAttribute PrepareGeneratorIfNeeded(
@@ -242,20 +244,17 @@ internal static class DataGeneratorHandler
 
     private static void InitializeResult(object? funcResult)
     {
-        Task.Run(async () =>
+        if (funcResult is object?[] objectArray)
         {
-            if (funcResult is object?[] objectArray)
+            foreach (var obj in objectArray.Where(o => o is not null))
             {
-                foreach (var obj in objectArray.Where(o => o is not null))
-                {
-                    await ObjectInitializer.InitializeAsync(obj).ConfigureAwait(false);
-                }
+                AsyncToSyncHelper.RunSync(() => ObjectInitializer.InitializeAsync(obj));
             }
-            else if (funcResult is not null)
-            {
-                await ObjectInitializer.InitializeAsync(funcResult).ConfigureAwait(false);
-            }
-        }).GetAwaiter().GetResult();
+        }
+        else if (funcResult is not null)
+        {
+            AsyncToSyncHelper.RunSync(() => ObjectInitializer.InitializeAsync(funcResult));
+        }
     }
 
     private static IEnumerable<Func<object?[]>> ProcessMethodResults(
@@ -318,18 +317,58 @@ internal static class DataGeneratorHandler
             ?.Invoke(instance, arguments);
     }
 
-    private static object InvokeStaticMethod(Type methodDataSourceType, MethodDataSourceAttribute attribute)
+    private static IEnumerable<Func<object?[]>> ProcessMethodResultsAsync(
+        Type methodDataSourceType,
+        MethodDataSourceAttribute attribute,
+        DataGeneratorContext context)
     {
         const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | 
                                           BindingFlags.Static | BindingFlags.FlattenHierarchy;
 
-        return methodDataSourceType.GetMethod(
-                name: attribute.MethodNameProvidingDataSource,
-                bindingAttr: bindingFlags,
-                binder: null,
-                types: attribute.Arguments.Select(x => x?.GetType() ?? typeof(object)).ToArray(),
-                modifiers: null)!
-            .Invoke(null, attribute.Arguments) ?? Array.Empty<object>();
+        var method = methodDataSourceType.GetMethod(
+            name: attribute.MethodNameProvidingDataSource,
+            bindingAttr: bindingFlags,
+            binder: null,
+            types: attribute.Arguments.Select(x => x?.GetType() ?? typeof(object)).ToArray(),
+            modifiers: null)!;
+            
+        var result = method.Invoke(null, attribute.Arguments);
+        
+        // If the method returns a Task or ValueTask, we need to handle it
+        if (IsAsyncResult(result))
+        {
+            // For async methods, we need to await the result before processing
+            // Note: This follows the same pattern as async data generators - test discovery is synchronous
+            var unwrappedResult = UnwrapAsyncResult(result);
+            
+            // Now process the unwrapped result normally
+            foreach (var item in ProcessMethodResults(unwrappedResult, context))
+            {
+                yield return item;
+            }
+        }
+        else
+        {
+            // Regular synchronous method result
+            foreach (var item in ProcessMethodResults(result, context))
+            {
+                yield return item;
+            }
+        }
+    }
+    
+    private static bool IsAsyncResult(object? result)
+    {
+        if (result is null)
+            return false;
+            
+        var type = result.GetType();
+        return typeof(Task).IsAssignableFrom(type) || type.Name.StartsWith("ValueTask");
+    }
+    
+    private static object? UnwrapAsyncResult(object? result)
+    {
+        return AsyncToSyncHelper.UnwrapTaskResult(result);
     }
 
     private static bool IsAssignableTo(Type? source, Type? target)

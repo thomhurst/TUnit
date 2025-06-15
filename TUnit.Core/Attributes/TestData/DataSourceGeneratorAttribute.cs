@@ -1,4 +1,5 @@
 ﻿using TUnit.Core.Extensions;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -19,18 +20,9 @@ public abstract class DataSourceGeneratorAttribute<T> : AsyncDataSourceGenerator
     public IEnumerable<Func<T>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        var enumerator = asyncEnumerable.GetAsyncEnumerator();
-        try
+        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
         {
-            while (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
-            {
-                var asyncFunc = enumerator.Current;
-                yield return () => asyncFunc().GetAwaiter().GetResult();
-            }
-        }
-        finally
-        {
-            enumerator.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
         }
     }
 
@@ -60,18 +52,9 @@ public abstract class DataSourceGeneratorAttribute<T1, T2> : AsyncDataSourceGene
     public IEnumerable<Func<(T1, T2)>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        var enumerator = asyncEnumerable.GetAsyncEnumerator();
-        try
+        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
         {
-            while (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
-            {
-                var asyncFunc = enumerator.Current;
-                yield return () => asyncFunc().GetAwaiter().GetResult();
-            }
-        }
-        finally
-        {
-            enumerator.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
         }
     }
 
@@ -101,18 +84,9 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : AsyncDataSource
     public IEnumerable<Func<(T1, T2, T3)>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        var enumerator = asyncEnumerable.GetAsyncEnumerator();
-        try
+        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
         {
-            while (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
-            {
-                var asyncFunc = enumerator.Current;
-                yield return () => asyncFunc().GetAwaiter().GetResult();
-            }
-        }
-        finally
-        {
-            enumerator.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
         }
     }
 
@@ -142,18 +116,9 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : AsyncDataSo
     public IEnumerable<Func<(T1, T2, T3, T4)>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        var enumerator = asyncEnumerable.GetAsyncEnumerator();
-        try
+        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
         {
-            while (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
-            {
-                var asyncFunc = enumerator.Current;
-                yield return () => asyncFunc().GetAwaiter().GetResult();
-            }
-        }
-        finally
-        {
-            enumerator.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
         }
     }
 
@@ -183,18 +148,9 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : AsyncDa
     public IEnumerable<Func<(T1, T2, T3, T4, T5)>> Generate(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var asyncEnumerable = GenerateAsync(dataGeneratorMetadata);
-        var enumerator = asyncEnumerable.GetAsyncEnumerator();
-        try
+        foreach (var asyncFunc in AsyncToSyncHelper.EnumerateSync(asyncEnumerable))
         {
-            while (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
-            {
-                var asyncFunc = enumerator.Current;
-                yield return () => asyncFunc().GetAwaiter().GetResult();
-            }
-        }
-        finally
-        {
-            enumerator.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            yield return () => AsyncToSyncHelper.RunSync(asyncFunc);
         }
     }
 

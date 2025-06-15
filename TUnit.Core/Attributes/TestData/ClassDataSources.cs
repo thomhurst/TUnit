@@ -177,16 +177,16 @@ internal class ClassDataSources
 
     public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
-        return Task.Run(async () => await GetItemForIndexAsync<T>(index, testClassType, sharedTypes, keys, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
+        return AsyncToSyncHelper.RunSync(() => GetItemForIndexAsync<T>(index, testClassType, sharedTypes, keys, dataGeneratorMetadata));
     }
 
     public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return Task.Run(async () => await GetAsync<T>(sharedType, testClassType, key, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
+        return AsyncToSyncHelper.RunSync(() => GetAsync<T>(sharedType, testClassType, key, dataGeneratorMetadata));
     }
 
     public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return Task.Run(async () => await GetAsync(sharedType, type, testClassType, key, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
+        return AsyncToSyncHelper.RunSync(() => GetAsync(sharedType, type, testClassType, key, dataGeneratorMetadata));
     }
 }

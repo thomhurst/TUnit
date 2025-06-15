@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Extensions;
 using TUnit.Core;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -18,9 +19,9 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
 {
     protected override DiscoveredTest[] DiscoverTests()
     {
-        // TODO: This is a blocking call due to the synchronous base class constraint.
-        // Future refactoring should make the entire discovery pipeline async.
-        return DiscoverTestsAsync().GetAwaiter().GetResult();
+        // Note: Test discovery in Microsoft.Testing.Platform is synchronous,
+        // so we must block here. Using AsyncToSyncHelper to handle this properly.
+        return AsyncToSyncHelper.RunSync(DiscoverTestsAsync);
     }
 
     private async Task<DiscoveredTest[]> DiscoverTestsAsync()

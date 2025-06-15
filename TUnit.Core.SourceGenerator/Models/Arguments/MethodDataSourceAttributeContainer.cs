@@ -17,7 +17,8 @@ public record MethodDataSourceAttributeContainer(
     string MethodName,
     bool IsStatic,
     ITypeSymbol MethodReturnType,
-    string ArgumentsExpression)
+    string ArgumentsExpression,
+    bool IsAsync = false)
     : ArgumentsContainer(ArgumentsType)
 {
     public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
@@ -145,20 +146,22 @@ public record MethodDataSourceAttributeContainer(
 
     private string GetMethodInvocation()
     {
+        var awaitPrefix = IsAsync ? "await " : "";
+        
         if (IsStatic)
         {
-            return $"{Type.GloballyQualified()}.{MethodName}({ArgumentsExpression})";
+            return $"{awaitPrefix}{Type.GloballyQualified()}.{MethodName}({ArgumentsExpression})";
         }
         
         if (Type is INamedTypeSymbol namedTypeSymbol &&
             namedTypeSymbol.Constructors.Any(x => x.Parameters.IsDefaultOrEmpty))
         {
-            return $"new {Type.GloballyQualified()}().{MethodName}({ArgumentsExpression})";
+            return $"{awaitPrefix}new {Type.GloballyQualified()}().{MethodName}({ArgumentsExpression})";
         }
         
         if (SymbolEqualityComparer.Default.Equals(Type, TestClassType) && ArgumentsType == ArgumentsType.Method)
         {
-            return $"classInstance.{MethodName}({ArgumentsExpression})";
+            return $"{awaitPrefix}classInstance.{MethodName}({ArgumentsExpression})";
         }
         
         throw new ArgumentException("Only test arguments can reference non-static MethodDataSources");
