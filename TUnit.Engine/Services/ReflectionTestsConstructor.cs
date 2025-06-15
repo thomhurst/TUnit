@@ -66,7 +66,8 @@ internal class ReflectionTestsConstructor(
                     .ToArray();
 
                 var testBuilder = new TestBuilder();
-                foreach (var test in testBuilder.BuildTests(classInformation, methodInformations))
+                var tests = await testBuilder.BuildTestsAsync(classInformation, methodInformations);
+                foreach (var test in tests)
                 {
                     results.Add(test);
                 }

@@ -9,7 +9,7 @@ namespace TUnit.Engine.Services.Reflection;
 [UnconditionalSuppressMessage("AOT", "IL3050")]
 internal class TestBuilder
 {
-    public IEnumerable<DynamicTest> BuildTests(
+    public async Task<IEnumerable<DynamicTest>> BuildTestsAsync(
         SourceGeneratedClassInformation classInformation,
         SourceGeneratedMethodInformation[] testMethods)
     {
@@ -17,12 +17,12 @@ internal class TestBuilder
 
         foreach (var testMethod in testMethods)
         {
-            BuildTestsForMethod(classInformation, testMethod, dynamicTests);
+            await BuildTestsForMethodAsync(classInformation, testMethod, dynamicTests);
         }
         return dynamicTests;
     }
 
-    private void BuildTestsForMethod(
+    private async Task BuildTestsForMethodAsync(
         SourceGeneratedClassInformation classInformation,
         SourceGeneratedMethodInformation testMethod,
         List<DynamicTest> dynamicTests)
@@ -38,7 +38,7 @@ internal class TestBuilder
             {
                 foreach (var testDataAttribute in testDataAttributes)
                 {
-                    BuildTestVariations(testMethod, classDataAttribute, testDataAttribute, dynamicTests);
+                    await BuildTestVariationsAsync(testMethod, classDataAttribute, testDataAttribute, dynamicTests);
                 }
             }
         }
@@ -48,7 +48,7 @@ internal class TestBuilder
         }
     }
 
-    private void BuildTestVariations(
+    private async Task BuildTestVariationsAsync(
         SourceGeneratedMethodInformation testMethod,
         IDataAttribute classDataAttribute,
         IDataAttribute testDataAttribute,
@@ -74,12 +74,12 @@ internal class TestBuilder
         foreach (var classInstanceArguments in DataGeneratorHandler.GetArgumentsFromDataAttribute(
             classDataAttribute, classArgumentsContext))
         {
-            BuildSingleTest(testMethod, classInstanceArguments, classDataAttribute,
+            await BuildSingleTestAsync(testMethod, classInstanceArguments, classDataAttribute, 
                 testDataAttribute, testBuilderContextAccessor, dynamicTests);
         }
     }
 
-    private void BuildSingleTest(
+    private async Task BuildSingleTestAsync(
         SourceGeneratedMethodInformation testInformation,
         Func<object?[]> classInstanceArguments,
         IDataAttribute typeDataAttribute,
@@ -96,12 +96,13 @@ internal class TestBuilder
             var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
             // Prepare the data generator instance once, outside the repeat loop
-            var testDataAttributeInstance = DataGeneratorHandler.PrepareDataGeneratorInstance(
-                testDataAttribute, testInformation, testBuilderContextAccessor);
+            var testDataAttributeInstance = await Task.Run(() =>
+                DataGeneratorHandler.PrepareDataGeneratorInstance(
+                    testDataAttribute, testInformation, testBuilderContextAccessor));
 
             for (var index = 0; index < repeatCount + 1; index++)
             {
-                BuildTestInstance(testInformation, classInstanceArguments, typeDataAttribute,
+                await BuildTestInstanceAsync(testInformation, classInstanceArguments, typeDataAttribute,
                     testDataAttributeInstance, testBuilderContextAccessor, allAttributes, dynamicTests);
             }
         }
@@ -112,7 +113,7 @@ internal class TestBuilder
         }
     }
 
-    private void BuildTestInstance(
+    private async Task BuildTestInstanceAsync(
         SourceGeneratedMethodInformation testInformation,
         Func<object?[]> classInstanceArguments,
         IDataAttribute typeDataAttribute,
@@ -142,7 +143,7 @@ internal class TestBuilder
         foreach (var testArguments in DataGeneratorHandler.GetArgumentsFromDataAttribute(
             testDataAttributeInstance, testArgumentsContext))
         {
-            var test = CreateTest(testInformation, invokedClassInstanceArguments, typeDataAttribute,
+            var test = await CreateTestAsync(testInformation, invokedClassInstanceArguments, typeDataAttribute,
                 testArguments, testBuilderContextAccessor, allAttributes);
 
             dynamicTests.Add(test);
@@ -152,7 +153,7 @@ internal class TestBuilder
         }
     }
 
-    private DynamicTest CreateTest(
+    private async Task<DynamicTest> CreateTestAsync(
         SourceGeneratedMethodInformation testInformation,
         object?[] invokedClassInstanceArguments,
         IDataAttribute typeDataAttribute,
@@ -163,7 +164,7 @@ internal class TestBuilder
         var classInformation = testInformation.Class;
         var testAttribute = testInformation.Attributes.OfType<BaseTestAttribute>().First();
 
-        var propertyArgs = GetPropertyArguments(classInformation, invokedClassInstanceArguments,
+        var propertyArgs = await GetPropertyArgumentsAsync(classInformation, invokedClassInstanceArguments,
             testInformation, testBuilderContextAccessor);
 
         if (typeDataAttribute is not ClassConstructorAttribute)
@@ -198,15 +199,17 @@ internal class TestBuilder
         };
     }
 
-    private Dictionary<string, object?> GetPropertyArguments(
+    private async Task<Dictionary<string, object?>> GetPropertyArgumentsAsync(
         SourceGeneratedClassInformation classInformation,
         object?[] classInstanceArguments,
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        return InstanceCreator.GetPropertyArgumentsEnumerable(
-                classInformation, classInstanceArguments, testInformation, testBuilderContextAccessor)
-            .ToDictionary(p => p.PropertyInformation.Name, p => p.Args().ElementAtOrDefault(0));
+        return await Task.Run(() => 
+            InstanceCreator.GetPropertyArgumentsEnumerable(
+                    classInformation, classInstanceArguments, testInformation, testBuilderContextAccessor)
+                .ToDictionary(p => p.PropertyInformation.Name, p => p.Args().ElementAtOrDefault(0))
+        );
     }
 
     private static Attribute[] CollectAllAttributes(SourceGeneratedMethodInformation testInformation)

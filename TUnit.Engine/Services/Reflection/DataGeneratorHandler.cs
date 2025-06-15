@@ -6,7 +6,6 @@ using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Helpers;
 using Polyfills;
 
 namespace TUnit.Engine.Services.Reflection;
