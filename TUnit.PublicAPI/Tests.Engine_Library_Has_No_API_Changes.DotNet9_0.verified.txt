@@ -72,6 +72,14 @@ namespace TUnit.Engine.Framework
         public static void AddExtensions(Microsoft.Testing.Platform.Builder.ITestApplicationBuilder testApplicationBuilder, string[] _) { }
     }
 }
+namespace TUnit.Engine.Helpers
+{
+    public static class DotNetAssemblyHelper
+    {
+        public static bool IsDotNetCoreLibrary(byte[]? publicKeyToken) { }
+        public static bool IsInDotNetCoreLibrary(System.Type type) { }
+    }
+}
 namespace TUnit.Engine.Json
 {
     public class ExceptionJson : System.IEquatable<TUnit.Engine.Json.ExceptionJson>

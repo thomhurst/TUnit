@@ -10,8 +10,9 @@ namespace TUnit.Core;
 [DebuggerDisplay("{Type}.{Name}")]
 public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
 {
-    internal static SourceGeneratedMethodInformation Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+    internal static SourceGeneratedMethodInformation Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>(string methodName) =>
         new()
         {
@@ -55,11 +56,12 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
 
     public required Type ReturnType { get; init; }
 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.NonPublicMethods)]
     public override required Type Type { get; init; }
-    
+
     protected override bool PrintMembers(StringBuilder stringBuilder)
     {
         stringBuilder.Append($"ReturnType = {ReturnType.Name}, ");

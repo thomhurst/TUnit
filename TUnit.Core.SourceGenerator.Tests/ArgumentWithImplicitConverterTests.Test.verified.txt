@@ -10,6 +10,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -17,16 +18,17 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgumentWithImplicitConverterTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return
-		[
-			..Tests0(sessionId),
-			..Tests1(sessionId),
-			..Tests2(sessionId),
-		];
+		var results = new global::System.Collections.Generic.List<TestMetadata>();
+		results.AddRange(await Tests0(sessionId));
+		results.AddRange(await Tests1(sessionId));
+		results.AddRange(await Tests2(sessionId));
+		return results;
 	}
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -42,8 +44,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				Attributes = 
 				[
 					new global::TUnit.Core.TestAttribute(),
+
 					new global::TUnit.Core.ArgumentsAttribute(1),
+
 					new global::TUnit.Core.ArgumentsAttribute(2),
+
 					new global::TUnit.Core.ArgumentsAttribute(3)
 				],
 				Parameters = 
@@ -62,7 +67,10 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgumentWithImplicitConverterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgumentWithImplicitConverterTests",
 					Namespace = "TUnit.TestProject",
@@ -70,246 +78,257 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Parameters = [],
 					Properties = [],
 				}),
-};
-
-				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-				global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
-				object?[]? classInstanceArguments = null;
-				classInstanceArguments = [];
-
-				global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(1);
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
-				new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
-				, sessionId, testBuilderContext);
-				var resettableClassFactory = resettableClassFactoryDelegate();
+			};
 
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-				{
-					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg],
-					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-					{
-					},
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
-					TestFilePath = @"",
-					TestLineNumber = 5,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
-			}
-			catch (global::System.Exception exception)
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(1);
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => new global::TUnit.TestProject.ArgumentWithImplicitConverterTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 			{
-				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 				{
-					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-					MethodName = $"Explicit",
-					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
-					TestFilePath = @"",
-					TestLineNumber = 5,
-				});
-			}
-			return nodes;
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
+				TestFilePath = @"",
+				TestLineNumber = 5,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
 		}
-		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+		catch (global::System.Exception exception)
 		{
-			global::System.Collections.Generic.List<TestMetadata> nodes = [];
-			var classDataIndex = 0;
-			var testMethodDataIndex = 0;
-			try
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 			{
-				var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-				{
-					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-					Name = "Explicit",
-					GenericTypeCount = 0,
-					ReturnType = typeof(void),
-					Attributes = 
-					[
-						new global::TUnit.Core.TestAttribute(),
-						new global::TUnit.Core.ArgumentsAttribute(1),
-						new global::TUnit.Core.ArgumentsAttribute(2),
-						new global::TUnit.Core.ArgumentsAttribute(3)
-					],
-					Parameters = 
-					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
-						{
-							Name = "integer",
-							Attributes = [],
-							ReflectionInfo = null!,
-						},
-					],
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+				MethodName = $"Explicit",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 5,
+			});
+		}
+		return nodes;
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+				Name = "Explicit",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.ArgumentsAttribute(1),
+
+					new global::TUnit.Core.ArgumentsAttribute(2),
+
+					new global::TUnit.Core.ArgumentsAttribute(3)
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "ArgumentWithImplicitConverterTests",
-							Attributes = [],
-						}),
-						Name = "ArgumentWithImplicitConverterTests",
-						Namespace = "TUnit.TestProject",
+						Name = "integer",
 						Attributes = [],
-						Parameters = [],
-						Properties = [],
-					}),
-};
-
-					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-					global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
-					object?[]? classInstanceArguments = null;
-					classInstanceArguments = [];
-
-					global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(2);
-
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
-					new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
-					, sessionId, testBuilderContext);
-					var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-					nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-					{
-						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-						TestClassArguments = [],
-						TestMethodArguments = [methodArg],
-						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-						{
-						},
-						CurrentRepeatAttempt = 0,
-						RepeatLimit = 0,
-						ResettableClassFactory = resettableClassFactory,
-						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
-						TestFilePath = @"",
-						TestLineNumber = 5,
-						TestMethod = testInformation,
-						TestBuilderContext = testBuilderContext,
-					});
-					resettableClassFactory = resettableClassFactoryDelegate();
-					testBuilderContext = new();
-					testBuilderContextAccessor.Current = testBuilderContext;
-				}
-				catch (global::System.Exception exception)
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
-					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-						MethodName = $"Explicit",
-						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
-						TestFilePath = @"",
-						TestLineNumber = 5,
-					});
-				}
-				return nodes;
-			}
-			private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
-			{
-				global::System.Collections.Generic.List<TestMetadata> nodes = [];
-				var classDataIndex = 0;
-				var testMethodDataIndex = 0;
-				try
-				{
-					var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-					{
-						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-						Name = "Explicit",
-						GenericTypeCount = 0,
-						ReturnType = typeof(void),
+						Name = "ArgumentWithImplicitConverterTests",
 						Attributes = 
 						[
-							new global::TUnit.Core.TestAttribute(),
-							new global::TUnit.Core.ArgumentsAttribute(1),
-							new global::TUnit.Core.ArgumentsAttribute(2),
-							new global::TUnit.Core.ArgumentsAttribute(3)
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
 						],
-						Parameters = 
-						[
-							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
-							{
-								Name = "integer",
-								Attributes = [],
-								ReflectionInfo = null!,
-							},
-						],
-						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
-							Parent = null,
-							Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
-								Name = "ArgumentWithImplicitConverterTests",
-								Attributes = [],
-							}),
-							Name = "ArgumentWithImplicitConverterTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = [],
-							Parameters = [],
-							Properties = [],
-						}),
-};
-
-						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-						global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
-						object?[]? classInstanceArguments = null;
-						classInstanceArguments = [];
-
-						global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(3);
-
-						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
-						new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
-						, sessionId, testBuilderContext);
-						var resettableClassFactory = resettableClassFactoryDelegate();
+					}),
+					Name = "ArgumentWithImplicitConverterTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-						nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-						{
-							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-							TestClassArguments = [],
-							TestMethodArguments = [methodArg],
-							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-							{
-							},
-							CurrentRepeatAttempt = 0,
-							RepeatLimit = 0,
-							ResettableClassFactory = resettableClassFactory,
-							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
-							TestFilePath = @"",
-							TestLineNumber = 5,
-							TestMethod = testInformation,
-							TestBuilderContext = testBuilderContext,
-						});
-						resettableClassFactory = resettableClassFactoryDelegate();
-						testBuilderContext = new();
-						testBuilderContextAccessor.Current = testBuilderContext;
-					}
-					catch (global::System.Exception exception)
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(2);
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => new global::TUnit.TestProject.ArgumentWithImplicitConverterTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
+				TestFilePath = @"",
+				TestLineNumber = 5,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+				MethodName = $"Explicit",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 5,
+			});
+		}
+		return nodes;
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests2(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+				Name = "Explicit",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.ArgumentsAttribute(1),
+
+					new global::TUnit.Core.ArgumentsAttribute(2),
+
+					new global::TUnit.Core.ArgumentsAttribute(3)
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ExplicitInteger>
 					{
-						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-						{
-							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
-							MethodName = $"Explicit",
-							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
-							TestFilePath = @"",
-							TestLineNumber = 5,
-						});
-					}
-					return nodes;
-				}
-			}
+						Name = "integer",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "ArgumentWithImplicitConverterTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "ArgumentWithImplicitConverterTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			global::TUnit.TestProject.ExplicitInteger methodArg = (global::TUnit.TestProject.ExplicitInteger)(3);
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => new global::TUnit.TestProject.ArgumentWithImplicitConverterTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
+				TestFilePath = @"",
+				TestLineNumber = 5,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit(TUnit.TestProject.ExplicitInteger):0",
+				MethodName = $"Explicit",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Explicit failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 5,
+			});
+		}
+		return nodes;
+	}
+
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -322,6 +341,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -329,16 +349,17 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new ArgumentWithImplicitConverterTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return
-		[
-			..Tests0(sessionId),
-			..Tests1(sessionId),
-			..Tests2(sessionId),
-		];
+		var results = new global::System.Collections.Generic.List<TestMetadata>();
+		results.AddRange(await Tests0(sessionId));
+		results.AddRange(await Tests1(sessionId));
+		results.AddRange(await Tests2(sessionId));
+		return results;
 	}
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -354,8 +375,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				Attributes = 
 				[
 					new global::TUnit.Core.TestAttribute(),
+
 					new global::TUnit.Core.ArgumentsAttribute(1),
+
 					new global::TUnit.Core.ArgumentsAttribute(2),
+
 					new global::TUnit.Core.ArgumentsAttribute(3)
 				],
 				Parameters = 
@@ -374,7 +398,10 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "ArgumentWithImplicitConverterTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "ArgumentWithImplicitConverterTests",
 					Namespace = "TUnit.TestProject",
@@ -382,244 +409,255 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 					Parameters = [],
 					Properties = [],
 				}),
-};
-
-				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-				global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
-				object?[]? classInstanceArguments = null;
-				classInstanceArguments = [];
-
-				global::TUnit.TestProject.ImplicitInteger methodArg = 1;
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
-				new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
-				, sessionId, testBuilderContext);
-				var resettableClassFactory = resettableClassFactoryDelegate();
+			};
 
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-				{
-					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg],
-					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-					{
-					},
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
-					TestFilePath = @"",
-					TestLineNumber = 14,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
-			}
-			catch (global::System.Exception exception)
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			global::TUnit.TestProject.ImplicitInteger methodArg = 1;
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => new global::TUnit.TestProject.ArgumentWithImplicitConverterTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 			{
-				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 				{
-					TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-					MethodName = $"Implicit",
-					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
-					TestFilePath = @"",
-					TestLineNumber = 14,
-				});
-			}
-			return nodes;
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
+				TestFilePath = @"",
+				TestLineNumber = 14,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
 		}
-		private global::System.Collections.Generic.List<TestMetadata> Tests1(string sessionId)
+		catch (global::System.Exception exception)
 		{
-			global::System.Collections.Generic.List<TestMetadata> nodes = [];
-			var classDataIndex = 0;
-			var testMethodDataIndex = 0;
-			try
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
 			{
-				var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-				{
-					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-					Name = "Implicit",
-					GenericTypeCount = 0,
-					ReturnType = typeof(void),
-					Attributes = 
-					[
-						new global::TUnit.Core.TestAttribute(),
-						new global::TUnit.Core.ArgumentsAttribute(1),
-						new global::TUnit.Core.ArgumentsAttribute(2),
-						new global::TUnit.Core.ArgumentsAttribute(3)
-					],
-					Parameters = 
-					[
-						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
-						{
-							Name = "integer",
-							Attributes = [],
-							ReflectionInfo = null!,
-						},
-					],
-					Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+				MethodName = $"Implicit",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 14,
+			});
+		}
+		return nodes;
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+				Name = "Implicit",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.ArgumentsAttribute(1),
+
+					new global::TUnit.Core.ArgumentsAttribute(2),
+
+					new global::TUnit.Core.ArgumentsAttribute(3)
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
 					{
-						Parent = null,
-						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-						{
-							Name = "ArgumentWithImplicitConverterTests",
-							Attributes = [],
-						}),
-						Name = "ArgumentWithImplicitConverterTests",
-						Namespace = "TUnit.TestProject",
+						Name = "integer",
 						Attributes = [],
-						Parameters = [],
-						Properties = [],
-					}),
-};
-
-					var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-					var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-					global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
-					object?[]? classInstanceArguments = null;
-					classInstanceArguments = [];
-
-					global::TUnit.TestProject.ImplicitInteger methodArg = 2;
-
-					var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
-					new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
-					, sessionId, testBuilderContext);
-					var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-					nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-					{
-						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-						TestClassArguments = [],
-						TestMethodArguments = [methodArg],
-						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-						{
-						},
-						CurrentRepeatAttempt = 0,
-						RepeatLimit = 0,
-						ResettableClassFactory = resettableClassFactory,
-						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
-						TestFilePath = @"",
-						TestLineNumber = 14,
-						TestMethod = testInformation,
-						TestBuilderContext = testBuilderContext,
-					});
-					resettableClassFactory = resettableClassFactoryDelegate();
-					testBuilderContext = new();
-					testBuilderContextAccessor.Current = testBuilderContext;
-				}
-				catch (global::System.Exception exception)
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 				{
-					nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
-						TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-						MethodName = $"Implicit",
-						Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
-						TestFilePath = @"",
-						TestLineNumber = 14,
-					});
-				}
-				return nodes;
-			}
-			private global::System.Collections.Generic.List<TestMetadata> Tests2(string sessionId)
-			{
-				global::System.Collections.Generic.List<TestMetadata> nodes = [];
-				var classDataIndex = 0;
-				var testMethodDataIndex = 0;
-				try
-				{
-					var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
-					{
-						Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-						Name = "Implicit",
-						GenericTypeCount = 0,
-						ReturnType = typeof(void),
+						Name = "ArgumentWithImplicitConverterTests",
 						Attributes = 
 						[
-							new global::TUnit.Core.TestAttribute(),
-							new global::TUnit.Core.ArgumentsAttribute(1),
-							new global::TUnit.Core.ArgumentsAttribute(2),
-							new global::TUnit.Core.ArgumentsAttribute(3)
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
 						],
-						Parameters = 
-						[
-							new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
-							{
-								Name = "integer",
-								Attributes = [],
-								ReflectionInfo = null!,
-							},
-						],
-						Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
-						{
-							Parent = null,
-							Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
-							Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
-							{
-								Name = "ArgumentWithImplicitConverterTests",
-								Attributes = [],
-							}),
-							Name = "ArgumentWithImplicitConverterTests",
-							Namespace = "TUnit.TestProject",
-							Attributes = [],
-							Parameters = [],
-							Properties = [],
-						}),
-};
-
-						var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-						var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-						global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
-						object?[]? classInstanceArguments = null;
-						classInstanceArguments = [];
-
-						global::TUnit.TestProject.ImplicitInteger methodArg = 3;
-
-						var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => 
-						new global::TUnit.TestProject.ArgumentWithImplicitConverterTests()
-						, sessionId, testBuilderContext);
-						var resettableClassFactory = resettableClassFactoryDelegate();
+					}),
+					Name = "ArgumentWithImplicitConverterTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
 
-						nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-						{
-							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-							TestClassArguments = [],
-							TestMethodArguments = [methodArg],
-							TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-							{
-							},
-							CurrentRepeatAttempt = 0,
-							RepeatLimit = 0,
-							ResettableClassFactory = resettableClassFactory,
-							TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
-							TestFilePath = @"",
-							TestLineNumber = 14,
-							TestMethod = testInformation,
-							TestBuilderContext = testBuilderContext,
-						});
-						resettableClassFactory = resettableClassFactoryDelegate();
-						testBuilderContext = new();
-						testBuilderContextAccessor.Current = testBuilderContext;
-					}
-					catch (global::System.Exception exception)
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			global::TUnit.TestProject.ImplicitInteger methodArg = 2;
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => new global::TUnit.TestProject.ArgumentWithImplicitConverterTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
+				TestFilePath = @"",
+				TestLineNumber = 14,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+				MethodName = $"Implicit",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 14,
+			});
+		}
+		return nodes;
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests2(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+				Name = "Implicit",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.ArgumentsAttribute(1),
+
+					new global::TUnit.Core.ArgumentsAttribute(2),
+
+					new global::TUnit.Core.ArgumentsAttribute(3)
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.ImplicitInteger>
 					{
-						nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-						{
-							TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
-							MethodName = $"Implicit",
-							Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
-							TestFilePath = @"",
-							TestLineNumber = 14,
-						});
-					}
-					return nodes;
-				}
-			}
+						Name = "integer",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ArgumentWithImplicitConverterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "ArgumentWithImplicitConverterTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "ArgumentWithImplicitConverterTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
 
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			global::TUnit.TestProject.ImplicitInteger methodArg = 3;
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(() => new global::TUnit.TestProject.ArgumentWithImplicitConverterTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+				TestClassArguments = [],
+				TestMethodArguments = [methodArg],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
+				TestFilePath = @"",
+				TestLineNumber = 14,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
+			{
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit(TUnit.TestProject.ImplicitInteger):0",
+				MethodName = $"Implicit",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ArgumentWithImplicitConverterTests.Implicit failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 14,
+			});
+		}
+		return nodes;
+	}
+
+}
 ]

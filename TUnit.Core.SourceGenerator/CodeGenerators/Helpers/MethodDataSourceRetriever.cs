@@ -41,6 +41,9 @@ public static class MethodDataSourceRetriever
         
         var argumentsExpression = GetArgumentsExpression(context, methodDataAttribute);
         
+        // Check if the method is async
+        var isAsync = IsAsyncReturnType(context.SemanticModel.Compilation, dataSourceMethod.ReturnType, out _);
+        
         return new MethodDataSourceAttributeContainer
         (
             context.SemanticModel.Compilation,
@@ -54,7 +57,8 @@ public static class MethodDataSourceRetriever
             MethodName: methodName,
             Type: type,
             MethodReturnType: dataSourceMethod.ReturnType,
-            ArgumentsExpression: argumentsExpression
+            ArgumentsExpression: argumentsExpression,
+            IsAsync: isAsync
         )
         {
             Attribute = methodDataAttribute,
@@ -97,6 +101,12 @@ public static class MethodDataSourceRetriever
         }
 
         var type = dataSourceMethod.ReturnType;
+        
+        // Handle async return types (Task<T> and ValueTask<T>)
+        if (IsAsyncReturnType(context.SemanticModel.Compilation, type, out var unwrappedType))
+        {
+            type = unwrappedType;
+        }
         if (type.IsIEnumerable(context.SemanticModel.Compilation, out var enumerableInnerType))
         {
             isExpandableEnumerable = true;
@@ -167,5 +177,27 @@ public static class MethodDataSourceRetriever
         }
 
         return argumentsSyntax.Accept(new CollectionToArgumentsListRewriter(context.SemanticModel))?.ToFullString() ?? string.Empty;
+    }
+    
+    private static bool IsAsyncReturnType(Compilation compilation, ITypeSymbol type, out ITypeSymbol unwrappedType)
+    {
+        unwrappedType = type;
+        
+        if (type is not INamedTypeSymbol namedType || !namedType.IsGenericType)
+        {
+            return false;
+        }
+        
+        var taskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1");
+        var valueTaskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
+        
+        if (SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, taskType) ||
+            SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, valueTaskType))
+        {
+            unwrappedType = namedType.TypeArguments[0];
+            return true;
+        }
+        
+        return false;
     }
 }

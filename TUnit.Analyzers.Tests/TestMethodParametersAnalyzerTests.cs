@@ -30,7 +30,7 @@ public class TestMethodParametersAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-                            
+
                 public class MyClass
                 {
                     [Test]
@@ -71,9 +71,9 @@ public class TestMethodParametersAnalyzerTests
                 using System;
                 using System.Collections;
                 using System.Collections.Generic;
-                            
+
                 namespace TUnit.TestProject;
-                            
+
                 public class DataSourceGeneratorTests
                 {
                     [Test]
@@ -82,25 +82,25 @@ public class TestMethodParametersAnalyzerTests
                     {
                         // Dummy method
                     }
-                                
+
                     [Test]
                     [AutoFixtureGenerator<int, string, bool>]
                     public void GeneratedData_Method2(int value, string value2, bool value3)
                     {
                         // Dummy method
                     }
-                                
+
                     public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
                     {
-                        public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                        protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                         {
                             return [() => default!];
                         }
                     }
-                                
+
                     public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
                     {
-                        public override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                        protected override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                         {
                             return [() => default!];
                         }

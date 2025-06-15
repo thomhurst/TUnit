@@ -5,7 +5,8 @@ namespace TUnit.Core;
 public record FailedTestMetadata<[DynamicallyAccessedMembers(
     DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>
+    | DynamicallyAccessedMemberTypes.NonPublicMethods
+    | DynamicallyAccessedMemberTypes.PublicProperties)] TClassType>
     where TClassType : class
 {
     public required string TestId { get; init; }
@@ -13,7 +14,6 @@ public record FailedTestMetadata<[DynamicallyAccessedMembers(
     public required Exception Exception { get; init; }
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
-
 
     public static implicit operator TestMetadata<TClassType>(FailedTestMetadata<TClassType> failedTestMetadata)
     {

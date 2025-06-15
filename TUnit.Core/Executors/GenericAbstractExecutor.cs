@@ -51,7 +51,7 @@ public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor
     {
         return ExecuteAsync(action);
     }
-    
+
     public ValueTask ExecuteAfterTestHook(SourceGeneratedMethodInformation hookMethodInfo, TestContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
@@ -61,4 +61,6 @@ public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor
     {
         return ExecuteAsync(action);
     }
+
+    public int Order => 0;
 }

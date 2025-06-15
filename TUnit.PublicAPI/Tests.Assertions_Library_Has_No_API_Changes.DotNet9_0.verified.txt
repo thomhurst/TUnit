@@ -1,6 +1,7 @@
 ﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v9.0", FrameworkDisplayName=".NET 9.0")]
 namespace TUnit.Assertions
 {
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Usage", "TUnitAssertions0002:Assert statements must be awaited")]
     public static class Assert
     {
         public static void Fail(string reason) { }
@@ -1377,6 +1378,12 @@ namespace TUnit.Assertions.Extensions
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsSameReferenceAs<TActual, TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, TExpected expected, [System.Runtime.CompilerServices.CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = null) { }
         public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<object> IsTypeOf(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource, System.Type type) { }
         public static TUnit.Assertions.AssertionBuilders.CastedAssertionBuilder<object, TExpected> IsTypeOf<TExpected>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<object> valueSource) { }
+    }
+    public static class GenericIsInExtensions
+    {
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, System.Collections.Generic.IEnumerable<TActual> expected) { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, params TActual[] expected) { }
+        public static TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this TUnit.Assertions.AssertConditions.Interfaces.IValueSource<TActual> valueSource, System.Collections.Generic.IEnumerable<TActual> expected, System.Collections.Generic.IEqualityComparer<TActual> equalityComparer) { }
     }
     public static class GenericIsNotExtensions
     {

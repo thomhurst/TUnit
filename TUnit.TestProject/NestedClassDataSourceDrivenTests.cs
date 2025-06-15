@@ -60,10 +60,10 @@ public class NestedClassDataSourceDrivenTests
         [ClassDataSource<SomeClass2>(Shared = SharedType.PerAssembly)]
         public required SomeClass2 InnerClass { get; init; }
 
-        public Task InitializeAsync()
+        public async Task InitializeAsync()
         {
+            await Assert.That(InnerClass.IsInitialized).IsTrue();
             IsInitialized = true;
-            return Task.CompletedTask;
         }
 
         public bool IsInitialized
@@ -86,10 +86,10 @@ public class NestedClassDataSourceDrivenTests
         [ClassDataSource<SomeClass3>(Shared = SharedType.PerAssembly)]
         public required SomeClass3 InnerClass { get; init; }
 
-        public Task InitializeAsync()
+        public async Task InitializeAsync()
         {
+            await Assert.That(InnerClass.IsInitialized).IsTrue();
             IsInitialized = true;
-            return Task.CompletedTask;
         }
 
         public bool IsInitialized

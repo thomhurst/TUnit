@@ -17,7 +17,7 @@ public abstract record DynamicTest
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
                                 | DynamicallyAccessedMemberTypes.PublicMethods
-                                | DynamicallyAccessedMemberTypes.NonPublicMethods
+                                | DynamicallyAccessedMemberTypes.PublicProperties
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public abstract Type TestClassType { get; }
 
@@ -93,10 +93,10 @@ public abstract record DynamicTest
         return new SourceGeneratedPropertyInformation
         {
             Attributes = [], // TODO?
+            ReflectionInfo = null!, // TODO?
             Name = property.Key,
-#pragma warning disable IL2072
             Type = property.Value?.GetType() ?? typeof(object),
-#pragma warning restore IL2072
+            Getter = _ => property.Value,
             IsStatic = false, // TODO?
         };
     }
@@ -136,7 +136,7 @@ public record DynamicTest<
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
                                 | DynamicallyAccessedMemberTypes.PublicMethods
-                                | DynamicallyAccessedMemberTypes.NonPublicMethods
+                                | DynamicallyAccessedMemberTypes.PublicProperties
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType { get; } = typeof(TClass);
 
@@ -163,7 +163,7 @@ public record DynamicTest<
                 RepeatLimit = repeatLimit,
                 TestMethod = sourceGeneratedMethodInformation,
                 ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
-                        sourceGeneratedMethodInformation.Class,
+                        sourceGeneratedMethodInformation,
                         TestClassArguments, Properties, testBuilderContext),
                     TestSessionContext.Current?.Id ?? "Unknown",
                     testBuilderContext),
@@ -183,6 +183,7 @@ public record DynamicTest<
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 DynamicAttributes = Attributes,
+                DiscoveryException = Exception
             };
         }
     }

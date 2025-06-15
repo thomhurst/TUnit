@@ -58,6 +58,7 @@ public static class DataSourceGeneratorRetriever
 
     private static bool HasGeneratorInterface(ITypeSymbol t)
     {
-        return t.Interfaces.Select(i => i.GloballyQualified()).Contains(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute.WithGlobalPrefix);
+        var interfaces = t.Interfaces.Select(i => i.GloballyQualified()).ToList();
+        return interfaces.Contains(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute.WithGlobalPrefix);
     }
 }

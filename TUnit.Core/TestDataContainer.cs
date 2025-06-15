@@ -17,10 +17,14 @@ internal static class TestDataContainer
     private static readonly ScopedContainer<Assembly> AssemblyContainer = new();
     private static readonly ScopedContainer<string> KeyContainer = new();
 
-    // Improved dependency tracking
-    private static readonly Data.DependencyTracker DependencyTracker = new();
+    // Note: Dependency tracking has been moved to the framework level
 
-    private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);    /// <summary>
+    private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);
+
+    // Cache for async instances to avoid creating multiple instances while one is being created
+    private static readonly ConcurrentDictionary<string, Task<object>> _asyncInstanceCache = new();
+
+    /// <summary>
     /// Gets an instance for the specified class.
     /// </summary>
     /// <param name="testClass">The test class type.</param>
@@ -120,7 +124,122 @@ internal static class TestDataContainer
     {
         var scopedInstance = KeyContainer.GetOrCreate(key, type, func);
         return scopedInstance.Instance;
-    }    /// <summary>
+    }
+
+    // Async versions of the get methods
+
+    /// <summary>
+    /// Gets an instance for the specified class asynchronously.
+    /// </summary>
+    /// <param name="testClass">The test class type.</param>
+    /// <param name="type">The type of object to retrieve</param>
+    /// <param name="func">The async function to create the instance.</param>
+    /// <returns>The instance.</returns>
+    public static async Task<object> GetInstanceForClassAsync(Type testClass, Type type, Func<Task<object>> func)
+    {
+        var cacheKey = $"Class:{testClass.FullName}:{type.FullName}";
+        
+        var task = _asyncInstanceCache.GetOrAdd(cacheKey, async _ =>
+        {
+            var instance = await func().ConfigureAwait(false);
+            var scopedInstance = ClassContainer.GetOrCreate(testClass, type, () => instance);
+            return scopedInstance.Instance;
+        });
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _asyncInstanceCache.TryRemove(cacheKey, out _);
+        }
+    }
+
+    /// <summary>
+    /// Gets an instance for the specified assembly asynchronously.
+    /// </summary>
+    /// <param name="assembly">The assembly.</param>
+    /// <param name="type">The type of object to retrieve</param>
+    /// <param name="func">The async function to create the instance.</param>
+    /// <returns>The instance.</returns>
+    public static async Task<object> GetInstanceForAssemblyAsync(Assembly assembly, Type type, Func<Task<object>> func)
+    {
+        var cacheKey = $"Assembly:{assembly.FullName}:{type.FullName}";
+        
+        var task = _asyncInstanceCache.GetOrAdd(cacheKey, async _ =>
+        {
+            var instance = await func().ConfigureAwait(false);
+            var scopedInstance = AssemblyContainer.GetOrCreate(assembly, type, () => instance);
+            return scopedInstance.Instance;
+        });
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _asyncInstanceCache.TryRemove(cacheKey, out _);
+        }
+    }
+
+    /// <summary>
+    /// Gets a global instance of the specified type asynchronously.
+    /// </summary>
+    /// <param name="type">The type of object to retrieve</param>
+    /// <param name="func">The async function to create the instance.</param>
+    /// <returns>The instance.</returns>
+    public static async Task<object> GetGlobalInstanceAsync(Type type, Func<Task<object>> func)
+    {
+        var cacheKey = $"Global:{type.FullName}";
+        
+        var task = _asyncInstanceCache.GetOrAdd(cacheKey, async _ =>
+        {
+            var instance = await func().ConfigureAwait(false);
+            var scopedInstance = GlobalContainer.GetOrCreate(typeof(object).FullName!, type, () => instance);
+            return scopedInstance.Instance;
+        });
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _asyncInstanceCache.TryRemove(cacheKey, out _);
+        }
+    }
+
+    /// <summary>
+    /// Gets an instance for the specified key asynchronously.
+    /// </summary>
+    /// <param name="key">The key.</param>
+    /// <param name="type">The type of object to retrieve</param>
+    /// <param name="func">The async function to create the instance.</param>
+    /// <returns>The instance.</returns>
+    public static async Task<object> GetInstanceForKeyAsync(string key, Type type, Func<Task<object>> func)
+    {
+        var cacheKey = $"Key:{key}:{type.FullName}";
+        
+        var task = _asyncInstanceCache.GetOrAdd(cacheKey, async _ =>
+        {
+            var instance = await func().ConfigureAwait(false);
+            var scopedInstance = KeyContainer.GetOrCreate(key, type, () => instance);
+            return scopedInstance.Instance;
+        });
+
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _asyncInstanceCache.TryRemove(cacheKey, out _);
+        }
+    }
+
+    /// <summary>
     /// Consumes the count for the specified key and type.
     /// </summary>
     /// <param name="key">The key.</param>
@@ -255,7 +374,7 @@ internal static class TestDataContainer
             ClassScopedInstances = (int)classDiagnostics["TotalInstances"],
             AssemblyScopedInstances = (int)assemblyDiagnostics["TotalInstances"],
             KeyScopedInstances = (int)keyDiagnostics["TotalInstances"],
-            NestedDependencies = DependencyTracker.GetDependencyCount(),
+            NestedDependencies = 0, // Dependency tracking moved to framework level
             Details = new Dictionary<string, object>
             {
                 ["Global"] = globalDiagnostics,
@@ -291,7 +410,7 @@ internal static class TestDataContainer
 
         return sb.ToString();
     }    /// <summary>
-    /// Disposes an object and all its nested dependencies using the new dependency tracker.
+    /// Disposes an object.
     /// </summary>
     /// <param name="item">The item to dispose.</param>
     private static async ValueTask DisposeWithNestedDependencies<T>(T? item)
@@ -301,83 +420,6 @@ internal static class TestDataContainer
             return;
         }
 
-        // First, dispose nested dependencies using the new dependency tracker
-        await DependencyTracker.DisposeNestedDependenciesAsync(item);
-
-        // Then dispose the item itself
+        // Dispose the item (dependency disposal is handled at framework level)
         await Disposer.DisposeAsync(item);
-    }    /// <summary>
-    /// Registers a nested dependency relationship between a parent and child object using the new dependency tracker.
-    /// </summary>
-    /// <param name="parentObject">The parent object that depends on the child.</param>
-    /// <param name="childObject">The child object that the parent depends on.</param>
-    /// <param name="childSharedType">The shared type of the child object.</param>
-    /// <param name="childKey">The key of the child object (for keyed sharing).</param>
-    internal static void RegisterNestedDependency(object parentObject, object childObject, SharedType childSharedType, string? childKey)
-    {
-        // For now, we'll track the dependency relationship directly without scope managers
-        // since the current scope managers don't have a unified interface that supports all scenarios
-        // The new dependency tracker will handle disposal ordering properly
-
-        // Create a simple disposable reference that just disposes the child directly
-        var disposableRef = new DirectDisposableReference(childObject);
-        DependencyTracker.RegisterDependency(parentObject, childObject, new DirectScopeManager());
-
-        // Don't increment usage counts here - they're already managed by the main ClassDataSource attribute logic
-        // We only track the relationship for proper disposal ordering
-    }
-
-    /// <summary>
-    /// A simple scope manager that directly disposes objects without additional scope logic.
-    /// This is used for nested dependency tracking where we just want disposal ordering.
-    /// </summary>
-    private class DirectScopeManager : IScopeManager
-    {
-        public T GetOrCreate<T>(Func<T> factory) => factory();
-        public void IncrementUsage<T>() { /* No-op for direct disposal */ }
-        public Task<bool> TryDisposeAsync<T>(T item)
-        {
-            // Always dispose directly since this is for nested dependencies
-            return DisposeHelper.DisposeAsync(item).AsTask().ContinueWith(_ => true);
-        }
-    }
-
-    /// <summary>
-    /// A direct disposable reference implementation.
-    /// </summary>
-    private class DirectDisposableReference
-    {
-        private readonly object _instance;
-
-        public DirectDisposableReference(object instance)
-        {
-            _instance = instance;
-        }
-
-        public async Task DisposeAsync()
-        {
-            await DisposeHelper.DisposeAsync(_instance);
-        }
-    }
-
-    /// <summary>
-    /// Helper class for disposing objects (duplicate of the one in GlobalScopeManager for internal use).
-    /// </summary>
-    private static class DisposeHelper
-    {
-        public static async ValueTask DisposeAsync(object? obj)
-        {
-            switch (obj)
-            {
-                case null:
-                    return;
-                case IAsyncDisposable asyncDisposable:
-                    await asyncDisposable.DisposeAsync();
-                    break;
-                case IDisposable disposable:
-                    disposable.Dispose();
-                    break;
-            }
-        }
-    }
-}
+    }}

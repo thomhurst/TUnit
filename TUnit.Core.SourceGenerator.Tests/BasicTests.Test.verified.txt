@@ -10,6 +10,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -17,11 +18,13 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new BasicTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -46,7 +49,10 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "BasicTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "BasicTests",
 					Namespace = "TUnit.TestProject",
@@ -54,56 +60,55 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Parameters = [],
 					Properties = [],
 				}),
-};
-
-				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-				global::TUnit.TestProject.BasicTests? classInstance = null;
-				object?[]? classInstanceArguments = null;
-				classInstanceArguments = [];
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.BasicTests>(() => 
-				new global::TUnit.TestProject.BasicTests()
-				, sessionId, testBuilderContext);
-				var resettableClassFactory = resettableClassFactoryDelegate();
+			};
 
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.BasicTests>
-				{
-					TestId = $"TUnit.TestProject.BasicTests.SynchronousTest:0",
-					TestClassArguments = [],
-					TestMethodArguments = [],
-					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-					{
-					},
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SynchronousTest()),
-					TestFilePath = @"",
-					TestLineNumber = 5,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
-			}
-			catch (global::System.Exception exception)
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.BasicTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.BasicTests>(() => new global::TUnit.TestProject.BasicTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.BasicTests>
 			{
-				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
+				TestId = $"TUnit.TestProject.BasicTests.SynchronousTest:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 				{
-					TestId = $"TUnit.TestProject.BasicTests.SynchronousTest:0",
-					MethodName = $"SynchronousTest",
-					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.SynchronousTest failed to initialize", exception),
-					TestFilePath = @"",
-					TestLineNumber = 5,
-				});
-			}
-			return nodes;
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SynchronousTest()),
+				TestFilePath = @"",
+				TestLineNumber = 5,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
 		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
+			{
+				TestId = $"TUnit.TestProject.BasicTests.SynchronousTest:0",
+				MethodName = $"SynchronousTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.SynchronousTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 5,
+			});
+		}
+		return nodes;
 	}
 
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -116,6 +121,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -123,11 +129,13 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new BasicTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -152,7 +160,10 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "BasicTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "BasicTests",
 					Namespace = "TUnit.TestProject",
@@ -160,56 +171,55 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Parameters = [],
 					Properties = [],
 				}),
-};
-
-				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-				global::TUnit.TestProject.BasicTests? classInstance = null;
-				object?[]? classInstanceArguments = null;
-				classInstanceArguments = [];
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.BasicTests>(() => 
-				new global::TUnit.TestProject.BasicTests()
-				, sessionId, testBuilderContext);
-				var resettableClassFactory = resettableClassFactoryDelegate();
+			};
 
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.BasicTests>
-				{
-					TestId = $"TUnit.TestProject.BasicTests.AsynchronousTest:0",
-					TestClassArguments = [],
-					TestMethodArguments = [],
-					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-					{
-					},
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AsynchronousTest()),
-					TestFilePath = @"",
-					TestLineNumber = 11,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
-			}
-			catch (global::System.Exception exception)
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.BasicTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.BasicTests>(() => new global::TUnit.TestProject.BasicTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.BasicTests>
 			{
-				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
+				TestId = $"TUnit.TestProject.BasicTests.AsynchronousTest:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 				{
-					TestId = $"TUnit.TestProject.BasicTests.AsynchronousTest:0",
-					MethodName = $"AsynchronousTest",
-					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.AsynchronousTest failed to initialize", exception),
-					TestFilePath = @"",
-					TestLineNumber = 11,
-				});
-			}
-			return nodes;
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.AsynchronousTest()),
+				TestFilePath = @"",
+				TestLineNumber = 11,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
 		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
+			{
+				TestId = $"TUnit.TestProject.BasicTests.AsynchronousTest:0",
+				MethodName = $"AsynchronousTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.AsynchronousTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 11,
+			});
+		}
+		return nodes;
 	}
 
+}
   
 // <auto-generated/>
 #pragma warning disable
@@ -222,6 +232,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -229,11 +240,13 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 	{
 		global::TUnit.Core.SourceRegistrar.Register(new BasicTests());
 	}
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -258,7 +271,10 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("BasicTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 					{
 						Name = "BasicTests",
-						Attributes = [],
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
 					}),
 					Name = "BasicTests",
 					Namespace = "TUnit.TestProject",
@@ -266,54 +282,53 @@ file partial class BasicTests : global::TUnit.Core.Interfaces.SourceGenerator.IT
 					Parameters = [],
 					Properties = [],
 				}),
-};
-
-				var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-				var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-				global::TUnit.TestProject.BasicTests? classInstance = null;
-				object?[]? classInstanceArguments = null;
-				classInstanceArguments = [];
-
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.BasicTests>(() => 
-				new global::TUnit.TestProject.BasicTests()
-				, sessionId, testBuilderContext);
-				var resettableClassFactory = resettableClassFactoryDelegate();
+			};
 
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.BasicTests>
-				{
-					TestId = $"TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest:0",
-					TestClassArguments = [],
-					TestMethodArguments = [],
-					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-					{
-					},
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ValueTaskAsynchronousTest()),
-					TestFilePath = @"",
-					TestLineNumber = 17,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
-				testBuilderContextAccessor.Current = testBuilderContext;
-			}
-			catch (global::System.Exception exception)
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.BasicTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.BasicTests>(() => new global::TUnit.TestProject.BasicTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.BasicTests>
 			{
-				nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
+				TestId = $"TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 				{
-					TestId = $"TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest:0",
-					MethodName = $"ValueTaskAsynchronousTest",
-					Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.ValueTaskAsynchronousTest failed to initialize", exception),
-					TestFilePath = @"",
-					TestLineNumber = 17,
-				});
-			}
-			return nodes;
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.ValueTaskAsynchronousTest()),
+				TestFilePath = @"",
+				TestLineNumber = 17,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new();
+			testBuilderContextAccessor.Current = testBuilderContext;
 		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.BasicTests>
+			{
+				TestId = $"TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest:0",
+				MethodName = $"ValueTaskAsynchronousTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("BasicTests.ValueTaskAsynchronousTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 17,
+			});
+		}
+		return nodes;
 	}
 
+}
 ]

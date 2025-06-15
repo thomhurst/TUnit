@@ -75,9 +75,41 @@ public static class ArgumentsRetriever
                 }
                 
                 if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
-                        .NonTypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                        .UntypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
                     yield return DataSourceGeneratorRetriever.Parse(context, 
+                        testClass, 
+                        testMethod, 
+                        parameters, 
+                        property, 
+                        parameterOrPropertyTypes, 
+                        dataAttribute, 
+                        argumentsType,
+                        index, 
+                        propertyName,
+                        false);
+                }
+
+                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                        .AsyncDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                {
+                    yield return AsyncDataSourceGeneratorRetriever.Parse(context, 
+                        testClass, 
+                        testMethod, 
+                        parameters, 
+                        property, 
+                        parameterOrPropertyTypes, 
+                        dataAttribute, 
+                        argumentsType,
+                        index, 
+                        propertyName, 
+                        true);
+                }
+                
+                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                        .AsyncUntypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                {
+                    yield return AsyncDataSourceGeneratorRetriever.Parse(context, 
                         testClass, 
                         testMethod, 
                         parameters, 

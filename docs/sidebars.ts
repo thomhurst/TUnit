@@ -48,6 +48,7 @@ const sidebars: SidebarsConfig = {
         'test-authoring/explicit',
         'test-authoring/depends-on',
         'test-authoring/order',
+        'test-authoring/mocking',
       ],
     },
     {
