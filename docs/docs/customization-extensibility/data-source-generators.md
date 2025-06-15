@@ -47,6 +47,15 @@ For data sources that need to perform asynchronous operations (like reading from
 
 This works similarly to `DataSourceGeneratorAttribute` but allows you to use async/await:
 
+:::warning Performance Consideration
+**Important**: AsyncDataSourceGenerator code runs at test discovery time, not test execution time. This means:
+- Keep async operations fast and lightweight
+- Avoid long-running operations or external dependencies that might be slow/unavailable
+- If an async operation hangs, your tests may never be discovered
+- Consider caching results if the operation is expensive
+- For heavy operations, consider using a regular test method that loads data once and shares it across tests
+:::
+
 ```csharp
 using TUnit.Core;
 
