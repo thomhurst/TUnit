@@ -81,7 +81,7 @@ internal class TestBuilder
 
     private async Task BuildSingleTestAsync(
         SourceGeneratedMethodInformation testInformation,
-        Func<object?[]> classInstanceArguments,
+        Func<Task<object?[]>> classInstanceArguments,
         IDataAttribute typeDataAttribute,
         IDataAttribute testDataAttribute,
         TestBuilderContextAccessor testBuilderContextAccessor,
@@ -114,14 +114,14 @@ internal class TestBuilder
 
     private async Task BuildTestInstanceAsync(
         SourceGeneratedMethodInformation testInformation,
-        Func<object?[]> classInstanceArguments,
+        Func<Task<object?[]>> classInstanceArguments,
         IDataAttribute typeDataAttribute,
         IDataAttribute testDataAttributeInstance,
         TestBuilderContextAccessor testBuilderContextAccessor,
         Attribute[] allAttributes,
         List<DynamicTest> dynamicTests)
     {
-        var invokedClassInstanceArguments = classInstanceArguments();
+        var invokedClassInstanceArguments = await classInstanceArguments();
 
         var testArgumentsContext = new DataGeneratorContext
         {
@@ -148,7 +148,7 @@ internal class TestBuilder
             dynamicTests.Add(test);
 
             testBuilderContextAccessor.Current = new TestBuilderContext();
-            invokedClassInstanceArguments = classInstanceArguments();
+            invokedClassInstanceArguments = await classInstanceArguments();
         }
     }
 
@@ -156,7 +156,7 @@ internal class TestBuilder
         SourceGeneratedMethodInformation testInformation,
         object?[] invokedClassInstanceArguments,
         IDataAttribute typeDataAttribute,
-        Func<object?[]> testArguments,
+        Func<Task<object?[]>> testArguments,
         TestBuilderContextAccessor testBuilderContextAccessor,
         Attribute[] allAttributes)
     {

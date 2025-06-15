@@ -6,6 +6,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Helpers;
 using Polyfills;
 
 namespace TUnit.Engine.Services.Reflection;
@@ -21,7 +22,7 @@ internal static class DataGeneratorHandler
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        if (dataAttribute is not (IDataSourceGeneratorAttribute or IAsyncDataSourceGeneratorAttribute) ||
+        if (dataAttribute is not IAsyncDataSourceGeneratorAttribute ||
             DotNetAssemblyHelper.IsInDotNetCoreLibrary(dataAttribute.GetType()))
         {
             return dataAttribute;
@@ -76,7 +77,7 @@ internal static class DataGeneratorHandler
                     yield return item;
                 break;
             case NoOpDataAttribute or ClassConstructorAttribute:
-                yield return async () => await Task.FromResult([]);
+                yield return () => Task.FromResult(Array.Empty<object?>());
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(dataAttribute), dataAttribute, null);
@@ -234,10 +235,12 @@ internal static class DataGeneratorHandler
     }
 
     
+    #pragma warning disable CS1998 // Async method lacks 'await' operators
     private static async IAsyncEnumerable<Func<Task<object?[]>>> ProcessMethodResultsAsync(
         object? result,
         DataGeneratorContext context)
     {
+    #pragma warning restore CS1998
         var enumerableResult = result is not string and IEnumerable enumerable
             ? enumerable.Cast<object?>().ToArray()
             : [result];
@@ -374,7 +377,9 @@ internal static class DataGeneratorHandler
         if (type.Name.StartsWith("ValueTask"))
         {
             // Convert ValueTask to Task first
+            #pragma warning disable IL2075
             var asTaskMethod = type.GetMethod("AsTask");
+            #pragma warning restore IL2075
             var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
 
             if (type.IsGenericType)

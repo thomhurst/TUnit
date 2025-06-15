@@ -8,7 +8,7 @@ namespace TUnit.UnitTests;
 public class AsyncToSyncHelperTests
 {
     [Test]
-    public void RunSync_WithTask_ReturnsCorrectResult()
+    public async Task RunSync_WithTask_ReturnsCorrectResult()
     {
         // Arrange
         const string expected = "test result";
@@ -21,7 +21,7 @@ public class AsyncToSyncHelperTests
         });
         
         // Assert
-        Assert.That(result).IsEqualTo(expected);
+        await Assert.That(result).IsEqualTo(expected);
     }
     
     [Test]
@@ -42,7 +42,7 @@ public class AsyncToSyncHelperTests
     }
     
     [Test]
-    public void EnumerateSync_WithAsyncEnumerable_ReturnsAllItems()
+    public async Task EnumerateSync_WithAsyncEnumerable_ReturnsAllItems()
     {
         // Arrange
         async IAsyncEnumerable<int> GetNumbersAsync()
@@ -58,14 +58,14 @@ public class AsyncToSyncHelperTests
         var results = AsyncToSyncHelper.EnumerateSync(GetNumbersAsync()).ToList();
         
         // Assert
-        Assert.That(results).HasCount(3);
-        Assert.That(results[0]).IsEqualTo(1);
-        Assert.That(results[1]).IsEqualTo(2);
-        Assert.That(results[2]).IsEqualTo(3);
+        await Assert.That(results).HasCount(3);
+        await Assert.That(results[0]).IsEqualTo(1);
+        await Assert.That(results[1]).IsEqualTo(2);
+        await Assert.That(results[2]).IsEqualTo(3);
     }
     
     [Test]
-    public void UnwrapTaskResult_WithGenericTask_ReturnsResult()
+    public async Task UnwrapTaskResult_WithGenericTask_ReturnsResult()
     {
         // Arrange
         var task = Task.FromResult("test result");
@@ -74,11 +74,11 @@ public class AsyncToSyncHelperTests
         var result = AsyncToSyncHelper.UnwrapTaskResult(task);
         
         // Assert
-        Assert.That(result).IsEqualTo("test result");
+        await Assert.That(result).IsEqualTo("test result");
     }
     
     [Test]
-    public void UnwrapTaskResult_WithNonGenericTask_ReturnsEmptyArray()
+    public async Task UnwrapTaskResult_WithNonGenericTask_ReturnsEmptyArray()
     {
         // Arrange
         var task = Task.CompletedTask;
@@ -87,12 +87,12 @@ public class AsyncToSyncHelperTests
         var result = AsyncToSyncHelper.UnwrapTaskResult(task);
         
         // Assert
-        Assert.That(result).IsOfType<object[]>();
-        Assert.That(((object[])result).Length).IsEqualTo(0);
+        await Assert.That(result).IsTypeOf<object[]>();
+        await Assert.That(((object[])result).Length).IsEqualTo(0);
     }
     
     [Test]
-    public void UnwrapTaskResult_WithValueTask_ReturnsResult()
+    public async Task UnwrapTaskResult_WithValueTask_ReturnsResult()
     {
         // Arrange
         var valueTask = new ValueTask<string>(Task.FromResult("test result"));
@@ -101,6 +101,6 @@ public class AsyncToSyncHelperTests
         var result = AsyncToSyncHelper.UnwrapTaskResult(valueTask);
         
         // Assert
-        Assert.That(result).IsEqualTo("test result");
+        await Assert.That(result).IsEqualTo("test result");
     }
 }

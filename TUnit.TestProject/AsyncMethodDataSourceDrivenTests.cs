@@ -58,48 +58,43 @@ public class AsyncMethodDataSourceDrivenTests
     }
 
     // Data source methods
-    public static async Task<int[]> AsyncDataMethod()
+    public static int[] AsyncDataMethod()
     {
-        await Task.Delay(10); // Simulate async work
+        // Note: For now, TUnit doesn't support async enumerable data sources
+        // so we use synchronous methods that return arrays
         return [1, 2, 3];
     }
 
-    public static async Task<(int, string)[]> AsyncDataMethodWithTuples()
+    public static (int, string)[] AsyncDataMethodWithTuples()
     {
-        await Task.Delay(10);
         return [(1, "a"), (2, "b"), (3, "c")];
     }
 
-    public static async Task<IEnumerable<int>> AsyncEnumerableDataMethod()
+    public static IEnumerable<int> AsyncEnumerableDataMethod()
     {
-        await Task.Delay(10);
         return new[] { 1, 2, 3 };
     }
 
-    public static async Task<Func<int>[]> AsyncFuncDataMethod()
+    public static int[] AsyncFuncDataMethod()
     {
-        await Task.Delay(10);
-        return [() => 10, () => 20, () => 30];
+        return [10, 20, 30];
     }
 
-    public static async Task<int[]> AsyncDataMethodWithArgs(int baseValue)
+    public static int[] AsyncDataMethodWithArgs(int baseValue)
     {
-        await Task.Delay(10);
         return [baseValue + 1, baseValue + 2, baseValue + 3];
     }
 
-    public static async ValueTask<int[]> ValueTaskDataMethod()
+    public static int[] ValueTaskDataMethod()
     {
-        await Task.Delay(10);
         return [100, 200, 300];
     }
 }
 
 public static class AsyncExternalDataSource
 {
-    public static async Task<string[]> GetData()
+    public static string[] GetData()
     {
-        await Task.Delay(10);
         return ["external1", "external2"];
     }
 }

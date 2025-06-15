@@ -99,7 +99,9 @@ internal static class AsyncToSyncHelper
             
             if (type.IsGenericType)
             {
+                #pragma warning disable IL2075
                 var resultProperty = type.GetProperty("Result");
+                #pragma warning restore IL2075
                 return resultProperty?.GetValue(task);
             }
             
@@ -110,7 +112,9 @@ internal static class AsyncToSyncHelper
         if (type.Name.StartsWith("ValueTask"))
         {
             // Convert ValueTask to Task for easier handling
+            #pragma warning disable IL2075
             var asTaskMethod = type.GetMethod("AsTask");
+            #pragma warning restore IL2075
             var convertedTask = (Task)asTaskMethod!.Invoke(taskLikeObject, null)!;
             
             return UnwrapTaskResult(convertedTask);

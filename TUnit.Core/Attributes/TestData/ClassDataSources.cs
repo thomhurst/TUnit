@@ -43,27 +43,27 @@ internal class ClassDataSources
 #pragma warning disable CS8603 // Possible null reference return.
         if (sharedType == SharedType.None)
         {
-            return await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false);
+            return Create<T>(dataGeneratorMetadata);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return (T)(await TestDataContainer.GetGlobalInstanceAsync(typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
+            return (T)(await TestDataContainer.GetGlobalInstanceAsync(typeof(T), () => Task.FromResult<object>(Create<T>(dataGeneratorMetadata))).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return (T)(await TestDataContainer.GetInstanceForClassAsync(testClassType, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
+            return (T)(await TestDataContainer.GetInstanceForClassAsync(testClassType, typeof(T), () => Task.FromResult<object>(Create<T>(dataGeneratorMetadata))).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return (T)(await TestDataContainer.GetInstanceForKeyAsync(key, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
+            return (T)(await TestDataContainer.GetInstanceForKeyAsync(key, typeof(T), () => Task.FromResult<object>(Create<T>(dataGeneratorMetadata))).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return (T)(await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
+            return (T)(await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, typeof(T), () => Task.FromResult<object>(Create<T>(dataGeneratorMetadata))).ConfigureAwait(false))!;
         }
 #pragma warning restore CS8603 // Possible null reference return.
 
@@ -74,39 +74,39 @@ internal class ClassDataSources
     {
         if (sharedType == SharedType.None)
         {
-            return await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false);
+            return Create(type, dataGeneratorMetadata);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return await TestDataContainer.GetGlobalInstanceAsync(type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
+            return await TestDataContainer.GetGlobalInstanceAsync(type, () => Task.FromResult(Create(type, dataGeneratorMetadata))).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return await TestDataContainer.GetInstanceForClassAsync(testClassType, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
+            return await TestDataContainer.GetInstanceForClassAsync(testClassType, type, () => Task.FromResult(Create(type, dataGeneratorMetadata))).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return await TestDataContainer.GetInstanceForKeyAsync(key!, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
+            return await TestDataContainer.GetInstanceForKeyAsync(key!, type, () => Task.FromResult(Create(type, dataGeneratorMetadata))).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
+            return await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, type, () => Task.FromResult(Create(type, dataGeneratorMetadata))).ConfigureAwait(false);
         }
 
         throw new ArgumentOutOfRangeException();
     }
 
     [return: NotNull]
-    private static async Task<T> CreateAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
+    private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return ((T)(await CreateAsync(typeof(T), dataGeneratorMetadata).ConfigureAwait(false)))!;
+        return ((T)Create(typeof(T), dataGeneratorMetadata))!;
     }
 
-    private static async Task<object> CreateAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
+    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
     {
         try
         {
