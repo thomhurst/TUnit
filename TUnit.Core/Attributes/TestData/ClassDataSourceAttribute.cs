@@ -13,7 +13,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-            .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata, dataGeneratorMetadata.DataSourceContext);
+            .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
     }
 
     public IEnumerable<SharedType> GetSharedTypes() => [Shared];
@@ -106,7 +106,7 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
             for (var i = 0; i < _types.Length; i++)
             {
                 items[i] = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                    .Get(Shared.ElementAtOrDefault(0), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(0), dataGeneratorMetadata, dataGeneratorMetadata.DataSourceContext);
+                    .Get(Shared.ElementAtOrDefault(0), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(0), dataGeneratorMetadata);
             }
 
             return items;

@@ -11,7 +11,6 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.OutputDevice;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
-using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
@@ -101,8 +100,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         );
 
         var dependencyCollector = new DependencyCollector();
-        
-        var testDataDependencyTracker = Register<IDependencyTracker>(new TestDataDependencyTracker());
 
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
 
@@ -130,10 +127,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         Disposer = Register(new Disposer(Logger));
 
         var objectLifetimeManager = Register(new ObjectLifetimeManager(Disposer));
+        
+        var dataSourceObjectRegistrar = Register(new DataSourceObjectRegistrar(objectLifetimeManager));
 
         var testRegistrar = Register(new TestRegistrar(instanceTracker, objectLifetimeManager));
 
-        var testInvoker = Register(new TestInvocation(testHookOrchestrator, Disposer));
+        var testInvoker = Register(new TestInvocation(testHookOrchestrator, Disposer, dataSourceObjectRegistrar));
 
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
 

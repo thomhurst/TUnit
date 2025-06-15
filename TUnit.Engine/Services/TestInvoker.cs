@@ -9,7 +9,7 @@ using TUnit.Engine.Hooks;
 
 namespace TUnit.Engine.Services;
 
-internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Disposer disposer)
+internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Disposer disposer, DataSourceObjectRegistrar dataSourceObjectRegistrar)
 {
     private readonly SemaphoreSlim _consoleStandardOutLock = new(1, 1);
 
@@ -17,6 +17,10 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
     {
         try
         {
+            // Register test instance and all data source objects
+            var testInstance = discoveredTest.TestContext.TestDetails.ClassInstance;
+            dataSourceObjectRegistrar.RegisterExistingDataSourceObjects(testInstance);
+            
             foreach (var onInitializeObject in discoveredTest.TestContext.GetOnInitializeObjects())
             {
                 await ObjectInitializer.InitializeAsync(onInitializeObject, cancellationToken);
