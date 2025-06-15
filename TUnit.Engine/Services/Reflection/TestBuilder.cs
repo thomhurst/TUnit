@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Enums;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Services.Reflection;
 
@@ -15,7 +14,7 @@ internal class TestBuilder
         SourceGeneratedMethodInformation[] testMethods)
     {
         var dynamicTests = new List<DynamicTest>();
-        
+
         foreach (var testMethod in testMethods)
         {
             BuildTestsForMethod(classInformation, testMethod, dynamicTests);
@@ -75,7 +74,7 @@ internal class TestBuilder
         foreach (var classInstanceArguments in DataGeneratorHandler.GetArgumentsFromDataAttribute(
             classDataAttribute, classArgumentsContext))
         {
-            BuildSingleTest(testMethod, classInstanceArguments, classDataAttribute, 
+            BuildSingleTest(testMethod, classInstanceArguments, classDataAttribute,
                 testDataAttribute, testBuilderContextAccessor, dynamicTests);
         }
     }
@@ -145,9 +144,9 @@ internal class TestBuilder
         {
             var test = CreateTest(testInformation, invokedClassInstanceArguments, typeDataAttribute,
                 testArguments, testBuilderContextAccessor, allAttributes);
-            
+
             dynamicTests.Add(test);
-            
+
             testBuilderContextAccessor.Current = new TestBuilderContext();
             invokedClassInstanceArguments = classInstanceArguments();
         }
@@ -169,7 +168,7 @@ internal class TestBuilder
 
         if (typeDataAttribute is not ClassConstructorAttribute)
         {
-            ParameterMapper.MapImplicitParameters(ref invokedClassInstanceArguments, 
+            ParameterMapper.MapImplicitParameters(ref invokedClassInstanceArguments,
                 testInformation.Class.Parameters);
         }
 
