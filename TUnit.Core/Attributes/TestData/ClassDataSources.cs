@@ -112,14 +112,8 @@ internal class ClassDataSources
         {
             var instance = Activator.CreateInstance(type)!;
 
-            if (!Sources.Properties.TryGetValue(instance.GetType(), out var properties))
-            {
-                properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-            }
-
-            await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, instance, properties).ConfigureAwait(false);
-
-            await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
+            // Use the centralized DataSourceInitializer for all initialization logic
+            await DataSourceInitializer.InitializeAsync(instance, dataGeneratorMetadata).ConfigureAwait(false);
 
             return instance;
         }
@@ -134,52 +128,6 @@ internal class ClassDataSources
         }
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task InitializeDataSourcePropertiesAsync(DataGeneratorMetadata dataGeneratorMetadata, object instance, PropertyInfo[] properties)
-    {
-        foreach (var propertyInfo in properties)
-        {
-            if (propertyInfo.GetCustomAttributes().OfType<IAsyncDataSourceGeneratorAttribute>().FirstOrDefault() is not { } asyncDataSourceGeneratorAttribute)
-            {
-                continue;
-            }
-
-            if (propertyInfo.GetValue(instance) is not {} result)
-            {
-                var asyncEnumerable = asyncDataSourceGeneratorAttribute.GenerateAsync(dataGeneratorMetadata with
-                {
-                    Type = DataGeneratorType.Property, MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
-                });
-
-                await using var enumerator = asyncEnumerable.GetAsyncEnumerator();
-                if (await enumerator.MoveNextAsync().ConfigureAwait(false))
-                {
-                    var func = enumerator.Current;
-                    var resultArray = await func().ConfigureAwait(false);
-                    result = resultArray?.FirstOrDefault();
-                }
-
-                propertyInfo.SetValue(instance, result);
-            }
-
-            if (result is null)
-            {
-                continue;
-            }
-
-            if (!Sources.Properties.TryGetValue(result.GetType(), out var nestedProperties))
-            {
-                nestedProperties = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-            }
-
-            await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, result, nestedProperties).ConfigureAwait(false);
-
-            await ObjectInitializer.InitializeAsync(result).ConfigureAwait(false);
-        }
-    }
 
     public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {

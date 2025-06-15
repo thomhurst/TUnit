@@ -28,75 +28,25 @@ internal static class DataGeneratorHandler
         }
 
         var instance = (IDataAttribute)Activator.CreateInstance(dataAttribute.GetType())!;
-        await InitializeNestedDataGeneratorsAsync(instance, testInformation, testBuilderContextAccessor);
-
-        await ObjectInitializer.InitializeAsync(instance);
+        
+        // Use centralized DataSourceInitializer
+        var metadata = new DataGeneratorMetadata
+        {
+            Type = DataGeneratorType.Property,
+            TestInformation = testInformation,
+            ClassInstanceArguments = [],
+            MembersToGenerate = [],
+            TestBuilderContext = testBuilderContextAccessor,
+            TestClassInstance = null,
+            TestSessionId = string.Empty,
+        };
+        
+        await DataSourceInitializer.InitializeAsync(instance, metadata, testBuilderContextAccessor);
 
         return instance;
     }
 
-    public static async Task InitializeNestedDataGeneratorsAsync(
-        object? obj,
-        SourceGeneratedMethodInformation methodInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor)
-    {
-        var visited = new HashSet<object>();
-        await InitializeNestedDataGeneratorsInternalAsync(obj, methodInformation, testBuilderContextAccessor, visited);
-    }
-    
-    private static async Task InitializeNestedDataGeneratorsInternalAsync(
-        object? obj,
-        SourceGeneratedMethodInformation methodInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor,
-        HashSet<object> visited)
-    {
-        if (obj is null || !visited.Add(obj))
-        {
-            return;
-        }
 
-        var classInformation = ReflectionToSourceModelHelpers.GenerateClass(obj.GetType());
-
-        foreach (var property in classInformation.Properties.Where(p => p.HasAttribute<IDataAttribute>()))
-        {
-            var generator = property.Attributes.OfType<IDataAttribute>().First();
-            
-            await InitializeNestedDataGeneratorsInternalAsync(generator, methodInformation, testBuilderContextAccessor, visited);
-
-            var dataGeneratorMetadata = new DataGeneratorMetadata
-            {
-                Type = DataGeneratorType.Property,
-                TestInformation = methodInformation,
-                ClassInstanceArguments = [],
-                MembersToGenerate = [property],
-                TestBuilderContext = testBuilderContextAccessor,
-                TestClassInstance = null,
-                TestSessionId = string.Empty,
-            };
-
-            var value = await ReflectionValueCreator.CreatePropertyValueAsync(
-                classInformation, 
-                testBuilderContextAccessor, 
-                generator, 
-                property, 
-                dataGeneratorMetadata);
-
-            if (value is not null)
-            {
-                property.ReflectionInfo.SetValue(obj, value);
-                await ObjectInitializer.InitializeAsync(value);
-            }
-        }
-    }
-
-    private static async Task InitializeNestedDataGenerators(
-        object obj,
-        SourceGeneratedMethodInformation testInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor)
-    {
-        var visited = new HashSet<object>();
-        await InitializeNestedDataGeneratorsInternalAsync(obj, testInformation, testBuilderContextAccessor, visited);
-    }
 
     public static async IAsyncEnumerable<Func<Task<object?[]>>> GetArgumentsFromDataAttributeAsync(
         IDataAttribute dataAttribute,
@@ -212,7 +162,20 @@ internal static class DataGeneratorHandler
 
         // For property generators, we need a fresh instance that's properly initialized
         var instance = (IAsyncDataSourceGeneratorAttribute)Activator.CreateInstance(generator.GetType())!;
-        await InitializeNestedDataGenerators(instance, context.TestInformation, context.TestBuilderContextAccessor);
+        
+        // Use centralized DataSourceInitializer
+        var metadata = new DataGeneratorMetadata
+        {
+            Type = DataGeneratorType.Property,
+            TestInformation = context.TestInformation,
+            ClassInstanceArguments = context.ClassInstanceArgumentsInvoked ?? [],
+            MembersToGenerate = [],
+            TestBuilderContext = context.TestBuilderContextAccessor,
+            TestClassInstance = null,
+            TestSessionId = string.Empty,
+        };
+        
+        await DataSourceInitializer.InitializeAsync(instance, metadata, context.TestBuilderContextAccessor);
         return instance;
     }
 
