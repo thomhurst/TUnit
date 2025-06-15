@@ -36,7 +36,8 @@ dotnet run -- --list-tests                    # List all tests
 dotnet run -- --fail-fast                     # Stop on first failure
 dotnet run -- --maximum-parallel-tests 10     # Control parallelism
 dotnet run -- --report-trx --coverage         # Generate reports
-dotnet run -- --treenode-filter "TestName"    # Run specific test
+dotnet run -- --treenode-filter "TestName"    # Run specific test by exact name
+dotnet run -- --treenode-filter/*/*/*PartialName*/*  # Filter tests by partial name pattern
 
 # Build NuGet packages
 dotnet pack -c Release

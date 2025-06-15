@@ -26,7 +26,7 @@ public class FromServiceProviderFactoryAttribute : NonTypedDataSourceGeneratorAt
         return Task.CompletedTask;
     }
 
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.ClassInstanceArguments is null)
         {

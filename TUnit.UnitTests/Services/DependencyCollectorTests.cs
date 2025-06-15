@@ -14,7 +14,7 @@ public class DependencyCollectorTests
         // Arrange
         var testA = CreateTest("TestA");
         var testB = CreateTest("TestB", "TestA");
-        
+
         typeof(TestDetails).GetProperty(nameof(TestDetails.Attributes))!
             .GetBackingField()!
             .SetValue(testA.TestDetails, new Attribute[] { new DependsOnAttribute(testB.TestDetails.TestName) });
@@ -57,7 +57,7 @@ public class DependencyCollectorTests
         // Arrange
         var testA = CreateTest("TestA");
         var testB = CreateTest("TestB", "TestA");
-        var testC = CreateTest("TestC", "TestB");   
+        var testC = CreateTest("TestC", "TestB");
 
         var collector = new DependencyCollector();
         var visited = new HashSet<TestDetails>([testC.TestDetails], new DependencyCollector.TestDetailsEqualityComparer());
@@ -72,7 +72,7 @@ public class DependencyCollectorTests
         await Assert.That(dependencies).Contains(d => d.Test == testA);
         await Assert.That(dependencies).Contains(d => d.Test == testB);
     }
-    
+
     [Test]
 public async Task CollectDependencies_ShouldResolveComplexNestedDependenciesCorrectly_WhenNoConflictsExist()
 {
@@ -131,9 +131,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
             TestName = name,
             TestId = Guid.NewGuid()
                 .ToString("N"),
-            TestMethodArguments =
-            [
-            ],
+            TestMethodArguments = [],
             TestClassArguments = [],
             TestClassInjectedPropertyArguments = new Dictionary<string, object?>(),
             TestMethod = new SourceGeneratedMethodInformation
@@ -171,9 +169,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
             },
             CurrentRepeatAttempt = 0,
             RepeatLimit = 0,
-            DataAttributes =
-            [
-            ],
+            DataAttributes = [],
             ReturnType = typeof(Task),
             TestFilePath = string.Empty,
             TestLineNumber = 0,
@@ -201,7 +197,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
         {
             ClassType = typeof(DependencyCollectorTests)
         };
-            
+
         return new DiscoveredTest<DependencyCollectorTests>(resettableLazy)
         {
             TestContext = new TestContext(Substitute.For<IServiceProvider>(),

@@ -11,6 +11,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
     <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="Sourcy.DotNet">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Sourcy.Git" />
     <PackageReference Include="Verify.TUnit" />
   </ItemGroup>

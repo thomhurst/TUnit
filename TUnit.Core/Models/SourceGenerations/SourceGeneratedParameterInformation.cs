@@ -7,12 +7,12 @@ namespace TUnit.Core;
 [DebuggerDisplay("{Type} {Name})")]
 public record SourceGeneratedParameterInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.NonPublicMethods)]T>() : SourceGeneratedParameterInformation(typeof(T));
+    | DynamicallyAccessedMemberTypes.PublicProperties)]T>() : SourceGeneratedParameterInformation(typeof(T));
 
 [DebuggerDisplay("{Type} {Name})")]
 public record SourceGeneratedParameterInformation([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type Type) : SourceGeneratedMemberInformation
+    | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : SourceGeneratedMemberInformation
 {
     public required ParameterInfo ReflectionInfo { get; set; }
     public bool IsParams => ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);

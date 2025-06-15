@@ -2,7 +2,7 @@
 
 namespace TUnit.Core.Helpers;
 
-public class DefaultParallelLimit : IParallelLimit
+public class ProcessorCountParallelLimit : IParallelLimit
 {
     public int Limit { get; } = Environment.ProcessorCount;
 }

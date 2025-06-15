@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
-using TUnit.Core.Logging;
-
-#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace TUnit.Core;
 
@@ -18,23 +14,18 @@ internal class ClassDataSources
     {
     }
 
-    public GetOnlyDictionary<Type, Task> GlobalInitializers = new();
-    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, Task>> TestClassTypeInitializers = new();
-    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> AssemblyInitializers = new();
-    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, Task>> KeyedInitializers = new();
-
     public static readonly GetOnlyDictionary<string, ClassDataSources> SourcesPerSession = new();
 
     public static ClassDataSources Get(string sessionId) => SourcesPerSession.GetOrAdd(sessionId, _ => new());
 
-    public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
+    public async Task<(T, SharedType, string)> GetItemForIndexAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
         var shared = sharedTypes.ElementAtOrDefault(index);
         var key = shared == SharedType.Keyed ? GetKey(index, sharedTypes, keys) : string.Empty;
 
         return
         (
-            Get<T>(shared, testClassType, key, dataGeneratorMetadata),
+            await GetAsync<T>(shared, testClassType, key, dataGeneratorMetadata).ConfigureAwait(false),
             shared,
             key
         );
@@ -47,212 +38,88 @@ internal class ClassDataSources
         return keys.ElementAtOrDefault(keyedIndex) ?? throw new ArgumentException($"Key at index {keyedIndex} not found");
     }
 
-    public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
+    public async Task<T> GetAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
+#pragma warning disable CS8603 // Possible null reference return.
         if (sharedType == SharedType.None)
         {
-            return Create<T>(dataGeneratorMetadata);
+            return await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return (T)TestDataContainer.GetGlobalInstance(typeof(T), () => Create<T>(dataGeneratorMetadata));
+            return (T)(await TestDataContainer.GetGlobalInstanceAsync(typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return (T)TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create<T>(dataGeneratorMetadata));
+            return (T)(await TestDataContainer.GetInstanceForClassAsync(testClassType, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return (T)TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create<T>(dataGeneratorMetadata));
+            return (T)(await TestDataContainer.GetInstanceForKeyAsync(key, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return (T)TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create<T>(dataGeneratorMetadata));
+            return (T)(await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, typeof(T), async () => await CreateAsync<T>(dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false))!;
         }
+#pragma warning restore CS8603 // Possible null reference return.
 
         throw new ArgumentOutOfRangeException();
     }
 
-    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
+    public async Task<object> GetAsync(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (sharedType == SharedType.None)
         {
-            return Create(type, dataGeneratorMetadata);
+            return await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return TestDataContainer.GetGlobalInstance(type, () => Create(type, dataGeneratorMetadata));
+            return await TestDataContainer.GetGlobalInstanceAsync(type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return TestDataContainer.GetInstanceForClass(testClassType, type, () => Create(type, dataGeneratorMetadata));
+            return await TestDataContainer.GetInstanceForClassAsync(testClassType, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return TestDataContainer.GetInstanceForKey(key!, type, () => Create(type, dataGeneratorMetadata));
+            return await TestDataContainer.GetInstanceForKeyAsync(key!, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, () => Create(type, dataGeneratorMetadata));
+            return await TestDataContainer.GetInstanceForAssemblyAsync(testClassType.Assembly, type, async () => await CreateAsync(type, dataGeneratorMetadata).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         throw new ArgumentOutOfRangeException();
-    }
-
-    public Task InitializeObject(object? item)
-    {
-        if (item is IAsyncInitializer asyncInitializer)
-        {
-            return asyncInitializer.InitializeAsync();
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string? key, T? item)
-    {
-        switch (shared)
-        {
-            case SharedType.None:
-                break;
-            case SharedType.PerClass:
-                TestDataContainer.IncrementTestClassUsage(testContext.TestDetails.TestClass.Type, typeof(T));
-                break;
-            case SharedType.PerAssembly:
-                TestDataContainer.IncrementAssemblyUsage(testContext.TestDetails.TestClass.Type.Assembly, typeof(T));
-                break;
-            case SharedType.PerTestSession:
-                TestDataContainer.IncrementGlobalUsage(typeof(T));
-                break;
-            case SharedType.Keyed:
-                TestDataContainer.IncrementKeyUsage(key!, typeof(T));
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        if (isStatic)
-        {
-            await Initialize(testContext, shared, key!, item);
-        }
-
-        if (item is ITestRegisteredEventReceiver testRegisteredEventReceiver)
-        {
-            await testRegisteredEventReceiver.OnTestRegistered(new TestRegisteredContext(testContext.InternalDiscoveredTest));
-        }
-    }
-
-    public async ValueTask OnInitialize<T>(TestContext testContext, bool isStatic, SharedType shared, string? key, T? item)
-    {
-        if (isStatic)
-        {
-            // Done already before test start
-            return;
-        }
-
-        await Initialize(testContext, shared, key, item);
-    }
-
-    public Task Initialize<T>(TestContext testContext, SharedType shared, string? key, T? item)
-    {
-        if (shared == SharedType.PerTestSession)
-        {
-            return GlobalInitializers.GetOrAdd(typeof(T), _ => InitializeObject(item));
-        }
-
-        if (shared == SharedType.None)
-        {
-            return InitializeObject(item);
-        }
-
-        if (shared == SharedType.PerClass)
-        {
-            var innerDictionary = TestClassTypeInitializers.GetOrAdd(typeof(T),
-                _ => new GetOnlyDictionary<Type, Task>());
-
-            return innerDictionary.GetOrAdd(testContext.TestDetails.TestClass.Type,
-                _ => InitializeObject(item));
-        }
-
-        if (shared == SharedType.PerAssembly)
-        {
-            var innerDictionary = AssemblyInitializers.GetOrAdd(typeof(T),
-                _ => new GetOnlyDictionary<Assembly, Task>());
-
-            return innerDictionary.GetOrAdd(testContext.TestDetails.TestClass.Type.Assembly,
-                _ => InitializeObject(item));
-        }
-
-        if (shared == SharedType.Keyed)
-        {
-            var innerDictionary = KeyedInitializers.GetOrAdd(typeof(T),
-                _ => new GetOnlyDictionary<string, Task>());
-
-            return innerDictionary.GetOrAdd(key!, _ => InitializeObject(item));
-        }
-
-        throw new ArgumentOutOfRangeException(nameof(shared));
-    }
-
-    public async ValueTask OnDispose<T>(TestContext testContext, SharedType shared, string? key, T? item)
-    {
-        if (shared is SharedType.None)
-        {
-            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(item);
-        }
-
-        if (shared == SharedType.Keyed)
-        {
-            await TestDataContainer.ConsumeKey(key!, typeof(T));
-        }
-
-        if (shared == SharedType.PerClass)
-        {
-            await TestDataContainer.ConsumeTestClassCount(testContext.TestDetails.TestClass.Type, item);
-        }
-
-        if (shared == SharedType.PerAssembly)
-        {
-            await TestDataContainer.ConsumeAssemblyCount(testContext.TestDetails.TestClass.Type.Assembly, item);
-        }
-
-        if (shared == SharedType.PerTestSession)
-        {
-            await TestDataContainer.ConsumeGlobalCount(item);
-        }
-    }
-
-    public static bool IsStaticProperty(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        return dataGeneratorMetadata.MembersToGenerate is [SourceGeneratedPropertyInformation { IsStatic: true }];
     }
 
     [return: NotNull]
-    private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
+    private static async Task<T> CreateAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return ((T)Create(typeof(T), dataGeneratorMetadata))!;
+        return ((T)(await CreateAsync(typeof(T), dataGeneratorMetadata).ConfigureAwait(false)))!;
     }
 
-    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
+    private static async Task<object> CreateAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
     {
         try
         {
             var instance = Activator.CreateInstance(type)!;
 
-            if (!Sources.DataGeneratorProperties.TryGetValue(instance.GetType(), out var properties))
+            if (!Sources.Properties.TryGetValue(instance.GetType(), out var properties))
             {
                 properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
             }
 
-            InitializeDataSourceProperties(dataGeneratorMetadata, instance, properties);
+            await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, instance, properties).ConfigureAwait(false);
+
+            await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
 
             return instance;
         }
@@ -271,7 +138,7 @@ internal class ClassDataSources
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static void InitializeDataSourceProperties(DataGeneratorMetadata dataGeneratorMetadata, object instance, PropertyInfo[] properties)
+    private static async Task InitializeDataSourcePropertiesAsync(DataGeneratorMetadata dataGeneratorMetadata, object instance, PropertyInfo[] properties)
     {
         foreach (var propertyInfo in properties)
         {
@@ -280,96 +147,46 @@ internal class ClassDataSources
                 continue;
             }
 
-            var resultDelegateArray = dataSourceGeneratorAttribute.GenerateDataSourcesInternal(dataGeneratorMetadata with
+            if (propertyInfo.GetValue(instance) is not {} result)
             {
-                Type = DataGeneratorType.Property,
-                MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
-            });
-
-            var result = resultDelegateArray.FirstOrDefault()?.Invoke()?.FirstOrDefault();
-
-            propertyInfo.SetValue(instance, result);
-
-            if (result is not null && dataSourceGeneratorAttribute.GetType().IsAssignableTo(typeof(IDataSourceGeneratorAttribute)))
-            {
-                SharedType sharedType;
-                string? key;
-                if (dataSourceGeneratorAttribute is ISharedDataSourceAttribute sharedDataSourceAttribute)
+                var resultDelegateArray = dataSourceGeneratorAttribute.Generate(dataGeneratorMetadata with
                 {
-                    sharedType = sharedDataSourceAttribute.GetSharedTypes().FirstOrDefault();
-                    key = sharedDataSourceAttribute.GetKeys().FirstOrDefault();
-                }
-                else
-                {
-                    sharedType = SharedType.None;
-                    key = null;
-                }
+                    Type = DataGeneratorType.Property, MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
+                });
 
-                TestDataContainer.RegisterNestedDependency(instance, result, sharedType, key);
+                result = resultDelegateArray.FirstOrDefault()?.Invoke()?.FirstOrDefault();
 
-                // Register the nested dependency with the test lifecycle - this is the key fix!
-                // We need to register it as if it were a main ClassDataSource so it gets proper usage tracking
-                RegisterNestedDependencyWithLifecycle(result, sharedType, key, dataGeneratorMetadata);
+                propertyInfo.SetValue(instance, result);
             }
 
-            if (result is not null)
+            if (result is null)
             {
-                if (!Sources.DataGeneratorProperties.TryGetValue(result.GetType(), out var nestedProperties))
-                {
-                    nestedProperties = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-                }
-
-                InitializeDataSourceProperties(dataGeneratorMetadata, result, nestedProperties);
+                continue;
             }
+
+            if (!Sources.Properties.TryGetValue(result.GetType(), out var nestedProperties))
+            {
+                nestedProperties = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+            }
+
+            await InitializeDataSourcePropertiesAsync(dataGeneratorMetadata, result, nestedProperties).ConfigureAwait(false);
+
+            await ObjectInitializer.InitializeAsync(result).ConfigureAwait(false);
         }
     }
 
-    public async Task OnTestStart<T>(BeforeTestContext context, T item)
+    public (T, SharedType, string) GetItemForIndex<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
-        if (item is ITestStartEventReceiver testStartEventReceiver)
-        {
-            await testStartEventReceiver.OnTestStart(context);
-        }
+        return Task.Run(async () => await GetItemForIndexAsync<T>(index, testClassType, sharedTypes, keys, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
     }
 
-    public async Task OnTestEnd<T>(AfterTestContext context, T item)
+    public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        if (item is ITestEndEventReceiver testEndEventReceiver)
-        {
-            await testEndEventReceiver.OnTestEnd(context);
-        }
+        return Task.Run(async () => await GetAsync<T>(sharedType, testClassType, key, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
     }
 
-    /// <summary>
-    /// Registers a nested dependency with proper usage tracking for its shared type.
-    /// </summary>
-    /// <param name="nestedObject">The nested dependency object.</param>
-    /// <param name="sharedType">The shared type of the nested dependency.</param>
-    /// <param name="key">The key for keyed sharing.</param>
-    /// <param name="dataGeneratorMetadata">The data generator metadata.</param>
-    private static void RegisterNestedDependencyWithLifecycle(object nestedObject, SharedType sharedType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
+    public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Increment usage count for the nested dependency based on its shared type
-        // This ensures it gets the same usage tracking as if it were a main ClassDataSource
-        switch (sharedType)
-        {
-            case SharedType.None:
-                // No usage tracking needed for non-shared objects
-                break;
-            case SharedType.PerClass:
-                TestDataContainer.IncrementTestClassUsage(dataGeneratorMetadata.TestClassType, nestedObject.GetType());
-                break;
-            case SharedType.PerAssembly:
-                TestDataContainer.IncrementAssemblyUsage(dataGeneratorMetadata.TestClassType.Assembly, nestedObject.GetType());
-                break;
-            case SharedType.PerTestSession:
-                TestDataContainer.IncrementGlobalUsage(nestedObject.GetType());
-                break;
-            case SharedType.Keyed:
-                TestDataContainer.IncrementKeyUsage(key!, nestedObject.GetType());
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(sharedType));
-        }
+        return Task.Run(async () => await GetAsync(sharedType, type, testClassType, key, dataGeneratorMetadata).ConfigureAwait(false)).GetAwaiter().GetResult();
     }
 }

@@ -36,7 +36,7 @@ public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccess
         {
             return [..enumerable];
         }
-        
+
         return [result];
     }
 }

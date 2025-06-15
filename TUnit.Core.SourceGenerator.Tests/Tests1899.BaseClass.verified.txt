@@ -12,6 +12,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
 file partial class Hooks_BaseClass : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
@@ -20,18 +21,21 @@ file partial class Hooks_BaseClass : global::TUnit.Core.Interfaces.SourceGenerat
 		var instance = new Hooks_BaseClass();
 		SourceRegistrar.RegisterTestHookSource(instance);
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
 	{
 		return
 		[
 		];
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
 	{
 		return
 		[
 		];
 	}
+
 	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
 	{
 		return
@@ -57,7 +61,10 @@ file partial class Hooks_BaseClass : global::TUnit.Core.Interfaces.SourceGenerat
 						Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1899", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 						{
 							Name = "Tests1899",
-							Attributes = [],
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
 						}),
 						Name = "BaseClass",
 						Namespace = "TUnit.TestProject.Library.Bugs._1899",
@@ -65,19 +72,22 @@ file partial class Hooks_BaseClass : global::TUnit.Core.Interfaces.SourceGenerat
 						Parameters = [],
 						Properties = [],
 					}),
-},
-					Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod("Setup", []).Invoke(classInstance, [])),
-					HookExecutor = DefaultExecutor.Instance,
-					Order = 0,
-				},
-			];
-		}
-		public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
-		{
-			return
-			[
-			];
-		}
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod("Setup", []).Invoke(classInstance, [])),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
 	}
 
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
 ]

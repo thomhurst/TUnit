@@ -18,7 +18,18 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
 {
     protected override DiscoveredTest[] DiscoverTests()
     {
-        var testMetadatas = testsCollector.GetTests();
+        // TODO: This is a blocking call due to the synchronous base class constraint.
+        // Future refactoring should make the entire discovery pipeline async.
+        return DiscoverTestsAsync().GetAwaiter().GetResult();
+    }
+
+    private async Task<DiscoveredTest[]> DiscoverTestsAsync()
+    {
+        var testMetadatas = new List<TestMetadata>();
+        await foreach (var testMetadata in testsCollector.GetTestsAsync())
+        {
+            testMetadatas.Add(testMetadata);
+        }
         
         var dynamicTests = testsCollector.GetDynamicTests();
 
