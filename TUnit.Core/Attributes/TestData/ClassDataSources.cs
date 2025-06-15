@@ -111,10 +111,8 @@ internal class ClassDataSources
         try
         {
             var instance = Activator.CreateInstance(type)!;
-
-            // Use the centralized DataSourceInitializer for all initialization logic
-            await DataSourceInitializer.InitializeAsync(instance, dataGeneratorMetadata).ConfigureAwait(false);
-
+            
+            // The framework will handle initialization when the data is consumed
             return instance;
         }
         catch (TargetInvocationException targetInvocationException)

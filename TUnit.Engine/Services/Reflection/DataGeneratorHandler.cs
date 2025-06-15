@@ -60,7 +60,12 @@ internal static class DataGeneratorHandler
                 break;
             case ArgumentsAttribute args:
                 foreach (var item in GetArgumentsFromArgumentsAttribute(args))
-                    yield return async () => await Task.FromResult(item());
+                    yield return async () => 
+                    {
+                        var result = item();
+                        await InitializeDataGeneratorResultsAsync(result, context);
+                        return result;
+                    };
                 break;
             case InstanceMethodDataSourceAttribute instance:
                 await foreach (var item in GetArgumentsFromInstanceMethodAsync(instance, context))
@@ -91,7 +96,12 @@ internal static class DataGeneratorHandler
             yield return async () =>
             {
                 var funcResult = await func();
-                return ProcessDataGeneratorResult(funcResult);
+                var result = ProcessDataGeneratorResult(funcResult);
+                
+                // Initialize all objects returned by the data generator
+                await InitializeDataGeneratorResultsAsync(result, context);
+                
+                return result;
             };
         }
     }
@@ -197,18 +207,29 @@ internal static class DataGeneratorHandler
         return [funcResult];
     }
 
-    private static async Task InitializeResultAsync(object? funcResult)
+    private static async Task InitializeDataGeneratorResultsAsync(object?[]? results, DataGeneratorContext context)
     {
-        if (funcResult is object?[] objectArray)
+        if (results is null)
         {
-            foreach (var obj in objectArray.Where(o => o is not null))
-            {
-                await ObjectInitializer.InitializeAsync(obj);
-            }
+            return;
         }
-        else if (funcResult is not null)
+
+        // Create metadata for initialization
+        var metadata = new DataGeneratorMetadata
         {
-            await ObjectInitializer.InitializeAsync(funcResult);
+            Type = context.DataGeneratorType,
+            TestInformation = context.TestInformation,
+            ClassInstanceArguments = context.ClassInstanceArgumentsInvoked ?? [],
+            MembersToGenerate = [],
+            TestBuilderContext = context.TestBuilderContextAccessor,
+            TestClassInstance = null,
+            TestSessionId = string.Empty,
+        };
+
+        // Initialize each result object
+        foreach (var obj in results.Where(o => o is not null))
+        {
+            await DataSourceInitializer.InitializeAsync(obj!, metadata, context.TestBuilderContextAccessor);
         }
     }
 
@@ -223,7 +244,12 @@ internal static class DataGeneratorHandler
 
         foreach (var methodResult in enumerableResult)
         {
-            yield return async () => await Task.FromResult(ProcessMethodResult(methodResult, context));
+            yield return async () => 
+            {
+                var result = ProcessMethodResult(methodResult, context);
+                await InitializeDataGeneratorResultsAsync(result, context);
+                return result;
+            };
         }
     }
 
