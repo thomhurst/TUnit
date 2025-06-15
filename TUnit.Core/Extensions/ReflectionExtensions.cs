@@ -13,7 +13,13 @@ internal static class ReflectionExtensions
 
         var genericArguments = string.Join(",", type.GetGenericArguments().Select(GetFormattedName));
 
-        return $"{type.Name[..type.Name.IndexOf("`", StringComparison.Ordinal)]}<{genericArguments}>";
+        var backtickIndex = type.Name.IndexOf("`", StringComparison.Ordinal);
+        if (backtickIndex == -1)
+        {
+            return $"{type.Name}<{genericArguments}>";
+        }
+        
+        return $"{type.Name[..backtickIndex]}<{genericArguments}>";
 
     }
 

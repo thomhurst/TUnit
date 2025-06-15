@@ -537,6 +537,13 @@ internal class ReflectionTestsConstructor(
         TestBuilderContextAccessor testBuilderContextAccessor,
         out Exception? exception)
     {
+        return CreateInstance(typeDataAttribute, classInformation, classInstanceArguments, testInformation, testBuilderContextAccessor, false, out exception);
+    }
+    
+    private static object? CreateInstance(IDataAttribute typeDataAttribute, SourceGeneratedClassInformation classInformation, object?[] classInstanceArguments, SourceGeneratedMethodInformation testInformation,
+        TestBuilderContextAccessor testBuilderContextAccessor, bool skipPropertyInitialization,
+        out Exception? exception)
+    {
         exception = null;
 
         try
@@ -548,8 +555,10 @@ internal class ReflectionTestsConstructor(
 
             var args = classInstanceArguments.Select((x, i) => CastHelper.Cast(testInformation.Class.Parameters[i].Type, x)).ToArray();
 
-            var propertyArgs = GetPropertyArgs(classInformation, args, testInformation, testBuilderContextAccessor)
-                .ToDictionary(p => p.PropertyInformation.Name, p => p.Args().ElementAtOrDefault(0));
+            var propertyArgs = skipPropertyInitialization 
+                ? new Dictionary<string, object?>()
+                : GetPropertyArgs(classInformation, args, testInformation, testBuilderContextAccessor)
+                    .ToDictionary(p => p.PropertyInformation.Name, p => p.Args().ElementAtOrDefault(0));
 
             return InstanceHelper.CreateInstance(testInformation, args, propertyArgs, testBuilderContextAccessor.Current);
         }
@@ -873,7 +882,7 @@ internal class ReflectionTestsConstructor(
             TestBuilderContext = testBuilderContextAccessor,
             TestClassInstance =
                 needsInstance
-                    ? CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, out _)
+                    ? CreateInstance(testDataAttribute, type, classInstanceArgumentsInvoked ?? classInstanceArguments(), testInformation, testBuilderContextAccessor, true, out _)
                     : null,
             TestSessionId = string.Empty,
         };
