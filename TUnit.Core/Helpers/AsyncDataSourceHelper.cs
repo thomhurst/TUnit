@@ -16,11 +16,8 @@ internal static class AsyncDataSourceHelper
         DataGeneratorMetadata dataGeneratorMetadata,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        // Initialize the data generator if it implements IAsyncInitializer
-        if (dataSourceGenerator is IAsyncInitializer asyncInitializer)
-        {
-            await asyncInitializer.InitializeAsync().ConfigureAwait(false);
-        }
+        // Initialize the data generator
+        await ObjectInitializer.InitializeAsync(dataSourceGenerator).ConfigureAwait(false);
 
         var syncEnumerable = dataSourceGenerator.Generate(dataGeneratorMetadata);
         
@@ -41,11 +38,8 @@ internal static class AsyncDataSourceHelper
         DataGeneratorMetadata dataGeneratorMetadata,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        // Initialize the data generator if it implements IAsyncInitializer
-        if (asyncDataSourceGenerator is IAsyncInitializer asyncInitializer)
-        {
-            await asyncInitializer.InitializeAsync().ConfigureAwait(false);
-        }
+        // Initialize the data generator
+        await ObjectInitializer.InitializeAsync(asyncDataSourceGenerator).ConfigureAwait(false);
 
         var asyncEnumerable = asyncDataSourceGenerator.GenerateAsync(dataGeneratorMetadata);
         

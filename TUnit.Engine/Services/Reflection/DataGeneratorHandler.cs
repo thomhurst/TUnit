@@ -29,10 +29,7 @@ internal static class DataGeneratorHandler
         var instance = (IDataAttribute)Activator.CreateInstance(dataAttribute.GetType())!;
         await InitializeNestedDataGeneratorsAsync(instance, testInformation, testBuilderContextAccessor);
 
-        if (instance is IAsyncInitializer asyncInitializer)
-        {
-            await asyncInitializer.InitializeAsync();
-        }
+        await ObjectInitializer.InitializeAsync(instance);
 
         return instance;
     }
