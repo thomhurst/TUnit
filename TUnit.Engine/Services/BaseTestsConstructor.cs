@@ -18,16 +18,16 @@ internal abstract class BaseTestsConstructor(IExtension extension,
     ContextManager contextManager,
     IServiceProvider serviceProvider) : IDataProducer
 {
-    public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
+    public async Task<DiscoveredTest[]> GetTestsAsync(CancellationToken cancellationToken)
     {
-        var discoveredTests = DiscoverTests();
+        var discoveredTests = await DiscoverTestsAsync();
 
         dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
 
         return discoveredTests;
     }
 
-    protected abstract DiscoveredTest[] DiscoverTests();
+    protected abstract Task<DiscoveredTest[]> DiscoverTestsAsync();
 
     protected internal DiscoveredTest ConstructTest(TestMetadata testMetadata)
     {

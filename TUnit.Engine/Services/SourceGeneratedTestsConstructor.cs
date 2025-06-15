@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Extensions;
 using TUnit.Core;
-using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -17,14 +16,7 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
     ContextManager contextManager,
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
 {
-    protected override DiscoveredTest[] DiscoverTests()
-    {
-        // Note: Test discovery in Microsoft.Testing.Platform is synchronous,
-        // so we must block here. Using AsyncToSyncHelper to handle this properly.
-        return AsyncToSyncHelper.RunSync(DiscoverTestsAsync);
-    }
-
-    private async Task<DiscoveredTest[]> DiscoverTestsAsync()
+    protected override async Task<DiscoveredTest[]> DiscoverTestsAsync()
     {
         var testMetadatas = new List<TestMetadata>();
         await foreach (var testMetadata in testsCollector.GetTestsAsync())

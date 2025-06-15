@@ -25,7 +25,7 @@ internal class ReflectionTestsConstructor(
     ContextManager contextManager,
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
 {
-    protected override DiscoveredTest[] DiscoverTests()
+    protected override async Task<DiscoveredTest[]> DiscoverTestsAsync()
     {
 #if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
@@ -36,8 +36,8 @@ internal class ReflectionTestsConstructor(
 
         var allTypes = ReflectionScanner.GetTypes();
 
-        var standardTests = DiscoverStandardTests(allTypes).ToList();
-        var dynamicTests = DiscoverDynamicTests(allTypes).ToList();
+        var standardTests = await DiscoverStandardTestsAsync(allTypes);
+        var dynamicTests = await DiscoverDynamicTestsAsync(allTypes);
 
         var allDynamicTests = standardTests.Concat(dynamicTests).ToList();
         var discoveredTests = allDynamicTests.SelectMany(ConstructTests).ToArray();
@@ -45,29 +45,35 @@ internal class ReflectionTestsConstructor(
         return discoveredTests;
     }
 
-    private IEnumerable<DynamicTest> DiscoverStandardTests(HashSet<Type> allTypes)
+    private async Task<List<DynamicTest>> DiscoverStandardTestsAsync(HashSet<Type> allTypes)
     {
-        var testClasses = allTypes.Where(IsTestClass);
-
-        foreach (var testClass in testClasses)
+        return await Task.Run(() =>
         {
-            var testMethods = GetTestMethods(testClass);
-            if (testMethods.Length == 0)
-            {
-                continue;
-            }
+            var results = new List<DynamicTest>();
+            var testClasses = allTypes.Where(IsTestClass);
 
-            var classInformation = ReflectionToSourceModelHelpers.GenerateClass(testClass);
-            var methodInformations = testMethods
-                .Select(method => ReflectionToSourceModelHelpers.BuildTestMethod(classInformation, method, method.Name))
-                .ToArray();
-
-            var testBuilder = new TestBuilder();
-            foreach (var test in testBuilder.BuildTests(classInformation, methodInformations))
+            foreach (var testClass in testClasses)
             {
-                yield return test;
+                var testMethods = GetTestMethods(testClass);
+                if (testMethods.Length == 0)
+                {
+                    continue;
+                }
+
+                var classInformation = ReflectionToSourceModelHelpers.GenerateClass(testClass);
+                var methodInformations = testMethods
+                    .Select(method => ReflectionToSourceModelHelpers.BuildTestMethod(classInformation, method, method.Name))
+                    .ToArray();
+
+                var testBuilder = new TestBuilder();
+                foreach (var test in testBuilder.BuildTests(classInformation, methodInformations))
+                {
+                    results.Add(test);
+                }
             }
-        }
+            
+            return results;
+        });
     }
 
     private static bool IsTestClass(Type type)
@@ -88,27 +94,34 @@ internal class ReflectionTestsConstructor(
             .ToArray();
     }
 
-    private IEnumerable<DynamicTest> DiscoverDynamicTests(HashSet<Type> allTypes)
+    private async Task<List<DynamicTest>> DiscoverDynamicTestsAsync(HashSet<Type> allTypes)
     {
-        foreach (var type in allTypes)
+        return await Task.Run(() =>
         {
-            foreach (var method in type.GetMethods())
+            var results = new List<DynamicTest>();
+            
+            foreach (var type in allTypes)
             {
-                var dynamicTestBuilderAttribute = method
-                    .GetCustomAttributes<DynamicTestBuilderAttribute>()
-                    .FirstOrDefault();
-
-                if (dynamicTestBuilderAttribute is null)
+                foreach (var method in type.GetMethods())
                 {
-                    continue;
-                }
+                    var dynamicTestBuilderAttribute = method
+                        .GetCustomAttributes<DynamicTestBuilderAttribute>()
+                        .FirstOrDefault();
 
-                foreach (var test in BuildDynamicTests(type, method, dynamicTestBuilderAttribute))
-                {
-                    yield return test;
+                    if (dynamicTestBuilderAttribute is null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var test in BuildDynamicTests(type, method, dynamicTestBuilderAttribute))
+                    {
+                        results.Add(test);
+                    }
                 }
             }
-        }
+            
+            return results;
+        });
     }
 
     private static IEnumerable<DynamicTest> BuildDynamicTests(
