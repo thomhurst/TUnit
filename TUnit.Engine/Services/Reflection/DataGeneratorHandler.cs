@@ -22,7 +22,7 @@ internal static class DataGeneratorHandler
         SourceGeneratedMethodInformation testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        if (dataAttribute is not IDataSourceGeneratorAttribute || 
+        if (dataAttribute is not IDataSourceGeneratorAttribute ||
             DotNetAssemblyHelper.IsInDotNetCoreLibrary(dataAttribute.GetType()))
         {
             return dataAttribute;
@@ -30,7 +30,7 @@ internal static class DataGeneratorHandler
 
         var instance = (IDataAttribute)Activator.CreateInstance(dataAttribute.GetType())!;
         InitializeNestedDataGenerators(instance, testInformation, testBuilderContextAccessor);
-        
+
         if (instance is IAsyncInitializer asyncInitializer)
         {
             AsyncToSyncHelper.RunSync(() => asyncInitializer.InitializeAsync());
@@ -64,7 +64,7 @@ internal static class DataGeneratorHandler
         foreach (var property in classInformation.Properties.Where(p => p.HasAttribute<IDataAttribute>()))
         {
             var generator = property.Attributes.OfType<IDataAttribute>().First();
-            
+
             InitializeNestedDataGeneratorsInternal(generator, methodInformation, testBuilderContextAccessor, visited);
 
             var dataGeneratorMetadata = new DataGeneratorMetadata
@@ -79,10 +79,10 @@ internal static class DataGeneratorHandler
             };
 
             var value = ReflectionValueCreator.CreatePropertyValue(
-                classInformation, 
-                testBuilderContextAccessor, 
-                generator, 
-                property, 
+                classInformation,
+                testBuilderContextAccessor,
+                generator,
+                property,
                 dataGeneratorMetadata);
 
             if (value is not null)
@@ -167,7 +167,7 @@ internal static class DataGeneratorHandler
             out _);
 
         var methodDataSourceType = attribute.ClassProvidingDataSource ?? context.ClassInformation.Type;
-        var result = InvokeMethod(methodDataSourceType, attribute.MethodNameProvidingDataSource, 
+        var result = InvokeMethod(methodDataSourceType, attribute.MethodNameProvidingDataSource,
             attribute.Arguments, instance);
 
         // Handle async instance methods
@@ -186,7 +186,7 @@ internal static class DataGeneratorHandler
         DataGeneratorContext context)
     {
         var methodDataSourceType = attribute.ClassProvidingDataSource ?? context.ClassInformation.Type;
-        
+
         // We need to handle async methods here, but since this method returns IEnumerable<Func<object?[]>>,
         // we'll wrap the async call in a synchronous context that can be executed later
         return ProcessMethodResultsAsync(methodDataSourceType, attribute, context);
@@ -197,12 +197,12 @@ internal static class DataGeneratorHandler
         DataGeneratorContext context)
     {
         // Don't prepare generators from core libraries or if not for properties
-        if (context.DataGeneratorType != DataGeneratorType.Property || 
+        if (context.DataGeneratorType != DataGeneratorType.Property ||
             DotNetAssemblyHelper.IsInDotNetCoreLibrary(generator.GetType()))
         {
             return generator;
         }
-        
+
         // For property generators, we need a fresh instance that's properly initialized
         var instance = (IDataSourceGeneratorAttribute)Activator.CreateInstance(generator.GetType())!;
         InitializeNestedDataGenerators(instance, context.TestInformation, context.TestBuilderContextAccessor);
@@ -214,12 +214,12 @@ internal static class DataGeneratorHandler
         DataGeneratorContext context)
     {
         // Don't prepare generators from core libraries or if not for properties
-        if (context.DataGeneratorType != DataGeneratorType.Property || 
+        if (context.DataGeneratorType != DataGeneratorType.Property ||
             DotNetAssemblyHelper.IsInDotNetCoreLibrary(generator.GetType()))
         {
             return generator;
         }
-        
+
         // For property generators, we need a fresh instance that's properly initialized
         var instance = (IAsyncDataSourceGeneratorAttribute)Activator.CreateInstance(generator.GetType())!;
         InitializeNestedDataGenerators(instance, context.TestInformation, context.TestBuilderContextAccessor);
@@ -323,7 +323,7 @@ internal static class DataGeneratorHandler
         MethodDataSourceAttribute attribute,
         DataGeneratorContext context)
     {
-        const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | 
+        const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic |
                                           BindingFlags.Static | BindingFlags.FlattenHierarchy;
 
         var method = methodDataSourceType.GetMethod(
@@ -332,16 +332,16 @@ internal static class DataGeneratorHandler
             binder: null,
             types: attribute.Arguments.Select(x => x?.GetType() ?? typeof(object)).ToArray(),
             modifiers: null)!;
-            
+
         var result = method.Invoke(null, attribute.Arguments);
-        
+
         // If the method returns a Task or ValueTask, we need to handle it
         if (TryGetAsyncTask(result, out var asyncTask))
         {
             // For async methods, we need to await the result before processing
             // Note: This follows the same pattern as async data generators - test discovery is synchronous
             var unwrappedResult = AsyncToSyncHelper.RunSync(() => asyncTask);
-            
+
             // Now process the unwrapped result normally
             foreach (var item in ProcessMethodResults(unwrappedResult, context))
             {
@@ -357,25 +357,25 @@ internal static class DataGeneratorHandler
             }
         }
     }
-    
+
     private static bool IsAsyncResult(object? result)
     {
         if (result is null)
             return false;
-            
+
         var type = result.GetType();
         return typeof(Task).IsAssignableFrom(type) || type.Name.StartsWith("ValueTask");
     }
-    
+
     private static bool TryGetAsyncTask(object? result, out Task<object?> task)
     {
         task = null!;
-        
+
         if (result is null)
             return false;
-            
+
         var type = result.GetType();
-        
+
         // Handle Task<T>
         if (result is Task taskResult)
         {
@@ -385,36 +385,30 @@ internal static class DataGeneratorHandler
                 task = CreateObjectTask(taskResult, type);
                 return true;
             }
-            else
-            {
-                // Non-generic Task, wrap it as Task<object?>
-                task = taskResult.ContinueWith(_ => (object?)null);
-                return true;
-            }
+            // Non-generic Task, wrap it as Task<object?>
+            task = taskResult.ContinueWith(_ => (object?)null);
+            return true;
         }
-        
+
         // Handle ValueTask<T>
         if (type.Name.StartsWith("ValueTask"))
         {
             // Convert ValueTask to Task first
             var asTaskMethod = type.GetMethod("AsTask");
             var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
-            
+
             if (type.IsGenericType)
             {
                 task = CreateObjectTask(convertedTask, convertedTask.GetType());
                 return true;
             }
-            else
-            {
-                task = convertedTask.ContinueWith(_ => (object?)null);
-                return true;
-            }
+            task = convertedTask.ContinueWith(_ => (object?)null);
+            return true;
         }
-        
+
         return false;
     }
-    
+
     private static Task<object?> CreateObjectTask(Task task, Type taskType)
     {
         // Use ContinueWith to extract the result and cast to object?
@@ -422,15 +416,15 @@ internal static class DataGeneratorHandler
         {
             if (t.IsFaulted)
                 throw t.Exception!.InnerException!;
-                
+
             if (t.IsCanceled)
                 throw new TaskCanceledException();
-                
+
             var resultProperty = taskType.GetProperty("Result");
             return resultProperty?.GetValue(t);
         });
     }
-    
+
     private static object? UnwrapAsyncResult(object? result)
     {
         return AsyncToSyncHelper.UnwrapTaskResult(result);
@@ -480,8 +474,8 @@ internal class DataGeneratorContext
             },
             TestBuilderContext = TestBuilderContextAccessor,
             TestClassInstance = NeedsInstance
-                ? InstanceCreator.CreateInstance(TestDataAttribute, ClassInformation, 
-                    ClassInstanceArgumentsInvoked ?? ClassInstanceArguments(), 
+                ? InstanceCreator.CreateInstance(TestDataAttribute, ClassInformation,
+                    ClassInstanceArgumentsInvoked ?? ClassInstanceArguments(),
                     TestInformation, TestBuilderContextAccessor, true, out _)
                 : null,
             TestSessionId = string.Empty,
