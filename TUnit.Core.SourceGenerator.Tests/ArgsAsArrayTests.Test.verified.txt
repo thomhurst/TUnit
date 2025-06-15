@@ -19,12 +19,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -142,12 +142,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -265,12 +265,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -388,12 +388,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -511,12 +511,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		global::TUnit.Core.SourceRegistrar.Register(new ArgsAsArrayTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;

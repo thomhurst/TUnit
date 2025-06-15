@@ -19,12 +19,12 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 		global::TUnit.Core.SourceRegistrar.Register(new ClassConstructorTest());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -73,6 +73,7 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 					[
 						new global::TUnit.Core.SourceGeneratedPropertyInformation
 						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.ClassConstructorTest).GetProperty("DummyReferenceTypeClass"),
 							Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
 							Name = "DummyReferenceTypeClass",
 							IsStatic = false,

@@ -19,12 +19,12 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		global::TUnit.Core.SourceRegistrar.Register(new Tests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -111,15 +111,16 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
-				var classArgGeneratedData = classArgGeneratedDataAccessor();
-				classInstanceArguments = [classArgGeneratedData];
+				var classArgGeneratedData = await classArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Bugs._1821.MyData classArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1821.MyData>(classArgGeneratedData[0]);
+				classInstanceArguments = [classArg];
 
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1821.Tests>(() => new global::TUnit.TestProject.Bugs._1821.Tests(classArgGeneratedData), sessionId, testBuilderContext);
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1821.Tests>(() => new global::TUnit.TestProject.Bugs._1821.Tests(classArg), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
 				classInstance = resettableClassFactory.Value;
 				foreach (var methodDataAccessor in classInstance.DataSource())
@@ -130,8 +131,8 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
-						TestClassArguments = [classArgGeneratedData],
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
+						TestClassArguments = [classArg],
 						TestMethodArguments = [methodData],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 						{
@@ -155,7 +156,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
 				MethodName = $"MethodDataSource",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.MethodDataSource failed to initialize", exception),
 				TestFilePath = @"",
@@ -187,12 +188,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		global::TUnit.Core.SourceRegistrar.Register(new Tests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		var results = new global::System.Collections.Generic.List<TestMetadata>();
+		results.AddRange(await Tests0(sessionId));
+		results.AddRange(await Tests1(sessionId));
+		return results;
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -280,15 +284,16 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
-				var classArgGeneratedData = classArgGeneratedDataAccessor();
-				classInstanceArguments = [classArgGeneratedData];
+				var classArgGeneratedData = await classArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Bugs._1821.MyData classArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1821.MyData>(classArgGeneratedData[0]);
+				classInstanceArguments = [classArg];
 
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1821.Tests>(() => new global::TUnit.TestProject.Bugs._1821.Tests(classArgGeneratedData), sessionId, testBuilderContext);
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1821.Tests>(() => new global::TUnit.TestProject.Bugs._1821.Tests(classArg), sessionId, testBuilderContext);
 				var resettableClassFactory = resettableClassFactoryDelegate();
 				classInstance = resettableClassFactory.Value;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -317,19 +322,19 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
+				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
 
 				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
-					var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+					var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
 					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
 
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
-						TestClassArguments = [classArgGeneratedData],
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
+						TestClassArguments = [classArg],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
 						{
@@ -353,7 +358,179 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
+				MethodName = $"MatrixDataSource",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.MatrixDataSource failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 18,
+			});
+		}
+		return nodes;
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests1(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation
+			{
+				Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
+				Name = "MatrixDataSource",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+					{
+						Name = "value",
+						Attributes = 
+						[
+							new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
+						],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1821.Tests", () => new global::TUnit.Core.SourceGeneratedClassInformation
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
+					Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Tests1821", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
+					{
+						Name = "Tests1821",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "Tests",
+					Namespace = "TUnit.TestProject.Bugs._1821",
+					Attributes = 
+					[
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1821.MyData>
+						{
+							Name = "data",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.Bugs._1821.Tests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1821.MyData>
+					{
+						Name = "data",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			};
+			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>();
+
+
+			testBuilderContext.DataAttributes.Add(classDataAttribute);
+
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
+
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			{
+				classDataIndex++;
+				var classArgGeneratedData = await classArgGeneratedDataAccessor();
+				global::TUnit.TestProject.Bugs._1821.MyData classArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1821.MyData>(classArgGeneratedData[0]);
+				classInstanceArguments = [classArg];
+
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1821.Tests>(() => new global::TUnit.TestProject.Bugs._1821.Tests(classArg), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
+				classInstance = resettableClassFactory.Value;
+				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+						{
+							Name = "value",
+							Attributes = 
+							[
+								new global::TUnit.Core.MatrixInstanceMethodAttribute<global::TUnit.TestProject.Bugs._1821.Tests>("DataSource")
+							],
+							ReflectionInfo = null!,
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				};
+				var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
+
+
+				testBuilderContext.DataAttributes.Add(methodDataAttribute);
+
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
+
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				{
+					testMethodDataIndex++;
+					var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
+					string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
+
+
+					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
+					{
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
+						TestClassArguments = [classArg],
+						TestMethodArguments = [methodArg],
+						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+						{
+						},
+						CurrentRepeatAttempt = 0,
+						RepeatLimit = 0,
+						ResettableClassFactory = resettableClassFactory,
+						TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixDataSource(methodArg)),
+						TestFilePath = @"",
+						TestLineNumber = 18,
+						TestMethod = testInformation,
+						TestBuilderContext = testBuilderContext,
+					});
+					resettableClassFactory = resettableClassFactoryDelegate();
+					testBuilderContext = new();
+					testBuilderContextAccessor.Current = testBuilderContext;
+				}
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
+			{
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
 				MethodName = $"MatrixDataSource",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.MatrixDataSource failed to initialize", exception),
 				TestFilePath = @"",

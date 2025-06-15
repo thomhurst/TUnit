@@ -85,6 +85,7 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 						[
 							new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetProperty("Fixture"),
 								Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
 								Name = "Fixture",
 								IsStatic = false,
@@ -234,6 +235,7 @@ file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGener
 						[
 							new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>).GetProperty("Fixture"),
 								Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
 								Name = "Fixture",
 								IsStatic = false,
@@ -383,6 +385,7 @@ file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.Source
 						[
 							new global::TUnit.Core.SourceGeneratedPropertyInformation
 							{
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>).GetProperty("Fixture"),
 								Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
 								Name = "Fixture",
 								IsStatic = false,

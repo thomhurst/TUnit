@@ -73,21 +73,69 @@ namespace TUnit.Core
         public static System.Threading.Tasks.ValueTask ConvertObject(object? invoke) { }
         public static bool TryGetAwaitableTask(object awaitable, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out System.Threading.Tasks.Task? task) { }
     }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
+    public abstract class AsyncDataSourceGeneratorAttribute<T> : TUnit.Core.TestDataAttribute, TUnit.Core.IAsyncDataSourceGeneratorAttribute, TUnit.Core.IDataAttribute
+    {
+        protected AsyncDataSourceGeneratorAttribute() { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.AsyncDataSourceGeneratorAttribute<T>.<GenerateAsync>d__1))]
+        public System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<T>>> GenerateAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected abstract System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<T>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
+    public abstract class AsyncDataSourceGeneratorAttribute<T1, T2> : TUnit.Core.TestDataAttribute, TUnit.Core.IAsyncDataSourceGeneratorAttribute, TUnit.Core.IDataAttribute
+    {
+        protected AsyncDataSourceGeneratorAttribute() { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2>.<GenerateAsync>d__1))]
+        public System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2>>>> GenerateAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected abstract System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
+    public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3> : TUnit.Core.TestDataAttribute, TUnit.Core.IAsyncDataSourceGeneratorAttribute, TUnit.Core.IDataAttribute
+    {
+        protected AsyncDataSourceGeneratorAttribute() { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GenerateAsync>d__1))]
+        public System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3>>>> GenerateAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected abstract System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
+    public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4> : TUnit.Core.TestDataAttribute, TUnit.Core.IAsyncDataSourceGeneratorAttribute, TUnit.Core.IDataAttribute
+    {
+        protected AsyncDataSourceGeneratorAttribute() { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>.<GenerateAsync>d__1))]
+        public System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3, T4>>>> GenerateAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected abstract System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
+    public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : TUnit.Core.TestDataAttribute, TUnit.Core.IAsyncDataSourceGeneratorAttribute, TUnit.Core.IDataAttribute
+    {
+        protected AsyncDataSourceGeneratorAttribute() { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GenerateAsync>d__1))]
+        public System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3, T4, T5>>>> GenerateAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected abstract System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3, T4, T5>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+    }
     public class AsyncEvent<TEventArgs>
     {
         public AsyncEvent() { }
         public int Order { get; set; }
-        public static TUnit.Core.AsyncEvent<TEventArgs> operator +(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object, TEventArgs, System.Threading.Tasks.Task> callback) { }
+        public static TUnit.Core.AsyncEvent<TEventArgs> operator +(TUnit.Core.AsyncEvent<TEventArgs>? e, System.Func<object, TEventArgs, System.Threading.Tasks.ValueTask> callback) { }
         public class Invocation : TUnit.Core.Interfaces.IEventReceiver
         {
-            public Invocation(System.Func<object, TEventArgs, System.Threading.Tasks.Task> factory, int order) { }
+            public Invocation(System.Func<object, TEventArgs, System.Threading.Tasks.ValueTask> factory, int order) { }
             public int Order { get; }
             public System.Threading.Tasks.ValueTask InvokeAsync(object sender, TEventArgs eventArgs) { }
         }
     }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
+    public abstract class AsyncUntypedDataSourceGeneratorAttribute : TUnit.Core.TestDataAttribute, TUnit.Core.IAsyncDataSourceGeneratorAttribute, TUnit.Core.IDataAttribute
+    {
+        protected AsyncUntypedDataSourceGeneratorAttribute() { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute.<GenerateAsync>d__1))]
+        public System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<object?[]?>>> GenerateAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected abstract System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<object?[]?>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+    }
     public abstract class BaseClassConstructorAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.IDataAttribute
     {
-        public abstract System.Type ClassConstructorType { get; set; }
+        public abstract System.Type ClassConstructorType { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Method)]
     public abstract class BaseTestAttribute : TUnit.Core.TUnitAttribute
@@ -133,14 +181,14 @@ namespace TUnit.Core
     public class ClassConstructorAttribute : TUnit.Core.BaseClassConstructorAttribute
     {
         public ClassConstructorAttribute(System.Type classConstructorType) { }
-        public override System.Type ClassConstructorType { get; set; }
+        public override System.Type ClassConstructorType { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class)]
     public sealed class ClassConstructorAttribute<T> : TUnit.Core.ClassConstructorAttribute
         where T : TUnit.Core.Interfaces.IClassConstructor, new ()
     {
         public ClassConstructorAttribute() { }
-        public override System.Type ClassConstructorType { get; set; }
+        public override System.Type ClassConstructorType { get; init; }
     }
     public class ClassConstructorMetadata : System.IEquatable<TUnit.Core.ClassConstructorMetadata>
     {
@@ -149,7 +197,7 @@ namespace TUnit.Core
         public required string TestSessionId { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute : TUnit.Core.UntypedDataSourceGeneratorAttribute
+    public sealed class ClassDataSourceAttribute : TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute, TUnit.Core.IDataAttribute, TUnit.Core.ISharedDataSourceAttribute
     {
         public ClassDataSourceAttribute(System.Type type) { }
         public ClassDataSourceAttribute(params System.Type[] types) { }
@@ -159,35 +207,38 @@ namespace TUnit.Core
         public ClassDataSourceAttribute(System.Type type, System.Type type2, System.Type type3, System.Type type4, System.Type type5) { }
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
-        public override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.ClassDataSourceAttribute.<GenerateDataSourcesAsync>d__15))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<object?[]?>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
         public System.Collections.Generic.IEnumerable<string> GetKeys() { }
         public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T> : TUnit.Core.DataSourceGeneratorAttribute<T>
+    public sealed class ClassDataSourceAttribute<T> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T>, TUnit.Core.IDataAttribute, TUnit.Core.ISharedDataSourceAttribute
     {
         public ClassDataSourceAttribute() { }
         public System.Type ClassType { get; }
         public string Key { get; set; }
         public TUnit.Core.SharedType Shared { get; set; }
-        public override System.Collections.Generic.IEnumerable<System.Func<T>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.ClassDataSourceAttribute<T>.<GenerateDataSourcesAsync>d__10))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<T>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
         public System.Collections.Generic.IEnumerable<string> GetKeys() { }
         public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T1, T2> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2>
+    public sealed class ClassDataSourceAttribute<T1, T2> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2>, TUnit.Core.IDataAttribute, TUnit.Core.ISharedDataSourceAttribute
         where T1 : new()
         where T2 : new()
     {
         public ClassDataSourceAttribute() { }
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
-        public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.ClassDataSourceAttribute<T1, T2>.<GenerateDataSourcesAsync>d__8))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
         public System.Collections.Generic.IEnumerable<string> GetKeys() { }
         public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T1, T2, T3> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3>
+    public sealed class ClassDataSourceAttribute<T1, T2, T3> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3>, TUnit.Core.IDataAttribute, TUnit.Core.ISharedDataSourceAttribute
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -195,12 +246,13 @@ namespace TUnit.Core
         public ClassDataSourceAttribute() { }
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
-        public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.ClassDataSourceAttribute<T1, T2, T3>.<GenerateDataSourcesAsync>d__8))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
         public System.Collections.Generic.IEnumerable<string> GetKeys() { }
         public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T1, T2, T3, T4> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4>
+    public sealed class ClassDataSourceAttribute<T1, T2, T3, T4> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>, TUnit.Core.IDataAttribute, TUnit.Core.ISharedDataSourceAttribute
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -209,12 +261,13 @@ namespace TUnit.Core
         public ClassDataSourceAttribute() { }
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
-        public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4>.<GenerateDataSourcesAsync>d__8))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
         public System.Collections.Generic.IEnumerable<string> GetKeys() { }
         public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<T1, T2, T3, T4, T5> : TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
+    public sealed class ClassDataSourceAttribute<T1, T2, T3, T4, T5> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>, TUnit.Core.IDataAttribute, TUnit.Core.ISharedDataSourceAttribute
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -224,7 +277,8 @@ namespace TUnit.Core
         public ClassDataSourceAttribute() { }
         public string[] Keys { get; set; }
         public TUnit.Core.SharedType[] Shared { get; set; }
-        public override System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4, T5>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.ClassDataSourceAttribute<T1, T2, T3, T4, T5>.<GenerateDataSourcesAsync>d__8))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3, T4, T5>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
         public System.Collections.Generic.IEnumerable<string> GetKeys() { }
         public System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes() { }
     }
@@ -270,42 +324,53 @@ namespace TUnit.Core
         public required TUnit.Core.Enums.DataGeneratorType Type { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T> : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
+    public abstract class DataSourceGeneratorAttribute<T> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T>
     {
         protected DataSourceGeneratorAttribute() { }
-        public abstract System.Collections.Generic.IEnumerable<System.Func<T>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        protected abstract System.Collections.Generic.IEnumerable<System.Func<T>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.DataSourceGeneratorAttribute<T>.<GenerateDataSourcesAsync>d__1))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<T>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T1, T2> : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
+    public abstract class DataSourceGeneratorAttribute<T1, T2> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2>
     {
         protected DataSourceGeneratorAttribute() { }
-        public abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        protected abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.DataSourceGeneratorAttribute<T1, T2>.<GenerateDataSourcesAsync>d__1))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
+    public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3>
     {
         protected DataSourceGeneratorAttribute() { }
-        public abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        protected abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3>.<GenerateDataSourcesAsync>d__1))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
+    public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>
     {
         protected DataSourceGeneratorAttribute() { }
-        public abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        protected abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4>.<GenerateDataSourcesAsync>d__1))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
+    public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : TUnit.Core.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
     {
         protected DataSourceGeneratorAttribute() { }
-        public abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4, T5>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        protected abstract System.Collections.Generic.IEnumerable<System.Func<System.ValueTuple<T1, T2, T3, T4, T5>>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GenerateDataSourcesAsync>d__1))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<System.ValueTuple<T1, T2, T3, T4, T5>>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
-    public class DedicatedThreadExecutor : TUnit.Core.GenericAbstractExecutor
+    public class DedicatedThreadExecutor : TUnit.Core.GenericAbstractExecutor, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
     {
         public DedicatedThreadExecutor() { }
         protected virtual void CleanUp() { }
         protected virtual void ConfigureThread(System.Threading.Thread thread) { }
         protected override sealed System.Threading.Tasks.ValueTask ExecuteAsync(System.Func<System.Threading.Tasks.ValueTask> action) { }
         protected virtual void Initialize() { }
+        public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
     }
     public class DefaultExecutor : TUnit.Core.GenericAbstractExecutor
     {
@@ -317,7 +382,7 @@ namespace TUnit.Core
         protected DependencyInjectionDataSourceAttribute() { }
         public abstract object? Create(TScope scope, System.Type type);
         public abstract TScope CreateScope(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
-        public override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
     public class DependsOnAttribute : TUnit.Core.TUnitAttribute
@@ -460,6 +525,7 @@ namespace TUnit.Core
     public abstract class GenericAbstractExecutor : TUnit.Core.Interfaces.IHookExecutor, TUnit.Core.Interfaces.ITestExecutor
     {
         protected GenericAbstractExecutor() { }
+        public int Order { get; }
         public System.Threading.Tasks.ValueTask ExecuteAfterAssemblyHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.AssemblyHookContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
         public System.Threading.Tasks.ValueTask ExecuteAfterClassHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.ClassHookContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
         public System.Threading.Tasks.ValueTask ExecuteAfterTestDiscoveryHook(TUnit.Core.SourceGeneratedMethodInformation hookMethodInfo, TUnit.Core.TestDiscoveryContext context, System.Func<System.Threading.Tasks.ValueTask> action) { }
@@ -501,11 +567,20 @@ namespace TUnit.Core
         TestDiscovery = 4,
     }
     public interface IAccessesInstanceData { }
+    public interface IAsyncDataSourceGeneratorAttribute : TUnit.Core.IDataAttribute
+    {
+        System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<object?[]?>>> GenerateAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+    }
     public interface IDataAttribute { }
     public interface IDynamicTestRegistrar
     {
         System.Threading.Tasks.Task Register<TClass>(TUnit.Core.DynamicTest<TClass> dynamicTest)
             where TClass :  class;
+    }
+    public interface ISharedDataSourceAttribute : TUnit.Core.IDataAttribute
+    {
+        System.Collections.Generic.IEnumerable<string> GetKeys();
+        System.Collections.Generic.IEnumerable<TUnit.Core.SharedType> GetSharedTypes();
     }
     [System.AttributeUsage(System.AttributeTargets.Class)]
     public sealed class InheritsTestsAttribute : TUnit.Core.TUnitAttribute
@@ -540,7 +615,7 @@ namespace TUnit.Core
     public sealed class MatrixDataSourceAttribute : TUnit.Core.UntypedDataSourceGeneratorAttribute
     {
         public MatrixDataSourceAttribute() { }
-        public override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
     public class MatrixExclusionAttribute : TUnit.Core.TUnitAttribute
@@ -575,12 +650,6 @@ namespace TUnit.Core
     {
         public MethodDataSourceAttribute(string methodNameProvidingDataSource) { }
     }
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
-    public abstract class UntypedDataSourceGeneratorAttribute : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
-    {
-        protected UntypedDataSourceGeneratorAttribute() { }
-        public abstract System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
-    }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public class NotInParallelAttribute : TUnit.Core.SingleTUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestDiscoveryEventReceiver
     {
@@ -599,7 +668,7 @@ namespace TUnit.Core
     }
     public static class ObjectInitializer
     {
-        public static System.Threading.Tasks.Task InitializeAsync(object? obj, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.ValueTask InitializeAsync(object? obj, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public class ParallelGroupAttribute : TUnit.Core.TUnitAttribute, TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestDiscoveryEventReceiver
     {
@@ -791,8 +860,10 @@ namespace TUnit.Core
     public class SourceGeneratedPropertyInformation : TUnit.Core.SourceGeneratedMemberInformation, System.IEquatable<TUnit.Core.SourceGeneratedPropertyInformation>
     {
         public SourceGeneratedPropertyInformation() { }
+        public required System.Func<object?, object?> Getter { get; init; }
         public required bool IsStatic { get; init; }
         public string? Key { get; init; }
+        public required System.Reflection.PropertyInfo ReflectionInfo { get; init; }
         public TUnit.Core.SharedType Shared { get; init; }
         public override required System.Type Type { get; init; }
     }
@@ -805,6 +876,7 @@ namespace TUnit.Core
         public static void RegisterAssemblyHookSource(TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource testSource) { }
         public static void RegisterClassHookSource(TUnit.Core.Interfaces.SourceGenerator.IClassHookSource testSource) { }
         public static void RegisterDynamic(TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource testSource) { }
+        public static void RegisterGlobalInitializer(System.Func<System.Threading.Tasks.Task> initializer) { }
         public static void RegisterProperty<T>() { }
         public static void RegisterTestDiscoveryHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource testSource) { }
         public static void RegisterTestHookSource(TUnit.Core.Interfaces.SourceGenerator.ITestHookSource testSource) { }
@@ -823,6 +895,7 @@ namespace TUnit.Core
         public TUnit.Core.TestContextEvents Events { get; }
         public System.Guid Id { get; }
         public System.Collections.Generic.Dictionary<string, object?> ObjectBag { get; }
+        public void RegisterForInitialization(object? obj) { }
     }
     public class TestBuilderContextAccessor
     {
@@ -1009,6 +1082,14 @@ namespace TUnit.Core
         public System.DateTimeOffset Start { get; init; }
         public string StepName { get; init; }
     }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
+    public abstract class UntypedDataSourceGeneratorAttribute : TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute
+    {
+        protected UntypedDataSourceGeneratorAttribute() { }
+        protected abstract System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.UntypedDataSourceGeneratorAttribute.<GenerateDataSourcesAsync>d__1))]
+        protected override System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<object?[]?>>> GenerateDataSourcesAsync(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
     public class UntypedDynamicTest : TUnit.Core.DynamicTest, System.IEquatable<TUnit.Core.UntypedDynamicTest>
     {
         public UntypedDynamicTest(System.Reflection.MethodInfo testBody) { }
@@ -1020,12 +1101,13 @@ namespace TUnit.Core
     }
     public class UntypedFailedDynamicTest : System.IEquatable<TUnit.Core.UntypedFailedDynamicTest>
     {
-        public UntypedFailedDynamicTest() { }
+        public UntypedFailedDynamicTest(System.Reflection.MethodInfo TestMethod) { }
         public required System.Exception Exception { get; init; }
         public required string MethodName { get; init; }
         public required System.Type TestClassType { get; init; }
         public required string TestFilePath { get; init; }
         public required int TestLineNumber { get; init; }
+        public System.Reflection.MethodInfo TestMethod { get; init; }
         public static TUnit.Core.DynamicTest op_Implicit(TUnit.Core.UntypedFailedDynamicTest failedTestMetadata) { }
     }
     public class UntypedTestDetails : TUnit.Core.TestDetails, System.IEquatable<TUnit.Core.UntypedTestDetails>
@@ -1093,21 +1175,23 @@ namespace TUnit.Core.Enums
 }
 namespace TUnit.Core.Events
 {
+    [System.Flags]
     public enum EventType
     {
-        Initialize = 0,
-        Dispose = 1,
-        TestRegistered = 2,
-        TestStart = 3,
-        TestEnd = 4,
-        TestSkipped = 5,
-        FirstTestInClass = 6,
-        FirstTestInAssembly = 7,
-        FirstTestInTestSession = 8,
-        LastTestInClass = 9,
-        LastTestInAssembly = 10,
-        LastTestInTestSession = 11,
-        TestRetry = 12,
+        Initialize = 1,
+        Dispose = 2,
+        TestRegistered = 4,
+        TestStart = 8,
+        TestEnd = 16,
+        TestSkipped = 32,
+        FirstTestInClass = 64,
+        FirstTestInAssembly = 128,
+        FirstTestInTestSession = 256,
+        LastTestInClass = 512,
+        LastTestInAssembly = 1024,
+        LastTestInTestSession = 2048,
+        TestRetry = 2049,
+        All = 4095,
     }
     public class FirstTestInAssemblyEventWrapper : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.IFirstTestInAssemblyEventReceiver
     {
@@ -1332,6 +1416,13 @@ namespace TUnit.Core.Extensions
 }
 namespace TUnit.Core.Helpers
 {
+    public static class AsyncDataSourceHelper
+    {
+        public static System.Threading.Tasks.Task<object?> GetFirstValueAsync(System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<object?[]?>>> asyncEnumerable, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.Collections.Generic.List<System.Func<System.Threading.Tasks.Task<object?[]?>>>> ToListAsync(System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<object?[]?>>> asyncEnumerable, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(TUnit.Core.Helpers.AsyncDataSourceHelper.<WrapAsyncEnumerable>d__0))]
+        public static System.Collections.Generic.IAsyncEnumerable<System.Func<System.Threading.Tasks.Task<object?[]?>>> WrapAsyncEnumerable(TUnit.Core.IAsyncDataSourceGeneratorAttribute asyncDataSourceGenerator, TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata, [System.Runtime.CompilerServices.EnumeratorCancellation] System.Threading.CancellationToken cancellationToken = default) { }
+    }
     public static class CastHelper
     {
         public static object? Cast(System.Type type, object? value) { }
@@ -1347,15 +1438,21 @@ namespace TUnit.Core.Helpers
         public int Decrement() { }
         public int Increment() { }
     }
-    public class DefaultParallelLimit : TUnit.Core.Interfaces.IParallelLimit
-    {
-        public DefaultParallelLimit() { }
-        public int Limit { get; }
-    }
     public class MethodInfoRetriever
     {
         public MethodInfoRetriever() { }
         public static System.Reflection.MethodInfo GetMethodInfo(System.Type type, string methodName, int genericParameterCount, System.Type[] parameterTypes) { }
+    }
+    public class ProcessorCountParallelLimit : TUnit.Core.Interfaces.IParallelLimit
+    {
+        public ProcessorCountParallelLimit() { }
+        public int Limit { get; }
+    }
+    public class ReferenceEqualityComparer : System.Collections.Generic.IEqualityComparer<object>
+    {
+        public ReferenceEqualityComparer() { }
+        public bool Equals(object? x, object? y) { }
+        public int GetHashCode(object obj) { }
     }
     public static class RobustParameterInfoRetriever
     {
@@ -1642,7 +1739,7 @@ namespace TUnit.Core.Interfaces.SourceGenerator
     }
     public interface ITestSource
     {
-        System.Collections.Generic.IReadOnlyList<TUnit.Core.TestMetadata> CollectTests(string sessionId);
+        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<TUnit.Core.TestMetadata>> CollectTestsAsync(string sessionId);
     }
 }
 namespace TUnit.Core.Logging

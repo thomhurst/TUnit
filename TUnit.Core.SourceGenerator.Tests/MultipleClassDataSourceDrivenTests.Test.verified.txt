@@ -19,12 +19,12 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 		global::TUnit.Core.SourceRegistrar.Register(new MultipleClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -152,17 +152,17 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
-				var classArgGeneratedData = classArgGeneratedDataAccessor();
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = classArgGeneratedData.Item1;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2 classArg1 = classArgGeneratedData.Item2;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3 classArg2 = classArgGeneratedData.Item3;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = classArgGeneratedData.Item4;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = classArgGeneratedData.Item5;
+				var classArgGeneratedData = await classArgGeneratedDataAccessor();
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>(classArgGeneratedData[0]);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2 classArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>(classArgGeneratedData[1]);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3 classArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>(classArgGeneratedData[2]);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>(classArgGeneratedData[3]);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>(classArgGeneratedData[4]);
 
 				classInstanceArguments = [classArg, classArg1, classArg2, classArg3, classArg4];
 
@@ -172,7 +172,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
 					TestClassArguments = [classArg, classArg1, classArg2, classArg3, classArg4],
 					TestMethodArguments = [],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -196,7 +196,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
 				MethodName = $"Test1",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MultipleClassDataSourceDrivenTests.Test1 failed to initialize", exception),
 				TestFilePath = @"",
@@ -228,12 +228,12 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 		global::TUnit.Core.SourceRegistrar.Register(new MultipleClassDataSourceDrivenTests());
 	}
 
-	public global::System.Collections.Generic.IReadOnlyList<TestMetadata> CollectTests(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
 	{
-		return Tests0(sessionId);
+		return await Tests0(sessionId);
 	}
 
-	private global::System.Collections.Generic.List<TestMetadata> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
 	{
 		global::System.Collections.Generic.List<TestMetadata> nodes = [];
 		var classDataIndex = 0;
@@ -361,17 +361,17 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
-				var classArgGeneratedData = classArgGeneratedDataAccessor();
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = classArgGeneratedData.Item1;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2 classArg1 = classArgGeneratedData.Item2;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3 classArg2 = classArgGeneratedData.Item3;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = classArgGeneratedData.Item4;
-				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = classArgGeneratedData.Item5;
+				var classArgGeneratedData = await classArgGeneratedDataAccessor();
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>(classArgGeneratedData[0]);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2 classArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>(classArgGeneratedData[1]);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3 classArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>(classArgGeneratedData[2]);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4 classArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>(classArgGeneratedData[3]);
+				global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5 classArg4 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>(classArgGeneratedData[4]);
 
 				classInstanceArguments = [classArg, classArg1, classArg2, classArg3, classArg4];
 
@@ -381,7 +381,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
 					TestClassArguments = [classArg, classArg1, classArg2, classArg3, classArg4],
 					TestMethodArguments = [],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -405,7 +405,7 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
 				MethodName = $"Test2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MultipleClassDataSourceDrivenTests.Test2 failed to initialize", exception),
 				TestFilePath = @"",
