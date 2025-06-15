@@ -75,7 +75,7 @@ public static class ArgumentsRetriever
                 }
                 
                 if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
-                        .NonTypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                        .UntypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
                     yield return DataSourceGeneratorRetriever.Parse(context, 
                         testClass, 
@@ -107,7 +107,7 @@ public static class ArgumentsRetriever
                 }
                 
                 if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
-                        .AsyncNonTypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                        .AsyncUntypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
                     yield return AsyncDataSourceGeneratorRetriever.Parse(context, 
                         testClass, 

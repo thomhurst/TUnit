@@ -16,7 +16,7 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName ClassDataSourceAttribute = "TUnit.Core.ClassDataSourceAttribute";
     public static readonly FullyQualifiedTypeName ClassConstructorAttribute = "TUnit.Core.ClassConstructorAttribute";
     public static readonly FullyQualifiedTypeName DataSourceGeneratorAttribute = "TUnit.Core.DataSourceGeneratorAttribute";
-    public static readonly FullyQualifiedTypeName NonTypedDataSourceGeneratorAttribute = "TUnit.Core.NonTypedDataSourceGeneratorAttribute";
+    public static readonly FullyQualifiedTypeName UntypedDataSourceGeneratorAttribute = "TUnit.Core.UntypedDataSourceGeneratorAttribute";
 
     
     // Metadata
@@ -43,5 +43,5 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName IDataSourceGeneratorAttribute = "TUnit.Core.IDataSourceGeneratorAttribute";
     public static readonly FullyQualifiedTypeName IAsyncDataSourceGeneratorAttribute = "TUnit.Core.IAsyncDataSourceGeneratorAttribute";
     public static readonly FullyQualifiedTypeName AsyncDataSourceGeneratorAttribute = "TUnit.Core.AsyncDataSourceGeneratorAttribute";
-    public static readonly FullyQualifiedTypeName AsyncNonTypedDataSourceGeneratorAttribute = "TUnit.Core.AsyncNonTypedDataSourceGeneratorAttribute";
+    public static readonly FullyQualifiedTypeName AsyncUntypedDataSourceGeneratorAttribute = "TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute";
 }

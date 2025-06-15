@@ -1,6 +1,6 @@
 ﻿namespace TUnit.TestProject.Attributes;
 
-public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
+public class EnumGeneratorAttribute : UntypedDataSourceGeneratorAttribute
 {
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {

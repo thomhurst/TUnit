@@ -3,7 +3,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
+public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttribute
 {
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {

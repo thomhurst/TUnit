@@ -152,7 +152,7 @@ namespace TUnit.Core
         public required string TestSessionId { get; init; }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute : TUnit.Core.NonTypedDataSourceGeneratorAttribute
+    public sealed class ClassDataSourceAttribute : TUnit.Core.UntypedDataSourceGeneratorAttribute
     {
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
             "nctionality when AOT compiling.")]
@@ -339,7 +339,7 @@ namespace TUnit.Core
         public static readonly TUnit.Core.DefaultExecutor Instance;
         protected override System.Threading.Tasks.ValueTask ExecuteAsync(System.Func<System.Threading.Tasks.ValueTask> action) { }
     }
-    public abstract class DependencyInjectionDataSourceAttribute<TScope> : TUnit.Core.NonTypedDataSourceGeneratorAttribute
+    public abstract class DependencyInjectionDataSourceAttribute<TScope> : TUnit.Core.UntypedDataSourceGeneratorAttribute
     {
         protected DependencyInjectionDataSourceAttribute() { }
         public abstract object? Create(TScope scope, System.Type type);
@@ -573,7 +573,7 @@ namespace TUnit.Core
         public MatrixAttribute(params T?[]? objects) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
-    public sealed class MatrixDataSourceAttribute : TUnit.Core.NonTypedDataSourceGeneratorAttribute
+    public sealed class MatrixDataSourceAttribute : TUnit.Core.UntypedDataSourceGeneratorAttribute
     {
         public MatrixDataSourceAttribute() { }
         public override System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata) { }
@@ -619,9 +619,9 @@ namespace TUnit.Core
         public MethodDataSourceAttribute(string methodNameProvidingDataSource) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true)]
-    public abstract class NonTypedDataSourceGeneratorAttribute : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
+    public abstract class UntypedDataSourceGeneratorAttribute : TUnit.Core.TestDataAttribute, TUnit.Core.IDataAttribute
     {
-        protected NonTypedDataSourceGeneratorAttribute() { }
+        protected UntypedDataSourceGeneratorAttribute() { }
         public abstract System.Collections.Generic.IEnumerable<System.Func<object?[]?>> GenerateDataSources(TUnit.Core.DataGeneratorMetadata dataGeneratorMetadata);
     }
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]

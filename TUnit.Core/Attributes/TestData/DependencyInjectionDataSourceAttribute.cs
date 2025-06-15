@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-public abstract class DependencyInjectionDataSourceAttribute<TScope> : NonTypedDataSourceGeneratorAttribute
+public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDataSourceGeneratorAttribute
 {
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {

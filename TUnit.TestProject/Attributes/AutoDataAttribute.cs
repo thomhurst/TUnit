@@ -2,7 +2,7 @@
 
 namespace TUnit.TestProject.Attributes;
 
-public class AutoDataAttribute : NonTypedDataSourceGeneratorAttribute
+public class AutoDataAttribute : UntypedDataSourceGeneratorAttribute
 {
     private static readonly AutoFixture.Fixture Fixture = new();
 

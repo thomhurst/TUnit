@@ -22,7 +22,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttribute, ISharedDataSourceAttribute
+public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute, ISharedDataSourceAttribute
 {
     private readonly Type[] _types;
 

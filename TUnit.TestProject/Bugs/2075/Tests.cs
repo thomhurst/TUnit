@@ -19,7 +19,7 @@ public class ServiceProviderFactory : IAsyncInitializer
     }
 }
 
-public class FromServiceProviderFactoryAttribute : NonTypedDataSourceGeneratorAttribute, IAccessesInstanceData
+public class FromServiceProviderFactoryAttribute : UntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
     public Task InitializeAsync()
     {

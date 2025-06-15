@@ -56,7 +56,7 @@ public class AsyncUserDataSource : AsyncDataSourceGeneratorAttribute<int, string
     }
 }
 
-public class AsyncNonTypedDataSource : AsyncNonTypedDataSourceGeneratorAttribute
+public class AsyncUntypedDataSource : AsyncUntypedDataSourceGeneratorAttribute
 {
     protected override async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
@@ -98,8 +98,8 @@ public class AsyncDataSourceExampleTests
     }
     
     [Test]
-    [AsyncNonTypedDataSource]
-    public async Task TestWithAsyncNonTypedData(int number, string text, bool flag)
+    [AsyncUntypedDataSource]
+    public async Task TestWithAsyncUntypedData(int number, string text, bool flag)
     {
         // Test would use the async non-typed data
         await Task.Delay(1); // Simulate some async work

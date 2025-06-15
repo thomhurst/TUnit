@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
-public abstract class NonTypedDataSourceGeneratorAttribute : AsyncNonTypedDataSourceGeneratorAttribute, INonTypedDataSourceGeneratorAttribute
+public abstract class UntypedDataSourceGeneratorAttribute : AsyncUntypedDataSourceGeneratorAttribute, IUntypedDataSourceGeneratorAttribute
 {
     protected abstract IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
 

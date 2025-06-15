@@ -92,9 +92,9 @@ public async Task TestCustomerBehavior(Customer customer)
 }
 ```
 
-## NonTypedDataSourceGeneratorAttribute
+## UntypedDataSourceGeneratorAttribute
 
-For scenarios where you need to generate dynamic types or work with libraries that don't have compile-time type information (like AutoFixture), TUnit provides `NonTypedDataSourceGeneratorAttribute`.
+For scenarios where you need to generate dynamic types or work with libraries that don't have compile-time type information (like AutoFixture), TUnit provides `UntypedDataSourceGeneratorAttribute`.
 
 This is particularly useful when:
 - Working with anonymous types
@@ -107,7 +107,7 @@ using AutoFixture;
 
 namespace MyTestProject;
 
-public class AutoFixtureGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
+public class AutoFixtureGeneratorAttribute : UntypedDataSourceGeneratorAttribute
 {
     private readonly Type[] _types;
     
@@ -177,4 +177,4 @@ public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata
 
 - **DataSourceGeneratorAttribute**: Use when you know the types at compile time and want strong typing
 - **AsyncDataSourceGeneratorAttribute**: Use when you need to perform async operations (database, API, file I/O)
-- **NonTypedDataSourceGeneratorAttribute**: Use when working with dynamic types or type generation libraries
+- **UntypedDataSourceGeneratorAttribute**: Use when working with dynamic types or type generation libraries
