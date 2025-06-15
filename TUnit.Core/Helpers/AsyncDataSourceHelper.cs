@@ -33,7 +33,31 @@ public static class AsyncDataSourceHelper
         
         await foreach (var func in asyncEnumerable.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
-            yield return func;
+            // Wrap the function to ensure returned objects are properly initialized
+            yield return async () =>
+            {
+                var result = await func().ConfigureAwait(false);
+                
+                // Initialize each object in the result array
+                if (result != null)
+                {
+                    for (int i = 0; i < result.Length; i++)
+                    {
+                        if (result[i] != null)
+                        {
+                            // Initialize nested data source properties
+                            await DataSourceInitializer.InitializeAsync(
+                                result[i]!,
+                                dataGeneratorMetadata,
+                                dataGeneratorMetadata.TestBuilderContext,
+                                obj => { /* Object registration handled elsewhere */ }
+                            ).ConfigureAwait(false);
+                        }
+                    }
+                }
+                
+                return result;
+            };
         }
     }
 
