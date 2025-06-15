@@ -15,34 +15,6 @@ namespace TUnit.Engine.Services.Reflection;
 [UnconditionalSuppressMessage("AOT", "IL3050")]
 internal static class InstanceCreator
 {
-    // Synchronous wrapper for backward compatibility
-    public static object? CreateInstance(
-        IDataAttribute typeDataAttribute,
-        SourceGeneratedClassInformation classInformation,
-        object?[] classInstanceArguments,
-        SourceGeneratedMethodInformation testInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor,
-        out Exception? exception)
-    {
-        return CreateInstance(typeDataAttribute, classInformation, classInstanceArguments, 
-            testInformation, testBuilderContextAccessor, false, out exception);
-    }
-    
-    // Synchronous wrapper for backward compatibility
-    public static object? CreateInstance(
-        IDataAttribute typeDataAttribute,
-        SourceGeneratedClassInformation classInformation,
-        object?[] classInstanceArguments,
-        SourceGeneratedMethodInformation testInformation,
-        TestBuilderContextAccessor testBuilderContextAccessor,
-        bool skipPropertyInitialization,
-        out Exception? exception)
-    {
-        var (instance, error) = CreateInstanceAsync(typeDataAttribute, classInformation, classInstanceArguments,
-            testInformation, testBuilderContextAccessor, skipPropertyInitialization).GetAwaiter().GetResult();
-        exception = error;
-        return instance;
-    }
 
     public static async Task<(object? Instance, Exception? Exception)> CreateInstanceAsync(
         IDataAttribute typeDataAttribute,
