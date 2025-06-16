@@ -1437,6 +1437,12 @@ namespace .Extensions
         public static T Create<T>(this . classConstructor, .ClassConstructorMetadata classConstructorMetadata)
             where T :  class { }
     }
+    public static class ReflectionExtensions
+    {
+        public static [] GetCustomAttributesSafe(this .ICustomAttributeProvider provider, bool inherit = true) { }
+        public static T[] GetCustomAttributesSafe<T>(this .ICustomAttributeProvider provider, bool inherit = true)
+            where T :  { }
+    }
     public static class TestContextExtensions
     {
         public static . AddDynamicTest<T>(this .TestContext testContext, .DynamicTest<T> dynamicTest)

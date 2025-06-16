@@ -33,7 +33,7 @@ public static class ReflectionExtensions
     /// <typeparam name="T">The type of attribute to check for</typeparam>
     /// <param name="provider">The attribute provider</param>
     /// <returns>True if the attribute is present, false otherwise</returns>
-    public static bool HasExactAttribute<T>(this ICustomAttributeProvider provider)
+    internal static bool HasExactAttribute<T>(this ICustomAttributeProvider provider)
     {
         return HasAttribute<T>(provider, false);
     }
@@ -50,7 +50,7 @@ public static class ReflectionExtensions
     /// <param name="provider">The attribute provider</param>
     /// <param name="inherit">Whether to search the inheritance chain</param>
     /// <returns>True if the attribute is present, false otherwise</returns>
-    public static bool HasAttribute<T>(this ICustomAttributeProvider provider, bool inherit = true)
+    internal static bool HasAttribute<T>(this ICustomAttributeProvider provider, bool inherit = true)
     {
         try
         {
@@ -112,7 +112,7 @@ public static class ReflectionExtensions
         var attributes = new List<Attribute>();
 
         IList<CustomAttributeData> customAttributeDataList;
-        
+
         // Get custom attribute data based on the provider type
         if (provider is MemberInfo memberInfo)
         {
