@@ -133,7 +133,7 @@ public sealed class VerifySettingsTask
 
         var approved = await FilePolyfill.ReadAllTextAsync(_verifiedPath);
 
-        if (!string.Equals(final, approved, StringComparison.Ordinal))
+        if (!string.Equals(NormalizeNewline(final), NormalizeNewline(approved), StringComparison.Ordinal))
         {
             await FilePolyfill.WriteAllTextAsync(_receivedPath, final);
 
@@ -147,6 +147,12 @@ public sealed class VerifySettingsTask
                     $"Verification failed for '{name}'.\nReceived: {_receivedPath}\nVerified: {_verifiedPath}\nUpdate the verified file if this change is intentional.");
             }
         }
+    }
+
+    private string NormalizeNewline(string input)
+    {
+        // Normalize newlines to Unix style
+        return input.Replace("\r\n", "\n").Replace("\r", "\n");
     }
 
     public TaskAwaiter GetAwaiter() => ToTask().GetAwaiter();
