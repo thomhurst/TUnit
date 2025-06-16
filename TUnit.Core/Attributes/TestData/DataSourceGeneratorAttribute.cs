@@ -38,12 +38,13 @@ public abstract class DataSourceGeneratorAttribute<T1, T2> : AsyncDataSourceGene
 public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : AsyncDataSourceGeneratorAttribute<T1, T2, T3>{
     protected abstract IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
 
-    protected override async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    protected sealed override async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         foreach (var generateDataSource in GenerateDataSources(dataGeneratorMetadata))
         {
             yield return () => Task.FromResult(generateDataSource());
         }
+
         await Task.CompletedTask;
     }
 

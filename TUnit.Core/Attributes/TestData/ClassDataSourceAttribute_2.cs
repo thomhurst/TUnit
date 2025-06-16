@@ -6,21 +6,20 @@ namespace TUnit.Core;
 public sealed class ClassDataSourceAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T1,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T2>
-    : AsyncDataSourceGeneratorAttribute<T1, T2>, ISharedDataSourceAttribute
+    : DataSourceGeneratorAttribute<T1, T2>, ISharedDataSourceAttribute
     where T1 : new()
     where T2 : new()
 {
     public SharedType[] Shared { get; set; } = [SharedType.None, SharedType.None, SharedType.None, SharedType.None, SharedType.None];
     public string[] Keys { get; set; } = [string.Empty, string.Empty, string.Empty, string.Empty, string.Empty];
 
-    protected override async IAsyncEnumerable<Func<Task<(T1, T2)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<(T1, T2)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        await Task.CompletedTask;
-        yield return async () =>
+        yield return () =>
         {
-            var item1 = await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+            var item1 = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
                 .GetItemForIndexAsync<T1>(0, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
-            var item2 = await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+            var item2 = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
                 .GetItemForIndexAsync<T2>(1, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
 
             return (item1.Item1, item2.Item1);

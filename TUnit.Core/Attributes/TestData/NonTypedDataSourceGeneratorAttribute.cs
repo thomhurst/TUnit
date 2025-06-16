@@ -5,7 +5,7 @@ public abstract class UntypedDataSourceGeneratorAttribute : AsyncUntypedDataSour
 {
     protected abstract IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
 
-    protected override async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    protected sealed override async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         foreach (var generateDataSource in GenerateDataSources(dataGeneratorMetadata))
         {

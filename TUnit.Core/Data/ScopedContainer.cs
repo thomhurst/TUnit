@@ -9,7 +9,7 @@ namespace TUnit.Core.Data;
 /// <typeparam name="TKey">The type of the scoping key (e.g., Type for class scope, Assembly for assembly scope).</typeparam>
 internal class ScopedContainer<TKey> where TKey : notnull
 {
-    private readonly ConcurrentDictionary<TKey, ConcurrentDictionary<Type, ScopedInstance>> _containers = new();
+    private readonly GetOnlyDictionary<TKey, GetOnlyDictionary<Type, ScopedInstance>> _containers = new();
 
     /// <summary>
     /// Gets or creates an instance for the specified key and type.
@@ -20,7 +20,7 @@ internal class ScopedContainer<TKey> where TKey : notnull
     /// <returns>The scoped instance containing the object and its usage counter.</returns>
     public ScopedInstance GetOrCreate(TKey key, Type type, Func<object> factory)
     {
-        var container = _containers.GetOrAdd(key, _ => new ConcurrentDictionary<Type, ScopedInstance>());
+        var container = _containers.GetOrAdd(key, _ => new GetOnlyDictionary<Type, ScopedInstance>());
         return container.GetOrAdd(type, _ => new ScopedInstance(factory(), new Counter()));
     }
 
@@ -36,46 +36,5 @@ internal class ScopedContainer<TKey> where TKey : notnull
         instance = null;
         return _containers.TryGetValue(key, out var container) &&
                container.TryGetValue(type, out instance);
-    }
-
-    /// <summary>
-    /// Removes an instance from the container.
-    /// </summary>
-    /// <param name="key">The scoping key.</param>
-    /// <param name="type">The type of object to remove.</param>
-    /// <returns>The removed instance, or null if not found.</returns>
-    public ScopedInstance? Remove(TKey key, Type type)
-    {
-        if (!_containers.TryGetValue(key, out var container))
-        {
-            return null;
-        }
-
-        container.TryRemove(type, out var instance);
-
-        // Clean up empty containers
-        if (container.IsEmpty)
-        {
-            _containers.TryRemove(key, out _);
-        }
-
-        return instance;
-    }
-
-    /// <summary>
-    /// Gets diagnostic information about the container state.
-    /// </summary>
-    /// <returns>A dictionary containing diagnostic information.</returns>
-    public Dictionary<string, object> GetDiagnostics()
-    {
-        var scopeCount = _containers.Count;
-        var totalInstances = _containers.Values.Sum(c => c.Count);
-
-        return new Dictionary<string, object>
-        {
-            ["ScopeCount"] = scopeCount,
-            ["TotalInstances"] = totalInstances,
-            ["Scopes"] = _containers.Keys.Select(k => k.ToString()).ToList()
-        };
     }
 }
