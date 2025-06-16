@@ -105,16 +105,15 @@ internal class ClassDataSources
         return ((T)(await CreateAsync(typeof(T), dataGeneratorMetadata).ConfigureAwait(false)))!;
     }
 
-    private static async Task<object> CreateAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
+    private static Task<object> CreateAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
     {
         try
         {
             var instance = Activator.CreateInstance(type)!;
             
-            // Initialize data source properties on the created instance
-            await Helpers.DataSourceInitializer.InitializeAsync(instance, dataGeneratorMetadata).ConfigureAwait(false);
+            // Don't initialize here - let the TUnit framework handle initialization at the appropriate time
             
-            return instance;
+            return Task.FromResult(instance);
         }
         catch (TargetInvocationException targetInvocationException)
         {

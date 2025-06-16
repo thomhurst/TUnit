@@ -30,19 +30,18 @@ internal static class DataSourceInitializer
         TestBuilderContextAccessor? testBuilderContextAccessor = null,
         Action<object>? objectRegistrationCallback = null)
     {
-        if (instance is not IDataAttribute)
-        {
-            return;
-        }
-
         // Register the instance itself
         objectRegistrationCallback?.Invoke(instance);
 
         // Initialize nested data generators first
         await InitializeNestedDataGeneratorsAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback).ConfigureAwait(false);
 
-        // Then initialize the object itself
-        await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
+        // Only initialize the object itself if it's a data attribute
+        // This prevents initializing objects like WebApplicationFactory during data source generation
+        if (instance is IDataAttribute)
+        {
+            await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
+        }
     }
 
     /// <summary>
@@ -65,49 +64,79 @@ internal static class DataSourceInitializer
         Action<object>? objectRegistrationCallback,
         HashSet<object> visited)
     {
-        if (obj is not IDataAttribute || !visited.Add(obj))
+        if (obj is null || !visited.Add(obj))
         {
             return;
         }
 
-        var properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+        var objType = obj.GetType();
+        
+        // Skip primitive types, strings, and other types that shouldn't have nested properties processed
+        if (objType.IsPrimitive || obj is string || objType.IsEnum || objType.IsValueType && !objType.IsGenericType)
+        {
+            return;
+        }
+
+        // Skip system types that don't have meaningful properties to process
+        if (objType.Namespace?.StartsWith("System") == true)
+        {
+            return;
+        }
+
+        PropertyInfo[] properties;
+        try
+        {
+            properties = objType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+        }
+        catch (NotSupportedException)
+        {
+            // Some types don't support reflection
+            return;
+        }
 
         foreach (var propertyInfo in properties)
         {
-            // Skip if property doesn't have a data attribute
             var dataAttribute = propertyInfo.GetCustomAttributesSafe().OfType<IDataAttribute>().FirstOrDefault();
-            if (dataAttribute is null)
+            var existingValue = propertyInfo.GetValue(obj);
+
+            // Case 1: Property has a data attribute
+            if (dataAttribute is not null)
             {
-                continue;
+                if (existingValue is null)
+                {
+                    // First, recursively initialize the data attribute itself if needed
+                    if (dataAttribute is IAsyncDataSourceGeneratorAttribute)
+                    {
+                        await InitializeNestedDataGeneratorsInternalAsync(dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
+                    }
+
+                    // Create value for the property
+                    var value = await CreatePropertyValueAsync(obj, propertyInfo, dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor).ConfigureAwait(false);
+
+                    if (value is not null)
+                    {
+                        propertyInfo.SetValue(obj, value);
+                        existingValue = value;
+                    }
+                }
             }
 
-            // Skip if property already has a value
-            if (propertyInfo.GetValue(obj) is not null)
+            // Case 2: Process any existing value (whether created above or already present)
+            // This handles both values created by data attributes and values that need initialization
+            if (existingValue is not null)
             {
-                continue;
-            }
+                // Register the object
+                objectRegistrationCallback?.Invoke(existingValue);
 
-            // First, recursively initialize the data attribute itself if needed
-            if (dataAttribute is IAsyncDataSourceGeneratorAttribute)
-            {
-                await InitializeNestedDataGeneratorsInternalAsync(dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
-            }
+                // Recursively initialize if it's a data attribute or has nested properties
+                await InitializeNestedDataGeneratorsInternalAsync(existingValue, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
 
-            // Create value for the property
-            var value = await CreatePropertyValueAsync(obj, propertyInfo, dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor).ConfigureAwait(false);
-
-            if (value is not null)
-            {
-                propertyInfo.SetValue(obj, value);
-
-                // Register the created object
-                objectRegistrationCallback?.Invoke(value);
-
-                // Recursively initialize the created value
-                await InitializeNestedDataGeneratorsInternalAsync(value, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
-
-                // Initialize the value itself
-                await ObjectInitializer.InitializeAsync(value).ConfigureAwait(false);
+                // Only initialize the value itself if it's a data attribute
+                // Other objects should be initialized at test execution time
+                if (existingValue is IDataAttribute)
+                {
+                    await ObjectInitializer.InitializeAsync(existingValue).ConfigureAwait(false);
+                }
             }
         }
     }
