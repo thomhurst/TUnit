@@ -93,15 +93,19 @@ public sealed class VerifySettingsTask
             }
         }
         var final = string.Join("\n", lines);
-        await FilePolyfill.WriteAllTextAsync(_receivedPath, final);
 
         if (!File.Exists(_verifiedPath))
         {
+            await FilePolyfill.WriteAllTextAsync(_receivedPath, final);
             throw new InvalidOperationException($"No verified file found for '{name}'.");
         }
+
         var approved = await FilePolyfill.ReadAllTextAsync(_verifiedPath);
+
         if (!string.Equals(final, approved, StringComparison.Ordinal))
         {
+            await FilePolyfill.WriteAllTextAsync(_receivedPath, final);
+
             if (_onVerifyMismatch != null)
             {
                 await _onVerifyMismatch((_receivedPath, _verifiedPath), $"Verification failed for '{name}'", async () => { });
