@@ -30,7 +30,7 @@ internal static class DataSourceInitializer
         TestBuilderContextAccessor? testBuilderContextAccessor = null,
         Action<object>? objectRegistrationCallback = null)
     {
-        if (instance is null)
+        if (instance is not IDataAttribute)
         {
             return;
         }
@@ -65,7 +65,7 @@ internal static class DataSourceInitializer
         Action<object>? objectRegistrationCallback,
         HashSet<object> visited)
     {
-        if (obj is null || !visited.Add(obj))
+        if (obj is not IDataAttribute || !visited.Add(obj))
         {
             return;
         }
