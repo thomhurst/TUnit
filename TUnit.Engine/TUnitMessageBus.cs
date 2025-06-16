@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using Polyfills;
 using TUnit.Core;
@@ -13,9 +14,12 @@ using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
 
-internal class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
+internal class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, IServiceProvider serviceProvider, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
 {
     private readonly SessionUid _sessionSessionUid = context.Request.Session.SessionUid;
+
+    private bool? _isConsole;
+    private bool IsConsole => _isConsole ??= serviceProvider.GetClientInfo().Id.Contains("console", StringComparison.InvariantCultureIgnoreCase);
 
     public async ValueTask Discovered(TestContext testContext)
     {
@@ -25,7 +29,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(DiscoveredTestNodeStateProperty.CachedInstance)
         ));
     }
-    
+
     public async ValueTask InProgress(TestContext testContext)
     {
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
@@ -41,13 +45,13 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         {
             return;
         }
-        
+
         var standardOutput = testContext.GetStandardOutput();
 
         var standardError = testContext.GetErrorOutput();
 
         var trxMessages = GetTrxMessages(testContext, standardOutput, standardError).ToArray();
-        
+
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
@@ -68,11 +72,8 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         var timingProperty = GetTimingProperty(testContext, start);
 
-        if (!commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace))
-        {
-            exception = new TestFailedException(exception);
-        }
-        
+        exception = SimplifyStacktrace(exception);
+
         var updateType = GetFailureStateProperty(testContext, exception,
             timingProperty.GlobalTiming.Duration);
 
@@ -81,7 +82,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var standardError = testContext.GetErrorOutput();
 
         var trxMessages = GetTrxMessages(testContext, standardOutput, standardError).ToArray();
-        
+
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
@@ -94,14 +95,31 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         ));
     }
 
+    private Exception SimplifyStacktrace(Exception exception)
+    {
+        if (commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace))
+        {
+            return exception;
+        }
+
+        if (IsConsole)
+        {
+            // It's only really spammy in a console environment.
+            // In an IDE, every test has their own output window, so it's not as spammy.
+            return new TestFailedException(exception);
+        }
+
+        return exception;
+    }
+
     public async ValueTask Skipped(TestContext testContext, string reason)
     {
         var standardOutput = testContext.GetStandardOutput();
 
         var standardError = testContext.GetErrorOutput();
-        
+
         var trxMessages = GetTrxMessages(testContext, standardOutput, standardError).ToArray();
-        
+
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
@@ -121,7 +139,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var standardError = testContext.GetErrorOutput();
 
         var trxMessages = GetTrxMessages(testContext, standardOutput, standardError).ToArray();
-        
+
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
@@ -151,7 +169,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         {
             return new TimingProperty(new TimingInfo(default, default, TimeSpan.Zero));
         }
-        
+
         var end = DateTimeOffset.Now;
 
         lock (testContext.Lock)
@@ -179,10 +197,10 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         {
             return new FailedTestNodeStateProperty(e);
         }
-        
+
         return new ErrorTestNodeStateProperty(e);
     }
-    
+
     private IEnumerable<TrxMessage> GetTrxMessages(TestContext testContext, string standardOutput, string standardError)
     {
         if (!string.IsNullOrEmpty(standardOutput))

@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
-[DebuggerDisplay("{Type})")]
+[DebuggerDisplay("{Type}")]
 public record TestClass : TestMember
 {
     private static readonly ConcurrentDictionary<string, TestClass> Cache = [];

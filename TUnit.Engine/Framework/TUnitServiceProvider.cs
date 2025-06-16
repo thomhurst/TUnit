@@ -85,7 +85,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         ContextManager = new ContextManager(context.Request.Session.SessionUid.Value, stringFilter);
 
-        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, context));
+        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, frameworkServiceProvider, context));
 
         var instanceTracker = Register(new InstanceTracker());
 
@@ -127,7 +127,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         Disposer = Register(new Disposer(Logger));
 
         var objectLifetimeManager = Register(new ObjectLifetimeManager(Disposer));
-        
+
         var dataSourceObjectRegistrar = Register(new DataSourceObjectRegistrar(objectLifetimeManager));
 
         var testRegistrar = Register(new TestRegistrar(instanceTracker, objectLifetimeManager));
