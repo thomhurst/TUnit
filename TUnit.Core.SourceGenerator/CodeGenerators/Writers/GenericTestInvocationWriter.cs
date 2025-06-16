@@ -30,7 +30,7 @@ public static class GenericTestInvocationWriter
         sourceBuilder.Write($"TestMethodName = \"{testSourceDataModel.MethodName}\",");
         sourceBuilder.Write("ClassInformation = testInformation.Class,");
         sourceBuilder.Write("MethodInformation = testInformation");
-        sourceBuilder.Write("};
+        sourceBuilder.Write("}");
         sourceBuilder.Write("var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);");
 
         WriteScopesAndArguments(sourceBuilder, testSourceDataModel);
