@@ -103,7 +103,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -133,7 +137,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -220,7 +228,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -250,7 +262,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -337,7 +353,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -367,7 +387,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -454,7 +478,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -484,7 +512,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -571,7 +603,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -601,7 +637,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -688,7 +728,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -718,7 +762,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -805,7 +853,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -835,7 +887,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -922,7 +978,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -955,7 +1015,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Normal",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1074,7 +1138,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1104,7 +1172,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1187,7 +1259,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1217,7 +1293,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1300,7 +1380,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1330,7 +1414,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1413,7 +1501,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1443,7 +1535,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1526,7 +1622,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1556,7 +1656,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1639,7 +1743,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1669,7 +1777,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1752,7 +1864,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1782,7 +1898,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1865,7 +1985,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.StringArgumentTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1895,7 +2019,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Nullable",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)

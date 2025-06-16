@@ -68,7 +68,11 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "SecondTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.AbstractTests.ConcreteClass2? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -96,7 +100,11 @@ file partial class ConcreteClass2 : global::TUnit.Core.Interfaces.SourceGenerato
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "SecondTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -184,7 +192,11 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "AssertClassName",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.AbstractTests.ConcreteClass2? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -212,7 +224,11 @@ file partial class Inherited_ConcreteClass2 : global::TUnit.Core.Interfaces.Sour
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "AssertClassName",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -298,7 +314,11 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "AssertClassName",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.AbstractTests.ConcreteClass1? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -326,7 +346,11 @@ file partial class Inherited_ConcreteClass1 : global::TUnit.Core.Interfaces.Sour
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "AssertClassName",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)

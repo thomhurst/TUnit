@@ -81,7 +81,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Explicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -111,7 +115,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Explicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -181,7 +189,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Explicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -211,7 +223,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Explicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -281,7 +297,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Explicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -311,7 +331,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Explicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -412,7 +436,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Implicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -442,7 +470,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Implicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -512,7 +544,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Implicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -542,7 +578,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Implicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -612,7 +652,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Implicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ArgumentWithImplicitConverterTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -642,7 +686,11 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Implicit",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)

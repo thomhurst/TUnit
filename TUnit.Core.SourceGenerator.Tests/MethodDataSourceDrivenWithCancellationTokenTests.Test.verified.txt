@@ -101,7 +101,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -130,7 +134,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -217,7 +225,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -246,7 +258,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -333,7 +349,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -365,7 +385,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "MyTest",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -453,7 +477,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -485,7 +513,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "MyTest",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -573,7 +605,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -605,7 +641,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "MyTest",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -693,7 +733,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -725,7 +769,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "MyTest",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}

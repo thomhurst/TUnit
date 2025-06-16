@@ -94,7 +94,11 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.Bugs._1589.MyTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -155,7 +159,11 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "Test1",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}

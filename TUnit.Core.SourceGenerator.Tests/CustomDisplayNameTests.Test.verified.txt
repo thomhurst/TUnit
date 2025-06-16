@@ -79,7 +79,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -107,7 +111,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -206,7 +214,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -234,7 +246,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -360,7 +376,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test3",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -392,7 +412,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test3",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -488,7 +512,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test3",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -520,7 +548,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test3",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -629,7 +661,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MethodDataSourceTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -658,7 +694,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MethodDataSourceTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -766,7 +806,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "PasswordTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -824,7 +868,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "PasswordTest",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -903,7 +951,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "PasswordTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -961,7 +1013,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "PasswordTest",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -1061,7 +1117,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "SameClassConstantTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1089,7 +1149,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "SameClassConstantTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1188,7 +1252,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DifferentClassConstantTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1216,7 +1284,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DifferentClassConstantTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1315,7 +1387,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "NestedClassConstantTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.CustomDisplayNameTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1343,7 +1419,11 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "NestedClassConstantTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)

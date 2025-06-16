@@ -98,7 +98,11 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.MultipleClassDataSourceDrivenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -188,7 +192,11 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "Test1",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -307,7 +315,11 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.MultipleClassDataSourceDrivenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -397,7 +409,11 @@ file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Inter
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "Test2",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}

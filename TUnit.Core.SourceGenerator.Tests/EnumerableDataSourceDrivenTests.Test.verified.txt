@@ -76,7 +76,11 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSource_Method",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.EnumerableDataSourceDrivenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -108,7 +112,11 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "DataSource_Method",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -205,7 +213,11 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSource_Method2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.EnumerableDataSourceDrivenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -237,7 +249,11 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "DataSource_Method2",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -334,7 +350,11 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSource_WithBaseReturn",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.EnumerableDataSourceDrivenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -366,7 +386,11 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "DataSource_WithBaseReturn",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}

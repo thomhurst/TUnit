@@ -93,7 +93,11 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSource_TupleMethod",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -129,7 +133,11 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "DataSource_TupleMethod",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -213,7 +221,11 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSource_TupleMethod",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -249,7 +261,11 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "DataSource_TupleMethod",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}

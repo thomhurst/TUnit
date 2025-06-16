@@ -77,7 +77,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Base_Derived1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ClassDataSourceDrivenTests2? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -135,7 +139,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "Base_Derived1",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -203,7 +211,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Base_Derived1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ClassDataSourceDrivenTests2? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -261,7 +273,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "Base_Derived1",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -359,7 +375,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Base_Derived2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ClassDataSourceDrivenTests2? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -417,7 +437,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "Base_Derived2",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
@@ -485,7 +509,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Base_Derived2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.ClassDataSourceDrivenTests2? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -543,7 +571,11 @@ file partial class ClassDataSourceDrivenTests2 : global::TUnit.Core.Interfaces.S
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "Base_Derived2",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}

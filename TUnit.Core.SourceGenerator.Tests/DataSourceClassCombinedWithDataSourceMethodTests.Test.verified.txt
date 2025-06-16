@@ -104,7 +104,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -134,7 +138,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -221,7 +229,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -251,7 +263,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -338,7 +354,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -368,7 +388,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -455,7 +479,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -485,7 +513,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -572,7 +604,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -602,7 +638,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -689,7 +729,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -719,7 +763,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -806,7 +854,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -836,7 +888,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -923,7 +979,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -953,7 +1013,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
@@ -1040,7 +1104,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 			};
 
 
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -1070,7 +1138,11 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.C
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
