@@ -20,7 +20,7 @@ public static class DataSourceGeneratorRetriever
         string? propertyName,
         bool isStronglyTyped)
     {
-        return new DataSourceGeneratorContainer
+        return new AsyncDataSourceGeneratorContainer
         (
             Context: context,
             AttributeData: attributeData,

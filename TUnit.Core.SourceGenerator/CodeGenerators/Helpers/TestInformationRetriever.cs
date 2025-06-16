@@ -43,7 +43,7 @@ public static class TestInformationRetriever
             stringBuilder.Append($"CL-CCA{classLevelClassConstructorAttribute.AttributeIndex}:");
         }
         
-        if (testGenerationContext.ClassArguments is DataSourceGeneratorContainer classLevelGeneratedArgumentsContainer)
+        if (testGenerationContext.ClassArguments is AsyncDataSourceGeneratorContainer classLevelGeneratedArgumentsContainer)
         {
             stringBuilder.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
@@ -65,7 +65,7 @@ public static class TestInformationRetriever
             stringBuilder.Append($"TL-ARGS{testLevelArgumentsContainer.AttributeIndex}:");
         }
         
-        if (testGenerationContext.TestArguments is DataSourceGeneratorContainer testLevelGeneratedArgumentsContainer)
+        if (testGenerationContext.TestArguments is AsyncDataSourceGeneratorContainer testLevelGeneratedArgumentsContainer)
         {
             stringBuilder.Append($"TL-GAC{testLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }

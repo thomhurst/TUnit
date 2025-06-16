@@ -135,7 +135,7 @@ public class AttributeWriter
 
             var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute, sourceCodeWriter.TabLevel);
 
-            sourceCodeWriter.Write(DataSourceGeneratorContainer.GetPropertyAssignmentFromDataSourceGeneratorAttribute(innerAttribute, context, attributeData.AttributeClass!, propertySymbol, sourceCodeWriter.TabLevel, true));
+            sourceCodeWriter.Write(AsyncDataSourceGeneratorContainer.GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(innerAttribute, context, attributeData.AttributeClass!, propertySymbol, sourceCodeWriter.TabLevel, true));
         }
     }
 
