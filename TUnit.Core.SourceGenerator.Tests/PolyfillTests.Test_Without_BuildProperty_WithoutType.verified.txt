@@ -1,4 +1,23 @@
-﻿[
-  "namespace System.Runtime.CompilerServices;\r\n\r\nusing System;\r\nusing System.Diagnostics;\r\nusing System.Diagnostics.CodeAnalysis;\r\n\r\n[AttributeUsage(AttributeTargets.Method, Inherited = false)]\r\nsealed class ModuleInitializerAttribute : Attribute;",
-  "namespace System.Diagnostics;\r\n\r\nusing System;\r\nusing System.Diagnostics.CodeAnalysis;\r\n\r\n[AttributeUsage(\r\n    AttributeTargets.Class |\r\n    AttributeTargets.Method |\r\n    AttributeTargets.Constructor |\r\n    AttributeTargets.Struct,\r\n    Inherited = false)]\r\nsealed class StackTraceHiddenAttribute : Attribute;"
-]
+﻿namespace System.Runtime.CompilerServices;
+
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
+[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+sealed class ModuleInitializerAttribute : Attribute;
+
+// ===== FILE SEPARATOR =====
+
+namespace System.Diagnostics;
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+
+[AttributeUsage(
+    AttributeTargets.Class |
+    AttributeTargets.Method |
+    AttributeTargets.Constructor |
+    AttributeTargets.Struct,
+    Inherited = false)]
+sealed class StackTraceHiddenAttribute : Attribute;

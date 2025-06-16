@@ -1,4 +1,162 @@
-﻿[
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_TestDiscoveryHookTests();\r\n\t\tSourceRegistrar.RegisterTestDiscoveryHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.BeforeTestDiscoveryContext\u003E\u003E CollectBeforeTestDiscoveryHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod\r\n\t\t\t{\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),\r\n\t\t\t\t\tName = \u0022BeforeDiscovery\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tOrder = 5,\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.TestDiscoveryHookTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022TestDiscoveryHookTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022TestDiscoveryHookTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022TestDiscoveryHookTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 5,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 5,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestDiscoveryContext\u003E\u003E CollectAfterTestDiscoveryHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_TestDiscoveryHookTests();\r\n\t\tSourceRegistrar.RegisterTestDiscoveryHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.BeforeTestDiscoveryContext\u003E\u003E CollectBeforeTestDiscoveryHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestDiscoveryContext\u003E\u003E CollectAfterTestDiscoveryHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.AfterTestDiscoveryHookMethod\r\n\t\t\t{\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),\r\n\t\t\t\t\tName = \u0022AfterDiscovery\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.TestDiscoveryHookTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022TestDiscoveryHookTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022TestDiscoveryHookTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022TestDiscoveryHookTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 10,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n}"
-]
+﻿// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_TestDiscoveryHookTests();
+		SourceRegistrar.RegisterTestDiscoveryHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod
+			{
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
+					Name = "BeforeDiscovery",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
+						{
+							Order = 5,
+						}
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.TestDiscoveryHookTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("TestDiscoveryHookTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "TestDiscoveryHookTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "TestDiscoveryHookTests",
+						Namespace = "TUnit.TestProject",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 5,
+				FilePath = @"",
+				LineNumber = 5,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_TestDiscoveryHookTests();
+		SourceRegistrar.RegisterTestDiscoveryHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.AfterTestDiscoveryHookMethod
+			{
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
+					Name = "AfterDiscovery",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.TestDiscoveryHookTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("TestDiscoveryHookTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "TestDiscoveryHookTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "TestDiscoveryHookTests",
+						Namespace = "TUnit.TestProject",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+				FilePath = @"",
+				LineNumber = 10,
+			},
+		];
+	}
+
+}

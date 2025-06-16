@@ -1,4 +1,763 @@
-﻿[
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new PropertySetterTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests),\r\n\t\t\t\tName = \u0022Test\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute()\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.PropertySetterTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022InheritedPropertySetterTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022InheritedPropertySetterTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022PropertySetterTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),\r\n\r\n\t\t\t\t\t\tnew global::TUnit.Core.NotInParallelAttribute(\u0022PropertySetterTests\u0022)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property1\u0022),\r\n\t\t\t\t\t\t\tType = typeof(string),\r\n\t\t\t\t\t\t\tName = \u0022Property1\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property1,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.Core.ArgumentsAttribute(\u00221\u0022)\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property2\u0022),\r\n\t\t\t\t\t\t\tType = typeof(string),\r\n\t\t\t\t\t\t\tName = \u0022Property2\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property2,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.Core.MethodDataSourceAttribute(\u0022MethodData\u0022)\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property3\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\t\tName = \u0022Property3\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property3,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property4\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\t\tName = \u0022Property4\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property4,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property5\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\t\tName = \u0022Property5\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property5,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property6\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\t\tName = \u0022Property6\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property6,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property7\u0022),\r\n\t\t\t\t\t\t\tType = typeof(string),\r\n\t\t\t\t\t\t\tName = \u0022Property7\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property7,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022StaticProperty\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),\r\n\t\t\t\t\t\t\tName = \u0022StaticProperty\u0022,\r\n\t\t\t\t\t\t\tIsStatic = true,\r\n\t\t\t\t\t\t\tGetter = _ =\u003E global::TUnit.TestProject.PropertySetterTests.StaticProperty,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Test\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\t\t\tstring propertyArg = \u00221\u0022;\r\n\r\n\t\t\tstring propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();\r\n\t\t\tvar propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E();\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute2);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg2 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute2).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property3\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\tName = \u0022Property3\u0022,\r\n\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property3,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\nvar propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E()\r\n\t\t\t{\r\n\t\t\t\tShared = global::TUnit.Core.SharedType.PerTestSession,\r\n\t\t\t};\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute3);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg3 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute3).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property4\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\tName = \u0022Property4\u0022,\r\n\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property4,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\nvar propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E()\r\n\t\t\t{\r\n\t\t\t\tShared = global::TUnit.Core.SharedType.PerClass,\r\n\t\t\t};\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute4);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg4 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute4).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property5\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\tName = \u0022Property5\u0022,\r\n\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property5,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\nvar propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E()\r\n\t\t\t{\r\n\t\t\t\tShared = global::TUnit.Core.SharedType.Keyed,\r\n\t\t\t\tKey = \u0022Key\u0022,\r\n\t\t\t};\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute5);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg5 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute5).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022Property6\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\tName = \u0022Property6\u0022,\r\n\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.PropertySetterTests)o).Property6,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\nvar propertyDataAttribute6 = new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute\u003Cstring\u003E();\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute6);\r\n\r\n\t\t\tstring propertyArg6 = null! /* async initialization */;\r\n\r\nvar propertyDataAttribute7 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.StaticInnerModel\u003E()\r\n\t\t\t{\r\n\t\t\t\tShared = global::TUnit.Core.SharedType.PerTestSession,\r\n\t\t\t};\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute7);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.StaticInnerModel propertyArg7 = (global::TUnit.TestProject.PropertySetterTests.StaticInnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute7).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty(\u0022StaticProperty\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),\r\n\t\t\t\t\t\tName = \u0022StaticProperty\u0022,\r\n\t\t\t\t\t\tIsStatic = true,\r\n\t\t\t\t\t\tGetter = _ =\u003E global::TUnit.TestProject.PropertySetterTests.StaticProperty,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\n\r\nvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.PropertySetterTests\u003E(() =\u003E new global::TUnit.TestProject.PropertySetterTests()\r\n\t\t\t{\r\n\t\t\t\tProperty1 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cstring\u003E(propertyArg),\r\n\t\t\t\tProperty2 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cstring\u003E(propertyArg1),\r\n\t\t\t\tProperty3 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E(propertyArg2),\r\n\t\t\t\tProperty4 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E(propertyArg3),\r\n\t\t\t\tProperty5 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E(propertyArg4),\r\n\t\t\t\tProperty6 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E(propertyArg5),\r\n\t\t\t\tProperty7 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cstring\u003E(propertyArg6),\r\n\t\t\t}\r\n\t\t\t, sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg7;\r\n\t\t\tglobal::TUnit.Core.SourceRegistrar.RegisterGlobalInitializer(async () =\u003E await global::TUnit.Core.ObjectInitializer.InitializeAsync(global::TUnit.TestProject.PropertySetterTests.StaticProperty));\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.PropertySetterTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PropertySetterTests.Test:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t\t[\u0022Property1\u0022] = propertyArg,\r\n\t\t\t\t\t[\u0022Property2\u0022] = propertyArg1,\r\n\t\t\t\t\t[\u0022Property3\u0022] = propertyArg2,\r\n\t\t\t\t\t[\u0022Property4\u0022] = propertyArg3,\r\n\t\t\t\t\t[\u0022Property5\u0022] = propertyArg4,\r\n\t\t\t\t\t[\u0022Property6\u0022] = propertyArg5,\r\n\t\t\t\t\t[\u0022Property7\u0022] = propertyArg6,\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.Test()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 69,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Test\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.PropertySetterTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PropertySetterTests.Test:0\u0022,\r\n\t\t\t\tMethodName = $\u0022Test\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022PropertySetterTests.Test failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 69,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new Inherited_InheritedPropertySetterTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),\r\n\t\t\t\tName = \u0022Test\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute()\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.InheritedPropertySetterTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022InheritedPropertySetterTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022InheritedPropertySetterTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022InheritedPropertySetterTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.InheritsTestsAttribute(),\r\n\r\n\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),\r\n\r\n\t\t\t\t\t\tnew global::TUnit.Core.NotInParallelAttribute(\u0022PropertySetterTests\u0022)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property1\u0022),\r\n\t\t\t\t\t\t\tType = typeof(string),\r\n\t\t\t\t\t\t\tName = \u0022Property1\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property1,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.Core.ArgumentsAttribute(\u00221\u0022)\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property2\u0022),\r\n\t\t\t\t\t\t\tType = typeof(string),\r\n\t\t\t\t\t\t\tName = \u0022Property2\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property2,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.Core.MethodDataSourceAttribute(\u0022MethodData\u0022)\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property3\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\t\tName = \u0022Property3\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property3,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property4\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\t\tName = \u0022Property4\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property4,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property5\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\t\tName = \u0022Property5\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property5,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property6\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\t\tName = \u0022Property6\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property6,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property7\u0022),\r\n\t\t\t\t\t\t\tType = typeof(string),\r\n\t\t\t\t\t\t\tName = \u0022Property7\u0022,\r\n\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property7,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022StaticProperty\u0022),\r\n\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),\r\n\t\t\t\t\t\t\tName = \u0022StaticProperty\u0022,\r\n\t\t\t\t\t\t\tIsStatic = true,\r\n\t\t\t\t\t\t\tGetter = _ =\u003E global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Test\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.InheritedPropertySetterTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\t\t\tstring propertyArg = \u00221\u0022;\r\n\r\n\t\t\tstring propertyArg1 = global::TUnit.TestProject.InheritedPropertySetterTests.MethodData();\r\n\t\t\tvar propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E();\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute2);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg2 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute2).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property3\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\tName = \u0022Property3\u0022,\r\n\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property3,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\nvar propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E()\r\n\t\t\t{\r\n\t\t\t\tShared = global::TUnit.Core.SharedType.PerTestSession,\r\n\t\t\t};\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute3);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg3 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute3).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property4\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\tName = \u0022Property4\u0022,\r\n\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property4,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\nvar propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E()\r\n\t\t\t{\r\n\t\t\t\tShared = global::TUnit.Core.SharedType.PerClass,\r\n\t\t\t};\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute4);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg4 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute4).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property5\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\tName = \u0022Property5\u0022,\r\n\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property5,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\nvar propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E()\r\n\t\t\t{\r\n\t\t\t\tShared = global::TUnit.Core.SharedType.Keyed,\r\n\t\t\t\tKey = \u0022Key\u0022,\r\n\t\t\t};\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute5);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg5 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute5).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022Property6\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),\r\n\t\t\t\t\t\tName = \u0022Property6\u0022,\r\n\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property6,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\nvar propertyDataAttribute6 = new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute\u003Cstring\u003E();\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute6);\r\n\r\n\t\t\tstring propertyArg6 = null! /* async initialization */;\r\n\r\nvar propertyDataAttribute7 = new global::TUnit.Core.ClassDataSourceAttribute\u003Cglobal::TUnit.TestProject.PropertySetterTests.StaticInnerModel\u003E()\r\n\t\t\t{\r\n\t\t\t\tShared = global::TUnit.Core.SharedType.PerTestSession,\r\n\t\t\t};\r\n\r\n\t\t\ttestBuilderContext.DataAttributes.Add(propertyDataAttribute7);\r\n\r\n\t\t\tglobal::TUnit.TestProject.PropertySetterTests.StaticInnerModel propertyArg7 = (global::TUnit.TestProject.PropertySetterTests.StaticInnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute7).GenerateAsync(new DataGeneratorMetadata\r\n\t\t\t{\r\n\t\t\t\tType = global::TUnit.Core.Enums.DataGeneratorType.Property,\r\n\t\t\t\tTestBuilderContext = testBuilderContextAccessor,\r\n\t\t\t\tTestInformation = testInformation,\r\n\t\t\t\tMembersToGenerate = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty(\u0022StaticProperty\u0022),\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),\r\n\t\t\t\t\t\tName = \u0022StaticProperty\u0022,\r\n\t\t\t\t\t\tIsStatic = true,\r\n\t\t\t\t\t\tGetter = _ =\u003E global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tTestSessionId = sessionId,\r\n\t\t\t\tTestClassInstance = classInstance,\r\n\t\t\t\tClassInstanceArguments = classInstanceArguments,\r\n\t\t\t}\r\n\t\t\t)))!;\r\n\r\n\r\nvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.InheritedPropertySetterTests\u003E(() =\u003E new global::TUnit.TestProject.InheritedPropertySetterTests()\r\n\t\t\t{\r\n\t\t\t\tProperty1 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cstring\u003E(propertyArg),\r\n\t\t\t\tProperty2 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cstring\u003E(propertyArg1),\r\n\t\t\t\tProperty3 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E(propertyArg2),\r\n\t\t\t\tProperty4 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E(propertyArg3),\r\n\t\t\t\tProperty5 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E(propertyArg4),\r\n\t\t\t\tProperty6 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cglobal::TUnit.TestProject.PropertySetterTests.InnerModel\u003E(propertyArg5),\r\n\t\t\t\tProperty7 = global::TUnit.Core.Helpers.CastHelper.Cast\u003Cstring\u003E(propertyArg6),\r\n\t\t\t}\r\n\t\t\t, sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\tglobal::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty = propertyArg7;\r\n\t\t\tglobal::TUnit.Core.SourceRegistrar.RegisterGlobalInitializer(async () =\u003E await global::TUnit.Core.ObjectInitializer.InitializeAsync(global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty));\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.InheritedPropertySetterTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.InheritedPropertySetterTests.Test:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t\t[\u0022Property1\u0022] = propertyArg,\r\n\t\t\t\t\t[\u0022Property2\u0022] = propertyArg1,\r\n\t\t\t\t\t[\u0022Property3\u0022] = propertyArg2,\r\n\t\t\t\t\t[\u0022Property4\u0022] = propertyArg3,\r\n\t\t\t\t\t[\u0022Property5\u0022] = propertyArg4,\r\n\t\t\t\t\t[\u0022Property6\u0022] = propertyArg5,\r\n\t\t\t\t\t[\u0022Property7\u0022] = propertyArg6,\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.Test()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 69,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Test\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.InheritedPropertySetterTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.InheritedPropertySetterTests.Test:0\u0022,\r\n\t\t\t\tMethodName = $\u0022Test\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022InheritedPropertySetterTests.Test failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 69,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}"
-]
+﻿// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new PropertySetterTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.PropertySetterTests),
+				Name = "Test",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.PropertySetterTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.PropertySetterTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("InheritedPropertySetterTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "InheritedPropertySetterTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "PropertySetterTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+
+						new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
+					],
+					Parameters = [],
+					Properties = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property1"),
+							Type = typeof(string),
+							Name = "Property1",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property1,
+							Attributes = 
+							[
+								new global::TUnit.Core.ArgumentsAttribute("1")
+							],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property2"),
+							Type = typeof(string),
+							Name = "Property2",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property2,
+							Attributes = 
+							[
+								new global::TUnit.Core.MethodDataSourceAttribute("MethodData")
+							],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property3"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property3",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property3,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property4"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property4",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property4,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property5"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property5",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property5,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property6"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property6",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property6,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property7"),
+							Type = typeof(string),
+							Name = "Property7",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property7,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("StaticProperty"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),
+							Name = "StaticProperty",
+							IsStatic = true,
+							Getter = _ => global::TUnit.TestProject.PropertySetterTests.StaticProperty,
+							Attributes = [],
+						},
+					],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.PropertySetterTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+			string propertyArg = "1";
+
+			string propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
+			var propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>();
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute2);
+
+			global::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg2 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute2).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property3"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+						Name = "Property3",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property3,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerTestSession,
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute3);
+
+			global::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg3 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute3).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property4"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+						Name = "Property4",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property4,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerClass,
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute4);
+
+			global::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg4 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute4).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property5"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+						Name = "Property5",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property5,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.Keyed,
+				Key = "Key",
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute5);
+
+			global::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg5 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute5).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property6"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+						Name = "Property6",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property6,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+var propertyDataAttribute6 = new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<string>();
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute6);
+
+			string propertyArg6 = null! /* async initialization */;
+
+var propertyDataAttribute7 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerTestSession,
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute7);
+
+			global::TUnit.TestProject.PropertySetterTests.StaticInnerModel propertyArg7 = (global::TUnit.TestProject.PropertySetterTests.StaticInnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute7).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("StaticProperty"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),
+						Name = "StaticProperty",
+						IsStatic = true,
+						Getter = _ => global::TUnit.TestProject.PropertySetterTests.StaticProperty,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+
+var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PropertySetterTests>(() => new global::TUnit.TestProject.PropertySetterTests()
+			{
+				Property1 = global::TUnit.Core.Helpers.CastHelper.Cast<string>(propertyArg),
+				Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<string>(propertyArg1),
+				Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg2),
+				Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg3),
+				Property5 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg4),
+				Property6 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg5),
+				Property7 = global::TUnit.Core.Helpers.CastHelper.Cast<string>(propertyArg6),
+			}
+			, sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+			global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg7;
+			global::TUnit.Core.SourceRegistrar.RegisterGlobalInitializer(async () => await global::TUnit.Core.ObjectInitializer.InitializeAsync(global::TUnit.TestProject.PropertySetterTests.StaticProperty));
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.PropertySetterTests>
+			{
+				TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+					["Property1"] = propertyArg,
+					["Property2"] = propertyArg1,
+					["Property3"] = propertyArg2,
+					["Property4"] = propertyArg3,
+					["Property5"] = propertyArg4,
+					["Property6"] = propertyArg5,
+					["Property7"] = propertyArg6,
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
+				TestFilePath = @"",
+				TestLineNumber = 69,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PropertySetterTests>
+			{
+				TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
+				MethodName = $"Test",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PropertySetterTests.Test failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 69,
+			});
+		}
+		return nodes;
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new Inherited_InheritedPropertySetterTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),
+				Name = "Test",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute()
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.InheritedPropertySetterTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("InheritedPropertySetterTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "InheritedPropertySetterTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "InheritedPropertySetterTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = 
+					[
+						new global::TUnit.Core.InheritsTestsAttribute(),
+
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+
+						new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
+					],
+					Parameters = [],
+					Properties = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property1"),
+							Type = typeof(string),
+							Name = "Property1",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property1,
+							Attributes = 
+							[
+								new global::TUnit.Core.ArgumentsAttribute("1")
+							],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property2"),
+							Type = typeof(string),
+							Name = "Property2",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property2,
+							Attributes = 
+							[
+								new global::TUnit.Core.MethodDataSourceAttribute("MethodData")
+							],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property3"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property3",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property3,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property4"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property4",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property4,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property5"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property5",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property5,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property6"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+							Name = "Property6",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property6,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property7"),
+							Type = typeof(string),
+							Name = "Property7",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property7,
+							Attributes = [],
+						},
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("StaticProperty"),
+							Type = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),
+							Name = "StaticProperty",
+							IsStatic = true,
+							Getter = _ => global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty,
+							Attributes = [],
+						},
+					],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.InheritedPropertySetterTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+			string propertyArg = "1";
+
+			string propertyArg1 = global::TUnit.TestProject.InheritedPropertySetterTests.MethodData();
+			var propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>();
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute2);
+
+			global::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg2 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute2).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property3"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+						Name = "Property3",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property3,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerTestSession,
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute3);
+
+			global::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg3 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute3).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property4"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+						Name = "Property4",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property4,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerClass,
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute4);
+
+			global::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg4 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute4).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property5"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+						Name = "Property5",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property5,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.Keyed,
+				Key = "Key",
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute5);
+
+			global::TUnit.TestProject.PropertySetterTests.InnerModel propertyArg5 = (global::TUnit.TestProject.PropertySetterTests.InnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute5).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property6"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+						Name = "Property6",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property6,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+var propertyDataAttribute6 = new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<string>();
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute6);
+
+			string propertyArg6 = null! /* async initialization */;
+
+var propertyDataAttribute7 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+			{
+				Shared = global::TUnit.Core.SharedType.PerTestSession,
+			};
+
+			testBuilderContext.DataAttributes.Add(propertyDataAttribute7);
+
+			global::TUnit.TestProject.PropertySetterTests.StaticInnerModel propertyArg7 = (global::TUnit.TestProject.PropertySetterTests.StaticInnerModel)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute7).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("StaticProperty"),
+						Type = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),
+						Name = "StaticProperty",
+						IsStatic = true,
+						Getter = _ => global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
+
+
+var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedPropertySetterTests>(() => new global::TUnit.TestProject.InheritedPropertySetterTests()
+			{
+				Property1 = global::TUnit.Core.Helpers.CastHelper.Cast<string>(propertyArg),
+				Property2 = global::TUnit.Core.Helpers.CastHelper.Cast<string>(propertyArg1),
+				Property3 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg2),
+				Property4 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg3),
+				Property5 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg4),
+				Property6 = global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.PropertySetterTests.InnerModel>(propertyArg5),
+				Property7 = global::TUnit.Core.Helpers.CastHelper.Cast<string>(propertyArg6),
+			}
+			, sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+			global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty = propertyArg7;
+			global::TUnit.Core.SourceRegistrar.RegisterGlobalInitializer(async () => await global::TUnit.Core.ObjectInitializer.InitializeAsync(global::TUnit.TestProject.InheritedPropertySetterTests.StaticProperty));
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedPropertySetterTests>
+			{
+				TestId = $"TUnit.TestProject.InheritedPropertySetterTests.Test:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+					["Property1"] = propertyArg,
+					["Property2"] = propertyArg1,
+					["Property3"] = propertyArg2,
+					["Property4"] = propertyArg3,
+					["Property5"] = propertyArg4,
+					["Property6"] = propertyArg5,
+					["Property7"] = propertyArg6,
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
+				TestFilePath = @"",
+				TestLineNumber = 69,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Test",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.InheritedPropertySetterTests>
+			{
+				TestId = $"TUnit.TestProject.InheritedPropertySetterTests.Test:0",
+				MethodName = $"Test",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("InheritedPropertySetterTests.Test failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 69,
+			});
+		}
+		return nodes;
+	}
+
+}

@@ -1,3 +1,147 @@
-﻿[
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new AttributeTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.AttributeTests),\r\n\t\t\t\tName = \u0022MyTest\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.AttributeTests.MixedAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.AttributeTests.MixedAttribute(\u0022Foo\u0022),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.AttributeTests.MixedAttribute(\u0022Foo\u0022, \u0022Bar\u0022),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: \u0022Foo\u0022),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.AttributeTests.MixedAttribute()\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tProperty = \u0022Foo\u0022,\r\n\t\t\t\t\t},\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.AttributeTests.MixedAttribute(\u0022Foo\u0022)\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tProperty = \u0022Bar\u0022,\r\n\t\t\t\t\t},\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: \u0022Foo\u0022)\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tProperty = \u0022Bar\u0022,\r\n\t\t\t\t\t},\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.AttributeTests.MixedAttribute()\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tProperty = \u0022Foo\u0022,\r\n\t\t\t\t\t\tProperty2 = 1,\r\n\t\t\t\t\t}\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.AttributeTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.AttributeTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022AttributeTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022AttributeTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022AttributeTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022MyTest\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.AttributeTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.AttributeTests\u003E(() =\u003E new global::TUnit.TestProject.AttributeTests(), sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.AttributeTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.AttributeTests.MyTest:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.MyTest()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 7,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022MyTest\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.AttributeTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.AttributeTests.MyTest:0\u0022,\r\n\t\t\t\tMethodName = $\u0022MyTest\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022AttributeTests.MyTest failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 7,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}"
-]
+﻿// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class AttributeTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new AttributeTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.AttributeTests),
+				Name = "MyTest",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.TestProject.AttributeTests.MixedAttribute(),
+
+					new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo"),
+
+					new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo", "Bar"),
+
+					new global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: "Foo"),
+
+					new global::TUnit.TestProject.AttributeTests.MixedAttribute()
+					{
+						Property = "Foo",
+					},
+
+					new global::TUnit.TestProject.AttributeTests.MixedAttribute("Foo")
+					{
+						Property = "Bar",
+					},
+
+					new global::TUnit.TestProject.AttributeTests.MixedAttribute(property2: "Foo")
+					{
+						Property = "Bar",
+					},
+
+					new global::TUnit.TestProject.AttributeTests.MixedAttribute()
+					{
+						Property = "Foo",
+						Property2 = 1,
+					}
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.AttributeTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.AttributeTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("AttributeTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "AttributeTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "AttributeTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.AttributeTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AttributeTests>(() => new global::TUnit.TestProject.AttributeTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.AttributeTests>
+			{
+				TestId = $"TUnit.TestProject.AttributeTests.MyTest:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest()),
+				TestFilePath = @"",
+				TestLineNumber = 7,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "MyTest",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AttributeTests>
+			{
+				TestId = $"TUnit.TestProject.AttributeTests.MyTest:0",
+				MethodName = $"MyTest",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("AttributeTests.MyTest failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 7,
+			});
+		}
+		return nodes;
+	}
+
+}

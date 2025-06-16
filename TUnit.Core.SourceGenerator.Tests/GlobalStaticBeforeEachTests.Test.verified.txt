@@ -1,16 +1,1415 @@
-﻿[
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalBase1();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),\r\n\t\t\t\t\tName = \u0022BeforeEach1\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalBase1\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalBase1\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.BeforeTests.GlobalBase1)classInstance).BeforeEach1()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalBase2();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),\r\n\t\t\t\t\tName = \u0022BeforeEach2\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalBase2\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalBase2\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.BeforeTests.GlobalBase2)classInstance).BeforeEach2()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalBase3();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),\r\n\t\t\t\t\tName = \u0022BeforeEach3\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalBase3\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalBase3\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.BeforeTests.GlobalBase3)classInstance).BeforeEach3()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalSetUpTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\tName = \u0022SetUp\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalSetUpTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalSetUpTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUp()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalSetUpTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\tName = \u0022SetUp\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),\r\n\r\n\t\t\t\t\t\tnew global::TUnit.Core.TimeoutAttribute(30_000)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::System.Threading.CancellationToken\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022cancellationToken\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalSetUpTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalSetUpTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUp(cancellationToken)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalSetUpTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\tName = \u0022SetUpWithContext\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022testContext\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalSetUpTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalSetUpTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUpWithContext(context)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalSetUpTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\tName = \u0022SetUpWithContext\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),\r\n\r\n\t\t\t\t\t\tnew global::TUnit.Core.TimeoutAttribute(30_000)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022testContext\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::System.Threading.CancellationToken\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022cancellationToken\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalSetUpTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalSetUpTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUpWithContext(context, cancellationToken)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalBase1();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.BeforeTestHookMethod\r\n\t\t\t{ MethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),\r\n\t\t\t\t\tName = \u0022BeforeAll1\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022context\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalBase1\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalBase1\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.BeforeTests.GlobalBase1.BeforeAll1(context)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 5,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalBase2();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.BeforeTestHookMethod\r\n\t\t\t{ MethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),\r\n\t\t\t\t\tName = \u0022BeforeAll2\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022context\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalBase2\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalBase2\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.BeforeTests.GlobalBase2.BeforeAll2(context)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 20,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalBase3();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.BeforeTestHookMethod\r\n\t\t\t{ MethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),\r\n\t\t\t\t\tName = \u0022BeforeAll3\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022context\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalBase3\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalBase3\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.BeforeTests.GlobalBase3.BeforeAll3(context)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 35,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalSetUpTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.BeforeTestHookMethod\r\n\t\t\t{ MethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\tName = \u0022BeforeAllSetUp\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022context\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalSetUpTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalSetUpTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 50,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalSetUpTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.BeforeTestHookMethod\r\n\t\t\t{ MethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\tName = \u0022BeforeAllSetUp\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022context\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::System.Threading.CancellationToken\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022cancellationToken\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalSetUpTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalSetUpTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context, cancellationToken)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 56,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalSetUpTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.BeforeTestHookMethod\r\n\t\t\t{ MethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\tName = \u0022BeforeAllSetUpWithContext\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022context\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalSetUpTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalSetUpTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 62,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GlobalSetUpTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.BeforeTestHookMethod\r\n\t\t\t{ MethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\tName = \u0022BeforeAllSetUpWithContext\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.Core.TestContext\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022context\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::System.Threading.CancellationToken\u003E\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022cancellationToken\u0022,\r\n\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t},\r\n\t\t\t\t\t],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.BeforeTests.GlobalSetUpTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022GlobalStaticBeforeEachTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022GlobalStaticBeforeEachTests\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GlobalSetUpTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.BeforeTests\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context, cancellationToken)),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t\tFilePath = @\u0022\u0022,\r\n\t\t\t\tLineNumber = 68,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}"
-]
+﻿// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalBase1();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),
+					Name = "BeforeEach1",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalBase1", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalBase1",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalBase1)classInstance).BeforeEach1()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalBase2();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),
+					Name = "BeforeEach2",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalBase2", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalBase2",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalBase2)classInstance).BeforeEach2()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalBase3();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),
+					Name = "BeforeEach3",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalBase3", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalBase3",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalBase3)classInstance).BeforeEach3()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalSetUpTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+					Name = "SetUp",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalSetUpTests",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUp()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalSetUpTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+					Name = "SetUp",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),
+
+						new global::TUnit.Core.TimeoutAttribute(30_000)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::System.Threading.CancellationToken>
+						{
+							Name = "cancellationToken",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalSetUpTests",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUp(cancellationToken)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalSetUpTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+					Name = "SetUpWithContext",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "testContext",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalSetUpTests",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUpWithContext(context)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalSetUpTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+					Name = "SetUpWithContext",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test),
+
+						new global::TUnit.Core.TimeoutAttribute(30_000)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "testContext",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.TestParameter<global::System.Threading.CancellationToken>
+						{
+							Name = "cancellationToken",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalSetUpTests",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)classInstance).SetUpWithContext(context, cancellationToken)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalBase1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalBase1();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.BeforeTestHookMethod
+			{ MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),
+					Name = "BeforeAll1",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "context",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalBase1", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalBase1",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase1.BeforeAll1(context)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+				FilePath = @"",
+				LineNumber = 5,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalBase2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalBase2();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.BeforeTestHookMethod
+			{ MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),
+					Name = "BeforeAll2",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "context",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalBase2", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalBase2",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase2.BeforeAll2(context)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+				FilePath = @"",
+				LineNumber = 20,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalBase3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalBase3();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.BeforeTestHookMethod
+			{ MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),
+					Name = "BeforeAll3",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "context",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalBase3", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalBase3",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase3.BeforeAll3(context)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+				FilePath = @"",
+				LineNumber = 35,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalSetUpTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.BeforeTestHookMethod
+			{ MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+					Name = "BeforeAllSetUp",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "context",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalSetUpTests",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+				FilePath = @"",
+				LineNumber = 50,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalSetUpTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.BeforeTestHookMethod
+			{ MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+					Name = "BeforeAllSetUp",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "context",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.TestParameter<global::System.Threading.CancellationToken>
+						{
+							Name = "cancellationToken",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalSetUpTests",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context, cancellationToken)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+				FilePath = @"",
+				LineNumber = 56,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalSetUpTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.BeforeTestHookMethod
+			{ MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+					Name = "BeforeAllSetUpWithContext",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "context",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalSetUpTests",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+				FilePath = @"",
+				LineNumber = 62,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GlobalSetUpTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GlobalSetUpTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.BeforeTestHookMethod
+			{ MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+					Name = "BeforeAllSetUpWithContext",
+					GenericTypeCount = 0,
+					ReturnType = typeof(global::System.Threading.Tasks.Task),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = 
+					[
+						new global::TUnit.Core.TestParameter<global::TUnit.Core.TestContext>
+						{
+							Name = "context",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+						new global::TUnit.Core.TestParameter<global::System.Threading.CancellationToken>
+						{
+							Name = "cancellationToken",
+							Attributes = [],
+							ReflectionInfo = null!,
+						},
+					],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("GlobalStaticBeforeEachTests", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "GlobalStaticBeforeEachTests",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GlobalSetUpTests",
+						Namespace = "TUnit.TestProject.BeforeTests",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context, cancellationToken)),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+				FilePath = @"",
+				LineNumber = 68,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}

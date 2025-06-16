@@ -1,8 +1,735 @@
-﻿[
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\tName = \u0022High_1\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022High_1\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.PriorityFilteringTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E(() =\u003E new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.High_1:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.High_1()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 12,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022High_1\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.High_1:0\u0022,\r\n\t\t\t\tMethodName = $\u0022High_1\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022PriorityFilteringTests.High_1 failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 12,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\tName = \u0022High_2\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022High_2\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.PriorityFilteringTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E(() =\u003E new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.High_2:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.High_2()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 18,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022High_2\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.High_2:0\u0022,\r\n\t\t\t\tMethodName = $\u0022High_2\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022PriorityFilteringTests.High_2 failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 18,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\tName = \u0022High_3\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022High_3\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.PriorityFilteringTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E(() =\u003E new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.High_3:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.High_3()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 24,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022High_3\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.High_3:0\u0022,\r\n\t\t\t\tMethodName = $\u0022High_3\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022PriorityFilteringTests.High_3 failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 24,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\tName = \u0022Medium_1\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Medium)\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Medium_1\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.PriorityFilteringTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E(() =\u003E new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.Medium_1:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.Medium_1()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 30,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Medium_1\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.Medium_1:0\u0022,\r\n\t\t\t\tMethodName = $\u0022Medium_1\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022PriorityFilteringTests.Medium_1 failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 30,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\tName = \u0022Medium_2\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Medium)\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Medium_2\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.PriorityFilteringTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E(() =\u003E new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.Medium_2:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.Medium_2()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 36,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Medium_2\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.Medium_2:0\u0022,\r\n\t\t\t\tMethodName = $\u0022Medium_2\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022PriorityFilteringTests.Medium_2 failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 36,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\tName = \u0022Low_1\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(global::System.Threading.Tasks.Task),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Low)\r\n\t\t\t\t],\r\n\t\t\t\tParameters = [],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.PriorityFilteringTests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022PriorityFilteringTests\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022PriorityFilteringTests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject\u0022,\r\n\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Low_1\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.PriorityFilteringTests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E(() =\u003E new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);\r\n\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.Low_1:0\u0022,\r\n\t\t\t\tTestClassArguments = [],\r\n\t\t\t\tTestMethodArguments = [],\r\n\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t{\r\n\t\t\t\t},\r\n\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.Low_1()),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 42,\r\n\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t});\r\n\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Low_1\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.PriorityFilteringTests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022TUnit.TestProject.PriorityFilteringTests.Low_1:0\u0022,\r\n\t\t\t\tMethodName = $\u0022Low_1\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022PriorityFilteringTests.Low_1 failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 42,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}"
-]
+﻿// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+				Name = "High_1",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "PriorityFilteringTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "PriorityFilteringTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "High_1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_1:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.High_1()),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "High_1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_1:0",
+				MethodName = $"High_1",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_1 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 12,
+			});
+		}
+		return nodes;
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+				Name = "High_2",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "PriorityFilteringTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "PriorityFilteringTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "High_2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_2:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.High_2()),
+				TestFilePath = @"",
+				TestLineNumber = 18,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "High_2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_2:0",
+				MethodName = $"High_2",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_2 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 18,
+			});
+		}
+		return nodes;
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+				Name = "High_3",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "PriorityFilteringTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "PriorityFilteringTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "High_3",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_3:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.High_3()),
+				TestFilePath = @"",
+				TestLineNumber = 24,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "High_3",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_3:0",
+				MethodName = $"High_3",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.High_3 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 24,
+			});
+		}
+		return nodes;
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+				Name = "Medium_1",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Medium)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "PriorityFilteringTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "PriorityFilteringTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Medium_1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_1:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Medium_1()),
+				TestFilePath = @"",
+				TestLineNumber = 30,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Medium_1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_1:0",
+				MethodName = $"Medium_1",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Medium_1 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 30,
+			});
+		}
+		return nodes;
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+				Name = "Medium_2",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Medium)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "PriorityFilteringTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "PriorityFilteringTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Medium_2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_2:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Medium_2()),
+				TestFilePath = @"",
+				TestLineNumber = 36,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Medium_2",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_2:0",
+				MethodName = $"Medium_2",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Medium_2 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 36,
+			});
+		}
+		return nodes;
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+				Name = "Low_1",
+				GenericTypeCount = 0,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Low)
+				],
+				Parameters = [],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "PriorityFilteringTests",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "PriorityFilteringTests",
+					Namespace = "TUnit.TestProject",
+					Attributes = [],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Low_1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.PriorityFilteringTests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			classInstanceArguments = [];
+
+			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.PriorityFilteringTests>(() => new global::TUnit.TestProject.PriorityFilteringTests(), sessionId, testBuilderContext);
+			var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+			nodes.Add(new TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.Low_1:0",
+				TestClassArguments = [],
+				TestMethodArguments = [],
+				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				},
+				CurrentRepeatAttempt = 0,
+				RepeatLimit = 0,
+				ResettableClassFactory = resettableClassFactory,
+				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Low_1()),
+				TestFilePath = @"",
+				TestLineNumber = 42,
+				TestMethod = testInformation,
+				TestBuilderContext = testBuilderContext,
+			});
+			resettableClassFactory = resettableClassFactoryDelegate();
+			testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Low_1",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			testBuilderContextAccessor.Current = testBuilderContext;
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
+			{
+				TestId = $"TUnit.TestProject.PriorityFilteringTests.Low_1:0",
+				MethodName = $"Low_1",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("PriorityFilteringTests.Low_1 failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 42,
+			});
+		}
+		return nodes;
+	}
+
+}

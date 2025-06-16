@@ -1,5 +1,417 @@
-﻿[
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_MyTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),\r\n\t\t\t\t\tName = \u0022SetupMyTests\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.Bugs._1594.MyTests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022Hooks1594\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022Hooks1594\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022MyTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.Bugs._1594\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t\tParameters = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E\r\n\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\tName = \u0022myFixture\u0022,\r\n\t\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t\tProperties = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetProperty(\u0022Fixture\u0022),\r\n\t\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),\r\n\t\t\t\t\t\t\t\tName = \u0022Fixture\u0022,\r\n\t\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.Bugs._1594.MyTests)o).Fixture,\r\n\t\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.Bugs._1594.MyTests)classInstance).SetupMyTests()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_ParentTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests\u003C\u003E),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests\u003C\u003E),\r\n\t\t\t\t\tName = \u0022SetupParentTests\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.Bugs._1594.ParentTests\u003C\u003E\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests\u003C\u003E),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022Hooks1594\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022Hooks1594\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022ParentTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.Bugs._1594\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.ConvertObject(() =\u003E classInstance.GetType().GetMethod(\u0022SetupParentTests\u0022, []).Invoke(classInstance, [])),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E),\r\n\t\t\t\t\tName = \u0022SetupParentTests\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.Bugs._1594.ParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022Hooks1594\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022Hooks1594\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022ParentTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.Bugs._1594\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E\r\n\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\tName = \u0022fixture\u0022,\r\n\t\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t\tProperties = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E).GetProperty(\u0022Fixture\u0022),\r\n\t\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),\r\n\t\t\t\t\t\t\t\tName = \u0022Fixture\u0022,\r\n\t\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.Bugs._1594.ParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E)o).Fixture,\r\n\t\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.Bugs._1594.ParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E)classInstance).SetupParentTests()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::System.Runtime.CompilerServices;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Hooks;\r\nusing global::TUnit.Core.Interfaces;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tvar instance = new Hooks_GrandParentTests();\r\n\t\tSourceRegistrar.RegisterTestHookSource(instance);\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectBeforeEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.StaticHookMethod\u003Cglobal::TUnit.Core.TestContext\u003E\u003E CollectAfterEveryTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectBeforeTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003C\u003E),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003C\u003E),\r\n\t\t\t\t\tName = \u0022SetupBase\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003C\u003E\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003C\u003E),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022Hooks1594\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022Hooks1594\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GrandParentTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.Bugs._1594\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = [],\r\n\t\t\t\t\t\tProperties = [],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.ConvertObject(() =\u003E classInstance.GetType().GetMethod(\u0022SetupBase\u0022, []).Invoke(classInstance, [])),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t\tnew global::TUnit.Core.Hooks.InstanceHookMethod\r\n\t\t\t{\r\n\t\t\t\tClassType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E),\r\n\t\t\t\tMethodInfo = new global::TUnit.Core.TestMethod\r\n\t\t\t\t{\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E),\r\n\t\t\t\t\tName = \u0022SetupBase\u0022,\r\n\t\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tParent = null,\r\n\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E),\r\n\t\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022Hooks1594\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tName = \u0022Hooks1594\u0022,\r\n\t\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t\t],\r\n\t\t\t\t\t\t}),\r\n\t\t\t\t\t\tName = \u0022GrandParentTests\u0022,\r\n\t\t\t\t\t\tNamespace = \u0022TUnit.TestProject.Bugs._1594\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tParameters = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E\r\n\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\tName = \u0022fixture\u0022,\r\n\t\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t\tProperties = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.Core.TestProperty\r\n\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\tReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E).GetProperty(\u0022Fixture\u0022),\r\n\t\t\t\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),\r\n\t\t\t\t\t\t\t\tName = \u0022Fixture\u0022,\r\n\t\t\t\t\t\t\t\tIsStatic = false,\r\n\t\t\t\t\t\t\t\tGetter = o =\u003E ((global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E)o).Fixture,\r\n\t\t\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\t\t},\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t}\r\n\t\t\t\t,\r\n\r\n\t\t\t\tBody = (classInstance, context, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E ((global::TUnit.TestProject.Bugs._1594.GrandParentTests\u003Cglobal::TUnit.TestProject.Bugs._1594.MyFixture\u003E)classInstance).SetupBase()),\r\n\t\t\t\tHookExecutor = DefaultExecutor.Instance,\r\n\t\t\t\tOrder = 0,\r\n\t\t\t},\r\n\t\t];\r\n\t}\r\n\r\n\tpublic global::System.Collections.Generic.IReadOnlyList\u003Cglobal::TUnit.Core.Hooks.InstanceHookMethod\u003E CollectAfterTestHooks(string sessionId)\r\n\t{\r\n\t\treturn\r\n\t\t[\r\n\t\t];\r\n\t}\r\n\r\n}"
-]
+﻿// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_MyTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
+					Name = "SetupMyTests",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1594.MyTests", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Hooks1594", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "Hooks1594",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "MyTests",
+						Namespace = "TUnit.TestProject.Bugs._1594",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+						],
+						Parameters = 
+						[
+							new global::TUnit.Core.TestParameter<global::TUnit.TestProject.Bugs._1594.MyFixture>
+							{
+								Name = "myFixture",
+								Attributes = [],
+								ReflectionInfo = null!,
+							},
+						],
+						Properties = 
+						[
+							new global::TUnit.Core.TestProperty
+							{
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetProperty("Fixture"),
+								Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
+								Name = "Fixture",
+								IsStatic = false,
+								Getter = o => ((global::TUnit.TestProject.Bugs._1594.MyTests)o).Fixture,
+								Attributes = [],
+							},
+						],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1594.MyTests)classInstance).SetupMyTests()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_ParentTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_ParentTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<>),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<>),
+					Name = "SetupParentTests",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1594.ParentTests<>", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<>),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Hooks1594", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "Hooks1594",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "ParentTests",
+						Namespace = "TUnit.TestProject.Bugs._1594",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod("SetupParentTests", []).Invoke(classInstance, [])),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+					Name = "SetupParentTests",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Hooks1594", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "Hooks1594",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "ParentTests",
+						Namespace = "TUnit.TestProject.Bugs._1594",
+						Attributes = [],
+						Parameters = 
+						[
+							new global::TUnit.Core.TestParameter<global::TUnit.TestProject.Bugs._1594.MyFixture>
+							{
+								Name = "fixture",
+								Attributes = [],
+								ReflectionInfo = null!,
+							},
+						],
+						Properties = 
+						[
+							new global::TUnit.Core.TestProperty
+							{
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>).GetProperty("Fixture"),
+								Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
+								Name = "Fixture",
+								IsStatic = false,
+								Getter = o => ((global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>)o).Fixture,
+								Attributes = [],
+							},
+						],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1594.ParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>)classInstance).SetupParentTests()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::System.Runtime.CompilerServices;
+using global::TUnit.Core;
+using global::TUnit.Core.Hooks;
+using global::TUnit.Core.Interfaces;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Hooks_GrandParentTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		var instance = new Hooks_GrandParentTests();
+		SourceRegistrar.RegisterTestHookSource(instance);
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectBeforeEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>> CollectAfterEveryTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectBeforeTestHooks(string sessionId)
+	{
+		return
+		[
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<>),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<>),
+					Name = "SetupBase",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1594.GrandParentTests<>", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<>),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Hooks1594", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "Hooks1594",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GrandParentTests",
+						Namespace = "TUnit.TestProject.Bugs._1594",
+						Attributes = [],
+						Parameters = [],
+						Properties = [],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod("SetupBase", []).Invoke(classInstance, [])),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+			new global::TUnit.Core.Hooks.InstanceHookMethod
+			{
+				ClassType = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+				MethodInfo = new global::TUnit.Core.TestMethod
+				{
+					Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+					Name = "SetupBase",
+					GenericTypeCount = 0,
+					ReturnType = typeof(void),
+					Attributes = 
+					[
+						new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+					],
+					Parameters = [],
+					Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>", () => new global::TUnit.Core.TestClass
+					{
+						Parent = null,
+						Type = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>),
+						Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Hooks1594", () => new global::TUnit.Core.TestAssembly
+						{
+							Name = "Hooks1594",
+							Attributes = 
+							[
+								new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							],
+						}),
+						Name = "GrandParentTests",
+						Namespace = "TUnit.TestProject.Bugs._1594",
+						Attributes = [],
+						Parameters = 
+						[
+							new global::TUnit.Core.TestParameter<global::TUnit.TestProject.Bugs._1594.MyFixture>
+							{
+								Name = "fixture",
+								Attributes = [],
+								ReflectionInfo = null!,
+							},
+						],
+						Properties = 
+						[
+							new global::TUnit.Core.TestProperty
+							{
+								ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>).GetProperty("Fixture"),
+								Type = typeof(global::TUnit.TestProject.Bugs._1594.MyFixture),
+								Name = "Fixture",
+								IsStatic = false,
+								Getter = o => ((global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>)o).Fixture,
+								Attributes = [],
+							},
+						],
+					}),
+				}
+				,
+
+				Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => ((global::TUnit.TestProject.Bugs._1594.GrandParentTests<global::TUnit.TestProject.Bugs._1594.MyFixture>)classInstance).SetupBase()),
+				HookExecutor = DefaultExecutor.Instance,
+				Order = 0,
+			},
+		];
+	}
+
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod> CollectAfterTestHooks(string sessionId)
+	{
+		return
+		[
+		];
+	}
+
+}

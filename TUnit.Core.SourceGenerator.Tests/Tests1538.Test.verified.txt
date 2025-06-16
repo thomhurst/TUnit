@@ -1,4 +1,433 @@
-﻿[
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new Tests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1538.Tests),\r\n\t\t\t\tName = \u0022Eight_Args\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.Core.MethodDataSourceAttribute(\u0022EightItems\u0022)\r\n\t\t\t\t],\r\n\t\t\t\tParameters = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cbool\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedSuccess\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedError\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedT0\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedT1\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedT2\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedT3\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedT4\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedT5\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.Bugs._1538.Tests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1538.Tests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022Tests1538\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022Tests1538\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022Tests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject.Bugs._1538\u0022,\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022Eight_Args\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.Bugs._1538.Tests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tforeach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.EightItems())\r\n\t\t\t{\r\n\t\t\t\ttestMethodDataIndex\u002B\u002B;\r\n\t\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\t\tvar methodData = methodDataAccessor;\r\n\t\t\t\tvar methodArgTuples = global::System.TupleExtensions.ToTuple\u003Cbool, string, string, string, string, string, string, string\u003E(methodData);\r\n\t\t\t\tbool methodArg = methodArgTuples.Item1;\r\n\t\t\t\tstring methodArg1 = methodArgTuples.Item2;\r\n\t\t\t\tstring methodArg2 = methodArgTuples.Item3;\r\n\t\t\t\tstring methodArg3 = methodArgTuples.Item4;\r\n\t\t\t\tstring methodArg4 = methodArgTuples.Item5;\r\n\t\t\t\tstring methodArg5 = methodArgTuples.Item6;\r\n\t\t\t\tstring methodArg6 = methodArgTuples.Item7;\r\n\t\t\t\tstring methodArg7 = methodArgTuples.Rest.Item1;\r\n\t\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.Bugs._1538.Tests\u003E(() =\u003E new global::TUnit.TestProject.Bugs._1538.Tests(), sessionId, testBuilderContext);\r\n\t\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.Bugs._1538.Tests\u003E\r\n\t\t\t\t{\r\n\t\t\t\t\tTestId = $\u0022global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(bool,string,string,string,string,string,string,string):0\u0022,\r\n\t\t\t\t\tTestClassArguments = [],\r\n\t\t\t\t\tTestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7],\r\n\t\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t},\r\n\t\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.Eight_Args(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7)),\r\n\t\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\t\tTestLineNumber = 8,\r\n\t\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t\t});\r\n\t\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t\t{\r\n\t\t\t\t\tTestMethodName = \u0022Eight_Args\u0022,\r\n\t\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\t\tMethodInformation = testInformation\t\t\t\t};\r\n\t\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t\t}\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.Bugs._1538.Tests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(bool,string,string,string,string,string,string,string):0\u0022,\r\n\t\t\t\tMethodName = $\u0022Eight_Args\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022Tests.Eight_Args failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 8,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}",
-  "// \u003Cauto-generated/\u003E\r\n#pragma warning disable\r\nusing global::System.Linq;\r\nusing global::System.Reflection;\r\nusing global::TUnit.Core;\r\nusing global::TUnit.Core.Extensions;\r\n\r\nnamespace TUnit.SourceGenerated;\r\n\r\n[global::System.Diagnostics.StackTraceHidden]\r\n[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\r\n[System.CodeDom.Compiler.GeneratedCode(\u0022TUnit\u0022, \u00221.0.0.0\u0022)]\r\nfile partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource\r\n{\r\n\t[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n\tpublic static void Initialise()\r\n\t{\r\n\t\tglobal::TUnit.Core.SourceRegistrar.Register(new Tests());\r\n\t}\r\n\r\n\tpublic async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.IReadOnlyList\u003CTestMetadata\u003E\u003E CollectTestsAsync(string sessionId)\r\n\t{\r\n\t\treturn await Tests0(sessionId);\r\n\t}\r\n\r\n\tprivate async global::System.Threading.Tasks.Task\u003Cglobal::System.Collections.Generic.List\u003CTestMetadata\u003E\u003E Tests0(string sessionId)\r\n\t{\r\n\t\tglobal::System.Collections.Generic.List\u003CTestMetadata\u003E nodes = [];\r\n\t\tvar classDataIndex = 0;\r\n\t\tvar testMethodDataIndex = 0;\r\n\t\ttry\r\n\t\t{\r\n\t\t\tvar testInformation = new global::TUnit.Core.TestMethod\r\n\t\t\t{\r\n\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1538.Tests),\r\n\t\t\t\tName = \u0022SixteenArgs\u0022,\r\n\t\t\t\tGenericTypeCount = 0,\r\n\t\t\t\tReturnType = typeof(void),\r\n\t\t\t\tAttributes = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestAttribute(),\r\n\r\n\t\t\t\t\tnew global::TUnit.Core.MethodDataSourceAttribute(\u0022SixteenItems\u0022)\r\n\t\t\t\t],\r\n\t\t\t\tParameters = \r\n\t\t\t\t[\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cbool\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022expectedSuccess\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item1\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item2\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item3\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item4\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item5\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item6\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item7\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item8\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item9\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item10\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item11\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item12\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item13\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item14\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t\tnew global::TUnit.Core.TestParameter\u003Cstring\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022item15\u0022,\r\n\t\t\t\t\t\tAttributes = [],\r\n\t\t\t\t\t\tReflectionInfo = null!,\r\n\t\t\t\t\t},\r\n\t\t\t\t],\r\n\t\t\t\tClass = global::TUnit.Core.TestClass.GetOrAdd(\u0022global::TUnit.TestProject.Bugs._1538.Tests\u0022, () =\u003E new global::TUnit.Core.TestClass\r\n\t\t\t\t{\r\n\t\t\t\t\tParent = null,\r\n\t\t\t\t\tType = typeof(global::TUnit.TestProject.Bugs._1538.Tests),\r\n\t\t\t\t\tAssembly = global::TUnit.Core.TestAssembly.GetOrAdd(\u0022Tests1538\u0022, () =\u003E new global::TUnit.Core.TestAssembly\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tName = \u0022Tests1538\u0022,\r\n\t\t\t\t\t\tAttributes = \r\n\t\t\t\t\t\t[\r\n\t\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()\r\n\t\t\t\t\t\t],\r\n\t\t\t\t\t}),\r\n\t\t\t\t\tName = \u0022Tests\u0022,\r\n\t\t\t\t\tNamespace = \u0022TUnit.TestProject.Bugs._1538\u0022,\r\n\t\t\t\t\tAttributes = \r\n\t\t\t\t\t[\r\n\t\t\t\t\t\tnew global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)\r\n\t\t\t\t\t],\r\n\t\t\t\t\tParameters = [],\r\n\t\t\t\t\tProperties = [],\r\n\t\t\t\t}),\r\n\t\t\t};\r\n\r\n\r\n\t\t\tvar testBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t{\r\n\t\t\t\tTestMethodName = \u0022SixteenArgs\u0022,\r\n\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\tMethodInformation = testInformation\t\t\t};\r\n\t\t\tvar testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);\r\n\t\t\tglobal::TUnit.TestProject.Bugs._1538.Tests? classInstance = null;\r\n\t\t\tobject?[]? classInstanceArguments = null;\r\n\t\t\tforeach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems())\r\n\t\t\t{\r\n\t\t\t\ttestMethodDataIndex\u002B\u002B;\r\n\t\t\t\tclassInstanceArguments = [];\r\n\r\n\t\t\t\tvar methodData = methodDataAccessor;\r\n\t\t\t\tvar methodArgTuples = global::System.TupleExtensions.ToTuple\u003Cbool, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string\u003E(methodData);\r\n\t\t\t\tbool methodArg = methodArgTuples.Item1;\r\n\t\t\t\tstring methodArg1 = methodArgTuples.Item2;\r\n\t\t\t\tstring methodArg2 = methodArgTuples.Item3;\r\n\t\t\t\tstring methodArg3 = methodArgTuples.Item4;\r\n\t\t\t\tstring methodArg4 = methodArgTuples.Item5;\r\n\t\t\t\tstring methodArg5 = methodArgTuples.Item6;\r\n\t\t\t\tstring methodArg6 = methodArgTuples.Item7;\r\n\t\t\t\tstring methodArg7 = methodArgTuples.Rest.Item1;\r\n\t\t\t\tstring methodArg8 = methodArgTuples.Rest.Item2;\r\n\t\t\t\tstring methodArg9 = methodArgTuples.Rest.Item3;\r\n\t\t\t\tstring methodArg10 = methodArgTuples.Rest.Item4;\r\n\t\t\t\tstring methodArg11 = methodArgTuples.Rest.Item5;\r\n\t\t\t\tstring methodArg12 = methodArgTuples.Rest.Item6;\r\n\t\t\t\tstring methodArg13 = methodArgTuples.Rest.Item7;\r\n\t\t\t\tstring methodArg14 = methodArgTuples.Rest.Rest.Item1;\r\n\t\t\t\tstring methodArg15 = methodArgTuples.Rest.Rest.Item2;\r\n\t\t\t\tvar resettableClassFactoryDelegate = () =\u003E new ResettableLazy\u003Cglobal::TUnit.TestProject.Bugs._1538.Tests\u003E(() =\u003E new global::TUnit.TestProject.Bugs._1538.Tests(), sessionId, testBuilderContext);\r\n\t\t\t\tvar resettableClassFactory = resettableClassFactoryDelegate();\r\n\r\n\r\n\t\t\t\tnodes.Add(new TestMetadata\u003Cglobal::TUnit.TestProject.Bugs._1538.Tests\u003E\r\n\t\t\t\t{\r\n\t\t\t\t\tTestId = $\u0022global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(bool,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string):0\u0022,\r\n\t\t\t\t\tTestClassArguments = [],\r\n\t\t\t\t\tTestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7, methodArg8, methodArg9, methodArg10, methodArg11, methodArg12, methodArg13, methodArg14, methodArg15],\r\n\t\t\t\t\tTestClassProperties = new global::System.Collections.Generic.Dictionary\u003Cstring, object?\u003E\r\n\t\t\t\t\t{\r\n\t\t\t\t\t},\r\n\t\t\t\t\tCurrentRepeatAttempt = 0,\r\n\t\t\t\t\tRepeatLimit = 0,\r\n\t\t\t\t\tResettableClassFactory = resettableClassFactory,\r\n\t\t\t\t\tTestMethodFactory = (classInstance, cancellationToken) =\u003E AsyncConvert.Convert(() =\u003E classInstance.SixteenArgs(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7, methodArg8, methodArg9, methodArg10, methodArg11, methodArg12, methodArg13, methodArg14, methodArg15)),\r\n\t\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\t\tTestLineNumber = 16,\r\n\t\t\t\t\tTestMethod = testInformation,\r\n\t\t\t\t\tTestBuilderContext = testBuilderContext,\r\n\t\t\t\t});\r\n\t\t\t\tresettableClassFactory = resettableClassFactoryDelegate();\r\n\t\t\t\ttestBuilderContext = new global::TUnit.Core.TestBuilderContext\r\n\t\t\t\t{\r\n\t\t\t\t\tTestMethodName = \u0022SixteenArgs\u0022,\r\n\t\t\t\t\tClassInformation = testInformation.Class,\r\n\t\t\t\t\tMethodInformation = testInformation\t\t\t\t};\r\n\t\t\t\ttestBuilderContextAccessor.Current = testBuilderContext;\r\n\t\t\t}\r\n\t\t}\r\n\t\tcatch (global::System.Exception exception)\r\n\t\t{\r\n\t\t\tnodes.Add(new FailedTestMetadata\u003Cglobal::TUnit.TestProject.Bugs._1538.Tests\u003E\r\n\t\t\t{\r\n\t\t\t\tTestId = $\u0022global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(bool,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string):0\u0022,\r\n\t\t\t\tMethodName = $\u0022SixteenArgs\u0022,\r\n\t\t\t\tException = new TUnit.Core.Exceptions.TestFailedInitializationException(\u0022Tests.SixteenArgs failed to initialize\u0022, exception),\r\n\t\t\t\tTestFilePath = @\u0022\u0022,\r\n\t\t\t\tTestLineNumber = 16,\r\n\t\t\t});\r\n\t\t}\r\n\t\treturn nodes;\r\n\t}\r\n\r\n}"
-]
+﻿// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new Tests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
+				Name = "Eight_Args",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("EightItems")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.TestParameter<bool>
+					{
+						Name = "expectedSuccess",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "expectedError",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "expectedT0",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "expectedT1",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "expectedT2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "expectedT3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "expectedT4",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "expectedT5",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Tests1538", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "Tests1538",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "Tests",
+					Namespace = "TUnit.TestProject.Bugs._1538",
+					Attributes = 
+					[
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "Eight_Args",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.Bugs._1538.Tests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			foreach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.EightItems())
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
+
+				var methodData = methodDataAccessor;
+				var methodArgTuples = global::System.TupleExtensions.ToTuple<bool, string, string, string, string, string, string, string>(methodData);
+				bool methodArg = methodArgTuples.Item1;
+				string methodArg1 = methodArgTuples.Item2;
+				string methodArg2 = methodArgTuples.Item3;
+				string methodArg3 = methodArgTuples.Item4;
+				string methodArg4 = methodArgTuples.Item5;
+				string methodArg5 = methodArgTuples.Item6;
+				string methodArg6 = methodArgTuples.Item7;
+				string methodArg7 = methodArgTuples.Rest.Item1;
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1538.Tests>(() => new global::TUnit.TestProject.Bugs._1538.Tests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(bool,string,string,string,string,string,string,string):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Eight_Args(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7)),
+					TestFilePath = @"",
+					TestLineNumber = 8,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "Eight_Args",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(bool,string,string,string,string,string,string,string):0",
+				MethodName = $"Eight_Args",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.Eight_Args failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 8,
+			});
+		}
+		return nodes;
+	}
+
+}
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+using global::System.Linq;
+using global::System.Reflection;
+using global::TUnit.Core;
+using global::TUnit.Core.Extensions;
+
+namespace TUnit.SourceGenerated;
+
+[global::System.Diagnostics.StackTraceHidden]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+{
+	[global::System.Runtime.CompilerServices.ModuleInitializer]
+	public static void Initialise()
+	{
+		global::TUnit.Core.SourceRegistrar.Register(new Tests());
+	}
+
+	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	{
+		return await Tests0(sessionId);
+	}
+
+	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	{
+		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var classDataIndex = 0;
+		var testMethodDataIndex = 0;
+		try
+		{
+			var testInformation = new global::TUnit.Core.TestMethod
+			{
+				Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
+				Name = "SixteenArgs",
+				GenericTypeCount = 0,
+				ReturnType = typeof(void),
+				Attributes = 
+				[
+					new global::TUnit.Core.TestAttribute(),
+
+					new global::TUnit.Core.MethodDataSourceAttribute("SixteenItems")
+				],
+				Parameters = 
+				[
+					new global::TUnit.Core.TestParameter<bool>
+					{
+						Name = "expectedSuccess",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item1",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item2",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item3",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item4",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item5",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item6",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item7",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item8",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item9",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item10",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item11",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item12",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item13",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item14",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+					new global::TUnit.Core.TestParameter<string>
+					{
+						Name = "item15",
+						Attributes = [],
+						ReflectionInfo = null!,
+					},
+				],
+				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1538.Tests", () => new global::TUnit.Core.TestClass
+				{
+					Parent = null,
+					Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
+					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Tests1538", () => new global::TUnit.Core.TestAssembly
+					{
+						Name = "Tests1538",
+						Attributes = 
+						[
+							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+						],
+					}),
+					Name = "Tests",
+					Namespace = "TUnit.TestProject.Bugs._1538",
+					Attributes = 
+					[
+						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+					],
+					Parameters = [],
+					Properties = [],
+				}),
+			};
+
+
+			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
+			{
+				TestMethodName = "SixteenArgs",
+				ClassInformation = testInformation.Class,
+				MethodInformation = testInformation			};
+			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			global::TUnit.TestProject.Bugs._1538.Tests? classInstance = null;
+			object?[]? classInstanceArguments = null;
+			foreach (var methodDataAccessor in global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems())
+			{
+				testMethodDataIndex++;
+				classInstanceArguments = [];
+
+				var methodData = methodDataAccessor;
+				var methodArgTuples = global::System.TupleExtensions.ToTuple<bool, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string>(methodData);
+				bool methodArg = methodArgTuples.Item1;
+				string methodArg1 = methodArgTuples.Item2;
+				string methodArg2 = methodArgTuples.Item3;
+				string methodArg3 = methodArgTuples.Item4;
+				string methodArg4 = methodArgTuples.Item5;
+				string methodArg5 = methodArgTuples.Item6;
+				string methodArg6 = methodArgTuples.Item7;
+				string methodArg7 = methodArgTuples.Rest.Item1;
+				string methodArg8 = methodArgTuples.Rest.Item2;
+				string methodArg9 = methodArgTuples.Rest.Item3;
+				string methodArg10 = methodArgTuples.Rest.Item4;
+				string methodArg11 = methodArgTuples.Rest.Item5;
+				string methodArg12 = methodArgTuples.Rest.Item6;
+				string methodArg13 = methodArgTuples.Rest.Item7;
+				string methodArg14 = methodArgTuples.Rest.Rest.Item1;
+				string methodArg15 = methodArgTuples.Rest.Rest.Item2;
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1538.Tests>(() => new global::TUnit.TestProject.Bugs._1538.Tests(), sessionId, testBuilderContext);
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(bool,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string):0",
+					TestClassArguments = [],
+					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7, methodArg8, methodArg9, methodArg10, methodArg11, methodArg12, methodArg13, methodArg14, methodArg15],
+					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					},
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SixteenArgs(methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7, methodArg8, methodArg9, methodArg10, methodArg11, methodArg12, methodArg13, methodArg14, methodArg15)),
+					TestFilePath = @"",
+					TestLineNumber = 16,
+					TestMethod = testInformation,
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new global::TUnit.Core.TestBuilderContext
+				{
+					TestMethodName = "SixteenArgs",
+					ClassInformation = testInformation.Class,
+					MethodInformation = testInformation				};
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
+		}
+		catch (global::System.Exception exception)
+		{
+			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
+			{
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(bool,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string):0",
+				MethodName = $"SixteenArgs",
+				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.SixteenArgs failed to initialize", exception),
+				TestFilePath = @"",
+				TestLineNumber = 16,
+			});
+		}
+		return nodes;
+	}
+
+}
