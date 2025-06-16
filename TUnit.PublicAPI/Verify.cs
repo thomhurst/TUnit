@@ -47,10 +47,43 @@ public sealed class VerifySettingsTask
             var tfm = assembly.GetCustomAttributes(false)
                 .OfType<System.Runtime.Versioning.TargetFrameworkAttribute>()
                 .FirstOrDefault()?.FrameworkName ?? "unknown";
+            
+            // Convert framework name to short form (e.g., ".NETStandard,Version=v2.0" to "netstandard2.0")
+            var shortTfm = ConvertToShortFrameworkName(tfm);
+            
             var version = assembly.GetName().Version?.ToString() ?? "unknown";
-            _uniqueSuffix = $"_{tfm}_{version}";
+            _uniqueSuffix = $"_{shortTfm}_{version}";
         }
         return this;
+    }
+    
+    private static string ConvertToShortFrameworkName(string frameworkName)
+    {
+        // Parse the framework name like ".NETStandard,Version=v2.0"
+        var parts = frameworkName.Split(',');
+        if (parts.Length < 2)
+            return frameworkName;
+            
+        var framework = parts[0].Trim();
+        var versionPart = parts[1].Trim();
+        
+        // Extract version number
+        var versionMatch = System.Text.RegularExpressions.Regex.Match(versionPart, @"Version=v?(\d+\.\d+(?:\.\d+)?)");
+        if (!versionMatch.Success)
+            return frameworkName;
+            
+        var version = versionMatch.Groups[1].Value;
+        
+        // Convert to short form
+        return framework switch
+        {
+            ".NETStandard" => $"netstandard{version}",
+            ".NETCoreApp" => version.StartsWith("3.") || version == "3.0" || version == "3.1" 
+                ? $"netcoreapp{version}" 
+                : $"net{version}",
+            ".NETFramework" => $"net{version.Replace(".", "")}",
+            _ => $"{framework.ToLowerInvariant()}{version}"
+        };
     }
 
     public VerifySettingsTask ScrubLinesContaining(string substring)
