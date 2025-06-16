@@ -123,7 +123,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -151,7 +151,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 				MethodName = $"DataSource_Class",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",
@@ -290,7 +290,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -318,7 +318,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.In
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic(TUnit.TestProject.Library.Models.SomeAsyncDisposableClass):0",
 				MethodName = $"DataSource_Class_Generic",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic failed to initialize", exception),
 				TestFilePath = @"",

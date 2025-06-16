@@ -281,7 +281,28 @@ var propertyDataAttribute6 = new global::TUnit.TestProject.Attributes.AutoFixtur
 
 			testBuilderContext.DataAttributes.Add(propertyDataAttribute6);
 
-			string propertyArg6 = null! /* async initialization */;
+			string propertyArg6 = (string)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute6).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property7"),
+						Type = typeof(string),
+						Name = "Property7",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property7,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
 
 var propertyDataAttribute7 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
 			{
@@ -665,7 +686,28 @@ var propertyDataAttribute6 = new global::TUnit.TestProject.Attributes.AutoFixtur
 
 			testBuilderContext.DataAttributes.Add(propertyDataAttribute6);
 
-			string propertyArg6 = null! /* async initialization */;
+			string propertyArg6 = (string)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)propertyDataAttribute6).GenerateAsync(new DataGeneratorMetadata
+			{
+				Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+				TestBuilderContext = testBuilderContextAccessor,
+				TestInformation = testInformation,
+				MembersToGenerate = 
+				[
+					new global::TUnit.Core.TestProperty
+					{
+						ReflectionInfo = typeof(global::TUnit.TestProject.InheritedPropertySetterTests).GetProperty("Property7"),
+						Type = typeof(string),
+						Name = "Property7",
+						IsStatic = false,
+						Getter = o => ((global::TUnit.TestProject.InheritedPropertySetterTests)o).Property7,
+						Attributes = [],
+					},
+				],
+				TestSessionId = sessionId,
+				TestClassInstance = classInstance,
+				ClassInstanceArguments = classInstanceArguments,
+			}
+			)))!;
 
 var propertyDataAttribute7 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
 			{

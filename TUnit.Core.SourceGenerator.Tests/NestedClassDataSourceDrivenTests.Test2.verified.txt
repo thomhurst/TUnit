@@ -116,15 +116,36 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -255,15 +276,36 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -394,15 +436,36 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -533,15 +596,36 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -672,15 +756,36 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -811,15 +916,36 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -950,7 +1076,28 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
@@ -971,7 +1118,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 				{
-					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):0",
+					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -999,7 +1146,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 			{
-				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):0",
+				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):0",
 				MethodName = $"DataSource_Class",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests2.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",
@@ -1089,7 +1236,28 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
@@ -1110,7 +1278,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 				{
-					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):1",
+					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):1",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1138,7 +1306,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 			{
-				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):1",
+				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):1",
 				MethodName = $"DataSource_Class",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests2.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",
@@ -1228,7 +1396,28 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
@@ -1249,7 +1438,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 				{
-					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):2",
+					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):2",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1277,7 +1466,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 			{
-				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):2",
+				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):2",
 				MethodName = $"DataSource_Class",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests2.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",
@@ -1367,7 +1556,28 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
@@ -1388,7 +1598,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 				{
-					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):3",
+					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):3",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1416,7 +1626,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 			{
-				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):3",
+				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):3",
 				MethodName = $"DataSource_Class",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests2.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",
@@ -1506,7 +1716,28 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
@@ -1527,7 +1758,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 				{
-					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):4",
+					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):4",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1555,7 +1786,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 			{
-				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):4",
+				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):4",
 				MethodName = $"DataSource_Class",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests2.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",
@@ -1645,7 +1876,28 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 			};
 			var methodDataAttribute = new global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider()
 			{
-				InnerClass = null! /* async initialization */,
+				InnerClass = (global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1)(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1>()).GenerateAsync(new DataGeneratorMetadata
+				{
+					Type = global::TUnit.Core.Enums.DataGeneratorType.Property,
+					TestBuilderContext = testBuilderContextAccessor,
+					TestInformation = testInformation,
+					MembersToGenerate = 
+					[
+						new global::TUnit.Core.TestProperty
+						{
+							ReflectionInfo = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider).GetProperty("InnerClass"),
+							Type = typeof(global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1),
+							Name = "InnerClass",
+							IsStatic = false,
+							Getter = o => ((global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider)o).InnerClass,
+							Attributes = [],
+						},
+					],
+					TestSessionId = sessionId,
+					TestClassInstance = classInstance,
+					ClassInstanceArguments = classInstanceArguments,
+				}
+				)))!,
 			};
 
 
@@ -1666,7 +1918,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 				{
-					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):5",
+					TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):5",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1694,7 +1946,7 @@ file partial class NestedClassDataSourceDrivenTests2 : global::TUnit.Core.Interf
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.NestedClassDataSourceDrivenTests2>
 			{
-				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):5",
+				TestId = $"global::TUnit.TestProject.NestedClassDataSourceDrivenTests2.MyDataProvider:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.NestedClassDataSourceDrivenTests2.DataSource_Class(TUnit.TestProject.NestedClassDataSourceDrivenTests2.SomeClass1):5",
 				MethodName = $"DataSource_Class",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("NestedClassDataSourceDrivenTests2.DataSource_Class failed to initialize", exception),
 				TestFilePath = @"",

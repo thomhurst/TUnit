@@ -140,9 +140,9 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -328,7 +328,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.AutoDataTests>
 				{
-					TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
+					TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -356,7 +356,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.AutoDataTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
 				MethodName = $"Test1",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("AutoDataTests.Test1 failed to initialize", exception),
 				TestFilePath = @"",

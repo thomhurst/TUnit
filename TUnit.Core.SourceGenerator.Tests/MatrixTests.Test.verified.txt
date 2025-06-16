@@ -149,9 +149,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -344,7 +344,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -372,7 +372,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_One(string,int,bool):0",
 				MethodName = $"MatrixTest_One",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.MatrixTest_One failed to initialize", exception),
 				TestFilePath = @"",
@@ -555,9 +555,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -770,7 +770,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -798,7 +798,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Two(int,int,int,bool):0",
 				MethodName = $"MatrixTest_Two",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.MatrixTest_Two failed to initialize", exception),
 				TestFilePath = @"",
@@ -957,9 +957,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -1146,7 +1146,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum,TUnit.TestProject.TestEnum?):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum,TUnit.TestProject.TestEnum?):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1174,7 +1174,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum,TUnit.TestProject.TestEnum?):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(int,TUnit.TestProject.TestEnum,TUnit.TestProject.TestEnum?):0",
 				MethodName = $"MatrixTest_Enum",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.MatrixTest_Enum failed to initialize", exception),
 				TestFilePath = @"",
@@ -1315,9 +1315,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -1484,7 +1484,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1512,7 +1512,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools(string,bool):0",
 				MethodName = $"AutoGenerateBools",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.AutoGenerateBools failed to initialize", exception),
 				TestFilePath = @"",
@@ -1659,9 +1659,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -1834,7 +1834,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool?):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool?):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1862,7 +1862,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool?):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.AutoGenerateBools2(string,bool?):0",
 				MethodName = $"AutoGenerateBools2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.AutoGenerateBools2 failed to initialize", exception),
 				TestFilePath = @"",
@@ -2009,9 +2009,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -2184,7 +2184,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -2212,7 +2212,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ImplicitConversion(OneOf<TUnit.TestProject.TestEnum, TestEnum2>,bool):0",
 				MethodName = $"ImplicitConversion",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.ImplicitConversion failed to initialize", exception),
 				TestFilePath = @"",
@@ -2365,9 +2365,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -2546,7 +2546,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -2574,7 +2574,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues(TUnit.TestProject.MatrixTests.CountToTenEnum,bool):0",
 				MethodName = $"ExcludingAutoGeneratedMatrixValues",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.ExcludingAutoGeneratedMatrixValues failed to initialize", exception),
 				TestFilePath = @"",
@@ -2703,9 +2703,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -2858,7 +2858,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Method1(int):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method1(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -2886,7 +2886,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Method1(int):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method1(int):0",
 				MethodName = $"Method1",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method1 failed to initialize", exception),
 				TestFilePath = @"",
@@ -3015,9 +3015,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -3170,7 +3170,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Method2(int):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method2(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -3198,7 +3198,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Method2(int):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method2(int):0",
 				MethodName = $"Method2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method2 failed to initialize", exception),
 				TestFilePath = @"",
@@ -3327,9 +3327,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -3482,7 +3482,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Method3(int):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method3(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -3510,7 +3510,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Method3(int):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method3(int):0",
 				MethodName = $"Method3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method3 failed to initialize", exception),
 				TestFilePath = @"",
@@ -3639,9 +3639,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -3794,7 +3794,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Method4(int):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method4(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -3822,7 +3822,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Method4(int):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Method4(int):0",
 				MethodName = $"Method4",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Method4 failed to initialize", exception),
 				TestFilePath = @"",
@@ -3975,9 +3975,9 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
 				testMethodDataIndex++;
 				classInstanceArguments = [];
@@ -4156,7 +4156,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.MatrixTests>
 				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Exclusion(int,int):0",
+					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Exclusion(int,int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -4184,7 +4184,7 @@ file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.I
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.MatrixTests>
 			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.MatrixTests.Exclusion(int,int):0",
+				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.MatrixTests.Exclusion(int,int):0",
 				MethodName = $"Exclusion",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MatrixTests.Exclusion failed to initialize", exception),
 				TestFilePath = @"",

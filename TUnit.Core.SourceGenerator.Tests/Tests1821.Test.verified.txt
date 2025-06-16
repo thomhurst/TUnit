@@ -134,7 +134,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
 						TestClassArguments = [classArg],
 						TestMethodArguments = [methodData],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -163,7 +163,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.InstanceMethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MethodDataSource(string):0",
 				MethodName = $"MethodDataSource",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.MethodDataSource failed to initialize", exception),
 				TestFilePath = @"",
@@ -335,9 +335,9 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
@@ -346,7 +346,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
 						TestClassArguments = [classArg],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -375,7 +375,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
 				MethodName = $"MatrixDataSource",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.MatrixDataSource failed to initialize", exception),
 				TestFilePath = @"",
@@ -526,7 +526,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 					{
-						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
+						TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
 						TestClassArguments = [classArg],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -555,7 +555,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1821.Tests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>:{classDataIndex}:CL-GAC0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1821.Tests(TUnit.TestProject.Bugs._1821.MyData).MatrixDataSource(string):0",
 				MethodName = $"MatrixDataSource",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("Tests.MatrixDataSource failed to initialize", exception),
 				TestFilePath = @"",

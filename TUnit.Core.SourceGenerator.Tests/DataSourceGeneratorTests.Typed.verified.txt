@@ -145,9 +145,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -173,9 +173,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -373,9 +373,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -393,7 +393,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -422,7 +422,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 				MethodName = $"GeneratedData_Method",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 				TestFilePath = @"",
@@ -545,9 +545,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -573,9 +573,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -773,9 +773,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -793,7 +793,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -822,7 +822,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 				MethodName = $"GeneratedData_Method",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 				TestFilePath = @"",
@@ -945,9 +945,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -993,7 +993,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1022,7 +1022,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 				MethodName = $"GeneratedData_Method",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 				TestFilePath = @"",
@@ -1193,7 +1193,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1222,7 +1222,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 				MethodName = $"GeneratedData_Method",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 				TestFilePath = @"",
@@ -1345,9 +1345,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -1393,7 +1393,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1422,7 +1422,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 				MethodName = $"GeneratedData_Method",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 				TestFilePath = @"",
@@ -1593,7 +1593,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -1622,7 +1622,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method(int):0",
 				MethodName = $"GeneratedData_Method",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method failed to initialize", exception),
 				TestFilePath = @"",
@@ -1795,9 +1795,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -1835,9 +1835,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -2062,9 +2062,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -2085,7 +2085,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -2114,7 +2114,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 				MethodName = $"GeneratedData_Method2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 				TestFilePath = @"",
@@ -2249,9 +2249,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -2289,9 +2289,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -2516,9 +2516,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -2539,7 +2539,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -2568,7 +2568,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 				MethodName = $"GeneratedData_Method2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 				TestFilePath = @"",
@@ -2703,9 +2703,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -2766,7 +2766,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -2795,7 +2795,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 				MethodName = $"GeneratedData_Method2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 				TestFilePath = @"",
@@ -2993,7 +2993,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -3022,7 +3022,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 				MethodName = $"GeneratedData_Method2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 				TestFilePath = @"",
@@ -3157,9 +3157,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -3220,7 +3220,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -3249,7 +3249,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 				MethodName = $"GeneratedData_Method2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 				TestFilePath = @"",
@@ -3447,7 +3447,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -3476,7 +3476,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method2(int,string,bool):0",
 				MethodName = $"GeneratedData_Method2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method2 failed to initialize", exception),
 				TestFilePath = @"",
@@ -3649,9 +3649,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -3689,9 +3689,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -3916,9 +3916,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -3939,7 +3939,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -3968,7 +3968,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 				MethodName = $"GeneratedData_Method3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 				TestFilePath = @"",
@@ -4103,9 +4103,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -4143,9 +4143,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -4370,9 +4370,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 				testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-				var methodArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata));
+				var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
 
-				foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
+				await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 				{
 					testMethodDataIndex++;
 					var classArgGeneratedData = await classArgGeneratedDataAccessor();
@@ -4393,7 +4393,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -4422,7 +4422,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 				MethodName = $"GeneratedData_Method3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 				TestFilePath = @"",
@@ -4557,9 +4557,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -4620,7 +4620,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -4649,7 +4649,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 				MethodName = $"GeneratedData_Method3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 				TestFilePath = @"",
@@ -4847,7 +4847,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -4876,7 +4876,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 				MethodName = $"GeneratedData_Method3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 				TestFilePath = @"",
@@ -5011,9 +5011,9 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 			testBuilderContext.DataAttributes.Add(classDataAttribute);
 
-			var classArgGeneratedDataArray = await global::TUnit.Core.Helpers.AsyncDataSourceHelper.ToListAsync(global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata));
+			var classArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)classDataAttribute), classArgDataGeneratorMetadata);
 
-			foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
+			await foreach (var classArgGeneratedDataAccessor in classArgGeneratedDataArray)
 			{
 				classDataIndex++;
 				var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
@@ -5074,7 +5074,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -5103,7 +5103,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 				MethodName = $"GeneratedData_Method3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 				TestFilePath = @"",
@@ -5301,7 +5301,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 
 					nodes.Add(new TestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 					{
-						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+						TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 						TestClassArguments = [classArg, classArg1, classArg2],
 						TestMethodArguments = [methodArg, methodArg1, methodArg2],
 						TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -5330,7 +5330,7 @@ file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.Sour
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.DataSourceGeneratorTests>
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(int,string,bool).GeneratedData_Method3(int,string,bool):0",
 				MethodName = $"GeneratedData_Method3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DataSourceGeneratorTests.GeneratedData_Method3 failed to initialize", exception),
 				TestFilePath = @"",

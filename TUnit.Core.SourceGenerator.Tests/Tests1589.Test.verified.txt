@@ -142,7 +142,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1589.MyTests>
 				{
-					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>:{classDataIndex}:TUnit.TestProject.Bugs._1589.MyTests(TUnit.TestProject.Bugs._1589.MyFixture).Test1:0",
+					TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1589.MyTests(TUnit.TestProject.Bugs._1589.MyFixture).Test1:0",
 					TestClassArguments = [classArg],
 					TestMethodArguments = [],
 					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
@@ -170,7 +170,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 		{
 			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1589.MyTests>
 			{
-				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>:{classDataIndex}:TUnit.TestProject.Bugs._1589.MyTests(TUnit.TestProject.Bugs._1589.MyFixture).Test1:0",
+				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>:{classDataIndex}:CL-GAC0:TUnit.TestProject.Bugs._1589.MyTests(TUnit.TestProject.Bugs._1589.MyFixture).Test1:0",
 				MethodName = $"Test1",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("MyTests.Test1 failed to initialize", exception),
 				TestFilePath = @"",
