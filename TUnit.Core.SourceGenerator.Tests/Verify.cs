@@ -102,7 +102,7 @@ public sealed class VerifySettingsTask
         var testClassName = testContext.TestDetails.TestClass.Name;
         var testName = testContext.TestDetails.TestName;
         var name = $"{testClassName}.{testName}{_uniqueSuffix}";
-        var dir = Directory.GetCurrentDirectory();
+        var dir = Sourcy.DotNet.Projects.TUnit_Core_SourceGenerator_Tests.DirectoryName!;
         _receivedPath = Path.Combine(dir, $"{name}.received.txt");
         _verifiedPath = Path.Combine(dir, $"{name}.verified.txt");
 

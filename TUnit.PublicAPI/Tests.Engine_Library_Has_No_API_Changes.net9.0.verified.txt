@@ -1,0 +1,189 @@
+[assembly: .(@", PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
+[assembly: .(@", PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
+[assembly: .(".NETCoreApp,Version=v9.0", FrameworkDisplayName=".NET 9.0")]
+namespace .Capabilities
+{
+    [.("TPEXP")]
+    public class StopExecutionCapability : ..ICapability, .., ..
+    {
+        public StopExecutionCapability() { }
+        public bool IsStopRequested { get; }
+        public .AsyncEvent<>? OnStopRequested { get; set; }
+        public . StopTestExecutionAsync(.CancellationToken cancellationToken) { }
+    }
+}
+namespace .Enums
+{
+    public enum EngineMode
+    {
+        SourceGenerated = 0,
+        Reflection = 1,
+    }
+}
+namespace .Exceptions
+{
+    public class HookFailedException : .
+    {
+        public HookFailedException( exception) { }
+        public HookFailedException(string? message, ? innerException) { }
+    }
+    public abstract class TUnitFailedException : .
+    {
+        protected TUnitFailedException( exception) { }
+        protected TUnitFailedException(string? message, ? innerException) { }
+        public override string StackTrace { get; }
+    }
+    public class TestFailedException : .
+    {
+        public TestFailedException( exception) { }
+        public TestFailedException(string? message, ? innerException) { }
+    }
+}
+namespace .Extensions
+{
+    public static class JsonExtensions
+    {
+        public static . ToJsonModel(this  exception) { }
+        public static . ToJsonModel(this .AssemblyHookContext context) { }
+        public static . ToJsonModel(this .ClassHookContext context) { }
+        public static . ToJsonModel(this .TestContext context) { }
+        public static . ToJsonModel(this .TestResult result) { }
+        public static . ToJsonModel(this .TestSessionContext context) { }
+    }
+    public static class TestApplicationBuilderExtensions
+    {
+        public static void AddTUnit(this ..ITestApplicationBuilder testApplicationBuilder) { }
+    }
+    public static class TestContextExtensions
+    {
+        [.("WIP")]
+        [.("Reflection")]
+        public static . ReregisterTestWithArguments(this .TestContext testContext, object?[]? methodArguments, .<string, object?>? objectBag = null) { }
+    }
+}
+namespace .Framework
+{
+    public interface IFilterReceiver
+    {
+        string? Filter { set; }
+    }
+    public static class TestingPlatformBuilderHook
+    {
+        public static void AddExtensions(..ITestApplicationBuilder testApplicationBuilder, string[] _) { }
+    }
+}
+namespace .Helpers
+{
+    public static class DotNetAssemblyHelper
+    {
+        public static bool IsDotNetCoreLibrary(byte[]? publicKeyToken) { }
+        public static bool IsInDotNetCoreLibrary( type) { }
+    }
+}
+namespace .Json
+{
+    public class ExceptionJson : <.>
+    {
+        public ExceptionJson() { }
+        public required .? InnerException { get; init; }
+        public required string Message { get; init; }
+        public required string? Stacktrace { get; init; }
+        public required string? Type { get; init; }
+    }
+    public class TestAssemblyJson : <.>
+    {
+        public TestAssemblyJson() { }
+        public required string? AssemblyName { get; init; }
+        public required .[] Classes { get; init; }
+    }
+    public class TestClassJson : <.>
+    {
+        public TestClassJson() { }
+        public required .[] Tests { get; init; }
+        public required string? Type { get; init; }
+    }
+    public class TestJson : <.>
+    {
+        public TestJson() { }
+        public required .<string> Categories { get; init; }
+        public required string? ClassType { get; init; }
+        public required .<string, .<string>> CustomProperties { get; init; }
+        public required string DisplayName { get; set; }
+        public required .<string, object?> ObjectBag { get; init; }
+        public required .? Result { get; set; }
+        public required int RetryLimit { get; init; }
+        public required string? ReturnType { get; init; }
+        public required object?[]? TestClassArguments { get; init; }
+        public required string?[]? TestClassParameterTypes { get; init; }
+        public required string TestFilePath { get; init; }
+        public required string TestId { get; init; }
+        public required int TestLineNumber { get; init; }
+        public required object?[]? TestMethodArguments { get; init; }
+        public required string?[]? TestMethodParameterTypes { get; init; }
+        public required string TestName { get; init; }
+        public required ? Timeout { get; init; }
+    }
+    public class TestResultJson : <.>
+    {
+        public TestResultJson() { }
+        public required string ComputerName { get; init; }
+        public required ? Duration { get; init; }
+        public required ? End { get; init; }
+        public required .? Exception { get; init; }
+        public required string? Output { get; init; }
+        public required ? Start { get; init; }
+        public required . Status { get; init; }
+    }
+    public class TestSessionJson : <.>
+    {
+        public TestSessionJson() { }
+        public required .[] Assemblies { get; init; }
+    }
+}
+namespace .Reporters
+{
+    public class GitHubReporter : ..IExtension, .., .., .., .
+    {
+        public GitHubReporter(..IExtension extension) { }
+        public [] DataTypesConsumed { get; }
+        public string Description { get; }
+        public string DisplayName { get; }
+        public string? Filter { get; set; }
+        public string Uid { get; }
+        public string Version { get; }
+        public . AfterRunAsync(int exitCode, .CancellationToken cancellation) { }
+        public . BeforeRunAsync(.CancellationToken cancellationToken) { }
+        public . ConsumeAsync(.. dataProducer, .. value, .CancellationToken cancellationToken) { }
+        public .<bool> IsEnabledAsync() { }
+    }
+}
+namespace .Services
+{
+    public class FilterParser
+    {
+        public FilterParser() { }
+        public string? GetTestFilter(.. context) { }
+        public static string? StringifyFilter(..ITestExecutionFilter filter) { }
+    }
+    public class HookMessagePublisher : ..IExtension, .., .
+    {
+        public HookMessagePublisher(..IExtension extension, ..IMessageBus messageBus) { }
+        public [] DataTypesProduced { get; }
+        public string Description { get; }
+        public string DisplayName { get; }
+        public string Uid { get; }
+        public string Version { get; }
+        public . Discover(string sessionId, string displayName, . hookMethod) { }
+        public .<bool> IsEnabledAsync() { }
+        public . Push(string sessionId, string displayName, . hookMethod, <.> func) { }
+    }
+    public class LogLevelProvider
+    {
+        public LogLevelProvider(..ICommandLineOptions commandLineOptions) { }
+        public . LogLevel { get; }
+    }
+    public static class TUnitRunner
+    {
+        public static .<int> RunTests(params string[] args) { }
+    }
+}
