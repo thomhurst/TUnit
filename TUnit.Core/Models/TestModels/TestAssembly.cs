@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace TUnit.Core;
 
+[Obsolete]
+public record SourceGeneratedAssemblyInformation : TestAssembly;
+
 [DebuggerDisplay("{Name})")]
 public record TestAssembly
 {
@@ -11,7 +14,7 @@ public record TestAssembly
     {
         return Cache.GetOrAdd(name, _ => factory());
     }
-    
+
     public virtual bool Equals(TestAssembly? other)
     {
         if (other is null)
@@ -33,6 +36,6 @@ public record TestAssembly
     }
 
     public required string Name { get; init; }
-    
+
     public required Attribute[] Attributes { get; init; }
 }

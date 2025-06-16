@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
+using Microsoft;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators;
@@ -66,6 +67,16 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
             global using global::System.Threading.Tasks;
             global using global::TUnit.Core;
             global using static global::TUnit.Core.HookType;
+            """,
+            """
+            namespace System.Diagnostics.CodeAnalysis;
+
+            public class ExcludeFromCodeCoverageAttribute : Attribute;
+            """,
+            """
+            namespace System.Diagnostics.CodeAnalysis;
+
+            public class UnconditionalSuppressMessageAttribute : Attribute;
             """,
 #if NET
             ..await Task.WhenAll(runTestOptions.AdditionalFiles.Select(x => File.ReadAllTextAsync(x))),

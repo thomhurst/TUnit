@@ -7,6 +7,9 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
+[Obsolete]
+public record SourceGeneratedMethodInformation : TestMethod;
+
 [DebuggerDisplay("{Type}.{Name}")]
 public record TestMethod : TestMember
 {

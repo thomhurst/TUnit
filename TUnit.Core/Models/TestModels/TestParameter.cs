@@ -4,6 +4,15 @@ using System.Reflection;
 
 namespace TUnit.Core;
 
+[Obsolete]
+public record SourceGeneratedParameterInformation([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.PublicMethods
+    | DynamicallyAccessedMemberTypes.PublicProperties)]Type Type) : TestParameter(Type);
+
+public record SourceGeneratedParameterInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.PublicMethods
+    | DynamicallyAccessedMemberTypes.PublicProperties)]T> : TestParameter<T>;
+
 [DebuggerDisplay("{Type} {Name})")]
 public record TestParameter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods

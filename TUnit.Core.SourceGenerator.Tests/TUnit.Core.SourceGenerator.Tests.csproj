@@ -16,7 +16,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Sourcy.Git" />
-    <PackageReference Include="Verify.TUnit" />
+    <PackageReference Include="Verify" />
   </ItemGroup>
 
   <ItemGroup>

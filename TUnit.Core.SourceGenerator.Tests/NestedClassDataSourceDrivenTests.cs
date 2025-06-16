@@ -16,7 +16,7 @@ internal class NestedClassDataSourceDrivenTests : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(2);
+            await Assert.That(generatedFiles.Length).IsEqualTo(3);
         });
 
     [Test]
@@ -45,7 +45,7 @@ internal class NestedClassDataSourceDrivenTests : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(3);
+            await Assert.That(generatedFiles.Length).IsEqualTo(6);
         });
 
     [Test]

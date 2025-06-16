@@ -3,6 +3,9 @@ using System.Text;
 
 namespace TUnit.Core;
 
+[Obsolete]
+public abstract record SourceGeneratedMemberInformation : TestMember;
+
 public abstract record TestMember
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors

@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace TUnit.Core;
 
+[Obsolete]
+public record SourceGeneratedPropertyInformation : TestProperty;
+
 [DebuggerDisplay("{Type} {Name})")]
 public record TestProperty : TestMember
 {
