@@ -27,74 +27,123 @@ public static class ReflectionExtensions
         return HasAttribute<T>(member, false);
     }
 
+    /// <summary>
+    /// Checks if an ICustomAttributeProvider has an attribute of the specified type (exact match, no inheritance).
+    /// </summary>
+    /// <typeparam name="T">The type of attribute to check for</typeparam>
+    /// <param name="provider">The attribute provider</param>
+    /// <returns>True if the attribute is present, false otherwise</returns>
+    public static bool HasExactAttribute<T>(this ICustomAttributeProvider provider)
+    {
+        return HasAttribute<T>(provider, false);
+    }
+
     internal static bool HasAttribute<T>(this MemberInfo member, bool inherit = true)
+    {
+        return ((ICustomAttributeProvider)member).HasAttribute<T>(inherit);
+    }
+
+    /// <summary>
+    /// Checks if an ICustomAttributeProvider has an attribute of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of attribute to check for</typeparam>
+    /// <param name="provider">The attribute provider</param>
+    /// <param name="inherit">Whether to search the inheritance chain</param>
+    /// <returns>True if the attribute is present, false otherwise</returns>
+    public static bool HasAttribute<T>(this ICustomAttributeProvider provider, bool inherit = true)
     {
         try
         {
-            if (typeof(T).IsAssignableTo(typeof(Attribute)))
+            if (typeof(T).IsAssignableTo(typeof(Attribute)) && provider is MemberInfo member)
             {
                 return member.IsDefined(typeof(T), inherit);
             }
 
-            return member.GetCustomAttributes(inherit)
+            return provider.GetCustomAttributes(inherit)
                 .Any(x => x.GetType().IsAssignableTo(typeof(T)));
         }
         catch (NotSupportedException ex) when (ex.Message.Contains("Generic types are not valid"))
         {
             // Fall back to safe method for .NET Framework
-            return member.GetCustomAttributesSafe(inherit)
+            return provider.GetCustomAttributesSafe(inherit)
                 .Any(x => x.GetType().IsAssignableTo(typeof(T)));
         }
     }
 
     /// <summary>
-    /// Gets custom attributes from a MemberInfo, handling generic attributes on .NET Framework.
+    /// Gets custom attributes from an ICustomAttributeProvider, handling generic attributes on .NET Framework.
     /// </summary>
-    /// <param name="member">The member to get attributes from</param>
+    /// <param name="provider">The attribute provider (MemberInfo, Assembly, ParameterInfo, etc.)</param>
     /// <param name="inherit">Whether to search the inheritance chain</param>
     /// <returns>An array of attributes</returns>
     /// <remarks>
     /// This method works around the limitation in .NET Framework where GetCustomAttributes
     /// throws NotSupportedException for generic attributes.
     /// </remarks>
-    public static Attribute[] GetCustomAttributesSafe(this MemberInfo member, bool inherit = true)
+    public static Attribute[] GetCustomAttributesSafe(this ICustomAttributeProvider provider, bool inherit = true)
     {
 #if NETSTANDARD
-        return GetAttributesViaCustomAttributeData(member, typeof(object), inherit);
+        return GetAttributesViaCustomAttributeData(provider, typeof(Attribute), inherit);
 #else
-        return member.GetCustomAttributes(inherit).Cast<Attribute>().ToArray();
+        return provider.GetCustomAttributes(inherit).Cast<Attribute>().ToArray();
 #endif
     }
 
     /// <summary>
-    /// Gets custom attributes of a specific type from a MemberInfo, handling generic attributes on .NET Framework.
+    /// Gets custom attributes of a specific type from an ICustomAttributeProvider, handling generic attributes on .NET Framework.
     /// </summary>
     /// <typeparam name="T">The type of attribute to get</typeparam>
-    /// <param name="member">The member to get attributes from</param>
+    /// <param name="provider">The attribute provider (MemberInfo, Assembly, ParameterInfo, etc.)</param>
     /// <param name="inherit">Whether to search the inheritance chain</param>
     /// <returns>An array of attributes of the specified type</returns>
-    public static T[] GetCustomAttributesSafe<T>(this MemberInfo member, bool inherit = true) where T : Attribute
+    public static T[] GetCustomAttributesSafe<T>(this ICustomAttributeProvider provider, bool inherit = true) where T : Attribute
     {
 #if NETSTANDARD
-        return GetAttributesViaCustomAttributeData(member, typeof(T), inherit)
+        return GetAttributesViaCustomAttributeData(provider, typeof(T), inherit)
                 .OfType<T>()
                 .ToArray();
 #else
-        return member.GetCustomAttributes<T>(inherit).ToArray();
+        return provider.GetCustomAttributes(typeof(T), inherit).Cast<T>().ToArray();
 #endif
     }
 
-    private static Attribute[] GetAttributesViaCustomAttributeData(MemberInfo member, Type attributeType, bool inherit)
+    private static Attribute[] GetAttributesViaCustomAttributeData(ICustomAttributeProvider provider, Type attributeType, bool inherit)
     {
         var attributes = new List<Attribute>();
 
-        var customAttributeDataList = CustomAttributeData.GetCustomAttributes(member)
-            .Where(x => inherit
+        IList<CustomAttributeData> customAttributeDataList;
+        
+        // Get custom attribute data based on the provider type
+        if (provider is MemberInfo memberInfo)
+        {
+            customAttributeDataList = CustomAttributeData.GetCustomAttributes(memberInfo);
+        }
+        else if (provider is Assembly assembly)
+        {
+            customAttributeDataList = CustomAttributeData.GetCustomAttributes(assembly);
+        }
+        else if (provider is ParameterInfo parameterInfo)
+        {
+            customAttributeDataList = CustomAttributeData.GetCustomAttributes(parameterInfo);
+        }
+        else if (provider is Module module)
+        {
+            customAttributeDataList = CustomAttributeData.GetCustomAttributes(module);
+        }
+        else
+        {
+            // Fallback for any other ICustomAttributeProvider
+            return Array.Empty<Attribute>();
+        }
+
+        // Filter by attribute type if specified
+        var filteredList = customAttributeDataList
+            .Where(x => attributeType == typeof(Attribute) || (inherit
                 ? x.AttributeType.IsAssignableTo(attributeType)
-                : x.AttributeType == attributeType)
+                : x.AttributeType == attributeType))
             .ToList();
 
-        foreach (var attributeData in customAttributeDataList)
+        foreach (var attributeData in filteredList)
         {
             try
             {
@@ -111,13 +160,13 @@ public static class ReflectionExtensions
             }
         }
 
-        // If inherit is true and member is a Type, get attributes from base types
-        if (inherit && member is Type type)
+        // If inherit is true and provider is a Type, get attributes from base types
+        if (inherit && provider is Type type)
         {
             var baseType = type.BaseType;
             while (baseType != null && baseType != typeof(object))
             {
-                attributes.AddRange(GetAttributesViaCustomAttributeData(baseType, type, false));
+                attributes.AddRange(GetAttributesViaCustomAttributeData(baseType, attributeType, false));
                 baseType = baseType.BaseType;
             }
         }
