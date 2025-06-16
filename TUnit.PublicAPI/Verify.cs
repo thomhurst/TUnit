@@ -43,9 +43,9 @@ public sealed class VerifySettingsTask
     public VerifySettingsTask UniqueForTargetFrameworkAndVersion(Assembly? assembly)
     {
 #if NETFRAMEWORK
-        _uniqueSuffix = ".net472";
+        _uniqueSuffix = ".Net4_7";
 #else
-        _uniqueSuffix = $".net{Environment.Version.Major}.{Environment.Version.Minor}";
+        _uniqueSuffix = $".DotNet{Environment.Version.Major}_{Environment.Version.Minor}";
 #endif
 
         return this;

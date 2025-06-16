@@ -43,9 +43,9 @@ public sealed class VerifySettingsTask
     public VerifySettingsTask UniqueForTargetFrameworkAndVersion(Assembly? assembly)
     {
 #if NETFRAMEWORK
-        _uniqueSuffix = ".net472";
+        _uniqueSuffix = ".Net4_7";
 #else
-        _uniqueSuffix = $".net{Environment.Version.Major}.{Environment.Version.Minor}";
+        _uniqueSuffix = $".DotNet{Environment.Version.Major}_{Environment.Version.Minor}";
 #endif
 
         return this;
@@ -54,35 +54,6 @@ public sealed class VerifySettingsTask
     public VerifySettingsTask UniqueForTargetFrameworkAndVersion()
     {
         return UniqueForTargetFrameworkAndVersion(typeof(VerifySettingsTask).Assembly);
-    }
-
-    private static string ConvertToShortFrameworkName(string frameworkName)
-    {
-        // Parse the framework name like ".NETStandard,Version=v2.0"
-        var parts = frameworkName.Split(',');
-        if (parts.Length < 2)
-            return frameworkName;
-
-        var framework = parts[0].Trim();
-        var versionPart = parts[1].Trim();
-
-        // Extract version number
-        var versionMatch = System.Text.RegularExpressions.Regex.Match(versionPart, @"Version=v?(\d+\.\d+(?:\.\d+)?)");
-        if (!versionMatch.Success)
-            return frameworkName;
-
-        var version = versionMatch.Groups[1].Value;
-
-        // Convert to short form
-        return framework switch
-        {
-            ".NETStandard" => $"netstandard{version}",
-            ".NETCoreApp" => version.StartsWith("3.") || version == "3.0" || version == "3.1"
-                ? $"netcoreapp{version}"
-                : $"net{version}",
-            ".NETFramework" => $"net{version.Replace(".", "")}",
-            _ => $"{framework.ToLowerInvariant()}{version}"
-        };
     }
 
     public VerifySettingsTask ScrubLinesContaining(string substring)

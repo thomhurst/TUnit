@@ -16,16 +16,38 @@ public class TestExtensionsTests
     [Test]
     public async Task TopLevelClass()
     {
-        var testDetails = _fixture.Build<TestDetails<TestExtensionsTests>>()
-            .With(x => x.DynamicAttributes, [])
+        var testDetails = CreateTestDetails<TestExtensionsTests>();
+
+        var context = CreateTestContext(testDetails);
+
+        var name = context.GetClassTypeName();
+
+        await Assert.That(name).IsEqualTo("TestExtensionsTests");
+    }
+
+    [Test]
+    public async Task NestedClass()
+    {
+        var testDetails = CreateTestDetails<InnerClass>(parent: typeof(TestExtensionsTests));
+
+        var context = CreateTestContext(testDetails);
+
+        var name = context.GetClassTypeName();
+
+        await Assert.That(name).IsEqualTo("TestExtensionsTests+InnerClass");
+    }
+
+    private TestDetails<T> CreateTestDetails<T>(Type? parent = null) where T : class =>
+        _fixture.Build<TestDetails<T>>()
+            .OmitAutoProperties()
             .With(x => x.TestClassArguments, [])
-            .With(x => x.DataAttributes, [])
             .With(x => x.TestMethod, new TestMethod
             {
                 Attributes = [],
                 Class = new TestClass
                 {
-                    Name = "TestExtensionsTests",
+                    Parent = parent == null ? null : ReflectionToSourceModelHelpers.GetParent(parent),
+                    Name = typeof(T).Name,
                     Namespace = "TUnit.UnitTests",
                     Assembly = new TestAssembly
                     {
@@ -35,8 +57,7 @@ public class TestExtensionsTests
                     Attributes = [],
                     Parameters = [],
                     Properties = [],
-                    Type = typeof(TestExtensionsTests),
-                    Parent = null,
+                    Type = typeof(T),
                 },
                 Name = "DummyMethod",
                 Parameters = [],
@@ -46,51 +67,6 @@ public class TestExtensionsTests
             })
             .Create();
 
-        var context = CreateTestContext(testDetails);
-
-        var name = context.GetClassTypeName();
-        
-        await Assert.That(name).IsEqualTo("TestExtensionsTests");
-    }
-
-    [Test]
-    public async Task NestedClass()
-    {
-        var testDetails = _fixture.Build<TestDetails<InnerClass>>()
-            .With(x => x.DynamicAttributes, [])
-            .With(x => x.TestClassArguments, [])
-            .With(x => x.DataAttributes, [])
-            .With(x => x.TestMethod, new TestMethod
-            {
-                Attributes = [],
-                Class = new TestClass
-                {
-                    Parent = ReflectionToSourceModelHelpers.GetParent(typeof(InnerClass)),
-                    Name = "InnerClass",
-                    Namespace = "TUnit.UnitTests",
-                    Assembly = new TestAssembly
-                    {
-                        Attributes = [],
-                        Name = "TUnit.UnitTests",
-                    },
-                    Attributes = [],
-                    Parameters = [],
-                    Properties = [],
-                    Type = typeof(InnerClass),
-                },
-                Name = "DummyMethod",
-                Parameters = [],
-                Type = typeof(TestExtensionsTests),
-                ReturnType = typeof(void),
-                GenericTypeCount = 0,
-            })            .Create();
-
-        var context = CreateTestContext(testDetails);
-
-        var name = context.GetClassTypeName();
-        
-        await Assert.That(name).IsEqualTo("TestExtensionsTests+InnerClass");
-    }
 
     private TestContext CreateTestContext<
 #if NET
@@ -104,7 +80,7 @@ public class TestExtensionsTests
             null,
             [typeof(IServiceProvider), typeof(TestDetails), typeof(TestMetadata), typeof(ClassHookContext)],
             [])!;
-        
+
         var testDiscoveryContext = new BeforeTestDiscoveryContext()
         {
             TestFilter = ""
@@ -133,6 +109,7 @@ public class TestExtensionsTests
     private TestMetadata<TestExtensionsTests> CreateDummyMetadata()
     {
         return _fixture.Build<TestMetadata<TestExtensionsTests>>()
+            .OmitAutoProperties()
             .With(x => x.DynamicAttributes, [])
             .With(x => x.TestMethod, new TestMethod
             {
