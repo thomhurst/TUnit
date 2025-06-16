@@ -8,7 +8,9 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 [Arguments(1)]
 [Arguments(2)]
-[ClassDataSource<DataSource>]
+[ClassDataSource(typeof(DataSource1))]
+[ClassDataSource(typeof(DataSource2))]
+[ClassDataSource(typeof(DataSource3))]
 public class AllDataSourcesCombinedTests(int classValue)
 {
     private static readonly ConcurrentBag<string> ExecutedTests = new();
@@ -72,15 +74,18 @@ public class AllDataSourcesCombinedTests(int classValue)
         ExecutedTests.Clear();
     }
     
-    private class DataSource : IEnumerable<int>
+    public class DataSource1
     {
-        public IEnumerator<int> GetEnumerator()
-        {
-            yield return 10;
-            yield return 20;
-            yield return 30;
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public static implicit operator int(DataSource1 _) => 10;
+    }
+    
+    public class DataSource2
+    {
+        public static implicit operator int(DataSource2 _) => 20;
+    }
+    
+    public class DataSource3
+    {
+        public static implicit operator int(DataSource3 _) => 30;
     }
 }

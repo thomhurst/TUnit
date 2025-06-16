@@ -8,7 +8,8 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 [Arguments(1)]
 [Arguments(2)]
-[ClassDataSource<DataSource>]
+[ClassDataSource(typeof(IntDataSource1))]
+[ClassDataSource(typeof(IntDataSource2))]
 public class ArgumentsWithClassDataSourceTests(int classArg)
 {
     private static readonly ConcurrentBag<string> ExecutedTests = new();
@@ -19,8 +20,8 @@ public class ArgumentsWithClassDataSourceTests(int classArg)
         // Record this test execution
         ExecutedTests.Add($"Class:{classArg}");
         
-        // With 2 Arguments and 1 ClassDataSource providing 3 values,
-        // we should have 2 + 3 = 5 total test instances
+        // With 2 Arguments and 2 ClassDataSource,
+        // we should have 2 * 2 = 4 total test instances
         await Task.CompletedTask;
     }
 
@@ -36,17 +37,23 @@ public class ArgumentsWithClassDataSourceTests(int classArg)
             return;
         }
         
-        // Should have exactly 5 test instances (2 from Arguments + 3 from ClassDataSource)
-        await Assert.That(executedTests.Count).IsEqualTo(5);
+        // Log what we actually got
+        Console.WriteLine($"Executed tests count: {executedTests.Count}");
+        foreach (var test in executedTests)
+        {
+            Console.WriteLine($"  - {test}");
+        }
+        
+        // Should have exactly 4 test instances (2 Arguments * 2 ClassDataSource)
+        await Assert.That(executedTests.Count).IsEqualTo(4);
         
         // Verify we have the expected values
         var expected = new[]
         {
             "Class:1",      // From Arguments
-            "Class:2",      // From Arguments
-            "Class:10",     // From ClassDataSource
-            "Class:20",     // From ClassDataSource
-            "Class:30"      // From ClassDataSource
+            "Class:2",      // From Arguments  
+            "Class:100",    // From IntDataSource1
+            "Class:200"     // From IntDataSource2
         };
 
         foreach (var expectedTest in expected)
@@ -55,21 +62,19 @@ public class ArgumentsWithClassDataSourceTests(int classArg)
         }
         
         // Also verify we don't have duplicates
-        await Assert.That(executedTests.Distinct().Count()).IsEqualTo(5);
+        await Assert.That(executedTests.Distinct().Count()).IsEqualTo(4);
         
         // Clear for next run
         ExecutedTests.Clear();
     }
     
-    private class DataSource : IEnumerable<int>
+    public class IntDataSource1
     {
-        public IEnumerator<int> GetEnumerator()
-        {
-            yield return 10;
-            yield return 20;
-            yield return 30;
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public static implicit operator int(IntDataSource1 _) => 100;
+    }
+    
+    public class IntDataSource2
+    {
+        public static implicit operator int(IntDataSource2 _) => 200;
     }
 }

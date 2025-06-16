@@ -28,12 +28,12 @@ internal static class DataGeneratorHandler
             return dataAttribute;
         }
 
-        var instance = (IDataAttribute)Activator.CreateInstance(dataAttribute.GetType())!;
+        var instance = dataAttribute;
         
         // Use centralized DataSourceInitializer
         var metadata = new DataGeneratorMetadata
         {
-            Type = DataGeneratorType.Property,
+            Type = DataGeneratorType.TestParameters,
             TestInformation = testInformation,
             ClassInstanceArguments = [],
             MembersToGenerate = [],
@@ -164,20 +164,19 @@ internal static class DataGeneratorHandler
         IAsyncDataSourceGeneratorAttribute generator,
         DataGeneratorContext context)
     {
-        // Don't prepare generators from core libraries or if not for properties
-        if (context.DataGeneratorType != DataGeneratorType.Property ||
-            DotNetAssemblyHelper.IsInDotNetCoreLibrary(generator.GetType()))
+        // Don't prepare generators from core libraries
+        if (DotNetAssemblyHelper.IsInDotNetCoreLibrary(generator.GetType()))
         {
             return generator;
         }
 
         // For property generators, we need a fresh instance that's properly initialized
-        var instance = (IAsyncDataSourceGeneratorAttribute)Activator.CreateInstance(generator.GetType())!;
+        var instance = generator;
         
         // Use centralized DataSourceInitializer
         var metadata = new DataGeneratorMetadata
         {
-            Type = DataGeneratorType.Property,
+            Type = context.DataGeneratorType,
             TestInformation = context.TestInformation,
             ClassInstanceArguments = context.ClassInstanceArgumentsInvoked ?? [],
             MembersToGenerate = [],
