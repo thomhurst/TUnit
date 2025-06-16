@@ -74,8 +74,7 @@ public sealed class VerifySettingsTask
         var testContext = TestContext.Current!;
         var testClassName = testContext.TestDetails.TestClass.Name;
         var testName = testContext.TestDetails.TestName;
-        var currentRuntime = RuntimeInformation.FrameworkDescription;
-        var name = $"{testClassName}.{testName}.{currentRuntime}{_uniqueSuffix}";
+        var name = $"{testClassName}.{testName}{_uniqueSuffix}";
         var dir = Directory.GetCurrentDirectory();
         _receivedPath = Path.Combine(dir, $"{name}.received.txt");
         _verifiedPath = Path.Combine(dir, $"{name}.verified.txt");

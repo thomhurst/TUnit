@@ -42,6 +42,7 @@ const sidebars: SidebarsConfig = {
               label: 'Data Source Generators',
               href: '/docs/customization-extensibility/data-source-generators',
             },
+            'test-authoring/nested-data-sources',
           ],
         },
         'test-authoring/skip',
