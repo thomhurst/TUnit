@@ -22,38 +22,63 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
             var testInstance = discoveredTest.TestContext.TestDetails.ClassInstance;
             dataSourceObjectRegistrar.RegisterExistingDataSourceObjects(testInstance);
             
+            // Initialize method arguments first (they may have nested data source properties)
+            var testDetails = discoveredTest.TestContext.TestDetails;
+            if (testDetails.TestMethodArguments != null)
+            {
+                var dataGeneratorMetadata = new DataGeneratorMetadata
+                {
+                    Type = DataGeneratorType.TestParameters,
+                    TestInformation = testDetails.TestMethod,
+                    ClassInstanceArguments = testDetails.TestClassArguments ?? [],
+                    MembersToGenerate = [],
+                    TestBuilderContext = null!,
+                    TestClassInstance = testInstance,
+                    TestSessionId = TestSessionContext.Current?.Id ?? string.Empty
+                };
+                
+                foreach (var arg in testDetails.TestMethodArguments)
+                {
+                    if (arg != null)
+                    {
+                        // Initialize data source properties on method arguments
+                        await DataSourceInitializer.InitializeAsync(
+                            arg,
+                            dataGeneratorMetadata,
+                            null,
+                            obj => dataSourceObjectRegistrar.RegisterExistingDataSourceObjects(obj)
+                        ).ConfigureAwait(false);
+                    }
+                }
+            }
+            
+            // Create a list to track all objects that need initialization
+            var objectsToInitialize = new List<object>();
+            
+            // Add test instance
+            if (testInstance != null)
+            {
+                objectsToInitialize.Add(testInstance);
+            }
+            
+            // Add method arguments
+            if (testDetails.TestMethodArguments != null)
+            {
+                objectsToInitialize.AddRange(testDetails.TestMethodArguments.Where(arg => arg != null)!);
+            }
+            
+            // Initialize all objects in proper order (depth-first)
+            var visited = new HashSet<object>();
+            foreach (var obj in objectsToInitialize)
+            {
+                await InitializeObjectGraphAsync(obj, visited, cancellationToken).ConfigureAwait(false);
+            }
+            
+            // Now handle the standard initialization objects
             foreach (var onInitializeObject in discoveredTest.TestContext.GetOnInitializeObjects())
             {
-                // For objects with [ClassDataSource] properties, ensure they are populated first
-                if (onInitializeObject == testInstance)
+                if (!visited.Contains(onInitializeObject))
                 {
-                    // The test instance needs its data source properties populated before initialization
-                    var testDetails = discoveredTest.TestContext.TestDetails;
-                    var methodInfo = testDetails.TestMethod;
-                    
-                    // Create metadata for property initialization
-                    var dataGeneratorMetadata = new DataGeneratorMetadata
-                    {
-                        Type = DataGeneratorType.Property,
-                        TestInformation = methodInfo,
-                        ClassInstanceArguments = testDetails.TestClassArguments ?? [],
-                        MembersToGenerate = [],
-                        TestBuilderContext = null!,
-                        TestClassInstance = testInstance,
-                        TestSessionId = TestSessionContext.Current?.Id ?? string.Empty
-                    };
-                    
-                    // Initialize properties with data sources before calling InitializeAsync
-                    await DataSourceInitializer.InitializeAsync(
-                        testInstance,
-                        dataGeneratorMetadata,
-                        null,
-                        obj => dataSourceObjectRegistrar.RegisterExistingDataSourceObjects(obj)
-                    ).ConfigureAwait(false);
-                }
-                else
-                {
-                    // For other objects, just initialize them normally
                     await ObjectInitializer.InitializeAsync(onInitializeObject, cancellationToken);
                 }
             }
@@ -124,5 +149,45 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
         {
             _consoleStandardOutLock.Release();
         }
+    }
+
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
+    private async Task InitializeObjectGraphAsync(object obj, HashSet<object> visited, CancellationToken cancellationToken)
+    {
+        if (!visited.Add(obj))
+        {
+            return; // Already processed
+        }
+
+        var objType = obj.GetType();
+        
+        // Skip primitive types and strings
+        if (objType.IsPrimitive || obj is string || objType.IsEnum)
+        {
+            return;
+        }
+
+        // First, recursively initialize all property values (depth-first)
+        var properties = objType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        foreach (var property in properties)
+        {
+            try
+            {
+                var value = property.GetValue(obj);
+                if (value != null && !property.PropertyType.IsPrimitive && !(value is string) && !property.PropertyType.IsEnum)
+                {
+                    await InitializeObjectGraphAsync(value, visited, cancellationToken).ConfigureAwait(false);
+                }
+            }
+            catch
+            {
+                // Skip properties that throw when accessed
+                continue;
+            }
+        }
+
+        // Then initialize this object if it implements IAsyncInitializer
+        // This ensures children are initialized before parents
+        await ObjectInitializer.InitializeAsync(obj, cancellationToken).ConfigureAwait(false);
     }
 }

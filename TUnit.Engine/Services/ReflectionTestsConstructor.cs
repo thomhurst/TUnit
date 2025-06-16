@@ -23,8 +23,10 @@ internal class ReflectionTestsConstructor(
     IExtension extension,
     DependencyCollector dependencyCollector,
     ContextManager contextManager,
-    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
+    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector)
 {
+    private readonly UnifiedTestBuilder _unifiedBuilder = new(contextManager, serviceProvider);
+    
     protected override async Task<DiscoveredTest[]> DiscoverTestsAsync()
     {
 #if NET
@@ -40,7 +42,7 @@ internal class ReflectionTestsConstructor(
         var dynamicTests = await DiscoverDynamicTestsAsync(allTypes);
 
         var allDynamicTests = standardTests.Concat(dynamicTests).ToList();
-        var discoveredTests = allDynamicTests.SelectMany(ConstructTests).ToArray();
+        var discoveredTests = allDynamicTests.SelectMany(_unifiedBuilder.BuildTests).ToArray();
         
         return discoveredTests;
     }

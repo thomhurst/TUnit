@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
 
@@ -27,6 +28,9 @@ public static class AsyncDataSourceHelper
                 dataGeneratorMetadata.TestBuilderContext,
                 obj => { /* Object registration handled elsewhere */ }
             ).ConfigureAwait(false);
+            
+            // Initialize the data attribute itself since it may need to prepare data
+            await ObjectInitializer.InitializeAsync(generatorObj).ConfigureAwait(false);
         }
 
         var asyncEnumerable = asyncDataSourceGenerator.GenerateAsync(dataGeneratorMetadata);
@@ -44,19 +48,23 @@ public static class AsyncDataSourceHelper
                     return result;
                 }
 
+                // Populate all data source properties for all objects
                 foreach (var t in result)
                 {
-                    if (t is IDataAttribute)
+                    if (t != null)
                     {
                         // Initialize nested data source properties
                         await DataSourceInitializer.InitializeAsync(
-                            t!,
+                            t,
                             dataGeneratorMetadata,
                             dataGeneratorMetadata.TestBuilderContext,
                             obj => { /* Object registration handled elsewhere */ }
                         ).ConfigureAwait(false);
                     }
                 }
+                
+                // Don't initialize IAsyncInitializer objects here - that should happen
+                // during test execution when TestContext is available
 
                 return result;
             };
@@ -128,16 +136,59 @@ public static class AsyncDataSourceHelper
             var result = await func().ConfigureAwait(false);
             var value = result?.ElementAtOrDefault(0);
 
-            // Initialize the value if it implements IAsyncInitializer
-            if (value != null)
-            {
-                await ObjectInitializer.InitializeAsync(value, cancellationToken).ConfigureAwait(false);
-            }
-
+            // Don't initialize here - let the caller handle initialization
+            // after all nested properties are populated
             return value;
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Initializes an object graph in the correct order (children before parents).
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
+    private static async Task InitializeObjectGraphAsync(object obj, HashSet<object>? visited = null)
+    {
+        visited ??= new HashSet<object>();
+        
+        if (!visited.Add(obj))
+        {
+            return; // Already processed
+        }
+
+        var objType = obj.GetType();
+        
+        // Skip primitive types and strings
+        if (objType.IsPrimitive || obj is string || objType.IsEnum)
+        {
+            return;
+        }
+
+        // First, recursively initialize all property values
+        var properties = objType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        foreach (var property in properties)
+        {
+            try
+            {
+                var value = property.GetValue(obj);
+                if (value != null && !property.PropertyType.IsPrimitive && !(value is string) && !property.PropertyType.IsEnum)
+                {
+                    await InitializeObjectGraphAsync(value, visited).ConfigureAwait(false);
+                }
+            }
+            catch
+            {
+                // Skip properties that throw when accessed
+                continue;
+            }
+        }
+
+        // Then initialize this object if it implements IAsyncInitializer
+        if (obj is IAsyncInitializer)
+        {
+            await ObjectInitializer.InitializeAsync(obj).ConfigureAwait(false);
+        }
     }
 
 }

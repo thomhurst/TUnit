@@ -8,23 +8,26 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
     TestsCollector testsCollector,
     DependencyCollector dependencyCollector,
     ContextManager contextManager,
-    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector, contextManager, serviceProvider)
+    IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector)
 {
+    private readonly UnifiedTestBuilder _unifiedBuilder = new(contextManager, serviceProvider);
+    
     protected override async Task<DiscoveredTest[]> DiscoverTestsAsync()
     {
-        var testMetadatas = new List<TestMetadata>();
+        var discoveredTests = new List<DiscoveredTest>();
+        
+        // Process regular test metadata
         await foreach (var testMetadata in testsCollector.GetTestsAsync())
         {
-            testMetadatas.Add(testMetadata);
+            discoveredTests.Add(_unifiedBuilder.BuildTest(testMetadata));
         }
-
-        var dynamicTests = testsCollector.GetDynamicTests();
-
-        var discoveredTests = testMetadatas
-            .Select(ConstructTest)
-            .Concat(dynamicTests.SelectMany(ConstructTests))
-            .ToArray();
-
-        return discoveredTests;
+        
+        // Process dynamic tests
+        foreach (var dynamicTest in testsCollector.GetDynamicTests())
+        {
+            discoveredTests.AddRange(_unifiedBuilder.BuildTests(dynamicTest));
+        }
+        
+        return discoveredTests.ToArray();
     }
 }

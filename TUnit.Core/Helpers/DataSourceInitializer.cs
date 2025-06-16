@@ -35,9 +35,8 @@ internal static class DataSourceInitializer
 
         // Initialize nested data generators first
         await InitializeNestedDataGeneratorsAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback).ConfigureAwait(false);
-
-        // Only initialize the object itself if it's a data attribute
-        // This prevents initializing objects like WebApplicationFactory during data source generation
+        
+        // Initialize the instance itself if it's a data attribute
         if (instance is IDataAttribute)
         {
             await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
@@ -97,7 +96,21 @@ internal static class DataSourceInitializer
         foreach (var propertyInfo in properties)
         {
             var dataAttribute = propertyInfo.GetCustomAttributesSafe().OfType<IDataAttribute>().FirstOrDefault();
-            var existingValue = propertyInfo.GetValue(obj);
+            
+            object? existingValue = null;
+            try
+            {
+                existingValue = propertyInfo.GetValue(obj);
+            }
+            catch
+            {
+                // Some properties might throw when accessed (e.g., WebApplicationFactory.Server)
+                // If we can't read the property, skip it unless it has a data attribute
+                if (dataAttribute is null)
+                {
+                    continue;
+                }
+            }
 
             // Case 1: Property has a data attribute
             if (dataAttribute is not null)
@@ -128,11 +141,10 @@ internal static class DataSourceInitializer
                 // Register the object
                 objectRegistrationCallback?.Invoke(existingValue);
 
-                // Recursively initialize if it's a data attribute or has nested properties
+                // Recursively process nested properties
                 await InitializeNestedDataGeneratorsInternalAsync(existingValue, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
-
-                // Only initialize the value itself if it's a data attribute
-                // Other objects should be initialized at test execution time
+                
+                // Only initialize if it's a data attribute (not regular objects like WebApplicationFactory)
                 if (existingValue is IDataAttribute)
                 {
                     await ObjectInitializer.InitializeAsync(existingValue).ConfigureAwait(false);

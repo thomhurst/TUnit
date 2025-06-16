@@ -103,6 +103,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
 
+        var unifiedTestBuilder = Register(new UnifiedTestBuilder(ContextManager, this));
+        
         var testsConstructor = Register<BaseTestsConstructor>
         (
             isReflectionScannerEnabled
@@ -142,7 +144,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor));
 
-        DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(testsConstructor, testRegistrar,
+        DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(unifiedTestBuilder, testRegistrar,
             TestGrouper, TUnitMessageBus, TestsExecutor, EngineCancellationToken));
 
         TestFinder = Register(new TestsFinder(TestDiscoverer));
