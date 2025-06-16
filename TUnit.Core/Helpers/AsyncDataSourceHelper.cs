@@ -18,7 +18,7 @@ public static class AsyncDataSourceHelper
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // If the generator has properties with data sources, populate them first
-        if (asyncDataSourceGenerator is object generatorObj)
+        if (asyncDataSourceGenerator is IDataAttribute generatorObj)
         {
             // Use DataSourceInitializer to populate any [ClassDataSource] properties
             await DataSourceInitializer.InitializeAsync(
@@ -30,32 +30,34 @@ public static class AsyncDataSourceHelper
         }
 
         var asyncEnumerable = asyncDataSourceGenerator.GenerateAsync(dataGeneratorMetadata);
-        
+
         await foreach (var func in asyncEnumerable.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             // Wrap the function to ensure returned objects are properly initialized
             yield return async () =>
             {
                 var result = await func().ConfigureAwait(false);
-                
+
                 // Initialize each object in the result array
-                if (result != null)
+                if (result == null)
                 {
-                    for (int i = 0; i < result.Length; i++)
+                    return result;
+                }
+
+                foreach (var t in result)
+                {
+                    if (t is IDataAttribute)
                     {
-                        if (result[i] != null)
-                        {
-                            // Initialize nested data source properties
-                            await DataSourceInitializer.InitializeAsync(
-                                result[i]!,
-                                dataGeneratorMetadata,
-                                dataGeneratorMetadata.TestBuilderContext,
-                                obj => { /* Object registration handled elsewhere */ }
-                            ).ConfigureAwait(false);
-                        }
+                        // Initialize nested data source properties
+                        await DataSourceInitializer.InitializeAsync(
+                            t!,
+                            dataGeneratorMetadata,
+                            dataGeneratorMetadata.TestBuilderContext,
+                            obj => { /* Object registration handled elsewhere */ }
+                        ).ConfigureAwait(false);
                     }
                 }
-                
+
                 return result;
             };
         }
@@ -105,12 +107,12 @@ public static class AsyncDataSourceHelper
         CancellationToken cancellationToken = default)
     {
         var results = new List<Func<Task<object?[]?>>>();
-        
+
         await foreach (var item in asyncEnumerable.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             results.Add(item);
         }
-        
+
         return results;
     }
 
@@ -125,17 +127,17 @@ public static class AsyncDataSourceHelper
         {
             var result = await func().ConfigureAwait(false);
             var value = result?.ElementAtOrDefault(0);
-            
+
             // Initialize the value if it implements IAsyncInitializer
             if (value != null)
             {
                 await ObjectInitializer.InitializeAsync(value, cancellationToken).ConfigureAwait(false);
             }
-            
+
             return value;
         }
-        
+
         return null;
     }
-    
+
 }
