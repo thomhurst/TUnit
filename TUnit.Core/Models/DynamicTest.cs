@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
@@ -40,9 +41,9 @@ public abstract record DynamicTest
         return
         [
             ..Attributes,
-            ..TestBody.GetCustomAttributes(),
-            ..TestClassType.GetCustomAttributes(),
-            ..TestClassType.Assembly.GetCustomAttributes()
+            ..TestBody.GetCustomAttributesSafe(),
+            ..TestClassType.GetCustomAttributesSafe(),
+            ..TestClassType.Assembly.GetCustomAttributesSafe()
         ];
     }
 
@@ -52,7 +53,7 @@ public abstract record DynamicTest
     {
         return new TestMethod
         {
-            Attributes = methodInfo.GetCustomAttributes().ToArray(),
+            Attributes = methodInfo.GetCustomAttributesSafe().ToArray(),
             Class = GenerateClass(),
             Name = TestName ?? methodInfo.Name,
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
@@ -69,7 +70,7 @@ public abstract record DynamicTest
         {
             Parent = ReflectionToSourceModelHelpers.GetParent(TestClassType),
             Assembly = GenerateAssembly(),
-            Attributes = TestClassType.GetCustomAttributes().ToArray(),
+            Attributes = TestClassType.GetCustomAttributesSafe().ToArray(),
             Name = TestClassType.Name,
             Namespace = TestClassType.Namespace,
             Parameters = GetParameters(TestClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
@@ -82,7 +83,7 @@ public abstract record DynamicTest
     {
         return new TestAssembly
         {
-            Attributes = TestClassType.Assembly.GetCustomAttributes().ToArray(),
+            Attributes = TestClassType.Assembly.GetCustomAttributesSafe().ToArray(),
             Name = TestClassType.Assembly.GetName().Name ??
                    TestClassType.Assembly.GetName().FullName,
         };

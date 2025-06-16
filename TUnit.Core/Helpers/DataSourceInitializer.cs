@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Enums;
+using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Helpers;
@@ -24,7 +25,7 @@ internal static class DataSourceInitializer
     /// <param name="objectRegistrationCallback">Optional callback to register created objects</param>
     /// <returns>A task representing the asynchronous operation</returns>
     public static async Task InitializeAsync(
-        object instance, 
+        object instance,
         DataGeneratorMetadata dataGeneratorMetadata,
         TestBuilderContextAccessor? testBuilderContextAccessor = null,
         Action<object>? objectRegistrationCallback = null)
@@ -39,7 +40,7 @@ internal static class DataSourceInitializer
 
         // Initialize nested data generators first
         await InitializeNestedDataGeneratorsAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback).ConfigureAwait(false);
-        
+
         // Then initialize the object itself
         await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
     }
@@ -74,7 +75,7 @@ internal static class DataSourceInitializer
         foreach (var propertyInfo in properties)
         {
             // Skip if property doesn't have a data attribute
-            var dataAttribute = propertyInfo.GetCustomAttributes().OfType<IDataAttribute>().FirstOrDefault();
+            var dataAttribute = propertyInfo.GetCustomAttributesSafe().OfType<IDataAttribute>().FirstOrDefault();
             if (dataAttribute is null)
             {
                 continue;
@@ -98,13 +99,13 @@ internal static class DataSourceInitializer
             if (value is not null)
             {
                 propertyInfo.SetValue(obj, value);
-                
+
                 // Register the created object
                 objectRegistrationCallback?.Invoke(value);
-                
+
                 // Recursively initialize the created value
                 await InitializeNestedDataGeneratorsInternalAsync(value, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
-                
+
                 // Initialize the value itself
                 await ObjectInitializer.InitializeAsync(value).ConfigureAwait(false);
             }
@@ -123,7 +124,7 @@ internal static class DataSourceInitializer
         {
             var classInformation = ReflectionToSourceModelHelpers.GenerateClass(instance.GetType());
             var propertyInformation = ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo);
-            
+
             var propertyMetadata = dataGeneratorMetadata with
             {
                 Type = DataGeneratorType.Property,
@@ -137,7 +138,7 @@ internal static class DataSourceInitializer
                 propertyInformation,
                 propertyMetadata).ConfigureAwait(false);
         }
-        
+
         // For user context (without TestBuilderContextAccessor), handle async data sources
         if (dataAttribute is IAsyncDataSourceGeneratorAttribute asyncDataSource)
         {
@@ -149,7 +150,7 @@ internal static class DataSourceInitializer
 
             var asyncEnumerable = asyncDataSource.GenerateAsync(propertyMetadata);
             await using var enumerator = asyncEnumerable.GetAsyncEnumerator();
-            
+
             if (await enumerator.MoveNextAsync().ConfigureAwait(false))
             {
                 var func = enumerator.Current;
@@ -157,7 +158,7 @@ internal static class DataSourceInitializer
                 return resultArray?.FirstOrDefault();
             }
         }
-        
+
         return null;
     }
 }

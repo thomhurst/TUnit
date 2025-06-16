@@ -28,7 +28,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _methodCache.GetOrAdd(methodInfo, _ => new TestMethod
         {
-            Attributes = methodInfo.GetCustomAttributes().ToArray(),
+            Attributes = methodInfo.GetCustomAttributesSafe().ToArray(),
             Class = classInformation,
             Name = testName ?? methodInfo.Name,
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
@@ -62,7 +62,7 @@ internal class ReflectionToSourceModelHelpers
         {
             Parent = GetParent(testClassType),
             Assembly = GenerateAssembly(testClassType),
-            Attributes = testClassType.GetCustomAttributes().ToArray(),
+            Attributes = testClassType.GetCustomAttributesSafe().ToArray(),
             Name = testClassType.GetFormattedName(),
             Namespace = testClassType.Namespace,
             Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
@@ -75,7 +75,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _assemblyCache.GetOrAdd(testClassType.Assembly, _ => new TestAssembly
         {
-            Attributes = testClassType.Assembly.GetCustomAttributes().ToArray(),
+            Attributes = testClassType.Assembly.GetCustomAttributesSafe().ToArray(),
             Name = testClassType.Assembly.GetName().Name ??
                    testClassType.Assembly.GetName().FullName,
         });
@@ -85,7 +85,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _propertyCache.GetOrAdd(property, _ => new TestProperty
         {
-            Attributes = property.GetCustomAttributes().ToArray(),
+            Attributes = property.GetCustomAttributesSafe().ToArray(),
             ReflectionInfo = property,
             Name = property.Name,
             Type = property.PropertyType,
@@ -104,7 +104,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _parameterCache.GetOrAdd(parameter, _ => new TestParameter(parameter.ParameterType)
         {
-            Attributes = parameter.GetCustomAttributes().ToArray(),
+            Attributes = parameter.GetCustomAttributesSafe().ToArray(),
             Name = parameter.Name ?? string.Empty,
             ReflectionInfo = parameter,
         });

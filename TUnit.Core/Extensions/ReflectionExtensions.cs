@@ -18,7 +18,7 @@ public static class ReflectionExtensions
         {
             return $"{type.Name}<{genericArguments}>";
         }
-        
+
         return $"{type.Name[..backtickIndex]}<{genericArguments}>";
     }
 
@@ -59,16 +59,11 @@ public static class ReflectionExtensions
     /// </remarks>
     public static Attribute[] GetCustomAttributesSafe(this MemberInfo member, bool inherit = true)
     {
-        try
-        {
-            return member.GetCustomAttributes(inherit).Cast<Attribute>().ToArray();
-        }
-        catch (NotSupportedException ex) when (ex.Message.Contains("Generic types are not valid"))
-        {
-            // .NET Framework doesn't support generic attributes via GetCustomAttributes
-            // We need to use CustomAttributeData instead
-            return GetAttributesViaCustomAttributeData(member, inherit);
-        }
+#if NETSTANDARD
+        return GetAttributesViaCustomAttributeData(member, typeof(object), inherit);
+#else
+        return member.GetCustomAttributes(inherit).Cast<Attribute>().ToArray();
+#endif
     }
 
     /// <summary>
@@ -80,32 +75,31 @@ public static class ReflectionExtensions
     /// <returns>An array of attributes of the specified type</returns>
     public static T[] GetCustomAttributesSafe<T>(this MemberInfo member, bool inherit = true) where T : Attribute
     {
-        try
-        {
-            return member.GetCustomAttributes(typeof(T), inherit).Cast<T>().ToArray();
-        }
-        catch (NotSupportedException ex) when (ex.Message.Contains("Generic types are not valid"))
-        {
-            // .NET Framework doesn't support generic attributes via GetCustomAttributes
-            // We need to use CustomAttributeData instead
-            return GetAttributesViaCustomAttributeData(member, inherit)
+#if NETSTANDARD
+        return GetAttributesViaCustomAttributeData(member, typeof(T), inherit)
                 .OfType<T>()
                 .ToArray();
-        }
+#else
+        return member.GetCustomAttributes<T>(inherit).ToArray();
+#endif
     }
 
-    private static Attribute[] GetAttributesViaCustomAttributeData(MemberInfo member, bool inherit)
+    private static Attribute[] GetAttributesViaCustomAttributeData(MemberInfo member, Type attributeType, bool inherit)
     {
         var attributes = new List<Attribute>();
-        
-        // Get attributes from the member itself
-        var customAttributeDataList = CustomAttributeData.GetCustomAttributes(member);
-        
+
+        var customAttributeDataList = CustomAttributeData.GetCustomAttributes(member)
+            .Where(x => inherit
+                ? x.AttributeType.IsAssignableTo(attributeType)
+                : x.AttributeType == attributeType)
+            .ToList();
+
         foreach (var attributeData in customAttributeDataList)
         {
             try
             {
                 var attribute = CreateAttributeInstance(attributeData);
+
                 if (attribute != null)
                 {
                     attributes.Add(attribute);
@@ -116,18 +110,18 @@ public static class ReflectionExtensions
                 // Skip attributes that can't be instantiated
             }
         }
-        
+
         // If inherit is true and member is a Type, get attributes from base types
         if (inherit && member is Type type)
         {
             var baseType = type.BaseType;
             while (baseType != null && baseType != typeof(object))
             {
-                attributes.AddRange(GetAttributesViaCustomAttributeData(baseType, false));
+                attributes.AddRange(GetAttributesViaCustomAttributeData(baseType, type, false));
                 baseType = baseType.BaseType;
             }
         }
-        
+
         return attributes.ToArray();
     }
 
@@ -136,21 +130,21 @@ public static class ReflectionExtensions
     private static Attribute? CreateAttributeInstance(CustomAttributeData attributeData)
     {
         var attributeType = attributeData.AttributeType;
-        
+
         // Skip if it's a generic type definition (not a constructed generic type)
         if (attributeType.IsGenericTypeDefinition)
         {
             return null;
         }
-        
+
         // Get constructor arguments
         var constructorArgs = attributeData.ConstructorArguments
             .Select(arg => arg.Value)
             .ToArray();
-        
+
         // Try to create instance
-        Attribute? attribute = null;
-        
+        Attribute? attribute;
+
         if (constructorArgs.Length == 0)
         {
             // Try parameterless constructor
@@ -161,14 +155,13 @@ public static class ReflectionExtensions
             // Try constructor with parameters
             attribute = Activator.CreateInstance(attributeType, constructorArgs) as Attribute;
         }
-        
+
         if (attribute == null)
         {
             return null;
         }
-        
-        // Set named arguments (properties and fields)
-        foreach (var namedArg in attributeData.NamedArguments)
+
+        foreach (var namedArg in attributeData.NamedArguments ?? [])
         {
             if (namedArg.MemberInfo is PropertyInfo property)
             {
@@ -179,7 +172,7 @@ public static class ReflectionExtensions
                 field.SetValue(attribute, namedArg.TypedValue.Value);
             }
         }
-        
+
         return attribute;
     }
 }
