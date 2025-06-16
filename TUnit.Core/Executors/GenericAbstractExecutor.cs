@@ -6,53 +6,53 @@ public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor
 {
     protected abstract ValueTask ExecuteAsync(Func<ValueTask> action);
 
-    public ValueTask ExecuteBeforeTestDiscoveryHook(SourceGeneratedMethodInformation hookMethodInfo, BeforeTestDiscoveryContext context,
+    public ValueTask ExecuteBeforeTestDiscoveryHook(TestMethod hookMethodInfo, BeforeTestDiscoveryContext context,
         Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteBeforeTestSessionHook(SourceGeneratedMethodInformation hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
+    public ValueTask ExecuteBeforeTestSessionHook(TestMethod hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteBeforeAssemblyHook(SourceGeneratedMethodInformation hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action)
+    public ValueTask ExecuteBeforeAssemblyHook(TestMethod hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteBeforeClassHook(SourceGeneratedMethodInformation hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
+    public ValueTask ExecuteBeforeClassHook(TestMethod hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteBeforeTestHook(SourceGeneratedMethodInformation hookMethodInfo, TestContext context, Func<ValueTask> action)
+    public ValueTask ExecuteBeforeTestHook(TestMethod hookMethodInfo, TestContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteAfterTestDiscoveryHook(SourceGeneratedMethodInformation hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action)
+    public ValueTask ExecuteAfterTestDiscoveryHook(TestMethod hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteAfterTestSessionHook(SourceGeneratedMethodInformation hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
+    public ValueTask ExecuteAfterTestSessionHook(TestMethod hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteAfterAssemblyHook(SourceGeneratedMethodInformation hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action)
+    public ValueTask ExecuteAfterAssemblyHook(TestMethod hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteAfterClassHook(SourceGeneratedMethodInformation hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
+    public ValueTask ExecuteAfterClassHook(TestMethod hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }
 
-    public ValueTask ExecuteAfterTestHook(SourceGeneratedMethodInformation hookMethodInfo, TestContext context, Func<ValueTask> action)
+    public ValueTask ExecuteAfterTestHook(TestMethod hookMethodInfo, TestContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }

@@ -5,7 +5,7 @@ using System.Reflection;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Type} {Name})")]
-public record SourceGeneratedPropertyInformation : SourceGeneratedMemberInformation
+public record TestProperty : TestMember
 {
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace TUnit.Core;
 
-public abstract record SourceGeneratedMemberInformation
+public abstract record TestMember
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
@@ -23,7 +23,7 @@ public abstract record SourceGeneratedMemberInformation
         return true;
     }
 
-    public virtual bool Equals(SourceGeneratedMemberInformation? other)
+    public virtual bool Equals(TestMember? other)
     {
         if (other is null)
         {

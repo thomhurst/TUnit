@@ -18,9 +18,9 @@ internal static class InstanceCreator
 
     public static async Task<(object? Instance, Exception? Exception)> CreateInstanceAsync(
         IDataAttribute typeDataAttribute,
-        SourceGeneratedClassInformation classInformation,
+        TestClass classInformation,
         object?[] classInstanceArguments,
-        SourceGeneratedMethodInformation testInformation,
+        TestMethod testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         return await CreateInstanceAsync(typeDataAttribute, classInformation, classInstanceArguments, 
@@ -29,9 +29,9 @@ internal static class InstanceCreator
 
     public static async Task<(object? Instance, Exception? Exception)> CreateInstanceAsync(
         IDataAttribute typeDataAttribute,
-        SourceGeneratedClassInformation classInformation,
+        TestClass classInformation,
         object?[] classInstanceArguments,
-        SourceGeneratedMethodInformation testInformation,
+        TestMethod testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor,
         bool skipPropertyInitialization)
     {
@@ -86,9 +86,9 @@ internal static class InstanceCreator
     }
 
     private static async Task<Dictionary<string, object?>> GetPropertyArgumentsAsync(
-        SourceGeneratedClassInformation classInformation,
+        TestClass classInformation,
         object?[] args,
-        SourceGeneratedMethodInformation testInformation,
+        TestMethod testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var propertyArgs = new Dictionary<string, object?>();
@@ -103,11 +103,11 @@ internal static class InstanceCreator
         return propertyArgs;
     }
 
-    public static async IAsyncEnumerable<(SourceGeneratedPropertyInformation PropertyInformation, Func<Task<object?[]>> Args)> 
+    public static async IAsyncEnumerable<(TestProperty PropertyInformation, Func<Task<object?[]>> Args)> 
         GetPropertyArgumentsEnumerableAsync(
-            SourceGeneratedClassInformation type,
+            TestClass type,
             object?[] classInstanceArguments,
-            SourceGeneratedMethodInformation testInformation,
+            TestMethod testInformation,
             TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var properties = testInformation.Class.Properties;

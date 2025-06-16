@@ -40,7 +40,7 @@ public abstract record TestDetails
     /// Gets the class information for the test.
     /// </summary>
     [field: AllowNull, MaybeNull]
-    public SourceGeneratedClassInformation TestClass => field ??= TestMethod.Class;
+    public TestClass TestClass => field ??= TestMethod.Class;
 
     /// <summary>
     /// Gets the parameter types for the test method.
@@ -79,7 +79,7 @@ public abstract record TestDetails
     /// <summary>
     /// Gets or sets the test method information.
     /// </summary>
-    public required SourceGeneratedMethodInformation TestMethod { get; init; }
+    public required TestMethod TestMethod { get; init; }
 
     /// <summary>
     /// Gets the instance of the test class.

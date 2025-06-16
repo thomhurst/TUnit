@@ -11,7 +11,7 @@ namespace TUnit.Core.Helpers;
 [RequiresUnreferencedCode("Reflection")]
 internal static class InstanceHelper
 {
-    public static object CreateInstance(SourceGeneratedMethodInformation methodInformation, object?[]? args, IDictionary<string, object?>? testClassProperties, TestBuilderContext testBuilderContext)
+    public static object CreateInstance(TestMethod methodInformation, object?[]? args, IDictionary<string, object?>? testClassProperties, TestBuilderContext testBuilderContext)
     {
         var classInformation = methodInformation.Class;
         var instance = CreateObject(classInformation, args, testClassProperties, testBuilderContext);
@@ -22,7 +22,7 @@ internal static class InstanceHelper
         return instance;
     }
 
-    public static async Task InitializePropertiesAsync(object instance, SourceGeneratedMethodInformation methodInformation, TestBuilderContext testBuilderContext)
+    public static async Task InitializePropertiesAsync(object instance, TestMethod methodInformation, TestBuilderContext testBuilderContext)
     {
         var classInformation = methodInformation.Class;
         
@@ -53,7 +53,7 @@ internal static class InstanceHelper
         }
     }
 
-    private static object CreateObject(SourceGeneratedClassInformation classInformation, object?[]? args, IDictionary<string, object?>? testClassProperties, TestBuilderContext testBuilderContext)
+    private static object CreateObject(TestClass classInformation, object?[]? args, IDictionary<string, object?>? testClassProperties, TestBuilderContext testBuilderContext)
     {
         try
         {

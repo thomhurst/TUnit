@@ -5,14 +5,14 @@ using System.Reflection;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Type} {Name})")]
-public record SourceGeneratedParameterInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+public record TestParameter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)]T>() : SourceGeneratedParameterInformation(typeof(T));
+    | DynamicallyAccessedMemberTypes.PublicProperties)]T>() : TestParameter(typeof(T));
 
 [DebuggerDisplay("{Type} {Name})")]
-public record SourceGeneratedParameterInformation([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+public record TestParameter([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : SourceGeneratedMemberInformation
+    | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : TestMember
 {
     public required ParameterInfo ReflectionInfo { get; set; }
     public bool IsParams => ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);

@@ -84,7 +84,7 @@ public abstract record TestMetadata
     /// <summary>
     /// Gets or sets the test method information.
     /// </summary>
-    public required SourceGeneratedMethodInformation TestMethod { get; init; }
+    public required TestMethod TestMethod { get; init; }
     
     /// <summary>
     /// Gets or sets the repeat limit for the test.

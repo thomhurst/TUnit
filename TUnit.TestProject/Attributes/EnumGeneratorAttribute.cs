@@ -4,7 +4,7 @@ public class EnumGeneratorAttribute : UntypedDataSourceGeneratorAttribute
 {
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        if (dataGeneratorMetadata.MembersToGenerate is not [SourceGeneratedParameterInformation sourceGeneratedParameterInformation])
+        if (dataGeneratorMetadata.MembersToGenerate is not [TestParameter sourceGeneratedParameterInformation])
         {
             throw new Exception("Expecting one parameter");
         }

@@ -5,16 +5,16 @@ using System.Diagnostics.CodeAnalysis;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Type})")]
-public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
+public record TestClass : TestMember
 {
-    private static readonly ConcurrentDictionary<string, SourceGeneratedClassInformation> Cache = [];
+    private static readonly ConcurrentDictionary<string, TestClass> Cache = [];
 
-    public static SourceGeneratedClassInformation GetOrAdd(string name, Func<SourceGeneratedClassInformation> factory)
+    public static TestClass GetOrAdd(string name, Func<TestClass> factory)
     {
         return Cache.GetOrAdd(name, _ => factory());
     }
 
-    public virtual bool Equals(SourceGeneratedClassInformation? other)
+    public virtual bool Equals(TestClass? other)
     {
         return Type == other?.Type;
     }
@@ -32,9 +32,9 @@ public record SourceGeneratedClassInformation : SourceGeneratedMemberInformation
     public override required Type Type { get; init; }
 
     public required string? Namespace { get; init;}
-    public required SourceGeneratedAssemblyInformation Assembly { get; init; }
-    public required SourceGeneratedParameterInformation[] Parameters { get; init; }
+    public required TestAssembly Assembly { get; init; }
+    public required TestParameter[] Parameters { get; init; }
 
-    public required SourceGeneratedPropertyInformation[] Properties { get; init; }
-    public required SourceGeneratedClassInformation? Parent { get; init; }
+    public required TestProperty[] Properties { get; init; }
+    public required TestClass? Parent { get; init; }
 }

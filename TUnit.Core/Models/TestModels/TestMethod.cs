@@ -8,9 +8,9 @@ using TUnit.Core.Helpers;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Type}.{Name}")]
-public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformation
+public record TestMethod : TestMember
 {
-    internal static SourceGeneratedMethodInformation Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+    internal static TestMethod Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>(string methodName) =>
@@ -22,10 +22,10 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
             Type = typeof(TClassType),
             Parameters = [],
             GenericTypeCount = 0,
-            Class = new SourceGeneratedClassInformation
+            Class = new TestClass
             {
                 Parent = null,
-                Assembly = new SourceGeneratedAssemblyInformation
+                Assembly = new TestAssembly
                 {
                     Attributes = [],
                     Name = typeof(TClassType).Assembly.GetName().Name!,
@@ -39,11 +39,11 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
             }
         };
 
-    public required SourceGeneratedParameterInformation[] Parameters { get; init; }
+    public required TestParameter[] Parameters { get; init; }
 
     public required int GenericTypeCount { get; init; }
 
-    public required SourceGeneratedClassInformation Class { get; init; }
+    public required TestClass Class { get; init; }
 
     [field: AllowNull, MaybeNull]
     [JsonIgnore]
@@ -71,7 +71,7 @@ public record SourceGeneratedMethodInformation : SourceGeneratedMemberInformatio
         return true;
     }
 
-    public virtual bool Equals(SourceGeneratedMethodInformation? other)
+    public virtual bool Equals(TestMethod? other)
     {
         if (other is null)
         {

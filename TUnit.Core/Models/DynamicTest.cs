@@ -48,9 +48,9 @@ public abstract record DynamicTest
 
     public static T Argument<T>() => default!;
 
-    protected SourceGeneratedMethodInformation BuildTestMethod(MethodInfo methodInfo)
+    protected TestMethod BuildTestMethod(MethodInfo methodInfo)
     {
-        return new SourceGeneratedMethodInformation
+        return new TestMethod
         {
             Attributes = methodInfo.GetCustomAttributes().ToArray(),
             Class = GenerateClass(),
@@ -63,9 +63,9 @@ public abstract record DynamicTest
         };
     }
 
-    protected SourceGeneratedClassInformation GenerateClass()
+    protected TestClass GenerateClass()
     {
-        return new SourceGeneratedClassInformation
+        return new TestClass
         {
             Parent = ReflectionToSourceModelHelpers.GetParent(TestClassType),
             Assembly = GenerateAssembly(),
@@ -78,9 +78,9 @@ public abstract record DynamicTest
         };
     }
 
-    protected SourceGeneratedAssemblyInformation GenerateAssembly()
+    protected TestAssembly GenerateAssembly()
     {
-        return new SourceGeneratedAssemblyInformation
+        return new TestAssembly
         {
             Attributes = TestClassType.Assembly.GetCustomAttributes().ToArray(),
             Name = TestClassType.Assembly.GetName().Name ??
@@ -88,9 +88,9 @@ public abstract record DynamicTest
         };
     }
 
-    protected static SourceGeneratedPropertyInformation GenerateProperty(KeyValuePair<string, object?> property)
+    protected static TestProperty GenerateProperty(KeyValuePair<string, object?> property)
     {
-        return new SourceGeneratedPropertyInformation
+        return new TestProperty
         {
             Attributes = [], // TODO?
             ReflectionInfo = null!, // TODO?
@@ -101,12 +101,12 @@ public abstract record DynamicTest
         };
     }
 
-    protected SourceGeneratedParameterInformation[] GetParameters(ParameterInfo[] parameters)
+    protected TestParameter[] GetParameters(ParameterInfo[] parameters)
     {
         return parameters.Select(GenerateParameter).ToArray();
     }
 
-    protected SourceGeneratedParameterInformation GenerateParameter(ParameterInfo parameter)
+    protected TestParameter GenerateParameter(ParameterInfo parameter)
     {
         return ReflectionToSourceModelHelpers.GenerateParameter(parameter);
     }
@@ -152,7 +152,7 @@ public record DynamicTest<
         {
             var testBuilderContext = new TestBuilderContext();
 
-            var sourceGeneratedMethodInformation = BuildTestMethod(TestBody);
+            var testMethodInformation = BuildTestMethod(TestBody);
 
             yield return new TestMetadata<TClass>
             {
@@ -161,9 +161,9 @@ public record DynamicTest<
                 TestMethodArguments = TestMethodArguments,
                 CurrentRepeatAttempt = i,
                 RepeatLimit = repeatLimit,
-                TestMethod = sourceGeneratedMethodInformation,
+                TestMethod = testMethodInformation,
                 ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
-                        sourceGeneratedMethodInformation,
+                        testMethodInformation,
                         TestClassArguments, Properties, testBuilderContext),
                     TestSessionContext.Current?.Id ?? "Unknown",
                     testBuilderContext),

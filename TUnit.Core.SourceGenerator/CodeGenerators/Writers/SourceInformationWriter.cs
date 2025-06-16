@@ -9,7 +9,7 @@ public static class SourceInformationWriter
 {
     public static void GenerateClassInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
     {
-        sourceCodeWriter.Write($"global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd(\"{namedTypeSymbol.GloballyQualified()}\", () => new global::TUnit.Core.SourceGeneratedClassInformation");
+        sourceCodeWriter.Write($"global::TUnit.Core.TestClass.GetOrAdd(\"{namedTypeSymbol.GloballyQualified()}\", () => new global::TUnit.Core.TestClass");
         sourceCodeWriter.Write("{");
 
         var parent = namedTypeSymbol.ContainingType;
@@ -81,7 +81,7 @@ public static class SourceInformationWriter
     private static void GenerateAssemblyInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, IAssemblySymbol assembly)
     {
         sourceCodeWriter.Write(
-            $"global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd(\"{assembly.Name}\", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation");
+            $"global::TUnit.Core.TestAssembly.GetOrAdd(\"{assembly.Name}\", () => new global::TUnit.Core.TestAssembly");
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Name = \"{assembly.Name}\",");
 
@@ -95,7 +95,7 @@ public static class SourceInformationWriter
         GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol,
         IDictionary<string, string>? genericSubstitutions, char suffix)
     {
-        sourceCodeWriter.Write("new global::TUnit.Core.SourceGeneratedMethodInformation");
+        sourceCodeWriter.Write("new global::TUnit.Core.TestMethod");
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
         sourceCodeWriter.Write($"Name = \"{methodSymbol.Name}\",");
@@ -159,7 +159,7 @@ public static class SourceInformationWriter
     public static void GeneratePropertyInformation(SourceCodeWriter sourceCodeWriter,
         GeneratorAttributeSyntaxContext context, IPropertySymbol property, INamedTypeSymbol namedTypeSymbol)
     {
-        sourceCodeWriter.Write("new global::TUnit.Core.SourceGeneratedPropertyInformation");
+        sourceCodeWriter.Write("new global::TUnit.Core.TestProperty");
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"ReflectionInfo = typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\"),");
         sourceCodeWriter.Write($"Type = typeof({property.Type.GloballyQualified()}),");
@@ -192,7 +192,7 @@ public static class SourceInformationWriter
             type = GetTypeOrSubstitution(parameter.Type);
         }
 
-        sourceCodeWriter.Write($"new global::TUnit.Core.SourceGeneratedParameterInformation<{type}>");
+        sourceCodeWriter.Write($"new global::TUnit.Core.TestParameter<{type}>");
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Name = \"{parameter.Name}\",");
 

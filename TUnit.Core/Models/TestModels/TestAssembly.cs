@@ -4,15 +4,15 @@ using System.Diagnostics;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Name})")]
-public record SourceGeneratedAssemblyInformation
+public record TestAssembly
 {
-    private static readonly ConcurrentDictionary<string, SourceGeneratedAssemblyInformation> Cache = [];
-    public static SourceGeneratedAssemblyInformation GetOrAdd(string name, Func<SourceGeneratedAssemblyInformation> factory)
+    private static readonly ConcurrentDictionary<string, TestAssembly> Cache = [];
+    public static TestAssembly GetOrAdd(string name, Func<TestAssembly> factory)
     {
         return Cache.GetOrAdd(name, _ => factory());
     }
     
-    public virtual bool Equals(SourceGeneratedAssemblyInformation? other)
+    public virtual bool Equals(TestAssembly? other)
     {
         if (other is null)
         {

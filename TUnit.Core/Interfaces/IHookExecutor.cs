@@ -2,15 +2,15 @@
 
 public interface IHookExecutor
 {
-    ValueTask ExecuteBeforeTestDiscoveryHook(SourceGeneratedMethodInformation hookMethodInfo, BeforeTestDiscoveryContext context, Func<ValueTask> action);
-    ValueTask ExecuteBeforeTestSessionHook(SourceGeneratedMethodInformation hookMethodInfo, TestSessionContext context, Func<ValueTask> action);
-    ValueTask ExecuteBeforeAssemblyHook(SourceGeneratedMethodInformation hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
-    ValueTask ExecuteBeforeClassHook(SourceGeneratedMethodInformation hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
-    ValueTask ExecuteBeforeTestHook(SourceGeneratedMethodInformation hookMethodInfo, TestContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeTestDiscoveryHook(TestMethod hookMethodInfo, BeforeTestDiscoveryContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeTestSessionHook(TestMethod hookMethodInfo, TestSessionContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeAssemblyHook(TestMethod hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeClassHook(TestMethod hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeTestHook(TestMethod hookMethodInfo, TestContext context, Func<ValueTask> action);
     
-    ValueTask ExecuteAfterTestDiscoveryHook(SourceGeneratedMethodInformation hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action);
-    ValueTask ExecuteAfterTestSessionHook(SourceGeneratedMethodInformation hookMethodInfo, TestSessionContext context, Func<ValueTask> action);
-    ValueTask ExecuteAfterAssemblyHook(SourceGeneratedMethodInformation hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
-    ValueTask ExecuteAfterClassHook(SourceGeneratedMethodInformation hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
-    ValueTask ExecuteAfterTestHook(SourceGeneratedMethodInformation hookMethodInfo, TestContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterTestDiscoveryHook(TestMethod hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterTestSessionHook(TestMethod hookMethodInfo, TestSessionContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterAssemblyHook(TestMethod hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterClassHook(TestMethod hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterTestHook(TestMethod hookMethodInfo, TestContext context, Func<ValueTask> action);
 }

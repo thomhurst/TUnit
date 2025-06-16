@@ -21,7 +21,7 @@ public record FailedTestMetadata<[DynamicallyAccessedMembers(
         {
             TestId = failedTestMetadata.TestId,
             RepeatLimit = 0,
-            TestMethod = SourceGeneratedMethodInformation.Failure<TClassType>(failedTestMetadata.MethodName),
+            TestMethod = TestMethod.Failure<TClassType>(failedTestMetadata.MethodName),
             CurrentRepeatAttempt = 0,
             ResettableClassFactory = new ResettableLazy<TClassType>(() => null!, "Unknown", new TestBuilderContext()),
             TestMethodFactory = (_, _) => default,

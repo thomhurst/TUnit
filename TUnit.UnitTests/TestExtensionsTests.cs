@@ -20,14 +20,14 @@ public class TestExtensionsTests
             .With(x => x.DynamicAttributes, [])
             .With(x => x.TestClassArguments, [])
             .With(x => x.DataAttributes, [])
-            .With(x => x.TestMethod, new SourceGeneratedMethodInformation
+            .With(x => x.TestMethod, new TestMethod
             {
                 Attributes = [],
-                Class = new SourceGeneratedClassInformation
+                Class = new TestClass
                 {
                     Name = "TestExtensionsTests",
                     Namespace = "TUnit.UnitTests",
-                    Assembly = new SourceGeneratedAssemblyInformation
+                    Assembly = new TestAssembly
                     {
                         Attributes = [],
                         Name = "TUnit.UnitTests",
@@ -60,15 +60,15 @@ public class TestExtensionsTests
             .With(x => x.DynamicAttributes, [])
             .With(x => x.TestClassArguments, [])
             .With(x => x.DataAttributes, [])
-            .With(x => x.TestMethod, new SourceGeneratedMethodInformation
+            .With(x => x.TestMethod, new TestMethod
             {
                 Attributes = [],
-                Class = new SourceGeneratedClassInformation
+                Class = new TestClass
                 {
                     Parent = ReflectionToSourceModelHelpers.GetParent(typeof(InnerClass)),
                     Name = "InnerClass",
                     Namespace = "TUnit.UnitTests",
-                    Assembly = new SourceGeneratedAssemblyInformation
+                    Assembly = new TestAssembly
                     {
                         Attributes = [],
                         Name = "TUnit.UnitTests",
@@ -134,15 +134,15 @@ public class TestExtensionsTests
     {
         return _fixture.Build<TestMetadata<TestExtensionsTests>>()
             .With(x => x.DynamicAttributes, [])
-            .With(x => x.TestMethod, new SourceGeneratedMethodInformation
+            .With(x => x.TestMethod, new TestMethod
             {
                 Attributes = [],
-                Class = new SourceGeneratedClassInformation
+                Class = new TestClass
                 {
                     Parent = ReflectionToSourceModelHelpers.GetParent(typeof(TestExtensionsTests)),
                     Name = "TestExtensionsTests",
                     Namespace = "TUnit.UnitTests",
-                    Assembly = new SourceGeneratedAssemblyInformation
+                    Assembly = new TestAssembly
                     {
                         Attributes = [],
                         Name = "TUnit.UnitTests",

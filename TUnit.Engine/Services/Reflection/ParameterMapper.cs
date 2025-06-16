@@ -11,7 +11,7 @@ namespace TUnit.Engine.Services.Reflection;
 [UnconditionalSuppressMessage("AOT", "IL3050")]
 internal static class ParameterMapper
 {
-    public static void MapImplicitParameters(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)
+    public static void MapImplicitParameters(ref object?[] arguments, TestParameter[] parameters)
     {
         if (arguments.Length == parameters.Length)
         {
@@ -37,7 +37,7 @@ internal static class ParameterMapper
         }
     }
 
-    private static void HandleExactMatch(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)
+    private static void HandleExactMatch(ref object?[] arguments, TestParameter[] parameters)
     {
         if (parameters.Length > 0 && parameters.Last().IsParams &&
             arguments.Length > 0 && arguments.Last() is not IEnumerable)
@@ -46,7 +46,7 @@ internal static class ParameterMapper
         }
     }
 
-    private static void HandleMissingParameters(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)
+    private static void HandleMissingParameters(ref object?[] arguments, TestParameter[] parameters)
     {
         var missingParameters = parameters.Skip(arguments.Length).ToArray();
 
@@ -66,7 +66,7 @@ internal static class ParameterMapper
             $"Not enough arguments provided to fulfil the parameters. Expected {parameters.Length}, but got {arguments.Length}.");
     }
 
-    private static void HandleExcessParameters(ref object?[] arguments, SourceGeneratedParameterInformation[] parameters)
+    private static void HandleExcessParameters(ref object?[] arguments, TestParameter[] parameters)
     {
         var lastParameter = parameters.Last();
 
@@ -81,7 +81,7 @@ internal static class ParameterMapper
 
     private static void WrapLastArgumentInParamsArray(
         ref object?[] arguments, 
-        SourceGeneratedParameterInformation lastParameter)
+        TestParameter lastParameter)
     {
         var underlyingType = GetUnderlyingParamsType(lastParameter);
         var typedArray = Array.CreateInstance(underlyingType, 1);
@@ -93,8 +93,8 @@ internal static class ParameterMapper
 
     private static void ConvertToParamsArray(
         ref object?[] arguments,
-        SourceGeneratedParameterInformation[] parameters,
-        SourceGeneratedParameterInformation lastParameter)
+        TestParameter[] parameters,
+        TestParameter lastParameter)
     {
         var underlyingType = GetUnderlyingParamsType(lastParameter);
         var argumentsBeforeParams = arguments.Take(parameters.Length - 1).ToArray();
@@ -113,7 +113,7 @@ internal static class ParameterMapper
         }
     }
 
-    private static Type GetUnderlyingParamsType(SourceGeneratedParameterInformation parameter)
+    private static Type GetUnderlyingParamsType(TestParameter parameter)
     {
         return parameter.Type.GetElementType() 
                ?? parameter.Type.GenericTypeArguments.FirstOrDefault() 

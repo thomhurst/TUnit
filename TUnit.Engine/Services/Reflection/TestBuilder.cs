@@ -10,8 +10,8 @@ namespace TUnit.Engine.Services.Reflection;
 internal class TestBuilder
 {
     public async Task<IEnumerable<DynamicTest>> BuildTestsAsync(
-        SourceGeneratedClassInformation classInformation,
-        SourceGeneratedMethodInformation[] testMethods)
+        TestClass classInformation,
+        TestMethod[] testMethods)
     {
         var dynamicTests = new List<DynamicTest>();
 
@@ -23,8 +23,8 @@ internal class TestBuilder
     }
 
     private async Task BuildTestsForMethodAsync(
-        SourceGeneratedClassInformation classInformation,
-        SourceGeneratedMethodInformation testMethod,
+        TestClass classInformation,
+        TestMethod testMethod,
         List<DynamicTest> dynamicTests)
     {
         var testAttribute = testMethod.Attributes.OfType<TestAttribute>().First();
@@ -49,7 +49,7 @@ internal class TestBuilder
     }
 
     private async Task BuildTestVariationsAsync(
-        SourceGeneratedMethodInformation testMethod,
+        TestMethod testMethod,
         IDataAttribute classDataAttribute,
         IDataAttribute testDataAttribute,
         List<DynamicTest> dynamicTests)
@@ -99,7 +99,7 @@ internal class TestBuilder
     }
 
     private async Task BuildSingleTestAsync(
-        SourceGeneratedMethodInformation testInformation,
+        TestMethod testInformation,
         Func<Task<object?[]>> classInstanceArguments,
         IDataAttribute typeDataAttribute,
         IDataAttribute testDataAttribute,
@@ -139,7 +139,7 @@ internal class TestBuilder
     }
 
     private async Task BuildTestInstanceAsync(
-        SourceGeneratedMethodInformation testInformation,
+        TestMethod testInformation,
         Func<Task<object?[]>> classInstanceArguments,
         IDataAttribute typeDataAttribute,
         IDataAttribute testDataAttributeInstance,
@@ -186,7 +186,7 @@ internal class TestBuilder
     }
 
     private async Task<DynamicTest> CreateTestAsync(
-        SourceGeneratedMethodInformation testInformation,
+        TestMethod testInformation,
         object?[] invokedClassInstanceArguments,
         IDataAttribute typeDataAttribute,
         Func<Task<object?[]>> testArguments,
@@ -232,9 +232,9 @@ internal class TestBuilder
     }
 
     private async Task<Dictionary<string, object?>> GetPropertyArgumentsAsync(
-        SourceGeneratedClassInformation classInformation,
+        TestClass classInformation,
         object?[] classInstanceArguments,
-        SourceGeneratedMethodInformation testInformation,
+        TestMethod testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var propertyArgs = new Dictionary<string, object?>();
@@ -249,7 +249,7 @@ internal class TestBuilder
         return propertyArgs;
     }
 
-    private static Attribute[] CollectAllAttributes(SourceGeneratedMethodInformation testInformation)
+    private static Attribute[] CollectAllAttributes(TestMethod testInformation)
     {
         return
         [
@@ -259,14 +259,14 @@ internal class TestBuilder
         ];
     }
 
-    private static IEnumerable<IDataAttribute> GetDataAttributes(SourceGeneratedMemberInformation memberInformation)
+    private static IEnumerable<IDataAttribute> GetDataAttributes(TestMember memberInformation)
     {
         var attributes = memberInformation.Attributes.OfType<IDataAttribute>().ToArray();
         return attributes.Length == 0 ? NoOpDataAttribute.Array : attributes;
     }
 
     private void AddFailedTest(
-        SourceGeneratedMethodInformation testInformation,
+        TestMethod testInformation,
         BaseTestAttribute testAttribute,
         Exception exception,
         Type testClassType,
