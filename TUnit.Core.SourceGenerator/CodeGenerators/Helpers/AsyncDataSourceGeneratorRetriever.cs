@@ -48,7 +48,7 @@ public static class AsyncDataSourceGeneratorRetriever
     {
         var selfAndBaseTypes = attributeClass?.GetSelfAndBaseTypes();
 
-        if (selfAndBaseTypes?.FirstOrDefault(HasGeneratorInterface) is INamedTypeSymbol generatorInterface)
+        if (selfAndBaseTypes?.FirstOrDefault(HasGeneratorInterface) is { } generatorInterface)
         {
             return generatorInterface;
         }

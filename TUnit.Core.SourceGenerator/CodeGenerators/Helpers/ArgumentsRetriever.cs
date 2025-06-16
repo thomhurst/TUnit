@@ -21,7 +21,7 @@ public static class ArgumentsRetriever
         if (parameterOrPropertyTypes.IsDefaultOrEmpty || !IsDataDriven(dataAttributes))
         {
             yield return new EmptyArgumentsContainer();
-            
+
             yield break;
         }
 
@@ -46,78 +46,62 @@ public static class ArgumentsRetriever
                         parameterOrPropertyTypes, argumentsType, index);
                 }
 
-                if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix 
-                    || name == WellKnownFullyQualifiedClassNames.InstanceMethodDataSourceAttribute.WithGlobalPrefix)
+                else if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix
+                         || name == WellKnownFullyQualifiedClassNames.InstanceMethodDataSourceAttribute.WithGlobalPrefix)
                 {
                     yield return MethodDataSourceRetriever.ParseMethodData(context, parameterOrPropertyTypes,
                         testClass, dataAttribute, argumentsType, index);
                 }
 
-                if (name == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix)
+                else if (name == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix)
                 {
                     yield return ClassConstructorRetriever.Parse(dataAttribute, index);
                 }
 
-                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
-                        .DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                else if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                             .DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
-                    yield return DataSourceGeneratorRetriever.Parse(context, 
-                        testClass, 
-                        testMethod, 
-                        parameters, 
-                        property, 
-                        parameterOrPropertyTypes, 
-                        dataAttribute, 
+                    yield return DataSourceGeneratorRetriever.Parse(context,
+                        testClass,
+                        testMethod,
+                        parameters,
+                        property,
+                        parameterOrPropertyTypes,
+                        dataAttribute,
                         argumentsType,
-                        index, 
-                        propertyName, 
-                        true);
-                }
-                
-                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
-                        .UntypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
-                {
-                    yield return DataSourceGeneratorRetriever.Parse(context, 
-                        testClass, 
-                        testMethod, 
-                        parameters, 
-                        property, 
-                        parameterOrPropertyTypes, 
-                        dataAttribute, 
-                        argumentsType,
-                        index, 
+                        index,
                         propertyName,
-                        false);
+                        true);
                 }
 
-                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                else if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
                         .AsyncDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
-                    yield return AsyncDataSourceGeneratorRetriever.Parse(context, 
-                        testClass, 
-                        testMethod, 
-                        parameters, 
-                        property, 
-                        parameterOrPropertyTypes, 
-                        dataAttribute, 
+                    yield return AsyncDataSourceGeneratorRetriever.Parse(context,
+                        testClass,
+                        testMethod,
+                        parameters,
+                        property,
+                        parameterOrPropertyTypes,
+                        dataAttribute,
                         argumentsType,
-                        index, 
-                        propertyName, 
+                        index,
+                        propertyName,
                         true);
                 }
-                
-                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
-                        .AsyncUntypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+
+                else if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                             .AsyncUntypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
-                    yield return AsyncDataSourceGeneratorRetriever.Parse(context, 
-                        testClass, 
-                        testMethod, 
-                        parameters, 
-                        property, 
-                        parameterOrPropertyTypes, 
-                        dataAttribute, 
+                    yield return AsyncDataSourceGeneratorRetriever.Parse(context,
+                        testClass,
+                        testMethod,
+                        parameters,
+                        property,
+                        parameterOrPropertyTypes,
+                        dataAttribute,
                         argumentsType,
-                        index, 
+                        index,
                         propertyName,
                         false);
                 }
@@ -157,15 +141,15 @@ public static class ArgumentsRetriever
             var dataSourceAttributes = propertySymbol.GetAttributes().Where(x => x.IsDataSourceAttribute()).ToImmutableArray();
             if (dataSourceAttributes.Any())
             {
-                var args = GetArguments(context, 
+                var args = GetArguments(context,
                     ImmutableArray<IParameterSymbol>.Empty,
                     propertySymbol,
-                    ImmutableArray.Create(propertySymbol.Type), 
-                    dataSourceAttributes, 
-                    namedTypeSymbol, 
+                    ImmutableArray.Create(propertySymbol.Type),
+                    dataSourceAttributes,
+                    namedTypeSymbol,
                     methodSymbol,
                     ArgumentsType.Property, propertySymbol.Name);
-                
+
                 list.Add((propertySymbol, args.OfType<ArgumentsContainer>().First()));
             }
         }
