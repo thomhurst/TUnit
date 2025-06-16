@@ -25,7 +25,12 @@ public static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine();
 
-        sourceBuilder.Write("var testBuilderContext = new global::TUnit.Core.TestBuilderContext();");
+        sourceBuilder.Write("var testBuilderContext = new global::TUnit.Core.TestBuilderContext");
+        sourceBuilder.Write("{");
+        sourceBuilder.Write($"TestMethodName = \"{testSourceDataModel.MethodName}\",");
+        sourceBuilder.Write("ClassInformation = testInformation.Class,");
+        sourceBuilder.Write("MethodInformation = testInformation");
+        sourceBuilder.Write("};
         sourceBuilder.Write("var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);");
 
         WriteScopesAndArguments(sourceBuilder, testSourceDataModel);
@@ -68,7 +73,12 @@ public static class GenericTestInvocationWriter
         sourceBuilder.Write("});");
 
         sourceBuilder.Write("resettableClassFactory = resettableClassFactoryDelegate();");
-        sourceBuilder.Write("testBuilderContext = new();");
+        sourceBuilder.Write("testBuilderContext = new global::TUnit.Core.TestBuilderContext");
+        sourceBuilder.Write("{");
+        sourceBuilder.Write($"TestMethodName = \"{testSourceDataModel.MethodName}\",");
+        sourceBuilder.Write("ClassInformation = testInformation.Class,");
+        sourceBuilder.Write("MethodInformation = testInformation");
+        sourceBuilder.Write("};");
         sourceBuilder.Write("testBuilderContextAccessor.Current = testBuilderContext;");
 
         testSourceDataModel.ClassArguments.CloseScope(sourceBuilder);

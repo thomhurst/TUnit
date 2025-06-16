@@ -54,7 +54,20 @@ internal class TestBuilder
         IDataAttribute testDataAttribute,
         List<DynamicTest> dynamicTests)
     {
-        var testBuilderContextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
+        var testBuilderContext = new TestBuilderContext
+        {
+            TestMethodName = testMethod.Name,
+            ClassInformation = testMethod.Class,
+            MethodInformation = testMethod
+        };
+        var testBuilderContextAccessor = new TestBuilderContextAccessor(testBuilderContext);
+        
+        // Set the AsyncLocal for data generators to access
+        var previousContext = TestBuilderContext.Current;
+        TestBuilderContext.Current = testBuilderContext;
+        
+        try
+        {
 
         var classArgumentsContext = new DataGeneratorContext
         {
@@ -71,11 +84,17 @@ internal class TestBuilder
             NeedsInstance = false
         };
 
-        await foreach (var classInstanceArguments in DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(
-            classDataAttribute, classArgumentsContext))
+            await foreach (var classInstanceArguments in DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(
+                classDataAttribute, classArgumentsContext))
+            {
+                await BuildSingleTestAsync(testMethod, classInstanceArguments, classDataAttribute, 
+                    testDataAttribute, testBuilderContextAccessor, dynamicTests);
+            }
+        }
+        finally
         {
-            await BuildSingleTestAsync(testMethod, classInstanceArguments, classDataAttribute, 
-                testDataAttribute, testBuilderContextAccessor, dynamicTests);
+            // Restore previous context
+            TestBuilderContext.Current = previousContext;
         }
     }
 
@@ -108,7 +127,14 @@ internal class TestBuilder
         catch (Exception e)
         {
             AddFailedTest(testInformation, testAttribute, e, classInformation.Type, dynamicTests);
-            testBuilderContextAccessor.Current = new TestBuilderContext();
+            var newContext = new TestBuilderContext
+            {
+                TestMethodName = testInformation.Name,
+                ClassInformation = testInformation.Class,
+                MethodInformation = testInformation
+            };
+            testBuilderContextAccessor.Current = newContext;
+            TestBuilderContext.Current = newContext;
         }
     }
 
@@ -147,7 +173,14 @@ internal class TestBuilder
 
             dynamicTests.Add(test);
 
-            testBuilderContextAccessor.Current = new TestBuilderContext();
+            var newContext = new TestBuilderContext
+            {
+                TestMethodName = testInformation.Name,
+                ClassInformation = testInformation.Class,
+                MethodInformation = testInformation
+            };
+            testBuilderContextAccessor.Current = newContext;
+            TestBuilderContext.Current = newContext;
             invokedClassInstanceArguments = await classInstanceArguments();
         }
     }
