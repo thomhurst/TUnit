@@ -32,12 +32,7 @@ internal static class InstanceHelper
             {
                 var testBuilderContextAccessor = new TestBuilderContextAccessor(testBuilderContext);
 
-                var value = await ReflectionValueCreator.CreatePropertyValueAsync(
-                    classInformation,
-                    testBuilderContextAccessor,
-                    dataAttribute,
-                    propertyInformation,
-                    new DataGeneratorMetadata
+                var metadata = new DataGeneratorMetadata
                 {
                     Type = DataGeneratorType.Property,
                     TestInformation = methodInformation,
@@ -46,7 +41,21 @@ internal static class InstanceHelper
                     TestBuilderContext = testBuilderContextAccessor,
                     TestClassInstance = instance,
                     TestSessionId = string.Empty,
-                }).ConfigureAwait(false);
+                };
+
+                var value = await ReflectionValueCreator.CreatePropertyValueAsync(
+                    classInformation,
+                    testBuilderContextAccessor,
+                    dataAttribute,
+                    propertyInformation,
+                    metadata).ConfigureAwait(false);
+
+                if (value is not null)
+                {
+                    // Initialize the property value using DataSourceInitializer
+                    // This handles nested data sources and IAsyncInitializer
+                    await DataSourceInitializer.InitializeAsync(value, metadata, testBuilderContextAccessor).ConfigureAwait(false);
+                }
 
                 propertyInformation.ReflectionInfo.SetValue(instance, value);
             }

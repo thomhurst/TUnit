@@ -40,6 +40,12 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             yield break;
         }
 
+        var propertiesWithDataSource = namedTypeSymbol
+            .GetMembersIncludingBase()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.GetAttributes().Any(a => a.IsDataSourceAttribute()))
+            .ToArray();
+
         var nestedTypes = namedTypeSymbol
             .GetMembersIncludingBase()
             .OfType<IPropertySymbol>()
@@ -48,7 +54,16 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             .Where(x => IsOrHasEvent(x, hashSet))
             .ToArray();
 
-        foreach (var nestedType in nestedTypes)
+        // Also check properties with data source attributes
+        var dataSourcePropertyTypes = propertiesWithDataSource
+            .Select(x => x.Type)
+            .OfType<INamedTypeSymbol>()
+            .Where(x => !hashSet.Contains(x))
+            .ToArray();
+
+        var allNestedTypes = nestedTypes.Concat(dataSourcePropertyTypes).Distinct(SymbolEqualityComparer.Default).Cast<INamedTypeSymbol>().ToArray();
+
+        foreach (var nestedType in allNestedTypes)
         {
             foreach (var typeSymbol in CollectClass(nestedType, hashSet))
             {
@@ -56,7 +71,7 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             }
         }
 
-        if (nestedTypes.Length > 0)
+        if (allNestedTypes.Length > 0 || propertiesWithDataSource.Length > 0)
         {
             yield return namedTypeSymbol;
         }

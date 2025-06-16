@@ -106,7 +106,6 @@ public class SourceRegistrar
     {
         var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
             .Where(p => p.CanWrite && p.HasAttribute<IAsyncDataSourceGeneratorAttribute>())
-            .Where(p => IsEvent(p.PropertyType))
             .ToArray();
 
         if (properties.Length == 0)
