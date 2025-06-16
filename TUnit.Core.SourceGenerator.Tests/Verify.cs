@@ -77,10 +77,24 @@ public sealed class VerifySettingsTask
         _receivedPath = Path.Combine(dir, $"{name}.received.txt");
         _verifiedPath = Path.Combine(dir, $"{name}.verified.txt");
 
-        var serialized = _value as string ?? JsonSerializer.Serialize(_value, new JsonSerializerOptions
+        string serialized;
+        if (_value is string str)
         {
-            WriteIndented = true
-        });
+            serialized = str;
+        }
+        else if (_value is string[] stringArray)
+        {
+            // For string arrays (like generated source files), join them with clear separators
+            // instead of JSON serializing which would escape all the newlines
+            serialized = string.Join("\n\n// ===== FILE SEPARATOR =====\n\n", stringArray);
+        }
+        else
+        {
+            serialized = JsonSerializer.Serialize(_value, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+        }
         var sb = new StringBuilder(serialized);
         foreach (var scrubber in _scrubbers)
         {
