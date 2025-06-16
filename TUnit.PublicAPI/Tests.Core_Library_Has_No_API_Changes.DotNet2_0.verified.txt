@@ -891,10 +891,14 @@ namespace TUnit.Core
     public class TestBuilderContext : System.IEquatable<TUnit.Core.TestBuilderContext>
     {
         public TestBuilderContext() { }
+        public TUnit.Core.SourceGeneratedClassInformation? ClassInformation { get; init; }
         public System.Collections.Generic.List<TUnit.Core.IDataAttribute> DataAttributes { get; }
         public TUnit.Core.TestContextEvents Events { get; }
         public System.Guid Id { get; }
+        public TUnit.Core.SourceGeneratedMethodInformation? MethodInformation { get; init; }
         public System.Collections.Generic.Dictionary<string, object?> ObjectBag { get; }
+        public string? TestMethodName { get; init; }
+        public static TUnit.Core.TestBuilderContext? Current { get; }
         public void RegisterForInitialization(object? obj) { }
     }
     public class TestBuilderContextAccessor
