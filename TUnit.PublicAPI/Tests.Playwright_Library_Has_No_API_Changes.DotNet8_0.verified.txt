@@ -1,0 +1,85 @@
+[assembly: .(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
+namespace 
+{
+    public class BrowserTest : .PlaywrightTest
+    {
+        public BrowserTest() { }
+        public BrowserTest(.BrowserTypeLaunchOptions options) { }
+        public .IBrowser Browser { get; }
+        [.Before(., "", 0)]
+        public . BrowserSetup() { }
+        [.After(., "", 0)]
+        public . BrowserTearDown(.TestContext testContext) { }
+        public .<.IBrowserContext> NewContext(.BrowserNewContextOptions options) { }
+    }
+    public class ContextTest : .BrowserTest
+    {
+        public ContextTest() { }
+        public .IBrowserContext Context { get; }
+        public virtual .BrowserNewContextOptions ContextOptions(.TestContext testContext) { }
+        [.Before(., "", 0)]
+        public . ContextSetup(.TestContext testContext) { }
+    }
+    public sealed class DefaultPlaywrightParallelLimiter : .
+    {
+        public DefaultPlaywrightParallelLimiter() { }
+        public int Limit { get; }
+    }
+    public interface IWorkerService
+    {
+        . DisposeAsync();
+        . ResetAsync();
+    }
+    public class PageTest : .ContextTest
+    {
+        public PageTest() { }
+        public .IPage Page { get; }
+        [.Before(., "", 0)]
+        public . PageSetup() { }
+    }
+    public class PlaywrightSkipAttribute : .SkipAttribute
+    {
+        public PlaywrightSkipAttribute(params .[] combinations) { }
+        public .TestContext? TestContext { get; set; }
+        public override .<bool> ShouldSkip(.BeforeTestContext context) { }
+        []
+        public enum Targets : short
+        {
+            Windows = 1,
+            Linux = 2,
+            OSX = 4,
+            Chromium = 8,
+            Firefox = 16,
+            Webkit = 32,
+        }
+    }
+    public class PlaywrightTest : .WorkerAwareTest
+    {
+        public PlaywrightTest() { }
+        public virtual string BrowserName { get; }
+        public .IBrowserType BrowserType { get; }
+        public static .IPlaywright Playwright { get; }
+        public .IAPIResponseAssertions Expect(.IAPIResponse response) { }
+        public .ILocatorAssertions Expect(.ILocator locator) { }
+        public .IPageAssertions Expect(.IPage page) { }
+        [.After(., "", 0)]
+        public static void PlaywrightCleanup() { }
+        [.Before(., "", 0)]
+        public static . PlaywrightSetup() { }
+        public static void SetDefaultExpectTimeout(float timeout) { }
+    }
+    public class WorkerAwareTest : ., .
+    {
+        public WorkerAwareTest() { }
+        public virtual bool UseDefaultParallelLimiter { get; }
+        public int WorkerIndex { get; }
+        public . OnTestRegistered(.TestRegisteredContext context) { }
+        public .<T> RegisterService<T>(string name, <.<T>> factory)
+            where T :  class, .IWorkerService { }
+        protected bool TestOk(.TestContext testContext) { }
+        [.Before(., "", 0)]
+        public void WorkerSetup() { }
+        [.After(., "", 0)]
+        public . WorkerTeardown(.TestContext testContext) { }
+    }
+}
