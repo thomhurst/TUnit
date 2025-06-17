@@ -26,7 +26,8 @@ public static class TestContextExtensions
     {
         // TODO: Rework to use DynamicTestRegistrar
         
-        var testMetadata = testContext.OriginalMetadata;
+        var originalData = testContext.OriginalConstructionData 
+            ?? throw new InvalidOperationException("Cannot reregister test without original construction data");
 
         var testBuilderContext = new TestBuilderContext
         {
@@ -40,34 +41,42 @@ public static class TestContextExtensions
             testBuilderContext.ObjectBag.Add(key, value);
         }
         
-        foreach (var dataAttribute in testContext.OriginalMetadata.TestBuilderContext.DataAttributes)
+        foreach (var dataAttribute in originalData.TestBuilderContext.DataAttributes)
         {
             testBuilderContext.DataAttributes.Add(dataAttribute);
         }
         
-        var newTestMetaData = testMetadata.CloneWithNewMethodFactory(async (@class, token) =>
-                {
-                    var hasTimeout = testContext.TestDetails.Timeout != null;
-
-                    var args = GetArgs(methodArguments, hasTimeout, token);
-
-                    try
-                    {
-                        await AsyncConvert.ConvertObject(testMetadata.TestMethod.ReflectionInformation.Invoke(@class, args));
-                    }
-                    catch (TargetInvocationException e)
-                    {
-                        ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
-                    }
-                }
-            ) with
+        var newTestData = new TestConstructionData
+        {
+            TestId = Guid.NewGuid().ToString(),
+            TestMethod = originalData.TestMethod,
+            RepeatCount = originalData.RepeatCount,
+            CurrentRepeatAttempt = originalData.CurrentRepeatAttempt,
+            TestFilePath = originalData.TestFilePath,
+            TestLineNumber = originalData.TestLineNumber,
+            TestClassFactory = originalData.TestClassFactory,
+            TestMethodInvoker = async (@class, token) =>
             {
-                TestId = Guid.NewGuid().ToString(),
-                TestMethodArguments = methodArguments ?? [],
-                TestBuilderContext = testBuilderContext
-            };
+                var hasTimeout = testContext.TestDetails.Timeout != null;
+
+                var args = GetArgs(methodArguments, hasTimeout, token);
+
+                try
+                {
+                    await AsyncConvert.ConvertObject(originalData.TestMethod.ReflectionInformation.Invoke(@class, args));
+                }
+                catch (TargetInvocationException e)
+                {
+                    ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
+                }
+            },
+            ClassArgumentsProvider = originalData.ClassArgumentsProvider,
+            MethodArgumentsProvider = () => methodArguments ?? [],
+            PropertiesProvider = originalData.PropertiesProvider,
+            TestBuilderContext = testBuilderContext
+        };
         
-        var newTest = testContext.GetService<UnifiedTestBuilder>().BuildTest(newTestMetaData);
+        var newTest = testContext.GetService<UnifiedTestBuilder>().BuildTest(newTestData);
         
         var startTime = DateTimeOffset.UtcNow;
 

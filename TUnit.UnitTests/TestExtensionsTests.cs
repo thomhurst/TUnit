@@ -98,18 +98,20 @@ public class TestExtensionsTests
         };
 
         return _fixture.Build<TestContext>()
-            .FromFactory(() => new TestContext(null!, testDetails, CreateDummyMetadata(testDetails), classContext))
+            .FromFactory(() => new TestContext(null!, testDetails, CreateDummyConstructionData(testDetails), classContext))
             .OmitAutoProperties()
             .Create();
     }
 
-    private TestMetadata<T> CreateDummyMetadata<T>(TestDetails<T> testDetails) where T : class
+    private TestConstructionData CreateDummyConstructionData<T>(TestDetails<T> testDetails) where T : class
     {
-        return _fixture.Build<TestMetadata<T>>()
+        return _fixture.Build<TestConstructionData>()
             .OmitAutoProperties()
             .With(x => x.TestBuilderContext, new TestBuilderContext())
-            .With(x => x.DynamicAttributes, [])
             .With(x => x.TestMethod, testDetails.TestMethod)
+            .With(x => x.ClassArgumentsProvider, () => Array.Empty<object?>())
+            .With(x => x.MethodArgumentsProvider, () => Array.Empty<object?>())
+            .With(x => x.PropertiesProvider, () => new Dictionary<string, object?>())
             .Create();
     }
 

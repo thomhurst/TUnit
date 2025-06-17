@@ -16,10 +16,10 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
     {
         var discoveredTests = new List<DiscoveredTest>();
         
-        // Process test metadata
-        await foreach (var testMetadata in testsCollector.GetTestsAsync())
+        // Process test construction data
+        await foreach (var testConstructionData in testsCollector.GetTestsAsync())
         {
-            discoveredTests.Add(_unifiedBuilder.BuildTest(testMetadata));
+            discoveredTests.Add(_unifiedBuilder.BuildTest(testConstructionData));
         }
         
         // Process dynamic tests

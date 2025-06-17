@@ -72,4 +72,27 @@ public record TestConstructionData<[DynamicallyAccessedMembers(DynamicallyAccess
     /// Exception that occurred during test discovery, if any.
     /// </summary>
     public Exception? DiscoveryException { get; init; }
+    
+    /// <summary>
+    /// Converts this generic TestConstructionData to the base non-generic version.
+    /// </summary>
+    public static implicit operator TestConstructionData(TestConstructionData<TTestClass> data)
+    {
+        return new TestConstructionData
+        {
+            TestId = data.TestId,
+            TestMethod = data.TestMethod,
+            RepeatCount = data.RepeatCount,
+            CurrentRepeatAttempt = data.CurrentRepeatAttempt,
+            TestFilePath = data.TestFilePath,
+            TestLineNumber = data.TestLineNumber,
+            TestClassFactory = () => data.TestClassFactory(),
+            TestMethodInvoker = (obj, ct) => data.TestMethodInvoker((TTestClass)obj, ct),
+            ClassArgumentsProvider = data.ClassArgumentsProvider,
+            MethodArgumentsProvider = data.MethodArgumentsProvider,
+            PropertiesProvider = data.PropertiesProvider,
+            TestBuilderContext = data.TestBuilderContext,
+            DiscoveryException = data.DiscoveryException
+        };
+    }
 }

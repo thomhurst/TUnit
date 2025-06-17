@@ -27,7 +27,7 @@ public abstract record DynamicTest
 
     public Dictionary<string, object?>? Properties { get; init; }
 
-    public abstract IEnumerable<TestMetadata> BuildTestMetadatas();
+    public abstract IEnumerable<TestConstructionData> BuildTestConstructionData();
 
     internal string TestFilePath { get; init; } = string.Empty;
     internal int TestLineNumber { get; init; } = 0;
@@ -141,7 +141,7 @@ public record DynamicTest<
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType { get; } = typeof(TClass);
 
-    public override IEnumerable<TestMetadata> BuildTestMetadatas()
+    public override IEnumerable<TestConstructionData> BuildTestConstructionData()
     {
         var attributes = GetAttributes();
 
@@ -155,20 +155,18 @@ public record DynamicTest<
 
             var testMethodInformation = BuildTestMethod(TestBody);
 
-            yield return new TestMetadata<TClass>
+            yield return new TestConstructionData<TClass>
             {
                 TestId = $"{TestId}-{i}",
-                TestClassArguments = TestClassArguments ?? [],
-                TestMethodArguments = TestMethodArguments,
-                CurrentRepeatAttempt = i,
-                RepeatLimit = repeatLimit,
                 TestMethod = testMethodInformation,
-                ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
-                        testMethodInformation,
-                        TestClassArguments, Properties, testBuilderContext),
-                    TestSessionContext.Current?.Id ?? "Unknown",
-                    testBuilderContext),
-                TestMethodFactory = (@class, token) =>
+                RepeatCount = repeatLimit + 1,
+                CurrentRepeatAttempt = i,
+                TestFilePath = TestFilePath,
+                TestLineNumber = TestLineNumber,
+                TestClassFactory = () => (TClass)InstanceHelper.CreateInstance(
+                    testMethodInformation,
+                    TestClassArguments, Properties, testBuilderContext),
+                TestMethodInvoker = (@class, token) =>
                 {
                     var arguments = TestMethodArguments;
 
@@ -179,11 +177,10 @@ public record DynamicTest<
 
                     return AsyncConvert.ConvertObject(TestBody.Invoke(@class, arguments));
                 },
-                TestClassProperties = Properties ?? [],
+                ClassArgumentsProvider = () => TestClassArguments ?? [],
+                MethodArgumentsProvider = () => TestMethodArguments,
+                PropertiesProvider = () => Properties ?? new Dictionary<string, object?>(),
                 TestBuilderContext = testBuilderContext,
-                TestFilePath = TestFilePath,
-                TestLineNumber = TestLineNumber,
-                DynamicAttributes = Attributes,
                 DiscoveryException = Exception
             };
         }

@@ -47,23 +47,42 @@ public record UntypedDynamicTest : DynamicTest
         set;
     } = new();
 
-    public override IEnumerable<TestMetadata> BuildTestMetadatas()
+    public override IEnumerable<TestConstructionData> BuildTestConstructionData()
     {
-        yield return new UntypedTestMetadata(TestClassType)
+        var repeatLimit = Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
+        var testMethod = BuildTestMethod(TestBody);
+        
+        for (var i = 0; i <= repeatLimit; i++)
         {
-            TestId = TestId,
-            TestMethod = BuildTestMethod(TestBody),
-            CurrentRepeatAttempt = 0,
-            RepeatLimit = Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0,
-            TestBuilderContext = TestBuilderContext,
-            TestClassArguments = TestClassArguments ?? [],
-            TestClassProperties = Properties ?? [],
-            TestFilePath = TestFilePath,
-            TestLineNumber = TestLineNumber,
-            TestMethodArguments = TestMethodArguments,
-            DynamicAttributes = Attributes,
-            DiscoveryException = Exception
-        };
+            yield return new TestConstructionData
+            {
+                TestId = $"{TestId}-{i}",
+                TestMethod = testMethod,
+                RepeatCount = repeatLimit + 1,
+                CurrentRepeatAttempt = i,
+                TestFilePath = TestFilePath,
+                TestLineNumber = TestLineNumber,
+                TestClassFactory = () => InstanceHelper.CreateInstance(
+                    testMethod,
+                    TestClassArguments, Properties, TestBuilderContext),
+                TestMethodInvoker = async (instance, token) =>
+                {
+                    var arguments = TestMethodArguments;
+                    
+                    if (TestBody.GetParameters().LastOrDefault()?.ParameterType == typeof(CancellationToken))
+                    {
+                        arguments = TestMethodArguments.Append(token).ToArray();
+                    }
+                    
+                    await AsyncConvert.ConvertObject(TestBody.Invoke(instance, arguments));
+                },
+                ClassArgumentsProvider = () => TestClassArguments ?? [],
+                MethodArgumentsProvider = () => TestMethodArguments,
+                PropertiesProvider = () => Properties ?? new Dictionary<string, object?>(),
+                TestBuilderContext = TestBuilderContext,
+                DiscoveryException = Exception
+            };
+        }
     }
 
     private static string GetTestId(MethodInfo testBody)

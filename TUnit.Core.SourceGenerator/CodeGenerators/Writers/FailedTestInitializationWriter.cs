@@ -10,16 +10,22 @@ public static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
         
-        sourceBuilder.Write($"nodes.Add(");
-        sourceBuilder.Write($"new FailedTestMetadata<{testSourceDataModel.TestClass.GloballyQualified()}>");
+        sourceBuilder.Write($"nodes.Add(new TestConstructionData<{testSourceDataModel.TestClass.GloballyQualified()}>");
         sourceBuilder.Write("{");
         sourceBuilder.Write($"TestId = $\"{testId}\",");
-        sourceBuilder.Write($"MethodName = \"{testSourceDataModel.MethodName}\",");
-        sourceBuilder.Write($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
+        sourceBuilder.Write($"TestMethod = TestMethod.Failure<{testSourceDataModel.TestClass.GloballyQualified()}>(\"{testSourceDataModel.MethodName}\"),");
+        sourceBuilder.Write($"RepeatCount = 0,");
+        sourceBuilder.Write($"CurrentRepeatAttempt = 0,");
         sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        sourceBuilder.Write("}");
-        sourceBuilder.Write(");");
+        sourceBuilder.Write($"TestClassFactory = () => throw new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
+        sourceBuilder.Write($"TestMethodInvoker = (_, _) => throw new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
+        sourceBuilder.Write($"ClassArgumentsProvider = () => System.Array.Empty<object?>(),");
+        sourceBuilder.Write($"MethodArgumentsProvider = () => System.Array.Empty<object?>(),");
+        sourceBuilder.Write($"PropertiesProvider = () => new global::System.Collections.Generic.Dictionary<string, object?>(),");
+        sourceBuilder.Write($"TestBuilderContext = new TestBuilderContext(),");
+        sourceBuilder.Write($"DiscoveryException = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception)");
+        sourceBuilder.Write("});");
     }
     
     public static void GenerateFailedTestCode(SourceCodeWriter sourceBuilder,

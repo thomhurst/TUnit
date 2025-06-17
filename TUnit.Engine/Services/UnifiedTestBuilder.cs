@@ -13,48 +13,13 @@ internal class UnifiedTestBuilder(
     ContextManager contextManager,
     IServiceProvider serviceProvider)
 {
-    /// <summary>
-    /// Builds a discovered test from TestMetadata.
-    /// </summary>
-    public DiscoveredTest BuildTest(TestMetadata metadata)
-    {
-        // Build test details using existing TestMetadata behavior
-        var testDetails = metadata.BuildTestDetails();
-        
-        // Get class hook context
-        var classHookContext = contextManager.GetClassHookContext(metadata.TestClassType);
-        
-        // Create test context
-        var testContext = new TestContext(
-            serviceProvider,
-            testDetails,
-            metadata,
-            classHookContext
-        );
-        
-        // Handle discovery exceptions
-        if (metadata.DiscoveryException is not null)
-        {
-            testContext.SetResult(metadata.DiscoveryException);
-        }
-        
-        // Run discovery hooks
-        RunTestDiscoveryHooks(testDetails, testContext);
-        
-        // Build discovered test using existing TestMetadata behavior
-        var discoveredTest = metadata.BuildDiscoveredTest(testContext);
-        
-        testContext.InternalDiscoveredTest = discoveredTest;
-        
-        return discoveredTest;
-    }
     
     /// <summary>
     /// Builds multiple tests from dynamic test data.
     /// </summary>
     public IEnumerable<DiscoveredTest> BuildTests(DynamicTest dynamicTest)
     {
-        return dynamicTest.BuildTestMetadatas()
+        return dynamicTest.BuildTestConstructionData()
             .Select(BuildTest);
     }
     
@@ -106,28 +71,11 @@ internal class UnifiedTestBuilder(
         var classType = data.TestMethod.Class.Type;
         var classHookContext = contextManager.GetClassHookContext(classType);
         
-        // Create test context using TestConstructionData - convert generic to base
-        var baseData = new TestConstructionData
-        {
-            TestId = data.TestId,
-            TestMethod = data.TestMethod,
-            RepeatCount = data.RepeatCount,
-            CurrentRepeatAttempt = data.CurrentRepeatAttempt,
-            TestFilePath = data.TestFilePath,
-            TestLineNumber = data.TestLineNumber,
-            TestClassFactory = () => data.TestClassFactory(),
-            TestMethodInvoker = async (obj, ct) => await data.TestMethodInvoker((TTestClass)obj, ct),
-            ClassArgumentsProvider = data.ClassArgumentsProvider,
-            MethodArgumentsProvider = data.MethodArgumentsProvider,
-            PropertiesProvider = data.PropertiesProvider,
-            TestBuilderContext = data.TestBuilderContext,
-            DiscoveryException = data.DiscoveryException
-        };
-        
+        // Create test context using TestConstructionData - implicit conversion handles the conversion
         var testContext = new TestContext(
             serviceProvider,
             testDetails,
-            baseData,
+            data,
             classHookContext
         );
         

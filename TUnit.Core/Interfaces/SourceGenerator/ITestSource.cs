@@ -2,5 +2,5 @@
 
 public interface ITestSource
 {
-    Task<IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId);
+    Task<IReadOnlyList<TestConstructionData>> CollectTestsAsync(string sessionId);
 }

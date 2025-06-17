@@ -21,7 +21,6 @@ public partial class TestContext : Context
     internal readonly List<Artifact> Artifacts = [];
     internal readonly List<CancellationToken> LinkedCancellationTokens = [];
     internal readonly TestConstructionData? OriginalConstructionData;
-    internal readonly TestMetadata? OriginalMetadata; // Keep for backward compatibility during migration
 
 #if NET9_0_OR_GREATER
     /// <summary>
@@ -39,23 +38,6 @@ public partial class TestContext : Context
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestContext"/> class.
-    /// </summary>
-    /// <param name="serviceProvider">The service provider.</param>
-    /// <param name="testDetails">The test details.</param>
-    /// <param name="originalMetadata">The original metadata.</param>
-    /// <param name="classHookContext"></param>
-    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestMetadata originalMetadata, ClassHookContext classHookContext) : base(classHookContext)
-    {
-        _serviceProvider = serviceProvider;
-        OriginalMetadata = originalMetadata;
-        TestDetails = testDetails;
-        ObjectBag = originalMetadata.TestBuilderContext.ObjectBag;
-        Events = originalMetadata.TestBuilderContext.Events;
-        classHookContext.AddTest(this);
-    }
-    
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TestContext"/> class using TestConstructionData.
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="testDetails">The test details.</param>

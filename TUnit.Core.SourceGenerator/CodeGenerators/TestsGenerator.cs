@@ -132,7 +132,7 @@ public class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine();
 
                 sourceBuilder.Write(
-                    "public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)");
+                    "public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestConstructionData>> CollectTestsAsync(string sessionId)");
                 sourceBuilder.Write("{");
                 if (count == 1)
                 {
@@ -140,7 +140,7 @@ public class TestsGenerator : IIncrementalGenerator
                 }
                 else
                 {
-                    sourceBuilder.Write("var results = new global::System.Collections.Generic.List<TestMetadata>();");
+                    sourceBuilder.Write("var results = new global::System.Collections.Generic.List<TestConstructionData>();");
                     for (var i = 0; i < count; i++)
                     {
                         sourceBuilder.Write($"results.AddRange(await Tests{i}(sessionId));");
@@ -155,10 +155,10 @@ public class TestsGenerator : IIncrementalGenerator
                 foreach (var model in classGrouping)
                 {
                     sourceBuilder.Write(
-                        $"private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests{index++}(string sessionId)");
+                        $"private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestConstructionData>> Tests{index++}(string sessionId)");
                     sourceBuilder.Write("{");
                     sourceBuilder.Write(
-                        "global::System.Collections.Generic.List<TestMetadata> nodes = [];");
+                        "global::System.Collections.Generic.List<TestConstructionData> nodes = [];");
                     sourceBuilder.Write($"var {VariableNames.ClassDataIndex} = 0;");
                     sourceBuilder.Write($"var {VariableNames.TestMethodDataIndex} = 0;");
 
