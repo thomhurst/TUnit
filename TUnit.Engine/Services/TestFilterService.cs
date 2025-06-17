@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Extensions;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;

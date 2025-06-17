@@ -61,23 +61,22 @@ internal class UnifiedTestBuilder(
         );
         
         // Build test details
-        var testDetails = new TestDetails<TTestClass>
-        {
-            TestId = definition.TestId,
-            LazyClassInstance = resettableLazy,
-            TestClassArguments = definition.ClassArgumentsProvider(),
-            TestMethodArguments = definition.MethodArgumentsProvider(),
-            TestClassInjectedPropertyArguments = definition.PropertiesProvider(),
-            CurrentRepeatAttempt = currentRepeatAttempt, // Now passed in, not from definition
-            RepeatLimit = definition.RepeatCount,
-            TestMethod = definition.TestMethod,
-            TestName = definition.TestMethod.Name,
-            ReturnType = definition.TestMethod.ReturnType,
-            TestFilePath = definition.TestFilePath,
-            TestLineNumber = definition.TestLineNumber,
-            DynamicAttributes = [],
-            DataAttributes = definition.TestMethod.Attributes.OfType<Attribute>().ToArray()
-        };
+        var testDetails = TestDetails<TTestClass>.CreateWithRawAttributes(
+            testId: definition.TestId,
+            lazyClassInstance: resettableLazy,
+            testClassArguments: definition.ClassArgumentsProvider(),
+            testMethodArguments: definition.MethodArgumentsProvider(),
+            testClassInjectedPropertyArguments: definition.PropertiesProvider(),
+            currentRepeatAttempt: currentRepeatAttempt, // Now passed in, not from definition
+            repeatLimit: definition.RepeatCount,
+            testMethod: definition.TestMethod,
+            testName: definition.TestMethod.Name,
+            returnType: definition.TestMethod.ReturnType,
+            testFilePath: definition.TestFilePath,
+            testLineNumber: definition.TestLineNumber,
+            dynamicAttributes: [],
+            dataAttributes: definition.TestMethod.Attributes.OfType<Attribute>().ToArray()
+        );
         
         // Get class hook context
         var classType = definition.TestMethod.Class.Type;
@@ -124,21 +123,21 @@ internal class UnifiedTestBuilder(
         );
         
         // Build test details
-        var testDetails = new UntypedTestDetails(resettableLazy)
-        {
-            TestId = definition.TestId,
-            TestName = definition.TestMethod.Name,
-            TestMethod = definition.TestMethod,
-            TestFilePath = definition.TestFilePath,
-            TestLineNumber = definition.TestLineNumber,
-            TestClassArguments = definition.ClassArgumentsProvider(),
-            TestMethodArguments = definition.MethodArgumentsProvider(),
-            TestClassInjectedPropertyArguments = definition.PropertiesProvider(),
-            RepeatLimit = definition.RepeatCount,
-            CurrentRepeatAttempt = currentRepeatAttempt, // Now passed in
-            ReturnType = definition.TestMethod.ReturnType,
-            DataAttributes = definition.TestMethod.Attributes.OfType<Attribute>().ToArray()
-        };
+        var testDetails = UntypedTestDetails.CreateWithRawAttributes(
+            resettableLazy: resettableLazy,
+            testId: definition.TestId,
+            testName: definition.TestMethod.Name,
+            testMethod: definition.TestMethod,
+            testFilePath: definition.TestFilePath,
+            testLineNumber: definition.TestLineNumber,
+            testClassArguments: definition.ClassArgumentsProvider(),
+            testMethodArguments: definition.MethodArgumentsProvider(),
+            testClassInjectedPropertyArguments: definition.PropertiesProvider(),
+            repeatLimit: definition.RepeatCount,
+            currentRepeatAttempt: currentRepeatAttempt, // Now passed in
+            returnType: definition.TestMethod.ReturnType,
+            dataAttributes: definition.TestMethod.Attributes.OfType<Attribute>().ToArray()
+        );
         
         // Get class hook context
         var classType = definition.TestMethod.Class.Type;
@@ -177,8 +176,8 @@ internal class UnifiedTestBuilder(
     
     private static void RunTestDiscoveryHooks(TestDetails testDetails, TestContext testContext)
     {
-        var attributes = testDetails.DataAttributes
-            .Concat(testDetails.Attributes)
+        var attributes = testDetails.DataAttributes.Select(ta => ta.Instance)
+            .Concat(testDetails.Attributes.Select(ta => ta.Instance))
             .Distinct();
         
         DiscoveredTestContext? discoveredTestContext = null;

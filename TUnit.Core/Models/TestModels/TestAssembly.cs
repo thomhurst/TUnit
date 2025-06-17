@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
@@ -38,4 +39,10 @@ public record TestAssembly
     public required string Name { get; init; }
 
     public required Attribute[] Attributes { get; init; }
+
+    [field: AllowNull, MaybeNull] 
+    public TestAttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+        Attributes,
+        TestAttributeTarget.Assembly,
+        Name);
 }

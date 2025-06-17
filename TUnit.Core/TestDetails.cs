@@ -124,32 +124,130 @@ public abstract record TestDetails
     /// <summary>
     /// Gets the attributes for the test assembly.
     /// </summary>
-    [JsonIgnore] public Attribute[] AssemblyAttributes => TestClass.Assembly.Attributes;
+    [JsonIgnore] 
+    [field: AllowNull, MaybeNull]
+    public TestAttributeMetadata[] AssemblyAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+        TestClass.Assembly.Attributes, 
+        TestAttributeTarget.Assembly, 
+        TestClass.Assembly.Name);
 
     /// <summary>
     /// Gets the attributes for the test class.
     /// </summary>
-    [JsonIgnore] public Attribute[] ClassAttributes => TestClass.Attributes;
+    [JsonIgnore] 
+    [field: AllowNull, MaybeNull]
+    public TestAttributeMetadata[] ClassAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+        TestClass.Attributes, 
+        TestAttributeTarget.Class, 
+        TestClass.Name, 
+        TestClass.Type);
 
     /// <summary>
     /// Gets the attributes for the test method.
     /// </summary>
-    [JsonIgnore] public Attribute[] TestAttributes => TestMethod.Attributes;
+    [JsonIgnore] 
+    [field: AllowNull, MaybeNull]
+    public TestAttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+        TestMethod.Attributes, 
+        TestAttributeTarget.Method, 
+        TestMethod.Name, 
+        TestMethod.Type);
 
     /// <summary>
-    /// Gets the attributes for the test.
+    /// Gets all the attributes for the test (including dynamic, method, class, assembly, and data attributes).
     /// </summary>
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
-    public Attribute[] Attributes => field ??= [..DynamicAttributes, ..TestAttributes, ..ClassAttributes, ..AssemblyAttributes, ..DataAttributes];
+    public TestAttributeMetadata[] Attributes => field ??= [
+        ..DynamicAttributes, 
+        ..TestAttributes, 
+        ..ClassAttributes, 
+        ..AssemblyAttributes, 
+        ..DataAttributes
+    ];
 
-    [JsonIgnore] public Attribute[] DynamicAttributes { get; init; } = [];
+    [JsonIgnore] 
+    [field: AllowNull, MaybeNull]
+    public TestAttributeMetadata[] DynamicAttributes 
+    { 
+        get => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+            _rawDynamicAttributes, 
+            TestAttributeTarget.Method, 
+            TestMethod.Name, 
+            TestMethod.Type);
+        init
+        {
+            field = value;
+            _rawDynamicAttributes = value?.Select(ta => ta.Instance).ToArray() ?? [];
+        }
+    }
+    
+    internal Attribute[] _rawDynamicAttributes = [];
     
     /// <summary>
     /// Gets the attributes that specify the test data.
     /// </summary>
     [JsonIgnore]
-    public required Attribute[] DataAttributes { get; init; }
+    [field: AllowNull, MaybeNull]
+    public required TestAttributeMetadata[] DataAttributes 
+    { 
+        get => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+            _rawDataAttributes, 
+            TestAttributeTarget.Method, 
+            TestMethod.Name, 
+            TestMethod.Type);
+        init
+        {
+            field = value;
+            _rawDataAttributes = value?.Select(ta => ta.Instance).ToArray() ?? [];
+        }
+    }
+    
+    internal Attribute[] _rawDataAttributes = [];
+    
+    /// <summary>
+    /// Helper method to create TestDetails with raw Attribute arrays (for backward compatibility)
+    /// </summary>
+    public static TestDetails<TClassType> CreateWithRawAttributes<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TClassType>(
+        string testId,
+        ResettableLazy<TClassType> lazyClassInstance,
+        object?[] testClassArguments,
+        object?[] testMethodArguments,
+        IDictionary<string, object?> testClassInjectedPropertyArguments,
+        int currentRepeatAttempt,
+        int repeatLimit,
+        TestMethod testMethod,
+        string testName,
+        Type returnType,
+        string testFilePath,
+        int testLineNumber,
+        Attribute[] dynamicAttributes,
+        Attribute[] dataAttributes) where TClassType : class
+    {
+        var details = new TestDetails<TClassType>
+        {
+            TestId = testId,
+            LazyClassInstance = lazyClassInstance,
+            TestClassArguments = testClassArguments,
+            TestMethodArguments = testMethodArguments,
+            TestClassInjectedPropertyArguments = testClassInjectedPropertyArguments,
+            CurrentRepeatAttempt = currentRepeatAttempt,
+            RepeatLimit = repeatLimit,
+            TestMethod = testMethod,
+            TestName = testName,
+            ReturnType = returnType,
+            TestFilePath = testFilePath,
+            TestLineNumber = testLineNumber,
+            DynamicAttributes = [], // Will be set below
+            DataAttributes = [] // Will be set below
+        };
+        
+        // Set the raw attributes which will be converted to TestAttributeMetadata on access
+        details._rawDynamicAttributes = dynamicAttributes;
+        details._rawDataAttributes = dataAttributes;
+        
+        return details;
+    }
     
     [JsonIgnore]
     internal Func<TestContext, Exception, int, Task<bool>>? RetryLogic { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Extensions;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;

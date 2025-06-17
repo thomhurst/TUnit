@@ -18,6 +18,24 @@ public abstract record TestMember
 
     public required Attribute[] Attributes { get; init; }
 
+    [field: AllowNull, MaybeNull]
+    public TestAttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+        Attributes,
+        DetermineTargetElement(),
+        Name,
+        Type);
+
+    protected virtual TestAttributeTarget DetermineTargetElement()
+    {
+        return this switch
+        {
+            TestMethod => TestAttributeTarget.Method,
+            TestClass => TestAttributeTarget.Class,
+            TestProperty => TestAttributeTarget.Property,
+            _ => TestAttributeTarget.Class
+        };
+    }
+
     protected virtual bool PrintMembers(StringBuilder stringBuilder)
     {
         stringBuilder.Append($"Type = {Type.Name}, ");

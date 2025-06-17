@@ -128,7 +128,7 @@ public static class TestContextExtensions
     {
         IEnumerable<object?> disposableObjects =
         [
-            ..context.TestDetails.Attributes,
+            ..context.TestDetails.Attributes.Select(ta => ta.Instance),
             context.InternalDiscoveredTest.ClassConstructor,
             context.TestDetails.ClassInstance,
             ..GetEvents(context, EventType.Dispose),
@@ -183,7 +183,7 @@ public static class TestContextExtensions
             .SelectMany(x => x);
 
         // Filter out data generator attributes since they are initialized during test discovery
-        var attributes = CollectAttributes(context.TestDetails.Attributes)
+        var attributes = CollectAttributes(context.TestDetails.Attributes.Select(ta => ta.Instance).ToArray())
             .Where(attr => attr is not IAsyncDataSourceGeneratorAttribute);
 
         IEnumerable<object?> possibleEventObjects =
