@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -169,6 +170,24 @@ public static class SourceInformationWriter
 
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, property.GetAttributes());
+        
+        // Check if we should generate ClassMetadata for this property's type
+        if (ShouldGenerateClassMetadataForPropertyType(context, property))
+        {
+            sourceCodeWriter.Write("ClassMetadata = ");
+            if (property.Type is INamedTypeSymbol propertyTypeSymbol)
+            {
+                GenerateClassInformation(sourceCodeWriter, context, propertyTypeSymbol);
+            }
+            else
+            {
+                sourceCodeWriter.Write("null,");
+            }
+        }
+        else
+        {
+            sourceCodeWriter.Write("ClassMetadata = null,");
+        }
 
         sourceCodeWriter.Write("},");
     }
@@ -178,6 +197,36 @@ public static class SourceInformationWriter
         return property.IsStatic
             ? $"_ => {namedTypeSymbol.GloballyQualified()}.{property.Name}"
             : $"o => (({namedTypeSymbol.GloballyQualified()})o).{property.Name}";
+    }
+    
+    private static bool ShouldGenerateClassMetadataForPropertyType(GeneratorAttributeSyntaxContext context, IPropertySymbol property)
+    {
+        var compilation = context.SemanticModel.Compilation;
+        var dataAttributeType = compilation.GetTypeByMetadataName("TUnit.Core.IDataAttribute");
+        
+        if (dataAttributeType == null)
+        {
+            return false;
+        }
+        
+        // Check if the property type itself implements IDataAttribute
+        if (property.Type is INamedTypeSymbol namedType && 
+            namedType.AllInterfaces.Contains(dataAttributeType, SymbolEqualityComparer.Default))
+        {
+            return true;
+        }
+        
+        // Check if any of the property's attributes implement IDataAttribute
+        foreach (var attribute in property.GetAttributes())
+        {
+            if (attribute.AttributeClass != null &&
+                attribute.AttributeClass.AllInterfaces.Contains(dataAttributeType, SymbolEqualityComparer.Default))
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     public static void GenerateParameterInformation(SourceCodeWriter sourceCodeWriter,

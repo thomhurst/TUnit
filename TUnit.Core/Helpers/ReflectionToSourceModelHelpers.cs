@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using TUnit.Core.Extensions;
 
@@ -91,8 +92,28 @@ internal class ReflectionToSourceModelHelpers
             Type = property.PropertyType,
             IsStatic = property.GetMethod?.IsStatic is true
                 || property.SetMethod?.IsStatic is true,
-            Getter = property.GetValue
+            Getter = property.GetValue,
+            ClassMetadata = ShouldGenerateClassMetadataForType(property.PropertyType, property.GetCustomAttributesSafe().ToArray()) 
+                ? GenerateClass(property.PropertyType) 
+                : null
         });
+    }
+    
+    private static bool ShouldGenerateClassMetadataForType(Type type, Attribute[] propertyAttributes)
+    {
+        // Check if the type itself implements IDataAttribute
+        if (typeof(IDataAttribute).IsAssignableFrom(type))
+        {
+            return true;
+        }
+        
+        // Check if any of the property's attributes implement IDataAttribute
+        if (propertyAttributes.Any(attr => attr is IDataAttribute))
+        {
+            return true;
+        }
+        
+        return false;
     }
 
     public static ParameterMetadata[] GetParameters(ParameterInfo[] parameters)
