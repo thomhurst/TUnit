@@ -69,17 +69,17 @@ internal class UnifiedTestBuilder(
             testClassInjectedPropertyArguments: definition.PropertiesProvider(),
             currentRepeatAttempt: currentRepeatAttempt, // Now passed in, not from definition
             repeatLimit: definition.RepeatCount,
-            testMethod: definition.TestMethod,
-            testName: definition.TestMethod.Name,
-            returnType: definition.TestMethod.ReturnType,
+            testMethod: definition.MethodMetadata,
+            testName: definition.MethodMetadata.Name,
+            returnType: definition.MethodMetadata.ReturnType,
             testFilePath: definition.TestFilePath,
             testLineNumber: definition.TestLineNumber,
             dynamicAttributes: [],
-            dataAttributes: definition.TestMethod.Attributes.OfType<Attribute>().ToArray()
+            dataAttributes: definition.MethodMetadata.Attributes.OfType<Attribute>().ToArray()
         );
         
         // Get class hook context
-        var classType = definition.TestMethod.Class.Type;
+        var classType = definition.MethodMetadata.Class.Type;
         var classHookContext = contextManager.GetClassHookContext(classType);
         
         // Create test execution context for runtime state
@@ -126,8 +126,8 @@ internal class UnifiedTestBuilder(
         var testDetails = UntypedTestDetails.CreateWithRawAttributes(
             resettableLazy: resettableLazy,
             testId: definition.TestId,
-            testName: definition.TestMethod.Name,
-            testMethod: definition.TestMethod,
+            testName: definition.MethodMetadata.Name,
+            testMethod: definition.MethodMetadata,
             testFilePath: definition.TestFilePath,
             testLineNumber: definition.TestLineNumber,
             testClassArguments: definition.ClassArgumentsProvider(),
@@ -135,12 +135,12 @@ internal class UnifiedTestBuilder(
             testClassInjectedPropertyArguments: definition.PropertiesProvider(),
             repeatLimit: definition.RepeatCount,
             currentRepeatAttempt: currentRepeatAttempt, // Now passed in
-            returnType: definition.TestMethod.ReturnType,
-            dataAttributes: definition.TestMethod.Attributes.OfType<Attribute>().ToArray()
+            returnType: definition.MethodMetadata.ReturnType,
+            dataAttributes: definition.MethodMetadata.Attributes.OfType<Attribute>().ToArray()
         );
         
         // Get class hook context
-        var classType = definition.TestMethod.Class.Type;
+        var classType = definition.MethodMetadata.Class.Type;
         var classHookContext = contextManager.GetClassHookContext(classType);
         
         // Create test execution context

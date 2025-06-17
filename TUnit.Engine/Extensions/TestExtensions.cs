@@ -23,13 +23,13 @@ internal static class TestExtensions
                     End = new LinePosition(testDetails.TestLineNumber, 0)
                 }),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.TestClass.Type.Namespace ?? "GlobalNamespace",
-                    AssemblyFullName: testDetails.TestClass.Type.Assembly.FullName ?? "UnknownAssembly",
+                    Namespace: testDetails.ClassMetadata.Type.Namespace ?? "GlobalNamespace",
+                    AssemblyFullName: testDetails.ClassMetadata.Type.Assembly.FullName ?? "UnknownAssembly",
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
                     ReturnTypeFullName: testDetails.ReturnType.FullName!,
-                    MethodArity: testDetails.TestMethod.GenericTypeCount
+                    MethodArity: testDetails.MethodMetadata.GenericTypeCount
                     ),
 
                 // Custom TUnit Properties
@@ -40,7 +40,7 @@ internal static class TestExtensions
                 ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
 
                 // TRX Report Properties
-                new TrxFullyQualifiedTypeNameProperty(testDetails.TestClass.Type.FullName!),
+                new TrxFullyQualifiedTypeNameProperty(testDetails.ClassMetadata.Type.FullName!),
                 new TrxCategoriesProperty([..testDetails.Categories]),
             ])
         };

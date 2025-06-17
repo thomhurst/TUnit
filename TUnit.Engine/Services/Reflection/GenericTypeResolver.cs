@@ -12,8 +12,8 @@ namespace TUnit.Engine.Services.Reflection;
 [UnconditionalSuppressMessage("AOT", "IL3050")]
 internal static class GenericTypeResolver
 {
-    public static TestMethod ResolveGenericMethod(
-        TestMethod methodInfo,
+    public static MethodMetadata ResolveGenericMethod(
+        MethodMetadata methodInfo,
         object?[] arguments)
     {
         if (!methodInfo.ReflectionInformation.IsGenericMethodDefinition)
@@ -34,10 +34,10 @@ internal static class GenericTypeResolver
             methodInfo.Name);
     }
 
-    public static (TestClass ClassInfo, TestMethod MethodInfo) 
+    public static (ClassMetadata ClassInfo, MethodMetadata MethodInfo) 
         ResolveGenericClass(
-            TestClass classInformation,
-            TestMethod testInformation,
+            ClassMetadata classInformation,
+            MethodMetadata testInformation,
             object?[] invokedClassInstanceArguments)
     {
         if (!classInformation.Type.ContainsGenericParameters)
@@ -67,7 +67,7 @@ internal static class GenericTypeResolver
     }
 
     private static Dictionary<Type, Type> BuildTypeParameterMap(
-        TestParameter[] parameters,
+        ParameterMetadata[] parameters,
         Type?[] argumentsTypes)
     {
         var typeParameterMap = new Dictionary<Type, Type>();
@@ -88,7 +88,7 @@ internal static class GenericTypeResolver
 
     private static List<Type> ResolveTypeArguments(
         Type[] typeArguments,
-        TestParameter[] parameters,
+        ParameterMetadata[] parameters,
         Type?[] argumentsTypes,
         Dictionary<Type, Type> typeParameterMap)
     {
@@ -112,7 +112,7 @@ internal static class GenericTypeResolver
 
     private static Type InferTypeFromParameters(
         Type typeArgument,
-        TestParameter[] parameters,
+        ParameterMetadata[] parameters,
         Type?[] argumentsTypes)
     {
         var parameterIndex = FindParameterIndex(typeArgument, parameters);
@@ -135,7 +135,7 @@ internal static class GenericTypeResolver
             $"Cannot infer type for generic parameter '{typeArgument.Name}'. No matching argument found.");
     }
 
-    private static int FindParameterIndex(Type typeArgument, TestParameter[] parameters)
+    private static int FindParameterIndex(Type typeArgument, ParameterMetadata[] parameters)
     {
         for (var i = 0; i < parameters.Length; i++)
         {

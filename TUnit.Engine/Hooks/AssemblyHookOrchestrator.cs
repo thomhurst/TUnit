@@ -20,7 +20,7 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
         var assemblyHookContext = testContext.AssemblyContext;
 
         var assemblyHooksTaskCompletionSource = PreviouslyRunBeforeHooks.GetOrAdd(
-            testContext.TestDetails.TestClass.Type.Assembly, _ => new TaskCompletionSource<bool>(),
+            testContext.TestDetails.ClassMetadata.Type.Assembly, _ => new TaskCompletionSource<bool>(),
             out var assemblyHooksTaskPreviouslyExisted);
         
         if (assemblyHooksTaskPreviouslyExisted)
@@ -34,7 +34,7 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
 
         try
         {
-            var beforeAssemblyHooks = CollectBeforeHooks(testContext.TestDetails.TestClass.Type.Assembly);
+            var beforeAssemblyHooks = CollectBeforeHooks(testContext.TestDetails.ClassMetadata.Type.Assembly);
 
             await testSessionHookOrchestrator.RunBeforeTestSession(testContext.AssemblyContext.TestSessionContext, testContext.CancellationToken);
             

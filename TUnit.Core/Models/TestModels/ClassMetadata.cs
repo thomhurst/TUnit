@@ -5,16 +5,16 @@ using System.Diagnostics.CodeAnalysis;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Type}")]
-public record TestClass : TestMember
+public record ClassMetadata : MemberMetadata
 {
-    private static readonly ConcurrentDictionary<string, TestClass> Cache = [];
+    private static readonly ConcurrentDictionary<string, ClassMetadata> Cache = [];
 
-    public static TestClass GetOrAdd(string name, Func<TestClass> factory)
+    public static ClassMetadata GetOrAdd(string name, Func<ClassMetadata> factory)
     {
         return Cache.GetOrAdd(name, _ => factory());
     }
 
-    public virtual bool Equals(TestClass? other)
+    public virtual bool Equals(ClassMetadata? other)
     {
         return Type == other?.Type;
     }
@@ -32,9 +32,9 @@ public record TestClass : TestMember
     public override required Type Type { get; init; }
 
     public required string? Namespace { get; init;}
-    public required TestAssembly Assembly { get; init; }
-    public required TestParameter[] Parameters { get; init; }
+    public required AssemblyMetadata Assembly { get; init; }
+    public required ParameterMetadata[] Parameters { get; init; }
 
-    public required TestProperty[] Properties { get; init; }
-    public required TestClass? Parent { get; init; }
+    public required PropertyMetadata[] Properties { get; init; }
+    public required ClassMetadata? Parent { get; init; }
 }

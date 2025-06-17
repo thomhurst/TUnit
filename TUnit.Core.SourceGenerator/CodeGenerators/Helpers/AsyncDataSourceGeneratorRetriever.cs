@@ -26,8 +26,8 @@ public static class AsyncDataSourceGeneratorRetriever
             AttributeData: attributeData,
             ArgumentsType: argumentsType,
             ParameterOrPropertyTypes: parameterOrPropertyTypes,
-            TestClass: testClass,
-            TestMethod: testMethod,
+            ClassMetadata: testClass,
+            MethodMetadata: testMethod,
             Property: property,
             Parameters: parameters,
             GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass)?.TypeArguments.Select(x => x.GloballyQualified()).ToArray() ?? []

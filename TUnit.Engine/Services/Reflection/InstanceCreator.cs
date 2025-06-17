@@ -18,9 +18,9 @@ internal static class InstanceCreator
 
     public static async Task<(object? Instance, Exception? Exception)> CreateInstanceAsync(
         IDataAttribute typeDataAttribute,
-        TestClass classInformation,
+        ClassMetadata classInformation,
         object?[] classInstanceArguments,
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         return await CreateInstanceAsync(typeDataAttribute, classInformation, classInstanceArguments, 
@@ -29,9 +29,9 @@ internal static class InstanceCreator
 
     public static async Task<(object? Instance, Exception? Exception)> CreateInstanceAsync(
         IDataAttribute typeDataAttribute,
-        TestClass classInformation,
+        ClassMetadata classInformation,
         object?[] classInstanceArguments,
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor,
         bool skipPropertyInitialization)
     {
@@ -86,9 +86,9 @@ internal static class InstanceCreator
     }
 
     private static async Task<Dictionary<string, object?>> GetPropertyArgumentsAsync(
-        TestClass classInformation,
+        ClassMetadata classInformation,
         object?[] args,
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var propertyArgs = new Dictionary<string, object?>();
@@ -103,11 +103,11 @@ internal static class InstanceCreator
         return propertyArgs;
     }
 
-    public static async IAsyncEnumerable<(TestProperty PropertyInformation, Func<Task<object?[]>> Args)> 
+    public static async IAsyncEnumerable<(PropertyMetadata PropertyInformation, Func<Task<object?[]>> Args)> 
         GetPropertyArgumentsEnumerableAsync(
-            TestClass type,
+            ClassMetadata type,
             object?[] classInstanceArguments,
-            TestMethod testInformation,
+            MethodMetadata testInformation,
             TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var properties = testInformation.Class.Properties;

@@ -13,10 +13,10 @@ public static class FailedTestInitializationWriter
         sourceBuilder.Write($"discoveryFailures.Add(new DiscoveryFailure");
         sourceBuilder.Write("{");
         sourceBuilder.Write($"TestId = $\"{testId}\",");
-        sourceBuilder.Write($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
+        sourceBuilder.Write($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.ClassMetadata.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
         sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        sourceBuilder.Write($"TestClassName = \"{testSourceDataModel.TestClass.Name}\",");
+        sourceBuilder.Write($"TestClassName = \"{testSourceDataModel.ClassMetadata.Name}\",");
         sourceBuilder.Write($"TestMethodName = \"{testSourceDataModel.MethodName}\"");
         sourceBuilder.Write("});");
     }

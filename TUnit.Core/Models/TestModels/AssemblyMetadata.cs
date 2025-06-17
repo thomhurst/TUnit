@@ -5,18 +5,18 @@ using System.Diagnostics.CodeAnalysis;
 namespace TUnit.Core;
 
 [Obsolete]
-public record SourceGeneratedAssemblyInformation : TestAssembly;
+public record SourceGeneratedAssemblyInformation : AssemblyMetadata;
 
 [DebuggerDisplay("{Name})")]
-public record TestAssembly
+public record AssemblyMetadata
 {
-    private static readonly ConcurrentDictionary<string, TestAssembly> Cache = [];
-    public static TestAssembly GetOrAdd(string name, Func<TestAssembly> factory)
+    private static readonly ConcurrentDictionary<string, AssemblyMetadata> Cache = [];
+    public static AssemblyMetadata GetOrAdd(string name, Func<AssemblyMetadata> factory)
     {
         return Cache.GetOrAdd(name, _ => factory());
     }
 
-    public virtual bool Equals(TestAssembly? other)
+    public virtual bool Equals(AssemblyMetadata? other)
     {
         if (other is null)
         {

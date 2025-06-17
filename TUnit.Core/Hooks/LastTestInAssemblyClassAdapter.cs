@@ -8,17 +8,17 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
     public string Name => nameof(lastTestInAssemblyEventReceiver.OnLastTestInAssembly);
 
     [field: AllowNull, MaybeNull]
-    public TestMethod MethodInfo => field ??= new TestMethod
+    public MethodMetadata MethodInfo => field ??= new MethodMetadata
     {
         Type = typeof(ILastTestInAssemblyEventReceiver),
         Attributes = [],
         Name = nameof(lastTestInAssemblyEventReceiver.OnLastTestInAssembly),
-        Parameters = [new TestParameter<AssemblyHookContext>
+        Parameters = [new ParameterMetadata<AssemblyHookContext>
         {
             Attributes = [],
             Name = "context",
             ReflectionInfo = typeof(ILastTestInAssemblyEventReceiver).GetMethod(nameof(ILastTestInAssemblyEventReceiver.OnLastTestInAssembly))!.GetParameters()[0],
-        }, new TestParameter<TestContext>
+        }, new ParameterMetadata<TestContext>
         {
             Attributes = [],
             Name = "testContext",
@@ -26,11 +26,11 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),
-        Class = new TestClass
+        Class = new ClassMetadata
         {
             Parent = null,
             Type = typeof(ILastTestInAssemblyEventReceiver),
-            Assembly = new TestAssembly
+            Assembly = new AssemblyMetadata
             {
                 Name = "TUnit.Core",
                 Attributes = [],

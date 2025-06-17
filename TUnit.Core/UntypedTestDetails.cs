@@ -11,7 +11,7 @@ public record UntypedTestDetails(ResettableLazy<object> ResettableLazy) : TestDe
         ResettableLazy<object> resettableLazy,
         string testId,
         string testName,
-        TestMethod testMethod,
+        MethodMetadata testMethod,
         string testFilePath,
         int testLineNumber,
         object?[] testClassArguments,
@@ -26,7 +26,7 @@ public record UntypedTestDetails(ResettableLazy<object> ResettableLazy) : TestDe
         {
             TestId = testId,
             TestName = testName,
-            TestMethod = testMethod,
+            MethodMetadata = testMethod,
             TestFilePath = testFilePath,
             TestLineNumber = testLineNumber,
             TestClassArguments = testClassArguments,

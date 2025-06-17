@@ -20,7 +20,7 @@ public abstract record TestDefinitionBase : ITestDefinition
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
-    public abstract TestMethod TestMethod { get; init; }
+    public abstract MethodMetadata MethodMetadata { get; init; }
     
     /// <summary>
     /// How many times this test should be repeated.
@@ -51,7 +51,7 @@ public sealed record TestDefinition : TestDefinitionBase
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
-    public override required TestMethod TestMethod { get; init; }
+    public override required MethodMetadata MethodMetadata { get; init; }
     
     /// <summary>
     /// How many times this test should be repeated.
@@ -117,7 +117,7 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
-    public override required TestMethod TestMethod { get; init; }
+    public override required MethodMetadata MethodMetadata { get; init; }
     
     /// <summary>
     /// How many times this test should be repeated.
@@ -172,7 +172,7 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
         return new TestDefinition
         {
             TestId = definition.TestId,
-            TestMethod = definition.TestMethod,
+            MethodMetadata = definition.MethodMetadata,
             RepeatCount = definition.RepeatCount,
             TestFilePath = definition.TestFilePath,
             TestLineNumber = definition.TestLineNumber,
@@ -209,7 +209,7 @@ public interface ITestDefinition
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
-    TestMethod TestMethod { get; }
+    MethodMetadata MethodMetadata { get; }
     
     /// <summary>
     /// How many times this test should be repeated.

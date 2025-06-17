@@ -5,7 +5,7 @@ namespace TUnit.Core;
 
 [RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
-public record UntypedFailedDynamicTest(MethodInfo TestMethod)
+public record UntypedFailedDynamicTest(MethodInfo MethodMetadata)
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
@@ -19,7 +19,7 @@ public record UntypedFailedDynamicTest(MethodInfo TestMethod)
 
     public static implicit operator DynamicTest(UntypedFailedDynamicTest failedTestMetadata)
     {
-        return new UntypedDynamicTest(failedTestMetadata.TestMethod)
+        return new UntypedDynamicTest(failedTestMetadata.MethodMetadata)
         {
             TestClassArguments = [],
             Properties = [],

@@ -31,9 +31,9 @@ public static class TestContextExtensions
 
         var testBuilderContext = new TestBuilderContext
         {
-            TestMethodName = testContext.TestDetails.TestMethod.Name,
-            ClassInformation = testContext.TestDetails.TestClass,
-            MethodInformation = testContext.TestDetails.TestMethod
+            TestMethodName = testContext.TestDetails.MethodMetadata.Name,
+            ClassInformation = testContext.TestDetails.ClassMetadata,
+            MethodInformation = testContext.TestDetails.MethodMetadata
         };
         
         foreach (var (key, value) in objectBag ?? [])
@@ -57,7 +57,7 @@ public static class TestContextExtensions
         var newTestDefinition = new TestDefinition
         {
             TestId = Guid.NewGuid().ToString(),
-            TestMethod = originalDefinition.TestMethod,
+            MethodMetadata = originalDefinition.MethodMetadata,
             RepeatCount = originalDefinition.RepeatCount,
             TestFilePath = originalDefinition.TestFilePath,
             TestLineNumber = originalDefinition.TestLineNumber,
@@ -70,7 +70,7 @@ public static class TestContextExtensions
 
                 try
                 {
-                    await AsyncConvert.ConvertObject(originalDefinition.TestMethod.ReflectionInformation.Invoke(@class, args));
+                    await AsyncConvert.ConvertObject(originalDefinition.MethodMetadata.ReflectionInformation.Invoke(@class, args));
                 }
                 catch (TargetInvocationException e)
                 {

@@ -69,9 +69,9 @@ internal class DependencyCollector
     
     private DiscoveredTest[] GetDependencies(DiscoveredTest test, DependsOnAttribute dependsOnAttribute, DiscoveredTest[] allTests)
     {
-        var testsForClass = allTests.Where(x => x.TestDetails.TestClass.Type == (dependsOnAttribute.TestClass ?? test.TestDetails.TestClass.Type));
+        var testsForClass = allTests.Where(x => x.TestDetails.ClassMetadata.Type == (dependsOnAttribute.ClassMetadata ?? test.TestDetails.ClassMetadata.Type));
 
-        if (dependsOnAttribute.TestClass == null)
+        if (dependsOnAttribute.ClassMetadata == null)
         {
             testsForClass = testsForClass
                 .Where(x => EqualArgs(x.TestDetails.TestClassArguments, test.TestDetails.TestClassArguments));
@@ -142,7 +142,7 @@ internal class DependencyCollector
         return true;
     }
 
-    [DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
+    [DebuggerDisplay("{TestDetails.ClassMetadata.Name}.{TestDetails.TestName}")]
     internal class TestDetailsEqualityComparer : IEqualityComparer<TestDetails>
     {
         public bool Equals(TestDetails? x, TestDetails? y)

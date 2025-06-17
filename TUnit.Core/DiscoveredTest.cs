@@ -9,14 +9,14 @@ internal record DiscoveredTest<
     TTestClass
 >(ResettableLazy<TTestClass> ResettableLazyTestClassFactory) : DiscoveredTest where TTestClass : class
 {
-    public TTestClass TestClass => ResettableLazyTestClassFactory.Value;
+    public TTestClass ClassMetadata => ResettableLazyTestClassFactory.Value;
     
     public required Func<TTestClass, CancellationToken, ValueTask> TestBody { get; init; }
 
     public override async ValueTask ExecuteTest(CancellationToken cancellationToken)
     {
         TestContext.CancellationToken = cancellationToken;
-        await TestExecutor.ExecuteTest(TestContext, () => TestBody.Invoke(TestClass, cancellationToken));
+        await TestExecutor.ExecuteTest(TestContext, () => TestBody.Invoke(ClassMetadata, cancellationToken));
     }
     
     public override async ValueTask ResetTestInstance()

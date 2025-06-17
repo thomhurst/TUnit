@@ -9,13 +9,13 @@ namespace TUnit.Core.Helpers;
 [RequiresUnreferencedCode("Reflection")]
 internal class ReflectionToSourceModelHelpers
 {
-    private static readonly ConcurrentDictionary<Assembly, TestAssembly> _assemblyCache = new();
-    private static readonly ConcurrentDictionary<Type, TestClass> _classCache = new();
-    private static readonly ConcurrentDictionary<MethodInfo, TestMethod> _methodCache = new();
-    private static readonly ConcurrentDictionary<PropertyInfo, TestProperty> _propertyCache = new();
-    private static readonly ConcurrentDictionary<ParameterInfo, TestParameter> _parameterCache = new();
+    private static readonly ConcurrentDictionary<Assembly, AssemblyMetadata> _assemblyCache = new();
+    private static readonly ConcurrentDictionary<Type, ClassMetadata> _classCache = new();
+    private static readonly ConcurrentDictionary<MethodInfo, MethodMetadata> _methodCache = new();
+    private static readonly ConcurrentDictionary<PropertyInfo, PropertyMetadata> _propertyCache = new();
+    private static readonly ConcurrentDictionary<ParameterInfo, ParameterMetadata> _parameterCache = new();
 
-    public static TestMethod BuildTestMethod([DynamicallyAccessedMembers(
+    public static MethodMetadata BuildTestMethod([DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods
@@ -24,9 +24,9 @@ internal class ReflectionToSourceModelHelpers
         return BuildTestMethod(GenerateClass(testClassType), methodInfo, testName);
     }
 
-    public static TestMethod BuildTestMethod(TestClass classInformation, MethodInfo methodInfo, string? testName)
+    public static MethodMetadata BuildTestMethod(ClassMetadata classInformation, MethodInfo methodInfo, string? testName)
     {
-        return _methodCache.GetOrAdd(methodInfo, _ => new TestMethod
+        return _methodCache.GetOrAdd(methodInfo, _ => new MethodMetadata
         {
             Attributes = methodInfo.GetCustomAttributesSafe().ToArray(),
             Class = classInformation,
@@ -39,7 +39,7 @@ internal class ReflectionToSourceModelHelpers
         });
     }
 
-    public static TestClass? GetParent(
+    public static ClassMetadata? GetParent(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
             | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
@@ -52,13 +52,13 @@ internal class ReflectionToSourceModelHelpers
         return GenerateClass(type.DeclaringType);
     }
 
-    public static TestClass GenerateClass(
+    public static ClassMetadata GenerateClass(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType)
     {
-        return _classCache.GetOrAdd(testClassType, _ => new TestClass
+        return _classCache.GetOrAdd(testClassType, _ => new ClassMetadata
         {
             Parent = GetParent(testClassType),
             Assembly = GenerateAssembly(testClassType),
@@ -71,9 +71,9 @@ internal class ReflectionToSourceModelHelpers
         });
     }
 
-    public static TestAssembly GenerateAssembly(Type testClassType)
+    public static AssemblyMetadata GenerateAssembly(Type testClassType)
     {
-        return _assemblyCache.GetOrAdd(testClassType.Assembly, _ => new TestAssembly
+        return _assemblyCache.GetOrAdd(testClassType.Assembly, _ => new AssemblyMetadata
         {
             Attributes = testClassType.Assembly.GetCustomAttributesSafe().ToArray(),
             Name = testClassType.Assembly.GetName().Name ??
@@ -81,9 +81,9 @@ internal class ReflectionToSourceModelHelpers
         });
     }
 
-    public static TestProperty GenerateProperty(PropertyInfo property)
+    public static PropertyMetadata GenerateProperty(PropertyInfo property)
     {
-        return _propertyCache.GetOrAdd(property, _ => new TestProperty
+        return _propertyCache.GetOrAdd(property, _ => new PropertyMetadata
         {
             Attributes = property.GetCustomAttributesSafe().ToArray(),
             ReflectionInfo = property,
@@ -95,14 +95,14 @@ internal class ReflectionToSourceModelHelpers
         });
     }
 
-    public static TestParameter[] GetParameters(ParameterInfo[] parameters)
+    public static ParameterMetadata[] GetParameters(ParameterInfo[] parameters)
     {
         return parameters.Select(GenerateParameter).ToArray();
     }
 
-    public static TestParameter GenerateParameter(ParameterInfo parameter)
+    public static ParameterMetadata GenerateParameter(ParameterInfo parameter)
     {
-        return _parameterCache.GetOrAdd(parameter, _ => new TestParameter(parameter.ParameterType)
+        return _parameterCache.GetOrAdd(parameter, _ => new ParameterMetadata(parameter.ParameterType)
         {
             Attributes = parameter.GetCustomAttributesSafe().ToArray(),
             Name = parameter.Name ?? string.Empty,

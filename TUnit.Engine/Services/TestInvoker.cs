@@ -29,7 +29,7 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
                 var dataGeneratorMetadata = new DataGeneratorMetadata
                 {
                     Type = DataGeneratorType.TestParameters,
-                    TestInformation = testDetails.TestMethod,
+                    TestInformation = testDetails.MethodMetadata,
                     ClassInstanceArguments = testDetails.TestClassArguments ?? [],
                     MembersToGenerate = [],
                     TestBuilderContext = null!,

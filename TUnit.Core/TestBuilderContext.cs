@@ -32,12 +32,12 @@ public record TestBuilderContext
     /// <summary>
     /// Gets the test class information, if available during source generation.
     /// </summary>
-    public TestClass? ClassInformation { get; init; }
+    public ClassMetadata? ClassInformation { get; init; }
 
     /// <summary>
     /// Gets the test method information, if available during source generation.
     /// </summary>
-    public TestMethod? MethodInformation { get; init; }
+    public MethodMetadata? MethodInformation { get; init; }
 
     public void RegisterForInitialization(object? obj)
     {

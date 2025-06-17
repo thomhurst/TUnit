@@ -18,7 +18,7 @@ public abstract record StaticHookMethod<T> : StaticHookMethod, IExecutableHook<T
 #endif
 public abstract record StaticHookMethod
 {
-    public required TestMethod MethodInfo { get; init; }
+    public required MethodMetadata MethodInfo { get; init; }
 
     [field: AllowNull, MaybeNull]
     public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";

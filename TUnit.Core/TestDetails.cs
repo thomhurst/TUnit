@@ -40,13 +40,13 @@ public abstract record TestDetails
     /// Gets the class information for the test.
     /// </summary>
     [field: AllowNull, MaybeNull]
-    public TestClass TestClass => field ??= TestMethod.Class;
+    public ClassMetadata ClassMetadata => field ??= MethodMetadata.Class;
 
     /// <summary>
     /// Gets the parameter types for the test method.
     /// </summary>
     [field: AllowNull, MaybeNull]
-    public Type[] TestMethodParameterTypes => field ??= TestMethod.Parameters.Select(x => x.Type).ToArray();
+    public Type[] TestMethodParameterTypes => field ??= MethodMetadata.Parameters.Select(x => x.Type).ToArray();
 
     /// <summary>
     /// Gets or sets the arguments for the test method.
@@ -57,7 +57,7 @@ public abstract record TestDetails
     /// Gets the parameter types for the test class.
     /// </summary>
     [field: AllowNull, MaybeNull]
-    public Type[] TestClassParameterTypes => field ??= TestMethod.Class.Parameters.Select(x => x.Type).ToArray();
+    public Type[] TestClassParameterTypes => field ??= MethodMetadata.Class.Parameters.Select(x => x.Type).ToArray();
 
     /// <summary>
     /// Gets or sets the arguments for the test class.
@@ -79,7 +79,17 @@ public abstract record TestDetails
     /// <summary>
     /// Gets or sets the test method information.
     /// </summary>
-    public required TestMethod TestMethod { get; init; }
+    public required MethodMetadata MethodMetadata { get; init; }
+    
+    /// <summary>
+    /// Gets the test method information (alias for MethodMetadata).
+    /// </summary>
+    public MethodMetadata TestMethod => MethodMetadata;
+    
+    /// <summary>
+    /// Gets the test class information.
+    /// </summary>
+    public ClassMetadata TestClass => ClassMetadata;
 
     /// <summary>
     /// Gets the instance of the test class.
@@ -127,9 +137,9 @@ public abstract record TestDetails
     [JsonIgnore] 
     [field: AllowNull, MaybeNull]
     public TestAttributeMetadata[] AssemblyAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
-        TestClass.Assembly.Attributes, 
+        ClassMetadata.Assembly.Attributes, 
         TestAttributeTarget.Assembly, 
-        TestClass.Assembly.Name);
+        ClassMetadata.Assembly.Name);
 
     /// <summary>
     /// Gets the attributes for the test class.
@@ -137,10 +147,10 @@ public abstract record TestDetails
     [JsonIgnore] 
     [field: AllowNull, MaybeNull]
     public TestAttributeMetadata[] ClassAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
-        TestClass.Attributes, 
+        ClassMetadata.Attributes, 
         TestAttributeTarget.Class, 
-        TestClass.Name, 
-        TestClass.Type);
+        ClassMetadata.Name, 
+        ClassMetadata.Type);
 
     /// <summary>
     /// Gets the attributes for the test method.
@@ -148,10 +158,10 @@ public abstract record TestDetails
     [JsonIgnore] 
     [field: AllowNull, MaybeNull]
     public TestAttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
-        TestMethod.Attributes, 
+        MethodMetadata.Attributes, 
         TestAttributeTarget.Method, 
-        TestMethod.Name, 
-        TestMethod.Type);
+        MethodMetadata.Name, 
+        MethodMetadata.Type);
 
     /// <summary>
     /// Gets all the attributes for the test (including dynamic, method, class, assembly, and data attributes).
@@ -173,8 +183,8 @@ public abstract record TestDetails
         get => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
             _rawDynamicAttributes, 
             TestAttributeTarget.Method, 
-            TestMethod.Name, 
-            TestMethod.Type);
+            MethodMetadata.Name, 
+            MethodMetadata.Type);
         init
         {
             field = value;
@@ -194,8 +204,8 @@ public abstract record TestDetails
         get => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
             _rawDataAttributes, 
             TestAttributeTarget.Method, 
-            TestMethod.Name, 
-            TestMethod.Type);
+            MethodMetadata.Name, 
+            MethodMetadata.Type);
         init
         {
             field = value;
@@ -216,7 +226,7 @@ public abstract record TestDetails
         IDictionary<string, object?> testClassInjectedPropertyArguments,
         int currentRepeatAttempt,
         int repeatLimit,
-        TestMethod testMethod,
+        MethodMetadata testMethod,
         string testName,
         Type returnType,
         string testFilePath,
@@ -233,7 +243,7 @@ public abstract record TestDetails
             TestClassInjectedPropertyArguments = testClassInjectedPropertyArguments,
             CurrentRepeatAttempt = currentRepeatAttempt,
             RepeatLimit = repeatLimit,
-            TestMethod = testMethod,
+            MethodMetadata = testMethod,
             TestName = testName,
             ReturnType = returnType,
             TestFilePath = testFilePath,
@@ -275,6 +285,6 @@ public abstract record TestDetails
     public IParallelLimit? ParallelLimit { get; internal set; }
 
     internal bool IsSameTest(TestDetails testDetails) => TestName == testDetails.TestName &&
-                                                                 TestClass == testDetails.TestClass &&
+                                                                 ClassMetadata == testDetails.ClassMetadata &&
                                                                  TestMethodParameterTypes.SequenceEqual(testDetails.TestMethodParameterTypes);
 }

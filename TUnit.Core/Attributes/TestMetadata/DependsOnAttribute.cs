@@ -162,7 +162,7 @@ public class DependsOnAttribute : TUnitAttribute
     /// <param name="parameterTypes">The parameter types of the test method, used to disambiguate overloaded methods.</param>
     public DependsOnAttribute(Type testClass, string testName, Type[] parameterTypes)
     {
-        TestClass = testClass;
+        ClassMetadata = testClass;
         TestName = testName;
         ParameterTypes = parameterTypes;
     }
@@ -173,13 +173,13 @@ public class DependsOnAttribute : TUnitAttribute
     /// <remarks>
     /// If null, the dependency is assumed to be on a test in the same class.
     /// </remarks>
-    public Type? TestClass { get; }
+    public Type? ClassMetadata { get; }
 
     /// <summary>
     /// Gets the name of the test method this test depends on.
     /// </summary>
     /// <remarks>
-    /// If null, the dependency is assumed to be on all tests in the <see cref="TestClass"/>.
+    /// If null, the dependency is assumed to be on all tests in the <see cref="ClassMetadata"/>.
     /// </remarks>
     public string? TestName { get; }
 
@@ -207,9 +207,9 @@ public class DependsOnAttribute : TUnitAttribute
     /// <returns>A string that represents the dependency.</returns>
     public override string ToString()
     {
-        if (TestClass != null && TestName == null)
+        if (ClassMetadata != null && TestName == null)
         {
-            return TestClass.Name;
+            return ClassMetadata.Name;
         }
 
         if (ParameterTypes is { Length: > 0 })

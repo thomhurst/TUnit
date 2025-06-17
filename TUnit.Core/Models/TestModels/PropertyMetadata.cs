@@ -5,10 +5,10 @@ using System.Reflection;
 namespace TUnit.Core;
 
 [Obsolete]
-public record SourceGeneratedPropertyInformation : TestProperty;
+public record SourceGeneratedPropertyInformation : PropertyMetadata;
 
 [DebuggerDisplay("{Type} {Name})")]
-public record TestProperty : TestMember
+public record PropertyMetadata : MemberMetadata
 {
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors

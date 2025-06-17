@@ -10,10 +10,10 @@ namespace TUnit.Core.Helpers;
 internal static class ReflectionValueCreator
 {
 
-    public static async Task<object?> CreatePropertyValueAsync(TestClass classInformation,
+    public static async Task<object?> CreatePropertyValueAsync(ClassMetadata classInformation,
         TestBuilderContextAccessor testBuilderContextAccessor,
         IDataAttribute generator,
-        TestProperty property,
+        PropertyMetadata property,
         DataGeneratorMetadata dataGeneratorMetadata) =>
         generator switch
         {

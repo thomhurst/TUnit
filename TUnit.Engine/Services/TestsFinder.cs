@@ -8,7 +8,7 @@ internal class TestsFinder(TUnitTestDiscoverer testDiscoverer) : ITestFinder
     public IEnumerable<TestContext> GetTests(Type classType)
     {
         return testDiscoverer.CachedTests
-            .Where(x => x.TestDetails.TestClass.Type == classType)
+            .Where(x => x.TestDetails.ClassMetadata.Type == classType)
             .Select(x => x.TestContext);
     }
 
@@ -16,7 +16,7 @@ internal class TestsFinder(TUnitTestDiscoverer testDiscoverer) : ITestFinder
     {
         var testsWithoutMethodParameterTypesMatching = testDiscoverer.CachedTests.Where(x =>
                 x.TestContext.TestDetails.TestName == testName &&
-                x.TestContext.TestDetails.TestClass.Type == classType &&
+                x.TestContext.TestDetails.ClassMetadata.Type == classType &&
                 x.TestContext.TestDetails.TestClassParameterTypes.SequenceEqual(classParameterTypes) &&
                 x.TestContext.TestDetails.TestClassArguments.SequenceEqual(classArguments))
             .ToArray();

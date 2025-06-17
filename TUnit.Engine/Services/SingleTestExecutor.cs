@@ -124,7 +124,7 @@ internal class SingleTestExecutor(
                     || testContext.Result?.IsOverridden is false
                     || testContext.Result?.Status is Status.Failed or Status.Cancelled)
                 {
-                    await logger.LogDebugAsync($"Error in test {testContext.TestDetails.TestClass.Type.FullName}.{testContext.GetTestDisplayName()}: {e}");
+                    await logger.LogDebugAsync($"Error in test {testContext.TestDetails.ClassMetadata.Type.FullName}.{testContext.GetTestDisplayName()}: {e}");
                     testContext.SetResult(e);
                     throw;
                 }
@@ -301,7 +301,7 @@ internal class SingleTestExecutor(
     private async ValueTask ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
-        var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type);
+        var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.ClassMetadata.Type);
         var classHookContext = test.TestContext.ClassContext;
 
         ClassHookContext.Current = classHookContext;
@@ -323,7 +323,7 @@ internal class SingleTestExecutor(
 
         ClassHookContext.Current = null;
 
-        var afterAssemblyHooks = assemblyHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type.Assembly);
+        var afterAssemblyHooks = assemblyHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.ClassMetadata.Type.Assembly);
         var assemblyHookContext = test.TestContext.AssemblyContext;
 
         AssemblyHookContext.Current = assemblyHookContext;

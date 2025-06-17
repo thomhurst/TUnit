@@ -6,8 +6,8 @@ public record DataGeneratorMetadata
 {
     public Type TestClassType => TestInformation.Class.Type;
     public required TestBuilderContextAccessor TestBuilderContext { get; init; }
-    public required TestMember[] MembersToGenerate { get; init; }
-    public required TestMethod TestInformation { get; init; }
+    public required MemberMetadata[] MembersToGenerate { get; init; }
+    public required MethodMetadata TestInformation { get; init; }
     public required DataGeneratorType Type { get; init; }
     public required string TestSessionId { get; init; }
     public required object? TestClassInstance { get; init; }

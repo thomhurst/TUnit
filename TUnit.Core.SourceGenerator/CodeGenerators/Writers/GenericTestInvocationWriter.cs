@@ -20,7 +20,7 @@ public static class GenericTestInvocationWriter
 
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder,
             testSourceDataModel.TestGenerationContext.Context,
-            testSourceDataModel.TestClass, testSourceDataModel.TestMethod,
+            testSourceDataModel.ClassMetadata, testSourceDataModel.MethodMetadata,
             testSourceDataModel.GenericSubstitutions, ';');
 
         sourceBuilder.WriteLine();
@@ -48,7 +48,7 @@ public static class GenericTestInvocationWriter
         sourceBuilder.Write($"testDefinitions.Add(new TestDefinition<{fullyQualifiedClassType}>");
         sourceBuilder.Write("{");
         sourceBuilder.Write($"TestId = $\"{testId}\",");
-        sourceBuilder.Write("TestMethod = testInformation,");
+        sourceBuilder.Write("MethodMetadata = testInformation,");
         sourceBuilder.Write($"RepeatCount = {testSourceDataModel.RepeatLimit},");
         sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
@@ -84,7 +84,7 @@ public static class GenericTestInvocationWriter
         var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
 
-        sourceBuilder.Write($"{testSourceDataModel.TestClass.GloballyQualified()}? classInstance = null;");;
+        sourceBuilder.Write($"{testSourceDataModel.ClassMetadata.GloballyQualified()}? classInstance = null;");;
         sourceBuilder.Write("object?[]? classInstanceArguments = null;");;
 
         if (NeedsClassInstantiatedForMethodData(testSourceDataModel))
@@ -140,7 +140,7 @@ public static class GenericTestInvocationWriter
             return true;
         }
 
-        if (testSourceDataModel.TestMethod.Parameters
+        if (testSourceDataModel.MethodMetadata.Parameters
             .SelectMany(x => x.GetAttributes())
             .SelectMany(x => x.AttributeClass?.Interfaces ?? ImmutableArray<INamedTypeSymbol>.Empty)
             .Any(x => x.GloballyQualified() == "global::TUnit.Core.IAccessesInstanceData"))

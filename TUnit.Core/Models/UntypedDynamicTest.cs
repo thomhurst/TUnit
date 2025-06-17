@@ -60,7 +60,7 @@ public record UntypedDynamicTest : DynamicTest
             var testDefinition = new TestDefinition
             {
                 TestId = TestId,
-                TestMethod = testMethod,
+                MethodMetadata = testMethod,
                 RepeatCount = repeatLimit + 1,
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,

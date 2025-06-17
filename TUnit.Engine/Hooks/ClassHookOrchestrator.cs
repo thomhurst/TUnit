@@ -44,7 +44,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
         var classHookContext = testContext.ClassContext;
 
         var classHooksTaskCompletionSource = PreviouslyRunBeforeHooks.GetOrAdd(
-            testContext.TestDetails.TestClass.Type, _ => new TaskCompletionSource<bool>(),
+            testContext.TestDetails.ClassMetadata.Type, _ => new TaskCompletionSource<bool>(),
             out var classHooksTaskPreviouslyExisted);
 
         if (classHooksTaskPreviouslyExisted)
@@ -55,7 +55,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
 
         try
         {
-            var beforeClassHooks = CollectBeforeHooks(testContext.TestDetails.TestClass.Type);
+            var beforeClassHooks = CollectBeforeHooks(testContext.TestDetails.ClassMetadata.Type);
 
             ClassHookContext.Current = classHookContext;
 

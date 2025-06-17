@@ -19,7 +19,7 @@ internal static class DataGeneratorHandler
 {
     public static async Task<IDataAttribute> PrepareDataGeneratorInstanceAsync(
         IDataAttribute dataAttribute,
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         if (dataAttribute is not IAsyncDataSourceGeneratorAttribute ||
@@ -427,13 +427,13 @@ internal static class DataGeneratorHandler
 internal class DataGeneratorContext
 {
     public required IDataAttribute TypeDataAttribute { get; init; }
-    public required TestClass ClassInformation { get; init; }
-    public required TestMethod Method { get; init; }
-    public required TestProperty? PropertyInfo { get; init; }
+    public required ClassMetadata ClassInformation { get; init; }
+    public required MethodMetadata Method { get; init; }
+    public required PropertyMetadata? PropertyInfo { get; init; }
     public required IDataAttribute TestDataAttribute { get; init; }
     public required DataGeneratorType DataGeneratorType { get; init; }
     public required Func<object?[]> ClassInstanceArguments { get; init; }
-    public required TestMethod TestInformation { get; init; }
+    public required MethodMetadata TestInformation { get; init; }
     public required TestBuilderContextAccessor TestBuilderContextAccessor { get; init; }
     public required object?[]? ClassInstanceArgumentsInvoked { get; init; }
     public required bool NeedsInstance { get; init; }
@@ -464,8 +464,8 @@ internal class DataGeneratorContext
             ClassInstanceArguments = ClassInstanceArgumentsInvoked,
             MembersToGenerate = DataGeneratorType switch
             {
-                DataGeneratorType.TestParameters => Method.Parameters.ToArray<TestMember>(),
-                DataGeneratorType.ClassParameters => ClassInformation.Parameters.ToArray<TestMember>(),
+                DataGeneratorType.TestParameters => Method.Parameters.ToArray<MemberMetadata>(),
+                DataGeneratorType.ClassParameters => ClassInformation.Parameters.ToArray<MemberMetadata>(),
                 DataGeneratorType.Property => PropertyInfo is null ? [] : [PropertyInfo],
                 _ => throw new ArgumentOutOfRangeException(nameof(DataGeneratorType), DataGeneratorType, null)
             },

@@ -35,7 +35,7 @@ public static class TestContextExtensions
         var tests = context.GetService<ITestFinder>().GetTestsByNameAndParameters(
             testName: testName,
             methodParameterTypes: parameterTypes,
-            classType: context.TestDetails.TestClass.Type,
+            classType: context.TestDetails.ClassMetadata.Type,
             classParameterTypes: context.TestDetails.TestClassParameterTypes,
             classArguments: context.TestDetails.TestClassArguments);
 
@@ -56,9 +56,9 @@ public static class TestContextExtensions
     {
         var testDetails = testContext.TestDetails;
 
-        var classTypeName = testDetails.TestClass.Name;
+        var classTypeName = testDetails.ClassMetadata.Name;
 
-        var parent = testDetails.TestClass.Parent;
+        var parent = testDetails.ClassMetadata.Parent;
         while(parent is not null)
         {
             classTypeName = $"{parent.Name}+{classTypeName}";
@@ -164,7 +164,7 @@ public static class TestContextExtensions
 
     internal static object?[] GetPossibleEventObjects(this TestContext context)
     {
-        var staticProperties = context.TestDetails.TestClass.Properties
+        var staticProperties = context.TestDetails.ClassMetadata.Properties
             .Where(x => x.IsStatic)
             .Select(x =>
             {

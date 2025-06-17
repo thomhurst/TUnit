@@ -4,9 +4,9 @@ using System.Text;
 namespace TUnit.Core;
 
 [Obsolete]
-public abstract record SourceGeneratedMemberInformation : TestMember;
+public abstract record SourceGeneratedMemberInformation : MemberMetadata;
 
-public abstract record TestMember
+public abstract record MemberMetadata
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
@@ -29,9 +29,9 @@ public abstract record TestMember
     {
         return this switch
         {
-            TestMethod => TestAttributeTarget.Method,
-            TestClass => TestAttributeTarget.Class,
-            TestProperty => TestAttributeTarget.Property,
+            MethodMetadata => TestAttributeTarget.Method,
+            ClassMetadata => TestAttributeTarget.Class,
+            PropertyMetadata => TestAttributeTarget.Property,
             _ => TestAttributeTarget.Class
         };
     }
@@ -44,7 +44,7 @@ public abstract record TestMember
         return true;
     }
 
-    public virtual bool Equals(TestMember? other)
+    public virtual bool Equals(MemberMetadata? other)
     {
         if (other is null)
         {

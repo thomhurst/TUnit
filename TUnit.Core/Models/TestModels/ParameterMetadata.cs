@@ -7,21 +7,21 @@ namespace TUnit.Core;
 [Obsolete]
 public record SourceGeneratedParameterInformation([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)]Type Type) : TestParameter(Type);
+    | DynamicallyAccessedMemberTypes.PublicProperties)]Type Type) : ParameterMetadata(Type);
 
 public record SourceGeneratedParameterInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)]T> : TestParameter<T>;
+    | DynamicallyAccessedMemberTypes.PublicProperties)]T> : ParameterMetadata<T>;
 
 [DebuggerDisplay("{Type} {Name})")]
-public record TestParameter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+public record ParameterMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)]T>() : TestParameter(typeof(T));
+    | DynamicallyAccessedMemberTypes.PublicProperties)]T>() : ParameterMetadata(typeof(T));
 
 [DebuggerDisplay("{Type} {Name})")]
-public record TestParameter([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : TestMember
+    | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : MemberMetadata
 {
     public required ParameterInfo ReflectionInfo { get; set; }
     public bool IsParams => ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);

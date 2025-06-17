@@ -3,7 +3,7 @@
 public interface IExecutableHook<in T>
 {
     string Name { get; }
-    TestMethod MethodInfo { get; }
+    MethodMetadata MethodInfo { get; }
     int Order { get; }
     ValueTask ExecuteAsync(T context, CancellationToken cancellationToken);
 }

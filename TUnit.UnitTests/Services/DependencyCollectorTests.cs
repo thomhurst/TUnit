@@ -134,7 +134,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
             TestMethodArguments = [],
             TestClassArguments = [],
             TestClassInjectedPropertyArguments = new Dictionary<string, object?>(),
-            TestMethod = new TestMethod
+            MethodMetadata = new MethodMetadata
             {
                 Attributes = dependsOn != null
                     ?
@@ -142,12 +142,12 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                         new DependsOnAttribute(dependsOn)
                     ]
                     : [],
-                Class = new TestClass
+                Class = new ClassMetadata
                 {
                     Parent = ReflectionToSourceModelHelpers.GetParent(typeof(DependencyCollectorTests)),
                     Type = typeof(DependencyCollectorTests),
                     Namespace = null,
-                    Assembly = new TestAssembly
+                    Assembly = new AssemblyMetadata
                     {
                         Name = typeof(DependencyCollectorTests).Assembly.GetName().Name!,
                         Attributes =
@@ -207,7 +207,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                     TestClassFactory = () => new object(),
                     TestMethodInvoker = (_, _) => new ValueTask(),
                     TestId = "test-id",
-                    TestMethod = testDetails.TestMethod,
+                    MethodMetadata = testDetails.MethodMetadata,
                     RepeatCount = 1,
                     TestFilePath = "test.cs",
                     TestLineNumber = 1,

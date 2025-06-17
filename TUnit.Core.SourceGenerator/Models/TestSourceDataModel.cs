@@ -29,8 +29,8 @@ public record TestSourceDataModel
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
-    public required INamedTypeSymbol TestClass { get; init; }
-    public required IMethodSymbol TestMethod { get; init; }
+    public required INamedTypeSymbol ClassMetadata { get; init; }
+    public required IMethodSymbol MethodMetadata { get; init; }
     public required BaseContainer ClassArguments { get; init; }
     
     public required BaseContainer MethodArguments { get; init; }

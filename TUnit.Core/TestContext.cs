@@ -6,7 +6,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Represents the context for a test.
 /// </summary>
-[DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
+[DebuggerDisplay("{TestDetails.ClassMetadata.Name}.{TestDetails.TestName}")]
 public partial class TestContext : Context
 {
     private readonly IServiceProvider _serviceProvider;

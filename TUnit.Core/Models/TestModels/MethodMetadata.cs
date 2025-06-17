@@ -8,12 +8,12 @@ using TUnit.Core.Helpers;
 namespace TUnit.Core;
 
 [Obsolete]
-public record SourceGeneratedMethodInformation : TestMethod;
+public record SourceGeneratedMethodInformation : MethodMetadata;
 
 [DebuggerDisplay("{Type}.{Name}")]
-public record TestMethod : TestMember
+public record MethodMetadata : MemberMetadata
 {
-    public static TestMethod Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+    public static MethodMetadata Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>(string methodName) =>
@@ -25,10 +25,10 @@ public record TestMethod : TestMember
             Type = typeof(TClassType),
             Parameters = [],
             GenericTypeCount = 0,
-            Class = new TestClass
+            Class = new ClassMetadata
             {
                 Parent = null,
-                Assembly = new TestAssembly
+                Assembly = new AssemblyMetadata
                 {
                     Attributes = [],
                     Name = typeof(TClassType).Assembly.GetName().Name!,
@@ -42,11 +42,11 @@ public record TestMethod : TestMember
             }
         };
 
-    public required TestParameter[] Parameters { get; init; }
+    public required ParameterMetadata[] Parameters { get; init; }
 
     public required int GenericTypeCount { get; init; }
 
-    public required TestClass Class { get; init; }
+    public required ClassMetadata Class { get; init; }
 
     [field: AllowNull, MaybeNull]
     [JsonIgnore]
@@ -74,7 +74,7 @@ public record TestMethod : TestMember
         return true;
     }
 
-    public virtual bool Equals(TestMethod? other)
+    public virtual bool Equals(MethodMetadata? other)
     {
         if (other is null)
         {

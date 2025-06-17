@@ -41,15 +41,15 @@ public class TestExtensionsTests
         _fixture.Build<TestDetails<T>>()
             .OmitAutoProperties()
             .With(x => x.TestClassArguments, [])
-            .With(x => x.TestMethod, new TestMethod
+            .With(x => x.MethodMetadata, new MethodMetadata
             {
                 Attributes = [],
-                Class = new TestClass
+                Class = new ClassMetadata
                 {
                     Parent = ReflectionToSourceModelHelpers.GetParent(typeof(T)),
                     Name = typeof(T).Name,
                     Namespace = "TUnit.UnitTests",
-                    Assembly = new TestAssembly
+                    Assembly = new AssemblyMetadata
                     {
                         Attributes = [],
                         Name = "TUnit.UnitTests",
@@ -109,7 +109,7 @@ public class TestExtensionsTests
     {
         return _fixture.Build<TestDefinition>()
             .OmitAutoProperties()
-            .With(x => x.TestMethod, testDetails.TestMethod)
+            .With(x => x.MethodMetadata, testDetails.MethodMetadata)
             .With(x => x.TestClassFactory, () => Activator.CreateInstance<T>())
             .With(x => x.TestMethodInvoker, (obj, ct) => new ValueTask())
             .With(x => x.ClassArgumentsProvider, () => Array.Empty<object?>())

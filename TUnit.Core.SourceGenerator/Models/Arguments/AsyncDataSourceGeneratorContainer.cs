@@ -11,8 +11,8 @@ public record AsyncDataSourceGeneratorContainer(
     AttributeData AttributeData,
     ArgumentsType ArgumentsType,
     ImmutableArray<ITypeSymbol> ParameterOrPropertyTypes,
-    INamedTypeSymbol TestClass,
-    IMethodSymbol TestMethod,
+    INamedTypeSymbol ClassMetadata,
+    IMethodSymbol MethodMetadata,
     IPropertySymbol? Property,
     ImmutableArray<IParameterSymbol> Parameters,
     string[] GenericArguments) : ArgumentsContainer(ArgumentsType)
@@ -39,7 +39,7 @@ public record AsyncDataSourceGeneratorContainer(
         sourceCodeWriter.Write("TestInformation = testInformation,");
 
         sourceCodeWriter.Write("MembersToGenerate = ");
-        SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, TestClass, Parameters, null, ArgumentsType);
+        SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, ClassMetadata, Parameters, null, ArgumentsType);
 
         sourceCodeWriter.Write("TestSessionId = sessionId,");
         sourceCodeWriter.Write("TestClassInstance = classInstance,");
@@ -107,7 +107,7 @@ public record AsyncDataSourceGeneratorContainer(
 
             sourceCodeWriter.Write($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
 
-            sourceCodeWriter.Write(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Context, TestClass, Property, sourceCodeWriter.TabLevel, false));
+            sourceCodeWriter.Write(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Context, ClassMetadata, Property, sourceCodeWriter.TabLevel, false));
             sourceCodeWriter.WriteLine();
             return;
         }

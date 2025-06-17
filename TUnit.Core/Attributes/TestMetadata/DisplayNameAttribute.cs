@@ -39,7 +39,7 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
         var mutableDisplayName = displayName;
         
         var parameters = testDetails
-            .TestMethod
+            .MethodMetadata
             .Parameters
             .Zip(testDetails.TestMethodArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument));
         

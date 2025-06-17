@@ -13,8 +13,8 @@ namespace TUnit.Engine.Services.Reflection;
 internal class ReflectionTestConstructionBuilder
 {
     public async Task<DiscoveryResult> BuildTestsAsync(
-        TestClass classInformation,
-        TestMethod[] testMethods)
+        ClassMetadata classInformation,
+        MethodMetadata[] testMethods)
     {
         var testDefinitions = new List<ITestDefinition>();
         var discoveryFailures = new List<DiscoveryFailure>();
@@ -32,8 +32,8 @@ internal class ReflectionTestConstructionBuilder
     }
 
     private async Task BuildTestsForMethodAsync(
-        TestClass classInformation,
-        TestMethod testMethod,
+        ClassMetadata classInformation,
+        MethodMetadata testMethod,
         List<ITestDefinition> testDefinitions,
         List<DiscoveryFailure> discoveryFailures)
     {
@@ -59,7 +59,7 @@ internal class ReflectionTestConstructionBuilder
     }
 
     private async Task BuildTestVariationsAsync(
-        TestMethod testMethod,
+        MethodMetadata testMethod,
         IDataAttribute classDataAttribute,
         IDataAttribute testDataAttribute,
         List<ITestDefinition> testDefinitions,
@@ -109,7 +109,7 @@ internal class ReflectionTestConstructionBuilder
     }
 
     private async Task BuildSingleTestAsync(
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         Func<Task<object?[]>> classInstanceArguments,
         IDataAttribute typeDataAttribute,
         IDataAttribute testDataAttribute,
@@ -150,7 +150,7 @@ internal class ReflectionTestConstructionBuilder
     }
 
     private async Task BuildTestInstanceAsync(
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         Func<Task<object?[]>> classInstanceArguments,
         IDataAttribute typeDataAttribute,
         IDataAttribute testDataAttributeInstance,
@@ -199,7 +199,7 @@ internal class ReflectionTestConstructionBuilder
     }
 
     private async Task<TestDefinition> CreateTestDefinitionAsync(
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         object?[] invokedClassInstanceArguments,
         IDataAttribute typeDataAttribute,
         Func<Task<object?[]>> testArguments,
@@ -248,7 +248,7 @@ internal class ReflectionTestConstructionBuilder
         return new TestDefinition
         {
             TestId = testId,
-            TestMethod = resolvedMethodInfo,
+            MethodMetadata = resolvedMethodInfo,
             RepeatCount = repeatCount + 1,
             TestFilePath = testAttribute.File,
             TestLineNumber = testAttribute.Line,
@@ -269,9 +269,9 @@ internal class ReflectionTestConstructionBuilder
     }
 
     private async Task<Dictionary<string, object?>> GetPropertyArgumentsAsync(
-        TestClass classInformation,
+        ClassMetadata classInformation,
         object?[] classInstanceArguments,
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var propertyArgs = new Dictionary<string, object?>();
@@ -286,7 +286,7 @@ internal class ReflectionTestConstructionBuilder
         return propertyArgs;
     }
 
-    private static Attribute[] CollectAllAttributes(TestMethod testInformation)
+    private static Attribute[] CollectAllAttributes(MethodMetadata testInformation)
     {
         return
         [
@@ -296,14 +296,14 @@ internal class ReflectionTestConstructionBuilder
         ];
     }
 
-    private static IEnumerable<IDataAttribute> GetDataAttributes(TestMember memberInformation)
+    private static IEnumerable<IDataAttribute> GetDataAttributes(MemberMetadata memberInformation)
     {
         var attributes = memberInformation.Attributes.OfType<IDataAttribute>().ToArray();
         return attributes.Length == 0 ? NoOpDataAttribute.Array : attributes;
     }
 
     private void AddFailedTest(
-        TestMethod testInformation,
+        MethodMetadata testInformation,
         BaseTestAttribute testAttribute,
         Exception exception,
         Type testClassType,

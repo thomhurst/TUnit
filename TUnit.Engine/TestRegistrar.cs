@@ -15,7 +15,7 @@ internal class TestRegistrar(InstanceTracker instanceTracker, ObjectLifetimeMana
 
 			testContext.IsRegistered = true;
 
-			var classType = testContext.TestDetails.TestClass.Type;
+			var classType = testContext.TestDetails.ClassMetadata.Type;
 
 			RegisterTestContext(classType);
             RegisterObjects(testContext);

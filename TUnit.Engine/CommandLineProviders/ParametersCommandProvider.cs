@@ -7,7 +7,7 @@ namespace TUnit.Engine.CommandLineProviders;
 
 internal class ParametersCommandProvider(IExtension extension) : ICommandLineOptionsProvider
 {
-    public const string TestParameter = "test-parameter";
+    public const string ParameterMetadata = "test-parameter";
 
     public Task<bool> IsEnabledAsync()
     {
@@ -28,7 +28,7 @@ internal class ParametersCommandProvider(IExtension extension) : ICommandLineOpt
     {
         return
         [
-            new CommandLineOption(TestParameter, "Custom parameters to pass to TUnit", ArgumentArity.OneOrMore, false)
+            new CommandLineOption(ParameterMetadata, "Custom parameters to pass to TUnit", ArgumentArity.OneOrMore, false)
         ];
     }
 
@@ -36,7 +36,7 @@ internal class ParametersCommandProvider(IExtension extension) : ICommandLineOpt
     {
         if (arguments.Any(argument => !Regex.IsMatch(argument)))
         {
-            return ValidationResult.InvalidTask("TestParameter must be in the format of KEY=VALUE");
+            return ValidationResult.InvalidTask("ParameterMetadata must be in the format of KEY=VALUE");
         }
 
         return ValidationResult.ValidTask;

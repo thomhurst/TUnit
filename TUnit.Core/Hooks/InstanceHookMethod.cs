@@ -12,7 +12,7 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type ClassType { get; init; }
     public Assembly Assembly => ClassType.Assembly;
-    public required TestMethod MethodInfo { get; init; }
+    public required MethodMetadata MethodInfo { get; init; }
     
     [field: AllowNull, MaybeNull]
     public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";

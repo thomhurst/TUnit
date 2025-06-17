@@ -31,7 +31,7 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
 
     private void ParseParameters()
     {
-        if (!commandLineOptions.TryGetOptionArgumentList(ParametersCommandProvider.TestParameter, out var parameters))
+        if (!commandLineOptions.TryGetOptionArgumentList(ParametersCommandProvider.ParameterMetadata, out var parameters))
         {
             return;
         }

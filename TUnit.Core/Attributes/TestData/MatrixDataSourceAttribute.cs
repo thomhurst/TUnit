@@ -9,7 +9,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
     {
         var parameterInformation = dataGeneratorMetadata
             .MembersToGenerate
-            .OfType<TestParameter>()
+            .OfType<ParameterMetadata>()
             .ToArray();
 
         if (parameterInformation.Length != dataGeneratorMetadata.MembersToGenerate.Length
@@ -40,7 +40,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
     }
 
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
-        TestParameter sourceGeneratedParameterInformation)
+        ParameterMetadata sourceGeneratedParameterInformation)
     {
         var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault();
 
