@@ -38,20 +38,31 @@ internal class ReflectionTestsConstructor(
 
         var allTypes = ReflectionScanner.GetTypes();
 
-        var standardTests = await DiscoverStandardTestsAsync(allTypes);
+        var standardTestConstructionData = await DiscoverStandardTestsAsync(allTypes);
         var dynamicTests = await DiscoverDynamicTestsAsync(allTypes);
 
-        var allDynamicTests = standardTests.Concat(dynamicTests).ToList();
-        var discoveredTests = allDynamicTests.SelectMany(_unifiedBuilder.BuildTests).ToArray();
+        var discoveredTests = new List<DiscoveredTest>();
         
-        return discoveredTests;
+        // Process standard tests
+        foreach (var testData in standardTestConstructionData)
+        {
+            discoveredTests.Add(_unifiedBuilder.BuildTest(testData));
+        }
+        
+        // Process dynamic tests
+        foreach (var dynamicTest in dynamicTests)
+        {
+            discoveredTests.AddRange(_unifiedBuilder.BuildTests(dynamicTest));
+        }
+        
+        return discoveredTests.ToArray();
     }
 
-    private async Task<List<DynamicTest>> DiscoverStandardTestsAsync(HashSet<Type> allTypes)
+    private async Task<List<TestConstructionData>> DiscoverStandardTestsAsync(HashSet<Type> allTypes)
     {
         return await Task.Run(async () =>
         {
-            var results = new List<DynamicTest>();
+            var results = new List<TestConstructionData>();
             var testClasses = allTypes.Where(IsTestClass);
 
             foreach (var testClass in testClasses)
@@ -67,7 +78,7 @@ internal class ReflectionTestsConstructor(
                     .Select(method => ReflectionToSourceModelHelpers.BuildTestMethod(classInformation, method, method.Name))
                     .ToArray();
 
-                var testBuilder = new TestBuilder();
+                var testBuilder = new ReflectionTestConstructionBuilder();
                 var tests = await testBuilder.BuildTestsAsync(classInformation, methodInformations);
                 foreach (var test in tests)
                 {

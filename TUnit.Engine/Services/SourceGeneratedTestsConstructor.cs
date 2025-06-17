@@ -16,7 +16,7 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
     {
         var discoveredTests = new List<DiscoveredTest>();
         
-        // Process regular test metadata
+        // Process test metadata
         await foreach (var testMetadata in testsCollector.GetTestsAsync())
         {
             discoveredTests.Add(_unifiedBuilder.BuildTest(testMetadata));

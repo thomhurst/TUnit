@@ -10,14 +10,16 @@ public static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
         
-        sourceBuilder.Write($"nodes.Add(new FailedTestMetadata<{testSourceDataModel.TestClass.GloballyQualified()}>");
-        sourceBuilder.Write("{"); 
+        sourceBuilder.Write($"nodes.Add(");
+        sourceBuilder.Write($"new FailedTestMetadata<{testSourceDataModel.TestClass.GloballyQualified()}>");
+        sourceBuilder.Write("{");
         sourceBuilder.Write($"TestId = $\"{testId}\",");
-        sourceBuilder.Write($"MethodName = $\"{testSourceDataModel.MethodName}\",");
+        sourceBuilder.Write($"MethodName = \"{testSourceDataModel.MethodName}\",");
         sourceBuilder.Write($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
         sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        sourceBuilder.Write("});");
+        sourceBuilder.Write("}");
+        sourceBuilder.Write(");");
     }
     
     public static void GenerateFailedTestCode(SourceCodeWriter sourceBuilder,

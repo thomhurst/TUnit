@@ -60,12 +60,12 @@ internal class UnifiedTestBuilder(
     
     /// <summary>
     /// Builds a discovered test from raw test construction data.
+    /// For AOT compatibility, source generators should use BuildTest<T> directly.
+    /// This method is for reflection mode only.
     /// </summary>
     public DiscoveredTest BuildTest(TestConstructionData data)
     {
-        // Always build using the unified approach
-        // Source generators will provide strongly-typed delegates
-        // Reflection mode will provide reflection-based delegates
+        // This method is only for non-generic TestConstructionData (reflection mode)
         return BuildUntypedTest(data);
     }
     
@@ -106,12 +106,28 @@ internal class UnifiedTestBuilder(
         var classType = data.TestMethod.Class.Type;
         var classHookContext = contextManager.GetClassHookContext(classType);
         
-        // Create test context - for now we need to pass null for TestConstructionData
-        // until we fully migrate away from TestMetadata
+        // Create test context using TestConstructionData - convert generic to base
+        var baseData = new TestConstructionData
+        {
+            TestId = data.TestId,
+            TestMethod = data.TestMethod,
+            RepeatCount = data.RepeatCount,
+            CurrentRepeatAttempt = data.CurrentRepeatAttempt,
+            TestFilePath = data.TestFilePath,
+            TestLineNumber = data.TestLineNumber,
+            TestClassFactory = () => data.TestClassFactory(),
+            TestMethodInvoker = async (obj, ct) => await data.TestMethodInvoker((TTestClass)obj, ct),
+            ClassArgumentsProvider = data.ClassArgumentsProvider,
+            MethodArgumentsProvider = data.MethodArgumentsProvider,
+            PropertiesProvider = data.PropertiesProvider,
+            TestBuilderContext = data.TestBuilderContext,
+            DiscoveryException = data.DiscoveryException
+        };
+        
         var testContext = new TestContext(
             serviceProvider,
             testDetails,
-            metadata: null!,
+            baseData,
             classHookContext
         );
         
@@ -166,12 +182,11 @@ internal class UnifiedTestBuilder(
         var classType = data.TestMethod.Class.Type;
         var classHookContext = contextManager.GetClassHookContext(classType);
         
-        // Create test context - for now we need to pass null for TestConstructionData
-        // until we fully migrate away from TestMetadata
+        // Create test context using TestConstructionData
         var testContext = new TestContext(
             serviceProvider,
             testDetails,
-            metadata: null!,
+            data,
             classHookContext
         );
         
