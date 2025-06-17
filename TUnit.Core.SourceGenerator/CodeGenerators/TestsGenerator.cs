@@ -132,21 +132,19 @@ public class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine();
 
                 sourceBuilder.Write(
-                    "public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestConstructionData>> CollectTestsAsync(string sessionId)");
+                    "public async global::System.Threading.Tasks.Task<global::TUnit.Core.DiscoveryResult> DiscoverTestsAsync(string sessionId)");
                 sourceBuilder.Write("{");
-                if (count == 1)
+                sourceBuilder.Write("var testDefinitions = new global::System.Collections.Generic.List<global::TUnit.Core.ITestDefinition>();");
+                sourceBuilder.Write("var discoveryFailures = new global::System.Collections.Generic.List<global::TUnit.Core.DiscoveryFailure>();");
+                
+                for (var i = 0; i < count; i++)
                 {
-                    sourceBuilder.Write("return await Tests0(sessionId);");
+                    sourceBuilder.Write($"var result{i} = await Tests{i}(sessionId);");
+                    sourceBuilder.Write($"testDefinitions.AddRange(result{i}.TestDefinitions);");
+                    sourceBuilder.Write($"discoveryFailures.AddRange(result{i}.DiscoveryFailures);");
                 }
-                else
-                {
-                    sourceBuilder.Write("var results = new global::System.Collections.Generic.List<TestConstructionData>();");
-                    for (var i = 0; i < count; i++)
-                    {
-                        sourceBuilder.Write($"results.AddRange(await Tests{i}(sessionId));");
-                    }
-                    sourceBuilder.Write("return results;");
-                }
+                
+                sourceBuilder.Write("return new global::TUnit.Core.DiscoveryResult { TestDefinitions = testDefinitions, DiscoveryFailures = discoveryFailures };");
 
                 sourceBuilder.Write("}");
                 sourceBuilder.WriteLine();
@@ -155,10 +153,12 @@ public class TestsGenerator : IIncrementalGenerator
                 foreach (var model in classGrouping)
                 {
                     sourceBuilder.Write(
-                        $"private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestConstructionData>> Tests{index++}(string sessionId)");
+                        $"private async global::System.Threading.Tasks.Task<global::TUnit.Core.DiscoveryResult> Tests{index++}(string sessionId)");
                     sourceBuilder.Write("{");
                     sourceBuilder.Write(
-                        "global::System.Collections.Generic.List<TestConstructionData> nodes = [];");
+                        "var testDefinitions = new global::System.Collections.Generic.List<global::TUnit.Core.ITestDefinition>();");
+                    sourceBuilder.Write(
+                        "var discoveryFailures = new global::System.Collections.Generic.List<global::TUnit.Core.DiscoveryFailure>();");
                     sourceBuilder.Write($"var {VariableNames.ClassDataIndex} = 0;");
                     sourceBuilder.Write($"var {VariableNames.TestMethodDataIndex} = 0;");
 
@@ -171,7 +171,7 @@ public class TestsGenerator : IIncrementalGenerator
                     FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, model);
                     sourceBuilder.Write("}");
 
-                    sourceBuilder.Write("return nodes;");
+                    sourceBuilder.Write("return new global::TUnit.Core.DiscoveryResult { TestDefinitions = testDefinitions, DiscoveryFailures = discoveryFailures };");
                     sourceBuilder.Write("}");
                     sourceBuilder.WriteLine();
                 }

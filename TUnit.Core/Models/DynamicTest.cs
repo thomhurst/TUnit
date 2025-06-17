@@ -27,7 +27,7 @@ public abstract record DynamicTest
 
     public Dictionary<string, object?>? Properties { get; init; }
 
-    public abstract IEnumerable<TestConstructionData> BuildTestConstructionData();
+    public abstract DiscoveryResult BuildTests();
 
     internal string TestFilePath { get; init; } = string.Empty;
     internal int TestLineNumber { get; init; } = 0;
@@ -141,26 +141,26 @@ public record DynamicTest<
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType { get; } = typeof(TClass);
 
-    public override IEnumerable<TestConstructionData> BuildTestConstructionData()
+    public override DiscoveryResult BuildTests()
     {
-        var attributes = GetAttributes();
+        var testDefinitions = new List<TestDefinition<TClass>>();
+        var discoveryFailures = new List<DiscoveryFailure>();
 
-        var repeatLimit = attributes.OfType<RepeatAttribute>()
-            .FirstOrDefault()
-            ?.Times ?? 0;
-
-        for (var i = 0; i < repeatLimit + 1; i++)
+        try
         {
-            var testBuilderContext = new TestBuilderContext();
+            var attributes = GetAttributes();
+            var repeatLimit = attributes.OfType<RepeatAttribute>()
+                .FirstOrDefault()
+                ?.Times ?? 0;
 
             var testMethodInformation = BuildTestMethod(TestBody);
+            var testBuilderContext = new TestBuilderContext();
 
-            yield return new TestConstructionData<TClass>
+            var testDefinition = new TestDefinition<TClass>
             {
-                TestId = $"{TestId}-{i}",
+                TestId = TestId,
                 TestMethod = testMethodInformation,
                 RepeatCount = repeatLimit + 1,
-                CurrentRepeatAttempt = i,
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 TestClassFactory = () => (TClass)InstanceHelper.CreateInstance(
@@ -179,11 +179,44 @@ public record DynamicTest<
                 },
                 ClassArgumentsProvider = () => TestClassArguments ?? [],
                 MethodArgumentsProvider = () => TestMethodArguments,
-                PropertiesProvider = () => Properties ?? new Dictionary<string, object?>(),
-                TestBuilderContext = testBuilderContext,
-                DiscoveryException = Exception
+                PropertiesProvider = () => Properties ?? new Dictionary<string, object?>()
             };
+
+            if (Exception != null)
+            {
+                discoveryFailures.Add(new DiscoveryFailure
+                {
+                    TestId = TestId,
+                    Exception = Exception,
+                    TestFilePath = TestFilePath,
+                    TestLineNumber = TestLineNumber,
+                    TestClassName = TestClassType.Name,
+                    TestMethodName = TestName ?? TestBody.Name
+                });
+            }
+            else
+            {
+                testDefinitions.Add(testDefinition);
+            }
         }
+        catch (Exception ex)
+        {
+            discoveryFailures.Add(new DiscoveryFailure
+            {
+                TestId = TestId,
+                Exception = ex,
+                TestFilePath = TestFilePath,
+                TestLineNumber = TestLineNumber,
+                TestClassName = TestClassType.Name,
+                TestMethodName = TestName ?? TestBody?.Name
+            });
+        }
+
+        return new DiscoveryResult
+        {
+            TestDefinitions = testDefinitions,
+            DiscoveryFailures = discoveryFailures
+        };
     }
 
     private MethodInfo GetMethodInfo(Expression<Action<TClass>> expression)

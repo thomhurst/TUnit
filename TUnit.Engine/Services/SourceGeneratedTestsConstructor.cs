@@ -16,10 +16,16 @@ internal class SourceGeneratedTestsConstructor(IExtension extension,
     {
         var discoveredTests = new List<DiscoveredTest>();
         
-        // Process test construction data
-        await foreach (var testConstructionData in testsCollector.GetTestsAsync())
+        // Process source-generated tests
+        var discoveryResult = await testsCollector.DiscoverTestsAsync();
+        var (tests, failures) = _unifiedBuilder.BuildTests(discoveryResult);
+        discoveredTests.AddRange(tests);
+        
+        // TODO: Handle discovery failures appropriately
+        foreach (var failure in failures)
         {
-            discoveredTests.Add(_unifiedBuilder.BuildTest(testConstructionData));
+            // For now, log to console. In the future, this should be reported properly
+            Console.WriteLine($"Test discovery failed: {failure.TestId ?? "Unknown"} - {failure.Reason}");
         }
         
         // Process dynamic tests

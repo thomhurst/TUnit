@@ -97,18 +97,21 @@ public class TestExtensionsTests
             ClassType = typeof(T)
         };
 
+        var testBuilderContext = new TestBuilderContext();
+        var testDefinition = CreateDummyTestDefinition(testDetails);
         return _fixture.Build<TestContext>()
-            .FromFactory(() => new TestContext(null!, testDetails, CreateDummyConstructionData(testDetails), classContext))
+            .FromFactory(() => new TestContext(null!, testDetails, testDefinition, testBuilderContext, classContext))
             .OmitAutoProperties()
             .Create();
     }
 
-    private TestConstructionData CreateDummyConstructionData<T>(TestDetails<T> testDetails) where T : class
+    private TestDefinition CreateDummyTestDefinition<T>(TestDetails<T> testDetails) where T : class
     {
-        return _fixture.Build<TestConstructionData>()
+        return _fixture.Build<TestDefinition>()
             .OmitAutoProperties()
-            .With(x => x.TestBuilderContext, new TestBuilderContext())
             .With(x => x.TestMethod, testDetails.TestMethod)
+            .With(x => x.TestClassFactory, () => Activator.CreateInstance<T>())
+            .With(x => x.TestMethodInvoker, (obj, ct) => new ValueTask())
             .With(x => x.ClassArgumentsProvider, () => Array.Empty<object?>())
             .With(x => x.MethodArgumentsProvider, () => Array.Empty<object?>())
             .With(x => x.PropertiesProvider, () => new Dictionary<string, object?>())

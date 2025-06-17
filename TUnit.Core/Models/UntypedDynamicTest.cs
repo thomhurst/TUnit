@@ -47,19 +47,21 @@ public record UntypedDynamicTest : DynamicTest
         set;
     } = new();
 
-    public override IEnumerable<TestConstructionData> BuildTestConstructionData()
+    public override DiscoveryResult BuildTests()
     {
-        var repeatLimit = Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
-        var testMethod = BuildTestMethod(TestBody);
-        
-        for (var i = 0; i <= repeatLimit; i++)
+        var testDefinitions = new List<TestDefinition>();
+        var discoveryFailures = new List<DiscoveryFailure>();
+
+        try
         {
-            yield return new TestConstructionData
+            var repeatLimit = Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
+            var testMethod = BuildTestMethod(TestBody);
+
+            var testDefinition = new TestDefinition
             {
-                TestId = $"{TestId}-{i}",
+                TestId = TestId,
                 TestMethod = testMethod,
                 RepeatCount = repeatLimit + 1,
-                CurrentRepeatAttempt = i,
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 TestClassFactory = () => InstanceHelper.CreateInstance(
@@ -78,11 +80,44 @@ public record UntypedDynamicTest : DynamicTest
                 },
                 ClassArgumentsProvider = () => TestClassArguments ?? [],
                 MethodArgumentsProvider = () => TestMethodArguments,
-                PropertiesProvider = () => Properties ?? new Dictionary<string, object?>(),
-                TestBuilderContext = TestBuilderContext,
-                DiscoveryException = Exception
+                PropertiesProvider = () => Properties ?? new Dictionary<string, object?>()
             };
+
+            if (Exception != null)
+            {
+                discoveryFailures.Add(new DiscoveryFailure
+                {
+                    TestId = TestId,
+                    Exception = Exception,
+                    TestFilePath = TestFilePath,
+                    TestLineNumber = TestLineNumber,
+                    TestClassName = TestClassType.Name,
+                    TestMethodName = TestName ?? TestBody.Name
+                });
+            }
+            else
+            {
+                testDefinitions.Add(testDefinition);
+            }
         }
+        catch (Exception ex)
+        {
+            discoveryFailures.Add(new DiscoveryFailure
+            {
+                TestId = TestId,
+                Exception = ex,
+                TestFilePath = TestFilePath,
+                TestLineNumber = TestLineNumber,
+                TestClassName = TestClassType.Name,
+                TestMethodName = TestName ?? TestBody?.Name
+            });
+        }
+
+        return new DiscoveryResult
+        {
+            TestDefinitions = testDefinitions,
+            DiscoveryFailures = discoveryFailures
+        };
     }
 
     private static string GetTestId(MethodInfo testBody)

@@ -202,21 +202,21 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
         {
             TestContext = new TestContext(Substitute.For<IServiceProvider>(),
                 testDetails,
-                new TestConstructionData
+                new TestDefinition
                 {
-                    TestClassFactory = null!,
-                    TestMethodInvoker = null!,
-                    TestId = null!,
-                    TestMethod = null!,
-                    RepeatCount = 0,
-                    CurrentRepeatAttempt = 0,
-                    TestFilePath = null!,
-                    TestLineNumber = 0,
+                    TestClassFactory = () => new object(),
+                    TestMethodInvoker = (_, _) => new ValueTask(),
+                    TestId = "test-id",
+                    TestMethod = testDetails.TestMethod,
+                    RepeatCount = 1,
+                    TestFilePath = "test.cs",
+                    TestLineNumber = 1,
                     ClassArgumentsProvider = () => [],
                     MethodArgumentsProvider = () => [],
-                    PropertiesProvider = () => new Dictionary<string, object?>(),
-                    TestBuilderContext = new TestBuilderContext()
-                }, classContext!),
+                    PropertiesProvider = () => new Dictionary<string, object?>()
+                },
+                new TestBuilderContext(),
+                classContext!),
             TestBody = (_, _) => default(ValueTask),
         };
     }

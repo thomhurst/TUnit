@@ -12,23 +12,30 @@ namespace TUnit.Engine.Services.Reflection;
 [UnconditionalSuppressMessage("AOT", "IL3050")]
 internal class ReflectionTestConstructionBuilder
 {
-    public async Task<IEnumerable<TestConstructionData>> BuildTestsAsync(
+    public async Task<DiscoveryResult> BuildTestsAsync(
         TestClass classInformation,
         TestMethod[] testMethods)
     {
-        var testConstructionDataList = new List<TestConstructionData>();
+        var testDefinitions = new List<ITestDefinition>();
+        var discoveryFailures = new List<DiscoveryFailure>();
 
         foreach (var testMethod in testMethods)
         {
-            await BuildTestsForMethodAsync(classInformation, testMethod, testConstructionDataList);
+            await BuildTestsForMethodAsync(classInformation, testMethod, testDefinitions, discoveryFailures);
         }
-        return testConstructionDataList;
+        
+        return new DiscoveryResult
+        {
+            TestDefinitions = testDefinitions,
+            DiscoveryFailures = discoveryFailures
+        };
     }
 
     private async Task BuildTestsForMethodAsync(
         TestClass classInformation,
         TestMethod testMethod,
-        List<TestConstructionData> testConstructionDataList)
+        List<ITestDefinition> testDefinitions,
+        List<DiscoveryFailure> discoveryFailures)
     {
         var testAttribute = testMethod.Attributes.OfType<TestAttribute>().First();
 
@@ -41,13 +48,13 @@ internal class ReflectionTestConstructionBuilder
             {
                 foreach (var testDataAttribute in testDataAttributes)
                 {
-                    await BuildTestVariationsAsync(testMethod, classDataAttribute, testDataAttribute, testConstructionDataList);
+                    await BuildTestVariationsAsync(testMethod, classDataAttribute, testDataAttribute, testDefinitions, discoveryFailures);
                 }
             }
         }
         catch (Exception e)
         {
-            AddFailedTest(testMethod, testAttribute, e, classInformation.Type, testConstructionDataList);
+            AddFailedTest(testMethod, testAttribute, e, classInformation.Type, discoveryFailures);
         }
     }
 
@@ -55,7 +62,8 @@ internal class ReflectionTestConstructionBuilder
         TestMethod testMethod,
         IDataAttribute classDataAttribute,
         IDataAttribute testDataAttribute,
-        List<TestConstructionData> testConstructionDataList)
+        List<ITestDefinition> testDefinitions,
+        List<DiscoveryFailure> discoveryFailures)
     {
         var testBuilderContext = new TestBuilderContext
         {
@@ -90,7 +98,7 @@ internal class ReflectionTestConstructionBuilder
                 classDataAttribute, classArgumentsContext))
             {
                 await BuildSingleTestAsync(testMethod, classInstanceArguments, classDataAttribute, 
-                    testDataAttribute, testBuilderContextAccessor, testConstructionDataList);
+                    testDataAttribute, testBuilderContextAccessor, testDefinitions, discoveryFailures);
             }
         }
         finally
@@ -106,7 +114,8 @@ internal class ReflectionTestConstructionBuilder
         IDataAttribute typeDataAttribute,
         IDataAttribute testDataAttribute,
         TestBuilderContextAccessor testBuilderContextAccessor,
-        List<TestConstructionData> testConstructionDataList)
+        List<ITestDefinition> testDefinitions,
+        List<DiscoveryFailure> discoveryFailures)
     {
         var classInformation = testInformation.Class;
         var testAttribute = testInformation.Attributes.OfType<BaseTestAttribute>().First();
@@ -123,12 +132,12 @@ internal class ReflectionTestConstructionBuilder
             for (var index = 0; index < repeatCount + 1; index++)
             {
                 await BuildTestInstanceAsync(testInformation, classInstanceArguments, typeDataAttribute,
-                    testDataAttributeInstance, testBuilderContextAccessor, allAttributes, index, testConstructionDataList);
+                    testDataAttributeInstance, testBuilderContextAccessor, allAttributes, index, testDefinitions, discoveryFailures);
             }
         }
         catch (Exception e)
         {
-            AddFailedTest(testInformation, testAttribute, e, classInformation.Type, testConstructionDataList);
+            AddFailedTest(testInformation, testAttribute, e, classInformation.Type, discoveryFailures);
             var newContext = new TestBuilderContext
             {
                 TestMethodName = testInformation.Name,
@@ -148,7 +157,8 @@ internal class ReflectionTestConstructionBuilder
         TestBuilderContextAccessor testBuilderContextAccessor,
         Attribute[] allAttributes,
         int currentRepeatAttempt,
-        List<TestConstructionData> testConstructionDataList)
+        List<ITestDefinition> testDefinitions,
+        List<DiscoveryFailure> discoveryFailures)
     {
         var invokedClassInstanceArguments = await classInstanceArguments();
 
@@ -171,10 +181,10 @@ internal class ReflectionTestConstructionBuilder
         await foreach (var testArguments in DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(
             testDataAttributeInstance, testArgumentsContext))
         {
-            var testData = await CreateTestConstructionDataAsync(testInformation, invokedClassInstanceArguments, typeDataAttribute,
+            var testDefinition = await CreateTestDefinitionAsync(testInformation, invokedClassInstanceArguments, typeDataAttribute,
                 testArguments, testBuilderContextAccessor, allAttributes, currentRepeatAttempt);
 
-            testConstructionDataList.Add(testData);
+            testDefinitions.Add(testDefinition);
 
             var newContext = new TestBuilderContext
             {
@@ -188,7 +198,7 @@ internal class ReflectionTestConstructionBuilder
         }
     }
 
-    private async Task<TestConstructionData> CreateTestConstructionDataAsync(
+    private async Task<TestDefinition> CreateTestDefinitionAsync(
         TestMethod testInformation,
         object?[] invokedClassInstanceArguments,
         IDataAttribute typeDataAttribute,
@@ -235,27 +245,26 @@ internal class ReflectionTestConstructionBuilder
             currentRepeatAttempt
         );
 
-        return new TestConstructionData
+        return new TestDefinition
         {
             TestId = testId,
             TestMethod = resolvedMethodInfo,
             RepeatCount = repeatCount + 1,
-            CurrentRepeatAttempt = currentRepeatAttempt,
             TestFilePath = testAttribute.File,
             TestLineNumber = testAttribute.Line,
             TestClassFactory = () => Activator.CreateInstance(classType, invokedClassInstanceArguments)!,
-            TestMethodInvoker = async (instance, cancellationToken) =>
+            TestMethodInvoker = (instance, cancellationToken) =>
             {
                 var result = methodInfo.Invoke(instance, testMethodArguments);
                 if (result is Task task)
                 {
-                    await task;
+                    return new ValueTask(task);
                 }
+                return new ValueTask();
             },
             ClassArgumentsProvider = () => invokedClassInstanceArguments,
             MethodArgumentsProvider = () => testMethodArguments,
-            PropertiesProvider = () => propertyArgs,
-            TestBuilderContext = testBuilderContextAccessor.Current
+            PropertiesProvider = () => propertyArgs
         };
     }
 
@@ -298,9 +307,8 @@ internal class ReflectionTestConstructionBuilder
         BaseTestAttribute testAttribute,
         Exception exception,
         Type testClassType,
-        List<TestConstructionData> testConstructionDataList)
+        List<DiscoveryFailure> discoveryFailures)
     {
-        var repeatCount = 0;
         var currentRepeatAttempt = 0;
 
         var testId = TestIdGenerator.GenerateTestId(
@@ -311,26 +319,14 @@ internal class ReflectionTestConstructionBuilder
             currentRepeatAttempt
         );
 
-        testConstructionDataList.Add(new TestConstructionData
+        discoveryFailures.Add(new DiscoveryFailure
         {
             TestId = testId,
-            TestMethod = testInformation,
-            RepeatCount = repeatCount,
-            CurrentRepeatAttempt = currentRepeatAttempt,
+            Exception = exception,
             TestFilePath = testAttribute.File,
             TestLineNumber = testAttribute.Line,
-            TestClassFactory = () => throw exception,
-            TestMethodInvoker = (_, _) => throw exception,
-            ClassArgumentsProvider = () => Array.Empty<object?>(),
-            MethodArgumentsProvider = () => Array.Empty<object?>(),
-            PropertiesProvider = () => new Dictionary<string, object?>(),
-            TestBuilderContext = new TestBuilderContext
-            {
-                TestMethodName = testInformation.Name,
-                ClassInformation = testInformation.Class,
-                MethodInformation = testInformation
-            },
-            DiscoveryException = exception
+            TestClassName = testClassType.Name,
+            TestMethodName = testInformation.Name
         });
     }
 }

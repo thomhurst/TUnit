@@ -13,7 +13,7 @@ public record SourceGeneratedMethodInformation : TestMethod;
 [DebuggerDisplay("{Type}.{Name}")]
 public record TestMethod : TestMember
 {
-    internal static TestMethod Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+    public static TestMethod Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>(string methodName) =>

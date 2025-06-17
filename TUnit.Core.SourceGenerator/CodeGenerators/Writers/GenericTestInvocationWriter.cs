@@ -45,12 +45,11 @@ public static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine();
 
-        sourceBuilder.Write($"nodes.Add(new TestConstructionData<{fullyQualifiedClassType}>");
+        sourceBuilder.Write($"testDefinitions.Add(new TestDefinition<{fullyQualifiedClassType}>");
         sourceBuilder.Write("{");
         sourceBuilder.Write($"TestId = $\"{testId}\",");
         sourceBuilder.Write("TestMethod = testInformation,");
         sourceBuilder.Write($"RepeatCount = {testSourceDataModel.RepeatLimit},");
-        sourceBuilder.Write($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.Write($"TestClassFactory = () => resettableClassFactory.Value,");
@@ -63,8 +62,7 @@ public static class GenericTestInvocationWriter
         {
             sourceBuilder.Write($"[\"{propertyContainer.PropertySymbol.Name}\"] = {propertyContainer.ArgumentsContainer.DataVariables.Select(variable => variable.Name).ToCommaSeparatedString()},");
         }
-        sourceBuilder.Write("},");
-        sourceBuilder.Write("TestBuilderContext = testBuilderContext,");
+        sourceBuilder.Write("}");
         sourceBuilder.Write("});");
 
         sourceBuilder.Write("resettableClassFactory = resettableClassFactoryDelegate();");

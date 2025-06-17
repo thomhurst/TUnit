@@ -20,7 +20,8 @@ public partial class TestContext : Context
 
     internal readonly List<Artifact> Artifacts = [];
     internal readonly List<CancellationToken> LinkedCancellationTokens = [];
-    internal readonly TestConstructionData? OriginalConstructionData;
+    internal readonly ITestDefinition? OriginalTestDefinition;
+    internal readonly TestBuilderContext TestBuilderContext;
 
 #if NET9_0_OR_GREATER
     /// <summary>
@@ -41,15 +42,17 @@ public partial class TestContext : Context
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="testDetails">The test details.</param>
-    /// <param name="constructionData">The test construction data.</param>
+    /// <param name="testDefinition">The test definition.</param>
+    /// <param name="testBuilderContext">The test builder context.</param>
     /// <param name="classHookContext"></param>
-    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestConstructionData constructionData, ClassHookContext classHookContext) : base(classHookContext)
+    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, ITestDefinition testDefinition, TestBuilderContext testBuilderContext, ClassHookContext classHookContext) : base(classHookContext)
     {
         _serviceProvider = serviceProvider;
-        OriginalConstructionData = constructionData;
+        OriginalTestDefinition = testDefinition;
         TestDetails = testDetails;
-        ObjectBag = constructionData.TestBuilderContext.ObjectBag;
-        Events = constructionData.TestBuilderContext.Events;
+        TestBuilderContext = testBuilderContext;
+        ObjectBag = testBuilderContext.ObjectBag;
+        Events = testBuilderContext.Events;
         classHookContext.AddTest(this);
     }
 

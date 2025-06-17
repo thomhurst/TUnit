@@ -10,21 +10,14 @@ public static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
         
-        sourceBuilder.Write($"nodes.Add(new TestConstructionData<{testSourceDataModel.TestClass.GloballyQualified()}>");
+        sourceBuilder.Write($"discoveryFailures.Add(new DiscoveryFailure");
         sourceBuilder.Write("{");
         sourceBuilder.Write($"TestId = $\"{testId}\",");
-        sourceBuilder.Write($"TestMethod = TestMethod.Failure<{testSourceDataModel.TestClass.GloballyQualified()}>(\"{testSourceDataModel.MethodName}\"),");
-        sourceBuilder.Write($"RepeatCount = 0,");
-        sourceBuilder.Write($"CurrentRepeatAttempt = 0,");
+        sourceBuilder.Write($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
         sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        sourceBuilder.Write($"TestClassFactory = () => throw new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
-        sourceBuilder.Write($"TestMethodInvoker = (_, _) => throw new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
-        sourceBuilder.Write($"ClassArgumentsProvider = () => System.Array.Empty<object?>(),");
-        sourceBuilder.Write($"MethodArgumentsProvider = () => System.Array.Empty<object?>(),");
-        sourceBuilder.Write($"PropertiesProvider = () => new global::System.Collections.Generic.Dictionary<string, object?>(),");
-        sourceBuilder.Write($"TestBuilderContext = new TestBuilderContext(),");
-        sourceBuilder.Write($"DiscoveryException = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.TestClass.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception)");
+        sourceBuilder.Write($"TestClassName = \"{testSourceDataModel.TestClass.Name}\",");
+        sourceBuilder.Write($"TestMethodName = \"{testSourceDataModel.MethodName}\"");
         sourceBuilder.Write("});");
     }
     

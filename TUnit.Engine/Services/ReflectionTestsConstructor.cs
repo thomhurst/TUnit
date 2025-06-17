@@ -38,15 +38,19 @@ internal class ReflectionTestsConstructor(
 
         var allTypes = ReflectionScanner.GetTypes();
 
-        var standardTestConstructionData = await DiscoverStandardTestsAsync(allTypes);
+        var discoveryResult = await DiscoverStandardTestsAsync(allTypes);
         var dynamicTests = await DiscoverDynamicTestsAsync(allTypes);
 
         var discoveredTests = new List<DiscoveredTest>();
         
         // Process standard tests
-        foreach (var testData in standardTestConstructionData)
+        var (tests, failures) = _unifiedBuilder.BuildTests(discoveryResult);
+        discoveredTests.AddRange(tests);
+        
+        // Log discovery failures
+        foreach (var failure in failures)
         {
-            discoveredTests.Add(_unifiedBuilder.BuildTest(testData));
+            Console.WriteLine($"Test discovery failed: {failure.TestClassName}.{failure.TestMethodName} - {failure.Reason}");
         }
         
         // Process dynamic tests
@@ -58,11 +62,12 @@ internal class ReflectionTestsConstructor(
         return discoveredTests.ToArray();
     }
 
-    private async Task<List<TestConstructionData>> DiscoverStandardTestsAsync(HashSet<Type> allTypes)
+    private async Task<DiscoveryResult> DiscoverStandardTestsAsync(HashSet<Type> allTypes)
     {
         return await Task.Run(async () =>
         {
-            var results = new List<TestConstructionData>();
+            var allDefinitions = new List<ITestDefinition>();
+            var allFailures = new List<DiscoveryFailure>();
             var testClasses = allTypes.Where(IsTestClass);
 
             foreach (var testClass in testClasses)
@@ -79,14 +84,16 @@ internal class ReflectionTestsConstructor(
                     .ToArray();
 
                 var testBuilder = new ReflectionTestConstructionBuilder();
-                var tests = await testBuilder.BuildTestsAsync(classInformation, methodInformations);
-                foreach (var test in tests)
-                {
-                    results.Add(test);
-                }
+                var result = await testBuilder.BuildTestsAsync(classInformation, methodInformations);
+                allDefinitions.AddRange(result.TestDefinitions);
+                allFailures.AddRange(result.DiscoveryFailures);
             }
             
-            return results;
+            return new DiscoveryResult
+            {
+                TestDefinitions = allDefinitions,
+                DiscoveryFailures = allFailures
+            };
         });
     }
 

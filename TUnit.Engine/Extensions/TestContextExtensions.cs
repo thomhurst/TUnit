@@ -26,8 +26,8 @@ public static class TestContextExtensions
     {
         // TODO: Rework to use DynamicTestRegistrar
         
-        var originalData = testContext.OriginalConstructionData 
-            ?? throw new InvalidOperationException("Cannot reregister test without original construction data");
+        var originalDefinition = testContext.OriginalTestDefinition 
+            ?? throw new InvalidOperationException("Cannot reregister test without original test definition");
 
         var testBuilderContext = new TestBuilderContext
         {
@@ -41,20 +41,27 @@ public static class TestContextExtensions
             testBuilderContext.ObjectBag.Add(key, value);
         }
         
-        foreach (var dataAttribute in originalData.TestBuilderContext.DataAttributes)
+        foreach (var dataAttribute in testContext.TestBuilderContext.DataAttributes)
         {
             testBuilderContext.DataAttributes.Add(dataAttribute);
         }
         
-        var newTestData = new TestConstructionData
+        // For dynamic reregistration, we need access to the factories from the original definition
+        // This is a temporary workaround until we have a better dynamic test registration API
+        var nonGenericDef = originalDefinition as TestDefinition;
+        if (nonGenericDef == null)
+        {
+            throw new InvalidOperationException("Dynamic test reregistration requires a non-generic TestDefinition");
+        }
+        
+        var newTestDefinition = new TestDefinition
         {
             TestId = Guid.NewGuid().ToString(),
-            TestMethod = originalData.TestMethod,
-            RepeatCount = originalData.RepeatCount,
-            CurrentRepeatAttempt = originalData.CurrentRepeatAttempt,
-            TestFilePath = originalData.TestFilePath,
-            TestLineNumber = originalData.TestLineNumber,
-            TestClassFactory = originalData.TestClassFactory,
+            TestMethod = originalDefinition.TestMethod,
+            RepeatCount = originalDefinition.RepeatCount,
+            TestFilePath = originalDefinition.TestFilePath,
+            TestLineNumber = originalDefinition.TestLineNumber,
+            TestClassFactory = nonGenericDef.TestClassFactory,
             TestMethodInvoker = async (@class, token) =>
             {
                 var hasTimeout = testContext.TestDetails.Timeout != null;
@@ -63,20 +70,19 @@ public static class TestContextExtensions
 
                 try
                 {
-                    await AsyncConvert.ConvertObject(originalData.TestMethod.ReflectionInformation.Invoke(@class, args));
+                    await AsyncConvert.ConvertObject(originalDefinition.TestMethod.ReflectionInformation.Invoke(@class, args));
                 }
                 catch (TargetInvocationException e)
                 {
                     ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
                 }
             },
-            ClassArgumentsProvider = originalData.ClassArgumentsProvider,
+            ClassArgumentsProvider = nonGenericDef.ClassArgumentsProvider,
             MethodArgumentsProvider = () => methodArguments ?? [],
-            PropertiesProvider = originalData.PropertiesProvider,
-            TestBuilderContext = testBuilderContext
+            PropertiesProvider = nonGenericDef.PropertiesProvider
         };
         
-        var newTest = testContext.GetService<UnifiedTestBuilder>().BuildTest(newTestData);
+        var newTest = testContext.GetService<UnifiedTestBuilder>().BuildTest(newTestDefinition, 1);
         
         var startTime = DateTimeOffset.UtcNow;
 
