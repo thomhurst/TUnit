@@ -3,7 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-internal record DiscoveredTest<
+public record DiscoveredTest<
     [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis
         .DynamicallyAccessedMemberTypes.PublicConstructors)]
     TTestClass
@@ -28,7 +28,7 @@ internal record DiscoveredTest<
 }
 
 [DebuggerDisplay("{TestDetails.TestId}")]
-internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparable
+public abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparable
 {
     public required TestContext TestContext { get; init; }
 

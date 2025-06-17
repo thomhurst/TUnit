@@ -56,6 +56,14 @@ public sealed record TestDefinition : ITestDefinition
     /// Provider for properties to inject into the test class.
     /// </summary>
     public required Func<IDictionary<string, object?>> PropertiesProvider { get; init; }
+    
+    /// <summary>
+    /// Builds a discovered test using the provided builder.
+    /// </summary>
+    public DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt)
+    {
+        return builder.BuildTest(this, currentRepeatAttempt);
+    }
 }
 
 /// <summary>
@@ -139,6 +147,17 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
             PropertiesProvider = definition.PropertiesProvider
         };
     }
+    
+    /// <summary>
+    /// Builds a discovered test using the provided builder.
+    /// This method dispatches to the generic version on the builder, avoiding reflection.
+    /// </summary>
+    public DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt)
+    {
+        // This is the key: we know our generic type at compile time here,
+        // so we can call the generic method directly without reflection
+        return builder.BuildTest(this, currentRepeatAttempt);
+    }
 }
 
 /// <summary>
@@ -170,4 +189,28 @@ public interface ITestDefinition
     /// Line number in the source file where the test is defined.
     /// </summary>
     int TestLineNumber { get; }
+    
+    /// <summary>
+    /// Builds a discovered test using the provided builder.
+    /// This allows TestDefinition<T> to dispatch to the correct generic method.
+    /// </summary>
+    DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt);
+}
+
+/// <summary>
+/// Interface for test builders that can construct discovered tests.
+/// </summary>
+public interface ITestBuilder
+{
+    /// <summary>
+    /// Builds a discovered test from a non-generic test definition.
+    /// </summary>
+    DiscoveredTest BuildTest(TestDefinition definition, int currentRepeatAttempt);
+    
+    /// <summary>
+    /// Builds a discovered test from a generic test definition.
+    /// </summary>
+    DiscoveredTest<TTestClass> BuildTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
+        TestDefinition<TTestClass> definition, 
+        int currentRepeatAttempt) where TTestClass : class;
 }

@@ -119,6 +119,7 @@ public record UntypedDynamicTest : DynamicTest
             DiscoveryFailures = discoveryFailures
         };
     }
+    
 
     private static string GetTestId(MethodInfo testBody)
     {

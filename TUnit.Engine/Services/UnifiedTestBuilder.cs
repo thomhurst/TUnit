@@ -11,7 +11,7 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal class UnifiedTestBuilder(
     ContextManager contextManager,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider) : ITestBuilder
 {
     /// <summary>
     /// Builds multiple tests from dynamic test data.
@@ -24,22 +24,20 @@ internal class UnifiedTestBuilder(
     }
     
     /// <summary>
-    /// Builds a discovered test from a test definition.
+    /// Builds a discovered test from a test definition using polymorphic dispatch.
     /// </summary>
     public DiscoveredTest BuildTest(ITestDefinition definition, int currentRepeatAttempt = 1)
     {
-        // For non-generic definitions, we need to use the untyped path
-        var nonGenericDef = definition as TestDefinition;
-        if (nonGenericDef != null)
-        {
-            return BuildUntypedTest(nonGenericDef, currentRepeatAttempt);
-        }
-        
-        // For generic definitions, we'd need to use reflection or have a visitor pattern
-        // Since we can't determine TTestClass at compile time here
-        throw new NotSupportedException(
-            "Building tests from ITestDefinition requires either TestDefinition or " +
-            "using the generic BuildTest<T> method with TestDefinition<T>.");
+        // Use polymorphic dispatch - the definition knows how to build itself
+        return definition.BuildTest(this, currentRepeatAttempt);
+    }
+    
+    /// <summary>
+    /// Builds a discovered test from a non-generic test definition.
+    /// </summary>
+    public DiscoveredTest BuildTest(TestDefinition definition, int currentRepeatAttempt)
+    {
+        return BuildUntypedTest(definition, currentRepeatAttempt);
     }
     
     /// <summary>
@@ -48,7 +46,7 @@ internal class UnifiedTestBuilder(
     /// </summary>
     public DiscoveredTest<TTestClass> BuildTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
         TestDefinition<TTestClass> definition,
-        int currentRepeatAttempt = 1) where TTestClass : class
+        int currentRepeatAttempt) where TTestClass : class
     {
         // Create a resettable lazy for the class instance
         var resettableLazy = new ResettableLazy<TTestClass>(
@@ -203,7 +201,7 @@ internal class UnifiedTestBuilder(
             {
                 try
                 {
-                    var test = BuildTest(definition, repeatAttempt);
+                    var test = BuildTestFromDefinition(definition, repeatAttempt);
                     tests.Add(test);
                 }
                 catch (Exception ex)
@@ -216,5 +214,11 @@ internal class UnifiedTestBuilder(
         }
         
         return (tests, discoveryResult.DiscoveryFailures);
+    }
+    
+    private DiscoveredTest BuildTestFromDefinition(ITestDefinition definition, int repeatAttempt)
+    {
+        // Use polymorphic dispatch - no reflection needed!
+        return definition.BuildTest(this, repeatAttempt);
     }
 }
