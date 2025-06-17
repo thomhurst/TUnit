@@ -29,7 +29,12 @@ internal class UnifiedTestBuilder(
     public DiscoveredTest BuildTest(ITestDefinition definition, int currentRepeatAttempt = 1)
     {
         // Use polymorphic dispatch - the definition knows how to build itself
-        return definition.BuildTest(this, currentRepeatAttempt);
+        if (definition is TestDefinitionBase testDef)
+        {
+            return testDef.BuildTest(this, currentRepeatAttempt);
+        }
+        
+        throw new NotSupportedException($"Unknown test definition type: {definition.GetType()}");
     }
     
     /// <summary>
@@ -219,6 +224,11 @@ internal class UnifiedTestBuilder(
     private DiscoveredTest BuildTestFromDefinition(ITestDefinition definition, int repeatAttempt)
     {
         // Use polymorphic dispatch - no reflection needed!
-        return definition.BuildTest(this, repeatAttempt);
+        if (definition is TestDefinitionBase testDef)
+        {
+            return testDef.BuildTest(this, repeatAttempt);
+        }
+        
+        throw new NotSupportedException($"Unknown test definition type: {definition.GetType()}");
     }
 }

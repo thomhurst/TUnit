@@ -5,7 +5,7 @@ namespace TUnit.Core;
 /// <summary>
 /// A discovered test that uses a provided method invoker instead of reflection.
 /// </summary>
-public record UnifiedDiscoveredTest(
+internal record UnifiedDiscoveredTest(
     ResettableLazy<object> ResettableLazy,
     Func<object, CancellationToken, ValueTask> TestMethodInvoker) : DiscoveredTest
 {

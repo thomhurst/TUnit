@@ -3,34 +3,70 @@ using System.Diagnostics.CodeAnalysis;
 namespace TUnit.Core;
 
 /// <summary>
-/// Immutable definition of a test - represents what a test is, not how it runs.
+/// Base class for test definitions.
 /// </summary>
-public sealed record TestDefinition : ITestDefinition
+public abstract record TestDefinitionBase : ITestDefinition
 {
+    /// <summary>
+    /// Internal method to build a discovered test.
+    /// </summary>
+    internal abstract DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt);
+    
     /// <summary>
     /// Unique identifier for the test.
     /// </summary>
-    public required string TestId { get; init; }
+    public abstract string TestId { get; init; }
     
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
-    public required TestMethod TestMethod { get; init; }
+    public abstract TestMethod TestMethod { get; init; }
     
     /// <summary>
     /// How many times this test should be repeated.
     /// </summary>
-    public required int RepeatCount { get; init; }
+    public abstract int RepeatCount { get; init; }
     
     /// <summary>
     /// Source file path where the test is defined.
     /// </summary>
-    public required string TestFilePath { get; init; }
+    public abstract string TestFilePath { get; init; }
     
     /// <summary>
     /// Line number in the source file where the test is defined.
     /// </summary>
-    public required int TestLineNumber { get; init; }
+    public abstract int TestLineNumber { get; init; }
+}
+
+/// <summary>
+/// Immutable definition of a test - represents what a test is, not how it runs.
+/// </summary>
+public sealed record TestDefinition : TestDefinitionBase
+{
+    /// <summary>
+    /// Unique identifier for the test.
+    /// </summary>
+    public override required string TestId { get; init; }
+    
+    /// <summary>
+    /// Metadata about the test method.
+    /// </summary>
+    public override required TestMethod TestMethod { get; init; }
+    
+    /// <summary>
+    /// How many times this test should be repeated.
+    /// </summary>
+    public override required int RepeatCount { get; init; }
+    
+    /// <summary>
+    /// Source file path where the test is defined.
+    /// </summary>
+    public override required string TestFilePath { get; init; }
+    
+    /// <summary>
+    /// Line number in the source file where the test is defined.
+    /// </summary>
+    public override required int TestLineNumber { get; init; }
     
     /// <summary>
     /// Factory to create instances of the test class.
@@ -60,7 +96,7 @@ public sealed record TestDefinition : ITestDefinition
     /// <summary>
     /// Builds a discovered test using the provided builder.
     /// </summary>
-    public DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt)
+    internal override DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt)
     {
         return builder.BuildTest(this, currentRepeatAttempt);
     }
@@ -70,33 +106,33 @@ public sealed record TestDefinition : ITestDefinition
 /// Generic version of TestDefinition that maintains type safety for AOT/trimming.
 /// </summary>
 public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>
-    : ITestDefinition
+    : TestDefinitionBase
     where TTestClass : class
 {
     /// <summary>
     /// Unique identifier for the test.
     /// </summary>
-    public required string TestId { get; init; }
+    public override required string TestId { get; init; }
     
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
-    public required TestMethod TestMethod { get; init; }
+    public override required TestMethod TestMethod { get; init; }
     
     /// <summary>
     /// How many times this test should be repeated.
     /// </summary>
-    public required int RepeatCount { get; init; }
+    public override required int RepeatCount { get; init; }
     
     /// <summary>
     /// Source file path where the test is defined.
     /// </summary>
-    public required string TestFilePath { get; init; }
+    public override required string TestFilePath { get; init; }
     
     /// <summary>
     /// Line number in the source file where the test is defined.
     /// </summary>
-    public required int TestLineNumber { get; init; }
+    public override required int TestLineNumber { get; init; }
     
     /// <summary>
     /// Strongly-typed factory to create instances of the test class.
@@ -152,7 +188,7 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     /// Builds a discovered test using the provided builder.
     /// This method dispatches to the generic version on the builder, avoiding reflection.
     /// </summary>
-    public DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt)
+    internal override DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt)
     {
         // This is the key: we know our generic type at compile time here,
         // so we can call the generic method directly without reflection
@@ -190,17 +226,13 @@ public interface ITestDefinition
     /// </summary>
     int TestLineNumber { get; }
     
-    /// <summary>
-    /// Builds a discovered test using the provided builder.
-    /// This allows TestDefinition<T> to dispatch to the correct generic method.
-    /// </summary>
-    DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt);
 }
 
 /// <summary>
 /// Interface for test builders that can construct discovered tests.
+/// This interface is internal to avoid exposing DiscoveredTest publicly.
 /// </summary>
-public interface ITestBuilder
+internal interface ITestBuilder
 {
     /// <summary>
     /// Builds a discovered test from a non-generic test definition.
@@ -214,3 +246,4 @@ public interface ITestBuilder
         TestDefinition<TTestClass> definition, 
         int currentRepeatAttempt) where TTestClass : class;
 }
+
