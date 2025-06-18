@@ -23,5 +23,5 @@ public record PropertyMetadata : MemberMetadata
     public SharedType Shared { get; init; } = SharedType.None;
     public string? Key { get; init; } = null;
     public required Func<object?, object?> Getter { get; init; }
-    public ClassMetadata? ClassMetadata { get; init; }
+    public ClassMetadata? ClassMetadata { get; set; }
 }

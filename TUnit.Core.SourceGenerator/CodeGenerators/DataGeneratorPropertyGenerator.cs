@@ -132,6 +132,9 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             sourceBuilder.Write("public static void InitializeProperties()");
             sourceBuilder.Write("{");
 
+            // First, generate ClassMetadata for all property types that need it
+            GenerateClassMetadataForPropertyTypes(type, sourceBuilder, context, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
+            
             RegisterProperty(type, sourceBuilder, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
 
             sourceBuilder.Write("}");
@@ -152,6 +155,53 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
             context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));
 
             throw;
+        }
+    }
+
+    private static void GenerateClassMetadataForPropertyTypes(INamedTypeSymbol type, SourceCodeWriter sourceBuilder, SourceProductionContext context, HashSet<ITypeSymbol> visitedTypes)
+    {
+        if (!visitedTypes.Add(type))
+        {
+            return;
+        }
+
+        // Find properties with ClassDataSource attributes
+        var properties = type.GetMembersIncludingBase()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "ClassDataSourceAttribute"))
+            .ToArray();
+
+        foreach (var property in properties)
+        {
+            if (property.Type is INamedTypeSymbol propertyType && !propertyType.IsGenericDefinition())
+            {
+                // Generate a simple ClassMetadata registration for the property type
+                sourceBuilder.Write($@"
+                    global::TUnit.Core.ClassMetadata.GetOrAdd(""{propertyType.GloballyQualified()}"", () => new global::TUnit.Core.ClassMetadata
+                    {{
+                        Type = typeof({propertyType.GloballyQualified()}),
+                        Name = ""{propertyType.Name}"",
+                        Namespace = ""{propertyType.ContainingNamespace?.ToDisplayString() ?? ""}"",
+                        Assembly = new global::TUnit.Core.AssemblyMetadata
+                        {{
+                            Name = ""{propertyType.ContainingAssembly?.Name ?? ""}"",
+                            Attributes = []
+                        }},
+                        Parent = null,
+                        Parameters = [],
+                        Properties = [],
+                        Attributes = []
+                    }});
+                ");
+            }
+        }
+
+        // Recursively process nested types
+        foreach (var nestedType in type.GetMembersIncludingBase()
+            .OfType<INamedTypeSymbol>()
+            .Where(x => !x.IsGenericDefinition()))
+        {
+            GenerateClassMetadataForPropertyTypes(nestedType, sourceBuilder, context, visitedTypes);
         }
     }
 

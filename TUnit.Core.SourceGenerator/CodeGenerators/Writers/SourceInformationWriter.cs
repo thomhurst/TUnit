@@ -171,23 +171,9 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributes(sourceCodeWriter, context, property.GetAttributes());
         
-        // Check if we should generate ClassMetadata for this property's type
-        if (ShouldGenerateClassMetadataForPropertyType(context, property))
-        {
-            sourceCodeWriter.Write("ClassMetadata = ");
-            if (property.Type is INamedTypeSymbol propertyTypeSymbol)
-            {
-                GenerateClassInformation(sourceCodeWriter, context, propertyTypeSymbol);
-            }
-            else
-            {
-                sourceCodeWriter.Write("null,");
-            }
-        }
-        else
-        {
-            sourceCodeWriter.Write("ClassMetadata = null,");
-        }
+        // For now, always set ClassMetadata to null to avoid circular references
+        // The ClassMetadata will be available through the cache if needed at runtime
+        sourceCodeWriter.Write("ClassMetadata = null,");
 
         sourceCodeWriter.Write("},");
     }

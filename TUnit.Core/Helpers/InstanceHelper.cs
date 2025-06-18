@@ -78,7 +78,16 @@ internal static class InstanceHelper
             }
             var type = classInformation.Type;
 
-            var parameters = type.GetConstructors().First(x => !x.IsStatic).GetParameters();
+            // Find the best matching constructor
+            var constructors = type.GetConstructors().Where(x => !x.IsStatic).ToArray();
+            var constructor = FindBestMatchingConstructor(constructors, args);
+            
+            if (constructor == null)
+            {
+                throw new MissingMethodException($"No suitable constructor found for type {type.FullName} with {args?.Length ?? 0} arguments");
+            }
+
+            var parameters = constructor.GetParameters();
 
             var castedArgs = args?.Select((a, index) =>
             {
@@ -120,5 +129,81 @@ internal static class InstanceHelper
         {
             throw new TUnitException("Cannot create instance of type " + classInformation.Type.FullName, e);
         }
+    }
+    
+    private static ConstructorInfo? FindBestMatchingConstructor(ConstructorInfo[] constructors, object?[]? args)
+    {
+        var argCount = args?.Length ?? 0;
+        
+        // First try to find exact parameter count match
+        var candidateConstructors = constructors.Where(c => c.GetParameters().Length == argCount).ToArray();
+        
+        if (candidateConstructors.Length == 0)
+        {
+            // No exact match, look for constructors with optional parameters
+            candidateConstructors = constructors.Where(c => 
+            {
+                var parameters = c.GetParameters();
+                var requiredCount = parameters.Count(p => !p.HasDefaultValue);
+                return requiredCount <= argCount && parameters.Length >= argCount;
+            }).ToArray();
+        }
+        
+        if (candidateConstructors.Length == 0)
+        {
+            return null;
+        }
+        
+        if (candidateConstructors.Length == 1)
+        {
+            return candidateConstructors[0];
+        }
+        
+        // Multiple candidates - try to find best match based on parameter type compatibility
+        foreach (var constructor in candidateConstructors)
+        {
+            var parameters = constructor.GetParameters();
+            var isMatch = true;
+            
+            for (int i = 0; i < argCount; i++)
+            {
+                var arg = args![i];
+                var param = parameters[i];
+                
+                if (arg == null)
+                {
+                    // Null can be assigned to reference types and nullable value types
+                    if (param.ParameterType.IsValueType && Nullable.GetUnderlyingType(param.ParameterType) == null)
+                    {
+                        isMatch = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    // Check if the argument can be converted to the parameter type
+                    var argType = arg.GetType();
+                    
+                    if (!param.ParameterType.IsAssignableFrom(argType))
+                    {
+                        // Check for implicit/explicit conversion
+                        var conversionMethod = CastHelper.GetConversionMethod(argType, param.ParameterType);
+                        if (conversionMethod == null && !typeof(IConvertible).IsAssignableFrom(argType))
+                        {
+                            isMatch = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (isMatch)
+            {
+                return constructor;
+            }
+        }
+        
+        // If no perfect match found, return the first candidate
+        return candidateConstructors[0];
     }
 }

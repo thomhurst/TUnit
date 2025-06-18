@@ -15,6 +15,10 @@ internal class ReflectionToSourceModelHelpers
     private static readonly ConcurrentDictionary<MethodInfo, MethodMetadata> _methodCache = new();
     private static readonly ConcurrentDictionary<PropertyInfo, PropertyMetadata> _propertyCache = new();
     private static readonly ConcurrentDictionary<ParameterInfo, ParameterMetadata> _parameterCache = new();
+    
+    // Track types currently being processed to prevent infinite recursion
+    [ThreadStatic]
+    private static HashSet<Type>? _typesBeingProcessed;
 
     public static MethodMetadata BuildTestMethod([DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
@@ -59,16 +63,46 @@ internal class ReflectionToSourceModelHelpers
         | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType)
     {
-        return _classCache.GetOrAdd(testClassType, _ => new ClassMetadata
+        return _classCache.GetOrAdd(testClassType, _ =>
         {
-            Parent = GetParent(testClassType),
-            Assembly = GenerateAssembly(testClassType),
-            Attributes = testClassType.GetCustomAttributesSafe().ToArray(),
-            Name = testClassType.GetFormattedName(),
-            Namespace = testClassType.Namespace,
-            Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
-            Properties = testClassType.GetProperties().Select(GenerateProperty).ToArray(),
-            Type = testClassType
+            // Initialize thread-local set if needed
+            _typesBeingProcessed ??= new HashSet<Type>();
+            
+            // Check if we're already processing this type
+            if (!_typesBeingProcessed.Add(testClassType))
+            {
+                // Return a minimal metadata to break the cycle
+                return new ClassMetadata
+                {
+                    Parent = null,
+                    Assembly = GenerateAssembly(testClassType),
+                    Attributes = [],
+                    Name = testClassType.GetFormattedName(),
+                    Namespace = testClassType.Namespace,
+                    Parameters = [],
+                    Properties = [], // Empty to prevent recursion
+                    Type = testClassType
+                };
+            }
+            
+            try
+            {
+                return new ClassMetadata
+                {
+                    Parent = GetParent(testClassType),
+                    Assembly = GenerateAssembly(testClassType),
+                    Attributes = testClassType.GetCustomAttributesSafe().ToArray(),
+                    Name = testClassType.GetFormattedName(),
+                    Namespace = testClassType.Namespace,
+                    Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
+                    Properties = testClassType.GetProperties().Select(GenerateProperty).ToArray(),
+                    Type = testClassType
+                };
+            }
+            finally
+            {
+                _typesBeingProcessed.Remove(testClassType);
+            }
         });
     }
 
