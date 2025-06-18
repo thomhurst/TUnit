@@ -20,7 +20,7 @@ public class TestHooksWriter : BaseHookWriter
                 sourceBuilder.Write("new global::TUnit.Core.Hooks.AfterTestHookMethod");
             }
 
-            sourceBuilder.Write("{ ");
+            sourceBuilder.Write("{");
             sourceBuilder.Write("MethodInfo = ");
             SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
 

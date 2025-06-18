@@ -92,24 +92,26 @@ public class AttributeWriter
     public static void WriteAttributeMetadata(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData, string targetElement, string? targetMemberName, string? targetTypeName)
     {
-        sourceCodeWriter.Write($"new global::TUnit.Core.AttributeMetadata {{ ");
+        sourceCodeWriter.Write("new global::TUnit.Core.AttributeMetadata");
+        sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Instance = {GetAttributeObjectInitializer(context, attributeData, sourceCodeWriter.TabLevel)}, ");
         sourceCodeWriter.Write($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement}, ");
-        
+
         if (targetMemberName != null)
         {
             sourceCodeWriter.Write($"TargetMemberName = \"{targetMemberName}\", ");
         }
-        
+
         if (targetTypeName != null)
         {
             sourceCodeWriter.Write($"TargetType = typeof({targetTypeName}), ");
         }
-        
+
         // Add constructor arguments if available
         if (attributeData.ConstructorArguments.Length > 0)
         {
-            sourceCodeWriter.Write("ConstructorArguments = new object?[] { ");
+            sourceCodeWriter.Write("ConstructorArguments = new object?[]");
+            sourceCodeWriter.Write("{");
             for (var i = 0; i < attributeData.ConstructorArguments.Length; i++)
             {
                 if (i > 0) sourceCodeWriter.Write(", ");
@@ -117,11 +119,12 @@ public class AttributeWriter
             }
             sourceCodeWriter.Write(" }, ");
         }
-        
+
         // Add named arguments if available
         if (attributeData.NamedArguments.Length > 0)
         {
-            sourceCodeWriter.Write("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?>() { ");
+            sourceCodeWriter.Write("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?>()");
+            sourceCodeWriter.Write("{");
             var first = true;
             foreach (var namedArg in attributeData.NamedArguments)
             {
@@ -131,7 +134,7 @@ public class AttributeWriter
             }
             sourceCodeWriter.Write(" }, ");
         }
-        
+
         sourceCodeWriter.Write("}");
     }
 

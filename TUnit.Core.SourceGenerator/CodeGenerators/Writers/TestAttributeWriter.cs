@@ -90,7 +90,8 @@ public class TestAttributeWriter
             return;
         }
 
-        sourceCodeWriter.Write("ConstructorArguments = new object?[] { ");
+        sourceCodeWriter.Write("ConstructorArguments = new object?[]");
+        sourceCodeWriter.Write("{");
 
         for (var i = 0; i < attributeData.ConstructorArguments.Length; i++)
         {

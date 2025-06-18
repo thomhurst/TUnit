@@ -23,7 +23,7 @@ public static class AssemblyHooksWriter
             sourceBuilder.Write("new global::TUnit.Core.Hooks.AfterAssemblyHookMethod");
         }
 
-        sourceBuilder.Write("{ ");
+        sourceBuilder.Write("{");
         sourceBuilder.Write("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
 

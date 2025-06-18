@@ -169,17 +169,19 @@ public record AsyncDataSourceGeneratorContainer(
         var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var isReferenceType = property.Type.IsReferenceType;
         var isNullable = property.Type.NullableAnnotation == NullableAnnotation.Annotated;
-        
+
         // Use a simplified approach to get the first value from the async enumerable
-        sourceCodeWriter.Write("await (async () => { ");
+        sourceCodeWriter.Write("await (async () => {");
         sourceCodeWriter.Write($"var enumerator = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){attributeVariableName}).GenerateAsync(");
         WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, namedTypeSymbol, property);
         sourceCodeWriter.Write(").GetAsyncEnumerator(); ");
-        sourceCodeWriter.Write("try { ");
-        sourceCodeWriter.Write("if (await enumerator.MoveNextAsync()) { ");
+        sourceCodeWriter.Write("try");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write("if (await enumerator.MoveNextAsync())");
+        sourceCodeWriter.Write("{");
         sourceCodeWriter.Write("var result = await enumerator.Current(); ");
         sourceCodeWriter.Write($"return ({propertyType})(result?.ElementAtOrDefault(0)");
-        
+
         if (isReferenceType && !isNullable)
         {
             sourceCodeWriter.Write(")!; ");
@@ -192,10 +194,14 @@ public record AsyncDataSourceGeneratorContainer(
         {
             sourceCodeWriter.Write("); ");
         }
-        
+
         sourceCodeWriter.Write("} ");
         sourceCodeWriter.Write($"return default({propertyType}); ");
-        sourceCodeWriter.Write("} finally { await enumerator.DisposeAsync(); } ");
+        sourceCodeWriter.Write("}");
+        sourceCodeWriter.Write("finally");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write("await enumerator.DisposeAsync();");
+        sourceCodeWriter.Write("}");
         sourceCodeWriter.Write("})()");
         if (isNested)
         {
