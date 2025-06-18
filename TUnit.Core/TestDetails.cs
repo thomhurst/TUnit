@@ -135,33 +135,19 @@ public abstract record TestDetails
     /// Gets the attributes for the test assembly.
     /// </summary>
     [JsonIgnore] 
-    [field: AllowNull, MaybeNull]
-    public AttributeMetadata[] AssemblyAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
-        ClassMetadata.Assembly.Attributes, 
-        TestAttributeTarget.Assembly, 
-        ClassMetadata.Assembly.Name);
+    public AttributeMetadata[] AssemblyAttributes => ClassMetadata.Assembly.Attributes;
 
     /// <summary>
     /// Gets the attributes for the test class.
     /// </summary>
     [JsonIgnore] 
-    [field: AllowNull, MaybeNull]
-    public AttributeMetadata[] ClassAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
-        ClassMetadata.Attributes, 
-        TestAttributeTarget.Class, 
-        ClassMetadata.Name, 
-        ClassMetadata.Type);
+    public AttributeMetadata[] ClassAttributes => ClassMetadata.Attributes;
 
     /// <summary>
     /// Gets the attributes for the test method.
     /// </summary>
     [JsonIgnore] 
-    [field: AllowNull, MaybeNull]
-    public AttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
-        MethodMetadata.Attributes, 
-        TestAttributeTarget.Method, 
-        MethodMetadata.Name, 
-        MethodMetadata.Type);
+    public AttributeMetadata[] TestAttributes => MethodMetadata.Attributes;
 
     /// <summary>
     /// Gets all the attributes for the test (including dynamic, method, class, assembly, and data attributes).
@@ -180,7 +166,7 @@ public abstract record TestDetails
     [field: AllowNull, MaybeNull]
     public AttributeMetadata[] DynamicAttributes 
     { 
-        get => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+        get => field ??= ConvertToAttributeMetadata(
             _rawDynamicAttributes, 
             TestAttributeTarget.Method, 
             MethodMetadata.Name, 
@@ -201,7 +187,7 @@ public abstract record TestDetails
     [field: AllowNull, MaybeNull]
     public required AttributeMetadata[] DataAttributes 
     { 
-        get => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+        get => field ??= ConvertToAttributeMetadata(
             _rawDataAttributes, 
             TestAttributeTarget.Method, 
             MethodMetadata.Name, 
@@ -287,4 +273,19 @@ public abstract record TestDetails
     internal bool IsSameTest(TestDetails testDetails) => TestName == testDetails.TestName &&
                                                                  ClassMetadata == testDetails.ClassMetadata &&
                                                                  TestMethodParameterTypes.SequenceEqual(testDetails.TestMethodParameterTypes);
+
+    private static AttributeMetadata[] ConvertToAttributeMetadata(
+        Attribute[] attributes, 
+        TestAttributeTarget targetElement,
+        string? targetMemberName = null,
+        Type? targetType = null)
+    {
+        return attributes.Select(attr => new AttributeMetadata
+        {
+            Instance = attr,
+            TargetElement = targetElement,
+            TargetMemberName = targetMemberName,
+            TargetType = targetType
+        }).ToArray();
+    }
 }

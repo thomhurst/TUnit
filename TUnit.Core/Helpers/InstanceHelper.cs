@@ -25,7 +25,7 @@ internal static class InstanceHelper
     {
         try
         {
-            if (classInformation.Attributes.OfType<ClassConstructorAttribute>().FirstOrDefault() is { } classConstructorAttribute)
+            if (classInformation.Attributes.Select(a => a.Instance).OfType<ClassConstructorAttribute>().FirstOrDefault() is { } classConstructorAttribute)
             {
                 var classConstructor = (IClassConstructor) Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
 

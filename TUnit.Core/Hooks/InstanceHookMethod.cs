@@ -17,9 +17,9 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     [field: AllowNull, MaybeNull]
     public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
 
-    public Attribute[] MethodAttributes => MethodInfo.Attributes;
-    public Attribute[] ClassAttributes => MethodInfo.Class.Attributes;
-    public Attribute[] AssemblyAttributes => MethodInfo.Class.Assembly.Attributes;
+    public Attribute[] MethodAttributes => MethodInfo.Attributes.Select(a => a.Instance).ToArray();
+    public Attribute[] ClassAttributes => MethodInfo.Class.Attributes.Select(a => a.Instance).ToArray();
+    public Attribute[] AssemblyAttributes => MethodInfo.Class.Assembly.Attributes.Select(a => a.Instance).ToArray();
     
     [field: AllowNull, MaybeNull]
     public IEnumerable<Attribute> Attributes => field ??=

@@ -38,11 +38,5 @@ public record AssemblyMetadata
 
     public required string Name { get; init; }
 
-    public required Attribute[] Attributes { get; init; }
-
-    [field: AllowNull, MaybeNull] 
-    public AttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
-        Attributes,
-        TestAttributeTarget.Assembly,
-        Name);
+    public required AttributeMetadata[] Attributes { get; init; }
 }

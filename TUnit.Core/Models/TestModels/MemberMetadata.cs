@@ -16,25 +16,7 @@ public abstract record MemberMetadata
 
     public required string Name { get; init; }
 
-    public required Attribute[] Attributes { get; init; }
-
-    [field: AllowNull, MaybeNull]
-    public AttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
-        Attributes,
-        DetermineTargetElement(),
-        Name,
-        Type);
-
-    protected virtual TestAttributeTarget DetermineTargetElement()
-    {
-        return this switch
-        {
-            MethodMetadata => TestAttributeTarget.Method,
-            ClassMetadata => TestAttributeTarget.Class,
-            PropertyMetadata => TestAttributeTarget.Property,
-            _ => TestAttributeTarget.Class
-        };
-    }
+    public required AttributeMetadata[] Attributes { get; init; }
 
     protected virtual bool PrintMembers(StringBuilder stringBuilder)
     {

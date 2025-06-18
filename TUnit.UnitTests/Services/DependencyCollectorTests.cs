@@ -139,7 +139,13 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                 Attributes = dependsOn != null
                     ?
                     [
-                        new DependsOnAttribute(dependsOn)
+                        new AttributeMetadata
+                        {
+                            Instance = new DependsOnAttribute(dependsOn),
+                            TargetElement = TestAttributeTarget.Method,
+                            TargetMemberName = name,
+                            TargetType = typeof(DependencyCollectorTests)
+                        }
                     ]
                     : [],
                 Class = new ClassMetadata

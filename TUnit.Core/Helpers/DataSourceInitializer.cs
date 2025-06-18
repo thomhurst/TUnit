@@ -59,7 +59,7 @@ internal static class DataSourceInitializer
                 // If property is null and has a data source attribute, generate the value
                 if (propertyValue is null)
                 {
-                    var dataAttribute = property.TestAttributes
+                    var dataAttribute = property.Attributes
                         .FirstOrDefault(x => x.AttributeType.IsAssignableTo(typeof(IAsyncDataSourceGeneratorAttribute)));
 
                     if (dataAttribute is not null)

@@ -34,7 +34,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _methodCache.GetOrAdd(methodInfo, _ => new MethodMetadata
         {
-            Attributes = methodInfo.GetCustomAttributesSafe().ToArray(),
+            Attributes = GetAttributeMetadatas(methodInfo.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Method, testName ?? methodInfo.Name, classInformation.Type),
             Class = classInformation,
             Name = testName ?? methodInfo.Name,
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
@@ -93,7 +93,7 @@ internal class ReflectionToSourceModelHelpers
                 {
                     Parent = GetParent(testClassType),
                     Assembly = GenerateAssembly(testClassType),
-                    Attributes = testClassType.GetCustomAttributesSafe().ToArray(),
+                    Attributes = GetAttributeMetadatas(testClassType.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Class, testClassType.Name, testClassType),
                     Name = testClassType.GetFormattedName(),
                     Namespace = testClassType.Namespace,
                     Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
@@ -113,7 +113,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _assemblyCache.GetOrAdd(testClassType.Assembly, _ => new AssemblyMetadata
         {
-            Attributes = testClassType.Assembly.GetCustomAttributesSafe().ToArray(),
+            Attributes = GetAttributeMetadatas(testClassType.Assembly.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Assembly, testClassType.Assembly.GetName().Name),
             Name = testClassType.Assembly.GetName().Name ??
                    testClassType.Assembly.GetName().FullName,
         });
@@ -123,7 +123,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _propertyCache.GetOrAdd(property, _ => new PropertyMetadata
         {
-            Attributes = property.GetCustomAttributesSafe().ToArray(),
+            Attributes = GetAttributeMetadatas(property.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Property, property.Name, property.DeclaringType),
             ReflectionInfo = property,
             Name = property.Name,
             Type = property.PropertyType,
@@ -162,7 +162,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _parameterCache.GetOrAdd(parameter, _ => new ParameterMetadata(parameter.ParameterType)
         {
-            Attributes = parameter.GetCustomAttributesSafe().ToArray(),
+            Attributes = GetAttributeMetadatas(parameter.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Parameter, parameter.Name, parameter.Member.DeclaringType),
             Name = parameter.Name ?? string.Empty,
             ReflectionInfo = parameter,
         });
@@ -180,7 +180,7 @@ internal class ReflectionToSourceModelHelpers
     {
         return _constructorCache.GetOrAdd(constructor, _ => new ConstructorMetadata
         {
-            Attributes = constructor.GetCustomAttributesSafe().ToArray(),
+            Attributes = GetAttributeMetadatas(constructor.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Constructor, ".ctor", constructor.DeclaringType),
             Name = ".ctor",
             Type = constructor.DeclaringType!,
             Parameters = GetParameters(constructor.GetParameters()),
@@ -191,5 +191,16 @@ internal class ReflectionToSourceModelHelpers
             IsInternal = constructor.IsAssembly,
             ReflectionInformation = constructor
         });
+    }
+
+    private static AttributeMetadata[] GetAttributeMetadatas(Attribute[] attributes, TestAttributeTarget target, string? memberName = null, Type? type = null)
+    {
+        return attributes.Select(attr => new AttributeMetadata
+        {
+            Instance = attr,
+            TargetElement = target,
+            TargetMemberName = memberName,
+            TargetType = type
+        }).ToArray();
     }
 }

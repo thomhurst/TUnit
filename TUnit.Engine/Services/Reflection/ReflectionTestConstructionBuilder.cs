@@ -37,7 +37,7 @@ internal class ReflectionTestConstructionBuilder
         List<ITestDefinition> testDefinitions,
         List<DiscoveryFailure> discoveryFailures)
     {
-        var testAttribute = testMethod.Attributes.OfType<TestAttribute>().First();
+        var testAttribute = testMethod.Attributes.Select(a => a.Instance).OfType<TestAttribute>().First();
 
         try
         {
@@ -118,7 +118,7 @@ internal class ReflectionTestConstructionBuilder
         List<DiscoveryFailure> discoveryFailures)
     {
         var classInformation = testInformation.Class;
-        var testAttribute = testInformation.Attributes.OfType<BaseTestAttribute>().First();
+        var testAttribute = testInformation.Attributes.Select(a => a.Instance).OfType<BaseTestAttribute>().First();
 
         try
         {
@@ -203,7 +203,7 @@ internal class ReflectionTestConstructionBuilder
         int currentRepeatAttempt)
     {
         var classInformation = testInformation.Class;
-        var testAttribute = testInformation.Attributes.OfType<BaseTestAttribute>().First();
+        var testAttribute = testInformation.Attributes.Select(a => a.Instance).OfType<BaseTestAttribute>().First();
 
         var propertyArgs = await GetPropertyArgumentsAsync(classInformation, invokedClassInstanceArguments,
             testInformation, testBuilderContextAccessor);
@@ -285,15 +285,15 @@ internal class ReflectionTestConstructionBuilder
     {
         return
         [
-            ..testInformation.Attributes,
-            ..testInformation.Class.Attributes,
-            ..testInformation.Class.Assembly.Attributes
+            ..testInformation.Attributes.Select(a => a.Instance),
+            ..testInformation.Class.Attributes.Select(a => a.Instance),
+            ..testInformation.Class.Assembly.Attributes.Select(a => a.Instance)
         ];
     }
 
     private static IEnumerable<IDataAttribute> GetDataAttributes(MemberMetadata memberInformation)
     {
-        var attributes = memberInformation.Attributes.OfType<IDataAttribute>().ToArray();
+        var attributes = memberInformation.Attributes.Select(a => a.Instance).OfType<IDataAttribute>().ToArray();
         return attributes.Length == 0 ? NoOpDataAttribute.Array : attributes;
     }
 

@@ -75,7 +75,7 @@ internal class UnifiedTestBuilder(
             testFilePath: definition.TestFilePath,
             testLineNumber: definition.TestLineNumber,
             dynamicAttributes: [],
-            dataAttributes: definition.MethodMetadata.Attributes.OfType<Attribute>().ToArray()
+            dataAttributes: definition.MethodMetadata.Attributes.Select(a => a.Instance).ToArray()
         );
 
         // Get class hook context
@@ -136,7 +136,7 @@ internal class UnifiedTestBuilder(
             repeatLimit: definition.RepeatCount,
             currentRepeatAttempt: currentRepeatAttempt, // Now passed in
             returnType: definition.MethodMetadata.ReturnType,
-            dataAttributes: definition.MethodMetadata.Attributes.OfType<Attribute>().ToArray()
+            dataAttributes: definition.MethodMetadata.Attributes.Select(a => a.Instance).ToArray()
         );
 
         // Get class hook context

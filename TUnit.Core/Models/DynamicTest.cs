@@ -53,7 +53,7 @@ public abstract record DynamicTest
     {
         return new MethodMetadata
         {
-            Attributes = methodInfo.GetCustomAttributesSafe().ToArray(),
+            Attributes = ConvertToAttributeMetadata(methodInfo.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Method, TestName ?? methodInfo.Name, TestClassType),
             Class = GenerateClass(),
             Name = TestName ?? methodInfo.Name,
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
@@ -70,7 +70,7 @@ public abstract record DynamicTest
         {
             Parent = ReflectionToSourceModelHelpers.GetParent(TestClassType),
             Assembly = GenerateAssembly(),
-            Attributes = TestClassType.GetCustomAttributesSafe().ToArray(),
+            Attributes = ConvertToAttributeMetadata(TestClassType.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Class, TestClassType.Name, TestClassType),
             Constructors = [],
             Name = TestClassType.Name,
             Namespace = TestClassType.Namespace,
@@ -84,7 +84,7 @@ public abstract record DynamicTest
     {
         return new AssemblyMetadata
         {
-            Attributes = TestClassType.Assembly.GetCustomAttributesSafe().ToArray(),
+            Attributes = ConvertToAttributeMetadata(TestClassType.Assembly.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Assembly, TestClassType.Assembly.GetName().Name),
             Name = TestClassType.Assembly.GetName().Name ??
                    TestClassType.Assembly.GetName().FullName,
         };
@@ -111,6 +111,21 @@ public abstract record DynamicTest
     protected ParameterMetadata GenerateParameter(ParameterInfo parameter)
     {
         return ReflectionToSourceModelHelpers.GenerateParameter(parameter);
+    }
+    
+    private static AttributeMetadata[] ConvertToAttributeMetadata(
+        Attribute[] attributes, 
+        TestAttributeTarget targetElement,
+        string? targetMemberName = null,
+        Type? targetType = null)
+    {
+        return attributes.Select(attr => new AttributeMetadata
+        {
+            Instance = attr,
+            TargetElement = targetElement,
+            TargetMemberName = targetMemberName,
+            TargetType = targetType
+        }).ToArray();
     }
 }
 

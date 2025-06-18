@@ -34,7 +34,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
 
         sourceCodeWriter.Write("Attributes = ");
-        AttributeWriter.WriteAttributes(sourceCodeWriter, context, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray());
+        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray(), "Class", namedTypeSymbol.Name, namedTypeSymbol.ToDisplayString());
 
         sourceCodeWriter.Write("Parameters = ");
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters
@@ -91,7 +91,7 @@ public static class SourceInformationWriter
 
             foreach (var constructor in constructors)
             {
-                GenerateConstructorInformation(sourceCodeWriter, context, constructor);
+                GenerateConstructorInformation(sourceCodeWriter, context, namedTypeSymbol, constructor);
             }
 
             sourceCodeWriter.Write("],");
@@ -108,7 +108,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write($"Name = \"{assembly.Name}\",");
 
         sourceCodeWriter.Write("Attributes = ");
-        AttributeWriter.WriteAttributes(sourceCodeWriter, context, assembly.GetAttributes());
+        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, assembly.GetAttributes(), "Assembly", assembly.Name);
 
         sourceCodeWriter.Write("}),");
     }
@@ -125,7 +125,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
 
         sourceCodeWriter.Write("Attributes = ");
-        AttributeWriter.WriteAttributes(sourceCodeWriter, context, methodSymbol.GetAttributes());
+        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, methodSymbol.GetAttributes(), "Method", methodSymbol.Name, namedTypeSymbol.ToDisplayString());
 
         sourceCodeWriter.Write("Parameters = ");
         var parameters = methodSymbol.Parameters;
@@ -190,7 +190,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write($"Getter = {GetPropertyAccessor(namedTypeSymbol, property)},");
 
         sourceCodeWriter.Write("Attributes = ");
-        AttributeWriter.WriteAttributes(sourceCodeWriter, context, property.GetAttributes());
+        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, property.GetAttributes(), "Property", property.Name, namedTypeSymbol.ToDisplayString());
         
         // For now, always set ClassMetadata to null to avoid circular references
         // The ClassMetadata will be available through the cache if needed at runtime
@@ -199,7 +199,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write("},");
     }
 
-    private static void GenerateConstructorInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, IMethodSymbol constructor)
+    private static void GenerateConstructorInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IMethodSymbol constructor)
     {
         sourceCodeWriter.Write("new global::TUnit.Core.ConstructorMetadata");
         sourceCodeWriter.Write("{");
@@ -213,7 +213,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write($"IsInternal = {(constructor.DeclaredAccessibility == Accessibility.Internal).ToString().ToLowerInvariant()},");
 
         sourceCodeWriter.Write("Attributes = ");
-        AttributeWriter.WriteAttributes(sourceCodeWriter, context, constructor.GetAttributes());
+        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, constructor.GetAttributes(), "Constructor", ".ctor", namedTypeSymbol.ToDisplayString());
 
         sourceCodeWriter.Write("Parameters = ");
         var parameters = constructor.Parameters;
@@ -291,7 +291,13 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write($"Name = \"{parameter.Name}\",");
 
         sourceCodeWriter.Write("Attributes = ");
-        AttributeWriter.WriteAttributes(sourceCodeWriter, context, parameter.GetAttributes());
+        var containingType = parameter.ContainingSymbol switch
+        {
+            IMethodSymbol method => method.ContainingType,
+            IPropertySymbol property => property.ContainingType,
+            _ => null
+        };
+        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, parameter.GetAttributes(), "Parameter", parameter.Name, containingType?.ToDisplayString());
 
         // TODO: Struggling to get this to work with generic type parameters
         sourceCodeWriter.Write("ReflectionInfo = null!,");

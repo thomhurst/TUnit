@@ -51,7 +51,6 @@ public record ConstructorMetadata : MemberMetadata
             ?? throw new InvalidOperationException($"Constructor not found on type {Type} with parameters: {string.Join(", ", parameterTypes.Select(t => t.Name))}");
     }
 
-    protected override TestAttributeTarget DetermineTargetElement() => TestAttributeTarget.Constructor;
 
     protected override bool PrintMembers(StringBuilder stringBuilder)
     {

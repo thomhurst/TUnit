@@ -32,9 +32,11 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         }
     }
 
-    private object?[][] GetExclusions(Attribute[] attributes)
+    private object?[][] GetExclusions(AttributeMetadata[] attributes)
     {
-        return attributes.OfType<MatrixExclusionAttribute>()
+        return attributes
+            .Select(a => a.Instance)
+            .OfType<MatrixExclusionAttribute>()
             .Select(x => x.Objects)
             .ToArray();
     }
@@ -42,7 +44,10 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
         ParameterMetadata sourceGeneratedParameterInformation)
     {
-        var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault();
+        var matrixAttribute = sourceGeneratedParameterInformation.Attributes
+            .Select(a => a.Instance)
+            .OfType<MatrixAttribute>()
+            .FirstOrDefault();
 
         var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata.TestClassInstance);
 

@@ -46,10 +46,93 @@ public class AttributeWriter
         sourceCodeWriter.Write("],");
     }
 
+    public static void WriteAttributeMetadatas(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, string? targetTypeName = null)
+    {
+        var dataAttributeInterface =
+            context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute
+                .WithoutGlobalPrefix);
+
+        attributeDatas = attributeDatas.RemoveAll(x => x.AttributeClass?.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataAttributeInterface)) == true);
+
+        if (attributeDatas.Length == 0)
+        {
+            sourceCodeWriter.Write("[],");
+            return;
+        }
+
+        sourceCodeWriter.Write("[");
+        for (var index = 0; index < attributeDatas.Length; index++)
+        {
+            var attributeData = attributeDatas[index];
+
+            if (attributeData.ApplicationSyntaxReference is null)
+            {
+                continue;
+            }
+
+            WriteAttributeMetadata(sourceCodeWriter, context, attributeData, targetElement, targetMemberName, targetTypeName);
+
+            if (index != attributeDatas.Length - 1)
+            {
+                sourceCodeWriter.Write(",");
+            }
+
+            sourceCodeWriter.WriteLine();
+        }
+        sourceCodeWriter.Write("],");
+    }
+
     public static void WriteAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData)
     {
         sourceCodeWriter.Write(GetAttributeObjectInitializer(context, attributeData, sourceCodeWriter.TabLevel));
+    }
+
+    public static void WriteAttributeMetadata(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        AttributeData attributeData, string targetElement, string? targetMemberName, string? targetTypeName)
+    {
+        sourceCodeWriter.Write($"new global::TUnit.Core.AttributeMetadata {{ ");
+        sourceCodeWriter.Write($"Instance = {GetAttributeObjectInitializer(context, attributeData, sourceCodeWriter.TabLevel)}, ");
+        sourceCodeWriter.Write($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement}, ");
+        
+        if (targetMemberName != null)
+        {
+            sourceCodeWriter.Write($"TargetMemberName = \"{targetMemberName}\", ");
+        }
+        
+        if (targetTypeName != null)
+        {
+            sourceCodeWriter.Write($"TargetType = typeof({targetTypeName}), ");
+        }
+        
+        // Add constructor arguments if available
+        if (attributeData.ConstructorArguments.Length > 0)
+        {
+            sourceCodeWriter.Write("ConstructorArguments = new object?[] { ");
+            for (var i = 0; i < attributeData.ConstructorArguments.Length; i++)
+            {
+                if (i > 0) sourceCodeWriter.Write(", ");
+                sourceCodeWriter.Write(TypedConstantParser.GetRawTypedConstantValue(attributeData.ConstructorArguments[i]));
+            }
+            sourceCodeWriter.Write(" }, ");
+        }
+        
+        // Add named arguments if available
+        if (attributeData.NamedArguments.Length > 0)
+        {
+            sourceCodeWriter.Write("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?>() { ");
+            var first = true;
+            foreach (var namedArg in attributeData.NamedArguments)
+            {
+                if (!first) sourceCodeWriter.Write(", ");
+                first = false;
+                sourceCodeWriter.Write($"{{ \"{namedArg.Key}\", {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)} }}");
+            }
+            sourceCodeWriter.Write(" }, ");
+        }
+        
+        sourceCodeWriter.Write("}");
     }
 
     public static string GetAttributeObjectInitializer(GeneratorAttributeSyntaxContext context,
