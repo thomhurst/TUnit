@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 /// <summary>
 /// Represents the context for building tests.

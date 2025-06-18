@@ -1,6 +1,4 @@
-﻿using TUnit.Core.Extensions;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 public abstract class DataSourceGeneratorAttribute<T> : AsyncDataSourceGeneratorAttribute<T>{

@@ -2,8 +2,6 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
-using TUnit.Core.Enums;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 

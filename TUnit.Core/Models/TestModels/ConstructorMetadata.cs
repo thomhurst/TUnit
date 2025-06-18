@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
-using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -74,12 +73,17 @@ public record ConstructorMetadata : MemberMetadata
         }
 
         return base.Equals(other) &&
-               Parameters.SequenceEqual(other.Parameters) &&
+               MatchingParameters(other) &&
                IsStatic == other.IsStatic &&
                IsPublic == other.IsPublic &&
                IsPrivate == other.IsPrivate &&
                IsProtected == other.IsProtected &&
                IsInternal == other.IsInternal;
+    }
+
+    private bool MatchingParameters(ConstructorMetadata other)
+    {
+        return Parameters.Cast<ParameterMetadata>().SequenceEqual(other.Parameters);
     }
 
     public override int GetHashCode()
