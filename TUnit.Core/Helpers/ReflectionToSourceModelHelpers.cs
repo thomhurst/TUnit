@@ -21,7 +21,8 @@ internal class ReflectionToSourceModelHelpers
     [ThreadStatic]
     private static HashSet<Type>? _typesBeingProcessed;
 
-    public static MethodMetadata BuildTestMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+    public static MethodMetadata BuildTestMethod([DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType, MethodInfo methodInfo, string? testName)

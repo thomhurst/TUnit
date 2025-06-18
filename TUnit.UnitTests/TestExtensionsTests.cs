@@ -57,6 +57,7 @@ public class TestExtensionsTests
                     Attributes = [],
                     Parameters = [],
                     Properties = [],
+                    Constructors = [],
                     Type = typeof(T),
                 },
                 Name = "DummyMethod",

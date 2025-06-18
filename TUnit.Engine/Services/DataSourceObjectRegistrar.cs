@@ -24,9 +24,7 @@ internal class DataSourceObjectRegistrar(ObjectLifetimeManager objectLifetimeMan
         // Initialize and register nested data source objects
         await DataSourceInitializer.InitializeAsync(
             testInstance,
-            dataGeneratorMetadata,
-            null,
-            obj => objectLifetimeManager.RegisterObject(obj)
+            dataGeneratorMetadata.TestInformation
         ).ConfigureAwait(false);
     }
 
