@@ -74,7 +74,8 @@ public static class TypedConstantParser
                 return $"typeof({((ITypeSymbol)typedConstant.Value!).GloballyQualified()})";
             case TypedConstantKind.Array:
                 var elements = typedConstant.Values.Select(GetRawTypedConstantValue);
-                return $"new[] {{ {string.Join(", ", elements)} }}";
+                var elementType = (typedConstant.Type as IArrayTypeSymbol)?.ElementType.GloballyQualified() ?? "object";
+                return $"new {elementType}[] {{ {string.Join(", ", elements)} }}";
             case TypedConstantKind.Error:
                 return "default";
             default:
