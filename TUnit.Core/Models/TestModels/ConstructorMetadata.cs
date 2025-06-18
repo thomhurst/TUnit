@@ -23,7 +23,9 @@ public record ConstructorMetadata : MemberMetadata
     public required bool IsInternal { get; init; }
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override required Type Type { get; init; }
 
     [field: AllowNull, MaybeNull]
@@ -37,14 +39,14 @@ public record ConstructorMetadata : MemberMetadata
     private ConstructorInfo GetConstructorInfo()
     {
         var bindingFlags = BindingFlags.Instance | BindingFlags.Static;
-        
+
         if (IsPublic) bindingFlags |= BindingFlags.Public;
         if (IsPrivate || IsProtected || IsInternal) bindingFlags |= BindingFlags.NonPublic;
 
         var constructors = Type.GetConstructors(bindingFlags);
         var parameterTypes = Parameters.Select(p => p.Type).ToArray();
-        
-        return constructors.FirstOrDefault(c => 
+
+        return constructors.FirstOrDefault(c =>
             c.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes))
             ?? throw new InvalidOperationException($"Constructor not found on type {Type} with parameters: {string.Join(", ", parameterTypes.Select(t => t.Name))}");
     }
@@ -72,8 +74,8 @@ public record ConstructorMetadata : MemberMetadata
             return true;
         }
 
-        return base.Equals(other) && 
-               Parameters.SequenceEqual(other.Parameters) && 
+        return base.Equals(other) &&
+               Parameters.SequenceEqual(other.Parameters) &&
                IsStatic == other.IsStatic &&
                IsPublic == other.IsPublic &&
                IsPrivate == other.IsPrivate &&
