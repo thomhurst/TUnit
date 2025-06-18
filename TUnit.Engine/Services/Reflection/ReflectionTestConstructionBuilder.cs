@@ -125,15 +125,11 @@ internal class ReflectionTestConstructionBuilder
             var allAttributes = CollectAllAttributes(testInformation);
             var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
-            // Prepare the data generator instance once, outside the repeat loop
             var testDataAttributeInstance = await DataGeneratorHandler.PrepareDataGeneratorInstanceAsync(
                 testDataAttribute, testInformation, testBuilderContextAccessor);
 
-            for (var index = 0; index < repeatCount + 1; index++)
-            {
-                await BuildTestInstanceAsync(testInformation, classInstanceArguments, typeDataAttribute,
-                    testDataAttributeInstance, testBuilderContextAccessor, allAttributes, index, testDefinitions, discoveryFailures);
-            }
+            await BuildTestInstanceAsync(testInformation, classInstanceArguments, typeDataAttribute,
+                testDataAttributeInstance, testBuilderContextAccessor, allAttributes, 0, testDefinitions, discoveryFailures);
         }
         catch (Exception e)
         {
