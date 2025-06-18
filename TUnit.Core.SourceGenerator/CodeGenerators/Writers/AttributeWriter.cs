@@ -92,7 +92,7 @@ public class AttributeWriter
     public static void WriteAttributeMetadata(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData, string targetElement, string? targetMemberName, string? targetTypeName)
     {
-        sourceCodeWriter.Write($"new global::TUnit.Core.AttributeMetadata {{ ");
+        sourceCodeWriter.Write("new global::TUnit.Core.AttributeMetadata { ");
         sourceCodeWriter.Write($"Instance = {GetAttributeObjectInitializer(context, attributeData, sourceCodeWriter.TabLevel)}, ");
         sourceCodeWriter.Write($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement}, ");
         
@@ -121,13 +121,15 @@ public class AttributeWriter
         // Add named arguments if available
         if (attributeData.NamedArguments.Length > 0)
         {
-            sourceCodeWriter.Write("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?>() { ");
+            sourceCodeWriter.Write("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?> { ");
             var first = true;
             foreach (var namedArg in attributeData.NamedArguments)
             {
                 if (!first) sourceCodeWriter.Write(", ");
                 first = false;
-                sourceCodeWriter.Write($"{{ \"{namedArg.Key}\", {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)} }}");
+                sourceCodeWriter.Write("{ ");
+                sourceCodeWriter.Write($"\"{namedArg.Key}\", {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}");
+                sourceCodeWriter.Write(" }");
             }
             sourceCodeWriter.Write(" }, ");
         }
