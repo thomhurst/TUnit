@@ -30,19 +30,8 @@ internal static class DataGeneratorHandler
 
         var instance = dataAttribute;
         
-        // Use centralized DataSourceInitializer
-        var metadata = new DataGeneratorMetadata
-        {
-            Type = DataGeneratorType.TestParameters,
-            TestInformation = testInformation,
-            ClassInstanceArguments = [],
-            MembersToGenerate = [],
-            TestBuilderContext = testBuilderContextAccessor,
-            TestClassInstance = null,
-            TestSessionId = string.Empty,
-        };
-        
-        await DataSourceInitializer.InitializeAsync(instance, metadata, testBuilderContextAccessor);
+        // Initialize the data attribute instance if it has properties that need initialization
+        await DataSourceInitializer.InitializeAsync(instance, testInformation);
 
         return instance;
     }

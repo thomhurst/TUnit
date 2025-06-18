@@ -62,7 +62,7 @@ public record AsyncDataSourceGeneratorContainer(
         sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
         sourceCodeWriter.WriteLine();
 
-        sourceCodeWriter.Write($"var {arrayVariableName} = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){dataAttr.Name}), {dataGeneratorMetadataVariableName});");
+        sourceCodeWriter.Write($"var {arrayVariableName} = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){dataAttr.Name}).GenerateAsync({dataGeneratorMetadataVariableName});");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write($"await foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
         sourceCodeWriter.Write("{");
@@ -170,21 +170,33 @@ public record AsyncDataSourceGeneratorContainer(
         var isReferenceType = property.Type.IsReferenceType;
         var isNullable = property.Type.NullableAnnotation == NullableAnnotation.Annotated;
         
-        sourceCodeWriter.Write($"({propertyType})(await global::TUnit.Core.Helpers.AsyncDataSourceHelper.GetFirstValueAsync(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){attributeVariableName}).GenerateAsync(");
+        // Use a simplified approach to get the first value from the async enumerable
+        sourceCodeWriter.Write("await (async () => { ");
+        sourceCodeWriter.Write($"var enumerator = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){attributeVariableName}).GenerateAsync(");
         WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, namedTypeSymbol, property);
+        sourceCodeWriter.Write(").GetAsyncEnumerator(); ");
+        sourceCodeWriter.Write("try { ");
+        sourceCodeWriter.Write("if (await enumerator.MoveNextAsync()) { ");
+        sourceCodeWriter.Write("var result = await enumerator.Current(); ");
+        sourceCodeWriter.Write($"return ({propertyType})(result?.ElementAtOrDefault(0)");
         
         if (isReferenceType && !isNullable)
         {
-            sourceCodeWriter.Write(")))!");
+            sourceCodeWriter.Write(")!; ");
         }
         else if (property.Type.IsValueType && !isNullable)
         {
-            sourceCodeWriter.Write($"))) ?? default({propertyType})");
+            sourceCodeWriter.Write($" ?? default({propertyType})); ");
         }
         else
         {
-            sourceCodeWriter.Write(")))");
+            sourceCodeWriter.Write("); ");
         }
+        
+        sourceCodeWriter.Write("} ");
+        sourceCodeWriter.Write($"return default({propertyType}); ");
+        sourceCodeWriter.Write("} finally { await enumerator.DisposeAsync(); } ");
+        sourceCodeWriter.Write("})()");
         if (isNested)
         {
             sourceCodeWriter.Write(",");

@@ -22,34 +22,11 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
             var testInstance = discoveredTest.TestContext.TestDetails.ClassInstance;
             dataSourceObjectRegistrar.RegisterExistingDataSourceObjects(testInstance);
             
-            // Initialize method arguments first (they may have nested data source properties)
+            // Initialize data sources on the test instance using the simplified API
             var testDetails = discoveredTest.TestContext.TestDetails;
-            if (testDetails.TestMethodArguments != null)
+            if (testInstance != null && testDetails.MethodMetadata != null)
             {
-                var dataGeneratorMetadata = new DataGeneratorMetadata
-                {
-                    Type = DataGeneratorType.TestParameters,
-                    TestInformation = testDetails.MethodMetadata,
-                    ClassInstanceArguments = testDetails.TestClassArguments ?? [],
-                    MembersToGenerate = [],
-                    TestBuilderContext = null!,
-                    TestClassInstance = testInstance,
-                    TestSessionId = TestSessionContext.Current?.Id ?? string.Empty
-                };
-                
-                foreach (var arg in testDetails.TestMethodArguments)
-                {
-                    if (arg != null)
-                    {
-                        // Initialize data source properties on method arguments
-                        await DataSourceInitializer.InitializeAsync(
-                            arg,
-                            dataGeneratorMetadata,
-                            null,
-                            obj => dataSourceObjectRegistrar.RegisterExistingDataSourceObjects(obj)
-                        ).ConfigureAwait(false);
-                    }
-                }
+                await DataSourceInitializer.InitializeAsync(testInstance, testDetails.MethodMetadata).ConfigureAwait(false);
             }
             
             // Create a list to track all objects that need initialization
