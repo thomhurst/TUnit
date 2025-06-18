@@ -32,6 +32,11 @@ public record AttributeMetadata
     public Type? TargetType { get; init; }
 
     /// <summary>
+    /// The class metadata for the containing class (if applicable)
+    /// </summary>
+    public ClassMetadata? ClassMetadata { get; init; }
+
+    /// <summary>
     /// Constructor arguments used when the attribute was applied
     /// </summary>
     public object?[]? ConstructorArguments { get; init; }

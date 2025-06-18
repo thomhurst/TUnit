@@ -12,7 +12,8 @@ public static class TestAttributeHelper
         Attribute[] attributes, 
         TestAttributeTarget targetElement,
         string? targetMemberName = null,
-        Type? targetType = null)
+        Type? targetType = null,
+        ClassMetadata? classMetadata = null)
     {
         return attributes.Select(attr => new AttributeMetadata
         {
@@ -20,6 +21,7 @@ public static class TestAttributeHelper
             TargetElement = targetElement,
             TargetMemberName = targetMemberName,
             TargetType = targetType,
+            ClassMetadata = classMetadata,
             ConstructorArguments = GetConstructorArguments(attr),
             NamedArguments = GetNamedArguments(attr)
         }).ToArray();
