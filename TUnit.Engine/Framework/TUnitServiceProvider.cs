@@ -186,7 +186,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     public object? GetService(Type serviceType)
     {
-        _services.TryGetValue(serviceType, out object? result);
+        _services.TryGetValue(serviceType, out var result);
         return result;
     }
 

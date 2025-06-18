@@ -22,7 +22,7 @@ internal class UnifiedTestBuilder(
         var (tests, _) = BuildTests(discoveryResult);
         return tests;
     }
-    
+
     /// <summary>
     /// Builds a discovered test from a test definition using polymorphic dispatch.
     /// </summary>
@@ -33,10 +33,10 @@ internal class UnifiedTestBuilder(
         {
             return testDef.BuildTest(this, currentRepeatAttempt);
         }
-        
+
         throw new NotSupportedException($"Unknown test definition type: {definition.GetType()}");
     }
-    
+
     /// <summary>
     /// Builds a discovered test from a non-generic test definition.
     /// </summary>
@@ -44,7 +44,7 @@ internal class UnifiedTestBuilder(
     {
         return BuildUntypedTest(definition, currentRepeatAttempt);
     }
-    
+
     /// <summary>
     /// Builds a typed discovered test from a generic test definition.
     /// This method is AOT-safe as it uses only generic constraints and no reflection.
@@ -59,9 +59,9 @@ internal class UnifiedTestBuilder(
             definition.TestId,
             new TestBuilderContext() // Clean context, no longer part of definition
         );
-        
+
         // Build test details
-        var testDetails = TestDetails<TTestClass>.CreateWithRawAttributes(
+        var testDetails = TestDetails.CreateWithRawAttributes(
             testId: definition.TestId,
             lazyClassInstance: resettableLazy,
             testClassArguments: definition.ClassArgumentsProvider(),
@@ -77,14 +77,14 @@ internal class UnifiedTestBuilder(
             dynamicAttributes: [],
             dataAttributes: definition.MethodMetadata.Attributes.OfType<Attribute>().ToArray()
         );
-        
+
         // Get class hook context
         var classType = definition.MethodMetadata.Class.Type;
         var classHookContext = contextManager.GetClassHookContext(classType);
-        
+
         // Create test execution context for runtime state
         var executionContext = new TestExecutionContext(definition, currentRepeatAttempt);
-        
+
         // Create test context
         var testBuilderContext = new TestBuilderContext();
         var testContext = new TestContext(
@@ -94,25 +94,25 @@ internal class UnifiedTestBuilder(
             testBuilderContext,
             classHookContext
         );
-        
+
         // Link the execution context for runtime state tracking
         testContext.ObjectBag["ExecutionContext"] = executionContext;
-        
+
         // Run discovery hooks
         RunTestDiscoveryHooks(testDetails, testContext);
-        
+
         // Build discovered test
         var discoveredTest = new DiscoveredTest<TTestClass>(resettableLazy)
         {
             TestContext = testContext,
             TestBody = definition.TestMethodInvoker
         };
-        
+
         testContext.InternalDiscoveredTest = discoveredTest;
-        
+
         return discoveredTest;
     }
-    
+
     private DiscoveredTest BuildUntypedTest(TestDefinition definition, int currentRepeatAttempt)
     {
         // Create a resettable lazy for the class instance
@@ -121,7 +121,7 @@ internal class UnifiedTestBuilder(
             definition.TestId,
             new TestBuilderContext() // Clean context
         );
-        
+
         // Build test details
         var testDetails = UntypedTestDetails.CreateWithRawAttributes(
             resettableLazy: resettableLazy,
@@ -138,14 +138,14 @@ internal class UnifiedTestBuilder(
             returnType: definition.MethodMetadata.ReturnType,
             dataAttributes: definition.MethodMetadata.Attributes.OfType<Attribute>().ToArray()
         );
-        
+
         // Get class hook context
         var classType = definition.MethodMetadata.Class.Type;
         var classHookContext = contextManager.GetClassHookContext(classType);
-        
+
         // Create test execution context
         var executionContext = new TestExecutionContext(definition, currentRepeatAttempt);
-        
+
         // Create test context
         var testBuilderContext = new TestBuilderContext();
         var testContext = new TestContext(
@@ -155,33 +155,33 @@ internal class UnifiedTestBuilder(
             testBuilderContext,
             classHookContext
         );
-        
+
         // Link the execution context for runtime state tracking
         testContext.ObjectBag["ExecutionContext"] = executionContext;
-        
+
         // Run discovery hooks
         RunTestDiscoveryHooks(testDetails, testContext);
-        
+
         // Build discovered test
         var discoveredTest = new UnifiedDiscoveredTest(resettableLazy, definition.TestMethodInvoker)
         {
             TestContext = testContext
         };
-        
+
         testContext.InternalDiscoveredTest = discoveredTest;
-        
+
         return discoveredTest;
     }
-    
-    
+
+
     private static void RunTestDiscoveryHooks(TestDetails testDetails, TestContext testContext)
     {
         var attributes = testDetails.DataAttributes.Select(ta => ta.Instance)
             .Concat(testDetails.Attributes.Select(ta => ta.Instance))
             .Distinct();
-        
+
         DiscoveredTestContext? discoveredTestContext = null;
-        
+
         // Reverse to run assembly, then class, then method
         foreach (var attribute in attributes.OfType<ITestDiscoveryEventReceiver>().Reverse())
         {
@@ -189,7 +189,7 @@ internal class UnifiedTestBuilder(
             attribute.OnTestDiscovery(discoveredTestContext);
         }
     }
-    
+
     /// <summary>
     /// Builds discovered tests from a discovery result.
     /// </summary>
@@ -197,11 +197,11 @@ internal class UnifiedTestBuilder(
         DiscoveryResult discoveryResult)
     {
         var tests = new List<DiscoveredTest>();
-        
+        var failures = discoveryResult.DiscoveryFailures.ToList();
+
         foreach (var definition in discoveryResult.TestDefinitions)
         {
-            // For each test definition, create discovered tests for each repeat
-            for (int repeatAttempt = 1; repeatAttempt <= definition.RepeatCount; repeatAttempt++)
+            for (var repeatAttempt = 1; repeatAttempt <= definition.RepeatCount; repeatAttempt++)
             {
                 try
                 {
@@ -210,16 +210,20 @@ internal class UnifiedTestBuilder(
                 }
                 catch (Exception ex)
                 {
-                    // If building a test fails, we should log it but continue
-                    // This would be better handled with proper logging
-                    Console.WriteLine($"Failed to build test {definition.TestId}: {ex.Message}");
+                    failures.Add(new DiscoveryFailure
+                    {
+                        TestId = definition.TestId,
+                        Exception = ex,
+                        TestFilePath = definition.TestFilePath,
+                        TestLineNumber = definition.TestLineNumber,
+                    });
                 }
             }
         }
-        
-        return (tests, discoveryResult.DiscoveryFailures);
+
+        return (tests, failures);
     }
-    
+
     private DiscoveredTest BuildTestFromDefinition(ITestDefinition definition, int repeatAttempt)
     {
         // Use polymorphic dispatch - no reflection needed!
@@ -227,7 +231,7 @@ internal class UnifiedTestBuilder(
         {
             return testDef.BuildTest(this, repeatAttempt);
         }
-        
+
         throw new NotSupportedException($"Unknown test definition type: {definition.GetType()}");
     }
 }
