@@ -91,8 +91,8 @@ public static class TypedConstantParser
     {
         return value switch
         {
-            string s => $"\"{s}\"",
-            char c => $"'{c}'",
+            string s => SymbolDisplay.FormatLiteral(s, quote: true),
+            char c => SymbolDisplay.FormatLiteral(c, quote: true),
             bool b => b ? "true" : "false",
             null => "null",
             _ => value.ToString() ?? "null"
