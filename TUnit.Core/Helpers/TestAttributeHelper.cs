@@ -12,8 +12,7 @@ public static class TestAttributeHelper
         Attribute[] attributes, 
         TestAttributeTarget targetElement,
         string? targetMemberName = null,
-        Type? targetType = null,
-        ClassMetadata? classMetadata = null)
+        Type? targetType = null)
     {
         return attributes.Select(attr => new AttributeMetadata
         {
@@ -21,7 +20,7 @@ public static class TestAttributeHelper
             TargetElement = targetElement,
             TargetMemberName = targetMemberName,
             TargetType = targetType,
-            ClassMetadata = classMetadata,
+            ClassMetadata = GetAttributeClassMetadata(attr),
             ConstructorArguments = GetConstructorArguments(attr),
             NamedArguments = GetNamedArguments(attr)
         }).ToArray();
@@ -110,5 +109,18 @@ public static class TestAttributeHelper
         }
 
         return namedArgs.Count > 0 ? namedArgs : null;
+    }
+
+    private static ClassMetadata? GetAttributeClassMetadata(Attribute attribute)
+    {
+        var attributeType = attribute.GetType();
+        
+        // Only create ClassMetadata for non-system attributes
+        if (attributeType.Namespace?.StartsWith("System") == true)
+        {
+            return null;
+        }
+        
+        return ReflectionToSourceModelHelpers.GenerateClass(attributeType);
     }
 }

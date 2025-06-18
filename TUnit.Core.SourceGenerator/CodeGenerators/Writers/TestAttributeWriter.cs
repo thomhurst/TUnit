@@ -42,7 +42,7 @@ public class TestAttributeWriter
     public static void WriteTestAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData, string targetElement, string? targetMemberName = null, ITypeSymbol? targetType = null)
     {
-        sourceCodeWriter.Write("new global::TUnit.Core.TestAttributeMetadata");
+        sourceCodeWriter.Write("new global::TUnit.Core.AttributeMetadata");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.Write("{");
         sourceCodeWriter.WriteLine();
@@ -70,6 +70,9 @@ public class TestAttributeWriter
             sourceCodeWriter.Write($"TargetType = typeof({targetType.GloballyQualified()}),");
             sourceCodeWriter.WriteLine();
         }
+
+        // Write ClassMetadata for the attribute type
+        WriteAttributeClassMetadata(sourceCodeWriter, attributeData);
 
         // Write constructor arguments
         WriteConstructorArguments(sourceCodeWriter, attributeData);
@@ -123,6 +126,23 @@ public class TestAttributeWriter
         }
 
         sourceCodeWriter.Write("},");
+        sourceCodeWriter.WriteLine();
+    }
+
+    private static void WriteAttributeClassMetadata(SourceCodeWriter sourceCodeWriter, AttributeData attributeData)
+    {
+        var attributeType = attributeData.AttributeClass;
+        
+        // Skip system attributes
+        if (attributeType?.ContainingNamespace?.ToDisplayString()?.StartsWith("System") == true)
+        {
+            return;
+        }
+
+        // For source generated attributes, we can generate the ClassMetadata
+        sourceCodeWriter.Write("ClassMetadata = ");
+        SourceInformationWriter.WriteClassInfo(sourceCodeWriter, attributeType);
+        sourceCodeWriter.Write(",");
         sourceCodeWriter.WriteLine();
     }
 

@@ -32,7 +32,7 @@ public record AttributeMetadata
     public Type? TargetType { get; init; }
 
     /// <summary>
-    /// The class metadata for the containing class (if applicable)
+    /// The class metadata for the attribute type itself
     /// </summary>
     public ClassMetadata? ClassMetadata { get; init; }
 

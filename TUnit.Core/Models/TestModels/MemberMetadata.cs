@@ -23,8 +23,7 @@ public abstract record MemberMetadata
         Attributes,
         DetermineTargetElement(),
         Name,
-        Type,
-        this as ClassMetadata);
+        Type);
 
     protected virtual TestAttributeTarget DetermineTargetElement()
     {
