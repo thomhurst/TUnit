@@ -23,7 +23,7 @@ internal class ReflectionTestConstructionBuilder
         {
             await BuildTestsForMethodAsync(classInformation, testMethod, testDefinitions, discoveryFailures);
         }
-        
+
         return new DiscoveryResult
         {
             TestDefinitions = testDefinitions,
@@ -72,11 +72,11 @@ internal class ReflectionTestConstructionBuilder
             MethodInformation = testMethod
         };
         var testBuilderContextAccessor = new TestBuilderContextAccessor(testBuilderContext);
-        
+
         // Set the AsyncLocal for data generators to access
         var previousContext = TestBuilderContext.Current;
         TestBuilderContext.Current = testBuilderContext;
-        
+
         try
         {
             var classArgumentsContext = new DataGeneratorContext
@@ -97,7 +97,7 @@ internal class ReflectionTestConstructionBuilder
             await foreach (var classInstanceArguments in DataGeneratorHandler.GetArgumentsFromDataAttributeAsync(
                 classDataAttribute, classArgumentsContext))
             {
-                await BuildSingleTestAsync(testMethod, classInstanceArguments, classDataAttribute, 
+                await BuildSingleTestAsync(testMethod, classInstanceArguments, classDataAttribute,
                     testDataAttribute, testBuilderContextAccessor, testDefinitions, discoveryFailures);
             }
         }
@@ -123,7 +123,6 @@ internal class ReflectionTestConstructionBuilder
         try
         {
             var allAttributes = CollectAllAttributes(testInformation);
-            var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
             var testDataAttributeInstance = await DataGeneratorHandler.PrepareDataGeneratorInstanceAsync(
                 testDataAttribute, testInformation, testBuilderContextAccessor);
@@ -271,14 +270,14 @@ internal class ReflectionTestConstructionBuilder
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var propertyArgs = new Dictionary<string, object?>();
-        
+
         await foreach (var (propertyInformation, argsFunc) in InstanceCreator.GetPropertyArgumentsEnumerableAsync(
             classInformation, classInstanceArguments, testInformation, testBuilderContextAccessor))
         {
             var args = await argsFunc();
             propertyArgs[propertyInformation.Name] = args.ElementAtOrDefault(0);
         }
-        
+
         return propertyArgs;
     }
 

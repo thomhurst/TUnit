@@ -136,7 +136,7 @@ public abstract record TestDetails
     /// </summary>
     [JsonIgnore] 
     [field: AllowNull, MaybeNull]
-    public TestAttributeMetadata[] AssemblyAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+    public AttributeMetadata[] AssemblyAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
         ClassMetadata.Assembly.Attributes, 
         TestAttributeTarget.Assembly, 
         ClassMetadata.Assembly.Name);
@@ -146,7 +146,7 @@ public abstract record TestDetails
     /// </summary>
     [JsonIgnore] 
     [field: AllowNull, MaybeNull]
-    public TestAttributeMetadata[] ClassAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+    public AttributeMetadata[] ClassAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
         ClassMetadata.Attributes, 
         TestAttributeTarget.Class, 
         ClassMetadata.Name, 
@@ -157,7 +157,7 @@ public abstract record TestDetails
     /// </summary>
     [JsonIgnore] 
     [field: AllowNull, MaybeNull]
-    public TestAttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
+    public AttributeMetadata[] TestAttributes => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
         MethodMetadata.Attributes, 
         TestAttributeTarget.Method, 
         MethodMetadata.Name, 
@@ -168,7 +168,7 @@ public abstract record TestDetails
     /// </summary>
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
-    public TestAttributeMetadata[] Attributes => field ??= [
+    public AttributeMetadata[] Attributes => field ??= [
         ..DynamicAttributes, 
         ..TestAttributes, 
         ..ClassAttributes, 
@@ -178,7 +178,7 @@ public abstract record TestDetails
 
     [JsonIgnore] 
     [field: AllowNull, MaybeNull]
-    public TestAttributeMetadata[] DynamicAttributes 
+    public AttributeMetadata[] DynamicAttributes 
     { 
         get => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
             _rawDynamicAttributes, 
@@ -199,7 +199,7 @@ public abstract record TestDetails
     /// </summary>
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
-    public required TestAttributeMetadata[] DataAttributes 
+    public required AttributeMetadata[] DataAttributes 
     { 
         get => field ??= Helpers.TestAttributeHelper.ConvertToTestAttributes(
             _rawDataAttributes, 

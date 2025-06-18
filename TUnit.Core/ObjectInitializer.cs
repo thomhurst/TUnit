@@ -9,6 +9,19 @@ public static class ObjectInitializer
     private static readonly ConditionalWeakTable<object, Task> _initializationTasks = new();
     private static readonly Lock _lock = new();
 
+    internal static bool IsInitialized(object? obj)
+    {
+        if (obj is not IAsyncInitializer)
+        {
+            return false;
+        }
+
+        lock (_lock)
+        {
+            return _initializationTasks.TryGetValue(obj, out var task) && task.IsCompleted;
+        }
+    }
+
     public static async ValueTask InitializeAsync(object? obj, CancellationToken cancellationToken = default)
     {
         await InitializeProperties(obj);

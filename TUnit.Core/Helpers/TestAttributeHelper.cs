@@ -8,13 +8,13 @@ public static class TestAttributeHelper
     /// <summary>
     /// Converts an array of attributes to TestAttributeMetadata instances with metadata
     /// </summary>
-    public static TestAttributeMetadata[] ConvertToTestAttributes(
+    public static AttributeMetadata[] ConvertToTestAttributes(
         Attribute[] attributes, 
         TestAttributeTarget targetElement,
         string? targetMemberName = null,
         Type? targetType = null)
     {
-        return attributes.Select(attr => new TestAttributeMetadata
+        return attributes.Select(attr => new AttributeMetadata
         {
             Instance = attr,
             TargetElement = targetElement,
@@ -28,7 +28,7 @@ public static class TestAttributeHelper
     /// <summary>
     /// Converts assembly attributes to TestAttributeMetadata instances
     /// </summary>
-    public static TestAttributeMetadata[] FromAssembly(Assembly assembly)
+    public static AttributeMetadata[] FromAssembly(Assembly assembly)
     {
         var attributes = assembly.GetCustomAttributes().ToArray();
         return ConvertToTestAttributes(attributes, TestAttributeTarget.Assembly, assembly.GetName().Name);
@@ -37,7 +37,7 @@ public static class TestAttributeHelper
     /// <summary>
     /// Converts type attributes to TestAttributeMetadata instances
     /// </summary>
-    public static TestAttributeMetadata[] FromType(Type type)
+    public static AttributeMetadata[] FromType(Type type)
     {
         var attributes = type.GetCustomAttributes().ToArray();
         return ConvertToTestAttributes(attributes, TestAttributeTarget.Class, type.Name, type);
@@ -46,7 +46,7 @@ public static class TestAttributeHelper
     /// <summary>
     /// Converts method attributes to TestAttributeMetadata instances
     /// </summary>
-    public static TestAttributeMetadata[] FromMethod(MethodInfo method)
+    public static AttributeMetadata[] FromMethod(MethodInfo method)
     {
         var attributes = method.GetCustomAttributes().ToArray();
         return ConvertToTestAttributes(attributes, TestAttributeTarget.Method, method.Name, method.DeclaringType);
@@ -55,7 +55,7 @@ public static class TestAttributeHelper
     /// <summary>
     /// Converts property attributes to TestAttributeMetadata instances
     /// </summary>
-    public static TestAttributeMetadata[] FromProperty(PropertyInfo property)
+    public static AttributeMetadata[] FromProperty(PropertyInfo property)
     {
         var attributes = property.GetCustomAttributes().ToArray();
         return ConvertToTestAttributes(attributes, TestAttributeTarget.Property, property.Name, property.DeclaringType);
@@ -64,7 +64,7 @@ public static class TestAttributeHelper
     /// <summary>
     /// Converts parameter attributes to TestAttributeMetadata instances
     /// </summary>
-    public static TestAttributeMetadata[] FromParameter(ParameterInfo parameter)
+    public static AttributeMetadata[] FromParameter(ParameterInfo parameter)
     {
         var attributes = parameter.GetCustomAttributes().ToArray();
         return ConvertToTestAttributes(attributes, TestAttributeTarget.Parameter, parameter.Name, parameter.Member.DeclaringType);

@@ -16,6 +16,65 @@ namespace TUnit.Core.Helpers;
 [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
 internal static class DataSourceInitializer
 {
+    public static async Task InitializeAsync(object instance, MethodMetadata methodMetadata)
+    {
+        await InitializeAsync(instance, methodMetadata.Class, []);
+    }
+
+    public static async Task InitializeAsync(object instance, ClassMetadata classMetadata, HashSet<object?> visited)
+    {
+        if (!visited.Add(instance))
+        {
+            return;
+        }
+
+        foreach (var property in classMetadata.Properties)
+        {
+            await InitializeAsync(instance, property, visited);
+        }
+    }
+
+    public static async Task InitializeAsync(object instance, PropertyMetadata propertyMetadata, HashSet<object?> visited)
+    {
+        if (propertyMetadata.Getter(instance) is not { } propertyValue)
+        {
+            var dataAttribute = propertyMetadata.TestAttributes.FirstOrDefault(x => x.AttributeType.IsAssignableTo(typeof(IAsyncDataSourceGeneratorAttribute)));
+
+            if(dataAttribute is not null)
+            {
+                await InitializeAsync(instance, dataAttribute, propertyMetadata, visited);
+            }
+        }
+
+
+    }
+
+    public static async Task InitializeAsync(object instance, AttributeMetadata attributeMetadata, PropertyMetadata propertyMetadata, HashSet<object?> visited)
+    {
+        var dataAttribute = (IAsyncDataSourceGeneratorAttribute)attributeMetadata.Instance;
+
+        // await InitializeAsync(dataAttribute,)
+
+        var values = dataAttribute.GenerateAsync(new DataGeneratorMetadata()
+        {
+            Type = DataGeneratorType.Property,
+            ClassInstanceArguments = [],
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+            MembersToGenerate = [propertyMetadata],
+            TestClassInstance = instance,
+            TestInformation = null!,
+            TestSessionId = ""
+        });
+
+        await using var asyncEnumerator = values.GetAsyncEnumerator();
+
+        await asyncEnumerator.MoveNextAsync();
+
+        var value = await asyncEnumerator.Current();
+
+        propertyMetadata.ReflectionInfo.SetValue(instance, value?.ElementAtOrDefault(0));
+    }
+
     /// <summary>
     /// Initializes an object and all its properties that have data attributes.
     /// </summary>
@@ -35,7 +94,7 @@ internal static class DataSourceInitializer
 
         // Initialize nested data generators first
         await InitializeNestedDataGeneratorsAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback).ConfigureAwait(false);
-        
+
         // Initialize the instance itself if it's a data attribute
         if (instance is IDataAttribute)
         {
@@ -69,7 +128,7 @@ internal static class DataSourceInitializer
         }
 
         var objType = obj.GetType();
-        
+
         // Skip primitive types, strings, and other types that shouldn't have nested properties processed
         if (objType.IsPrimitive || obj is string || objType.IsEnum || objType.IsValueType && !objType.IsGenericType)
         {
@@ -96,7 +155,7 @@ internal static class DataSourceInitializer
         foreach (var propertyInfo in properties)
         {
             var dataAttribute = propertyInfo.GetCustomAttributesSafe().OfType<IDataAttribute>().FirstOrDefault();
-            
+
             object? existingValue = null;
             try
             {
@@ -143,7 +202,7 @@ internal static class DataSourceInitializer
 
                 // Recursively process nested properties
                 await InitializeNestedDataGeneratorsInternalAsync(existingValue, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
-                
+
                 // Only initialize if it's a data attribute (not regular objects like WebApplicationFactory)
                 if (existingValue is IDataAttribute)
                 {

@@ -4,7 +4,7 @@ using System.Reflection;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{AttributeType.Name} on {TargetElement}")]
-public record TestAttributeMetadata
+public record AttributeMetadata
 {
     /// <summary>
     /// The actual attribute instance
@@ -56,7 +56,7 @@ public record TestAttributeMetadata
     /// </summary>
     public AttributeTargets ValidTargets => AttributeType.GetCustomAttribute<AttributeUsageAttribute>()?.ValidOn ?? AttributeTargets.All;
 
-    public virtual bool Equals(TestAttributeMetadata? other)
+    public virtual bool Equals(AttributeMetadata? other)
     {
         if (other is null)
         {
