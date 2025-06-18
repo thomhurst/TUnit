@@ -76,6 +76,27 @@ public static class SourceInformationWriter
             sourceCodeWriter.Write("],");
         }
 
+        sourceCodeWriter.Write("Constructors = ");
+        var constructors = namedTypeSymbol.GetMembers().OfType<IMethodSymbol>()
+            .Where(m => m.MethodKind == MethodKind.Constructor)
+            .ToArray();
+
+        if(constructors.Length == 0)
+        {
+            sourceCodeWriter.Write("[],");
+        }
+        else
+        {
+            sourceCodeWriter.Write("[");
+
+            foreach (var constructor in constructors)
+            {
+                GenerateConstructorInformation(sourceCodeWriter, context, constructor);
+            }
+
+            sourceCodeWriter.Write("],");
+        }
+
         sourceCodeWriter.Write("}),");
     }
 
@@ -174,6 +195,44 @@ public static class SourceInformationWriter
         // For now, always set ClassMetadata to null to avoid circular references
         // The ClassMetadata will be available through the cache if needed at runtime
         sourceCodeWriter.Write("ClassMetadata = null,");
+
+        sourceCodeWriter.Write("},");
+    }
+
+    private static void GenerateConstructorInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, IMethodSymbol constructor)
+    {
+        sourceCodeWriter.Write("new global::TUnit.Core.ConstructorMetadata");
+        sourceCodeWriter.Write("{");
+        
+        sourceCodeWriter.Write($"Type = typeof({constructor.ContainingType.GloballyQualified()}),");
+        sourceCodeWriter.Write($"Name = \".ctor\",");
+        sourceCodeWriter.Write($"IsStatic = {constructor.IsStatic.ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Write($"IsPublic = {(constructor.DeclaredAccessibility == Accessibility.Public).ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Write($"IsPrivate = {(constructor.DeclaredAccessibility == Accessibility.Private).ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Write($"IsProtected = {(constructor.DeclaredAccessibility == Accessibility.Protected).ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Write($"IsInternal = {(constructor.DeclaredAccessibility == Accessibility.Internal).ToString().ToLowerInvariant()},");
+
+        sourceCodeWriter.Write("Attributes = ");
+        AttributeWriter.WriteAttributes(sourceCodeWriter, context, constructor.GetAttributes());
+
+        sourceCodeWriter.Write("Parameters = ");
+        var parameters = constructor.Parameters;
+
+        if (parameters.Length == 0)
+        {
+            sourceCodeWriter.Write("[],");
+        }
+        else
+        {
+            sourceCodeWriter.Write("[");
+
+            foreach (var parameter in parameters)
+            {
+                GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor, null);
+            }
+
+            sourceCodeWriter.Write("],");
+        }
 
         sourceCodeWriter.Write("},");
     }
