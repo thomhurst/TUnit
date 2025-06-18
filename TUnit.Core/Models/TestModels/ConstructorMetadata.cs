@@ -23,7 +23,9 @@ public record ConstructorMetadata : MemberMetadata
     public required bool IsInternal { get; init; }
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override required Type Type { get; init; }
 
     [field: AllowNull, MaybeNull]

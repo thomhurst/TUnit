@@ -22,7 +22,10 @@ internal class ReflectionToSourceModelHelpers
     private static HashSet<Type>? _typesBeingProcessed;
 
     public static MethodMetadata BuildTestMethod([DynamicallyAccessedMembers(
-        )] Type testClassType, MethodInfo methodInfo, string? testName)
+        DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType, MethodInfo methodInfo, string? testName)
     {
         return BuildTestMethod(GenerateClass(testClassType), methodInfo, testName);
     }
