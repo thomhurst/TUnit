@@ -71,6 +71,7 @@ public abstract record DynamicTest
             Parent = ReflectionToSourceModelHelpers.GetParent(TestClassType),
             Assembly = GenerateAssembly(),
             Attributes = TestClassType.GetCustomAttributesSafe().ToArray(),
+            Constructors = [],
             Name = TestClassType.Name,
             Namespace = TestClassType.Namespace,
             Parameters = GetParameters(TestClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),

@@ -23,7 +23,7 @@ internal static class InstanceCreator
         MethodMetadata testInformation,
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
-        return await CreateInstanceAsync(typeDataAttribute, classInformation, classInstanceArguments, 
+        return await CreateInstanceAsync(typeDataAttribute, classInformation, classInstanceArguments,
             testInformation, testBuilderContextAccessor, false);
     }
 
@@ -39,7 +39,7 @@ internal static class InstanceCreator
         {
             if (typeDataAttribute is ClassConstructorAttribute classConstructorAttribute)
             {
-                return (CreateByClassConstructor(classInformation.Type, classConstructorAttribute), null);
+                return (await CreateByClassConstructor(classInformation.Type, classConstructorAttribute, testInformation), null);
             }
 
             var args = classInstanceArguments
@@ -50,15 +50,11 @@ internal static class InstanceCreator
                 ? new Dictionary<string, object?>()
                 : await GetPropertyArgumentsAsync(classInformation, args, testInformation, testBuilderContextAccessor);
 
-            var instance = InstanceHelper.CreateInstance(testInformation, args, propertyArgs, 
+            var instance = InstanceHelper.CreateInstance(testInformation, args, propertyArgs,
                 testBuilderContextAccessor.Current);
-            
-            if (!skipPropertyInitialization)
-            {
-                await InstanceHelper.InitializePropertiesAsync(instance, testInformation, 
-                    testBuilderContextAccessor.Current).ConfigureAwait(false);
-            }
-            
+
+            await DataSourceInitializer.InitializeAsync(instance, testInformation);
+
             return (instance, null);
         }
         catch (Exception e)
@@ -67,7 +63,7 @@ internal static class InstanceCreator
         }
     }
 
-    private static object CreateByClassConstructor(Type type, ClassConstructorAttribute classConstructorAttribute)
+    private static async Task<object> CreateByClassConstructor(Type type, ClassConstructorAttribute classConstructorAttribute, MethodMetadata testInformation)
     {
         var classConstructor = (IClassConstructor)Activator.CreateInstance(
             classConstructorAttribute.ClassConstructorType)!;
@@ -82,7 +78,11 @@ internal static class InstanceCreator
             .GetMethod(nameof(IClassConstructor.Create))!
             .MakeGenericMethod(type);
 
-        return createMethod.Invoke(classConstructor, [metadata])!;
+        var value = createMethod.Invoke(classConstructor, [metadata])!;
+
+        await DataSourceInitializer.InitializeAsync(value, testInformation);
+
+        return value;
     }
 
     private static async Task<Dictionary<string, object?>> GetPropertyArgumentsAsync(
@@ -92,18 +92,18 @@ internal static class InstanceCreator
         TestBuilderContextAccessor testBuilderContextAccessor)
     {
         var propertyArgs = new Dictionary<string, object?>();
-        
+
         await foreach (var (propertyInformation, argsFunc) in GetPropertyArgumentsEnumerableAsync(
             classInformation, args, testInformation, testBuilderContextAccessor))
         {
             var propArgs = await argsFunc();
             propertyArgs[propertyInformation.Name] = propArgs.ElementAtOrDefault(0);
         }
-        
+
         return propertyArgs;
     }
 
-    public static async IAsyncEnumerable<(PropertyMetadata PropertyInformation, Func<Task<object?[]>> Args)> 
+    public static async IAsyncEnumerable<(PropertyMetadata PropertyInformation, Func<Task<object?[]>> Args)>
         GetPropertyArgumentsEnumerableAsync(
             ClassMetadata type,
             object?[] classInstanceArguments,

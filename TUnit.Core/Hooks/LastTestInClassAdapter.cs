@@ -35,6 +35,7 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
                 Name = "TUnit.Core",
                 Attributes = [],
             },
+            Constructors = [],
             Attributes = [],
             Namespace = "TUnit.Core.Interfaces",
             Name = "ILastTestInClassEventReceiver",

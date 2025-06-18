@@ -11,10 +11,7 @@ public record SourceGeneratedPropertyInformation : PropertyMetadata;
 public record PropertyMetadata : MemberMetadata
 {
     [DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
-        | DynamicallyAccessedMemberTypes.PublicProperties)]
+        )]
     public override required Type Type { get; init; }
 
     public required PropertyInfo ReflectionInfo { get; init; }

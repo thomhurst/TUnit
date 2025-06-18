@@ -16,16 +16,13 @@ internal class ReflectionToSourceModelHelpers
     private static readonly ConcurrentDictionary<PropertyInfo, PropertyMetadata> _propertyCache = new();
     private static readonly ConcurrentDictionary<ParameterInfo, ParameterMetadata> _parameterCache = new();
     private static readonly ConcurrentDictionary<ConstructorInfo, ConstructorMetadata> _constructorCache = new();
-    
+
     // Track types currently being processed to prevent infinite recursion
     [ThreadStatic]
     private static HashSet<Type>? _typesBeingProcessed;
 
     public static MethodMetadata BuildTestMethod([DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
-        | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType, MethodInfo methodInfo, string? testName)
+        )] Type testClassType, MethodInfo methodInfo, string? testName)
     {
         return BuildTestMethod(GenerateClass(testClassType), methodInfo, testName);
     }
@@ -68,7 +65,7 @@ internal class ReflectionToSourceModelHelpers
         {
             // Initialize thread-local set if needed
             _typesBeingProcessed ??= new HashSet<Type>();
-            
+
             // Check if we're already processing this type
             if (!_typesBeingProcessed.Add(testClassType))
             {
@@ -86,7 +83,7 @@ internal class ReflectionToSourceModelHelpers
                     Type = testClassType
                 };
             }
-            
+
             try
             {
                 return new ClassMetadata
@@ -130,12 +127,12 @@ internal class ReflectionToSourceModelHelpers
             IsStatic = property.GetMethod?.IsStatic is true
                 || property.SetMethod?.IsStatic is true,
             Getter = property.GetValue,
-            ClassMetadata = ShouldGenerateClassMetadataForType(property.PropertyType, property.GetCustomAttributesSafe().ToArray()) 
-                ? GenerateClass(property.PropertyType) 
+            ClassMetadata = ShouldGenerateClassMetadataForType(property.PropertyType, property.GetCustomAttributesSafe().ToArray())
+                ? GenerateClass(property.PropertyType)
                 : null
         });
     }
-    
+
     private static bool ShouldGenerateClassMetadataForType(Type type, Attribute[] propertyAttributes)
     {
         // Check if the type itself implements IDataAttribute
@@ -143,13 +140,13 @@ internal class ReflectionToSourceModelHelpers
         {
             return true;
         }
-        
+
         // Check if any of the property's attributes implement IDataAttribute
         if (propertyAttributes.Any(attr => attr is IDataAttribute))
         {
             return true;
         }
-        
+
         return false;
     }
 

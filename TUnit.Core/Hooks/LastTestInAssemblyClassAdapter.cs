@@ -36,6 +36,7 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
                 Attributes = [],
             },
             Attributes = [],
+            Constructors = [],
             Namespace = "TUnit.Core.Interfaces",
             Name = "ILastTestInAssemblyEventReceiver",
             Parameters = [],

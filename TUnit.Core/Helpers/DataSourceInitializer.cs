@@ -24,12 +24,12 @@ internal static class DataSourceInitializer
     public static async Task InitializeAsync(object instance, MethodMetadata methodMetadata)
     {
         var context = new InitializationContext();
-        
+
         try
         {
             // Pass 1: Populate all data sources
             await PopulateDataSourcesAsync(instance, methodMetadata.Class, context);
-            
+
             // Pass 2: Initialize IRequiresImmediateInitialization objects in dependency order
             await InitializeDependenciesAsync(instance, methodMetadata.Class, context);
         }
@@ -55,7 +55,7 @@ internal static class DataSourceInitializer
             try
             {
                 var propertyValue = property.Getter(instance);
-                
+
                 // If property is null and has a data source attribute, generate the value
                 if (propertyValue is null)
                 {
@@ -65,7 +65,7 @@ internal static class DataSourceInitializer
                     if (dataAttribute is not null)
                     {
                         propertyValue = await GeneratePropertyValueAsync(instance, dataAttribute, property, context);
-                        
+
                         if (propertyValue is not null && property.ReflectionInfo.CanWrite)
                         {
                             property.ReflectionInfo.SetValue(instance, propertyValue);
@@ -93,7 +93,7 @@ internal static class DataSourceInitializer
     private static async Task InitializeDependenciesAsync(object instance, ClassMetadata classMetadata, InitializationContext context)
     {
         var state = context.GetInitializationState(instance);
-        
+
         switch (state)
         {
             case InitializationState.Initialized:
@@ -111,7 +111,7 @@ internal static class DataSourceInitializer
             foreach (var property in classMetadata.Properties)
             {
                 var propertyValue = property.Getter(instance);
-                
+
                 if (propertyValue is IRequiresImmediateInitialization && property.ClassMetadata is not null)
                 {
                     await InitializeDependenciesAsync(propertyValue, property.ClassMetadata, context);
@@ -133,8 +133,8 @@ internal static class DataSourceInitializer
     /// Generates a property value using IAsyncDataSourceGeneratorAttribute
     /// </summary>
     private static async Task<object?> GeneratePropertyValueAsync(
-        object instance, 
-        AttributeMetadata attributeMetadata, 
+        object instance,
+        AttributeMetadata attributeMetadata,
         PropertyMetadata propertyMetadata,
         InitializationContext context)
     {
@@ -160,7 +160,7 @@ internal static class DataSourceInitializer
 
         // Get the first generated value
         await using var asyncEnumerator = dataAttribute.GenerateAsync(generatorMetadata).GetAsyncEnumerator();
-        
+
         if (await asyncEnumerator.MoveNextAsync())
         {
             var values = await asyncEnumerator.Current();
@@ -175,13 +175,13 @@ internal static class DataSourceInitializer
     /// </summary>
     private class InitializationContext
     {
-        public HashSet<object> VisitedForDataSources { get; } = new(ReferenceEqualityComparer.Instance);
-        private readonly Dictionary<object, InitializationState> _initializationStates = new(ReferenceEqualityComparer.Instance);
+        public HashSet<object> VisitedForDataSources { get; } = new(new ReferenceEqualityComparer());
+        private readonly Dictionary<object, InitializationState> _initializationStates = new(new ReferenceEqualityComparer());
 
         public InitializationState GetInitializationState(object instance)
         {
-            return _initializationStates.TryGetValue(instance, out var state) 
-                ? state 
+            return _initializationStates.TryGetValue(instance, out var state)
+                ? state
                 : InitializationState.NotInitialized;
         }
 

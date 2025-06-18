@@ -29,7 +29,7 @@ internal static class DataGeneratorHandler
         }
 
         var instance = dataAttribute;
-        
+
         // Initialize the data attribute instance if it has properties that need initialization
         await DataSourceInitializer.InitializeAsync(instance, testInformation);
 
@@ -50,12 +50,7 @@ internal static class DataGeneratorHandler
                 break;
             case ArgumentsAttribute args:
                 foreach (var item in GetArgumentsFromArgumentsAttribute(args))
-                    yield return async () => 
-                    {
-                        var result = item();
-                        await InitializeDataGeneratorResultsAsync(result, context);
-                        return result;
-                    };
+                    yield return () => Task.FromResult(item());
                 break;
             case InstanceMethodDataSourceAttribute instance:
                 await foreach (var item in GetArgumentsFromInstanceMethodAsync(instance, context))
@@ -72,26 +67,22 @@ internal static class DataGeneratorHandler
                 throw new ArgumentOutOfRangeException(nameof(dataAttribute), dataAttribute, null);
         }
     }
-    
+
     private static async IAsyncEnumerable<Func<Task<object?[]>>> GetArgumentsFromAsyncGeneratorAsync(
         IAsyncDataSourceGeneratorAttribute generator,
         DataGeneratorContext context)
     {
-        var generatorToUse = await PrepareGeneratorIfNeededAsync(generator, context);
         var metadata = await context.CreateMetadataAsync();
-        var asyncEnumerable = generatorToUse.GenerateAsync(metadata);
+
+        var asyncEnumerable = generator.GenerateAsync(metadata);
 
         await foreach (var func in asyncEnumerable)
         {
             yield return async () =>
             {
                 var funcResult = await func();
-                var result = ProcessDataGeneratorResult(funcResult);
-                
-                // Initialize all objects returned by the data generator
-                await InitializeDataGeneratorResultsAsync(result, context);
-                
-                return result;
+
+                return ProcessDataGeneratorResult(funcResult);
             };
         }
     }
@@ -113,7 +104,7 @@ internal static class DataGeneratorHandler
             context.ClassInstanceArgumentsInvoked ?? context.ClassInstanceArguments(),
             context.TestInformation,
             context.TestBuilderContextAccessor);
-            
+
         if (error != null)
         {
             throw error;
@@ -136,53 +127,19 @@ internal static class DataGeneratorHandler
                 yield return item;
         }
     }
-    
+
     private static async IAsyncEnumerable<Func<Task<object?[]>>> GetArgumentsFromMethodAsync(
         MethodDataSourceAttribute attribute,
         DataGeneratorContext context)
     {
         var methodDataSourceType = attribute.ClassProvidingDataSource ?? context.ClassInformation.Type;
-        
+
         await foreach (var item in ProcessStaticMethodResultsAsync(methodDataSourceType, attribute, context))
             yield return item;
     }
 
-
-
-    private static async Task<IAsyncDataSourceGeneratorAttribute> PrepareGeneratorIfNeededAsync(
-        IAsyncDataSourceGeneratorAttribute generator,
-        DataGeneratorContext context)
-    {
-        // Don't prepare generators from core libraries
-        if (DotNetAssemblyHelper.IsInDotNetCoreLibrary(generator.GetType()))
-        {
-            return generator;
-        }
-
-        // For property generators, we need a fresh instance that's properly initialized
-        var instance = generator;
-        
-        // Use centralized DataSourceInitializer
-        var metadata = new DataGeneratorMetadata
-        {
-            Type = context.DataGeneratorType,
-            TestInformation = context.TestInformation,
-            ClassInstanceArguments = context.ClassInstanceArgumentsInvoked ?? [],
-            MembersToGenerate = [],
-            TestBuilderContext = context.TestBuilderContextAccessor,
-            TestClassInstance = null,
-            TestSessionId = string.Empty,
-        };
-        
-        await DataSourceInitializer.InitializeAsync(instance, metadata, context.TestBuilderContextAccessor);
-        return instance;
-    }
-
     private static object?[] ProcessDataGeneratorResult(object? funcResult)
     {
-        // Note: Object initialization should be done at execution time, not discovery time
-        // InitializeResultAsync(funcResult);
-
         if (TupleHelper.TryParseTupleToObjectArray(funcResult, out var objectArray))
         {
             return objectArray;
@@ -196,33 +153,7 @@ internal static class DataGeneratorHandler
         return [funcResult];
     }
 
-    private static async Task InitializeDataGeneratorResultsAsync(object?[]? results, DataGeneratorContext context)
-    {
-        if (results is null)
-        {
-            return;
-        }
 
-        // Create metadata for initialization
-        var metadata = new DataGeneratorMetadata
-        {
-            Type = context.DataGeneratorType,
-            TestInformation = context.TestInformation,
-            ClassInstanceArguments = context.ClassInstanceArgumentsInvoked ?? [],
-            MembersToGenerate = [],
-            TestBuilderContext = context.TestBuilderContextAccessor,
-            TestClassInstance = null,
-            TestSessionId = string.Empty,
-        };
-
-        // Initialize each result object
-        foreach (var obj in results.Where(o => o is not null))
-        {
-            await DataSourceInitializer.InitializeAsync(obj!, metadata, context.TestBuilderContextAccessor);
-        }
-    }
-
-    
     #pragma warning disable CS1998 // Async method lacks 'await' operators
     private static async IAsyncEnumerable<Func<Task<object?[]>>> ProcessMethodResultsAsync(
         object? result,
@@ -235,12 +166,7 @@ internal static class DataGeneratorHandler
 
         foreach (var methodResult in enumerableResult)
         {
-            yield return async () => 
-            {
-                var result = ProcessMethodResult(methodResult, context);
-                await InitializeDataGeneratorResultsAsync(result, context);
-                return result;
-            };
+            yield return () => Task.FromResult(ProcessMethodResult(methodResult, context));
         }
     }
 
@@ -290,7 +216,7 @@ internal static class DataGeneratorHandler
             ?.Invoke(instance, arguments);
     }
 
-    
+
     private static async IAsyncEnumerable<Func<Task<object?[]>>> ProcessStaticMethodResultsAsync(
         Type methodDataSourceType,
         MethodDataSourceAttribute attribute,
@@ -312,7 +238,7 @@ internal static class DataGeneratorHandler
         if (TryGetAsyncTask(result, out var asyncTask))
         {
             var unwrappedResult = await asyncTask;
-            
+
             // Now process the unwrapped result normally
             await foreach (var item in ProcessMethodResultsAsync(unwrappedResult, context))
             {
@@ -430,22 +356,22 @@ internal class DataGeneratorContext
     public async Task<DataGeneratorMetadata> CreateMetadataAsync()
     {
         object? testClassInstance = null;
-        
+
         if (NeedsInstance)
         {
             var (instance, error) = await InstanceCreator.CreateInstanceAsync(
                 TestDataAttribute, ClassInformation,
                 ClassInstanceArgumentsInvoked ?? ClassInstanceArguments(),
                 TestInformation, TestBuilderContextAccessor, true);
-                
+
             if (error != null)
             {
                 throw error;
             }
-            
+
             testClassInstance = instance;
         }
-        
+
         return new DataGeneratorMetadata
         {
             Type = DataGeneratorType,

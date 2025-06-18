@@ -72,7 +72,7 @@ public class TestAttributeWriter
         }
 
         // Write ClassMetadata for the attribute type
-        WriteAttributeClassMetadata(sourceCodeWriter, attributeData);
+        WriteAttributeClassMetadata(sourceCodeWriter, context, attributeData);
 
         // Write constructor arguments
         WriteConstructorArguments(sourceCodeWriter, attributeData);
@@ -91,18 +91,18 @@ public class TestAttributeWriter
         }
 
         sourceCodeWriter.Write("ConstructorArguments = new object?[] { ");
-        
+
         for (var i = 0; i < attributeData.ConstructorArguments.Length; i++)
         {
             var arg = attributeData.ConstructorArguments[i];
             sourceCodeWriter.Write(TypedConstantParser.GetRawTypedConstantValue(arg));
-            
+
             if (i < attributeData.ConstructorArguments.Length - 1)
             {
                 sourceCodeWriter.Write(", ");
             }
         }
-        
+
         sourceCodeWriter.Write(" },");
         sourceCodeWriter.WriteLine();
     }
@@ -129,10 +129,10 @@ public class TestAttributeWriter
         sourceCodeWriter.WriteLine();
     }
 
-    private static void WriteAttributeClassMetadata(SourceCodeWriter sourceCodeWriter, AttributeData attributeData)
+    private static void WriteAttributeClassMetadata(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, AttributeData attributeData)
     {
         var attributeType = attributeData.AttributeClass;
-        
+
         // Skip system attributes
         if (attributeType?.ContainingNamespace?.ToDisplayString()?.StartsWith("System") == true)
         {
@@ -141,7 +141,7 @@ public class TestAttributeWriter
 
         // For source generated attributes, we can generate the ClassMetadata
         sourceCodeWriter.Write("ClassMetadata = ");
-        SourceInformationWriter.WriteClassInfo(sourceCodeWriter, attributeType);
+        SourceInformationWriter.GenerateClassInformation(sourceCodeWriter, context, attributeType!);
         sourceCodeWriter.Write(",");
         sourceCodeWriter.WriteLine();
     }

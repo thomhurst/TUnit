@@ -13,35 +13,6 @@ public record SourceGeneratedMethodInformation : MethodMetadata;
 [DebuggerDisplay("{Type}.{Name}")]
 public record MethodMetadata : MemberMetadata
 {
-    public static MethodMetadata Failure< [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.PublicProperties
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>(string methodName) =>
-        new()
-        {
-            Attributes = [],
-            Name = methodName,
-            ReturnType = typeof(void),
-            Type = typeof(TClassType),
-            Parameters = [],
-            GenericTypeCount = 0,
-            Class = new ClassMetadata
-            {
-                Parent = null,
-                Assembly = new AssemblyMetadata
-                {
-                    Attributes = [],
-                    Name = typeof(TClassType).Assembly.GetName().Name!,
-                },
-                Attributes = [],
-                Name = typeof(TClassType).Name,
-                Namespace = typeof(TClassType).Namespace,
-                Parameters = [],
-                Properties = [],
-                Type = typeof(TClassType)
-            }
-        };
-
     public required ParameterMetadata[] Parameters { get; init; }
 
     public required int GenericTypeCount { get; init; }
