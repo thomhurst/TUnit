@@ -36,7 +36,9 @@ internal static class DataSourceInitializer
 
     public static async Task InitializeAsync(object instance, PropertyMetadata propertyMetadata, HashSet<object?> visited)
     {
-        if (propertyMetadata.Getter(instance) is not { } propertyValue)
+        var propertyValue = propertyMetadata.Getter(instance);
+
+        if (propertyValue is null)
         {
             var dataAttribute = propertyMetadata.TestAttributes.FirstOrDefault(x => x.AttributeType.IsAssignableTo(typeof(IAsyncDataSourceGeneratorAttribute)));
 
@@ -46,16 +48,27 @@ internal static class DataSourceInitializer
             }
         }
 
+        propertyValue ??= propertyMetadata.Getter(instance);
 
+        if (propertyValue is IRequiresImmediateInitialization)
+        {
+            if (propertyMetadata.ClassMetadata is not null)
+            {
+                await InitializeAsync(propertyValue, propertyMetadata.ClassMetadata, visited);
+            }
+        }
     }
 
     public static async Task InitializeAsync(object instance, AttributeMetadata attributeMetadata, PropertyMetadata propertyMetadata, HashSet<object?> visited)
     {
         var dataAttribute = (IAsyncDataSourceGeneratorAttribute)attributeMetadata.Instance;
 
-        // await InitializeAsync(dataAttribute,)
+        if (attributeMetadata.ClassMetadata is not null)
+        {
+            await InitializeAsync(dataAttribute, attributeMetadata.ClassMetadata, visited);
+        }
 
-        var values = dataAttribute.GenerateAsync(new DataGeneratorMetadata()
+        var values = dataAttribute.GenerateAsync(new DataGeneratorMetadata
         {
             Type = DataGeneratorType.Property,
             ClassInstanceArguments = [],
@@ -70,195 +83,13 @@ internal static class DataSourceInitializer
 
         await asyncEnumerator.MoveNextAsync();
 
-        var value = await asyncEnumerator.Current();
+        var array = await asyncEnumerator.Current();
 
-        propertyMetadata.ReflectionInfo.SetValue(instance, value?.ElementAtOrDefault(0));
-    }
+        var value = array?.ElementAtOrDefault(0);
 
-    /// <summary>
-    /// Initializes an object and all its properties that have data attributes.
-    /// </summary>
-    /// <param name="instance">The instance to initialize</param>
-    /// <param name="dataGeneratorMetadata">Metadata for data generation</param>
-    /// <param name="testBuilderContextAccessor">Optional test builder context (used by engine)</param>
-    /// <param name="objectRegistrationCallback">Optional callback to register created objects</param>
-    /// <returns>A task representing the asynchronous operation</returns>
-    public static async Task InitializeAsync(
-        object instance,
-        DataGeneratorMetadata dataGeneratorMetadata,
-        TestBuilderContextAccessor? testBuilderContextAccessor = null,
-        Action<object>? objectRegistrationCallback = null)
-    {
-        // Register the instance itself
-        objectRegistrationCallback?.Invoke(instance);
-
-        // Initialize nested data generators first
-        await InitializeNestedDataGeneratorsAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback).ConfigureAwait(false);
-
-        // Initialize the instance itself if it's a data attribute
-        if (instance is IDataAttribute)
+        if (value is not null)
         {
-            await ObjectInitializer.InitializeAsync(instance).ConfigureAwait(false);
+            propertyMetadata.ReflectionInfo.SetValue(instance, value);
         }
-    }
-
-    /// <summary>
-    /// Initializes all properties with data attributes on the given object.
-    /// </summary>
-    private static async Task InitializeNestedDataGeneratorsAsync(
-        object instance,
-        DataGeneratorMetadata dataGeneratorMetadata,
-        TestBuilderContextAccessor? testBuilderContextAccessor,
-        Action<object>? objectRegistrationCallback)
-    {
-        var visited = new HashSet<object>();
-        await InitializeNestedDataGeneratorsInternalAsync(instance, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
-    }
-
-    private static async Task InitializeNestedDataGeneratorsInternalAsync(
-        object? obj,
-        DataGeneratorMetadata dataGeneratorMetadata,
-        TestBuilderContextAccessor? testBuilderContextAccessor,
-        Action<object>? objectRegistrationCallback,
-        HashSet<object> visited)
-    {
-        if (obj is null || !visited.Add(obj))
-        {
-            return;
-        }
-
-        var objType = obj.GetType();
-
-        // Skip primitive types, strings, and other types that shouldn't have nested properties processed
-        if (objType.IsPrimitive || obj is string || objType.IsEnum || objType.IsValueType && !objType.IsGenericType)
-        {
-            return;
-        }
-
-        // Skip system types that don't have meaningful properties to process
-        if (objType.Namespace?.StartsWith("System") == true)
-        {
-            return;
-        }
-
-        PropertyInfo[] properties;
-        try
-        {
-            properties = objType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-        }
-        catch (NotSupportedException)
-        {
-            // Some types don't support reflection
-            return;
-        }
-
-        foreach (var propertyInfo in properties)
-        {
-            var dataAttribute = propertyInfo.GetCustomAttributesSafe().OfType<IDataAttribute>().FirstOrDefault();
-
-            object? existingValue = null;
-            try
-            {
-                existingValue = propertyInfo.GetValue(obj);
-            }
-            catch
-            {
-                // Some properties might throw when accessed (e.g., WebApplicationFactory.Server)
-                // If we can't read the property, skip it unless it has a data attribute
-                if (dataAttribute is null)
-                {
-                    continue;
-                }
-            }
-
-            // Case 1: Property has a data attribute
-            if (dataAttribute is not null)
-            {
-                if (existingValue is null)
-                {
-                    // First, recursively initialize the data attribute itself if needed
-                    if (dataAttribute is IAsyncDataSourceGeneratorAttribute)
-                    {
-                        await InitializeNestedDataGeneratorsInternalAsync(dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
-                    }
-
-                    // Create value for the property
-                    var value = await CreatePropertyValueAsync(obj, propertyInfo, dataAttribute, dataGeneratorMetadata, testBuilderContextAccessor).ConfigureAwait(false);
-
-                    if (value is not null)
-                    {
-                        propertyInfo.SetValue(obj, value);
-                        existingValue = value;
-                    }
-                }
-            }
-
-            // Case 2: Process any existing value (whether created above or already present)
-            // This handles both values created by data attributes and values that need initialization
-            if (existingValue is not null)
-            {
-                // Register the object
-                objectRegistrationCallback?.Invoke(existingValue);
-
-                // Recursively process nested properties
-                await InitializeNestedDataGeneratorsInternalAsync(existingValue, dataGeneratorMetadata, testBuilderContextAccessor, objectRegistrationCallback, visited).ConfigureAwait(false);
-
-                // Only initialize if it's a data attribute (not regular objects like WebApplicationFactory)
-                if (existingValue is IDataAttribute)
-                {
-                    await ObjectInitializer.InitializeAsync(existingValue).ConfigureAwait(false);
-                }
-            }
-        }
-    }
-
-    private static async Task<object?> CreatePropertyValueAsync(
-        object instance,
-        PropertyInfo propertyInfo,
-        IDataAttribute dataAttribute,
-        DataGeneratorMetadata dataGeneratorMetadata,
-        TestBuilderContextAccessor? testBuilderContextAccessor)
-    {
-        // For engine context (with TestBuilderContextAccessor), use ReflectionValueCreator
-        if (testBuilderContextAccessor is not null)
-        {
-            var classInformation = ReflectionToSourceModelHelpers.GenerateClass(instance.GetType());
-            var propertyInformation = ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo);
-
-            var propertyMetadata = dataGeneratorMetadata with
-            {
-                Type = DataGeneratorType.Property,
-                MembersToGenerate = [propertyInformation]
-            };
-
-            return await ReflectionValueCreator.CreatePropertyValueAsync(
-                classInformation,
-                testBuilderContextAccessor,
-                dataAttribute,
-                propertyInformation,
-                propertyMetadata).ConfigureAwait(false);
-        }
-
-        // For user context (without TestBuilderContextAccessor), handle async data sources
-        if (dataAttribute is IAsyncDataSourceGeneratorAttribute asyncDataSource)
-        {
-            var propertyMetadata = dataGeneratorMetadata with
-            {
-                Type = DataGeneratorType.Property,
-                MembersToGenerate = [ReflectionToSourceModelHelpers.GenerateProperty(propertyInfo)]
-            };
-
-            var asyncEnumerable = asyncDataSource.GenerateAsync(propertyMetadata);
-            await using var enumerator = asyncEnumerable.GetAsyncEnumerator();
-
-            if (await enumerator.MoveNextAsync().ConfigureAwait(false))
-            {
-                var func = enumerator.Current;
-                var resultArray = await func().ConfigureAwait(false);
-                return resultArray?.FirstOrDefault();
-            }
-        }
-
-        return null;
     }
 }
