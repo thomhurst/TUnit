@@ -39,9 +39,9 @@ public record MethodMetadata : MemberMetadata
 
     protected override bool PrintMembers(StringBuilder stringBuilder)
     {
-        stringBuilder.Append($"ReturnType = {ReturnType.Name}, ");
-        stringBuilder.Append($"GenericTypeCount = {GenericTypeCount}, ");
-        stringBuilder.Append($"Type = {Type.Name}, ");
+        stringBuilder.Append($"ReturnType = {ReturnType.Name},");
+        stringBuilder.Append($"GenericTypeCount = {GenericTypeCount},");
+        stringBuilder.Append($"Type = {Type.Name},");
         stringBuilder.Append($"Name = {Name}");
         return true;
     }

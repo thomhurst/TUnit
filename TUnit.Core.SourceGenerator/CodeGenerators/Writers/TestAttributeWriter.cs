@@ -100,11 +100,11 @@ public class TestAttributeWriter
 
             if (i < attributeData.ConstructorArguments.Length - 1)
             {
-                sourceCodeWriter.Write(", ");
+                sourceCodeWriter.Write(",");
             }
         }
 
-        sourceCodeWriter.Write(" },");
+        sourceCodeWriter.Write("},");
         sourceCodeWriter.WriteLine();
     }
 

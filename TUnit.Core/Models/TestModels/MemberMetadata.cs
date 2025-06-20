@@ -21,7 +21,7 @@ public abstract record MemberMetadata
 
     protected virtual bool PrintMembers(StringBuilder stringBuilder)
     {
-        stringBuilder.Append($"Type = {Type.Name}, ");
+        stringBuilder.Append($"Type = {Type.Name},");
         stringBuilder.Append($"Name = {Name}");
 
         return true;

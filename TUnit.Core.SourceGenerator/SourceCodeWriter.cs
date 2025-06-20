@@ -44,12 +44,12 @@ public class SourceCodeWriter : IDisposable
 
     public void Write([StringSyntax("c#")] string value)
     {
-        if (string.IsNullOrEmpty(value))
+        if (string.IsNullOrWhiteSpace(value))
         {
             return;
         }
 
-        var firstChar = value[0];
+        var firstChar = value.Trim()[0];
 
         if (_appendLineOnNextWrite && firstChar != ';')
         {

@@ -94,17 +94,17 @@ public class AttributeWriter
     {
         sourceCodeWriter.Write("new global::TUnit.Core.AttributeMetadata");
         sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write($"Instance = {GetAttributeObjectInitializer(context, attributeData, sourceCodeWriter.TabLevel)}, ");
-        sourceCodeWriter.Write($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement}, ");
+        sourceCodeWriter.Write($"Instance = {GetAttributeObjectInitializer(context, attributeData, sourceCodeWriter.TabLevel)},");
+        sourceCodeWriter.Write($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement},");
 
         if (targetMemberName != null)
         {
-            sourceCodeWriter.Write($"TargetMemberName = \"{targetMemberName}\", ");
+            sourceCodeWriter.Write($"TargetMemberName = \"{targetMemberName}\",");
         }
 
         if (targetTypeName != null)
         {
-            sourceCodeWriter.Write($"TargetType = typeof({targetTypeName}), ");
+            sourceCodeWriter.Write($"TargetType = typeof({targetTypeName}),");
         }
 
         // Add constructor arguments if available
@@ -114,10 +114,10 @@ public class AttributeWriter
             sourceCodeWriter.Write("{");
             for (var i = 0; i < attributeData.ConstructorArguments.Length; i++)
             {
-                if (i > 0) sourceCodeWriter.Write(", ");
+                if (i > 0) sourceCodeWriter.Write(",");
                 sourceCodeWriter.Write(TypedConstantParser.GetRawTypedConstantValue(attributeData.ConstructorArguments[i]));
             }
-            sourceCodeWriter.Write(" }, ");
+            sourceCodeWriter.Write("},");
         }
 
         // Add named arguments if available
@@ -128,11 +128,11 @@ public class AttributeWriter
             var first = true;
             foreach (var namedArg in attributeData.NamedArguments)
             {
-                if (!first) sourceCodeWriter.Write(", ");
+                if (!first) sourceCodeWriter.Write(",");
                 first = false;
                 sourceCodeWriter.Write($"{{ \"{namedArg.Key}\", {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)} }}");
             }
-            sourceCodeWriter.Write(" }, ");
+            sourceCodeWriter.Write("},");
         }
 
         sourceCodeWriter.Write("}");

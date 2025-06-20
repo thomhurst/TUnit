@@ -54,9 +54,9 @@ public record ConstructorMetadata : MemberMetadata
 
     protected override bool PrintMembers(StringBuilder stringBuilder)
     {
-        stringBuilder.Append($"Type = {Type.Name}, ");
-        stringBuilder.Append($"Parameters = [{string.Join(", ", Parameters.Select(p => p.Type.Name))}], ");
-        stringBuilder.Append($"IsPublic = {IsPublic}, ");
+        stringBuilder.Append($"Type = {Type.Name},");
+        stringBuilder.Append($"Parameters = [{string.Join(", ", Parameters.Select(p => p.Type.Name))}],");
+        stringBuilder.Append($"IsPublic = {IsPublic},");
         stringBuilder.Append($"IsStatic = {IsStatic}");
         return true;
     }
