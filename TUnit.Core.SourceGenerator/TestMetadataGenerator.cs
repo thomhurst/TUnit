@@ -85,10 +85,10 @@ public class TestMetadataGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine();
         sourceBuilder.Write("file static class TestMetadataRegistry");
         sourceBuilder.Write("{");
-        sourceBuilder.Write("    [System.Runtime.CompilerServices.ModuleInitializer]");
-        sourceBuilder.Write("    public static void Initialize()");
-        sourceBuilder.Write("    {");
-        sourceBuilder.Write("        var testMetadata = new List<TestMetadata>();");
+        sourceBuilder.Write("[System.Runtime.CompilerServices.ModuleInitializer]");
+        sourceBuilder.Write("public static void Initialize()");
+        sourceBuilder.Write("{");
+        sourceBuilder.Write("var testMetadata = new List<TestMetadata>();");
         sourceBuilder.WriteLine();
 
         // Generate metadata for each test
@@ -128,41 +128,35 @@ public class TestMetadataGenerator : IIncrementalGenerator
         var methodName = testInfo.MethodSymbol.Name;
 
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.Write($"    private static TestMetadata CreateTestMetadata_{index}()");
-        sourceCodeWriter.Write("    {");
-        sourceCodeWriter.Write("        return new TestMetadata");
-        sourceCodeWriter.Write("        {");
-        sourceCodeWriter.Write($"            TestIdTemplate = \"{className}.{methodName}_{{{{TestIndex}}}}\",");
-        sourceCodeWriter.Write($"            TestClassType = typeof({className}),");
-        sourceCodeWriter.Write($"            TestMethod = typeof({className}).GetMethod(\"{methodName}\", BindingFlags.Public | BindingFlags.Instance),");
-        sourceCodeWriter.Write($"            MethodMetadata = CreateMethodMetadata_{index}(),");
-        sourceCodeWriter.Write($"            TestFilePath = @\"{testInfo.FilePath}\",");
-        sourceCodeWriter.Write($"            TestLineNumber = {testInfo.LineNumber},");
-        sourceCodeWriter.Write($"            TestClassFactory = CreateClassFactory_{index}(),");
-        sourceCodeWriter.Write($"            ClassDataSources = GetClassDataSources_{index}(),");
-        sourceCodeWriter.Write($"            MethodDataSources = GetMethodDataSources_{index}(),");
-        sourceCodeWriter.Write($"            PropertyDataSources = GetPropertyDataSources_{index}(),");
-        sourceCodeWriter.Write($"            DisplayNameTemplate = \"{methodName}\",");
-        sourceCodeWriter.Write($"            RepeatCount = {GetRepeatCount(testInfo)},");
-        sourceCodeWriter.Write($"            IsAsync = {(IsAsyncMethod(testInfo.MethodSymbol) ? "true" : "false")},");
-        sourceCodeWriter.Write($"            IsSkipped = {(IsSkipped(testInfo) ? "true" : "false")},");
-
-        var skipReason = GetSkipReason(testInfo);
-        if (skipReason != null)
-        {
-            sourceCodeWriter.Write($"            SkipReason = \"{skipReason}\",");
-        }
-
-        sourceCodeWriter.Write("            Attributes = Array.Empty<Attribute>(),");
+        sourceCodeWriter.Write($"private static TestMetadata CreateTestMetadata_{index}()");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write("return new TestMetadata");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"TestIdTemplate = \"{className}.{methodName}_{{{{TestIndex}}}}\",");
+        sourceCodeWriter.Write($"TestClassType = typeof({className}),");
+        sourceCodeWriter.Write($"TestMethod = typeof({className}).GetMethod(\"{methodName}\", BindingFlags.Public | BindingFlags.Instance),");
+        sourceCodeWriter.Write($"MethodMetadata = CreateMethodMetadata_{index}(),");
+        sourceCodeWriter.Write($"TestFilePath = @\"{testInfo.FilePath}\",");
+        sourceCodeWriter.Write($"TestLineNumber = {testInfo.LineNumber},");
+        sourceCodeWriter.Write($"TestClassFactory = CreateClassFactory_{index}(),");
+        sourceCodeWriter.Write($"ClassDataSources = GetClassDataSources_{index}(),");
+        sourceCodeWriter.Write($"MethodDataSources = GetMethodDataSources_{index}(),");
+        sourceCodeWriter.Write($"PropertyDataSources = GetPropertyDataSources_{index}(),");
+        sourceCodeWriter.Write($"DisplayNameTemplate = \"{methodName}\",");
+        sourceCodeWriter.Write($"RepeatCount = {GetRepeatCount(testInfo)},");
+        sourceCodeWriter.Write($"IsAsync = {(IsAsyncMethod(testInfo.MethodSymbol) ? "true" : "false")},");
+        sourceCodeWriter.Write($"IsSkipped = {(IsSkipped(testInfo) ? "true" : "false")},");
+        sourceCodeWriter.Write($"SkipReason = \"{GetSkipReason(testInfo)}\",");
+        sourceCodeWriter.Write("Attributes = Array.Empty<Attribute>(),");
 
         var timeout = GetTimeout(testInfo);
         if (timeout.HasValue)
         {
-            sourceCodeWriter.Write($"            Timeout = TimeSpan.FromMilliseconds({timeout.Value})");
+            sourceCodeWriter.Write($"Timeout = TimeSpan.FromMilliseconds({timeout.Value})");
         }
         else
         {
-            sourceCodeWriter.Write("            Timeout = null");
+            sourceCodeWriter.Write("Timeout = null");
         }
 
         sourceCodeWriter.Write("}");
@@ -184,70 +178,43 @@ public class TestMetadataGenerator : IIncrementalGenerator
         var className = GetFullTypeName(testInfo.TypeSymbol);
 
         sb.WriteLine();
-        sb.Write($"    private static MethodMetadata CreateMethodMetadata_{index}()");
-        sb.Write("    {");
-        sb.Write("        return new MethodMetadata");
-        sb.Write("        {");
-        sb.Write($"            Name = \"{testInfo.MethodSymbol.Name}\",");
-        sb.Write($"            Type = typeof({className}),");
+        sb.Write($"private static MethodMetadata CreateMethodMetadata_{index}()");
+        sb.Write("{");
+        sb.Write("return new MethodMetadata");
+        sb.Write("{");
+        sb.Write($"Name = \"{testInfo.MethodSymbol.Name}\",");
+        sb.Write($"Type = typeof({className}),");
 
         // Generate parameter metadata
-        sb.Write("            Parameters = new ParameterMetadata[]");
-        sb.Write("            {");
+        sb.Write("Parameters = new ParameterMetadata[]");
+        sb.Write("{");
         foreach (var param in testInfo.MethodSymbol.Parameters)
         {
-            sb.Write($"                new ParameterMetadata(typeof({GetFullTypeName(param.Type)}))");
+            sb.Write($"new ParameterMetadata(typeof({GetFullTypeName(param.Type)}))");
             sb.Write("                {");
-            sb.Write($"                    Name = \"{param.Name}\",");
-            sb.Write("                    Attributes = Array.Empty<AttributeMetadata>(),");
-            sb.Write($"                    ReflectionInfo = typeof({GetFullTypeName(testInfo.TypeSymbol)}).GetMethod(\"{testInfo.MethodSymbol.Name}\")!.GetParameters()[{param.Ordinal}]");
+            sb.Write($"Name = \"{param.Name}\",");
+            sb.Write("Attributes = Array.Empty<AttributeMetadata>(),");
+            sb.Write($"ReflectionInfo = typeof({GetFullTypeName(testInfo.TypeSymbol)}).GetMethod(\"{testInfo.MethodSymbol.Name}\")!.GetParameters()[{param.Ordinal}]");
             sb.Write("                },");
         }
-        sb.Write("            },");
-
-        sb.Write($"            GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},");
-        sb.Write("            Class = new ClassMetadata");
-        sb.Write("            {");
-        sb.Write($"                Name = \"{testInfo.TypeSymbol.Name}\",");
-        sb.Write($"                Type = typeof({className}),");
-        sb.Write("                Attributes = Array.Empty<AttributeMetadata>(),");
-        sb.Write($"                Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\",");
-        sb.Write($"                Assembly = new AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = Array.Empty<AttributeMetadata>() }},");
-
-        // Generate constructor parameters
-        var constructors = testInfo.TypeSymbol.Constructors
-            .Where(c => c.DeclaredAccessibility == Accessibility.Public)
-            .ToList();
-
-        if (constructors.Any())
-        {
-            var primaryConstructor = constructors.OrderBy(c => c.Parameters.Length).First();
-            sb.Write("                Parameters = new ParameterMetadata[]");
-            sb.Write("                {");
-            foreach (var param in primaryConstructor.Parameters)
-            {
-                sb.Write($"                    new ParameterMetadata(typeof({GetFullTypeName(param.Type)}))");
-                sb.Write("                    {");
-                sb.Write($"                        Name = \"{param.Name}\",");
-                sb.Write("                        Attributes = Array.Empty<AttributeMetadata>(),");
-                sb.Write($"                        ReflectionInfo = typeof({GetFullTypeName(testInfo.TypeSymbol)}).GetConstructors()[0].GetParameters()[{param.Ordinal}]");
-                sb.Write("                    },");
-            }
-            sb.Write("                },");
-        }
-        else
-        {
-            sb.Write("                Parameters = Array.Empty<ParameterMetadata>(),");
-        }
-
-        sb.Write("                Properties = Array.Empty<PropertyMetadata>(),");
-        sb.Write("                Constructors = Array.Empty<ConstructorMetadata>(),");
-        sb.Write("                Parent = null");
-        sb.Write("            },");
-        sb.Write($"            ReturnType = typeof({GetReturnTypeName(testInfo.MethodSymbol)}),");
-        sb.Write("            Attributes = Array.Empty<AttributeMetadata>()");
-        sb.Write("        };");
-        sb.Write("    }");
+        sb.Write("},");
+        sb.Write($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},");
+        sb.Write("Class = new ClassMetadata");
+        sb.Write("{");
+        sb.Write($"Name = \"{testInfo.TypeSymbol.Name}\",");
+        sb.Write($"Type = typeof({className}),");
+        sb.Write("Attributes = Array.Empty<AttributeMetadata>(),");
+        sb.Write($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\",");
+        sb.Write($"Assembly = new AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = Array.Empty<AttributeMetadata>() }},");
+        sb.Write("Parameters = Array.Empty<ParameterMetadata>(),");
+        sb.Write("Properties = Array.Empty<PropertyMetadata>(),");
+        sb.Write("Constructors = Array.Empty<ConstructorMetadata>(),");
+        sb.Write("Parent = null");
+        sb.Write("},");
+        sb.Write($"ReturnType = typeof({GetReturnTypeName(testInfo.MethodSymbol)}),");
+        sb.Write("Attributes = Array.Empty<AttributeMetadata>()");
+        sb.Write("};");
+        sb.Write("}");
     }
 
     private static void GenerateClassFactoryHelper(SourceCodeWriter sb, TestMethodInfo testInfo, int index)
@@ -255,10 +222,10 @@ public class TestMetadataGenerator : IIncrementalGenerator
         var className = GetFullTypeName(testInfo.TypeSymbol);
 
         sb.WriteLine();
-        sb.Write($"    private static Func<object?[]?, object?> CreateClassFactory_{index}()");
-        sb.Write("    {");
-        sb.Write("        return args =>");
-        sb.Write("        {");
+        sb.Write($"private static Func<object?[]?, object?> CreateClassFactory_{index}()");
+        sb.Write("{");
+        sb.Write("return args =>");
+        sb.Write("{");
 
         // Get public constructors
         var constructors = testInfo.TypeSymbol.Constructors
@@ -269,7 +236,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         if (!constructors.Any())
         {
             // No public constructors - use Activator
-            sb.Write($"            return Activator.CreateInstance(typeof({className}), args);");
+            sb.Write($"return Activator.CreateInstance(typeof({className}), args);");
         }
         else
         {
@@ -278,13 +245,13 @@ public class TestMetadataGenerator : IIncrementalGenerator
             if (primaryConstructor.Parameters.Length == 0)
             {
                 // Parameterless constructor
-                sb.Write($"            return new {className}();");
+                sb.Write($"return new {className}();");
             }
             else
             {
                 // Constructor with parameters
-                sb.Write("            if (args == null || args.Length == 0)");
-                sb.Write("            {");
+                sb.Write("if (args == null || args.Length == 0)");
+                sb.Write("{");
 
                 // Check if all parameters have defaults
                 var allHaveDefaults = primaryConstructor.Parameters.All(p => p.HasExplicitDefaultValue);
@@ -292,30 +259,30 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 {
                     var defaultArgs = string.Join(", ",
                         primaryConstructor.Parameters.Select(p => FormatValue(p.ExplicitDefaultValue)));
-                    sb.Write($"                return new {className}({defaultArgs});");
+                    sb.Write($"return new {className}({defaultArgs});");
                 }
                 else
                 {
-                    sb.Write($"                throw new InvalidOperationException(\"Constructor for {className} requires {primaryConstructor.Parameters.Length} arguments\");");
+                    sb.Write($"throw new InvalidOperationException(\"Constructor for {className} requires {primaryConstructor.Parameters.Length} arguments\");");
                 }
 
-                sb.Write("            }");
+                sb.Write("}");
                 sb.WriteLine();
 
                 // Generate constructor call with args
-                sb.Write($"            return new {className}(");
+                sb.Write($"return new {className}(");
                 for (int i = 0; i < primaryConstructor.Parameters.Length; i++)
                 {
                     var param = primaryConstructor.Parameters[i];
                     var comma = i < primaryConstructor.Parameters.Length - 1 ? "," : "";
-                    sb.Write($"                ({GetFullTypeName(param.Type)})args[{i}]{comma}");
+                    sb.Write($"({GetFullTypeName(param.Type)})args[{i}]{comma}");
                 }
-                sb.Write("            );");
+                sb.Write(");");
             }
         }
 
-        sb.Write("        };");
-        sb.Write("    }");
+        sb.Write("};");
+        sb.Write("}");
     }
 
     private static void GenerateDataSourceHelpers(SourceCodeWriter sb, TestMethodInfo testInfo, int index)
@@ -324,59 +291,59 @@ public class TestMetadataGenerator : IIncrementalGenerator
 
         // Class data sources
         sb.WriteLine();
-        sb.Write($"    private static IReadOnlyList<IDataSourceProvider> GetClassDataSources_{index}()");
-        sb.Write("    {");
+        sb.Write($"private static IReadOnlyList<IDataSourceProvider> GetClassDataSources_{index}()");
+        sb.Write("{");
 
         var classDataSources = GetClassDataSources(testInfo);
         if (classDataSources.Any())
         {
-            sb.Write("        return new IDataSourceProvider[]");
-            sb.Write("        {");
+            sb.Write("return new IDataSourceProvider[]");
+            sb.Write("{");
             foreach (var source in classDataSources)
             {
                 sb.Write($"            {source},");
             }
-            sb.Write("        };");
+            sb.Write("};");
         }
         else
         {
-            sb.Write("        return Array.Empty<IDataSourceProvider>();");
+            sb.Write("return Array.Empty<IDataSourceProvider>();");
         }
 
-        sb.Write("    }");
+        sb.Write("}");
 
         // Method data sources
         sb.WriteLine();
-        sb.Write($"    private static IReadOnlyList<IDataSourceProvider> GetMethodDataSources_{index}()");
-        sb.Write("    {");
+        sb.Write($"private static IReadOnlyList<IDataSourceProvider> GetMethodDataSources_{index}()");
+        sb.Write("{");
 
         var methodDataSources = GetMethodDataSources(testInfo);
         if (methodDataSources.Any())
         {
-            sb.Write("        return new IDataSourceProvider[]");
-            sb.Write("        {");
+            sb.Write("return new IDataSourceProvider[]");
+            sb.Write("{");
             foreach (var source in methodDataSources)
             {
                 sb.Write($"            {source},");
             }
-            sb.Write("        };");
+            sb.Write("};");
         }
         else
         {
-            sb.Write("        return Array.Empty<IDataSourceProvider>();");
+            sb.Write("return Array.Empty<IDataSourceProvider>();");
         }
 
-        sb.Write("    }");
+        sb.Write("}");
 
         // Property data sources
         sb.WriteLine();
-        sb.Write($"    private static IReadOnlyDictionary<PropertyInfo, IDataSourceProvider> GetPropertyDataSources_{index}()");
-        sb.Write("    {");
+        sb.Write($"private static IReadOnlyDictionary<PropertyInfo, IDataSourceProvider> GetPropertyDataSources_{index}()");
+        sb.Write("{");
 
         var propertyDataSources = GetPropertyDataSources(testInfo);
         if (propertyDataSources.Any())
         {
-            sb.Write("        var dict = new Dictionary<PropertyInfo, IDataSourceProvider>();");
+            sb.Write("var dict = new Dictionary<PropertyInfo, IDataSourceProvider>();");
             foreach (var (propName, source) in propertyDataSources)
             {
                 sb.Write($"        dict[typeof({className}).GetProperty(\"{propName}\")] = {source};");
@@ -385,10 +352,10 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            sb.Write("        return new Dictionary<PropertyInfo, IDataSourceProvider>();");
+            sb.Write("return new Dictionary<PropertyInfo, IDataSourceProvider>();");
         }
 
-        sb.Write("    }");
+        sb.Write("}");
     }
 
     private static string GetFullTypeName(ITypeSymbol typeSymbol)
