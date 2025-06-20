@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -47,7 +48,7 @@ public class AttributeWriter
     }
 
     public static void WriteAttributeMetadatas(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
-        ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, string? targetTypeName = null)
+        ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, string? targetTypeName = null, bool includeClassMetadata = false)
     {
         var dataAttributeInterface =
             context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute
@@ -71,7 +72,7 @@ public class AttributeWriter
                 continue;
             }
 
-            WriteAttributeMetadata(sourceCodeWriter, context, attributeData, targetElement, targetMemberName, targetTypeName);
+            WriteAttributeMetadata(sourceCodeWriter, context, attributeData, targetElement, targetMemberName, targetTypeName, includeClassMetadata);
 
             if (index != attributeDatas.Length - 1)
             {
@@ -90,7 +91,7 @@ public class AttributeWriter
     }
 
     public static void WriteAttributeMetadata(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
-        AttributeData attributeData, string targetElement, string? targetMemberName, string? targetTypeName)
+        AttributeData attributeData, string targetElement, string? targetMemberName, string? targetTypeName, bool includeClassMetadata = false)
     {
         sourceCodeWriter.Write("new global::TUnit.Core.AttributeMetadata");
         sourceCodeWriter.Write("{");
@@ -105,6 +106,14 @@ public class AttributeWriter
         if (targetTypeName != null)
         {
             sourceCodeWriter.Write($"TargetType = typeof({targetTypeName}),");
+        }
+        
+        // Add ClassMetadata if requested and not a system attribute
+        if (includeClassMetadata && attributeData.AttributeClass?.ContainingNamespace?.ToDisplayString()?.StartsWith("System") != true)
+        {
+            sourceCodeWriter.Write("ClassMetadata = ");
+            SourceInformationWriter.GenerateClassInformation(sourceCodeWriter, context, attributeData.AttributeClass!);
+            sourceCodeWriter.Write(",");
         }
 
         // Add constructor arguments if available
@@ -131,9 +140,7 @@ public class AttributeWriter
             {
                 if (!first) sourceCodeWriter.Write(",");
                 first = false;
-                sourceCodeWriter.Write($$"""
-                                         { "{{namedArg.Key}}" {{TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}} }
-                                         """);
+                sourceCodeWriter.Write($@"{{ ""{namedArg.Key}"", {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)} }}");
             }
             sourceCodeWriter.Write("}");
             sourceCodeWriter.Write(",");
@@ -266,5 +273,56 @@ public class AttributeWriter
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"{formattedNamedArgs}");
         sourceCodeWriter.Write("}");
+    }
+    
+    // Write test attributes with special filtering and formatting
+    public static void WriteTestAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, ITypeSymbol? targetType = null)
+    {
+        // Filter out attributes that don't have application syntax reference (except mscorlib)
+        var filteredAttributes = attributeDatas.Where(x => 
+            x.ApplicationSyntaxReference is not null || 
+            x.AttributeClass?.ContainingAssembly?.Identity.Name == "mscorlib").ToImmutableArray();
+        
+        var targetTypeName = targetType?.GloballyQualified();
+        
+        // Use the enhanced WriteAttributeMetadatas with ClassMetadata support
+        WriteAttributeMetadatas(sourceCodeWriter, context, filteredAttributes, targetElement, targetMemberName, targetTypeName, includeClassMetadata: true);
+    }
+    
+    // Helper methods for different contexts (previously in TestAttributeWriter)
+    public static void WriteAssemblyTestAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        IAssemblySymbol assembly)
+    {
+        var attributes = assembly.GetAttributes();
+        WriteTestAttributes(sourceCodeWriter, context, attributes, "Assembly", assembly.Name);
+    }
+
+    public static void WriteTypeTestAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        ITypeSymbol type)
+    {
+        var attributes = type.GetAttributes();
+        WriteTestAttributes(sourceCodeWriter, context, attributes, "Class", type.Name, type);
+    }
+
+    public static void WriteMethodTestAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        IMethodSymbol method)
+    {
+        var attributes = method.GetAttributes();
+        WriteTestAttributes(sourceCodeWriter, context, attributes, "Method", method.Name, method.ContainingType);
+    }
+
+    public static void WritePropertyTestAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        IPropertySymbol property)
+    {
+        var attributes = property.GetAttributes();
+        WriteTestAttributes(sourceCodeWriter, context, attributes, "Property", property.Name, property.ContainingType);
+    }
+
+    public static void WriteParameterTestAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+        IParameterSymbol parameter)
+    {
+        var attributes = parameter.GetAttributes();
+        WriteTestAttributes(sourceCodeWriter, context, attributes, "Parameter", parameter.Name, parameter.ContainingType);
     }
 }

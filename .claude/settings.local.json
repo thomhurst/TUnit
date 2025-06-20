@@ -41,7 +41,9 @@
       "Bash(chmod:*)",
       "Bash(python3:*)",
       "Bash(./bin/Release/net8.0/TUnit.TestProject:*)",
-      "Bash(dotnet new:*)"
+      "Bash(dotnet new:*)",
+      "Bash(./clean.ps1)",
+      "Bash(pwsh ./clean.ps1)"
     ],
     "deny": []
   }
