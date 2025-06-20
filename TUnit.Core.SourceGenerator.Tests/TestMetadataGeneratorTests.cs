@@ -1,8 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace TUnit.Core.SourceGenerator.Tests;

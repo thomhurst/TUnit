@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.Tests.Bugs;
 

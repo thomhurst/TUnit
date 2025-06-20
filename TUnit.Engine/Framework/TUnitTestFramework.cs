@@ -11,7 +11,6 @@ using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Capabilities;
 using TUnit.Engine.Exceptions;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 #pragma warning disable TPEXP
 

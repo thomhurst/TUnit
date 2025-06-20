@@ -1,9 +1,7 @@
 ﻿using System.IO.Compression;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Testing;
 using NuGet.Common;
 using NuGet.Configuration;
-using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 

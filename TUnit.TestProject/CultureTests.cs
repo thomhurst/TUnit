@@ -1,7 +1,4 @@
 ﻿using System.Globalization;
-using TUnit.Assertions;
-using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.Assertions.Extensions;
 using TUnit.Core.Executors;
 using TUnit.TestProject.Attributes;
 

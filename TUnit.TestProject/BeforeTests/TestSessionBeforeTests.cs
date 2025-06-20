@@ -1,8 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using Polyfills;
-
-namespace TUnit.TestProject.BeforeTests;
+﻿namespace TUnit.TestProject.BeforeTests;
 
 public class TestSessionBeforeHooks
 {

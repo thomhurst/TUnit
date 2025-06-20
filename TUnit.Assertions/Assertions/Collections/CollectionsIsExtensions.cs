@@ -1,6 +1,5 @@
 ﻿#nullable disable
 
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Collections;

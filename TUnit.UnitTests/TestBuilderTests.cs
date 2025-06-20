@@ -1,7 +1,4 @@
 using System.Reflection;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core;
 using TUnit.Core.DataSources;
 
 namespace TUnit.UnitTests;

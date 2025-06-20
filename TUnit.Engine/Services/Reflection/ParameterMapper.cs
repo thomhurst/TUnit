@@ -2,7 +2,6 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Helpers;
-using Polyfills;
 
 namespace TUnit.Engine.Services.Reflection;
 

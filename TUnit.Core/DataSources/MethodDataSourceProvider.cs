@@ -1,7 +1,5 @@
 using System.Reflection;
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace TUnit.Core.DataSources;
 
 /// <summary>

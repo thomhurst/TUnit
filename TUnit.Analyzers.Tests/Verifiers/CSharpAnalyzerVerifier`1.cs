@@ -3,9 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using Polly.CircuitBreaker;
-using TUnit.Core;
 using TUnit.TestProject.Library;
 
 namespace TUnit.Analyzers.Tests.Verifiers;

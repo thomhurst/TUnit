@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.String;
+﻿using TUnit.Assertions.AssertConditions.String;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 

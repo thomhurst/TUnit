@@ -1,6 +1,4 @@
-﻿using TUnit.TestProject.Attributes;
-
-namespace TUnit.TestProject.Bugs._2481;
+﻿namespace TUnit.TestProject.Bugs._2481;
 
 public class Tests
 {

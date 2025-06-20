@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace TUnit.TestProject.OrderedSetupTests;
+﻿namespace TUnit.TestProject.OrderedSetupTests;
 
 #pragma warning disable
 public class Base2 : Base1

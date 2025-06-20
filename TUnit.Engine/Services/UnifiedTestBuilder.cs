@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 

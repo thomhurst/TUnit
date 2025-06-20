@@ -2,8 +2,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using PublicApiGenerator;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.PublicAPI;
 

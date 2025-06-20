@@ -1,4 +1,3 @@
-using TUnit.Core.Configuration;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;

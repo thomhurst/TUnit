@@ -1,8 +1,6 @@
 ﻿using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;

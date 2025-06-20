@@ -1,6 +1,5 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Hooks;
-using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;

@@ -1,5 +1,4 @@
-﻿using System.CodeDom.Compiler;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace TUnit.Core.SourceGenerator;
@@ -76,7 +75,7 @@ public class SourceCodeWriter : IDisposable
             if(_stringBuilder.Length > 0
                && _stringBuilder[^1] != '\n')
             {
-                if(!_endOfStringNewLineTriggerringChars.Contains(value[^1]))
+                if(_endOfStringNewLineTriggerringChars.Contains(value[^1]))
                 {
                     _stringBuilder.AppendLine();
                 }

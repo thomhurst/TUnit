@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.Example.Asp.Net.TestProject;
+﻿namespace TUnit.Example.Asp.Net.TestProject;
 
 [ClassDataSource<WebApplicationFactory>(Shared = SharedType.None)]
 [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerClass)]

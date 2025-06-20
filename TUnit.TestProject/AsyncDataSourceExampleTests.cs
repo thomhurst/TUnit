@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 public class AsyncApiDataSource : AsyncDataSourceGeneratorAttribute<string>

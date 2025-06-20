@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Concurrent;
-using TUnit.Core;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
@@ -19,7 +17,7 @@ public class ArgumentsWithClassDataSourceTests(int classArg)
     {
         // Record this test execution
         ExecutedTests.Add($"Class:{classArg}");
-        
+
         // With 2 Arguments and 2 ClassDataSource,
         // we should have 2 * 2 = 4 total test instances
         await Task.CompletedTask;
@@ -30,28 +28,28 @@ public class ArgumentsWithClassDataSourceTests(int classArg)
     {
         // Get the executed tests
         var executedTests = ExecutedTests.ToList();
-        
+
         // Skip verification if no tests were executed (e.g., filtered run)
         if (executedTests.Count == 0)
         {
             return;
         }
-        
+
         // Log what we actually got
         Console.WriteLine($"Executed tests count: {executedTests.Count}");
         foreach (var test in executedTests)
         {
             Console.WriteLine($"  - {test}");
         }
-        
+
         // Should have exactly 4 test instances (2 Arguments * 2 ClassDataSource)
         await Assert.That(executedTests.Count).IsEqualTo(4);
-        
+
         // Verify we have the expected values
         var expected = new[]
         {
             "Class:1",      // From Arguments
-            "Class:2",      // From Arguments  
+            "Class:2",      // From Arguments
             "Class:100",    // From IntDataSource1
             "Class:200"     // From IntDataSource2
         };
@@ -60,19 +58,19 @@ public class ArgumentsWithClassDataSourceTests(int classArg)
         {
             await Assert.That(executedTests).Contains(expectedTest);
         }
-        
+
         // Also verify we don't have duplicates
         await Assert.That(executedTests.Distinct().Count()).IsEqualTo(4);
-        
+
         // Clear for next run
         ExecutedTests.Clear();
     }
-    
+
     public class IntDataSource1
     {
         public static implicit operator int(IntDataSource1 _) => 100;
     }
-    
+
     public class IntDataSource2
     {
         public static implicit operator int(IntDataSource2 _) => 200;

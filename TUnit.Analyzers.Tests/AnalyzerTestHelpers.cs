@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Polly.CircuitBreaker;
-using TUnit.Core;
 using TUnit.TestProject.Library;
 
 namespace TUnit.Analyzers.Tests;

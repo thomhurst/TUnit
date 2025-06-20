@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -125,6 +124,7 @@ public class AttributeWriter
             {
                 sourceCodeWriter.Write($"{TypedConstantParser.GetRawTypedConstantValue(typedConstant)},");
             }
+
             sourceCodeWriter.Write("}");
             sourceCodeWriter.Write(",");
         }

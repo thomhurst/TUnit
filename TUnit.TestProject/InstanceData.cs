@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 public class InstanceData
 {

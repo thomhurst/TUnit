@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using System.Runtime.InteropServices;
 
 namespace TUnit.PublicAPI;
 

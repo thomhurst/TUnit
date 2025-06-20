@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Analyzers.Tests.Extensions;
-using TUnit.Core;
 
 namespace TUnit.Analyzers.Tests.Verifiers;
 

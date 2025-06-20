@@ -2,8 +2,6 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
-using TUnit.Core.Interfaces;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 

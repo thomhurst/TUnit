@@ -1,6 +1,3 @@
-using System.Collections;
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 [ClassDataSource(typeof(ClassData1))]

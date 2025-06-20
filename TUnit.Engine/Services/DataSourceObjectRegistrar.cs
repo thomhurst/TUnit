@@ -3,7 +3,6 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Services;
 

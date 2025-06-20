@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.Testing;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;

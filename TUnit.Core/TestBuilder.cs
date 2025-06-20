@@ -4,8 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using TUnit.Core.Configuration;
-using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 

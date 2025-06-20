@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core.Interfaces;
-using Polyfills;
+﻿using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 

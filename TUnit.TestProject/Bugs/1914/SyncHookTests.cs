@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1914;

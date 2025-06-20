@@ -1,7 +1,5 @@
 ﻿#pragma warning disable
 
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 

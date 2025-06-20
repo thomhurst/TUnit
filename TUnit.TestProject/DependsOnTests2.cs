@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.Assertions.Extensions;
+﻿using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Core.Extensions;
 using TUnit.TestProject.Attributes;
 
