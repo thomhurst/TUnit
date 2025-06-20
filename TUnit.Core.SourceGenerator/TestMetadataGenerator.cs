@@ -72,8 +72,6 @@ public class TestMetadataGenerator : IIncrementalGenerator
 
         var sourceBuilder = new SourceCodeWriter();
 
-        // Generate file header
-        sourceBuilder.Write("#nullable enable");
         sourceBuilder.Write("using System;");
         sourceBuilder.Write("using System.Collections.Generic;");
         sourceBuilder.Write("using System.Reflection;");
@@ -99,8 +97,8 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
 
         sourceBuilder.WriteLine();
-        sourceBuilder.Write("        TestSourceRegistrar.RegisterMetadata(testMetadata);");
-        sourceBuilder.Write("    }");
+        sourceBuilder.Write("TestSourceRegistrar.RegisterMetadata(testMetadata);");
+        sourceBuilder.Write("}");
 
         // Generate helper methods
         foreach (var testInfo in validTests.Select((t, i) => new { Test = t, Index = i }))
@@ -191,11 +189,11 @@ public class TestMetadataGenerator : IIncrementalGenerator
         foreach (var param in testInfo.MethodSymbol.Parameters)
         {
             sb.Write($"new ParameterMetadata(typeof({GetFullTypeName(param.Type)}))");
-            sb.Write("                {");
+            sb.Write("{");
             sb.Write($"Name = \"{param.Name}\",");
             sb.Write("Attributes = Array.Empty<AttributeMetadata>(),");
             sb.Write($"ReflectionInfo = typeof({GetFullTypeName(testInfo.TypeSymbol)}).GetMethod(\"{testInfo.MethodSymbol.Name}\")!.GetParameters()[{param.Ordinal}]");
-            sb.Write("                },");
+            sb.Write("},");
         }
         sb.Write("},");
         sb.Write($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},");
