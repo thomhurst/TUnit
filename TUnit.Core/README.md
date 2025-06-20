@@ -135,7 +135,6 @@ public class DatabaseTests
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `TUnitTestBuilderMode` | `Optimized` | `Basic`, `Optimized`, or `WithDiagnostics` |
 | `TUnitEnableDiagnostics` | `false` | Enable detailed diagnostics |
 | `TUnitMaxConcurrency` | `ProcessorCount` | Maximum parallel test execution |
 | `TUnitEnableTelemetry` | `false` | Enable metrics collection |
@@ -145,7 +144,7 @@ public class DatabaseTests
 All MSBuild properties can be overridden with environment variables:
 
 ```bash
-export TUNIT_TESTBUILDER_MODE=WithDiagnostics
+export TUNIT_TESTBUILDER_DIAGNOSTICS=true
 export TUNIT_ENABLE_TELEMETRY=true
 ```
 
@@ -257,7 +256,7 @@ public void Test(int a, int b, int c) { }
 
 ## Performance Tips
 
-1. **TestBuilder Mode**: Use `Optimized` mode for best performance
+1. **Expression Compilation**: TestBuilder uses compiled expressions for fast execution
 2. **Share Data Sources**: Use `Shared = true` for expensive data
 3. **Optimize Parallel Execution**: Adjust `TUnitMaxConcurrency`
 4. **Cache Test Data**: Use lazy initialization for expensive setup

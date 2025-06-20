@@ -16,56 +16,43 @@ public class TestBuilderPerformanceTests
     private const int TestIterations = 1000;
     
     [Test]
-    public async Task TestBuilder_BasicVsOptimized_PerformanceComparison()
+    public async Task TestBuilder_PerformanceWithCaching()
     {
         var metadata = CreateSampleTestMetadata();
+        var builder = new TestBuilder();
         
-        // Warmup both builders
-        var basicBuilder = new TestBuilder();
-        var optimizedBuilder = new TestBuilderOptimized();
-        
+        // Warmup
         for (int i = 0; i < WarmupIterations; i++)
         {
-            await basicBuilder.BuildTestsAsync(metadata);
-            await optimizedBuilder.BuildTestsAsync(metadata);
+            await builder.BuildTestsAsync(metadata);
         }
         
-        // Measure basic builder
-        var basicStopwatch = Stopwatch.StartNew();
+        // Measure performance
+        var stopwatch = Stopwatch.StartNew();
         for (int i = 0; i < TestIterations; i++)
         {
-            await basicBuilder.BuildTestsAsync(metadata);
+            await builder.BuildTestsAsync(metadata);
         }
-        basicStopwatch.Stop();
+        stopwatch.Stop();
         
-        // Measure optimized builder
-        var optimizedStopwatch = Stopwatch.StartNew();
-        for (int i = 0; i < TestIterations; i++)
-        {
-            await optimizedBuilder.BuildTestsAsync(metadata);
-        }
-        optimizedStopwatch.Stop();
+        var avgTimePerBuild = (double)stopwatch.ElapsedMilliseconds / TestIterations;
         
-        // Calculate improvement
-        var improvement = (double)basicStopwatch.ElapsedMilliseconds / optimizedStopwatch.ElapsedMilliseconds;
+        Console.WriteLine($"Total: {stopwatch.ElapsedMilliseconds}ms");
+        Console.WriteLine($"Average per build: {avgTimePerBuild:F2}ms");
         
-        Console.WriteLine($"Basic: {basicStopwatch.ElapsedMilliseconds}ms");
-        Console.WriteLine($"Optimized: {optimizedStopwatch.ElapsedMilliseconds}ms");
-        Console.WriteLine($"Improvement: {improvement:F2}x faster");
-        
-        // Optimized should be at least 2x faster due to expression compilation and caching
-        await Assert.That(improvement).IsGreaterThan(2.0);
+        // With expression compilation and caching, should be very fast
+        await Assert.That(avgTimePerBuild).IsLessThan(1.0);
     }
     
     [Test]
     public async Task TestBuilder_CachingEffectiveness()
     {
         var metadata = CreateSampleTestMetadata();
-        var optimizedBuilder = new TestBuilderOptimized();
+        var builder = new TestBuilder();
         
         // First run - cold cache
         var coldStopwatch = Stopwatch.StartNew();
-        await optimizedBuilder.BuildTestsAsync(metadata);
+        await builder.BuildTestsAsync(metadata);
         coldStopwatch.Stop();
         
         // Subsequent runs - warm cache
@@ -73,7 +60,7 @@ public class TestBuilderPerformanceTests
         for (int i = 0; i < 10; i++)
         {
             var warmStopwatch = Stopwatch.StartNew();
-            await optimizedBuilder.BuildTestsAsync(metadata);
+            await builder.BuildTestsAsync(metadata);
             warmStopwatch.Stop();
             warmTimes[i] = warmStopwatch.ElapsedTicks;
         }
@@ -96,14 +83,14 @@ public class TestBuilderPerformanceTests
     public async Task TestBuilder_ScalesLinearly(int dataSourceSize)
     {
         var metadata = CreateTestMetadataWithDataSize(dataSourceSize);
-        var optimizedBuilder = new TestBuilderOptimized();
+        var builder = new TestBuilder();
         
         // Warmup
-        await optimizedBuilder.BuildTestsAsync(metadata);
+        await builder.BuildTestsAsync(metadata);
         
         // Measure
         var stopwatch = Stopwatch.StartNew();
-        var tests = await optimizedBuilder.BuildTestsAsync(metadata);
+        var tests = await builder.BuildTestsAsync(metadata);
         stopwatch.Stop();
         
         var testCount = tests.Count();
@@ -119,10 +106,10 @@ public class TestBuilderPerformanceTests
     public async Task TestBuilder_ParallelDataSourceProcessing()
     {
         var metadata = CreateTestMetadataWithMultipleDataSources();
-        var optimizedBuilder = new TestBuilderOptimized();
+        var builder = new TestBuilder();
         
         var stopwatch = Stopwatch.StartNew();
-        var tests = await optimizedBuilder.BuildTestsAsync(metadata);
+        var tests = await builder.BuildTestsAsync(metadata);
         stopwatch.Stop();
         
         // With parallel processing, this should be fast even with multiple data sources
@@ -134,7 +121,7 @@ public class TestBuilderPerformanceTests
     public async Task TestBuilder_ExpressionCompilation_Performance()
     {
         var testType = typeof(PerformanceTestClass);
-        var optimizedBuilder = new TestBuilderOptimized();
+        var builder = new TestBuilder();
         
         // Create metadata with various method signatures
         var metadata = new TestMetadata
@@ -164,7 +151,7 @@ public class TestBuilderPerformanceTests
         
         // Measure compilation + execution
         var stopwatch = Stopwatch.StartNew();
-        var tests = await optimizedBuilder.BuildTestsAsync(metadata);
+        var tests = await builder.BuildTestsAsync(metadata);
         stopwatch.Stop();
         
         await Assert.That(tests.Count()).IsEqualTo(3);

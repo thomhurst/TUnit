@@ -1,6 +1,4 @@
 using TUnit.Core.Configuration;
-using TUnit.Core.DataSources;
-using TUnit.Core.Diagnostics;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -11,25 +9,12 @@ namespace TUnit.Core;
 public class TestMetadataSource : ITestSource
 {
     private readonly IReadOnlyList<TestMetadata> _testMetadata;
-    private readonly ITestBuilderInternal _testBuilder;
+    private readonly TestBuilder _testBuilder;
     
     public TestMetadataSource(IReadOnlyList<TestMetadata> testMetadata)
     {
         _testMetadata = testMetadata;
-        _testBuilder = CreateTestBuilder();
-    }
-    
-    private static ITestBuilderInternal CreateTestBuilder()
-    {
-        return TUnitConfiguration.TestBuilderMode switch
-        {
-            TestBuilderMode.Basic => new TestBuilderAdapter(new TestBuilder()),
-            TestBuilderMode.Optimized => new TestBuilderAdapter(new TestBuilderOptimized()),
-            TestBuilderMode.WithDiagnostics => new TestBuilderAdapter(
-                new TestBuilderWithDiagnostics(
-                    new TestBuilderDiagnostics(TUnitConfiguration.EnableDiagnostics))),
-            _ => new TestBuilderAdapter(new TestBuilderOptimized())
-        };
+        _testBuilder = new TestBuilder();
     }
     
     public async Task<DiscoveryResult> DiscoverTestsAsync(string sessionId)

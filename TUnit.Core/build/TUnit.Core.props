@@ -6,9 +6,6 @@
   
   <!-- Default TUnit configuration -->
   <PropertyGroup>
-    <!-- TestBuilder configuration -->
-    <TUnitTestBuilderMode Condition="'$(TUnitTestBuilderMode)' == ''">Optimized</TUnitTestBuilderMode>
-    
     <!-- Diagnostic settings -->
     <TUnitEnableDiagnostics Condition="'$(TUnitEnableDiagnostics)' == ''">false</TUnitEnableDiagnostics>
     <TUnitEnableTelemetry Condition="'$(TUnitEnableTelemetry)' == ''">false</TUnitEnableTelemetry>
@@ -28,7 +25,6 @@
 
   <!-- Make properties visible to source generator -->
   <ItemGroup>
-    <CompilerVisibleProperty Include="TUnitTestBuilderMode" />
     <CompilerVisibleProperty Include="TUnitEnableDiagnostics" />
     <CompilerVisibleProperty Include="TUnitEnableTelemetry" />
     <CompilerVisibleProperty Include="TUnitMaxConcurrency" />
