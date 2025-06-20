@@ -117,7 +117,8 @@ public class AttributeWriter
                 if (i > 0) sourceCodeWriter.Write(",");
                 sourceCodeWriter.Write(TypedConstantParser.GetRawTypedConstantValue(attributeData.ConstructorArguments[i]));
             }
-            sourceCodeWriter.Write("},");
+            sourceCodeWriter.Write("}");
+            sourceCodeWriter.Write(",");
         }
 
         // Add named arguments if available
@@ -130,9 +131,12 @@ public class AttributeWriter
             {
                 if (!first) sourceCodeWriter.Write(",");
                 first = false;
-                sourceCodeWriter.Write($"{{ \"{namedArg.Key}\", {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)} }}");
+                sourceCodeWriter.Write($$"""
+                                         { "{{namedArg.Key}}" {{TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}} }
+                                         """);
             }
-            sourceCodeWriter.Write("},");
+            sourceCodeWriter.Write("}");
+            sourceCodeWriter.Write(",");
         }
 
         sourceCodeWriter.Write("}");

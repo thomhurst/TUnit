@@ -104,7 +104,8 @@ public class TestAttributeWriter
             }
         }
 
-        sourceCodeWriter.Write("},");
+        sourceCodeWriter.Write("}");
+        sourceCodeWriter.Write(",");
         sourceCodeWriter.WriteLine();
     }
 
@@ -126,7 +127,8 @@ public class TestAttributeWriter
             sourceCodeWriter.WriteLine();
         }
 
-        sourceCodeWriter.Write("},");
+        sourceCodeWriter.Write("}");
+            sourceCodeWriter.Write(",");
         sourceCodeWriter.WriteLine();
     }
 

@@ -74,10 +74,13 @@ public class SourceCodeWriter : IDisposable
         if (_startOfStringTabLevelIncreasingChars.Contains(firstChar))
         {
             if(_stringBuilder.Length > 0
-               && _stringBuilder[^1] != '\n'
-               && !_endOfStringNewLineTriggerringChars.Contains(value[^1]))
+               && _stringBuilder[^1] != '\n')
             {
-                _stringBuilder.AppendLine();
+                if(_tabLevelDecreasingChars.Contains(firstChar) ||
+                    !_endOfStringNewLineTriggerringChars.Contains(value[^1]))
+                {
+                    _stringBuilder.AppendLine();
+                }
             }
 
             if (_stringBuilder.Length > 0

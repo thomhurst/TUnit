@@ -191,19 +191,20 @@ public static class SourceInformationWriter
 
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, property.GetAttributes(), "Property", property.Name, namedTypeSymbol.ToDisplayString());
-        
+
         // For now, always set ClassMetadata to null to avoid circular references
         // The ClassMetadata will be available through the cache if needed at runtime
         sourceCodeWriter.Write("ClassMetadata = null,");
 
-        sourceCodeWriter.Write("},");
+        sourceCodeWriter.Write("}");
+            sourceCodeWriter.Write(",");
     }
 
     private static void GenerateConstructorInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IMethodSymbol constructor)
     {
         sourceCodeWriter.Write("new global::TUnit.Core.ConstructorMetadata");
         sourceCodeWriter.Write("{");
-        
+
         sourceCodeWriter.Write($"Type = typeof({constructor.ContainingType.GloballyQualified()}),");
         sourceCodeWriter.Write($"Name = \".ctor\",");
         sourceCodeWriter.Write($"IsStatic = {constructor.IsStatic.ToString().ToLowerInvariant()},");
@@ -234,7 +235,8 @@ public static class SourceInformationWriter
             sourceCodeWriter.Write("],");
         }
 
-        sourceCodeWriter.Write("},");
+        sourceCodeWriter.Write("}");
+            sourceCodeWriter.Write(",");
     }
 
     private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
@@ -243,24 +245,24 @@ public static class SourceInformationWriter
             ? $"_ => {namedTypeSymbol.GloballyQualified()}.{property.Name}"
             : $"o => (({namedTypeSymbol.GloballyQualified()})o).{property.Name}";
     }
-    
+
     private static bool ShouldGenerateClassMetadataForPropertyType(GeneratorAttributeSyntaxContext context, IPropertySymbol property)
     {
         var compilation = context.SemanticModel.Compilation;
         var dataAttributeType = compilation.GetTypeByMetadataName("TUnit.Core.IDataAttribute");
-        
+
         if (dataAttributeType == null)
         {
             return false;
         }
-        
+
         // Check if the property type itself implements IDataAttribute
-        if (property.Type is INamedTypeSymbol namedType && 
+        if (property.Type is INamedTypeSymbol namedType &&
             namedType.AllInterfaces.Contains(dataAttributeType, SymbolEqualityComparer.Default))
         {
             return true;
         }
-        
+
         // Check if any of the property's attributes implement IDataAttribute
         foreach (var attribute in property.GetAttributes())
         {
@@ -270,7 +272,7 @@ public static class SourceInformationWriter
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -325,7 +327,8 @@ public static class SourceInformationWriter
         //     sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetMethodParameterInfo(typeof({containingType}), \"{methodName}\", {parameterIndex}, new Type[] {{{parameterTypesString}}}, {isStatic.ToString().ToLowerInvariant()}, {genericParameterCount}),");
         // }
 
-        sourceCodeWriter.Write("},");
+        sourceCodeWriter.Write("}");
+            sourceCodeWriter.Write(",");
 
         string GetTypeOrSubstitution(ITypeSymbol type)
         {
