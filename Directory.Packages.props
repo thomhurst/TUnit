@@ -57,7 +57,7 @@
     <PackageVersion Include="Polly" Version="8.6.1" />
     <PackageVersion Include="Polyfill" Version="7.33.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
-    <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19" />
+    <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="0.7.7">
       <PrivateAssets>all</PrivateAssets>
