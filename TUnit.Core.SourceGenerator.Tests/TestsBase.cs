@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
+using TUnit.Core.SourceGenerator.Tests.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
