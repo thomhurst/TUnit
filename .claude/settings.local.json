@@ -43,7 +43,11 @@
       "Bash(./bin/Release/net8.0/TUnit.TestProject:*)",
       "Bash(dotnet new:*)",
       "Bash(./clean.ps1)",
-      "Bash(pwsh ./clean.ps1)"
+      "Bash(pwsh ./clean.ps1)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(claude-code --help)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__zen__listmodels"
     ],
     "deny": []
   }

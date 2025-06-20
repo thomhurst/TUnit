@@ -1,0 +1,116 @@
+<!-- 
+  TUnit.Core MSBuild targets
+  Automatically imported when TUnit.Core package is referenced
+-->
+<Project>
+
+  <!-- Environment variable propagation for runtime -->
+  <Target Name="SetTUnitEnvironmentVariables" BeforeTargets="Build;VSTest;Test">
+    <PropertyGroup>
+      <TUnitEnvironmentVariables>
+TUNIT_USE_TEST_BUILDER=$(TUnitUseTestBuilder)
+TUNIT_TESTBUILDER_MODE=$(TUnitTestBuilderMode)
+TUNIT_TESTBUILDER_DIAGNOSTICS=$(TUnitEnableDiagnostics)
+TUNIT_ENABLE_TELEMETRY=$(TUnitEnableTelemetry)
+TUNIT_MAX_CONCURRENCY=$(TUnitMaxConcurrency)
+TUNIT_BUILD_TIMEOUT=$(TUnitBuildTimeout)
+TUNIT_CONTINUE_ON_ERROR=$(TUnitContinueOnError)
+TUNIT_MAX_ERRORS=$(TUnitMaxErrors)
+TUNIT_LOG_ERRORS=$(TUnitLogErrors)
+TUNIT_ENABLE_CACHING=$(TUnitEnableCaching)
+      </TUnitEnvironmentVariables>
+    </PropertyGroup>
+    
+    <!-- Set environment variables for test execution -->
+    <ItemGroup>
+      <EnvironmentVariable Include="TUNIT_USE_TEST_BUILDER" Value="$(TUnitUseTestBuilder)" />
+      <EnvironmentVariable Include="TUNIT_TESTBUILDER_MODE" Value="$(TUnitTestBuilderMode)" />
+      <EnvironmentVariable Include="TUNIT_TESTBUILDER_DIAGNOSTICS" Value="$(TUnitEnableDiagnostics)" />
+      <EnvironmentVariable Include="TUNIT_ENABLE_TELEMETRY" Value="$(TUnitEnableTelemetry)" />
+      <EnvironmentVariable Include="TUNIT_MAX_CONCURRENCY" Value="$(TUnitMaxConcurrency)" />
+      <EnvironmentVariable Include="TUNIT_BUILD_TIMEOUT" Value="$(TUnitBuildTimeout)" />
+      <EnvironmentVariable Include="TUNIT_CONTINUE_ON_ERROR" Value="$(TUnitContinueOnError)" />
+      <EnvironmentVariable Include="TUNIT_MAX_ERRORS" Value="$(TUnitMaxErrors)" />
+      <EnvironmentVariable Include="TUNIT_LOG_ERRORS" Value="$(TUnitLogErrors)" />
+      <EnvironmentVariable Include="TUNIT_ENABLE_CACHING" Value="$(TUnitEnableCaching)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Diagnostics output -->
+  <Target Name="TUnitDiagnosticsOutput" 
+          AfterTargets="Build" 
+          Condition="'$(TUnitEnableDiagnostics)' == 'true'">
+    <Message Text="=== TUnit Configuration ===" Importance="high" />
+    <Message Text="UseTestBuilder: $(TUnitUseTestBuilder)" Importance="high" />
+    <Message Text="TestBuilderMode: $(TUnitTestBuilderMode)" Importance="high" />
+    <Message Text="EnableDiagnostics: $(TUnitEnableDiagnostics)" Importance="high" />
+    <Message Text="EnableTelemetry: $(TUnitEnableTelemetry)" Importance="high" />
+    <Message Text="MaxConcurrency: $(TUnitMaxConcurrency)" Importance="high" />
+    <Message Text="BuildTimeout: $(TUnitBuildTimeout)ms" Importance="high" />
+    <Message Text="ContinueOnError: $(TUnitContinueOnError)" Importance="high" />
+    <Message Text="MaxErrors: $(TUnitMaxErrors)" Importance="high" />
+    <Message Text="LogErrors: $(TUnitLogErrors)" Importance="high" />
+    <Message Text="EnableCaching: $(TUnitEnableCaching)" Importance="high" />
+    <Message Text="=========================" Importance="high" />
+  </Target>
+
+  <!-- Validate configuration -->
+  <Target Name="ValidateTUnitConfiguration" BeforeTargets="CoreCompile">
+    <!-- Validate TestBuilderMode -->
+    <Error Text="Invalid TUnitTestBuilderMode '$(TUnitTestBuilderMode)'. Valid values are: Basic, Optimized, WithDiagnostics"
+           Condition="'$(TUnitTestBuilderMode)' != '' AND '$(TUnitTestBuilderMode)' != 'Basic' AND '$(TUnitTestBuilderMode)' != 'Optimized' AND '$(TUnitTestBuilderMode)' != 'WithDiagnostics'" />
+    
+    <!-- Validate numeric properties -->
+    <Error Text="TUnitMaxConcurrency must be a positive number"
+           Condition="'$(TUnitMaxConcurrency)' != '' AND $([System.Int32]::TryParse('$(TUnitMaxConcurrency)', [ref] null)) == false" />
+    
+    <Error Text="TUnitBuildTimeout must be a positive number"
+           Condition="'$(TUnitBuildTimeout)' != '' AND $([System.Int32]::TryParse('$(TUnitBuildTimeout)', [ref] null)) == false" />
+    
+    <Error Text="TUnitMaxErrors must be a positive number"
+           Condition="'$(TUnitMaxErrors)' != '' AND $([System.Int32]::TryParse('$(TUnitMaxErrors)', [ref] null)) == false" />
+  </Target>
+
+  <!-- TestBuilder migration helper -->
+  <Target Name="TUnitTestBuilderMigrationReport" 
+          AfterTargets="Build" 
+          Condition="'$(TUnitGenerateMigrationReport)' == 'true'">
+    <PropertyGroup>
+      <TUnitMigrationReportPath>$(OutputPath)TUnit.MigrationReport.txt</TUnitMigrationReportPath>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <TUnitMigrationReportLines Include="TUnit Migration Report" />
+      <TUnitMigrationReportLines Include="=====================" />
+      <TUnitMigrationReportLines Include="Generated: $([System.DateTime]::Now)" />
+      <TUnitMigrationReportLines Include="" />
+      <TUnitMigrationReportLines Include="Current Configuration:" />
+      <TUnitMigrationReportLines Include="  UseTestBuilder: $(TUnitUseTestBuilder)" />
+      <TUnitMigrationReportLines Include="  Mode: $(TUnitTestBuilderMode)" />
+      <TUnitMigrationReportLines Include="" />
+      <TUnitMigrationReportLines Include="To enable TestBuilder, add to your project file:" />
+      <TUnitMigrationReportLines Include="  &lt;PropertyGroup&gt;" />
+      <TUnitMigrationReportLines Include="    &lt;TUnitUseTestBuilder&gt;true&lt;/TUnitUseTestBuilder&gt;" />
+      <TUnitMigrationReportLines Include="  &lt;/PropertyGroup&gt;" />
+      <TUnitMigrationReportLines Include="" />
+      <TUnitMigrationReportLines Include="Benefits of migrating:" />
+      <TUnitMigrationReportLines Include="  - Better performance with caching and optimization" />
+      <TUnitMigrationReportLines Include="  - Improved debugging experience" />
+      <TUnitMigrationReportLines Include="  - Enhanced error messages" />
+      <TUnitMigrationReportLines Include="  - Easier maintenance and extensibility" />
+    </ItemGroup>
+    
+    <WriteLinesToFile File="$(TUnitMigrationReportPath)" Lines="@(TUnitMigrationReportLines)" Overwrite="true" />
+    <Message Text="TUnit migration report generated: $(TUnitMigrationReportPath)" Importance="high" />
+  </Target>
+
+  <!-- Clean up generated files -->
+  <Target Name="CleanTUnitGenerated" BeforeTargets="Clean">
+    <ItemGroup>
+      <TUnitGeneratedFiles Include="$(IntermediateOutputPath)**\TUnit.*.g.cs" />
+      <TUnitGeneratedFiles Include="$(IntermediateOutputPath)**\*TestMetadataRegistry*.g.cs" />
+    </ItemGroup>
+    <Delete Files="@(TUnitGeneratedFiles)" />
+  </Target>
+
+</Project>

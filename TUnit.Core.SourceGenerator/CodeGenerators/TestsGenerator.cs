@@ -6,7 +6,7 @@ using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
-[Generator]
+// [Generator] // Disabled - using TestMetadataGenerator instead
 public class TestsGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
