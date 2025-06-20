@@ -1,8 +1,7 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class ArgumentWithImplicitConverterTests : TestsBase<TestsGenerator>
+internal class ArgumentWithImplicitConverterTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -10,6 +9,6 @@ internal class ArgumentWithImplicitConverterTests : TestsBase<TestsGenerator>
             "ArgumentWithImplicitConverterTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(2);
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
         });
 }

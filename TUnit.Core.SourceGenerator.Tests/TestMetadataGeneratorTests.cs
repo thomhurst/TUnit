@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -24,22 +25,22 @@ public class TestClass
 
         var (compilation, diagnostics) = await CreateCompilationAsync(source);
         
-        Assert.Empty(diagnostics);
+        await Assert.That(diagnostics).IsEmpty();
         
         var generator = new TestMetadataGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var generatorDiagnostics);
         
-        Assert.Empty(generatorDiagnostics);
+        await Assert.That(generatorDiagnostics).IsEmpty();
         
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify key elements are generated
-        Assert.Contains("TestMetadataRegistry", generatedSource);
-        Assert.Contains("CreateTestMetadata_0", generatedSource);
-        Assert.Contains("TestClass.SimpleTest", generatedSource);
-        Assert.Contains("TestSourceRegistrar.RegisterMetadata", generatedSource);
+        await Assert.That(generatedSource.Contains("TestMetadataRegistry")).IsTrue();
+        await Assert.That(generatedSource.Contains("CreateTestMetadata_0")).IsTrue();
+        await Assert.That(generatedSource.Contains("TestClass.SimpleTest")).IsTrue();
+        await Assert.That(generatedSource.Contains("TestSourceRegistrar.RegisterMetadata")).IsTrue();
     }
     
     [Fact]
@@ -61,16 +62,16 @@ public class TestClass
         var (compilation, _) = await CreateCompilationAsync(source);
         
         var generator = new TestMetadataGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
         
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify data sources are generated
-        Assert.Contains("InlineDataSourceProvider(1, 2, 3)", generatedSource);
-        Assert.Contains("InlineDataSourceProvider(4, 5, 6)", generatedSource);
-        Assert.Contains("GetMethodDataSources_0", generatedSource);
+        await Assert.That(generatedSource.Contains("InlineDataSourceProvider(1, 2, 3)")).IsTrue();
+        await Assert.That(generatedSource.Contains("InlineDataSourceProvider(4, 5, 6)")).IsTrue();
+        await Assert.That(generatedSource.Contains("GetMethodDataSources_0")).IsTrue();
     }
     
     [Fact]
@@ -98,15 +99,15 @@ public class TestClass
         var (compilation, _) = await CreateCompilationAsync(source);
         
         var generator = new TestMetadataGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
         
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify method data source is generated
-        Assert.Contains("MethodDataSourceProvider", generatedSource);
-        Assert.Contains("GetTestData", generatedSource);
+        await Assert.That(generatedSource.Contains("MethodDataSourceProvider")).IsTrue();
+        await Assert.That(generatedSource.Contains("GetTestData")).IsTrue();
     }
     
     [Fact]
@@ -128,15 +129,15 @@ public class TestClass
         var (compilation, _) = await CreateCompilationAsync(source);
         
         var generator = new TestMetadataGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
         
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify repeat and timeout are generated
-        Assert.Contains("RepeatCount = 5", generatedSource);
-        Assert.Contains("Timeout = TimeSpan.FromMilliseconds(1000)", generatedSource);
+        await Assert.That(generatedSource.Contains("RepeatCount = 5")).IsTrue();
+        await Assert.That(generatedSource.Contains("Timeout = TimeSpan.FromMilliseconds(1000)")).IsTrue();
     }
     
     [Fact]
@@ -157,15 +158,15 @@ public class TestClass
         var (compilation, _) = await CreateCompilationAsync(source);
         
         var generator = new TestMetadataGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
         
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify skip is generated
-        Assert.Contains("IsSkipped = true", generatedSource);
-        Assert.Contains("SkipReason = \"Not implemented yet\"", generatedSource);
+        await Assert.That(generatedSource.Contains("IsSkipped = true")).IsTrue();
+        await Assert.That(generatedSource.Contains("SkipReason = \"Not implemented yet\"")).IsTrue();
     }
     
     private async Task<(Compilation, ImmutableArray<Diagnostic>)> CreateCompilationAsync(string source)

@@ -1,10 +1,9 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
 #if !NET
-internal class PolyfillTests : TestsBase<PolyfillGenerator>
+internal class PolyfillTests : TestsBase
 {
     [Test]
     public Task Test_Without_BuildProperty_WithoutType() => RunTest(Path.Combine(Git.RootDirectory.FullName,

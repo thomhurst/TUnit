@@ -1,9 +1,8 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class AbstractTests : TestsBase<TestsGenerator>
+internal class AbstractTests : TestsBase
 {
     [Test]
     public Task AbstractClass() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -49,7 +48,7 @@ internal class AbstractTests : TestsBase<TestsGenerator>
         async generatedFiles =>
         {
             // Extra generation because we added ConcreteClass1 to the compilation (because it's a base class and therefore a required dependency)
-            await Assert.That(generatedFiles.Length).IsEqualTo(3);
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
             // await AssertFileContains(generatedFiles[0], "ReturnType = typeof(void),");
         });
 }

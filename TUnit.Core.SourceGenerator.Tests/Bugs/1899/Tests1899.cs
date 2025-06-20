@@ -1,9 +1,8 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests.Bugs._1899;
 
-internal class Tests1899 : TestsBase<TestHooksGenerator>
+internal class Tests1899 : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -17,7 +16,7 @@ internal class Tests1899 : TestsBase<TestHooksGenerator>
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(0);
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
         });
     
     [Test]

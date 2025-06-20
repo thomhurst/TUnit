@@ -48,7 +48,9 @@
       "Bash(claude-code --help)",
       "mcp__sequential-thinking__sequentialthinking",
       "mcp__zen__listmodels",
-      "Bash(dotnet restore:*)"
+      "Bash(dotnet restore:*)",
+      "Bash(true)",
+      "Bash(/home/thomh/dev/TUnit/update_test_assertions.sh:*)"
     ],
     "deny": []
   }

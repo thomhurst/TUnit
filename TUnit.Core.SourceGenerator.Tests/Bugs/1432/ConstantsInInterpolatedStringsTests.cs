@@ -1,8 +1,7 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests.Bugs._1432;
 
-internal class ConstantsInInterpolatedStringsTests : TestsBase<TestsGenerator>
+internal class ConstantsInInterpolatedStringsTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,

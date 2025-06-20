@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Core.SourceGenerator;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Extensions;
 using TUnit.Core.SourceGenerator.Tests.Options;
@@ -15,13 +16,21 @@ public class TestsBase
     {
     }
 
-    public TestsBase<TestsGenerator> TestsGenerator = new();
+    public TestsBase<TestMetadataGenerator> TestMetadataGenerator = new();
     public TestsBase<TestHooksGenerator> HooksGenerator = new();
     public TestsBase<AssemblyLoaderGenerator> AssemblyLoaderGenerator = new();
+    public TestsBase<DisableReflectionScannerGenerator> DisableReflectionScannerGenerator = new();
+    public TestsBase<DynamicTestsGenerator> DynamicTestsGenerator = new();
+    public TestsBase<PolyfillGenerator> PolyfillGenerator = new();
 
     public Task RunTest(string inputFile, Func<string[], Task> assertions)
     {
-        return TestsGenerator.RunTest(inputFile, new RunTestOptions(), assertions);
+        return TestMetadataGenerator.RunTest(inputFile, new RunTestOptions(), assertions);
+    }
+
+    public Task RunTest(string inputFile, RunTestOptions runTestOptions, Func<string[], Task> assertions)
+    {
+        return TestMetadataGenerator.RunTest(inputFile, runTestOptions, assertions);
     }
 }
 

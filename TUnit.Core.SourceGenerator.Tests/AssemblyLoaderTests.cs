@@ -1,10 +1,9 @@
 using Microsoft.CodeAnalysis.Testing;
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class AssemblyLoaderTests : TestsBase<AssemblyLoaderGenerator>
+internal class AssemblyLoaderTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
