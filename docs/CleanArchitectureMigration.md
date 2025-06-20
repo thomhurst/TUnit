@@ -118,20 +118,19 @@ The test execution pipeline remains unchanged. Your custom executors will receiv
 
 The clean architecture is now the default. No configuration needed!
 
-### TestBuilder Modes
+### TestBuilder Features
 
-Control runtime behavior via environment variable or MSBuild property:
+The TestBuilder includes built-in optimizations:
+- Expression compilation for method invocation
+- Caching of reflection operations
+- Parallel data source processing
+- Automatic tuple unwrapping
+- Property injection support
 
-```xml
-<PropertyGroup>
-    <TUnitTestBuilderMode>Optimized</TUnitTestBuilderMode>
-</PropertyGroup>
+Enable diagnostics for troubleshooting:
+```csharp
+TUnitConfiguration.EnableDiagnostics = true;
 ```
-
-Options:
-- `Basic` - Simple implementation, good for debugging
-- `Optimized` - With caching and expression compilation (default)
-- `WithDiagnostics` - Detailed logging for troubleshooting
 
 ## Troubleshooting
 

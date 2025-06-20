@@ -103,4 +103,13 @@ public class SourceRegistrar
     {
         Sources.GlobalInitializers.Enqueue(initializer);
     }
+    
+    /// <summary>
+    /// Registers a property source (for property injection).
+    /// </summary>
+    /// <param name="propertySource">The property source to register.</param>
+    public static void RegisterProperty(IPropertySource propertySource)
+    {
+        Sources.PropertySources.Enqueue(propertySource);
+    }
 }

@@ -1,8 +1,11 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace TUnit.Core.SourceGenerator;
@@ -484,7 +487,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         foreach (var attr in argumentsAttributes)
         {
             var args = attr.ConstructorArguments
-                .SelectMany(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
+                .SelectMany<TypedConstant, TypedConstant>(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
                 .Select(a => a.Value)
                 .ToArray();
             result.Add(args);
@@ -538,7 +541,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         foreach (var attr in constructorAttrs)
         {
             var args = attr.ConstructorArguments
-                .SelectMany(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
+                .SelectMany<TypedConstant, TypedConstant>(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
                 .Select(a => a.Value)
                 .ToArray();
             
@@ -604,7 +607,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             if (argsAttr != null)
             {
                 var args = argsAttr.ConstructorArguments
-                    .SelectMany(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
+                    .SelectMany<TypedConstant, TypedConstant>(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
                     .Select(a => a.Value)
                     .ToArray();
                 

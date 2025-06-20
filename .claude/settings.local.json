@@ -47,7 +47,8 @@
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(claude-code --help)",
       "mcp__sequential-thinking__sequentialthinking",
-      "mcp__zen__listmodels"
+      "mcp__zen__listmodels",
+      "Bash(dotnet restore:*)"
     ],
     "deny": []
   }

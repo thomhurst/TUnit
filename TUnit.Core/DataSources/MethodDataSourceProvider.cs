@@ -1,5 +1,7 @@
 using System.Reflection;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace TUnit.Core.DataSources;
 
 /// <summary>
@@ -96,7 +98,7 @@ public class MethodDataSourceProvider : IDataSourceProvider
         // If it's a tuple, unwrap it
         var itemType = item?.GetType();
         if (itemType != null && itemType.IsGenericType && 
-            itemType.FullName?.StartsWith("System.ValueTuple`") == true)
+            itemType.FullName?.StartsWith("System.ValueTuple`") == true && item != null)
         {
             return UnwrapTuple(item);
         }
@@ -108,7 +110,10 @@ public class MethodDataSourceProvider : IDataSourceProvider
     private object?[] UnwrapTuple(object tuple)
     {
         var tupleType = tuple.GetType();
+        
+        #pragma warning disable IL2075 // We know tuples have public fields
         var fields = tupleType.GetFields();
+        #pragma warning restore IL2075
         var values = new List<object?>();
         
         foreach (var field in fields.Where(f => f.Name.StartsWith("Item")))

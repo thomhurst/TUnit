@@ -20,4 +20,5 @@ internal static class Sources
     public static readonly ConcurrentQueue<ITestDiscoveryHookSource> TestDiscoveryHookSources = [];
     
     public static readonly ConcurrentQueue<Func<Task>> GlobalInitializers = [];
+    public static readonly ConcurrentQueue<IPropertySource> PropertySources = [];
 }

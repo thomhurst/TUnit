@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Interfaces;
 
@@ -17,6 +18,7 @@ public record TestMetadata
     /// <summary>
     /// The type of the test class.
     /// </summary>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     public required Type TestClassType { get; init; }
     
     /// <summary>

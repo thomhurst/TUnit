@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using TUnit.Core.Configuration;
@@ -93,14 +94,16 @@ public class TestBuilder
         };
     }
     
-    private Func<object?[], object> GetOrCompileConstructor(Type type)
+    private Func<object?[], object> GetOrCompileConstructor([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type)
     {
         return ConstructorInvokerCache.GetOrAdd(type, t =>
         {
+            #pragma warning disable IL2070 // Type parameter is annotated for constructors
             var ctor = ConstructorCache.GetOrAdd(t, type =>
                 type.GetConstructors()
                     .OrderBy(c => c.GetParameters().Length)
                     .FirstOrDefault());
+            #pragma warning restore IL2070
             
             if (ctor == null)
             {
@@ -265,8 +268,13 @@ public class TestBuilder
         // Process data sources in parallel for better performance
         var tasks = dataSourceProviders.Select(async provider =>
         {
-            var data = await provider.GetDataAsync(cancellationToken);
-            return data.ToList();
+            var data = provider.GetDataAsync();
+            var dataList = new List<object?[]>();
+            await foreach (var item in data.WithCancellation(cancellationToken))
+            {
+                dataList.Add(item);
+            }
+            return dataList;
         }).ToArray();
         
         var results = await Task.WhenAll(tasks);
@@ -295,20 +303,44 @@ public class TestBuilder
         // Build display name
         var displayName = BuildDisplayName(metadata.DisplayNameTemplate, combination.MethodArguments);
         
-        // Create test class factory
-        Func<object?> testClassFactory = () =>
+        // Create test class factory that also sets properties
+        Func<object> testClassFactory = () =>
         {
-            return factories.ClassFactory(combination.ClassArguments);
+            var instance = factories.ClassFactory(combination.ClassArguments);
+            
+            // Apply property values
+            if (instance != null && factories.PropertySetters.Any())
+            {
+                foreach (var (property, setter) in factories.PropertySetters)
+                {
+                    if (combination.PropertyValues.TryGetValue(property, out var value))
+                    {
+                        setter(instance, value);
+                    }
+                }
+            }
+            
+            return instance!;
         };
         
         // Create test method invoker
-        Func<object, object?[], object?> testMethodInvoker = (instance, args) =>
+        Func<object, CancellationToken, ValueTask> testMethodInvoker = async (instance, cancellationToken) =>
         {
-            return factories.MethodInvoker(instance, args);
+            var result = factories.MethodInvoker(instance, combination.MethodArguments);
+            
+            // Handle async methods
+            if (result is Task task)
+            {
+                await task;
+            }
+            else if (result is ValueTask valueTask)
+            {
+                await valueTask;
+            }
         };
         
-        // Create property setter
-        Func<Dictionary<string, object?>> propertiesProvider = () =>
+        // Create property setter that also applies the values
+        Func<IDictionary<string, object?>> propertiesProvider = () =>
         {
             var props = new Dictionary<string, object?>();
             foreach (var (property, value) in combination.PropertyValues)
@@ -317,6 +349,7 @@ public class TestBuilder
             }
             return props;
         };
+        
         
         // Handle tuple unwrapping for method arguments
         var unwrappedMethodArgs = await UnwrapTuplesAsync(combination.MethodArguments, cancellationToken);
@@ -331,13 +364,7 @@ public class TestBuilder
             TestMethodInvoker = testMethodInvoker,
             ClassArgumentsProvider = () => combination.ClassArguments,
             MethodArgumentsProvider = () => unwrappedMethodArgs,
-            PropertiesProvider = propertiesProvider,
-            PropertySetters = factories.PropertySetters,
-            TestCombination = combination,
-            DisplayName = displayName,
-            Timeout = metadata.Timeout,
-            IsSkipped = metadata.IsSkipped,
-            SkipReason = metadata.SkipReason
+            PropertiesProvider = propertiesProvider
         };
     }
     
@@ -384,22 +411,25 @@ public class TestBuilder
         return value.ToString() ?? "null";
     }
     
-    private async Task<object?[]> UnwrapTuplesAsync(object?[] arguments, CancellationToken cancellationToken)
+    private Task<object?[]> UnwrapTuplesAsync(object?[] arguments, CancellationToken cancellationToken)
     {
         if (arguments.Length != 1)
-            return arguments;
+            return Task.FromResult(arguments);
         
         var singleArg = arguments[0];
         if (singleArg == null)
-            return arguments;
+            return Task.FromResult(arguments);
         
         var argType = singleArg.GetType();
         if (!IsTupleType(argType))
-            return arguments;
+            return Task.FromResult(arguments);
         
         // Unwrap tuple into individual values
         var tupleValues = new List<object?>();
+        
+        #pragma warning disable IL2075 // We know tuples have public fields
         var fields = argType.GetFields();
+        #pragma warning restore IL2075
         
         foreach (var field in fields.Where(f => f.Name.StartsWith("Item")))
         {
@@ -407,7 +437,7 @@ public class TestBuilder
             tupleValues.Add(value);
         }
         
-        return tupleValues.ToArray();
+        return Task.FromResult(tupleValues.ToArray());
     }
     
     private bool IsTupleType(Type type)
@@ -452,32 +482,4 @@ public class TestBuilder
     }
 }
 
-// Extension to support existing TestDefinition
-public static class TestDefinitionExtensions
-{
-    public static void SetPropertyValues(this TestDefinition testDefinition, object instance)
-    {
-        if (testDefinition.PropertySetters == null)
-            return;
-        
-        var propertyValues = testDefinition.PropertiesProvider();
-        foreach (var (property, setter) in testDefinition.PropertySetters)
-        {
-            if (propertyValues.TryGetValue(property.Name, out var value))
-            {
-                setter(instance, value);
-            }
-        }
-    }
-}
 
-// Update TestDefinition to include new fields if needed
-public partial class TestDefinition
-{
-    internal Dictionary<PropertyInfo, Action<object, object?>>? PropertySetters { get; set; }
-    internal object? TestCombination { get; set; }
-    internal string? DisplayName { get; set; }
-    internal bool IsSkipped { get; set; }
-    internal string? SkipReason { get; set; }
-    internal TimeSpan? Timeout { get; set; }
-}

@@ -242,8 +242,15 @@ public class TestBuilderTests
         var instance = testDef.TestClassFactory();
         
         // Verify the method can be invoked without throwing
-        await Assert.That(async () => await testDef.TestMethodInvoker(instance, CancellationToken.None))
-            .DoesNotThrowAsync();
+        try
+        {
+            await testDef.TestMethodInvoker(instance, CancellationToken.None);
+            // Test passes if no exception is thrown
+        }
+        catch (Exception ex)
+        {
+            await Assert.That(ex).IsNull(); // This will fail and show the exception
+        }
     }
     
     private static MethodMetadata CreateMethodMetadata(MethodInfo method)
