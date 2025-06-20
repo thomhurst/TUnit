@@ -403,3 +403,5 @@ FodyWeavers.xsd
 # Verify
 *.received.*
 *.received/
+
+SourceGeneratedViewer

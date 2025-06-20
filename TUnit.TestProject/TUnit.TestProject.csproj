@@ -24,7 +24,7 @@
   <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="coverlet.collector" />
@@ -57,20 +57,20 @@
     </None>
   </ItemGroup>
 
-<!--      <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">-->
-<!--          <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />-->
-<!--          <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />-->
-<!--      </Target>-->
+      <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">
+          <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />
+          <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />
+      </Target>
 
-<!--      <PropertyGroup>-->
-<!--          <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
-<!--          <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>-->
-<!--      </PropertyGroup>-->
+      <PropertyGroup>
+          <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+          <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
+      </PropertyGroup>
 
-<!--      <ItemGroup>-->
-<!--          <Compile Remove="SourceGeneratedViewer\**" />-->
-<!--          <None Include="SourceGeneratedViewer\**" />-->
-<!--      </ItemGroup>-->
+      <ItemGroup>
+          <Compile Remove="SourceGeneratedViewer\**" />
+          <None Include="SourceGeneratedViewer\**" />
+      </ItemGroup>
 
 <Import Project="..\TestProject.targets" />
 
