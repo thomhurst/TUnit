@@ -1,30 +1,6 @@
-<!-- 
+<!--
   TUnit MSBuild properties
   This file defines configuration options for TUnit
 -->
 <Project>
-  <PropertyGroup>
-    <!-- 
-      Enable the new TestBuilder architecture for test discovery.
-      Set to true to use the new approach, false for legacy source-generated execution logic.
-      Default: false (for backward compatibility)
-    -->
-    <TUnitUseTestBuilder Condition="'$(TUnitUseTestBuilder)' == ''">false</TUnitUseTestBuilder>
-  </PropertyGroup>
-
-  <!-- Pass the configuration to the compiler -->
-  <PropertyGroup Condition="'$(TUnitUseTestBuilder)' == 'true'">
-    <DefineConstants>$(DefineConstants);TUNIT_USE_TEST_BUILDER</DefineConstants>
-  </PropertyGroup>
-
-  <!-- Pass configuration to source generator -->
-  <ItemGroup>
-    <CompilerVisibleProperty Include="TUnitUseTestBuilder" />
-  </ItemGroup>
-
-  <!-- Configure source generator behavior -->
-  <PropertyGroup>
-    <TUnitSourceGeneratorMode Condition="'$(TUnitUseTestBuilder)' == 'true'">TestMetadata</TUnitSourceGeneratorMode>
-    <TUnitSourceGeneratorMode Condition="'$(TUnitUseTestBuilder)' != 'true'">Legacy</TUnitSourceGeneratorMode>
-  </PropertyGroup>
 </Project>

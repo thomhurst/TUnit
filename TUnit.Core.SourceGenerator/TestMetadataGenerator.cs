@@ -443,10 +443,9 @@ public class TestMetadataGenerator : IIncrementalGenerator
 
         foreach (var attr in argumentsAttributes)
         {
-            var args = attr.ConstructorArguments
-                .SelectMany<TypedConstant, TypedConstant>(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
-                .Select(a => a.Value)
-                .ToArray();
+            var args = attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Kind == TypedConstantKind.Array
+                ? attr.ConstructorArguments[0].Values.Select(v => v.Value).ToArray()
+                : attr.ConstructorArguments.Select(a => a.Value).ToArray();
             result.Add(args);
         }
 
@@ -507,10 +506,9 @@ public class TestMetadataGenerator : IIncrementalGenerator
 
         foreach (var attr in constructorAttrs)
         {
-            var args = attr.ConstructorArguments
-                .SelectMany<TypedConstant, TypedConstant>(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
-                .Select(a => a.Value)
-                .ToArray();
+            var args = attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Kind == TypedConstantKind.Array
+                ? attr.ConstructorArguments[0].Values.Select(v => v.Value).ToArray()
+                : attr.ConstructorArguments.Select(a => a.Value).ToArray();
 
             if (args.Length > 0)
             {
@@ -573,10 +571,9 @@ public class TestMetadataGenerator : IIncrementalGenerator
 
             if (argsAttr != null)
             {
-                var args = argsAttr.ConstructorArguments
-                    .SelectMany<TypedConstant, TypedConstant>(a => a.Kind == TypedConstantKind.Array ? a.Values : new[] { a })
-                    .Select(a => a.Value)
-                    .ToArray();
+                var args = argsAttr.ConstructorArguments.Length > 0 && argsAttr.ConstructorArguments[0].Kind == TypedConstantKind.Array
+                    ? argsAttr.ConstructorArguments[0].Values.Select(v => v.Value).ToArray()
+                    : argsAttr.ConstructorArguments.Select(a => a.Value).ToArray();
 
                 if (args.Length > 0)
                 {

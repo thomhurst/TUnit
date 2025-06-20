@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
-using TUnit.Core.Configuration;
 
 namespace TUnit.Core;
 
@@ -22,33 +21,24 @@ public class TestBuilder
     private static readonly ConcurrentDictionary<MethodInfo, Func<object?, object?[], object?>> MethodInvokerCache = new();
     private static readonly ConcurrentDictionary<PropertyInfo, Action<object, object?>> PropertySetterCache = new();
     private static readonly ConcurrentDictionary<Type, Func<object?[], object>> ConstructorInvokerCache = new();
-    
+
     /// <summary>
     /// Builds all test definitions from the given metadata.
     /// Handles all data source combinations, tuple unwrapping, and property initialization.
     /// </summary>
     public async Task<IEnumerable<TestDefinition>> BuildTestsAsync(TestMetadata metadata, CancellationToken cancellationToken = default)
     {
-        var stopwatch = TUnitConfiguration.EnableDiagnostics ? Stopwatch.StartNew() : null;
-        
-        if (TUnitConfiguration.EnableDiagnostics)
-        {
-            Console.WriteLine($"[TestBuilder] Building tests for {metadata.TestClassType.Name}.{metadata.TestMethod.Name}");
-        }
-        
+
         var testDefinitions = new List<TestDefinition>();
-        
+
         // Pre-compile delegates for this metadata for better performance
         var compiledFactories = CompileFactories(metadata);
-        
+
         // Get all combinations of class and method data
         var testCombinations = await GetTestCombinationsAsync(metadata, cancellationToken);
-        
-        if (TUnitConfiguration.EnableDiagnostics)
-        {
-            Console.WriteLine($"[TestBuilder] Found {testCombinations.Count} test combinations");
-        }
-        
+
+        // Test combinations ready
+
         var testIndex = 0;
         foreach (var combination in testCombinations)
         {
@@ -56,31 +46,27 @@ public class TestBuilder
             for (var repeatIndex = 0; repeatIndex < metadata.RepeatCount; repeatIndex++)
             {
                 var testDefinition = await BuildSingleTestDefinitionAsync(
-                    metadata, 
-                    combination, 
-                    testIndex, 
+                    metadata,
+                    combination,
+                    testIndex,
                     repeatIndex,
                     compiledFactories,
                     cancellationToken);
-                
+
                 if (testDefinition != null)
                 {
                     testDefinitions.Add(testDefinition);
                 }
-                
+
                 testIndex++;
             }
         }
-        
-        if (TUnitConfiguration.EnableDiagnostics && stopwatch != null)
-        {
-            stopwatch.Stop();
-            Console.WriteLine($"[TestBuilder] Built {testDefinitions.Count} tests in {stopwatch.ElapsedMilliseconds}ms");
-        }
-        
+
+        // Test building complete
+
         return testDefinitions;
     }
-    
+
     private CompiledFactories CompileFactories(TestMetadata metadata)
     {
         return new CompiledFactories
@@ -91,7 +77,7 @@ public class TestBuilder
                 .ToDictionary(p => p, GetOrCompilePropertySetter)
         };
     }
-    
+
     private Func<object?[], object> GetOrCompileConstructor([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type)
     {
         return ConstructorInvokerCache.GetOrAdd(type, t =>
@@ -102,16 +88,16 @@ public class TestBuilder
                     .OrderBy(c => c.GetParameters().Length)
                     .FirstOrDefault());
             #pragma warning restore IL2070
-            
+
             if (ctor == null)
             {
                 return args => throw new InvalidOperationException($"No accessible constructor found for {type.Name}");
             }
-            
+
             // Compile expression for faster invocation
             var parameters = Expression.Parameter(typeof(object?[]), "args");
             var ctorParams = ctor.GetParameters();
-            
+
             var arguments = new Expression[ctorParams.Length];
             for (int i = 0; i < ctorParams.Length; i++)
             {
@@ -120,16 +106,16 @@ public class TestBuilder
                 var argument = Expression.ArrayIndex(parameters, index);
                 arguments[i] = Expression.Convert(argument, paramType);
             }
-            
+
             var newExpr = Expression.New(ctor, arguments);
             var lambda = Expression.Lambda<Func<object?[], object>>(
                 Expression.Convert(newExpr, typeof(object)),
                 parameters);
-            
+
             return lambda.Compile();
         });
     }
-    
+
     private Func<object?, object?[], object?> GetOrCompileMethodInvoker(MethodInfo method)
     {
         return MethodInvokerCache.GetOrAdd(method, m =>
@@ -137,10 +123,10 @@ public class TestBuilder
             // Compile expression for method invocation
             var instanceParam = Expression.Parameter(typeof(object), "instance");
             var argsParam = Expression.Parameter(typeof(object?[]), "args");
-            
+
             var methodParams = m.GetParameters();
             var arguments = new Expression[methodParams.Length];
-            
+
             for (int i = 0; i < methodParams.Length; i++)
             {
                 var index = Expression.Constant(i);
@@ -148,12 +134,12 @@ public class TestBuilder
                 var argument = Expression.ArrayIndex(argsParam, index);
                 arguments[i] = Expression.Convert(argument, paramType);
             }
-            
+
             var instanceCast = m.IsStatic ? null : Expression.Convert(instanceParam, m.DeclaringType!);
-            var methodCall = m.IsStatic 
+            var methodCall = m.IsStatic
                 ? Expression.Call(m, arguments)
                 : Expression.Call(instanceCast!, m, arguments);
-            
+
             // Handle void methods
             Expression body;
             if (m.ReturnType == typeof(void))
@@ -164,16 +150,16 @@ public class TestBuilder
             {
                 body = Expression.Convert(methodCall, typeof(object));
             }
-            
+
             var lambda = Expression.Lambda<Func<object?, object?[], object?>>(
                 body,
                 instanceParam,
                 argsParam);
-            
+
             return lambda.Compile();
         });
     }
-    
+
     private Action<object, object?> GetOrCompilePropertySetter(PropertyInfo property)
     {
         return PropertySetterCache.GetOrAdd(property, p =>
@@ -182,47 +168,47 @@ public class TestBuilder
             {
                 return (obj, value) => throw new InvalidOperationException($"Property {p.Name} is read-only");
             }
-            
+
             // Compile expression for property setter
             var instanceParam = Expression.Parameter(typeof(object), "instance");
             var valueParam = Expression.Parameter(typeof(object), "value");
-            
+
             var instanceCast = Expression.Convert(instanceParam, p.DeclaringType!);
             var valueCast = Expression.Convert(valueParam, p.PropertyType);
-            
+
             var propertyAccess = Expression.Property(instanceCast, p);
             var assignment = Expression.Assign(propertyAccess, valueCast);
-            
+
             var lambda = Expression.Lambda<Action<object, object?>>(
                 assignment,
                 instanceParam,
                 valueParam);
-            
+
             return lambda.Compile();
         });
     }
-    
+
     private async Task<List<TestCombination>> GetTestCombinationsAsync(
-        TestMetadata metadata, 
+        TestMetadata metadata,
         CancellationToken cancellationToken)
     {
         var combinations = new List<TestCombination>();
-        
+
         // Get all data sets in parallel for better performance
         var classDataTask = GetDataSetsAsync(metadata.ClassDataSources, cancellationToken);
         var methodDataTask = GetDataSetsAsync(metadata.MethodDataSources, cancellationToken);
-        
+
         var classDataSets = await classDataTask;
         var methodDataSets = await methodDataTask;
-        
+
         // Get property data sets
         var propertyDataTasks = metadata.PropertyDataSources
             .Select(async kvp => (kvp.Key, await GetDataSetsAsync(new[] { kvp.Value }, cancellationToken)))
             .ToArray();
-        
+
         var propertyDataResults = await Task.WhenAll(propertyDataTasks);
         var propertyDataSets = propertyDataResults.ToDictionary(r => r.Key, r => r.Item2);
-        
+
         // Generate all combinations
         if (!classDataSets.Any())
         {
@@ -238,7 +224,7 @@ public class TestBuilder
             foreach (var methodData in methodDataSets)
             {
                 var propertyData = new Dictionary<PropertyInfo, object?>();
-                
+
                 // Get property values for this combination
                 foreach (var (property, dataSets) in propertyDataSets)
                 {
@@ -248,7 +234,7 @@ public class TestBuilder
                         propertyData[property] = dataSets.First().FirstOrDefault();
                     }
                 }
-                
+
                 combinations.Add(new TestCombination
                 {
                     ClassArguments = classData,
@@ -257,16 +243,16 @@ public class TestBuilder
                 });
             }
         }
-        
+
         return combinations;
     }
-    
+
     private async Task<List<object?[]>> GetDataSetsAsync(
-        IEnumerable<IDataSourceProvider> dataSourceProviders, 
+        IEnumerable<IDataSourceProvider> dataSourceProviders,
         CancellationToken cancellationToken)
     {
         var allDataSets = new List<object?[]>();
-        
+
         // Process data sources in parallel for better performance
         var tasks = dataSourceProviders.Select(async provider =>
         {
@@ -278,17 +264,17 @@ public class TestBuilder
             }
             return dataList;
         }).ToArray();
-        
+
         var results = await Task.WhenAll(tasks);
-        
+
         foreach (var dataSet in results.SelectMany(r => r))
         {
             allDataSets.Add(dataSet);
         }
-        
+
         return allDataSets;
     }
-    
+
     private async Task<TestDefinition?> BuildSingleTestDefinitionAsync(
         TestMetadata metadata,
         TestCombination combination,
@@ -301,15 +287,15 @@ public class TestBuilder
         var testId = metadata.TestIdTemplate
             .Replace("{TestIndex}", testIndex.ToString())
             .Replace("{RepeatIndex}", repeatIndex.ToString());
-        
+
         // Build display name
         var displayName = BuildDisplayName(metadata.DisplayNameTemplate, combination.MethodArguments);
-        
+
         // Create test class factory that also sets properties
         Func<object> testClassFactory = () =>
         {
             var instance = factories.ClassFactory(combination.ClassArguments);
-            
+
             // Apply property values
             if (instance != null && factories.PropertySetters.Any())
             {
@@ -321,15 +307,15 @@ public class TestBuilder
                     }
                 }
             }
-            
+
             return instance!;
         };
-        
+
         // Create test method invoker
         Func<object, CancellationToken, ValueTask> testMethodInvoker = async (instance, cancellationToken) =>
         {
             var result = factories.MethodInvoker(instance, combination.MethodArguments);
-            
+
             // Handle async methods
             if (result is Task task)
             {
@@ -340,7 +326,7 @@ public class TestBuilder
                 await valueTask;
             }
         };
-        
+
         // Create property setter that also applies the values
         Func<IDictionary<string, object?>> propertiesProvider = () =>
         {
@@ -351,11 +337,11 @@ public class TestBuilder
             }
             return props;
         };
-        
-        
+
+
         // Handle tuple unwrapping for method arguments
         var unwrappedMethodArgs = await UnwrapTuplesAsync(combination.MethodArguments, cancellationToken);
-        
+
         return new TestDefinition
         {
             TestId = testId,
@@ -369,11 +355,11 @@ public class TestBuilder
             PropertiesProvider = propertiesProvider
         };
     }
-    
+
     private string BuildDisplayName(string template, object?[] methodArguments)
     {
         var displayName = template;
-        
+
         // Replace placeholders with actual values
         for (int i = 0; i < methodArguments.Length; i++)
         {
@@ -381,10 +367,10 @@ public class TestBuilder
             var formattedValue = FormatArgumentValue(value);
             displayName = displayName.Replace($"{{{i}}}", formattedValue);
         }
-        
+
         return displayName;
     }
-    
+
     private string FormatArgumentValue(object? value)
     {
         if (value == null)
@@ -417,10 +403,10 @@ public class TestBuilder
             }
             return $"[{string.Join(", ", elements)}]";
         }
-        
+
         return value.ToString() ?? "null";
     }
-    
+
     private Task<object?[]> UnwrapTuplesAsync(object?[] arguments, CancellationToken cancellationToken)
     {
         if (arguments.Length != 1)
@@ -442,20 +428,20 @@ public class TestBuilder
 
         // Unwrap tuple into individual values
         var tupleValues = new List<object?>();
-        
+
         #pragma warning disable IL2075 // We know tuples have public fields
         var fields = argType.GetFields();
         #pragma warning restore IL2075
-        
+
         foreach (var field in fields.Where(f => f.Name.StartsWith("Item")))
         {
             var value = field.GetValue(singleArg);
             tupleValues.Add(value);
         }
-        
+
         return Task.FromResult(tupleValues.ToArray());
     }
-    
+
     private bool IsTupleType(Type type)
     {
         return TupleTypeCache.GetOrAdd(type, t =>
@@ -484,14 +470,14 @@ public class TestBuilder
                    genericTypeDef == typeof(Tuple<,,,,,,,>);
         });
     }
-    
+
     private class TestCombination
     {
         public object?[] ClassArguments { get; set; } = Array.Empty<object?>();
         public object?[] MethodArguments { get; set; } = Array.Empty<object?>();
         public Dictionary<PropertyInfo, object?> PropertyValues { get; set; } = new();
     }
-    
+
     private class CompiledFactories
     {
         public Func<object?[], object> ClassFactory { get; set; } = null!;

@@ -135,18 +135,7 @@ public class DatabaseTests
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `TUnitEnableDiagnostics` | `false` | Enable detailed diagnostics |
 | `TUnitMaxConcurrency` | `ProcessorCount` | Maximum parallel test execution |
-| `TUnitEnableTelemetry` | `false` | Enable metrics collection |
-
-### Environment Variables
-
-All MSBuild properties can be overridden with environment variables:
-
-```bash
-export TUNIT_TESTBUILDER_DIAGNOSTICS=true
-export TUNIT_ENABLE_TELEMETRY=true
-```
 
 ## Advanced Features
 
@@ -196,26 +185,9 @@ public static bool IsCI => Environment.GetEnvironmentVariable("CI") == "true";
 
 ## Diagnostics and Troubleshooting
 
-### Enable Diagnostics
+### Debugging Tests
 
-```xml
-<PropertyGroup>
-  <TUnitEnableDiagnostics>true</TUnitEnableDiagnostics>
-  <TUnitTestBuilderMode>WithDiagnostics</TUnitTestBuilderMode>
-</PropertyGroup>
-```
-
-### View Telemetry
-
-```bash
-# Enable telemetry
-export TUNIT_ENABLE_TELEMETRY=true
-
-# Run tests
-dotnet test
-
-# Telemetry is output to console and can be collected by APM tools
-```
+TUnit's simplified architecture makes debugging straightforward. You can set breakpoints in your test code and step through the execution flow.
 
 ## Migration from Other Frameworks
 
