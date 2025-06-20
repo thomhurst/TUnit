@@ -225,10 +225,14 @@ public class TestBuilder
         
         // Generate all combinations
         if (!classDataSets.Any())
+        {
             classDataSets.Add(Array.Empty<object?>());
+        }
         if (!methodDataSets.Any())
+        {
             methodDataSets.Add(Array.Empty<object?>());
-        
+        }
+
         foreach (var classData in classDataSets)
         {
             foreach (var methodData in methodDataSets)
@@ -384,17 +388,25 @@ public class TestBuilder
     private string FormatArgumentValue(object? value)
     {
         if (value == null)
+        {
             return "null";
-        
+        }
+
         if (value is string str)
+        {
             return $"\"{str}\"";
-        
+        }
+
         if (value is char ch)
+        {
             return $"'{ch}'";
-        
+        }
+
         if (value is bool b)
+        {
             return b.ToString().ToLower();
-        
+        }
+
         if (value.GetType().IsArray)
         {
             var array = (Array)value;
@@ -412,16 +424,22 @@ public class TestBuilder
     private Task<object?[]> UnwrapTuplesAsync(object?[] arguments, CancellationToken cancellationToken)
     {
         if (arguments.Length != 1)
+        {
             return Task.FromResult(arguments);
-        
+        }
+
         var singleArg = arguments[0];
         if (singleArg == null)
+        {
             return Task.FromResult(arguments);
-        
+        }
+
         var argType = singleArg.GetType();
         if (!IsTupleType(argType))
+        {
             return Task.FromResult(arguments);
-        
+        }
+
         // Unwrap tuple into individual values
         var tupleValues = new List<object?>();
         
@@ -443,8 +461,10 @@ public class TestBuilder
         return TupleTypeCache.GetOrAdd(type, t =>
         {
             if (!t.IsGenericType)
+            {
                 return false;
-            
+            }
+
             var genericTypeDef = t.GetGenericTypeDefinition();
             return genericTypeDef == typeof(ValueTuple<>) ||
                    genericTypeDef == typeof(ValueTuple<,>) ||

@@ -58,7 +58,10 @@ internal static class TestIdGenerator
     {
         for (var i = 0; i < args.Length; i++)
         {
-            if (i > 0) sb.Append(',');
+            if (i > 0)
+            {
+                sb.Append(',');
+            }
             sb.Append(args[i]?.ToString() ?? "null");
         }
     }

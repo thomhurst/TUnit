@@ -90,7 +90,9 @@ internal static class ReflectionValueCreator
     private static bool IsAsyncResult(object? result)
     {
         if (result is null)
+        {
             return false;
+        }
 
         var type = result.GetType();
         return typeof(Task).IsAssignableFrom(type) || type.Name.StartsWith("ValueTask");

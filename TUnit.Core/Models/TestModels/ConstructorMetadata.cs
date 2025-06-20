@@ -40,8 +40,14 @@ public record ConstructorMetadata : MemberMetadata
     {
         var bindingFlags = BindingFlags.Instance | BindingFlags.Static;
 
-        if (IsPublic) bindingFlags |= BindingFlags.Public;
-        if (IsPrivate || IsProtected || IsInternal) bindingFlags |= BindingFlags.NonPublic;
+        if (IsPublic)
+        {
+            bindingFlags |= BindingFlags.Public;
+        }
+        if (IsPrivate || IsProtected || IsInternal)
+        {
+            bindingFlags |= BindingFlags.NonPublic;
+        }
 
         var constructors = Type.GetConstructors(bindingFlags);
         var parameterTypes = Parameters.Select(p => p.Type).ToArray();

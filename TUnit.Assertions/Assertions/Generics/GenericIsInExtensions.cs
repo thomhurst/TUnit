@@ -26,9 +26,13 @@ public static class GenericIsInExtensions
             (actual, expectedValues, _) =>
             {
                 if (actual == null && expectedValues.Any(e => e == null))
+                {
                     return true;
+                }
                 if (actual == null)
+                {
                     return false;
+                }
                 return expectedValues.Contains(actual, equalityComparer);
             },
             (actual, expectedValues, _) => $"{actual} was not found in the expected values: [{string.Join(", ", expectedValues)}]",

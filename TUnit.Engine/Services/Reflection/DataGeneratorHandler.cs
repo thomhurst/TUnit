@@ -256,7 +256,9 @@ internal static class DataGeneratorHandler
     private static bool IsAsyncResult(object? result)
     {
         if (result is null)
+        {
             return false;
+        }
 
         var type = result.GetType();
         return typeof(Task).IsAssignableFrom(type) || type.Name.StartsWith("ValueTask");
@@ -267,7 +269,9 @@ internal static class DataGeneratorHandler
         task = null!;
 
         if (result is null)
+        {
             return false;
+        }
 
         var type = result.GetType();
 
@@ -312,10 +316,14 @@ internal static class DataGeneratorHandler
         return task.ContinueWith(t =>
         {
             if (t.IsFaulted)
+            {
                 throw t.Exception!.InnerException!;
+            }
 
             if (t.IsCanceled)
+            {
                 throw new TaskCanceledException();
+            }
 
             var resultProperty = taskType.GetProperty("Result");
             return resultProperty?.GetValue(t);
