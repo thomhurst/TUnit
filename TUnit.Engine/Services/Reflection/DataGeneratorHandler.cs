@@ -31,6 +31,7 @@ internal static class DataGeneratorHandler
         var instance = dataAttribute;
 
         // Initialize the data attribute instance if it has properties that need initialization
+        // This ensures all nested properties are initialized before GenerateAsync is called
         await DataSourceInitializer.InitializeAsync(instance, testInformation);
 
         return instance;

@@ -4,6 +4,7 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Services.Reflection;
 
@@ -275,7 +276,20 @@ internal class ReflectionTestConstructionBuilder
             classInformation, classInstanceArguments, testInformation, testBuilderContextAccessor))
         {
             var args = await argsFunc();
-            propertyArgs[propertyInformation.Name] = args.ElementAtOrDefault(0);
+            var propertyValue = args.ElementAtOrDefault(0);
+            
+            // If this is an IAsyncDataSourceGeneratorAttribute property and it implements IAsyncInitializer,
+            // we need to initialize it immediately during discovery
+            var dataAttribute = propertyInformation.Attributes
+                .OfType<IDataAttribute>()
+                .FirstOrDefault();
+                
+            if (dataAttribute is IAsyncDataSourceGeneratorAttribute && propertyValue is IAsyncInitializer)
+            {
+                await ObjectInitializer.InitializeAsync(propertyValue);
+            }
+            
+            propertyArgs[propertyInformation.Name] = propertyValue;
         }
 
         return propertyArgs;

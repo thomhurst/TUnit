@@ -94,4 +94,13 @@ public class SourceRegistrar
     {
         Sources.TestDiscoveryHookSources.Enqueue(testSource);
     }
+    
+    /// <summary>
+    /// Registers a global initializer.
+    /// </summary>
+    /// <param name="initializer">The initializer to register.</param>
+    public static void RegisterGlobalInitializer(Func<Task> initializer)
+    {
+        Sources.GlobalInitializers.Enqueue(initializer);
+    }
 }

@@ -48,7 +48,7 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
             var visited = new HashSet<object>();
             foreach (var obj in objectsToInitialize)
             {
-                await InitializeObjectGraphAsync(obj, visited, cancellationToken).ConfigureAwait(false);
+                await InitializeObjectGraphAsync(obj, testDetails, visited, cancellationToken).ConfigureAwait(false);
             }
             
             // Now handle the standard initialization objects
@@ -129,7 +129,7 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
     }
 
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
-    private async Task InitializeObjectGraphAsync(object obj, HashSet<object> visited, CancellationToken cancellationToken)
+    private async Task InitializeObjectGraphAsync(object obj, TestDetails testDetails, HashSet<object> visited, CancellationToken cancellationToken)
     {
         if (!visited.Add(obj))
         {
@@ -144,6 +144,12 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
             return;
         }
 
+        // For the test instance, we need to handle properties with IDataAttribute
+        if (obj == testDetails.ClassInstance && testDetails.MethodMetadata != null)
+        {
+            await InitializeDataAttributeProperties(obj, testDetails.MethodMetadata, testDetails, visited, cancellationToken);
+        }
+
         // First, recursively initialize all property values (depth-first)
         var properties = objType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
         foreach (var property in properties)
@@ -153,7 +159,7 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
                 var value = property.GetValue(obj);
                 if (value != null && !property.PropertyType.IsPrimitive && !(value is string) && !property.PropertyType.IsEnum)
                 {
-                    await InitializeObjectGraphAsync(value, visited, cancellationToken).ConfigureAwait(false);
+                    await InitializeObjectGraphAsync(value, testDetails, visited, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch
@@ -166,5 +172,18 @@ internal class TestInvocation(TestHookOrchestrator testHookOrchestrator, Dispose
         // Then initialize this object if it implements IAsyncInitializer
         // This ensures children are initialized before parents
         await ObjectInitializer.InitializeAsync(obj, cancellationToken).ConfigureAwait(false);
+    }
+
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
+    private async Task InitializeDataAttributeProperties(object testInstance, MethodMetadata methodMetadata, TestDetails testDetails, HashSet<object> visited, CancellationToken cancellationToken)
+    {
+        // For properties that were populated with IDataAttribute during test discovery,
+        // we need to ensure they are initialized if they implement IAsyncInitializer.
+        // This handles the case where properties have data attributes other than IAsyncDataSourceGeneratorAttribute
+        // (those are already handled by DataSourceInitializer during discovery)
+        
+        // Use DataSourceInitializer to handle all properties with proper nested initialization
+        // This will skip IAsyncDataSourceGeneratorAttribute properties as they're already initialized
+        await DataSourceInitializer.InitializeAsync(testInstance, methodMetadata);
     }
 }

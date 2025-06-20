@@ -327,17 +327,9 @@ public static class TestContextExtensions
             yield break;
         }
 
-        if (!Sources.Properties.TryGetValue(obj.GetType(), out var properties))
-        {
-#if NET
-            if (RuntimeFeature.IsDynamicCodeSupported)
-#endif
-            {
-                properties = obj.GetType().GetProperties();
-            }
-        }
+        var properties = obj.GetType().GetProperties();
 
-        foreach (var property in (properties ?? [])
+        foreach (var property in properties
                  .Where(x => x.GetIndexParameters().Length == 0))
         {
             if (property.DeclaringType is { IsGenericParameter: true })
