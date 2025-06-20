@@ -230,7 +230,6 @@ internal class ReflectionTestConstructionBuilder
 
         var classType = resolvedClassInfo.Type;
         var methodInfo = resolvedMethodInfo.ReflectionInformation;
-        var repeatCount = allAttributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0;
 
         // Generate test ID
         var testId = TestIdGenerator.GenerateTestId(
@@ -245,7 +244,6 @@ internal class ReflectionTestConstructionBuilder
         {
             TestId = testId,
             MethodMetadata = resolvedMethodInfo,
-            RepeatCount = repeatCount + 1,
             TestFilePath = testAttribute.File,
             TestLineNumber = testAttribute.Line,
             TestClassFactory = () => Activator.CreateInstance(classType, invokedClassInstanceArguments)!,
@@ -277,18 +275,18 @@ internal class ReflectionTestConstructionBuilder
         {
             var args = await argsFunc();
             var propertyValue = args.ElementAtOrDefault(0);
-            
+
             // If this is an IAsyncDataSourceGeneratorAttribute property and it implements IAsyncInitializer,
             // we need to initialize it immediately during discovery
             var dataAttribute = propertyInformation.Attributes
                 .OfType<IDataAttribute>()
                 .FirstOrDefault();
-                
+
             if (dataAttribute is IAsyncDataSourceGeneratorAttribute && propertyValue is IAsyncInitializer)
             {
                 await ObjectInitializer.InitializeAsync(propertyValue);
             }
-            
+
             propertyArgs[propertyInformation.Name] = propertyValue;
         }
 

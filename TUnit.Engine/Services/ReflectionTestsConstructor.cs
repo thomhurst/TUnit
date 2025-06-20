@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
@@ -26,8 +27,8 @@ internal class ReflectionTestsConstructor(
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector)
 {
     private readonly UnifiedTestBuilder _unifiedBuilder = new(contextManager, serviceProvider);
-    
-    protected override async Task<DiscoveredTest[]> DiscoverTestsAsync()
+
+    protected override async Task<DiscoveredTest[]> DiscoverTestsAsync(ExecuteRequestContext context)
     {
 #if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
@@ -42,23 +43,23 @@ internal class ReflectionTestsConstructor(
         var dynamicTests = await DiscoverDynamicTestsAsync(allTypes);
 
         var discoveredTests = new List<DiscoveredTest>();
-        
+
         // Process standard tests
         var (tests, failures) = _unifiedBuilder.BuildTests(discoveryResult);
         discoveredTests.AddRange(tests);
-        
+
         // Log discovery failures
         foreach (var failure in failures)
         {
             Console.WriteLine($"Test discovery failed: {failure.TestClassName}.{failure.TestMethodName} - {failure.Reason}");
         }
-        
+
         // Process dynamic tests
         foreach (var dynamicTest in dynamicTests)
         {
             discoveredTests.AddRange(_unifiedBuilder.BuildTests(dynamicTest));
         }
-        
+
         return discoveredTests.ToArray();
     }
 
@@ -88,7 +89,7 @@ internal class ReflectionTestsConstructor(
                 allDefinitions.AddRange(result.TestDefinitions);
                 allFailures.AddRange(result.DiscoveryFailures);
             }
-            
+
             return new DiscoveryResult
             {
                 TestDefinitions = allDefinitions,
@@ -103,7 +104,7 @@ internal class ReflectionTestsConstructor(
         {
             return false;
         }
-        
+
         // A test class must have at least one test method
         return GetTestMethods(type).Length > 0;
     }
@@ -120,7 +121,7 @@ internal class ReflectionTestsConstructor(
         return await Task.Run(() =>
         {
             var results = new List<DynamicTest>();
-            
+
             foreach (var type in allTypes)
             {
                 foreach (var method in type.GetMethods())
@@ -140,7 +141,7 @@ internal class ReflectionTestsConstructor(
                     }
                 }
             }
-            
+
             return results;
         });
     }
@@ -152,9 +153,9 @@ internal class ReflectionTestsConstructor(
     {
         var context = new DynamicTestBuilderContext(attribute.File, attribute.Line);
         var instance = Activator.CreateInstance(type)!;
-        
+
         method.Invoke(instance, [context]);
-        
+
         return context.Tests;
     }
 }

@@ -108,11 +108,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
             beforeTestDiscoveryContext.RestoreExecutionContext();
 
-            var tests = await serviceProvider.TestDiscoverer.GetTestsAsync(context.CancellationToken);
+            var tests = await serviceProvider.TestDiscoverer.GetTestsAsync(context, context.CancellationToken);
+
             serviceProvider.ContextManager.AfterTestDiscoveryContext.AddTests(
                 tests.Select(x => x.TestContext)
             );
-
 
             var afterDiscoveryHooks = serviceProvider.TestDiscoveryHookOrchestrator.CollectAfterHooks();
 

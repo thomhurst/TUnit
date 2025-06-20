@@ -9,7 +9,7 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public static class GenericTestInvocationWriter
 {
-    public static void GenerateTestInvocationCode(SourceProductionContext context, SourceCodeWriter sourceBuilder,
+    public static void GenerateTestInvocationCode(SourceCodeWriter sourceBuilder,
         TestSourceDataModel testSourceDataModel)
     {
         var testId = testSourceDataModel.TestId;
@@ -49,7 +49,6 @@ public static class GenericTestInvocationWriter
         sourceBuilder.Write("{");
         sourceBuilder.Write($"TestId = $\"{testId}\",");
         sourceBuilder.Write("MethodMetadata = testInformation,");
-        sourceBuilder.Write($"RepeatCount = {testSourceDataModel.RepeatLimit},");
         sourceBuilder.Write($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Write($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.Write($"TestClassFactory = () => resettableClassFactory.Value,");

@@ -10,28 +10,23 @@ public abstract record TestDefinitionBase : ITestDefinition
     /// <summary>
     /// Internal method to build a discovered test.
     /// </summary>
-    internal abstract DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt);
-    
+    internal abstract DiscoveredTest BuildTest(ITestBuilder builder);
+
     /// <summary>
     /// Unique identifier for the test.
     /// </summary>
     public abstract string TestId { get; init; }
-    
+
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
     public abstract MethodMetadata MethodMetadata { get; init; }
-    
-    /// <summary>
-    /// How many times this test should be repeated.
-    /// </summary>
-    public abstract int RepeatCount { get; init; }
-    
+
     /// <summary>
     /// Source file path where the test is defined.
     /// </summary>
     public abstract string TestFilePath { get; init; }
-    
+
     /// <summary>
     /// Line number in the source file where the test is defined.
     /// </summary>
@@ -47,58 +42,53 @@ public sealed record TestDefinition : TestDefinitionBase
     /// Unique identifier for the test.
     /// </summary>
     public override required string TestId { get; init; }
-    
+
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
     public override required MethodMetadata MethodMetadata { get; init; }
-    
-    /// <summary>
-    /// How many times this test should be repeated.
-    /// </summary>
-    public override required int RepeatCount { get; init; }
-    
+
     /// <summary>
     /// Source file path where the test is defined.
     /// </summary>
     public override required string TestFilePath { get; init; }
-    
+
     /// <summary>
     /// Line number in the source file where the test is defined.
     /// </summary>
     public override required int TestLineNumber { get; init; }
-    
+
     /// <summary>
     /// Factory to create instances of the test class.
     /// </summary>
     public required Func<object> TestClassFactory { get; init; }
-    
+
     /// <summary>
     /// Factory to invoke the test method on a class instance.
     /// </summary>
     public required Func<object, CancellationToken, ValueTask> TestMethodInvoker { get; init; }
-    
+
     /// <summary>
     /// Provider for test class constructor arguments.
     /// </summary>
     public required Func<object?[]> ClassArgumentsProvider { get; init; }
-    
+
     /// <summary>
     /// Provider for test method arguments.
     /// </summary>
     public required Func<object?[]> MethodArgumentsProvider { get; init; }
-    
+
     /// <summary>
     /// Provider for properties to inject into the test class.
     /// </summary>
     public required Func<IDictionary<string, object?>> PropertiesProvider { get; init; }
-    
+
     /// <summary>
     /// Builds a discovered test using the provided builder.
     /// </summary>
-    internal override DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt)
+    internal override DiscoveredTest BuildTest(ITestBuilder builder)
     {
-        return builder.BuildTest(this, currentRepeatAttempt);
+        return builder.BuildTest(this);
     }
 }
 
@@ -113,57 +103,52 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     /// Unique identifier for the test.
     /// </summary>
     public override required string TestId { get; init; }
-    
+
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
     public override required MethodMetadata MethodMetadata { get; init; }
-    
-    /// <summary>
-    /// How many times this test should be repeated.
-    /// </summary>
-    public override required int RepeatCount { get; init; }
-    
+
     /// <summary>
     /// Source file path where the test is defined.
     /// </summary>
     public override required string TestFilePath { get; init; }
-    
+
     /// <summary>
     /// Line number in the source file where the test is defined.
     /// </summary>
     public override required int TestLineNumber { get; init; }
-    
+
     /// <summary>
     /// Strongly-typed factory to create instances of the test class.
     /// </summary>
     public required Func<TTestClass> TestClassFactory { get; init; }
-    
+
     /// <summary>
     /// Strongly-typed factory to invoke the test method on a class instance.
     /// </summary>
     public required Func<TTestClass, CancellationToken, ValueTask> TestMethodInvoker { get; init; }
-    
+
     /// <summary>
     /// Provider for test class constructor arguments.
     /// </summary>
     public required Func<object?[]> ClassArgumentsProvider { get; init; }
-    
+
     /// <summary>
     /// Provider for test method arguments.
     /// </summary>
     public required Func<object?[]> MethodArgumentsProvider { get; init; }
-    
+
     /// <summary>
     /// Provider for properties to inject into the test class.
     /// </summary>
     public required Func<IDictionary<string, object?>> PropertiesProvider { get; init; }
-    
+
     /// <summary>
     /// Gets the type of the test class for AOT.
     /// </summary>
     public Type TestClassType => typeof(TTestClass);
-    
+
     /// <summary>
     /// Converts this generic TestDefinition to the base non-generic version.
     /// </summary>
@@ -173,7 +158,6 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
         {
             TestId = definition.TestId,
             MethodMetadata = definition.MethodMetadata,
-            RepeatCount = definition.RepeatCount,
             TestFilePath = definition.TestFilePath,
             TestLineNumber = definition.TestLineNumber,
             TestClassFactory = () => definition.TestClassFactory(),
@@ -183,16 +167,16 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
             PropertiesProvider = definition.PropertiesProvider
         };
     }
-    
+
     /// <summary>
     /// Builds a discovered test using the provided builder.
     /// This method dispatches to the generic version on the builder, avoiding reflection.
     /// </summary>
-    internal override DiscoveredTest BuildTest(ITestBuilder builder, int currentRepeatAttempt)
+    internal override DiscoveredTest BuildTest(ITestBuilder builder)
     {
         // This is the key: we know our generic type at compile time here,
         // so we can call the generic method directly without reflection
-        return builder.BuildTest(this, currentRepeatAttempt);
+        return builder.BuildTest(this);
     }
 }
 
@@ -205,27 +189,22 @@ public interface ITestDefinition
     /// Unique identifier for the test.
     /// </summary>
     string TestId { get; }
-    
+
     /// <summary>
     /// Metadata about the test method.
     /// </summary>
     MethodMetadata MethodMetadata { get; }
-    
-    /// <summary>
-    /// How many times this test should be repeated.
-    /// </summary>
-    int RepeatCount { get; }
-    
+
     /// <summary>
     /// Source file path where the test is defined.
     /// </summary>
     string TestFilePath { get; }
-    
+
     /// <summary>
     /// Line number in the source file where the test is defined.
     /// </summary>
     int TestLineNumber { get; }
-    
+
 }
 
 /// <summary>
@@ -237,13 +216,12 @@ internal interface ITestBuilder
     /// <summary>
     /// Builds a discovered test from a non-generic test definition.
     /// </summary>
-    DiscoveredTest BuildTest(TestDefinition definition, int currentRepeatAttempt);
-    
+    DiscoveredTest BuildTest(TestDefinition definition);
+
     /// <summary>
     /// Builds a discovered test from a generic test definition.
     /// </summary>
     DiscoveredTest<TTestClass> BuildTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
-        TestDefinition<TTestClass> definition, 
-        int currentRepeatAttempt) where TTestClass : class;
+        TestDefinition<TTestClass> definition) where TTestClass : class;
 }
 

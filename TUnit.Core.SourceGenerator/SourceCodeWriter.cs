@@ -76,8 +76,7 @@ public class SourceCodeWriter : IDisposable
             if(_stringBuilder.Length > 0
                && _stringBuilder[^1] != '\n')
             {
-                if(_tabLevelDecreasingChars.Contains(firstChar) ||
-                    !_endOfStringNewLineTriggerringChars.Contains(value[^1]))
+                if(!_endOfStringNewLineTriggerringChars.Contains(value[^1]))
                 {
                     _stringBuilder.AppendLine();
                 }
@@ -97,6 +96,11 @@ public class SourceCodeWriter : IDisposable
         if (_tabLevelDecreasingChars.Contains(firstChar))
         {
             _shouldIndent = true;
+
+            if (_stringBuilder[^1] != '\n')
+            {
+                _stringBuilder.AppendLine();
+            }
         }
 
         if (firstChar == ';')

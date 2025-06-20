@@ -3,7 +3,7 @@
 public record UntypedTestDetails(ResettableLazy<object> ResettableLazy) : TestDetails
 {
     public override object ClassInstance => ResettableLazy.Value;
-    
+
     /// <summary>
     /// Helper method to create UntypedTestDetails with raw Attribute arrays (for backward compatibility)
     /// </summary>
@@ -32,17 +32,15 @@ public record UntypedTestDetails(ResettableLazy<object> ResettableLazy) : TestDe
             TestClassArguments = testClassArguments,
             TestMethodArguments = testMethodArguments,
             TestClassInjectedPropertyArguments = testClassInjectedPropertyArguments,
-            RepeatLimit = repeatLimit,
-            CurrentRepeatAttempt = currentRepeatAttempt,
             ReturnType = returnType,
             DynamicAttributes = [], // Will be set below
             DataAttributes = [] // Will be set below
         };
-        
+
         // Set the raw attributes which will be converted to TestAttributeMetadata on access
         details._rawDynamicAttributes = [];
         details._rawDataAttributes = dataAttributes;
-        
+
         return details;
     }
 }

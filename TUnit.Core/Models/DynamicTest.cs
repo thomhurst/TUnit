@@ -112,9 +112,9 @@ public abstract record DynamicTest
     {
         return ReflectionToSourceModelHelpers.GenerateParameter(parameter);
     }
-    
+
     private static AttributeMetadata[] ConvertToAttributeMetadata(
-        Attribute[] attributes, 
+        Attribute[] attributes,
         TestAttributeTarget targetElement,
         string? targetMemberName = null,
         Type? targetType = null)
@@ -176,7 +176,6 @@ public record DynamicTest<
             {
                 TestId = TestId,
                 MethodMetadata = testMethodInformation,
-                RepeatCount = repeatLimit + 1,
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 TestClassFactory = () => (TClass)InstanceHelper.CreateInstance(
@@ -224,7 +223,7 @@ public record DynamicTest<
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 TestClassName = TestClassType.Name,
-                TestMethodName = TestName ?? TestBody?.Name
+                TestMethodName = TestName ?? TestBody.Name
             });
         }
 

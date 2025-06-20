@@ -61,7 +61,6 @@ public record UntypedDynamicTest : DynamicTest
             {
                 TestId = TestId,
                 MethodMetadata = testMethod,
-                RepeatCount = repeatLimit + 1,
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 TestClassFactory = () => InstanceHelper.CreateInstance(
@@ -70,12 +69,12 @@ public record UntypedDynamicTest : DynamicTest
                 TestMethodInvoker = async (instance, token) =>
                 {
                     var arguments = TestMethodArguments;
-                    
+
                     if (TestBody.GetParameters().LastOrDefault()?.ParameterType == typeof(CancellationToken))
                     {
                         arguments = TestMethodArguments.Append(token).ToArray();
                     }
-                    
+
                     await AsyncConvert.ConvertObject(TestBody.Invoke(instance, arguments));
                 },
                 ClassArgumentsProvider = () => TestClassArguments ?? [],
@@ -109,7 +108,7 @@ public record UntypedDynamicTest : DynamicTest
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 TestClassName = TestClassType.Name,
-                TestMethodName = TestName ?? TestBody?.Name
+                TestMethodName = TestName ?? TestBody.Name
             });
         }
 
@@ -119,7 +118,7 @@ public record UntypedDynamicTest : DynamicTest
             DiscoveryFailures = discoveryFailures
         };
     }
-    
+
 
     private static string GetTestId(MethodInfo testBody)
     {

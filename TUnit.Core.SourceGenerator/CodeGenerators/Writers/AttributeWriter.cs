@@ -107,7 +107,7 @@ public class AttributeWriter
         {
             sourceCodeWriter.Write($"TargetType = typeof({targetTypeName}),");
         }
-        
+
         // Add ClassMetadata if requested and not a system attribute
         if (includeClassMetadata && attributeData.AttributeClass?.ContainingNamespace?.ToDisplayString()?.StartsWith("System") != true)
         {
@@ -116,31 +116,28 @@ public class AttributeWriter
             sourceCodeWriter.Write(",");
         }
 
-        // Add constructor arguments if available
         if (attributeData.ConstructorArguments.Length > 0)
         {
             sourceCodeWriter.Write("ConstructorArguments = new object?[]");
             sourceCodeWriter.Write("{");
-            for (var i = 0; i < attributeData.ConstructorArguments.Length; i++)
+
+            foreach (var typedConstant in attributeData.ConstructorArguments)
             {
-                if (i > 0) sourceCodeWriter.Write(",");
-                sourceCodeWriter.Write(TypedConstantParser.GetRawTypedConstantValue(attributeData.ConstructorArguments[i]));
+                sourceCodeWriter.Write($"{TypedConstantParser.GetRawTypedConstantValue(typedConstant)},");
             }
             sourceCodeWriter.Write("}");
             sourceCodeWriter.Write(",");
         }
 
-        // Add named arguments if available
         if (attributeData.NamedArguments.Length > 0)
         {
             sourceCodeWriter.Write("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?>()");
             sourceCodeWriter.Write("{");
-            var first = true;
             foreach (var namedArg in attributeData.NamedArguments)
             {
-                if (!first) sourceCodeWriter.Write(",");
-                first = false;
-                sourceCodeWriter.Write($@"{{ ""{namedArg.Key}"", {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)} }}");
+                sourceCodeWriter.Write($"""
+                                        ["{namedArg.Key}"] = {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)},
+                                        """);
             }
             sourceCodeWriter.Write("}");
             sourceCodeWriter.Write(",");
@@ -274,22 +271,22 @@ public class AttributeWriter
         sourceCodeWriter.Write($"{formattedNamedArgs}");
         sourceCodeWriter.Write("}");
     }
-    
+
     // Write test attributes with special filtering and formatting
     public static void WriteTestAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, ITypeSymbol? targetType = null)
     {
         // Filter out attributes that don't have application syntax reference (except mscorlib)
-        var filteredAttributes = attributeDatas.Where(x => 
-            x.ApplicationSyntaxReference is not null || 
+        var filteredAttributes = attributeDatas.Where(x =>
+            x.ApplicationSyntaxReference is not null ||
             x.AttributeClass?.ContainingAssembly?.Identity.Name == "mscorlib").ToImmutableArray();
-        
+
         var targetTypeName = targetType?.GloballyQualified();
-        
+
         // Use the enhanced WriteAttributeMetadatas with ClassMetadata support
         WriteAttributeMetadatas(sourceCodeWriter, context, filteredAttributes, targetElement, targetMemberName, targetTypeName, includeClassMetadata: true);
     }
-    
+
     // Helper methods for different contexts (previously in TestAttributeWriter)
     public static void WriteAssemblyTestAttributes(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         IAssemblySymbol assembly)

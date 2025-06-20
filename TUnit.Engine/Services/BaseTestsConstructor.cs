@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
@@ -9,16 +10,16 @@ namespace TUnit.Engine.Services;
 internal abstract class BaseTestsConstructor(IExtension extension,
     DependencyCollector dependencyCollector) : IDataProducer
 {
-    public async Task<DiscoveredTest[]> GetTestsAsync(CancellationToken cancellationToken)
+    public async Task<DiscoveredTest[]> GetTestsAsync(ExecuteRequestContext context, CancellationToken cancellationToken)
     {
-        var discoveredTests = await DiscoverTestsAsync();
+        var discoveredTests = await DiscoverTestsAsync(context);
 
         dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
 
         return discoveredTests;
     }
 
-    protected abstract Task<DiscoveredTest[]> DiscoverTestsAsync();
+    protected abstract Task<DiscoveredTest[]> DiscoverTestsAsync(ExecuteRequestContext context);
 
     public Task<bool> IsEnabledAsync()
     {

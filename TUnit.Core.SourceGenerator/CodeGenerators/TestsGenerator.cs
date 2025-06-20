@@ -136,14 +136,14 @@ public class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.Write("{");
                 sourceBuilder.Write("var testDefinitions = new global::System.Collections.Generic.List<global::TUnit.Core.ITestDefinition>();");
                 sourceBuilder.Write("var discoveryFailures = new global::System.Collections.Generic.List<global::TUnit.Core.DiscoveryFailure>();");
-                
+
                 for (var i = 0; i < count; i++)
                 {
                     sourceBuilder.Write($"var result{i} = await Tests{i}(sessionId);");
                     sourceBuilder.Write($"testDefinitions.AddRange(result{i}.TestDefinitions);");
                     sourceBuilder.Write($"discoveryFailures.AddRange(result{i}.DiscoveryFailures);");
                 }
-                
+
                 sourceBuilder.Write("return new global::TUnit.Core.DiscoveryResult { TestDefinitions = testDefinitions, DiscoveryFailures = discoveryFailures };");
 
                 sourceBuilder.Write("}");
@@ -164,7 +164,7 @@ public class TestsGenerator : IIncrementalGenerator
 
                     sourceBuilder.Write("try");
                     sourceBuilder.Write("{");
-                    GenericTestInvocationWriter.GenerateTestInvocationCode(context, sourceBuilder, model);
+                    GenericTestInvocationWriter.GenerateTestInvocationCode(sourceBuilder, model);
                     sourceBuilder.Write("}");
                     sourceBuilder.Write("catch (global::System.Exception exception)");
                     sourceBuilder.Write("{");

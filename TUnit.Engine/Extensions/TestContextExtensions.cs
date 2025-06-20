@@ -20,13 +20,13 @@ public static class TestContextExtensions
     [RequiresUnreferencedCode("Reflection")]
     [Experimental("WIP")]
     public static async Task ReregisterTestWithArguments(
-        this TestContext testContext, 
-        object?[]? methodArguments, 
+        this TestContext testContext,
+        object?[]? methodArguments,
         Dictionary<string, object?>? objectBag = null)
     {
         // TODO: Rework to use DynamicTestRegistrar
-        
-        var originalDefinition = testContext.OriginalTestDefinition 
+
+        var originalDefinition = testContext.OriginalTestDefinition
             ?? throw new InvalidOperationException("Cannot reregister test without original test definition");
 
         var testBuilderContext = new TestBuilderContext
@@ -35,17 +35,17 @@ public static class TestContextExtensions
             ClassInformation = testContext.TestDetails.ClassMetadata,
             MethodInformation = testContext.TestDetails.MethodMetadata
         };
-        
+
         foreach (var (key, value) in objectBag ?? [])
         {
             testBuilderContext.ObjectBag.Add(key, value);
         }
-        
+
         foreach (var dataAttribute in testContext.TestBuilderContext.DataAttributes)
         {
             testBuilderContext.DataAttributes.Add(dataAttribute);
         }
-        
+
         // For dynamic reregistration, we need access to the factories from the original definition
         // This is a temporary workaround until we have a better dynamic test registration API
         var nonGenericDef = originalDefinition as TestDefinition;
@@ -53,12 +53,11 @@ public static class TestContextExtensions
         {
             throw new InvalidOperationException("Dynamic test reregistration requires a non-generic TestDefinition");
         }
-        
+
         var newTestDefinition = new TestDefinition
         {
             TestId = Guid.NewGuid().ToString(),
             MethodMetadata = originalDefinition.MethodMetadata,
-            RepeatCount = originalDefinition.RepeatCount,
             TestFilePath = originalDefinition.TestFilePath,
             TestLineNumber = originalDefinition.TestLineNumber,
             TestClassFactory = nonGenericDef.TestClassFactory,
@@ -81,16 +80,16 @@ public static class TestContextExtensions
             MethodArgumentsProvider = () => methodArguments ?? [],
             PropertiesProvider = nonGenericDef.PropertiesProvider
         };
-        
-        var newTest = testContext.GetService<UnifiedTestBuilder>().BuildTest(newTestDefinition, 1);
-        
+
+        var newTest = testContext.GetService<UnifiedTestBuilder>().BuildTest(newTestDefinition);
+
         var startTime = DateTimeOffset.UtcNow;
 
         await testContext.GetService<TUnitMessageBus>().Discovered(newTest.TestContext);
-        
+
         await testContext.GetService<TestRegistrar>().RegisterInstance(newTest,
             onFailureToInitialize: exception => testContext.GetService<ITUnitMessageBus>().Failed(newTest.TestContext, exception, startTime));
-        
+
         _ = testContext.GetService<TestsExecutor>().ExecuteAsync(new GroupedTests
         {
             AllValidTests = [newTest],
@@ -100,20 +99,20 @@ public static class TestContextExtensions
             ParallelGroups = new ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>>()
         }, null, testContext.GetService<EngineCancellationToken>().CancellationTokenSource.Token);
     }
-    
+
     internal static void SetResult(this TestContext testContext, Exception? exception)
     {
         if (exception != null && Equals(exception, testContext.Result?.Exception))
         {
             return;
         }
-        
+
         var status = exception switch
         {
             null => Status.Passed,
             SkipTestException => Status.Skipped,
             TestRunCanceledException => Status.Cancelled,
-            TaskCanceledException or OperationCanceledException 
+            TaskCanceledException or OperationCanceledException
                 when testContext.GetService<EngineCancellationToken>().Token.IsCancellationRequested => Status.Cancelled,
             _ => Status.Failed,
         };
@@ -133,10 +132,10 @@ public static class TestContextExtensions
         }
 
         DateTimeOffset? now = null;
-        
+
         var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? (now ??= DateTimeOffset.UtcNow);
         var end = testContext.Timings.MaxBy(x => x.End)?.End ?? (now ??= DateTimeOffset.UtcNow);
-        
+
         testContext.Result = new TestResult
         {
             TestContext = testContext,
@@ -161,7 +160,7 @@ public static class TestContextExtensions
         {
             return [token];
         }
-        
+
         return [..methodArguments, token];
     }
 }

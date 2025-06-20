@@ -30,7 +30,7 @@ public abstract record TestDetails
     /// Gets or sets the test ID.
     /// </summary>
     public required string TestId { get; init; }
-    
+
     /// <summary>
     /// Gets or sets the test name.
     /// </summary>
@@ -80,12 +80,12 @@ public abstract record TestDetails
     /// Gets or sets the test method information.
     /// </summary>
     public required MethodMetadata MethodMetadata { get; init; }
-    
+
     /// <summary>
     /// Gets the test method information (alias for MethodMetadata).
     /// </summary>
     public MethodMetadata TestMethod => MethodMetadata;
-    
+
     /// <summary>
     /// Gets the test class information.
     /// </summary>
@@ -97,16 +97,6 @@ public abstract record TestDetails
     public abstract object ClassInstance { get; }
 
     /// <summary>
-    /// Gets or sets the current repeat attempt for the test.
-    /// </summary>
-    public required int CurrentRepeatAttempt { get; init; }
-
-    /// <summary>
-    /// Gets or sets the repeat limit for the test.
-    /// </summary>
-    public required int RepeatLimit { get; init; }
-
-    /// <summary>
     /// Gets or sets the retry limit for the test.
     /// </summary>
     public int RetryLimit { get; internal set; }
@@ -115,7 +105,7 @@ public abstract record TestDetails
     /// Gets or sets the timeout for the test.
     /// </summary>
     public TimeSpan? Timeout { get; internal set; }
-    
+
     /// <summary>
     /// Gets or sets the parallel constraint for the test.
     /// </summary>
@@ -134,19 +124,19 @@ public abstract record TestDetails
     /// <summary>
     /// Gets the attributes for the test assembly.
     /// </summary>
-    [JsonIgnore] 
+    [JsonIgnore]
     public AttributeMetadata[] AssemblyAttributes => ClassMetadata.Assembly.Attributes;
 
     /// <summary>
     /// Gets the attributes for the test class.
     /// </summary>
-    [JsonIgnore] 
+    [JsonIgnore]
     public AttributeMetadata[] ClassAttributes => ClassMetadata.Attributes;
 
     /// <summary>
     /// Gets the attributes for the test method.
     /// </summary>
-    [JsonIgnore] 
+    [JsonIgnore]
     public AttributeMetadata[] TestAttributes => MethodMetadata.Attributes;
 
     /// <summary>
@@ -155,21 +145,21 @@ public abstract record TestDetails
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
     public AttributeMetadata[] Attributes => field ??= [
-        ..DynamicAttributes, 
-        ..TestAttributes, 
-        ..ClassAttributes, 
-        ..AssemblyAttributes, 
+        ..DynamicAttributes,
+        ..TestAttributes,
+        ..ClassAttributes,
+        ..AssemblyAttributes,
         ..DataAttributes
     ];
 
-    [JsonIgnore] 
+    [JsonIgnore]
     [field: AllowNull, MaybeNull]
-    public AttributeMetadata[] DynamicAttributes 
-    { 
+    public AttributeMetadata[] DynamicAttributes
+    {
         get => field ??= ConvertToAttributeMetadata(
-            _rawDynamicAttributes, 
-            TestAttributeTarget.Method, 
-            MethodMetadata.Name, 
+            _rawDynamicAttributes,
+            TestAttributeTarget.Method,
+            MethodMetadata.Name,
             MethodMetadata.Type);
         init
         {
@@ -177,20 +167,20 @@ public abstract record TestDetails
             _rawDynamicAttributes = value?.Select(ta => ta.Instance).ToArray() ?? [];
         }
     }
-    
+
     internal Attribute[] _rawDynamicAttributes = [];
-    
+
     /// <summary>
     /// Gets the attributes that specify the test data.
     /// </summary>
     [JsonIgnore]
     [field: AllowNull, MaybeNull]
-    public required AttributeMetadata[] DataAttributes 
-    { 
+    public required AttributeMetadata[] DataAttributes
+    {
         get => field ??= ConvertToAttributeMetadata(
-            _rawDataAttributes, 
-            TestAttributeTarget.Method, 
-            MethodMetadata.Name, 
+            _rawDataAttributes,
+            TestAttributeTarget.Method,
+            MethodMetadata.Name,
             MethodMetadata.Type);
         init
         {
@@ -198,9 +188,9 @@ public abstract record TestDetails
             _rawDataAttributes = value?.Select(ta => ta.Instance).ToArray() ?? [];
         }
     }
-    
+
     internal Attribute[] _rawDataAttributes = [];
-    
+
     /// <summary>
     /// Helper method to create TestDetails with raw Attribute arrays (for backward compatibility)
     /// </summary>
@@ -210,8 +200,6 @@ public abstract record TestDetails
         object?[] testClassArguments,
         object?[] testMethodArguments,
         IDictionary<string, object?> testClassInjectedPropertyArguments,
-        int currentRepeatAttempt,
-        int repeatLimit,
         MethodMetadata testMethod,
         string testName,
         Type returnType,
@@ -227,8 +215,6 @@ public abstract record TestDetails
             TestClassArguments = testClassArguments,
             TestMethodArguments = testMethodArguments,
             TestClassInjectedPropertyArguments = testClassInjectedPropertyArguments,
-            CurrentRepeatAttempt = currentRepeatAttempt,
-            RepeatLimit = repeatLimit,
             MethodMetadata = testMethod,
             TestName = testName,
             ReturnType = returnType,
@@ -237,17 +223,17 @@ public abstract record TestDetails
             DynamicAttributes = [], // Will be set below
             DataAttributes = [] // Will be set below
         };
-        
+
         // Set the raw attributes which will be converted to TestAttributeMetadata on access
         details._rawDynamicAttributes = dynamicAttributes;
         details._rawDataAttributes = dataAttributes;
-        
+
         return details;
     }
-    
+
     [JsonIgnore]
     internal Func<TestContext, Exception, int, Task<bool>>? RetryLogic { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the return type for the test.
     /// </summary>
@@ -264,7 +250,7 @@ public abstract record TestDetails
     public required int TestLineNumber { get; init; }
 
     internal string? DisplayName { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the parallel limit for the test.
     /// </summary>
@@ -275,7 +261,7 @@ public abstract record TestDetails
                                                                  TestMethodParameterTypes.SequenceEqual(testDetails.TestMethodParameterTypes);
 
     private static AttributeMetadata[] ConvertToAttributeMetadata(
-        Attribute[] attributes, 
+        Attribute[] attributes,
         TestAttributeTarget targetElement,
         string? targetMemberName = null,
         Type? targetType = null)
