@@ -90,13 +90,30 @@ public static class TypedConstantParser
 
     public static string FormatPrimitive(object? value)
     {
-        return value switch
+        switch (value)
         {
-            string s => SymbolDisplay.FormatLiteral(s, quote: true),
-            char c => SymbolDisplay.FormatLiteral(c, quote: true),
-            bool b => b ? "true" : "false",
-            null => "null",
-            _ => value.ToString() ?? "null"
-        };
+            case string s:
+                return SymbolDisplay.FormatLiteral(s, quote: true);
+            case char c:
+                return SymbolDisplay.FormatLiteral(c, quote: true);
+            case bool b:
+                return b ? "true" : "false";
+            case float.NaN:
+                return "float.NaN";
+            case float f when float.IsPositiveInfinity(f):
+                return "float.PositiveInfinity";
+            case float f when float.IsNegativeInfinity(f):
+                return "float.NegativeInfinity";
+            case double.NaN:
+                return "double.NaN";
+            case double d when double.IsPositiveInfinity(d):
+                return "double.PositiveInfinity";
+            case double d when double.IsNegativeInfinity(d):
+                return "double.NegativeInfinity";
+            case null:
+                return "null";
+            default:
+                return value.ToString() ?? "null";
+        }
     }
 }
