@@ -18,8 +18,4 @@ internal static class Sources
     public static readonly ConcurrentQueue<IAssemblyHookSource> AssemblyHookSources = [];
     public static readonly ConcurrentQueue<ITestSessionHookSource> TestSessionHookSources = [];
     public static readonly ConcurrentQueue<ITestDiscoveryHookSource> TestDiscoveryHookSources = [];
-
-    public static readonly ConcurrentDictionary<Type, PropertyInfo[]> Properties = new();
-
-    public static readonly List<Func<Task>> GlobalInitializers = [];
 }

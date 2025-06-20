@@ -1,9 +1,6 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using TUnit.Core.Extensions;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -96,35 +93,5 @@ public class SourceRegistrar
     public static void RegisterTestDiscoveryHookSource(ITestDiscoveryHookSource testSource)
     {
         Sources.TestDiscoveryHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a property initializer for a specific type that takes a DataGeneratorMetadata parameter.
-    /// </summary>
-    /// <typeparam name="T">The type to register the initializer for.</typeparam>
-    public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.Interfaces)] T>()
-    {
-        var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite && p.HasAttribute<IAsyncDataSourceGeneratorAttribute>())
-            .ToArray();
-
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        Sources.Properties.TryAdd(typeof(T), properties);
-    }
-
-    private static bool IsEvent(Type type)
-    {
-        return type.IsAssignableTo<IAsyncInitializer>()
-            || type.IsAssignableTo<IAsyncDisposable>()
-            || type.IsAssignableTo<IEventReceiver>();
-    }
-
-    public static void RegisterGlobalInitializer(Func<Task> initializer)
-    {
-        Sources.GlobalInitializers.Add(initializer);
     }
 }

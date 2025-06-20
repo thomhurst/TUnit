@@ -17,7 +17,6 @@ public class TestsBase
 
     public TestsBase<TestsGenerator> TestsGenerator = new();
     public TestsBase<TestHooksGenerator> HooksGenerator = new();
-    public TestsBase<DataGeneratorPropertyGenerator> DataPropertiesGenerator = new();
     public TestsBase<AssemblyLoaderGenerator> AssemblyLoaderGenerator = new();
 
     public Task RunTest(string inputFile, Func<string[], Task> assertions)
