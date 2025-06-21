@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -21,25 +20,25 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
-        sb.AppendLine("        {");
+        using var writer = new SourceCodeWriter(2); // Start with indent level 2 for inline arrays
+        writer.WriteLine("new global::TUnit.Core.ParameterMetadata[]");
+        writer.WriteLine("{");
 
         foreach (var param in method.Parameters)
         {
             var parameterIndex = method.Parameters.IndexOf(param);
             var typeForConstructor = ContainsTypeParameter(param.Type) ? "object" : param.Type.GloballyQualified();
-            sb.AppendLine($"            new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))");
-            sb.AppendLine("            {");
-            sb.AppendLine($"                Name = \"{param.Name}\",");
-            sb.AppendLine($"                TypeReference = {GenerateTypeReference(param.Type)},");
-            sb.AppendLine($"                Attributes = {GenerateAttributeMetadataArray(param.GetAttributes())},");
-            sb.AppendLine($"                ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
-            sb.AppendLine("            },");
+            writer.WriteLine($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))");
+            writer.WriteLine("{");
+            writer.WriteLine($"Name = \"{param.Name}\",");
+            writer.WriteLine($"TypeReference = {GenerateTypeReference(param.Type)},");
+            writer.WriteLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes())},");
+            writer.WriteLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
+            writer.WriteLine("},");
         }
 
-        sb.AppendLine("        }");
-        return sb.ToString();
+        writer.WriteLine("}");
+        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 
     /// <summary>
@@ -56,21 +55,21 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<global::TUnit.Core.AttributeMetadata>()";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("new global::TUnit.Core.AttributeMetadata[]");
-        sb.AppendLine("        {");
+        using var writer = new SourceCodeWriter(2); // Start with indent level 2 for inline arrays
+        writer.WriteLine("new global::TUnit.Core.AttributeMetadata[]");
+        writer.WriteLine("{");
 
         foreach (var attr in relevantAttributes)
         {
             var attributeCode = GenerateAttributeMetadata(attr);
             if (!string.IsNullOrEmpty(attributeCode))
             {
-                sb.AppendLine(attributeCode);
+                writer.Write(attributeCode);
             }
         }
 
-        sb.AppendLine("        }");
-        return sb.ToString();
+        writer.WriteLine("}");
+        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 
     /// <summary>
@@ -78,35 +77,35 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static string GenerateAttributeMetadata(AttributeData attr)
     {
-        var sb = new StringBuilder();
+        using var writer = new SourceCodeWriter(3); // Start with indent level 3 for nested objects
 
         // For known TUnit attributes, generate direct instantiation
         if (IsKnownTUnitAttribute(attr))
         {
-            sb.AppendLine("            new global::TUnit.Core.AttributeMetadata");
-            sb.AppendLine("            {");
-            sb.AppendLine($"                Instance = {GenerateAttributeInstantiation(attr)},");
-            sb.AppendLine("                TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
-            sb.AppendLine("                ConstructorArguments = null,");
-            sb.AppendLine("                NamedArguments = null");
-            sb.AppendLine("            },");
+            writer.WriteLine("new global::TUnit.Core.AttributeMetadata");
+            writer.WriteLine("{");
+            writer.WriteLine($"Instance = {GenerateAttributeInstantiation(attr)},");
+            writer.WriteLine("TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
+            writer.WriteLine("ConstructorArguments = null,");
+            writer.WriteLine("NamedArguments = null");
+            writer.WriteLine("},");
         }
         else
         {
             // For unknown attributes, generate runtime construction info
-            sb.AppendLine("            new global::TUnit.Core.AttributeMetadata");
-            sb.AppendLine("            {");
-            sb.AppendLine("                Instance = global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
-            sb.AppendLine($"                    typeof({attr.AttributeClass!.GloballyQualified()}),");
-            sb.AppendLine($"                    {GenerateConstructorArgumentsArray(attr)},");
-            sb.AppendLine($"                    {GenerateNamedArgumentsDictionary(attr)}),");
-            sb.AppendLine("                TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
-            sb.AppendLine("                ConstructorArguments = null,");
-            sb.AppendLine("                NamedArguments = null");
-            sb.AppendLine("            },");
+            writer.WriteLine("new global::TUnit.Core.AttributeMetadata");
+            writer.WriteLine("{");
+            writer.WriteLine("Instance = global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
+            writer.WriteLine($"typeof({attr.AttributeClass!.GloballyQualified()}),");
+            writer.WriteLine($"{GenerateConstructorArgumentsArray(attr)},");
+            writer.WriteLine($"{GenerateNamedArgumentsDictionary(attr)}),");
+            writer.WriteLine("TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
+            writer.WriteLine("ConstructorArguments = null,");
+            writer.WriteLine("NamedArguments = null");
+            writer.WriteLine("},");
         }
 
-        return sb.ToString();
+        return writer.ToString();
     }
 
     /// <summary>
@@ -130,27 +129,28 @@ internal static class CodeGenerationHelpers
     private static string GenerateAttributeInstantiation(AttributeData attr)
     {
         var typeName = attr.AttributeClass!.GloballyQualified();
-        var sb = new StringBuilder($"new {typeName}(");
+        using var writer = new SourceCodeWriter(1); // Inline expression
+        writer.Write($"new {typeName}(");
 
         // Add constructor arguments
         if (attr.ConstructorArguments.Length > 0)
         {
             var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
-            sb.Append(string.Join(", ", args));
+            writer.Write(string.Join(", ", args));
         }
 
-        sb.Append(")");
+        writer.Write(")");
 
         // Add named arguments
         if (attr.NamedArguments.Length > 0)
         {
-            sb.Append(" { ");
+            writer.Write(" { ");
             var namedArgs = attr.NamedArguments.Select(na => $"{na.Key} = {TypedConstantParser.GetRawTypedConstantValue(na.Value)}");
-            sb.Append(string.Join(", ", namedArgs));
-            sb.Append(" }");
+            writer.Write(string.Join(", ", namedArgs));
+            writer.Write(" }");
         }
 
-        return sb.ToString();
+        return writer.ToString().Trim();
     }
 
     /// <summary>
@@ -177,13 +177,14 @@ internal static class CodeGenerationHelpers
             return "null";
         }
 
-        var sb = new StringBuilder("new System.Collections.Generic.Dictionary<string, object?> { ");
+        using var writer = new SourceCodeWriter(1); // Inline expression
+        writer.Write("new System.Collections.Generic.Dictionary<string, object?> { ");
         foreach (var na in attr.NamedArguments)
         {
-            sb.Append($"{{ \"{na.Key}\", {TypedConstantParser.GetRawTypedConstantValue(na.Value)} }}, ");
+            writer.Write($"{{ \"{na.Key}\", {TypedConstantParser.GetRawTypedConstantValue(na.Value)} }}, ");
         }
-        sb.Append("}");
-        return sb.ToString();
+        writer.Write("}");
+        return writer.ToString().Trim();
     }
 
     /// <summary>
@@ -231,25 +232,25 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<global::TUnit.Core.PropertyMetadata>()";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("new global::TUnit.Core.PropertyMetadata[]");
-        sb.AppendLine("        {");
+        using var writer = new SourceCodeWriter(2); // Start with indent level 2 for inline arrays
+        writer.WriteLine("new global::TUnit.Core.PropertyMetadata[]");
+        writer.WriteLine("{");
 
         foreach (var prop in properties)
         {
-            sb.AppendLine("            new global::TUnit.Core.PropertyMetadata");
-            sb.AppendLine("            {");
-            sb.AppendLine($"                Name = \"{prop.Name}\",");
-            sb.AppendLine($"                Type = typeof({prop.Type.GloballyQualified()}),");
-            sb.AppendLine($"                ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
-            sb.AppendLine("                IsStatic = false,");
-            sb.AppendLine($"                Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
-            sb.AppendLine($"                Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes())}");
-            sb.AppendLine("            },");
+            writer.WriteLine("new global::TUnit.Core.PropertyMetadata");
+            writer.WriteLine("{");
+            writer.WriteLine($"Name = \"{prop.Name}\",");
+            writer.WriteLine($"Type = typeof({prop.Type.GloballyQualified()}),");
+            writer.WriteLine($"ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
+            writer.WriteLine("IsStatic = false,");
+            writer.WriteLine($"Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
+            writer.WriteLine($"Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes())}");
+            writer.WriteLine("},");
         }
 
-        sb.AppendLine("        }");
-        return sb.ToString();
+        writer.WriteLine("}");
+        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 
     /// <summary>
@@ -266,28 +267,28 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<global::TUnit.Core.ConstructorMetadata>()";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("new global::TUnit.Core.ConstructorMetadata[]");
-        sb.AppendLine("        {");
+        using var writer = new SourceCodeWriter(2); // Start with indent level 2 for inline arrays
+        writer.WriteLine("new global::TUnit.Core.ConstructorMetadata[]");
+        writer.WriteLine("{");
 
         foreach (var ctor in constructors)
         {
-            sb.AppendLine("            new global::TUnit.Core.ConstructorMetadata");
-            sb.AppendLine("            {");
-            sb.AppendLine($"                Type = typeof({typeSymbol.GloballyQualified()}),");
-            sb.AppendLine("                Name = \".ctor\",");
-            sb.AppendLine($"                Parameters = {GenerateParameterMetadataArray(ctor)},");
-            sb.AppendLine($"                Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes())},");
-            sb.AppendLine("                IsStatic = false,");
-            sb.AppendLine($"                IsPublic = {(ctor.DeclaredAccessibility == Accessibility.Public ? "true" : "false")},");
-            sb.AppendLine($"                IsPrivate = {(ctor.DeclaredAccessibility == Accessibility.Private ? "true" : "false")},");
-            sb.AppendLine($"                IsProtected = {(ctor.DeclaredAccessibility == Accessibility.Protected ? "true" : "false")},");
-            sb.AppendLine($"                IsInternal = {(ctor.DeclaredAccessibility == Accessibility.Internal ? "true" : "false")}");
-            sb.AppendLine("            },");
+            writer.WriteLine("new global::TUnit.Core.ConstructorMetadata");
+            writer.WriteLine("{");
+            writer.WriteLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
+            writer.WriteLine("Name = \".ctor\",");
+            writer.WriteLine($"Parameters = {GenerateParameterMetadataArray(ctor)},");
+            writer.WriteLine($"Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes())},");
+            writer.WriteLine("IsStatic = false,");
+            writer.WriteLine($"IsPublic = {(ctor.DeclaredAccessibility == Accessibility.Public ? "true" : "false")},");
+            writer.WriteLine($"IsPrivate = {(ctor.DeclaredAccessibility == Accessibility.Private ? "true" : "false")},");
+            writer.WriteLine($"IsProtected = {(ctor.DeclaredAccessibility == Accessibility.Protected ? "true" : "false")},");
+            writer.WriteLine($"IsInternal = {(ctor.DeclaredAccessibility == Accessibility.Internal ? "true" : "false")}");
+            writer.WriteLine("},");
         }
 
-        sb.AppendLine("        }");
-        return sb.ToString();
+        writer.WriteLine("}");
+        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 
     /// <summary>
@@ -304,21 +305,21 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<global::TUnit.Core.IDataSourceProvider>()";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("new global::TUnit.Core.IDataSourceProvider[]");
-        sb.AppendLine("        {");
+        using var writer = new SourceCodeWriter(2); // Start with indent level 2 for inline arrays
+        writer.WriteLine("new global::TUnit.Core.IDataSourceProvider[]");
+        writer.WriteLine("{");
 
         foreach (var attr in dataSourceAttributes)
         {
             var providerCode = GenerateDataSourceProvider(attr, typeSymbol);
             if (!string.IsNullOrEmpty(providerCode))
             {
-                sb.AppendLine($"            {providerCode},");
+                writer.WriteLine($"{providerCode},");
             }
         }
 
-        sb.AppendLine("        }");
-        return sb.ToString();
+        writer.WriteLine("}");
+        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 
     /// <summary>
@@ -341,21 +342,21 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<global::TUnit.Core.IDataSourceProvider>()";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("new global::TUnit.Core.IDataSourceProvider[]");
-        sb.AppendLine("        {");
+        using var writer = new SourceCodeWriter(2); // Start with indent level 2 for inline arrays
+        writer.WriteLine("new global::TUnit.Core.IDataSourceProvider[]");
+        writer.WriteLine("{");
 
         foreach (var attr in dataSourceAttributes)
         {
             var providerCode = GenerateDataSourceProvider(attr, methodSymbol.ContainingType);
             if (!string.IsNullOrEmpty(providerCode))
             {
-                sb.AppendLine($"            {providerCode},");
+                writer.WriteLine($"{providerCode},");
             }
         }
 
-        sb.AppendLine("        }");
-        return sb.ToString();
+        writer.WriteLine("}");
+        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 
     /// <summary>
@@ -374,9 +375,9 @@ internal static class CodeGenerationHelpers
             return "new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>()";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>");
-        sb.AppendLine("        {");
+        using var writer = new SourceCodeWriter(2); // Start with indent level 2 for inline dictionaries
+        writer.WriteLine("new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>");
+        writer.WriteLine("{");
 
         foreach (var prop in propertiesWithDataSources)
         {
@@ -386,13 +387,13 @@ internal static class CodeGenerationHelpers
                 var providerCode = GenerateDataSourceProvider(dataSourceAttr, typeSymbol);
                 if (!string.IsNullOrEmpty(providerCode))
                 {
-                    sb.AppendLine($"            {{ typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"), {providerCode} }},");
+                    writer.WriteLine($"{{ typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"), {providerCode} }},");
                 }
             }
         }
 
-        sb.AppendLine("        }");
-        return sb.ToString();
+        writer.WriteLine("}");
+        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 
     /// <summary>
@@ -579,28 +580,28 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<System.Attribute>()";
         }
 
-        var sb = new StringBuilder();
-        sb.AppendLine("new System.Attribute[]");
-        sb.AppendLine("        {");
+        using var writer = new SourceCodeWriter(2); // Start with indent level 2 for inline arrays
+        writer.WriteLine("new System.Attribute[]");
+        writer.WriteLine("{");
 
         foreach (var attr in allAttributes)
         {
             if (IsKnownTUnitAttribute(attr))
             {
-                sb.AppendLine($"            {GenerateAttributeInstantiation(attr)},");
+                writer.WriteLine($"{GenerateAttributeInstantiation(attr)},");
             }
             else
             {
                 // For unknown attributes, use runtime helper
-                sb.AppendLine("            global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
-                sb.AppendLine($"                typeof({attr.AttributeClass!.GloballyQualified()}),");
-                sb.AppendLine($"                {GenerateConstructorArgumentsArray(attr)},");
-                sb.AppendLine($"                {GenerateNamedArgumentsDictionary(attr)}),");
+                writer.WriteLine("global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
+                writer.WriteLine($"typeof({attr.AttributeClass!.GloballyQualified()}),");
+                writer.WriteLine($"{GenerateConstructorArgumentsArray(attr)},");
+                writer.WriteLine($"{GenerateNamedArgumentsDictionary(attr)}),");
             }
         }
 
-        sb.AppendLine("        }");
-        return sb.ToString();
+        writer.WriteLine("}");
+        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 
     /// <summary>
@@ -638,14 +639,14 @@ internal static class CodeGenerationHelpers
                 var genericDef = GetGenericTypeDefinitionName(namedType);
                 var genericArgs = namedType.TypeArguments.Select(GenerateTypeReference).ToArray();
                 
-                var sb = new StringBuilder();
-                sb.Append($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
+                using var writer = new SourceCodeWriter(1); // Inline expression
+                writer.Write($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
                 foreach (var arg in genericArgs)
                 {
-                    sb.Append($", {arg}");
+                    writer.Write($", {arg}");
                 }
-                sb.Append(")");
-                return sb.ToString();
+                writer.Write(")");
+                return writer.ToString().Trim();
             }
         }
 
