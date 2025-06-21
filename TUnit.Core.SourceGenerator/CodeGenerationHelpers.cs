@@ -1,9 +1,8 @@
-using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
+using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator;
 
@@ -12,83 +11,6 @@ namespace TUnit.Core.SourceGenerator;
 /// </summary>
 internal static class CodeGenerationHelpers
 {
-    /// <summary>
-    /// Generates a C# literal expression from a TypedConstant value.
-    /// </summary>
-    public static string GenerateCSharpLiteral(TypedConstant constant)
-    {
-        if (constant.IsNull)
-        {
-            return "null";
-        }
-
-        switch (constant.Kind)
-        {
-            case TypedConstantKind.Primitive:
-                return GeneratePrimitiveLiteral(constant.Value!, constant.Type!);
-
-            case TypedConstantKind.Enum:
-                return $"{GetFullTypeName(constant.Type!)}.{constant.Value}";
-
-            case TypedConstantKind.Type:
-                var typeSymbol = (ITypeSymbol)constant.Value!;
-                return $"typeof({GetFullTypeName(typeSymbol)})";
-
-            case TypedConstantKind.Array:
-                var elementType = ((IArrayTypeSymbol)constant.Type!).ElementType;
-                var elements = constant.Values.Select(GenerateCSharpLiteral);
-                return $"new {GetFullTypeName(elementType)}[] {{ {string.Join(", ", elements)} }}";
-
-            default:
-                throw new NotSupportedException($"TypedConstant kind '{constant.Kind}' is not supported");
-        }
-    }
-
-    /// <summary>
-    /// Generates a primitive literal with proper formatting.
-    /// </summary>
-    private static string GeneratePrimitiveLiteral(object value, ITypeSymbol type)
-    {
-        return type.SpecialType switch
-        {
-            SpecialType.System_String => $"@\"{((string)value).Replace("\"", "\"\"")}\"",
-            SpecialType.System_Char => $"'{EscapeChar((char)value)}'",
-            SpecialType.System_Boolean => value.ToString()!.ToLowerInvariant(),
-            SpecialType.System_Single => $"{value}f",
-            SpecialType.System_Double => $"{value}d",
-            SpecialType.System_Decimal => $"{value}m",
-            SpecialType.System_Int64 => $"{value}L",
-            SpecialType.System_UInt32 => $"{value}u",
-            SpecialType.System_UInt64 => $"{value}ul",
-            SpecialType.System_Byte => $"(byte){value}",
-            SpecialType.System_SByte => $"(sbyte){value}",
-            SpecialType.System_Int16 => $"(short){value}",
-            SpecialType.System_UInt16 => $"(ushort){value}",
-            _ => value.ToString()!
-        };
-    }
-
-    /// <summary>
-    /// Escapes a character for use in a character literal.
-    /// </summary>
-    private static string EscapeChar(char c)
-    {
-        return c switch
-        {
-            '\'' => @"\'",
-            '\\' => @"\\",
-            '\0' => @"\0",
-            '\a' => @"\a",
-            '\b' => @"\b",
-            '\f' => @"\f",
-            '\n' => @"\n",
-            '\r' => @"\r",
-            '\t' => @"\t",
-            '\v' => @"\v",
-            _ => c.ToString()
-        };
-    }
-
     /// <summary>
     /// Generates C# code for a ParameterMetadata array from method parameters.
     /// </summary>
@@ -106,11 +28,11 @@ internal static class CodeGenerationHelpers
         foreach (var param in method.Parameters)
         {
             var parameterIndex = method.Parameters.IndexOf(param);
-            sb.AppendLine($"            new global::TUnit.Core.ParameterMetadata(typeof({GetFullTypeName(param.Type)}))");
+            sb.AppendLine($"            new global::TUnit.Core.ParameterMetadata(typeof({param.Type.GloballyQualified()}))");
             sb.AppendLine("            {");
             sb.AppendLine($"                Name = \"{param.Name}\",");
             sb.AppendLine($"                Attributes = {GenerateAttributeMetadataArray(param.GetAttributes())},");
-            sb.AppendLine($"                ReflectionInfo = typeof({GetFullTypeName(method.ContainingType)}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
+            sb.AppendLine($"                ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
             sb.AppendLine("            },");
         }
 
@@ -155,14 +77,14 @@ internal static class CodeGenerationHelpers
     private static string GenerateAttributeMetadata(AttributeData attr)
     {
         var sb = new StringBuilder();
-        
+
         // For known TUnit attributes, generate direct instantiation
         if (IsKnownTUnitAttribute(attr))
         {
             sb.AppendLine("            new global::TUnit.Core.AttributeMetadata");
             sb.AppendLine("            {");
             sb.AppendLine($"                Instance = {GenerateAttributeInstantiation(attr)},");
-            sb.AppendLine($"                TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
+            sb.AppendLine("                TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
             sb.AppendLine("                ConstructorArguments = null,");
             sb.AppendLine("                NamedArguments = null");
             sb.AppendLine("            },");
@@ -172,11 +94,11 @@ internal static class CodeGenerationHelpers
             // For unknown attributes, generate runtime construction info
             sb.AppendLine("            new global::TUnit.Core.AttributeMetadata");
             sb.AppendLine("            {");
-            sb.AppendLine($"                Instance = global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
-            sb.AppendLine($"                    typeof({GetFullTypeName(attr.AttributeClass!)}),");
+            sb.AppendLine("                Instance = global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
+            sb.AppendLine($"                    typeof({attr.AttributeClass!.GloballyQualified()}),");
             sb.AppendLine($"                    {GenerateConstructorArgumentsArray(attr)},");
             sb.AppendLine($"                    {GenerateNamedArgumentsDictionary(attr)}),");
-            sb.AppendLine($"                TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
+            sb.AppendLine("                TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
             sb.AppendLine("                ConstructorArguments = null,");
             sb.AppendLine("                NamedArguments = null");
             sb.AppendLine("            },");
@@ -190,7 +112,7 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static bool IsKnownTUnitAttribute(AttributeData attr)
     {
-        var fullName = GetFullTypeName(attr.AttributeClass!);
+        var fullName = attr.AttributeClass!.GloballyQualified();
         return fullName.StartsWith("TUnit.Core.") && (
             fullName.EndsWith("TestAttribute") ||
             fullName.EndsWith("TimeoutAttribute") ||
@@ -205,13 +127,13 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static string GenerateAttributeInstantiation(AttributeData attr)
     {
-        var typeName = GetFullTypeName(attr.AttributeClass!);
+        var typeName = attr.AttributeClass!.GloballyQualified();
         var sb = new StringBuilder($"new {typeName}(");
 
         // Add constructor arguments
         if (attr.ConstructorArguments.Length > 0)
         {
-            var args = attr.ConstructorArguments.Select(GenerateCSharpLiteral);
+            var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
             sb.Append(string.Join(", ", args));
         }
 
@@ -221,7 +143,7 @@ internal static class CodeGenerationHelpers
         if (attr.NamedArguments.Length > 0)
         {
             sb.Append(" { ");
-            var namedArgs = attr.NamedArguments.Select(na => $"{na.Key} = {GenerateCSharpLiteral(na.Value)}");
+            var namedArgs = attr.NamedArguments.Select(na => $"{na.Key} = {TypedConstantParser.GetRawTypedConstantValue(na.Value)}");
             sb.Append(string.Join(", ", namedArgs));
             sb.Append(" }");
         }
@@ -239,7 +161,7 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<object?>()";
         }
 
-        var args = attr.ConstructorArguments.Select(GenerateCSharpLiteral);
+        var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
         return $"new object?[] {{ {string.Join(", ", args)} }}";
     }
 
@@ -256,7 +178,7 @@ internal static class CodeGenerationHelpers
         var sb = new StringBuilder("new System.Collections.Generic.Dictionary<string, object?> { ");
         foreach (var na in attr.NamedArguments)
         {
-            sb.Append($"{{ \"{na.Key}\", {GenerateCSharpLiteral(na.Value)} }}, ");
+            sb.Append($"{{ \"{na.Key}\", {TypedConstantParser.GetRawTypedConstantValue(na.Value)} }}, ");
         }
         sb.Append("}");
         return sb.ToString();
@@ -267,18 +189,9 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static bool IsCompilerGeneratedAttribute(AttributeData attr)
     {
-        var fullName = GetFullTypeName(attr.AttributeClass!);
+        var fullName = attr.AttributeClass!.GloballyQualified();
         return fullName.StartsWith("System.Runtime.CompilerServices.") ||
                fullName.StartsWith("System.Diagnostics.CodeAnalysis.");
-    }
-
-    /// <summary>
-    /// Gets the fully qualified type name for a symbol.
-    /// </summary>
-    public static string GetFullTypeName(ITypeSymbol typeSymbol)
-    {
-        return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
-            .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
     }
 
     /// <summary>
@@ -305,10 +218,10 @@ internal static class CodeGenerationHelpers
             sb.AppendLine("            new global::TUnit.Core.PropertyMetadata");
             sb.AppendLine("            {");
             sb.AppendLine($"                Name = \"{prop.Name}\",");
-            sb.AppendLine($"                Type = typeof({GetFullTypeName(prop.Type)}),");
-            sb.AppendLine($"                ReflectionInfo = typeof({GetFullTypeName(typeSymbol)}).GetProperty(\"{prop.Name}\"),");
-            sb.AppendLine($"                IsStatic = false,");
-            sb.AppendLine($"                Getter = obj => ((({GetFullTypeName(typeSymbol)})obj).{prop.Name}),");
+            sb.AppendLine($"                Type = typeof({prop.Type.GloballyQualified()}),");
+            sb.AppendLine($"                ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
+            sb.AppendLine("                IsStatic = false,");
+            sb.AppendLine($"                Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
             sb.AppendLine($"                Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes())}");
             sb.AppendLine("            },");
         }
@@ -339,11 +252,11 @@ internal static class CodeGenerationHelpers
         {
             sb.AppendLine("            new global::TUnit.Core.ConstructorMetadata");
             sb.AppendLine("            {");
-            sb.AppendLine($"                Type = typeof({GetFullTypeName(typeSymbol)}),");
-            sb.AppendLine($"                Name = \".ctor\",");
+            sb.AppendLine($"                Type = typeof({typeSymbol.GloballyQualified()}),");
+            sb.AppendLine("                Name = \".ctor\",");
             sb.AppendLine($"                Parameters = {GenerateParameterMetadataArray(ctor)},");
             sb.AppendLine($"                Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes())},");
-            sb.AppendLine($"                IsStatic = false,");
+            sb.AppendLine("                IsStatic = false,");
             sb.AppendLine($"                IsPublic = {(ctor.DeclaredAccessibility == Accessibility.Public ? "true" : "false")},");
             sb.AppendLine($"                IsPrivate = {(ctor.DeclaredAccessibility == Accessibility.Private ? "true" : "false")},");
             sb.AppendLine($"                IsProtected = {(ctor.DeclaredAccessibility == Accessibility.Protected ? "true" : "false")},");
@@ -430,7 +343,7 @@ internal static class CodeGenerationHelpers
     {
         var propertiesWithDataSources = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
-            .Where(p => p.DeclaredAccessibility == Accessibility.Public && 
+            .Where(p => p.DeclaredAccessibility == Accessibility.Public &&
                        p.GetAttributes().Any(IsDataSourceAttribute))
             .ToList();
 
@@ -451,7 +364,7 @@ internal static class CodeGenerationHelpers
                 var providerCode = GenerateDataSourceProvider(dataSourceAttr, typeSymbol);
                 if (!string.IsNullOrEmpty(providerCode))
                 {
-                    sb.AppendLine($"            {{ typeof({GetFullTypeName(typeSymbol)}).GetProperty(\"{prop.Name}\"), {providerCode} }},");
+                    sb.AppendLine($"            {{ typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"), {providerCode} }},");
                 }
             }
         }
@@ -465,14 +378,14 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static bool IsDataSourceAttribute(AttributeData attr)
     {
-        var fullName = GetFullTypeName(attr.AttributeClass!);
+        var fullName = attr.AttributeClass!.GloballyQualified();
         return fullName == "TUnit.Core.ArgumentsAttribute" ||
                fullName == "TUnit.Core.InlineDataAttribute" ||
                fullName == "TUnit.Core.MethodDataSourceAttribute" ||
                fullName == "TUnit.Core.ClassDataSourceAttribute" ||
                fullName == "TUnit.Core.PropertyDataSourceAttribute" ||
-               (attr.AttributeClass!.AllInterfaces.Any(i => 
-                   GetFullTypeName(i) == "TUnit.Core.Interfaces.IDataAttribute"));
+               (attr.AttributeClass!.AllInterfaces.Any(i =>
+                   i.GloballyQualified() == "TUnit.Core.Interfaces.IDataAttribute"));
     }
 
     /// <summary>
@@ -480,7 +393,7 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static string GenerateDataSourceProvider(AttributeData attr, INamedTypeSymbol containingType)
     {
-        var fullName = GetFullTypeName(attr.AttributeClass!);
+        var fullName = attr.AttributeClass!.GloballyQualified();
 
         switch (fullName)
         {
@@ -505,7 +418,7 @@ internal static class CodeGenerationHelpers
 
     private static string GenerateInlineDataProvider(AttributeData attr)
     {
-        var args = attr.ConstructorArguments.Select(GenerateCSharpLiteral);
+        var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
         return $"new global::TUnit.Core.DataSources.InlineDataSourceProvider(new object?[] {{ {string.Join(", ", args)} }})";
     }
 
@@ -519,7 +432,7 @@ internal static class CodeGenerationHelpers
         var methodName = attr.ConstructorArguments[0].Value?.ToString() ?? "";
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
-        return $"new global::TUnit.Core.DataSources.MethodDataSourceProvider(typeof({GetFullTypeName(containingType)}).GetMethod(\"{methodName}\", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), null, {isShared.ToString().ToLowerInvariant()})";
+        return $"new global::TUnit.Core.DataSources.MethodDataSourceProvider(typeof({containingType.GloballyQualified()}).GetMethod(\"{methodName}\", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), null, {isShared.ToString().ToLowerInvariant()})";
     }
 
     private static string GenerateClassDataSourceProvider(AttributeData attr)
@@ -537,7 +450,7 @@ internal static class CodeGenerationHelpers
 
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
-        return $"new global::TUnit.Core.DataSources.ClassDataSourceProvider(typeof({GetFullTypeName(dataSourceType)}), {isShared.ToString().ToLowerInvariant()})";
+        return $"new global::TUnit.Core.DataSources.ClassDataSourceProvider(typeof({dataSourceType.GloballyQualified()}), {isShared.ToString().ToLowerInvariant()})";
     }
 
     private static string GeneratePropertyDataSourceProvider(AttributeData attr, INamedTypeSymbol containingType)
@@ -550,7 +463,7 @@ internal static class CodeGenerationHelpers
         var propertyName = attr.ConstructorArguments[0].Value?.ToString() ?? "";
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
-        return $"new global::TUnit.Core.DataSources.PropertyDataSourceProvider(typeof({GetFullTypeName(containingType)}), \"{propertyName}\", {isShared.ToString().ToLowerInvariant()})";
+        return $"new global::TUnit.Core.DataSources.PropertyDataSourceProvider(typeof({containingType.GloballyQualified()}), \"{propertyName}\", {isShared.ToString().ToLowerInvariant()})";
     }
 
     private static string GenerateCustomDataProvider(AttributeData attr)
@@ -566,9 +479,9 @@ internal static class CodeGenerationHelpers
     {
         // Check method first, then class
         var timeoutAttr = methodSymbol.GetAttributes()
-            .FirstOrDefault(attr => GetFullTypeName(attr.AttributeClass!) == "TUnit.Core.TimeoutAttribute") ??
+            .FirstOrDefault(attr => attr.AttributeClass!.GloballyQualified() == "TUnit.Core.TimeoutAttribute") ??
             methodSymbol.ContainingType.GetAttributes()
-            .FirstOrDefault(attr => GetFullTypeName(attr.AttributeClass!) == "TUnit.Core.TimeoutAttribute");
+            .FirstOrDefault(attr => attr.AttributeClass!.GloballyQualified() == "TUnit.Core.TimeoutAttribute");
 
         if (timeoutAttr == null || timeoutAttr.ConstructorArguments.Length == 0)
         {
@@ -591,17 +504,17 @@ internal static class CodeGenerationHelpers
     {
         // Check method first, then class
         var skipAttr = methodSymbol.GetAttributes()
-            .FirstOrDefault(attr => GetFullTypeName(attr.AttributeClass!) == "TUnit.Core.SkipAttribute") ??
+            .FirstOrDefault(attr => attr.AttributeClass!.GloballyQualified() == "TUnit.Core.SkipAttribute") ??
             methodSymbol.ContainingType.GetAttributes()
-            .FirstOrDefault(attr => GetFullTypeName(attr.AttributeClass!) == "TUnit.Core.SkipAttribute");
+            .FirstOrDefault(attr => attr.AttributeClass!.GloballyQualified() == "TUnit.Core.SkipAttribute");
 
         if (skipAttr == null)
         {
             return (false, "null");
         }
 
-        var reason = skipAttr.ConstructorArguments.Length > 0 
-            ? GenerateCSharpLiteral(skipAttr.ConstructorArguments[0])
+        var reason = skipAttr.ConstructorArguments.Length > 0
+            ? TypedConstantParser.GetRawTypedConstantValue(skipAttr.ConstructorArguments[0])
             : "\"Test skipped\"";
 
         return (true, reason);
@@ -613,7 +526,7 @@ internal static class CodeGenerationHelpers
     public static int ExtractRepeatCount(IMethodSymbol methodSymbol)
     {
         var repeatAttr = methodSymbol.GetAttributes()
-            .FirstOrDefault(attr => GetFullTypeName(attr.AttributeClass!) == "TUnit.Core.RepeatAttribute");
+            .FirstOrDefault(attr => attr.AttributeClass!.GloballyQualified() == "TUnit.Core.RepeatAttribute");
 
         if (repeatAttr == null || repeatAttr.ConstructorArguments.Length == 0)
         {
@@ -657,8 +570,8 @@ internal static class CodeGenerationHelpers
             else
             {
                 // For unknown attributes, use runtime helper
-                sb.AppendLine($"            global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
-                sb.AppendLine($"                typeof({GetFullTypeName(attr.AttributeClass!)}),");
+                sb.AppendLine("            global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
+                sb.AppendLine($"                typeof({attr.AttributeClass!.GloballyQualified()}),");
                 sb.AppendLine($"                {GenerateConstructorArgumentsArray(attr)},");
                 sb.AppendLine($"                {GenerateNamedArgumentsDictionary(attr)}),");
             }
