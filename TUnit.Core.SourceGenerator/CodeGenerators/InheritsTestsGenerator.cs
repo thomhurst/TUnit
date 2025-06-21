@@ -150,6 +150,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
         writer.WriteLine();
         writer.WriteLine("using System;");
         writer.WriteLine("using System.Collections.Generic;");
+        writer.WriteLine("using System.Linq;");
         writer.WriteLine("using System.Reflection;");
         writer.WriteLine("using global::TUnit.Core;");
         writer.WriteLine("using global::TUnit.Core.SourceGenerator;");
@@ -161,11 +162,11 @@ public class InheritsTestsGenerator : IIncrementalGenerator
         writer.WriteLine("[System.Runtime.CompilerServices.ModuleInitializer]");
         writer.WriteLine("public static void Initialize()");
         writer.WriteLine("{");
-        writer.WriteLine("var testMetadata = new System.Collections.Generic.List<TestMetadata>();");
+        writer.WriteLine("var testMetadata = new System.Collections.Generic.List<DynamicTestMetadata>();");
         writer.WriteLine();
         
         // Generate test metadata
-        writer.WriteLine("testMetadata.Add(new TestMetadata");
+        writer.WriteLine("testMetadata.Add(new DynamicTestMetadata");
         writer.WriteLine("{");
         writer.WriteLine($"TestIdTemplate = \"{GetFullTypeName(classSymbol)}.{methodSymbol.Name}_{{{{TestIndex}}}}\",");
         writer.WriteLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
@@ -231,7 +232,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
         
         writer.WriteLine("});");
         writer.WriteLine();
-        writer.WriteLine("TestSourceRegistrar.RegisterMetadata(testMetadata);");
+        writer.WriteLine("TestSourceRegistrar.RegisterTests(testMetadata.Cast<ITestDescriptor>().ToList());");
         writer.WriteLine("}");
         writer.WriteLine("}");
 

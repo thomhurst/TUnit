@@ -100,6 +100,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.WriteLine();
         writer.WriteLine("using System;");
         writer.WriteLine("using System.Collections.Generic;");
+        writer.WriteLine("using System.Linq;");
         writer.WriteLine("using System.Reflection;");
         writer.WriteLine("using global::TUnit.Core;");
         writer.WriteLine();
@@ -112,7 +113,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.WriteLine("[System.Runtime.CompilerServices.ModuleInitializer]");
         writer.WriteLine("public static void Initialize()");
         writer.WriteLine("{");
-        writer.WriteLine("var testMetadata = new System.Collections.Generic.List<TestMetadata>();");
+        writer.WriteLine("var testMetadata = new System.Collections.Generic.List<DynamicTestMetadata>();");
         writer.WriteLine();
         // Extract skip information
         var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
@@ -120,7 +121,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         // For generic types, we can't use typeof() so TestClassType will be null
         var testClassTypeValue = testInfo.TypeSymbol.IsGenericType ? "null" : $"typeof({className})";
         
-        writer.WriteLine("testMetadata.Add(new TestMetadata");
+        writer.WriteLine("testMetadata.Add(new DynamicTestMetadata");
         writer.WriteLine("{");
         writer.WriteLine($"TestIdTemplate = \"{className}.{methodName}_{{{{TestIndex}}}}\",");
         writer.WriteLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
@@ -164,7 +165,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.WriteLine($"Timeout = {CodeGenerationHelpers.ExtractTimeout(testInfo.MethodSymbol)}");
         writer.WriteLine("});");
         writer.WriteLine();
-        writer.WriteLine("TestSourceRegistrar.RegisterMetadata(testMetadata);");
+        writer.WriteLine("TestSourceRegistrar.RegisterTests(testMetadata.Cast<ITestDescriptor>().ToList());");
         writer.WriteLine("}");
         writer.WriteLine("}");
 
