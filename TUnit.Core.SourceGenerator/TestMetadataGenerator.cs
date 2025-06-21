@@ -116,6 +116,9 @@ public class TestMetadataGenerator : IIncrementalGenerator
         sb.AppendLine("    {");
         sb.AppendLine("        var testMetadata = new System.Collections.Generic.List<TestMetadata>();");
         sb.AppendLine();
+        // Extract skip information
+        var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
+        
         sb.AppendLine($@"        testMetadata.Add(new TestMetadata
         {{
             TestIdTemplate = ""{className}.{methodName}_{{{{TestIndex}}}}"",
@@ -125,36 +128,36 @@ public class TestMetadataGenerator : IIncrementalGenerator
             {{
                 Name = ""{testInfo.MethodSymbol.Name}"",
                 Type = typeof({className}),
-                Parameters = System.Array.Empty<ParameterMetadata>(),
-                GenericTypeCount = 0,
+                Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)},
+                GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},
                 Class = new ClassMetadata
                 {{
                     Name = ""{testInfo.TypeSymbol.Name}"",
                     Type = typeof({className}),
-                    Attributes = System.Array.Empty<AttributeMetadata>(),
+                    Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes())},
                     Namespace = ""{testInfo.TypeSymbol.ContainingNamespace}"",
-                    Assembly = new AssemblyMetadata {{ Name = ""{testInfo.TypeSymbol.ContainingAssembly.Name}"", Attributes = System.Array.Empty<AttributeMetadata>() }},
+                    Assembly = new AssemblyMetadata {{ Name = ""{testInfo.TypeSymbol.ContainingAssembly.Name}"", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes())} }},
                     Parameters = System.Array.Empty<ParameterMetadata>(),
-                    Properties = System.Array.Empty<PropertyMetadata>(),
-                    Constructors = System.Array.Empty<ConstructorMetadata>(),
+                    Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)},
+                    Constructors = {CodeGenerationHelpers.GenerateConstructorMetadataArray(testInfo.TypeSymbol)},
                     Parent = null
                 }},
                 ReturnType = typeof({GetReturnTypeName(testInfo.MethodSymbol)}),
-                Attributes = System.Array.Empty<AttributeMetadata>()
+                Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes())}
             }},
             TestFilePath = @""{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}"",
             TestLineNumber = {testInfo.LineNumber},
             TestClassFactory = args => {GenerateTestClassFactory(className, requiredProperties, constructorWithParameters, hasParameterlessConstructor)},
-            ClassDataSources = System.Array.Empty<IDataSourceProvider>(),
-            MethodDataSources = System.Array.Empty<IDataSourceProvider>(),
-            PropertyDataSources = new System.Collections.Generic.Dictionary<PropertyInfo, IDataSourceProvider>(),
+            ClassDataSources = {CodeGenerationHelpers.GenerateClassDataSourceProviders(testInfo.TypeSymbol)},
+            MethodDataSources = {CodeGenerationHelpers.GenerateMethodDataSourceProviders(testInfo.MethodSymbol)},
+            PropertyDataSources = {CodeGenerationHelpers.GeneratePropertyDataSourceDictionary(testInfo.TypeSymbol)},
             DisplayNameTemplate = ""{methodName}"",
-            RepeatCount = 1,
+            RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testInfo.MethodSymbol)},
             IsAsync = {(IsAsyncMethod(testInfo.MethodSymbol) ? "true" : "false")},
-            IsSkipped = false,
-            SkipReason = null,
-            Attributes = System.Array.Empty<Attribute>(),
-            Timeout = null
+            IsSkipped = {(isSkipped ? "true" : "false")},
+            SkipReason = {skipReason},
+            Attributes = {CodeGenerationHelpers.GenerateTestAttributes(testInfo.MethodSymbol)},
+            Timeout = {CodeGenerationHelpers.ExtractTimeout(testInfo.MethodSymbol)}
         }});");
         sb.AppendLine();
         sb.AppendLine("        TestSourceRegistrar.RegisterMetadata(testMetadata);");
