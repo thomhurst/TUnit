@@ -85,11 +85,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         ContextManager = new ContextManager(context.Request.Session.SessionUid.Value, stringFilter);
 
-        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, context));
+        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, frameworkServiceProvider, context));
 
         var instanceTracker = Register(new InstanceTracker());
 
         var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions);
+
 
         HooksCollector = Register<HooksCollectorBase>
         (
@@ -123,11 +124,16 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector));
 
-        var testRegistrar = Register(new TestRegistrar(instanceTracker));
-
         Disposer = Register(new Disposer(Logger));
 
-        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Disposer));
+        var objectLifetimeManager = Register(new ObjectLifetimeManager(Disposer));
+
+        var dataSourceObjectRegistrar = Register(new DataSourceObjectRegistrar(objectLifetimeManager));
+
+        var testRegistrar = Register(new TestRegistrar(instanceTracker, objectLifetimeManager));
+
+        var testInvoker = Register(new TestInvocation(testHookOrchestrator, Disposer, dataSourceObjectRegistrar));
+
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
 
         var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar, GetCapability<StopExecutionCapability>()));
@@ -147,6 +153,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }
+
 
     public IDynamicTestRegistrar DynamicTestRegistrar { get; }
 

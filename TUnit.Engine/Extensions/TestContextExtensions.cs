@@ -28,7 +28,12 @@ public static class TestContextExtensions
         
         var testMetadata = testContext.OriginalMetadata;
 
-        var testBuilderContext = new TestBuilderContext();
+        var testBuilderContext = new TestBuilderContext
+        {
+            TestMethodName = testContext.TestDetails.TestMethod.Name,
+            ClassInformation = testContext.TestDetails.TestClass,
+            MethodInformation = testContext.TestDetails.TestMethod
+        };
         
         foreach (var (key, value) in objectBag ?? [])
         {
