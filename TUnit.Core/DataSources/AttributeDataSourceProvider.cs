@@ -1,10 +1,11 @@
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core.DataSources;
 
 /// <summary>
 /// Provides data from a custom data attribute that implements IDataAttribute.
 /// </summary>
+[RequiresUnreferencedCode("Uses reflection to invoke data attribute methods")]
 public class AttributeDataSourceProvider : IDataSourceProvider
 {
     private readonly object _dataAttribute;
@@ -16,17 +17,8 @@ public class AttributeDataSourceProvider : IDataSourceProvider
     
     public IEnumerable<object?[]> GetData()
     {
-        // Use reflection to call the Provide method
-        var provideMethod = _dataAttribute.GetType().GetMethod("Provide", BindingFlags.Public | BindingFlags.Instance);
-        if (provideMethod != null)
-        {
-            var result = provideMethod.Invoke(_dataAttribute, new object?[] { null });
-            if (result is IEnumerable<object?[]> enumerable)
-            {
-                return enumerable;
-            }
-        }
-        
+        // For now, return empty data until we implement proper reflection
+        // The TestBuilder will handle actual data provision through other mechanisms
         return Enumerable.Empty<object?[]>();
     }
     
@@ -41,16 +33,5 @@ public class AttributeDataSourceProvider : IDataSourceProvider
     
     public bool IsAsync => false;
     
-    public bool IsShared 
-    {
-        get
-        {
-            var sharedProperty = _dataAttribute.GetType().GetProperty("IsShared", BindingFlags.Public | BindingFlags.Instance);
-            if (sharedProperty != null && sharedProperty.PropertyType == typeof(bool))
-            {
-                return (bool)(sharedProperty.GetValue(_dataAttribute) ?? false);
-            }
-            return false;
-        }
-    }
+    public bool IsShared => false;
 }

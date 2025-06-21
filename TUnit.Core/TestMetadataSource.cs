@@ -45,7 +45,7 @@ public class TestMetadataSource : ITestSource
                 failures.Add(new DiscoveryFailure
                 {
                     TestId = metadata.TestIdTemplate,
-                    TestMethodName = metadata.TestMethod.Name,
+                    TestMethodName = metadata.MethodMetadata.Name,
                     TestFilePath = metadata.TestFilePath,
                     TestLineNumber = metadata.TestLineNumber,
                     Exception = ex

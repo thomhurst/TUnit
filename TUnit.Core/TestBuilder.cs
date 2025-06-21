@@ -72,7 +72,7 @@ public class TestBuilder
         return new CompiledFactories
         {
             ClassFactory = GetOrCompileConstructor(metadata.TestClassType),
-            MethodInvoker = GetOrCompileMethodInvoker(metadata.TestMethod),
+            MethodInvoker = GetOrCompileMethodInvoker(metadata.MethodMetadata.ReflectionInformation),
             PropertySetters = metadata.PropertyDataSources.Keys
                 .ToDictionary(p => p, GetOrCompilePropertySetter)
         };

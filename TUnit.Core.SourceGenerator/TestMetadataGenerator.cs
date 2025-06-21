@@ -123,7 +123,6 @@ public class TestMetadataGenerator : IIncrementalGenerator
         {{
             TestIdTemplate = ""{className}.{methodName}_{{{{TestIndex}}}}"",
             TestClassType = typeof({className}),
-            TestMethod = typeof({className}).GetMethod(""{methodName}"", BindingFlags.Public | BindingFlags.Instance),
             MethodMetadata = new MethodMetadata
             {{
                 Name = ""{testInfo.MethodSymbol.Name}"",

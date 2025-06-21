@@ -16,7 +16,6 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.SimpleTest",
             TestClassType = typeof(TestClass),
-            TestMethod = testMethod,
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 10,
@@ -51,7 +50,6 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.ParameterizedTest_{TestIndex}",
             TestClassType = typeof(TestClass),
-            TestMethod = testMethod,
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 20,
@@ -92,7 +90,6 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.SimpleTest_{RepeatIndex}",
             TestClassType = typeof(TestClass),
-            TestMethod = testMethod,
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 30,
@@ -128,7 +125,6 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.TupleTest",
             TestClassType = typeof(TestClass),
-            TestMethod = testMethod,
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 40,
@@ -170,7 +166,6 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.PropertyTest",
             TestClassType = typeof(TestClass),
-            TestMethod = testMethod,
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 50,
@@ -214,7 +209,6 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.AsyncTest",
             TestClassType = typeof(TestClass),
-            TestMethod = testMethod,
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 60,

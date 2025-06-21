@@ -21,11 +21,6 @@ public record TestMetadata
     public required Type TestClassType { get; init; }
     
     /// <summary>
-    /// Method information for the test method.
-    /// </summary>
-    public required MethodInfo TestMethod { get; init; }
-    
-    /// <summary>
     /// Metadata about the test method.
     /// </summary>
     public required MethodMetadata MethodMetadata { get; init; }

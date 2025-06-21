@@ -128,7 +128,6 @@ public class TestBuilderPerformanceTests
         {
             TestIdTemplate = "PerfTest_{TestIndex}",
             TestClassType = testType,
-            TestMethod = testType.GetMethod("TestMethod")!,
             MethodMetadata = CreateMethodMetadata(testType),
             TestFilePath = "PerfTest.cs",
             TestLineNumber = 1,
@@ -165,7 +164,6 @@ public class TestBuilderPerformanceTests
         {
             TestIdTemplate = "Test_{TestIndex}",
             TestClassType = testType,
-            TestMethod = testType.GetMethod("TestMethod")!,
             MethodMetadata = CreateMethodMetadata(testType),
             TestFilePath = "Test.cs",
             TestLineNumber = 1,
@@ -198,7 +196,6 @@ public class TestBuilderPerformanceTests
         {
             TestIdTemplate = "Test_{TestIndex}",
             TestClassType = testType,
-            TestMethod = testType.GetMethod("TestMethod")!,
             MethodMetadata = CreateMethodMetadata(testType),
             TestFilePath = "Test.cs",
             TestLineNumber = 1,
@@ -224,7 +221,6 @@ public class TestBuilderPerformanceTests
         {
             TestIdTemplate = "Test_{TestIndex}",
             TestClassType = testType,
-            TestMethod = testType.GetMethod("TestMethod")!,
             MethodMetadata = CreateMethodMetadata(testType),
             TestFilePath = "Test.cs",
             TestLineNumber = 1,
