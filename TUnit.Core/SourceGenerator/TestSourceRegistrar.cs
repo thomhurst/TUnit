@@ -8,14 +8,22 @@ namespace TUnit.Core.SourceGenerator;
 public static class TestSourceRegistrar
 {
     /// <summary>
-    /// Registers test metadata.
+    /// Registers test descriptors.
     /// The source generator calls this to register discovered tests.
     /// </summary>
-    [RequiresDynamicCode("TestMetadataSource uses TestBuilder which requires dynamic code generation")]
-    [RequiresUnreferencedCode("TestMetadataSource uses TestBuilder which may use types that aren't statically referenced")]
-    public static void RegisterMetadata(IReadOnlyList<TestMetadata> testMetadata)
+    public static void RegisterTests(IReadOnlyList<ITestDescriptor> testDescriptors)
     {
-        var metadataSource = new TestMetadataSource(testMetadata);
+        var metadataSource = new TestMetadataSource(testDescriptors);
         Sources.TestSources.Enqueue(metadataSource);
+    }
+    
+    /// <summary>
+    /// Legacy method for backwards compatibility.
+    /// New code should use RegisterTests.
+    /// </summary>
+    [Obsolete("Use RegisterTests instead")]
+    public static void RegisterMetadata(IReadOnlyList<DynamicTestMetadata> testMetadata)
+    {
+        RegisterTests(testMetadata.Cast<ITestDescriptor>().ToList());
     }
 }

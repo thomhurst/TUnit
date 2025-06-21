@@ -6,8 +6,8 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Helpers;
 
-[RequiresDynamicCode("Calls System.Type.MakeGenericType(params Type[])")]
-[RequiresUnreferencedCode("Reflection")]
+[RequiresDynamicCode("InstanceHelper uses reflection and MakeGenericType for dynamic type instantiation")]
+[RequiresUnreferencedCode("InstanceHelper uses reflection to create instances and set properties which may require types that aren't statically referenced")]
 internal static class InstanceHelper
 {
     public static object CreateInstance(MethodMetadata methodInformation, object?[]? args, IDictionary<string, object?>? testClassProperties, TestBuilderContext testBuilderContext)

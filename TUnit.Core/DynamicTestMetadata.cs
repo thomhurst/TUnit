@@ -4,11 +4,24 @@ using System.Reflection;
 namespace TUnit.Core;
 
 /// <summary>
-/// Represents compile-time metadata for a test that can be expanded into multiple TestDefinition instances at runtime.
-/// This is the data structure emitted by the source generator containing all information needed to build tests.
+/// Represents dynamic test metadata that requires runtime type resolution and reflection.
+/// Used for tests discovered at runtime or those requiring dynamic type construction.
 /// </summary>
-public record TestMetadata
+[RequiresDynamicCode("DynamicTestMetadata uses runtime type resolution and reflection")]
+[RequiresUnreferencedCode("DynamicTestMetadata may require types that aren't statically referenced")]
+public record DynamicTestMetadata : ITestDescriptor
 {
+    // ITestDescriptor implementation
+    public string TestId => TestIdTemplate; // For dynamic tests, this will be resolved at runtime
+    public string DisplayName => DisplayNameTemplate;
+    public required string TestFilePath { get; init; }
+    public required int TestLineNumber { get; init; }
+    public required bool IsAsync { get; init; }
+    public required bool IsSkipped { get; init; }
+    public string? SkipReason { get; init; }
+    public TimeSpan? Timeout { get; init; }
+    public required int RepeatCount { get; init; }
+    
     /// <summary>
     /// Unique identifier template for the test. Can contain placeholders for data-driven tests.
     /// </summary>
@@ -32,15 +45,6 @@ public record TestMetadata
     /// </summary>
     public required MethodMetadata MethodMetadata { get; init; }
     
-    /// <summary>
-    /// Source file path where the test is defined.
-    /// </summary>
-    public required string TestFilePath { get; init; }
-    
-    /// <summary>
-    /// Line number in the source file where the test is defined.
-    /// </summary>
-    public required int TestLineNumber { get; init; }
     
     /// <summary>
     /// Factory function to create test class instances.
@@ -70,35 +74,11 @@ public record TestMetadata
     /// </summary>
     public required string DisplayNameTemplate { get; init; }
     
-    /// <summary>
-    /// Number of times to repeat the test.
-    /// </summary>
-    public required int RepeatCount { get; init; }
-    
-    /// <summary>
-    /// Whether the test is async (returns Task or ValueTask).
-    /// </summary>
-    public required bool IsAsync { get; init; }
-    
-    /// <summary>
-    /// Whether the test should be skipped.
-    /// </summary>
-    public required bool IsSkipped { get; init; }
-    
-    /// <summary>
-    /// Skip reason if the test is skipped.
-    /// </summary>
-    public string? SkipReason { get; init; }
     
     /// <summary>
     /// Test attributes for filtering and metadata.
     /// </summary>
     public required IReadOnlyList<Attribute> Attributes { get; init; }
-    
-    /// <summary>
-    /// Timeout for the test execution.
-    /// </summary>
-    public TimeSpan? Timeout { get; init; }
 }
 
 /// <summary>

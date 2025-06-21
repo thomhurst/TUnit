@@ -5,7 +5,6 @@ namespace TUnit.Core.DataSources;
 /// <summary>
 /// Provides data from a custom data attribute that implements IDataAttribute.
 /// </summary>
-[RequiresUnreferencedCode("Uses reflection to invoke data attribute methods")]
 public class AttributeDataSourceProvider : IDataSourceProvider
 {
     private readonly object _dataAttribute;
