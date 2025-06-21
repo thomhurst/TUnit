@@ -24,6 +24,7 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     | DynamicallyAccessedMemberTypes.PublicMethods
     | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : MemberMetadata
 {
+    public required TypeReference TypeReference { get; init; }
     public required ParameterInfo ReflectionInfo { get; set; }
     public bool IsParams => ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);
     public bool IsOptional => ReflectionInfo.IsOptional;

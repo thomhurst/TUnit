@@ -66,7 +66,7 @@ internal class UnifiedTestBuilder(
             testClassInjectedPropertyArguments: definition.PropertiesProvider(),
             testMethod: definition.MethodMetadata,
             testName: definition.MethodMetadata.Name,
-            returnType: definition.MethodMetadata.ReturnType,
+            returnType: definition.MethodMetadata.ReturnType ?? typeof(void),
             testFilePath: definition.TestFilePath,
             testLineNumber: definition.TestLineNumber,
             dynamicAttributes: [],
@@ -122,7 +122,7 @@ internal class UnifiedTestBuilder(
             testClassArguments: definition.ClassArgumentsProvider(),
             testMethodArguments: definition.MethodArgumentsProvider(),
             testClassInjectedPropertyArguments: definition.PropertiesProvider(),
-            returnType: definition.MethodMetadata.ReturnType,
+            returnType: definition.MethodMetadata.ReturnType ?? typeof(void),
             dataAttributes: definition.MethodMetadata.Attributes.Select(a => a.Instance).ToArray(),
             dynamicAttributes: []
         );

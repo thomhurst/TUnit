@@ -16,6 +16,7 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.SimpleTest",
             TestClassType = typeof(TestClass),
+            TestClassTypeReference = TypeReference.CreateConcrete($"{typeof(TestClass).FullName}, {typeof(TestClass).Assembly.GetName().Name}"),
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 10,
@@ -50,6 +51,7 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.ParameterizedTest_{TestIndex}",
             TestClassType = typeof(TestClass),
+            TestClassTypeReference = TypeReference.CreateConcrete($"{typeof(TestClass).FullName}, {typeof(TestClass).Assembly.GetName().Name}"),
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 20,
@@ -90,6 +92,7 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.SimpleTest_{RepeatIndex}",
             TestClassType = typeof(TestClass),
+            TestClassTypeReference = TypeReference.CreateConcrete($"{typeof(TestClass).FullName}, {typeof(TestClass).Assembly.GetName().Name}"),
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 30,
@@ -125,6 +128,7 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.TupleTest",
             TestClassType = typeof(TestClass),
+            TestClassTypeReference = TypeReference.CreateConcrete($"{typeof(TestClass).FullName}, {typeof(TestClass).Assembly.GetName().Name}"),
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 40,
@@ -166,6 +170,7 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.PropertyTest",
             TestClassType = typeof(TestClass),
+            TestClassTypeReference = TypeReference.CreateConcrete($"{typeof(TestClass).FullName}, {typeof(TestClass).Assembly.GetName().Name}"),
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 50,
@@ -209,6 +214,7 @@ public class TestBuilderTests
         {
             TestIdTemplate = "TestClass.AsyncTest",
             TestClassType = typeof(TestClass),
+            TestClassTypeReference = TypeReference.CreateConcrete($"{typeof(TestClass).FullName}, {typeof(TestClass).Assembly.GetName().Name}"),
             MethodMetadata = CreateMethodMetadata(testMethod),
             TestFilePath = "test.cs",
             TestLineNumber = 60,
@@ -251,6 +257,7 @@ public class TestBuilderTests
         {
             Name = method.DeclaringType!.Name,
             Type = method.DeclaringType!,
+            TypeReference = TypeReference.CreateConcrete($"{method.DeclaringType!.FullName}, {method.DeclaringType!.Assembly.GetName().Name}"),
             Attributes = Array.Empty<AttributeMetadata>(),
             Namespace = method.DeclaringType!.Namespace,
             Assembly = new AssemblyMetadata 
@@ -268,15 +275,18 @@ public class TestBuilderTests
         {
             Name = method.Name,
             Type = method.DeclaringType!,
+            TypeReference = TypeReference.CreateConcrete($"{method.DeclaringType!.FullName}, {method.DeclaringType!.Assembly.GetName().Name}"),
             Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
             {
                 Name = p.Name!,
+                TypeReference = TypeReference.CreateConcrete($"{p.ParameterType.FullName}, {p.ParameterType.Assembly.GetName().Name}"),
                 ReflectionInfo = p,
                 Attributes = Array.Empty<AttributeMetadata>()
             }).ToArray(),
             GenericTypeCount = 0,
             Class = classMetadata,
             ReturnType = method.ReturnType,
+            ReturnTypeReference = TypeReference.CreateConcrete($"{method.ReturnType.FullName}, {method.ReturnType.Assembly.GetName().Name}"),
             Attributes = Array.Empty<AttributeMetadata>()
         };
     }

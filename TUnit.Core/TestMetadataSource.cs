@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -5,6 +6,8 @@ namespace TUnit.Core;
 /// <summary>
 /// Test source that provides TestMetadata instances to be expanded by TestBuilder.
 /// </summary>
+[RequiresDynamicCode("TestMetadataSource uses TestBuilder which requires dynamic code generation")]
+[RequiresUnreferencedCode("TestMetadataSource uses TestBuilder which may use types that aren't statically referenced")]
 public class TestMetadataSource : ITestSource
 {
     private readonly IReadOnlyList<TestMetadata> _testMetadata;

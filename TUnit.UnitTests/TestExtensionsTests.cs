@@ -56,11 +56,14 @@ public class TestExtensionsTests
                     Properties = [],
                     Constructors = [],
                     Type = typeof(T),
+                    TypeReference = TypeReference.CreateConcrete($"{typeof(T).FullName}, {typeof(T).Assembly.GetName().Name}"),
                 },
                 Name = "DummyMethod",
                 Parameters = [],
                 Type = typeof(T),
+                TypeReference = TypeReference.CreateConcrete($"{typeof(T).FullName}, {typeof(T).Assembly.GetName().Name}"),
                 ReturnType = typeof(void),
+                ReturnTypeReference = TypeReference.CreateConcrete($"{typeof(void).FullName}, {typeof(void).Assembly.GetName().Name}"),
                 GenericTypeCount = 0,
             })
             .Create();

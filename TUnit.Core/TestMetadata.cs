@@ -15,10 +15,17 @@ public record TestMetadata
     public required string TestIdTemplate { get; init; }
     
     /// <summary>
-    /// The type of the test class.
+    /// The type reference of the test class.
+    /// Can represent generic types with unresolved type parameters.
+    /// </summary>
+    public required TypeReference TestClassTypeReference { get; init; }
+    
+    /// <summary>
+    /// The concrete type of the test class (only available for non-generic types).
+    /// For generic types, this will be null and TypeReference must be resolved at runtime.
     /// </summary>
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    public required Type TestClassType { get; init; }
+    public Type? TestClassType { get; init; }
     
     /// <summary>
     /// Metadata about the test method.

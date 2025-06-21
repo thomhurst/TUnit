@@ -25,6 +25,7 @@ public static class SourceInformationWriter
         }
 
         sourceCodeWriter.Write($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
+        sourceCodeWriter.Write($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(namedTypeSymbol)},");
 
         sourceCodeWriter.Write("Assembly = ");
         GenerateAssemblyInformation(sourceCodeWriter, context, namedTypeSymbol.ContainingAssembly);
@@ -119,9 +120,11 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write("new global::TUnit.Core.MethodMetadata");
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
+        sourceCodeWriter.Write($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(namedTypeSymbol)},");
         sourceCodeWriter.Write($"Name = \"{methodSymbol.Name}\",");
         sourceCodeWriter.Write($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
         sourceCodeWriter.Write($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
+        sourceCodeWriter.Write($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
 
         sourceCodeWriter.Write("Attributes = ");
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, methodSymbol.GetAttributes(), "Method", methodSymbol.Name, namedTypeSymbol.ToDisplayString());
@@ -290,6 +293,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Write($"new global::TUnit.Core.ParameterMetadata<{type}>");
         sourceCodeWriter.Write("{");
         sourceCodeWriter.Write($"Name = \"{parameter.Name}\",");
+        sourceCodeWriter.Write($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},");
 
         sourceCodeWriter.Write("Attributes = ");
         var containingType = parameter.ContainingSymbol switch

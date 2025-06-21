@@ -11,25 +11,30 @@ public class LastTestInAssemblyAdapter(ILastTestInAssemblyEventReceiver lastTest
     public MethodMetadata MethodInfo => field ??= new MethodMetadata
     {
         Type = typeof(ILastTestInAssemblyEventReceiver),
+        TypeReference = TypeReference.CreateConcrete(typeof(ILastTestInAssemblyEventReceiver).AssemblyQualifiedName!),
         Attributes = [],
         Name = nameof(lastTestInAssemblyEventReceiver.OnLastTestInAssembly),
         Parameters = [new ParameterMetadata<AssemblyHookContext>
         {
+            TypeReference = TypeReference.CreateConcrete(typeof(AssemblyHookContext).AssemblyQualifiedName!),
             Attributes = [],
             Name = "context",
             ReflectionInfo = typeof(ILastTestInAssemblyEventReceiver).GetMethod(nameof(ILastTestInAssemblyEventReceiver.OnLastTestInAssembly))!.GetParameters()[0],
         }, new ParameterMetadata<TestContext>
         {
+            TypeReference = TypeReference.CreateConcrete(typeof(TestContext).AssemblyQualifiedName!),
             Attributes = [],
             Name = "testContext",
             ReflectionInfo = typeof(ILastTestInAssemblyEventReceiver).GetMethod(nameof(ILastTestInAssemblyEventReceiver.OnLastTestInAssembly))!.GetParameters()[1],
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),
+        ReturnTypeReference = TypeReference.CreateConcrete(typeof(ValueTask).AssemblyQualifiedName!),
         Class = new ClassMetadata
         {
             Parent = null,
             Type = typeof(ILastTestInAssemblyEventReceiver),
+            TypeReference = TypeReference.CreateConcrete(typeof(ILastTestInAssemblyEventReceiver).AssemblyQualifiedName!),
             Assembly = new AssemblyMetadata
             {
                 Name = "TUnit.Core",

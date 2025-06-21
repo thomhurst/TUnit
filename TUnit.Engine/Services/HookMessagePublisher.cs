@@ -31,7 +31,7 @@ public class HookMessagePublisher(IExtension extension, IMessageBus messageBus) 
                         hookMethod.Name,
                         hookMethod.MethodInfo.GenericTypeCount,
                         hookMethod.MethodInfo.Parameters.Select(x => x.Type.FullName!).ToArray(),
-                        hookMethod.MethodInfo.ReturnType.FullName!
+                        hookMethod.MethodInfo.ReturnType?.FullName ?? "void"
                     )
                 ),
             }));
@@ -80,7 +80,7 @@ public class HookMessagePublisher(IExtension extension, IMessageBus messageBus) 
                         hookMethod.Name,
                         hookMethod.MethodInfo.GenericTypeCount,
                         hookMethod.MethodInfo.Parameters.Select(x => x.Type.FullName!).ToArray(),
-                        hookMethod.MethodInfo.ReturnType.FullName!
+                        hookMethod.MethodInfo.ReturnType?.FullName ?? "void"
                     ),
                     stateProperty
                 )

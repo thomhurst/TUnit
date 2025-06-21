@@ -37,8 +37,8 @@ public class TestMetadataGenerator : IIncrementalGenerator
 
         var typeSymbol = methodSymbol.ContainingType;
 
-        // Skip abstract classes, static methods, and generic types
-        if (typeSymbol.IsAbstract || methodSymbol.IsStatic || typeSymbol.IsGenericType)
+        // Skip abstract classes, static methods, and open generic types
+        if (typeSymbol.IsAbstract || methodSymbol.IsStatic || (typeSymbol.IsGenericType && typeSymbol.TypeParameters.Length > 0))
         {
             return null;
         }
@@ -119,20 +119,26 @@ public class TestMetadataGenerator : IIncrementalGenerator
         // Extract skip information
         var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
         
+        // For generic types, we can't use typeof() so TestClassType will be null
+        var testClassTypeValue = testInfo.TypeSymbol.IsGenericType ? "null" : $"typeof({className})";
+        
         sb.AppendLine($@"        testMetadata.Add(new TestMetadata
         {{
             TestIdTemplate = ""{className}.{methodName}_{{{{TestIndex}}}}"",
-            TestClassType = typeof({className}),
+            TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},
+            TestClassType = {testClassTypeValue},
             MethodMetadata = new MethodMetadata
             {{
                 Name = ""{testInfo.MethodSymbol.Name}"",
-                Type = typeof({className}),
+                Type = {testClassTypeValue} ?? typeof(object),
+                TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},
                 Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)},
                 GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},
                 Class = new ClassMetadata
                 {{
                     Name = ""{testInfo.TypeSymbol.Name}"",
-                    Type = typeof({className}),
+                    Type = {testClassTypeValue} ?? typeof(object),
+                    TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},
                     Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes())},
                     Namespace = ""{testInfo.TypeSymbol.ContainingNamespace}"",
                     Assembly = new AssemblyMetadata {{ Name = ""{testInfo.TypeSymbol.ContainingAssembly.Name}"", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes())} }},
@@ -141,12 +147,13 @@ public class TestMetadataGenerator : IIncrementalGenerator
                     Constructors = {CodeGenerationHelpers.GenerateConstructorMetadataArray(testInfo.TypeSymbol)},
                     Parent = null
                 }},
-                ReturnType = typeof({GetReturnTypeName(testInfo.MethodSymbol)}),
+                ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")},
+                ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)},
                 Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes())}
             }},
             TestFilePath = @""{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}"",
             TestLineNumber = {testInfo.LineNumber},
-            TestClassFactory = args => {GenerateTestClassFactory(className, requiredProperties, constructorWithParameters, hasParameterlessConstructor)},
+            TestClassFactory = {GenerateTestClassFactory(testInfo.TypeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor)},
             ClassDataSources = {CodeGenerationHelpers.GenerateClassDataSourceProviders(testInfo.TypeSymbol)},
             MethodDataSources = {CodeGenerationHelpers.GenerateMethodDataSourceProviders(testInfo.MethodSymbol)},
             PropertyDataSources = {CodeGenerationHelpers.GeneratePropertyDataSourceDictionary(testInfo.TypeSymbol)},
@@ -207,9 +214,16 @@ public class TestMetadataGenerator : IIncrementalGenerator
         return returnType.Name == "Task" || returnType.Name == "ValueTask";
     }
 
-    private static string GenerateTestClassFactory(string className, List<IPropertySymbol> requiredProperties, IMethodSymbol? constructorWithParameters, bool hasParameterlessConstructor)
+    private static string GenerateTestClassFactory(INamedTypeSymbol typeSymbol, string className, List<IPropertySymbol> requiredProperties, IMethodSymbol? constructorWithParameters, bool hasParameterlessConstructor)
     {
+        // For generic types, we can't create instances at compile time
+        if (typeSymbol.IsGenericType)
+        {
+            return "null!"; // Will be replaced at runtime by TestBuilder
+        }
+        
         var sb = new StringBuilder();
+        sb.Append("args => ");
         
         // If the class has a constructor with parameters and no parameterless constructor
         if (constructorWithParameters != null && !hasParameterlessConstructor)
@@ -259,10 +273,30 @@ public class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Simple parameterless constructor
-            return $"new {className}()";
+            sb.Append($"new {className}()");
         }
         
         return sb.ToString();
+    }
+
+    private static bool ContainsTypeParameter(ITypeSymbol type)
+    {
+        if (type is ITypeParameterSymbol)
+        {
+            return true;
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return ContainsTypeParameter(arrayType.ElementType);
+        }
+
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            return namedType.TypeArguments.Any(ContainsTypeParameter);
+        }
+
+        return false;
     }
 
     private static string GetDefaultValueForType(ITypeSymbol type)

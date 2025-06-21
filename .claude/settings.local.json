@@ -50,7 +50,8 @@
       "mcp__zen__listmodels",
       "Bash(dotnet restore:*)",
       "Bash(true)",
-      "Bash(/home/thomh/dev/TUnit/update_test_assertions.sh:*)"
+      "Bash(/home/thomh/dev/TUnit/update_test_assertions.sh:*)",
+      "Bash(./bin/Release/net8.0/Playground:*)"
     ],
     "deny": []
   }

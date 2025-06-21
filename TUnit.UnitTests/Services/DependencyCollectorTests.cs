@@ -152,6 +152,7 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                 {
                     Parent = ReflectionToSourceModelHelpers.GetParent(typeof(DependencyCollectorTests)),
                     Type = typeof(DependencyCollectorTests),
+                    TypeReference = TypeReference.CreateConcrete($"{typeof(DependencyCollectorTests).FullName}, {typeof(DependencyCollectorTests).Assembly.GetName().Name}"),
                     Namespace = null,
                     Assembly = new AssemblyMetadata
                     {
@@ -171,7 +172,9 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                 ],
                 GenericTypeCount = 0,
                 ReturnType = typeof(Task),
+                ReturnTypeReference = TypeReference.CreateConcrete($"{typeof(Task).FullName}, {typeof(Task).Assembly.GetName().Name}"),
                 Type = typeof(DependencyCollectorTests),
+                TypeReference = TypeReference.CreateConcrete($"{typeof(DependencyCollectorTests).FullName}, {typeof(DependencyCollectorTests).Assembly.GetName().Name}"),
                 Name = name,
             },
             DataAttributes = [],

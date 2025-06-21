@@ -24,6 +24,8 @@ public record ClassMetadata : MemberMetadata
         return Type.GetHashCode();
     }
 
+    public required TypeReference TypeReference { get; init; }
+    
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors

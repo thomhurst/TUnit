@@ -40,8 +40,10 @@ internal class ReflectionToSourceModelHelpers
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
             Parameters = GetParameters(methodInfo.GetParameters()),
             Type = classInformation.Type,
+            TypeReference = TypeReference.CreateConcrete(classInformation.Type.AssemblyQualifiedName ?? classInformation.Type.FullName ?? classInformation.Type.Name),
             ReflectionInformation = methodInfo,
-            ReturnType = methodInfo.ReturnType
+            ReturnType = methodInfo.ReturnType,
+            ReturnTypeReference = TypeReference.CreateConcrete(methodInfo.ReturnType.AssemblyQualifiedName ?? methodInfo.ReturnType.FullName ?? methodInfo.ReturnType.Name)
         });
     }
 
@@ -84,7 +86,8 @@ internal class ReflectionToSourceModelHelpers
                     Parameters = [],
                     Properties = [], // Empty to prevent recursion
                     Constructors = [], // Empty to prevent recursion
-                    Type = testClassType
+                    Type = testClassType,
+                    TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? testClassType.FullName ?? testClassType.Name)
                 };
             }
 
@@ -100,7 +103,8 @@ internal class ReflectionToSourceModelHelpers
                     Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
                     Properties = testClassType.GetProperties().Select(GenerateProperty).ToArray(),
                     Constructors = GetConstructors(testClassType),
-                    Type = testClassType
+                    Type = testClassType,
+                    TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? testClassType.FullName ?? testClassType.Name)
                 };
             }
             finally
@@ -166,6 +170,7 @@ internal class ReflectionToSourceModelHelpers
             Attributes = GetAttributeMetadatas(parameter.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Parameter, parameter.Name, parameter.Member.DeclaringType),
             Name = parameter.Name ?? string.Empty,
             ReflectionInfo = parameter,
+            TypeReference = TypeReference.CreateConcrete(parameter.ParameterType.AssemblyQualifiedName ?? parameter.ParameterType.FullName ?? parameter.ParameterType.Name)
         });
     }
 

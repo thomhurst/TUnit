@@ -28,9 +28,11 @@ internal static class CodeGenerationHelpers
         foreach (var param in method.Parameters)
         {
             var parameterIndex = method.Parameters.IndexOf(param);
-            sb.AppendLine($"            new global::TUnit.Core.ParameterMetadata(typeof({param.Type.GloballyQualified()}))");
+            var typeForConstructor = ContainsTypeParameter(param.Type) ? "object" : param.Type.GloballyQualified();
+            sb.AppendLine($"            new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))");
             sb.AppendLine("            {");
             sb.AppendLine($"                Name = \"{param.Name}\",");
+            sb.AppendLine($"                TypeReference = {GenerateTypeReference(param.Type)},");
             sb.AppendLine($"                Attributes = {GenerateAttributeMetadataArray(param.GetAttributes())},");
             sb.AppendLine($"                ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
             sb.AppendLine("            },");
@@ -192,6 +194,26 @@ internal static class CodeGenerationHelpers
         var fullName = attr.AttributeClass!.GloballyQualified();
         return fullName.StartsWith("System.Runtime.CompilerServices.") ||
                fullName.StartsWith("System.Diagnostics.CodeAnalysis.");
+    }
+
+    private static bool ContainsTypeParameter(ITypeSymbol type)
+    {
+        if (type is ITypeParameterSymbol)
+        {
+            return true;
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return ContainsTypeParameter(arrayType.ElementType);
+        }
+
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            return namedType.TypeArguments.Any(ContainsTypeParameter);
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -579,5 +601,92 @@ internal static class CodeGenerationHelpers
 
         sb.AppendLine("        }");
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Generates C# code to create a TypeReference from an ITypeSymbol.
+    /// </summary>
+    public static string GenerateTypeReference(ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is ITypeParameterSymbol typeParameter)
+        {
+            // This is a generic parameter (e.g., T, TKey)
+            var position = GetGenericParameterPosition(typeParameter);
+            var isMethodParameter = typeParameter.DeclaringMethod != null;
+            return $@"global::TUnit.Core.TypeReference.CreateGenericParameter({position}, {(isMethodParameter ? "true" : "false")}, ""{typeParameter.Name}"")";
+        }
+
+        if (typeSymbol is IArrayTypeSymbol arrayType)
+        {
+            // This is an array type
+            var elementTypeRef = GenerateTypeReference(arrayType.ElementType);
+            return $@"global::TUnit.Core.TypeReference.CreateArray({elementTypeRef}, {arrayType.Rank})";
+        }
+
+        if (typeSymbol is IPointerTypeSymbol pointerType)
+        {
+            // This is a pointer type
+            var elementTypeRef = GenerateTypeReference(pointerType.PointedAtType);
+            return $@"new global::TUnit.Core.TypeReference {{ IsPointer = true, ElementType = {elementTypeRef} }}";
+        }
+
+        if (typeSymbol is INamedTypeSymbol namedType)
+        {
+            if (namedType.IsGenericType && !namedType.IsUnboundGenericType)
+            {
+                // This is a constructed generic type (e.g., List<int>, Dictionary<string, T>)
+                var genericDef = GetGenericTypeDefinitionName(namedType);
+                var genericArgs = namedType.TypeArguments.Select(GenerateTypeReference).ToArray();
+                
+                var sb = new StringBuilder();
+                sb.Append($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
+                foreach (var arg in genericArgs)
+                {
+                    sb.Append($", {arg}");
+                }
+                sb.Append(")");
+                return sb.ToString();
+            }
+        }
+
+        // Regular concrete type
+        var assemblyQualifiedName = GetAssemblyQualifiedName(typeSymbol);
+        return $@"global::TUnit.Core.TypeReference.CreateConcrete(""{assemblyQualifiedName}"")";
+    }
+
+    private static int GetGenericParameterPosition(ITypeParameterSymbol typeParameter)
+    {
+        if (typeParameter.DeclaringMethod != null)
+        {
+            return typeParameter.DeclaringMethod.TypeParameters.IndexOf(typeParameter);
+        }
+        else if (typeParameter.DeclaringType != null)
+        {
+            return typeParameter.DeclaringType.TypeParameters.IndexOf(typeParameter);
+        }
+        return 0;
+    }
+
+    private static string GetGenericTypeDefinitionName(INamedTypeSymbol namedType)
+    {
+        // Get the unbound generic type (e.g., List`1)
+        var unboundType = namedType.ConstructUnboundGenericType();
+        return GetAssemblyQualifiedName(unboundType);
+    }
+
+    private static string GetAssemblyQualifiedName(ITypeSymbol typeSymbol)
+    {
+        // Build assembly qualified name
+        var typeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
+            .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+        
+        // For well-known types, use simplified names
+        if (typeSymbol.ContainingAssembly.Name == "System.Private.CoreLib" || 
+            typeSymbol.ContainingAssembly.Name == "mscorlib")
+        {
+            return $"{typeName}, System.Private.CoreLib";
+        }
+        
+        return $"{typeName}, {typeSymbol.ContainingAssembly.Name}";
     }
 }

@@ -59,8 +59,10 @@ public abstract record DynamicTest
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
             Parameters = GetParameters(methodInfo.GetParameters()),
             Type = TestClassType,
+            TypeReference = TypeReference.CreateConcrete(TestClassType.AssemblyQualifiedName ?? TestClassType.FullName ?? TestClassType.Name),
             ReflectionInformation = methodInfo,
-            ReturnType = methodInfo.ReturnType
+            ReturnType = methodInfo.ReturnType,
+            ReturnTypeReference = TypeReference.CreateConcrete(methodInfo.ReturnType.AssemblyQualifiedName ?? methodInfo.ReturnType.FullName ?? methodInfo.ReturnType.Name)
         };
     }
 
@@ -76,7 +78,8 @@ public abstract record DynamicTest
             Namespace = TestClassType.Namespace,
             Parameters = GetParameters(TestClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
             Properties = Properties?.Select(GenerateProperty).ToArray() ?? [],
-            Type = TestClassType
+            Type = TestClassType,
+            TypeReference = TypeReference.CreateConcrete(TestClassType.AssemblyQualifiedName ?? TestClassType.FullName ?? TestClassType.Name)
         };
     }
 
