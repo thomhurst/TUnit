@@ -1,9 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace TUnit.Core.SourceGenerator;
 
@@ -122,12 +118,12 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 var testClassTypeValue = testInfo.TypeSymbol.IsGenericType ? "null" : $"typeof({className})";
 
                 // Create the test metadata object first without problematic array properties
-                using (writer.BeginObjectInitializer("var metadata = new DynamicTestMetadata", ";"))
+                using (writer.BeginObjectInitializer("var metadata = new DynamicTestMetadata"))
                 {
                     writer.AppendLine($"TestIdTemplate = \"{className}.{methodName}_{{{{TestIndex}}}}\",");
                     writer.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
                     writer.AppendLine($"TestClassType = {testClassTypeValue},");
-                    
+
                     using (writer.BeginObjectInitializer("MethodMetadata = new MethodMetadata", ","))
                     {
                         writer.AppendLine($"Name = \"{testInfo.MethodSymbol.Name}\",");
@@ -135,7 +131,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
                         writer.AppendLine($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)},");
                         writer.AppendLine($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},");
-                        
+
                         using (writer.BeginObjectInitializer("Class = new ClassMetadata", ","))
                         {
                             writer.AppendLine($"Name = \"{testInfo.TypeSymbol.Name}\",");
@@ -187,7 +183,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
     {
         // Replace all invalid filename characters with underscores
         var invalid = System.IO.Path.GetInvalidFileNameChars()
-            .Concat(new[] { '<', '>', '(', ')', '[', ']', '{', '}', ',', ' ', '`', '.' })
+            .Concat(['<', '>', '(', ')', '[', ']', '{', '}', ',', ' ', '`', '.'])
             .Distinct();
 
         var sanitized = name;

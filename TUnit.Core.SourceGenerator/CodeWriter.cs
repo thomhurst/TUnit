@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text;
 
 namespace TUnit.Core.SourceGenerator;
@@ -136,19 +132,6 @@ public class CodeWriter : ICodeWriter
         return new IndentScope(this);
     }
 
-    // Legacy compatibility - redirects to BeginBlock
-    public IDisposable Block(string opener = "{", string closer = "}")
-    {
-        if (opener == "{" && closer == "}")
-        {
-            return BeginBlock("");
-        }
-        // For custom block delimiters, use old behavior
-        AppendLine(opener);
-        _indentLevel++;
-        return new BlockScope(this, closer);
-    }
-
     public ICodeWriter AppendBlock(string header, Action<ICodeWriter> body)
     {
         using (BeginBlock(header))
@@ -185,7 +168,7 @@ public class CodeWriter : ICodeWriter
             return this;
         }
 
-        var lines = multilineText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        var lines = multilineText.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
 
         // Skip leading empty lines
         var startIndex = 0;
@@ -229,22 +212,13 @@ public class CodeWriter : ICodeWriter
     /// <summary>
     /// Begins an array initializer block that ensures balanced braces.
     /// </summary>
-    public IDisposable BeginArrayInitializer(string declaration, string terminator = "", bool inline = false)
+    public IDisposable BeginArrayInitializer(string declaration, string terminator = "")
     {
-        if (inline)
-        {
-            Append(declaration);
-            Append(" { ");
-            return new ArrayInitializerScope(this, terminator, inline: true);
-        }
-        else
-        {
-            Append(declaration);
-            Append(" {");
-            AppendLine();
-            _indentLevel++;
-            return new ArrayInitializerScope(this, terminator, inline: false);
-        }
+        AppendLine(declaration);
+        AppendLine("{");
+        _indentLevel++;
+
+        return new ArrayInitializerScope(this, terminator);
     }
 
     public void Dispose()
@@ -336,38 +310,25 @@ public class CodeWriter : ICodeWriter
     {
         private readonly CodeWriter _writer;
         private readonly string _terminator;
-        private readonly bool _inline;
         private bool _disposed;
 
-        public ArrayInitializerScope(CodeWriter writer, string terminator, bool inline)
+        public ArrayInitializerScope(CodeWriter writer, string terminator)
         {
             _writer = writer ?? throw new ArgumentNullException(nameof(writer));
             _terminator = terminator;
-            _inline = inline;
         }
 
         public void Dispose()
         {
             if (!_disposed)
             {
-                if (_inline)
+                _writer._indentLevel = Math.Max(0, _writer._indentLevel - 1);
+                _writer.Append("}");
+                if (!string.IsNullOrEmpty(_terminator))
                 {
-                    _writer.Append(" }");
-                    if (!string.IsNullOrEmpty(_terminator))
-                    {
-                        _writer.Append(_terminator);
-                    }
+                    _writer.Append(_terminator);
                 }
-                else
-                {
-                    _writer._indentLevel = Math.Max(0, _writer._indentLevel - 1);
-                    _writer.Append("}");
-                    if (!string.IsNullOrEmpty(_terminator))
-                    {
-                        _writer.Append(_terminator);
-                    }
-                    _writer.AppendLine();
-                }
+                _writer.AppendLine();
                 _disposed = true;
             }
         }

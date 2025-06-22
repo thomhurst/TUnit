@@ -200,6 +200,6 @@ public sealed class TypeResolver
     /// </summary>
     public static TypeResolver CreateSimple()
     {
-        return new TypeResolver(null, null);
+        return new TypeResolver();
     }
 }

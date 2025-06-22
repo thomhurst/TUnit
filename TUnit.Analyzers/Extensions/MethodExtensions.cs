@@ -51,7 +51,7 @@ public static class MethodExtensions
 
     public static AttributeData? GetTimeoutAttribute(this IMethodSymbol methodSymbol)
     {
-        return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.TimeoutAttribute.WithGlobalPrefix, true);
+        return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.TimeoutAttribute.WithGlobalPrefix);
     }
     
     public static AttributeData? GetArgumentsAttribute(this IMethodSymbol methodSymbol)
