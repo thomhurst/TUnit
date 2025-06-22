@@ -5,6 +5,7 @@ namespace TUnit.Core.SourceGenerator;
 /// </summary>
 public interface ICodeWriter : IDisposable
 {
+    public int IndentLevel { get; }
     /// <summary>
     /// Appends a line of code with proper indentation.
     /// </summary>

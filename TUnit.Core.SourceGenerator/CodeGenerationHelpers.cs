@@ -32,7 +32,7 @@ internal static class CodeGenerationHelpers
                 {
                     writer.AppendLine($"Name = \"{param.Name}\",");
                     writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
-                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes(), param)},");
+                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes(), param, writer._indentLevel)},");
                     writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
                 }
             }
@@ -43,7 +43,7 @@ internal static class CodeGenerationHelpers
     /// <summary>
     /// Generates C# code for an AttributeMetadata array from attributes.
     /// </summary>
-    public static string GenerateAttributeMetadataArray(ImmutableArray<AttributeData> attributes, ISymbol? targetSymbol = null)
+    public static string GenerateAttributeMetadataArray(ImmutableArray<AttributeData> attributes, ISymbol? targetSymbol, int writerIndentLevel)
     {
         var relevantAttributes = attributes
             .Where(attr => !IsCompilerGeneratedAttribute(attr))
@@ -54,8 +54,10 @@ internal static class CodeGenerationHelpers
             return "System.Array.Empty<global::TUnit.Core.AttributeMetadata>()";
         }
 
-        using var writer = new CodeWriter("", includeHeader: false);
-        writer.SetIndentLevel(2);
+        using var writer = new CodeWriter(includeHeader: false);
+
+        writer.SetIndentLevel(writerIndentLevel);
+
         using (writer.BeginArrayInitializer("new global::TUnit.Core.AttributeMetadata[]"))
         {
             foreach (var attr in relevantAttributes)
@@ -301,7 +303,7 @@ internal static class CodeGenerationHelpers
                     writer.AppendLine($"ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
                     writer.AppendLine("IsStatic = false,");
                     writer.AppendLine($"Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
-                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes(), prop)}");
+                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes(), prop, writer._indentLevel)}");
                 }
             }
         }
@@ -333,7 +335,7 @@ internal static class CodeGenerationHelpers
                     writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
                     writer.AppendLine("Name = \".ctor\",");
                     writer.AppendLine($"Parameters = {GenerateParameterMetadataArray(ctor)},");
-                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes(), ctor)},");
+                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes(), ctor, writer._indentLevel)},");
                     writer.AppendLine("IsStatic = false,");
                     writer.AppendLine($"IsPublic = {(ctor.DeclaredAccessibility == Accessibility.Public ? "true" : "false")},");
                     writer.AppendLine($"IsPrivate = {(ctor.DeclaredAccessibility == Accessibility.Private ? "true" : "false")},");

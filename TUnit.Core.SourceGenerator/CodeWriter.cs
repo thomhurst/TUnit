@@ -54,6 +54,8 @@ public class CodeWriter : ICodeWriter
         return this;
     }
 
+    public int IndentLevel => _indentLevel;
+
     /// <summary>
     /// Appends text and then ensures a newline.
     /// </summary>
