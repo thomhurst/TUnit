@@ -215,6 +215,17 @@ public class CodeWriter : ICodeWriter
         return _builder.ToString();
     }
 
+    /// <summary>
+    /// Begins an object initializer block that ensures balanced braces.
+    /// </summary>
+    public IDisposable BeginObjectInitializer(string declaration, string terminator = ";")
+    {
+        AppendLine(declaration);
+        AppendLine("{");
+        _indentLevel++;
+        return new ObjectInitializerScope(this, terminator);
+    }
+
     public void Dispose()
     {
         _builder.Clear();
@@ -262,6 +273,37 @@ public class CodeWriter : ICodeWriter
             if (!string.IsNullOrEmpty(_closer))
             {
                 _writer.AppendLine(_closer!);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Internal helper class to manage object initializer scope.
+    /// </summary>
+    private class ObjectInitializerScope : IDisposable
+    {
+        private readonly CodeWriter _writer;
+        private readonly string _terminator;
+        private bool _disposed;
+
+        public ObjectInitializerScope(CodeWriter writer, string terminator)
+        {
+            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            _terminator = terminator;
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _writer._indentLevel = Math.Max(0, _writer._indentLevel - 1);
+                _writer.Append("}");
+                if (!string.IsNullOrEmpty(_terminator))
+                {
+                    _writer.Append(_terminator);
+                }
+                _writer.AppendLine();
+                _disposed = true;
             }
         }
     }

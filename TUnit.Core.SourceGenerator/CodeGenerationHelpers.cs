@@ -29,13 +29,13 @@ internal static class CodeGenerationHelpers
         {
             var parameterIndex = method.Parameters.IndexOf(param);
             var typeForConstructor = ContainsTypeParameter(param.Type) ? "object" : param.Type.GloballyQualified();
-            writer.AppendLine($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))");
-            writer.AppendLine("{");
-            writer.AppendLine($"Name = \"{param.Name}\",");
-            writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
-            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes(), param)},");
-            writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
-            writer.AppendLine("},");
+            using (writer.BeginObjectInitializer($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))", ","))
+            {
+                writer.AppendLine($"Name = \"{param.Name}\",");
+                writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
+                writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes(), param)},");
+                writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
+            }
         }
 
         writer.AppendLine("}");
@@ -58,19 +58,17 @@ internal static class CodeGenerationHelpers
 
         using var writer = new CodeWriter("", includeHeader: false);
         writer.SetIndentLevel(2);
-        writer.AppendLine("new global::TUnit.Core.AttributeMetadata[]");
-        writer.AppendLine("{");
-
-        foreach (var attr in relevantAttributes)
+        using (writer.BeginObjectInitializer("new global::TUnit.Core.AttributeMetadata[]", ""))
         {
-            var attributeCode = GenerateAttributeMetadata(attr, targetSymbol);
-            if (!string.IsNullOrEmpty(attributeCode))
+            foreach (var attr in relevantAttributes)
             {
-                writer.Append(attributeCode);
+                var attributeCode = GenerateAttributeMetadata(attr, targetSymbol);
+                if (!string.IsNullOrEmpty(attributeCode))
+                {
+                    writer.Append(attributeCode);
+                }
             }
         }
-
-        writer.AppendLine("}");
         return writer.ToString().TrimEnd();
     }
 
@@ -125,13 +123,13 @@ internal static class CodeGenerationHelpers
         var namedArgs = ExtractNamedArgumentsDictionary(attr);
 
         // Generate unified attribute metadata
-        writer.AppendLine("new global::TUnit.Core.AttributeMetadata");
-        writer.AppendLine("{");
-        writer.AppendLine($"Instance = {GenerateAttributeInstantiation(attr)},");
-        writer.AppendLine($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement},");
-        writer.AppendLine($"ConstructorArguments = {constructorArgs},");
-        writer.AppendLine($"NamedArguments = {namedArgs}");
-        writer.AppendLine("},");
+        using (writer.BeginObjectInitializer("new global::TUnit.Core.AttributeMetadata", ","))
+        {
+            writer.AppendLine($"Instance = {GenerateAttributeInstantiation(attr)},");
+            writer.AppendLine($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement},");
+            writer.AppendLine($"ConstructorArguments = {constructorArgs},");
+            writer.AppendLine($"NamedArguments = {namedArgs}");
+        }
 
         return writer.ToString();
     }
@@ -299,15 +297,15 @@ internal static class CodeGenerationHelpers
 
         foreach (var prop in properties)
         {
-            writer.AppendLine("new global::TUnit.Core.PropertyMetadata");
-            writer.AppendLine("{");
-            writer.AppendLine($"Name = \"{prop.Name}\",");
-            writer.AppendLine($"Type = typeof({prop.Type.GloballyQualified()}),");
-            writer.AppendLine($"ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
-            writer.AppendLine("IsStatic = false,");
-            writer.AppendLine($"Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
-            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes(), prop)}");
-            writer.AppendLine("},");
+            using (writer.BeginObjectInitializer("new global::TUnit.Core.PropertyMetadata", ","))
+            {
+                writer.AppendLine($"Name = \"{prop.Name}\",");
+                writer.AppendLine($"Type = typeof({prop.Type.GloballyQualified()}),");
+                writer.AppendLine($"ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
+                writer.AppendLine("IsStatic = false,");
+                writer.AppendLine($"Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
+                writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes(), prop)}");
+            }
         }
 
         writer.AppendLine("}");
@@ -335,18 +333,18 @@ internal static class CodeGenerationHelpers
 
         foreach (var ctor in constructors)
         {
-            writer.AppendLine("new global::TUnit.Core.ConstructorMetadata");
-            writer.AppendLine("{");
-            writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
-            writer.AppendLine("Name = \".ctor\",");
-            writer.AppendLine($"Parameters = {GenerateParameterMetadataArray(ctor)},");
-            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes(), ctor)},");
-            writer.AppendLine("IsStatic = false,");
-            writer.AppendLine($"IsPublic = {(ctor.DeclaredAccessibility == Accessibility.Public ? "true" : "false")},");
-            writer.AppendLine($"IsPrivate = {(ctor.DeclaredAccessibility == Accessibility.Private ? "true" : "false")},");
-            writer.AppendLine($"IsProtected = {(ctor.DeclaredAccessibility == Accessibility.Protected ? "true" : "false")},");
-            writer.AppendLine($"IsInternal = {(ctor.DeclaredAccessibility == Accessibility.Internal ? "true" : "false")}");
-            writer.AppendLine("},");
+            using (writer.BeginObjectInitializer("new global::TUnit.Core.ConstructorMetadata", ","))
+            {
+                writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
+                writer.AppendLine("Name = \".ctor\",");
+                writer.AppendLine($"Parameters = {GenerateParameterMetadataArray(ctor)},");
+                writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes(), ctor)},");
+                writer.AppendLine("IsStatic = false,");
+                writer.AppendLine($"IsPublic = {(ctor.DeclaredAccessibility == Accessibility.Public ? "true" : "false")},");
+                writer.AppendLine($"IsPrivate = {(ctor.DeclaredAccessibility == Accessibility.Private ? "true" : "false")},");
+                writer.AppendLine($"IsProtected = {(ctor.DeclaredAccessibility == Accessibility.Protected ? "true" : "false")},");
+                writer.AppendLine($"IsInternal = {(ctor.DeclaredAccessibility == Accessibility.Internal ? "true" : "false")}");
+            }
         }
 
         writer.AppendLine("}");
@@ -441,23 +439,21 @@ internal static class CodeGenerationHelpers
 
         using var writer = new CodeWriter("", includeHeader: false);
         writer.SetIndentLevel(2); // Start with indent level 2 for inline dictionaries
-        writer.AppendLine("new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>");
-        writer.AppendLine("{");
-
-        foreach (var prop in propertiesWithDataSources)
+        using (writer.BeginObjectInitializer("new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>", ""))
         {
-            var dataSourceAttr = prop.GetAttributes().FirstOrDefault(IsDataSourceAttribute);
-            if (dataSourceAttr != null)
+            foreach (var prop in propertiesWithDataSources)
             {
-                var providerCode = GenerateDataSourceProvider(dataSourceAttr, typeSymbol);
-                if (!string.IsNullOrEmpty(providerCode))
+                var dataSourceAttr = prop.GetAttributes().FirstOrDefault(IsDataSourceAttribute);
+                if (dataSourceAttr != null)
                 {
-                    writer.AppendLine($"{{ typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"), {providerCode} }},");
+                    var providerCode = GenerateDataSourceProvider(dataSourceAttr, typeSymbol);
+                    if (!string.IsNullOrEmpty(providerCode))
+                    {
+                        writer.AppendLine($"{{ typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"), {providerCode} }},");
+                    }
                 }
             }
         }
-
-        writer.AppendLine("}");
         return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
     }
 

@@ -88,4 +88,12 @@ public interface ICodeWriter : IDisposable
     /// Sets the initial indentation level. Useful for inline code generation.
     /// </summary>
     ICodeWriter SetIndentLevel(int level);
+    
+    /// <summary>
+    /// Begins an object initializer block that ensures balanced braces.
+    /// Automatically handles indentation and comma/semicolon placement.
+    /// </summary>
+    /// <param name="declaration">The declaration (e.g., "var x = new Foo" or "Property = new Bar")</param>
+    /// <param name="terminator">The terminator after closing brace (e.g., ";", ",", or "")</param>
+    IDisposable BeginObjectInitializer(string declaration, string terminator = ";");
 }
