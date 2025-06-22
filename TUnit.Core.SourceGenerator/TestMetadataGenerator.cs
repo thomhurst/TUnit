@@ -221,6 +221,30 @@ public class TestMetadataGenerator : IIncrementalGenerator
             return "null!"; // Will be replaced at runtime by TestBuilder
         }
         
+        // If there are required properties with data sources, we need special handling
+        var requiredPropertiesWithDataSource = requiredProperties
+            .Where(p => p.GetAttributes().Any(attr =>
+            {
+                var attrClass = attr.AttributeClass;
+                if (attrClass == null) return false;
+                
+                var fullName = attrClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return fullName == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix ||
+                       fullName == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix ||
+                       fullName == WellKnownFullyQualifiedClassNames.DataSourceGeneratorAttribute.WithGlobalPrefix ||
+                       fullName == WellKnownFullyQualifiedClassNames.AsyncDataSourceGeneratorAttribute.WithGlobalPrefix;
+            }))
+            .ToList();
+            
+        // If all required properties have data sources, the runtime will handle them
+        // Generate a factory that creates the instance bypassing compile-time checks
+        if (requiredPropertiesWithDataSource.Count == requiredProperties.Count && requiredProperties.Any())
+        {
+            // Use a factory that creates the instance with required properties set to temporary values
+            // The runtime will replace these with actual data source values
+            return GenerateFactoryWithRequiredProperties(typeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor);
+        }
+        
         using var writer = new SourceCodeWriter(1); // Start with indent for inline expression
         writer.Write("args => ");
         
@@ -241,33 +265,6 @@ public class TestMetadataGenerator : IIncrementalGenerator
             
             writer.Write(parameterList);
             writer.Write(")");
-            
-            // If there are also required properties, add object initializer
-            if (requiredProperties.Any())
-            {
-                writer.Write(" { ");
-                var propertyInitializers = requiredProperties.Select(prop => 
-                {
-                    var defaultValue = GetDefaultValueForType(prop.Type);
-                    return $"{prop.Name} = {defaultValue}";
-                });
-                writer.Write(string.Join(", ", propertyInitializers));
-                writer.Write(" }");
-            }
-        }
-        else if (requiredProperties.Any())
-        {
-            // Only required properties, no constructor parameters
-            writer.Write($"new {className} {{ ");
-            
-            var propertyInitializers = requiredProperties.Select(prop => 
-            {
-                var defaultValue = GetDefaultValueForType(prop.Type);
-                return $"{prop.Name} = {defaultValue}";
-            });
-            
-            writer.Write(string.Join(", ", propertyInitializers));
-            writer.Write(" }");
         }
         else
         {
@@ -278,6 +275,81 @@ public class TestMetadataGenerator : IIncrementalGenerator
         return writer.ToString().Trim(); // Trim to remove any extra newlines
     }
 
+    private static string GenerateFactoryWithRequiredProperties(INamedTypeSymbol typeSymbol, string className, List<IPropertySymbol> requiredProperties, IMethodSymbol? constructorWithParameters, bool hasParameterlessConstructor)
+    {
+        using var writer = new SourceCodeWriter(1); // Start with indent for inline expression
+        writer.Write("args => ");
+        
+        // Create a new instance with all required properties initialized
+        if (constructorWithParameters != null && !hasParameterlessConstructor)
+        {
+            writer.Write($"new {className}(");
+            var parameterList = string.Join(", ", constructorWithParameters.Parameters
+                .Select((param, i) => 
+                {
+                    var typeName = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
+                        .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+                    return $"({typeName})args[{i}]";
+                }));
+            writer.Write(parameterList);
+            writer.Write(")");
+        }
+        else
+        {
+            writer.Write($"new {className}()");
+        }
+        
+        // Always add object initializer for required properties
+        writer.Write(" { ");
+        var propertyInitializers = requiredProperties.Select(prop => 
+        {
+            // For properties with data sources, create a minimal valid instance
+            // that satisfies the compiler but will be replaced at runtime
+            var defaultValue = GetDataSourceAwareDefaultValue(prop);
+            return $"{prop.Name} = {defaultValue}";
+        });
+        writer.Write(string.Join(", ", propertyInitializers));
+        writer.Write(" }");
+        
+        return writer.ToString().Trim();
+    }
+    
+    private static string GetDataSourceAwareDefaultValue(IPropertySymbol property)
+    {
+        var type = property.Type;
+        
+        // For reference types, try to create a new instance
+        if (type.IsReferenceType)
+        {
+            var typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
+                .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+            
+            // Special handling for common types
+            if (type.SpecialType == SpecialType.System_String)
+            {
+                return "string.Empty";
+            }
+            
+            // Check if the type has a parameterless constructor
+            if (type is INamedTypeSymbol namedType)
+            {
+                var hasParameterlessConstructor = namedType.Constructors
+                    .Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length == 0);
+                    
+                if (hasParameterlessConstructor)
+                {
+                    return $"new {typeName}()";
+                }
+            }
+            
+            // Fallback to null with suppression
+            return "null!";
+        }
+        
+        // Use the existing logic for value types
+        return GetDefaultValueForType(type);
+    }
+    
     private static bool ContainsTypeParameter(ITypeSymbol type)
     {
         if (type is ITypeParameterSymbol)
