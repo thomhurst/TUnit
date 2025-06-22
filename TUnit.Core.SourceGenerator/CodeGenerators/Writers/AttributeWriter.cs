@@ -93,18 +93,18 @@ public class AttributeWriter
         AttributeData attributeData, string targetElement, string? targetMemberName, string? targetTypeName, bool includeClassMetadata = false)
     {
         sourceCodeWriter.Append("new global::TUnit.Core.AttributeMetadata");
-        sourceCodeWriter.Append("{");
-        sourceCodeWriter.Append($"Instance = {GetAttributeObjectInitializer(context, attributeData)},");
-        sourceCodeWriter.Append($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement},");
+        sourceCodeWriter.Append(" { ");
+        sourceCodeWriter.Append($"Instance = {GetAttributeObjectInitializer(context, attributeData)}, ");
+        sourceCodeWriter.Append($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement}, ");
 
         if (targetMemberName != null)
         {
-            sourceCodeWriter.Append($"TargetMemberName = \"{targetMemberName}\",");
+            sourceCodeWriter.Append($"TargetMemberName = \"{targetMemberName}\", ");
         }
 
         if (targetTypeName != null)
         {
-            sourceCodeWriter.Append($"TargetType = typeof({targetTypeName}),");
+            sourceCodeWriter.Append($"TargetType = typeof({targetTypeName}), ");
         }
 
         // Add ClassMetadata if requested and not a system attribute
@@ -112,35 +112,29 @@ public class AttributeWriter
         {
             sourceCodeWriter.Append("ClassMetadata = ");
             SourceInformationWriter.GenerateClassInformation(sourceCodeWriter, context, attributeData.AttributeClass!);
-            sourceCodeWriter.Append(",");
+            sourceCodeWriter.Append(", ");
         }
 
         if (attributeData.ConstructorArguments.Length > 0)
         {
-            sourceCodeWriter.Append("ConstructorArguments = new object?[]");
-            sourceCodeWriter.Append("{");
+            sourceCodeWriter.Append("ConstructorArguments = new object?[] { ");
 
             foreach (var typedConstant in attributeData.ConstructorArguments)
             {
-                sourceCodeWriter.Append($"{TypedConstantParser.GetRawTypedConstantValue(typedConstant)},");
+                sourceCodeWriter.Append($"{TypedConstantParser.GetRawTypedConstantValue(typedConstant)}, ");
             }
 
-            sourceCodeWriter.Append("}");
-            sourceCodeWriter.Append(",");
+            sourceCodeWriter.Append("}, ");
         }
 
         if (attributeData.NamedArguments.Length > 0)
         {
-            sourceCodeWriter.Append("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?>()");
-            sourceCodeWriter.Append("{");
+            sourceCodeWriter.Append("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?>() { ");
             foreach (var namedArg in attributeData.NamedArguments)
             {
-                sourceCodeWriter.Append($"""
-                                        ["{namedArg.Key}"] = {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)},
-                                        """);
+                sourceCodeWriter.Append($"[\"{namedArg.Key}\"] = {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}, ");
             }
-            sourceCodeWriter.Append("}");
-            sourceCodeWriter.Append(",");
+            sourceCodeWriter.Append("}, ");
         }
 
         sourceCodeWriter.Append("}");

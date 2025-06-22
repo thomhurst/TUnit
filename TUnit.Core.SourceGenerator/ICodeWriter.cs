@@ -44,6 +44,27 @@ public interface ICodeWriter : IDisposable
     IDisposable Scope();
     
     /// <summary>
+    /// Ensures that the next text appended will start on a new line.
+    /// </summary>
+    ICodeWriter EnsureNewLine();
+    
+    /// <summary>
+    /// Increases the indentation level.
+    /// </summary>
+    ICodeWriter Indent();
+    
+    /// <summary>
+    /// Decreases the indentation level.
+    /// </summary>
+    ICodeWriter Unindent();
+    
+    /// <summary>
+    /// Begins a code block with automatic formatting, handling opening brace and indentation.
+    /// Returns an IDisposable that will unindent and append closing brace when disposed.
+    /// </summary>
+    IDisposable BeginBlock(string leadingText = "");
+    
+    /// <summary>
     /// Conditionally appends a line.
     /// </summary>
     ICodeWriter AppendLineIf(bool condition, string line);
@@ -62,4 +83,9 @@ public interface ICodeWriter : IDisposable
     /// Gets the generated code as a string.
     /// </summary>
     string ToString();
+    
+    /// <summary>
+    /// Sets the initial indentation level. Useful for inline code generation.
+    /// </summary>
+    ICodeWriter SetIndentLevel(int level);
 }

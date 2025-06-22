@@ -19,7 +19,7 @@ public static class TestInformationRetriever
     public static string GetTestId(TestGenerationContext testGenerationContext)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        writer._indentLevel++; // For inline expression
+        writer.SetIndentLevel(1); // For inline expression
 
         if (testGenerationContext.ClassArguments is DataSourceAttributeContainer { Attribute.AttributeClass: not null } classDataAttributeContainer)
         {

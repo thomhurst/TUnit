@@ -59,23 +59,18 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Diagnostics.StackTraceHidden]");
             sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
             sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DynamicTestsGenerator).Assembly.GetName().Version}\")]");
-            sourceBuilder.AppendLine(
-                $"file partial class {className} : global::TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource");
-            using (sourceBuilder.Block())
+            using (sourceBuilder.BeginBlock($"file partial class {className} : global::TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource"))
             {
                 sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-                sourceBuilder.AppendLine("public static void Initialise()");
-                using (sourceBuilder.Block())
+                using (sourceBuilder.BeginBlock("public static void Initialise()"))
                 {
                     sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterDynamic(new {className}());");
                 }
 
-                sourceBuilder.AppendLine(
-                    "public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)");
-                using (sourceBuilder.Block())
+                sourceBuilder.EnsureNewLine();
+                using (sourceBuilder.BeginBlock("public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)"))
                 {
-                    sourceBuilder.AppendLine("try");
-                    using (sourceBuilder.Block())
+                    using (sourceBuilder.BeginBlock("try"))
                     {
                         sourceBuilder.AppendLine(
                             $"""
@@ -89,8 +84,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                         sourceBuilder.AppendLine($"{receiver}.{dynamicTestSource.Method.Name}(context);");
                         sourceBuilder.AppendLine("return context.Tests;");
                     }
-                    sourceBuilder.AppendLine("catch (global::System.Exception exception)");
-                    using (sourceBuilder.Block())
+                    using (sourceBuilder.BeginBlock("catch (global::System.Exception exception)"))
                     {
                         FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, dynamicTestSource);
                     }

@@ -108,68 +108,68 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
         writer.AppendLine("namespace TUnit.Generated;");
         writer.AppendLine();
-        writer.AppendLine($"internal static class TestMetadataRegistry_{safeClassName}_{safeMethodName}_{guid}");
-        writer.AppendLine("{");
-        writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
-        writer.AppendLine("public static void Initialize()");
-        writer.AppendLine("{");
-        writer.AppendLine("var testMetadata = new System.Collections.Generic.List<DynamicTestMetadata>();");
-        writer.AppendLine();
-        // Extract skip information
-        var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
+        using (writer.BeginBlock($"internal static class TestMetadataRegistry_{safeClassName}_{safeMethodName}_{guid}"))
+        {
+            writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+            using (writer.BeginBlock("public static void Initialize()"))
+            {
+                writer.AppendLine("var testMetadata = new System.Collections.Generic.List<DynamicTestMetadata>();");
+                writer.AppendLine();
+                // Extract skip information
+                var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
 
-        // For generic types, we can't use typeof() so TestClassType will be null
-        var testClassTypeValue = testInfo.TypeSymbol.IsGenericType ? "null" : $"typeof({className})";
+                // For generic types, we can't use typeof() so TestClassType will be null
+                var testClassTypeValue = testInfo.TypeSymbol.IsGenericType ? "null" : $"typeof({className})";
 
-        // Create the test metadata object first without problematic array properties
-        writer.AppendLine("var metadata = new DynamicTestMetadata");
-        writer.AppendLine("{");
-        writer.AppendLine($"TestIdTemplate = \"{className}.{methodName}_{{{{TestIndex}}}}\",");
-        writer.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
-        writer.AppendLine($"TestClassType = {testClassTypeValue},");
-        writer.AppendLine("MethodMetadata = new MethodMetadata");
-        writer.AppendLine("{");
-        writer.AppendLine($"Name = \"{testInfo.MethodSymbol.Name}\",");
-        writer.AppendLine($"Type = {testClassTypeValue} ?? typeof(object),");
-        writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
-        writer.AppendLine($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)},");
-        writer.AppendLine($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},");
-        writer.AppendLine("Class = new ClassMetadata");
-        writer.AppendLine("{");
-        writer.AppendLine($"Name = \"{testInfo.TypeSymbol.Name}\",");
-        writer.AppendLine($"Type = {testClassTypeValue} ?? typeof(object),");
-        writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
-        writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes(), testInfo.TypeSymbol)},");
-        writer.AppendLine($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\",");
-        writer.AppendLine($"Assembly = new AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes(), testInfo.TypeSymbol.ContainingAssembly)} }},");
-        writer.AppendLine("Parameters = System.Array.Empty<ParameterMetadata>(),");
-        writer.AppendLine($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)},");
-        writer.AppendLine($"Constructors = {CodeGenerationHelpers.GenerateConstructorMetadataArray(testInfo.TypeSymbol)},");
-        writer.AppendLine("Parent = null");
-        writer.AppendLine("},");
-        writer.AppendLine($"ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")},");
-        writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)},");
-        writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes(), testInfo.MethodSymbol)}");
-        writer.AppendLine("},");
-        writer.AppendLine($"TestFilePath = @\"{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
-        writer.AppendLine($"TestLineNumber = {testInfo.LineNumber},");
-        writer.AppendLine($"TestClassFactory = {GenerateTestClassFactory(testInfo.TypeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor)},");
-        writer.AppendLine($"ClassDataSources = {CodeGenerationHelpers.GenerateClassDataSourceProviders(testInfo.TypeSymbol)},");
-        writer.AppendLine($"MethodDataSources = {CodeGenerationHelpers.GenerateMethodDataSourceProviders(testInfo.MethodSymbol)},");
-        writer.AppendLine($"PropertyDataSources = {CodeGenerationHelpers.GeneratePropertyDataSourceDictionary(testInfo.TypeSymbol)},");
-        writer.AppendLine($"DisplayNameTemplate = \"{methodName}\",");
-        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testInfo.MethodSymbol)},");
-        writer.AppendLine($"IsAsync = {(IsAsyncMethod(testInfo.MethodSymbol) ? "true" : "false")},");
-        writer.AppendLine($"IsSkipped = {(isSkipped ? "true" : "false")},");
-        writer.AppendLine($"SkipReason = {skipReason},");
-        writer.AppendLine($"Timeout = {CodeGenerationHelpers.ExtractTimeout(testInfo.MethodSymbol)}");
-        writer.AppendLine("};");
-        writer.AppendLine();
-        writer.AppendLine("testMetadata.Add(metadata);");
-        writer.AppendLine();
-        writer.AppendLine("TestSourceRegistrar.RegisterTests(testMetadata.Cast<ITestDescriptor>().ToList());");
-        writer.AppendLine("}");
-        writer.AppendLine("}");
+                // Create the test metadata object first without problematic array properties
+                writer.AppendLine("var metadata = new DynamicTestMetadata");
+                writer.AppendLine("{");
+                writer.AppendLine($"TestIdTemplate = \"{className}.{methodName}_{{{{TestIndex}}}}\",");
+                writer.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
+                writer.AppendLine($"TestClassType = {testClassTypeValue},");
+                writer.AppendLine("MethodMetadata = new MethodMetadata");
+                writer.AppendLine("{");
+                writer.AppendLine($"Name = \"{testInfo.MethodSymbol.Name}\",");
+                writer.AppendLine($"Type = {testClassTypeValue} ?? typeof(object),");
+                writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
+                writer.AppendLine($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)},");
+                writer.AppendLine($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},");
+                writer.AppendLine("Class = new ClassMetadata");
+                writer.AppendLine("{");
+                writer.AppendLine($"Name = \"{testInfo.TypeSymbol.Name}\",");
+                writer.AppendLine($"Type = {testClassTypeValue} ?? typeof(object),");
+                writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
+                writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes(), testInfo.TypeSymbol)},");
+                writer.AppendLine($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\",");
+                writer.AppendLine($"Assembly = new AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes(), testInfo.TypeSymbol.ContainingAssembly)} }},");
+                writer.AppendLine("Parameters = System.Array.Empty<ParameterMetadata>(),");
+                writer.AppendLine($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)},");
+                writer.AppendLine($"Constructors = {CodeGenerationHelpers.GenerateConstructorMetadataArray(testInfo.TypeSymbol)},");
+                writer.AppendLine("Parent = null");
+                writer.AppendLine("},");
+                writer.AppendLine($"ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")},");
+                writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)},");
+                writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes(), testInfo.MethodSymbol)}");
+                writer.AppendLine("},");
+                writer.AppendLine($"TestFilePath = @\"{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
+                writer.AppendLine($"TestLineNumber = {testInfo.LineNumber},");
+                writer.AppendLine($"TestClassFactory = {GenerateTestClassFactory(testInfo.TypeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor)},");
+                writer.AppendLine($"ClassDataSources = {CodeGenerationHelpers.GenerateClassDataSourceProviders(testInfo.TypeSymbol)},");
+                writer.AppendLine($"MethodDataSources = {CodeGenerationHelpers.GenerateMethodDataSourceProviders(testInfo.MethodSymbol)},");
+                writer.AppendLine($"PropertyDataSources = {CodeGenerationHelpers.GeneratePropertyDataSourceDictionary(testInfo.TypeSymbol)},");
+                writer.AppendLine($"DisplayNameTemplate = \"{methodName}\",");
+                writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testInfo.MethodSymbol)},");
+                writer.AppendLine($"IsAsync = {(IsAsyncMethod(testInfo.MethodSymbol) ? "true" : "false")},");
+                writer.AppendLine($"IsSkipped = {(isSkipped ? "true" : "false")},");
+                writer.AppendLine($"SkipReason = {skipReason},");
+                writer.AppendLine($"Timeout = {CodeGenerationHelpers.ExtractTimeout(testInfo.MethodSymbol)}");
+                writer.AppendLine("};");
+                writer.AppendLine();
+                writer.AppendLine("testMetadata.Add(metadata);");
+                writer.AppendLine();
+                writer.AppendLine("TestSourceRegistrar.RegisterTests(testMetadata.Cast<ITestDescriptor>().ToList());");
+            }
+        }
 
         // Use GUID in the filename to prevent overwrites
         context.AddSource($"TestMetadata_{safeClassName}_{safeMethodName}_{guid}.g.cs", writer.ToString());
@@ -280,7 +280,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
     private static string GenerateFactoryWithRequiredProperties(INamedTypeSymbol typeSymbol, string className, List<IPropertySymbol> requiredProperties, IMethodSymbol? constructorWithParameters, bool hasParameterlessConstructor)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        writer._indentLevel++; // Start with indent for inline expression
+        // No need to indent here - this generates inline code
         writer.Append("args => ");
 
         // Create a new instance with all required properties initialized

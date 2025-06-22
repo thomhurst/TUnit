@@ -21,7 +21,7 @@ internal static class CodeGenerationHelpers
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 2; i++) { writer._indentLevel++; }
+        writer.SetIndentLevel(2);
         writer.Append("new global::TUnit.Core.ParameterMetadata[] {");
         writer.AppendLine();
 
@@ -57,7 +57,7 @@ internal static class CodeGenerationHelpers
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 2; i++) { writer._indentLevel++; }
+        writer.SetIndentLevel(2);
         writer.AppendLine("new global::TUnit.Core.AttributeMetadata[]");
         writer.AppendLine("{");
 
@@ -115,10 +115,7 @@ internal static class CodeGenerationHelpers
     private static string GenerateAttributeMetadata(AttributeData attr, ISymbol? targetSymbol = null)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 3; i++)
-        {
-            writer._indentLevel++; // Start with indent level 3 for nested objects
-        }
+        writer.SetIndentLevel(3); // Start with indent level 3 for nested objects
 
         // Determine the target element based on the symbol
         var targetElement = DetermineTargetElement(targetSymbol);
@@ -180,7 +177,7 @@ internal static class CodeGenerationHelpers
     {
         var typeName = attr.AttributeClass!.GloballyQualified();
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 1; i++) { writer._indentLevel++; }
+        writer.SetIndentLevel(1);
         writer.Append($"new {typeName}(");
 
         // Add constructor arguments
@@ -296,7 +293,7 @@ internal static class CodeGenerationHelpers
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 2; i++) { writer._indentLevel++; }
+        writer.SetIndentLevel(2);
         writer.Append("new global::TUnit.Core.PropertyMetadata[] {");
         writer.AppendLine();
 
@@ -332,7 +329,7 @@ internal static class CodeGenerationHelpers
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 2; i++) { writer._indentLevel++; }
+        writer.SetIndentLevel(2);
         writer.Append("new global::TUnit.Core.ConstructorMetadata[] {");
         writer.AppendLine();
 
@@ -371,7 +368,7 @@ internal static class CodeGenerationHelpers
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 2; i++) { writer._indentLevel++; }
+        writer.SetIndentLevel(2);
         writer.Append("new global::TUnit.Core.IDataSourceProvider[] {");
         writer.AppendLine();
 
@@ -409,7 +406,7 @@ internal static class CodeGenerationHelpers
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 2; i++) { writer._indentLevel++; }
+        writer.SetIndentLevel(2);
         writer.Append("new global::TUnit.Core.IDataSourceProvider[] {");
         writer.AppendLine();
 
@@ -443,7 +440,7 @@ internal static class CodeGenerationHelpers
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 2; i++) { writer._indentLevel++; } // Start with indent level 2 for inline dictionaries
+        writer.SetIndentLevel(2); // Start with indent level 2 for inline dictionaries
         writer.AppendLine("new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>");
         writer.AppendLine("{");
 
@@ -697,7 +694,7 @@ internal static class CodeGenerationHelpers
                 var genericArgs = namedType.TypeArguments.Select(GenerateTypeReference).ToArray();
 
                 using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 1; i++) { writer._indentLevel++; }
+        writer.SetIndentLevel(1);
                 writer.Append($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
                 foreach (var arg in genericArgs)
                 {

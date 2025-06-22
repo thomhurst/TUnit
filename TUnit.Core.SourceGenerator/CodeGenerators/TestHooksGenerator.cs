@@ -123,13 +123,10 @@ public class TestHooksGenerator : IIncrementalGenerator
                 var distinctHookLevelsForClass = groupedByTypeName.Select(x => x.HookLevel).Distinct().ToList();
 
                 sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestHooksGenerator).Assembly.GetName().Version}\")]");
-                sourceBuilder.AppendLine(
-                    $"file partial class {className} : {string.Join(", ", distinctHookLevelsForClass.Select(GetInterfaceType))}");
-                using (sourceBuilder.Block())
+                using (sourceBuilder.BeginBlock($"file partial class {className} : {string.Join(", ", distinctHookLevelsForClass.Select(GetInterfaceType))}"))
                 {
                     sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-                    sourceBuilder.AppendLine("public static void Initialise()");
-                    using (sourceBuilder.Block())
+                    using (sourceBuilder.BeginBlock("public static void Initialise()"))
                     {
                         sourceBuilder.AppendLine($"var instance = new {className}();");
                         foreach (var hookLevel in distinctHookLevelsForClass)
@@ -153,10 +150,7 @@ public class TestHooksGenerator : IIncrementalGenerator
 
                             foreach (var hookLocationType in new[] { HookLocationType.Before, HookLocationType.After })
                             {
-                                sourceBuilder.AppendLine(
-                                    $"public global::System.Collections.Generic.IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}(string sessionId)");
-
-                                using (sourceBuilder.Block())
+                                using (sourceBuilder.BeginBlock($"public global::System.Collections.Generic.IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}(string sessionId)"))
                                 {
                                     sourceBuilder.AppendLine("return");
                                     sourceBuilder.AppendLine("[");
