@@ -96,4 +96,13 @@ public interface ICodeWriter : IDisposable
     /// <param name="declaration">The declaration (e.g., "var x = new Foo" or "Property = new Bar")</param>
     /// <param name="terminator">The terminator after closing brace (e.g., ";", ",", or "")</param>
     IDisposable BeginObjectInitializer(string declaration, string terminator = ";");
+    
+    /// <summary>
+    /// Begins an array initializer block that ensures balanced braces.
+    /// Automatically handles indentation and proper formatting for array elements.
+    /// </summary>
+    /// <param name="declaration">The array declaration (e.g., "new int[]" or "new string[]")</param>
+    /// <param name="terminator">The terminator after closing brace (e.g., ";", ",", or "")</param>
+    /// <param name="inline">Whether to format the array inline (single line) or multi-line</param>
+    IDisposable BeginArrayInitializer(string declaration, string terminator = "", bool inline = false);
 }

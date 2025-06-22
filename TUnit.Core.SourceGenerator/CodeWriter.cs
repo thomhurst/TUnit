@@ -226,6 +226,27 @@ public class CodeWriter : ICodeWriter
         return new ObjectInitializerScope(this, terminator);
     }
 
+    /// <summary>
+    /// Begins an array initializer block that ensures balanced braces.
+    /// </summary>
+    public IDisposable BeginArrayInitializer(string declaration, string terminator = "", bool inline = false)
+    {
+        if (inline)
+        {
+            Append(declaration);
+            Append(" { ");
+            return new ArrayInitializerScope(this, terminator, inline: true);
+        }
+        else
+        {
+            Append(declaration);
+            Append(" {");
+            AppendLine();
+            _indentLevel++;
+            return new ArrayInitializerScope(this, terminator, inline: false);
+        }
+    }
+
     public void Dispose()
     {
         _builder.Clear();
@@ -303,6 +324,50 @@ public class CodeWriter : ICodeWriter
                     _writer.Append(_terminator);
                 }
                 _writer.AppendLine();
+                _disposed = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Internal helper class to manage array initializer scope.
+    /// </summary>
+    private class ArrayInitializerScope : IDisposable
+    {
+        private readonly CodeWriter _writer;
+        private readonly string _terminator;
+        private readonly bool _inline;
+        private bool _disposed;
+
+        public ArrayInitializerScope(CodeWriter writer, string terminator, bool inline)
+        {
+            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            _terminator = terminator;
+            _inline = inline;
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                if (_inline)
+                {
+                    _writer.Append(" }");
+                    if (!string.IsNullOrEmpty(_terminator))
+                    {
+                        _writer.Append(_terminator);
+                    }
+                }
+                else
+                {
+                    _writer._indentLevel = Math.Max(0, _writer._indentLevel - 1);
+                    _writer.Append("}");
+                    if (!string.IsNullOrEmpty(_terminator))
+                    {
+                        _writer.Append(_terminator);
+                    }
+                    _writer.AppendLine();
+                }
                 _disposed = true;
             }
         }
