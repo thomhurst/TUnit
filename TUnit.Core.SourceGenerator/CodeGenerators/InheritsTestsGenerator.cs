@@ -265,11 +265,8 @@ public class InheritsTestsGenerator : IIncrementalGenerator
         var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
         var constructorWithParameters = !hasParameterlessConstructor ? constructors.FirstOrDefault() : null;
         
-        // Check for required properties
-        var requiredProperties = classSymbol.GetMembers()
-            .OfType<IPropertySymbol>()
-            .Where(p => p.IsRequired)
-            .ToList();
+        // Check for required properties that don't have data source attributes in this class and all base classes
+        var requiredProperties = GetAllRequiredPropertiesWithoutDataSource(classSymbol);
         
         var className = GetFullTypeName(classSymbol);
         
@@ -324,6 +321,35 @@ public class InheritsTestsGenerator : IIncrementalGenerator
         }
         
         return writer.ToString().Trim(); // Trim to remove any extra newlines
+    }
+
+    private static List<IPropertySymbol> GetAllRequiredPropertiesWithoutDataSource(INamedTypeSymbol classSymbol)
+    {
+        var requiredProperties = new List<IPropertySymbol>();
+        var currentType = classSymbol;
+        
+        // Walk up the inheritance chain to find all required properties
+        while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
+        {
+            var typeRequiredProperties = currentType.GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => p.IsRequired && !HasDataSourceAttribute(p));
+            
+            requiredProperties.AddRange(typeRequiredProperties);
+            currentType = currentType.BaseType;
+        }
+        
+        return requiredProperties;
+    }
+
+    private static bool HasDataSourceAttribute(IPropertySymbol property)
+    {
+        // Check if property has any attribute that ends with "DataSource" or "DataSourceAttribute"
+        return property.GetAttributes().Any(attr => 
+        {
+            var attrName = attr.AttributeClass?.Name ?? "";
+            return attrName.EndsWith("DataSource") || attrName.EndsWith("DataSourceAttribute");
+        });
     }
 
     private static string GetDefaultValueForType(ITypeSymbol type)
