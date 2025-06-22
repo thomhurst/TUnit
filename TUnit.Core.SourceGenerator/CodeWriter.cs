@@ -126,13 +126,13 @@ public class CodeWriter : ICodeWriter
         if (!string.IsNullOrEmpty(leadingText))
         {
             Append(leadingText);
-            if (!leadingText.TrimEnd().EndsWith("{"))
-            {
-                Append(" ");
-            }
         }
+
+        AppendLine();
         AppendLine("{");
+
         Indent();
+
         return new IndentScope(this);
     }
 
