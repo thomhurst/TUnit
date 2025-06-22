@@ -71,7 +71,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
 
         using var writer = new CodeWriter();
-        
+
         // Generate a unique identifier for this test
         var guid = Guid.NewGuid().ToString("N");
         var className = GetFullTypeName(testInfo.TypeSymbol);
@@ -79,19 +79,19 @@ public class TestMetadataGenerator : IIncrementalGenerator
         // Sanitize class and method names for use in filenames
         var safeClassName = SanitizeForFilename(className);
         var safeMethodName = SanitizeForFilename(methodName);
-        
+
         // Check for required properties
         var requiredProperties = testInfo.TypeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Where(p => p.IsRequired)
             .ToList();
-            
+
         // Check for constructor parameters
         var constructors = testInfo.TypeSymbol.Constructors
             .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
             .OrderBy(c => c.Parameters.Length)
             .ToList();
-        
+
         var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
         var constructorWithParameters = !hasParameterlessConstructor ? constructors.FirstOrDefault() : null;
 
@@ -113,15 +113,14 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
         writer.AppendLine("public static void Initialize()");
         writer.AppendLine("{");
-        writer.AppendLine("{"); // Extra scope block
         writer.AppendLine("var testMetadata = new System.Collections.Generic.List<DynamicTestMetadata>();");
         writer.AppendLine();
         // Extract skip information
         var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
-        
+
         // For generic types, we can't use typeof() so TestClassType will be null
         var testClassTypeValue = testInfo.TypeSymbol.IsGenericType ? "null" : $"typeof({className})";
-        
+
         // Create the test metadata object first without problematic array properties
         writer.AppendLine("var metadata = new DynamicTestMetadata");
         writer.AppendLine("{");
@@ -166,13 +165,9 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"Timeout = {CodeGenerationHelpers.ExtractTimeout(testInfo.MethodSymbol)}");
         writer.AppendLine("};");
         writer.AppendLine();
-        writer.AppendLine("// Assign attributes array to avoid CS8802 parser issues");
-        writer.AppendLine($"metadata.Attributes = {CodeGenerationHelpers.GenerateTestAttributes(testInfo.MethodSymbol)};");
-        writer.AppendLine();
         writer.AppendLine("testMetadata.Add(metadata);");
         writer.AppendLine();
         writer.AppendLine("TestSourceRegistrar.RegisterTests(testMetadata.Cast<ITestDescriptor>().ToList());");
-        writer.AppendLine("}"); // End extra scope block
         writer.AppendLine("}");
         writer.AppendLine("}");
 
@@ -185,20 +180,20 @@ public class TestMetadataGenerator : IIncrementalGenerator
         return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
             .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
     }
-    
+
     private static string SanitizeForFilename(string name)
     {
         // Replace all invalid filename characters with underscores
         var invalid = System.IO.Path.GetInvalidFileNameChars()
             .Concat(new[] { '<', '>', '(', ')', '[', ']', '{', '}', ',', ' ', '`', '.' })
             .Distinct();
-            
+
         var sanitized = name;
         foreach (var c in invalid)
         {
             sanitized = sanitized.Replace(c, '_');
         }
-        
+
         return sanitized;
     }
 
@@ -227,14 +222,14 @@ public class TestMetadataGenerator : IIncrementalGenerator
         {
             return "null!"; // Will be replaced at runtime by TestBuilder
         }
-        
+
         // If there are required properties with data sources, we need special handling
         var requiredPropertiesWithDataSource = requiredProperties
             .Where(p => p.GetAttributes().Any(attr =>
             {
                 var attrClass = attr.AttributeClass;
                 if (attrClass == null) return false;
-                
+
                 var fullName = attrClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 return fullName == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix ||
                        fullName == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix ||
@@ -242,7 +237,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                        fullName == WellKnownFullyQualifiedClassNames.AsyncDataSourceGeneratorAttribute.WithGlobalPrefix;
             }))
             .ToList();
-            
+
         // If there are any required properties, we need special handling
         // Generate a factory that creates the instance with required properties initialized
         if (requiredProperties.Any())
@@ -251,25 +246,25 @@ public class TestMetadataGenerator : IIncrementalGenerator
             // The runtime will replace these with actual values if they have data sources
             return GenerateFactoryWithRequiredProperties(typeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor);
         }
-        
+
         using var writer = new CodeWriter("", includeHeader: false); // No header for inline
         writer.Append("args => ");
-        
+
         // If the class has a constructor with parameters and no parameterless constructor
         if (constructorWithParameters != null && !hasParameterlessConstructor)
         {
             // Use the args parameter which contains class constructor arguments
             writer.Append($"new {className}(");
-            
+
             // Generate argument list with proper type casting
             var parameterList = string.Join(", ", constructorWithParameters.Parameters
-                .Select((param, i) => 
+                .Select((param, i) =>
                 {
                     var typeName = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
                         .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
                     return $"({typeName})args[{i}]";
                 }));
-            
+
             writer.Append(parameterList);
             writer.Append(")");
         }
@@ -278,7 +273,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             // Simple parameterless constructor
             writer.Append($"new {className}()");
         }
-        
+
         return writer.ToString().Trim(); // Trim to remove any extra newlines
     }
 
@@ -287,13 +282,13 @@ public class TestMetadataGenerator : IIncrementalGenerator
         using var writer = new CodeWriter("", includeHeader: false);
         writer._indentLevel++; // Start with indent for inline expression
         writer.Append("args => ");
-        
+
         // Create a new instance with all required properties initialized
         if (constructorWithParameters != null && !hasParameterlessConstructor)
         {
             writer.Append($"new {className}(");
             var parameterList = string.Join(", ", constructorWithParameters.Parameters
-                .Select((param, i) => 
+                .Select((param, i) =>
                 {
                     var typeName = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
                         .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
@@ -306,10 +301,10 @@ public class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.Append($"new {className}()");
         }
-        
+
         // Always add object initializer for required properties
         writer.Append(" { ");
-        var propertyInitializers = requiredProperties.Select(prop => 
+        var propertyInitializers = requiredProperties.Select(prop =>
         {
             // For properties with data sources, create a minimal valid instance
             // that satisfies the compiler but will be replaced at runtime
@@ -318,46 +313,46 @@ public class TestMetadataGenerator : IIncrementalGenerator
         });
         writer.Append(string.Join(", ", propertyInitializers));
         writer.Append(" }");
-        
+
         return writer.ToString().Trim();
     }
-    
+
     private static string GetDataSourceAwareDefaultValue(IPropertySymbol property)
     {
         var type = property.Type;
-        
+
         // For reference types, try to create a new instance
         if (type.IsReferenceType)
         {
             var typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
                 .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
-            
+
             // Special handling for common types
             if (type.SpecialType == SpecialType.System_String)
             {
                 return "string.Empty";
             }
-            
+
             // Check if the type has a parameterless constructor
             if (type is INamedTypeSymbol namedType)
             {
                 var hasParameterlessConstructor = namedType.Constructors
                     .Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length == 0);
-                    
+
                 if (hasParameterlessConstructor)
                 {
                     return $"new {typeName}()";
                 }
             }
-            
+
             // Fallback to null with suppression
             return "null!";
         }
-        
+
         // Use the existing logic for value types
         return GetDefaultValueForType(type);
     }
-    
+
     private static bool ContainsTypeParameter(ITypeSymbol type)
     {
         if (type is ITypeParameterSymbol)
