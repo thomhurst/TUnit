@@ -56,7 +56,7 @@ internal static class CodeGenerationHelpers
 
         using var writer = new CodeWriter("", includeHeader: false);
         writer.SetIndentLevel(2);
-        using (writer.BeginObjectInitializer("new global::TUnit.Core.AttributeMetadata[]", ""))
+        using (writer.BeginArrayInitializer("new global::TUnit.Core.AttributeMetadata[]"))
         {
             foreach (var attr in relevantAttributes)
             {
@@ -494,13 +494,13 @@ internal static class CodeGenerationHelpers
     {
         using var writer = new CodeWriter("", includeHeader: false);
         writer.Append("new global::TUnit.Core.DataSources.InlineDataSourceProvider(");
-        
+
         var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue).ToList();
         using (writer.BeginArrayInitializer("new object?[]", terminator: "", inline: true))
         {
             writer.Append(string.Join(", ", args));
         }
-        
+
         writer.Append(")");
         return writer.ToString().Trim();
     }
@@ -642,7 +642,7 @@ internal static class CodeGenerationHelpers
 
         // Generate as a single line array to avoid CS8802 parser issues
         using var writer = new CodeWriter("", includeHeader: false);
-        
+
         // Generate inline array to avoid parser issues
         using (writer.BeginArrayInitializer("new System.Attribute[]", terminator: "", inline: true))
         {
@@ -654,7 +654,7 @@ internal static class CodeGenerationHelpers
             }
             writer.Append(string.Join(", ", attributeStrings));
         }
-        
+
         return writer.ToString().Trim();
     }
 
