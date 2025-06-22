@@ -166,74 +166,72 @@ public class InheritsTestsGenerator : IIncrementalGenerator
 
                 // Generate test metadata
                 w2.AppendLine("// Create the test metadata object first without problematic array properties");
-                w2.AppendLine("var metadata = new DynamicTestMetadata");
-                w2.AppendLine("{");
-                w2.AppendLine($"TestIdTemplate = \"{GetFullTypeName(classSymbol)}.{methodSymbol.Name}_{{{{TestIndex}}}}\",");
-                w2.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
-                w2.AppendLine($"TestClassType = typeof({GetFullTypeName(classSymbol)}),");
-
-                // Generate TestClassFactory
-                w2.Append("TestClassFactory = ");
-                w2.Append(GenerateTestClassFactory(classSymbol));
-                w2.AppendLine(",");
-
-                // Generate MethodMetadata
-                w2.AppendBlock("MethodMetadata = new MethodMetadata", w3 =>
+                using (w2.BeginObjectInitializer("var metadata = new DynamicTestMetadata", ";"))
                 {
-                    w3.AppendLine($"Name = \"{methodSymbol.Name}\",");
-                    w3.AppendLine($"Type = typeof({GetFullTypeName(baseClass)}) ?? typeof(object),");
-                    w3.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(baseClass)},");
-                    w3.AppendLine($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(methodSymbol)},");
-                    w3.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
-                    w3.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
-                    w3.AppendLine($"ReturnType = {(ContainsTypeParameter(methodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(methodSymbol)})!")},");
+                    w2.AppendLine($"TestIdTemplate = \"{GetFullTypeName(classSymbol)}.{methodSymbol.Name}_{{{{TestIndex}}}}\",");
+                    w2.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
+                    w2.AppendLine($"TestClassType = typeof({GetFullTypeName(classSymbol)}),");
 
-                    // Generate ClassMetadata
-                    w3.AppendBlock("Class = new ClassMetadata", w4 =>
+                    // Generate TestClassFactory
+                    w2.Append("TestClassFactory = ");
+                    w2.Append(GenerateTestClassFactory(classSymbol));
+                    w2.AppendLine(",");
+
+                    // Generate MethodMetadata
+                    w2.AppendBlock("MethodMetadata = new MethodMetadata", w3 =>
                     {
-                        w4.AppendLine($"Name = \"{classSymbol.Name}\",");
-                        w4.AppendLine($"Type = typeof({GetFullTypeName(classSymbol)}) ?? typeof(object),");
-                        w4.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
-                        w4.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(classSymbol.GetAttributes(), classSymbol)},");
-                        w4.AppendLine($"Namespace = \"{classSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
+                        w3.AppendLine($"Name = \"{methodSymbol.Name}\",");
+                        w3.AppendLine($"Type = typeof({GetFullTypeName(baseClass)}) ?? typeof(object),");
+                        w3.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(baseClass)},");
+                        w3.AppendLine($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(methodSymbol)},");
+                        w3.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
+                        w3.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
+                        w3.AppendLine($"ReturnType = {(ContainsTypeParameter(methodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(methodSymbol)})!")},");
 
-                        // Generate Assembly metadata
-                        w4.AppendLine("Assembly = new AssemblyMetadata");
-                        w4.AppendLine("{");
-                        using (w4.Scope())
+                        // Generate ClassMetadata
+                        w3.AppendBlock("Class = new ClassMetadata", w4 =>
                         {
-                            w4.AppendLine($"Name = \"{classSymbol.ContainingAssembly.Name}\",");
-                            w4.AppendLine($"Attributes = System.Array.Empty<global::TUnit.Core.AttributeMetadata>()");
-                        }
-                        w4.AppendLine("},");
+                            w4.AppendLine($"Name = \"{classSymbol.Name}\",");
+                            w4.AppendLine($"Type = typeof({GetFullTypeName(classSymbol)}) ?? typeof(object),");
+                            w4.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
+                            w4.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(classSymbol.GetAttributes(), classSymbol)},");
+                            w4.AppendLine($"Namespace = \"{classSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
 
-                        // Generate Parameters (for class constructor)
-                        w4.AppendLine($"Parameters = System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
-                        w4.AppendLine($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(classSymbol)},");
-                        w4.AppendLine($"Constructors = {CodeGenerationHelpers.GenerateConstructorMetadataArray(classSymbol)},");
-                        w4.AppendLine("Parent = null");
+                            // Generate Assembly metadata
+                            w4.AppendBlock("Assembly = new AssemblyMetadata", w5 =>
+                            {
+                                w5.AppendLine($"Name = \"{classSymbol.ContainingAssembly.Name}\",");
+                                w5.AppendLine($"Attributes = System.Array.Empty<global::TUnit.Core.AttributeMetadata>()");
+                            });
+                            w4.AppendLine(",");
+
+                            // Generate Parameters (for class constructor)
+                            w4.AppendLine($"Parameters = System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
+                            w4.AppendLine($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(classSymbol)},");
+                            w4.AppendLine($"Constructors = {CodeGenerationHelpers.GenerateConstructorMetadataArray(classSymbol)},");
+                            w4.AppendLine("Parent = null");
+                        });
+                        w3.AppendLine(",");
+                        w3.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(methodSymbol.GetAttributes(), methodSymbol)},");
+                        w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)");
                     });
-                    w3.AppendLine("},");
-                    w3.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(methodSymbol.GetAttributes(), methodSymbol)},");
-                    w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)");
-                });
-                w2.AppendLine("},");
+                    w2.AppendLine(",");
 
-                w2.AppendLine($"DisplayNameTemplate = \"{GetDisplayName(classSymbol, methodSymbol, testMethodInfo.TestAttribute)}\",");
-                w2.AppendLine($"TestFilePath = \"{classInfo.FilePath.Replace("\\", "\\\\")}\",");
-                w2.AppendLine($"TestLineNumber = {classInfo.LineNumber},");
-                w2.AppendLine($"ClassDataSources = {CodeGenerationHelpers.GenerateClassDataSourceProviders(classSymbol)},");
-                w2.AppendLine($"MethodDataSources = {CodeGenerationHelpers.GenerateMethodDataSourceProviders(methodSymbol)},");
-                w2.AppendLine($"PropertyDataSources = {CodeGenerationHelpers.GeneratePropertyDataSourceDictionary(classSymbol)},");
+                    w2.AppendLine($"DisplayNameTemplate = \"{GetDisplayName(classSymbol, methodSymbol, testMethodInfo.TestAttribute)}\",");
+                    w2.AppendLine($"TestFilePath = \"{classInfo.FilePath.Replace("\\", "\\\\")}\",");
+                    w2.AppendLine($"TestLineNumber = {classInfo.LineNumber},");
+                    w2.AppendLine($"ClassDataSources = {CodeGenerationHelpers.GenerateClassDataSourceProviders(classSymbol)},");
+                    w2.AppendLine($"MethodDataSources = {CodeGenerationHelpers.GenerateMethodDataSourceProviders(methodSymbol)},");
+                    w2.AppendLine($"PropertyDataSources = {CodeGenerationHelpers.GeneratePropertyDataSourceDictionary(classSymbol)},");
 
-                // Extract timeout, skip info, and repeat count
-                var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(methodSymbol);
-                w2.AppendLine($"IsSkipped = {(isSkipped ? "true" : "false")},");
-                w2.AppendLine($"SkipReason = {skipReason},");
-                w2.AppendLine($"Timeout = {CodeGenerationHelpers.ExtractTimeout(methodSymbol)},");
-                w2.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol)},");
-                w2.AppendLine($"IsAsync = {(IsAsyncMethod(methodSymbol) ? "true" : "false")}");
-                w2.AppendLine("};");
+                    // Extract timeout, skip info, and repeat count
+                    var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(methodSymbol);
+                    w2.AppendLine($"IsSkipped = {(isSkipped ? "true" : "false")},");
+                    w2.AppendLine($"SkipReason = {skipReason},");
+                    w2.AppendLine($"Timeout = {CodeGenerationHelpers.ExtractTimeout(methodSymbol)},");
+                    w2.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol)},");
+                    w2.AppendLine($"IsAsync = {(IsAsyncMethod(methodSymbol) ? "true" : "false")}");
+                }
                 w2.AppendLine();
                 w2.AppendLine("testMetadata.Add(metadata);");
 
