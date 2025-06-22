@@ -86,8 +86,7 @@ public class AttributeWriter
     public static void WriteAttribute(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData)
     {
-        var indentLevel = sourceCodeWriter is SourceCodeWriter scw ? scw.TabLevel : 0;
-        sourceCodeWriter.Append(GetAttributeObjectInitializer(context, attributeData, indentLevel));
+        sourceCodeWriter.Append(GetAttributeObjectInitializer(context, attributeData));
     }
 
     public static void WriteAttributeMetadata(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
@@ -95,8 +94,7 @@ public class AttributeWriter
     {
         sourceCodeWriter.Append("new global::TUnit.Core.AttributeMetadata");
         sourceCodeWriter.Append("{");
-        var indentLevel2 = sourceCodeWriter is SourceCodeWriter scw2 ? scw2.TabLevel : 0;
-        sourceCodeWriter.Append($"Instance = {GetAttributeObjectInitializer(context, attributeData, indentLevel2)},");
+        sourceCodeWriter.Append($"Instance = {GetAttributeObjectInitializer(context, attributeData)},");
         sourceCodeWriter.Append($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement},");
 
         if (targetMemberName != null)
@@ -149,13 +147,9 @@ public class AttributeWriter
     }
 
     public static string GetAttributeObjectInitializer(GeneratorAttributeSyntaxContext context,
-        AttributeData attributeData, int indentLevel)
+        AttributeData attributeData)
     {
         var sourceCodeWriter = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < indentLevel; i++)
-        {
-            sourceCodeWriter._indentLevel++;
-        }
 
         var syntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
 
@@ -233,10 +227,9 @@ public class AttributeWriter
 
             sourceCodeWriter.Append($"{propertySymbol.Name} = ");
 
-            var indentLevel = sourceCodeWriter is SourceCodeWriter scw ? scw.TabLevel : 0;
-            var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute, indentLevel);
+            var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute);
 
-            sourceCodeWriter.Append(AsyncDataSourceGeneratorContainer.GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(innerAttribute, context, attributeData.AttributeClass!, propertySymbol, indentLevel, true));
+            sourceCodeWriter.Append(AsyncDataSourceGeneratorContainer.GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(innerAttribute, context, attributeData.AttributeClass!, propertySymbol, true));
         }
     }
 

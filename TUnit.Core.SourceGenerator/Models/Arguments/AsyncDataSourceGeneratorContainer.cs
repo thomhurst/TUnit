@@ -107,8 +107,7 @@ public record AsyncDataSourceGeneratorContainer(
 
             sourceCodeWriter.Append($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
 
-            var tabLevel = sourceCodeWriter is SourceCodeWriter scw ? scw.TabLevel : 0;
-            sourceCodeWriter.Append(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Context, ClassMetadata, Property, tabLevel, false));
+            sourceCodeWriter.Append(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Context, ClassMetadata, Property, false));
             sourceCodeWriter.AppendLine();
             
             // Initialize the property value if it implements IAsyncInitializer
@@ -169,13 +168,9 @@ public record AsyncDataSourceGeneratorContainer(
         }
     }
 
-    public static string GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property, int indentLevel, bool isNested)
+    public static string GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property, bool isNested)
     {
         var sourceCodeWriter = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < indentLevel; i++)
-        {
-            sourceCodeWriter._indentLevel++;
-        }
 
         var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var isReferenceType = property.Type.IsReferenceType;
