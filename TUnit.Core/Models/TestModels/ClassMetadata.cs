@@ -39,6 +39,5 @@ public record ClassMetadata : MemberMetadata
     public required ParameterMetadata[] Parameters { get; init; }
 
     public required PropertyMetadata[] Properties { get; init; }
-    public required ConstructorMetadata[] Constructors { get; init; }
     public required ClassMetadata? Parent { get; init; }
 }

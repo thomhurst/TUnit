@@ -54,7 +54,6 @@ public class TestExtensionsTests
                     Attributes = [],
                     Parameters = [],
                     Properties = [],
-                    Constructors = [],
                     Type = typeof(T),
                     TypeReference = TypeReference.CreateConcrete($"{typeof(T).FullName}, {typeof(T).Assembly.GetName().Name}"),
                 },

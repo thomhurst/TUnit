@@ -14,7 +14,6 @@ internal class ReflectionToSourceModelHelpers
     private static readonly ConcurrentDictionary<MethodInfo, MethodMetadata> _methodCache = new();
     private static readonly ConcurrentDictionary<PropertyInfo, PropertyMetadata> _propertyCache = new();
     private static readonly ConcurrentDictionary<ParameterInfo, ParameterMetadata> _parameterCache = new();
-    private static readonly ConcurrentDictionary<ConstructorInfo, ConstructorMetadata> _constructorCache = new();
 
     // Track types currently being processed to prevent infinite recursion
     [ThreadStatic]
@@ -85,7 +84,6 @@ internal class ReflectionToSourceModelHelpers
                     Namespace = testClassType.Namespace,
                     Parameters = [],
                     Properties = [], // Empty to prevent recursion
-                    Constructors = [], // Empty to prevent recursion
                     Type = testClassType,
                     TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? testClassType.FullName ?? testClassType.Name)
                 };
@@ -102,7 +100,6 @@ internal class ReflectionToSourceModelHelpers
                     Namespace = testClassType.Namespace,
                     Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
                     Properties = testClassType.GetProperties().Select(GenerateProperty).ToArray(),
-                    Constructors = GetConstructors(testClassType),
                     Type = testClassType,
                     TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? testClassType.FullName ?? testClassType.Name)
                 };
@@ -174,30 +171,6 @@ internal class ReflectionToSourceModelHelpers
         });
     }
 
-    public static ConstructorMetadata[] GetConstructors(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-            | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type)
-    {
-        var bindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-        return type.GetConstructors(bindingFlags).Select(GenerateConstructor).ToArray();
-    }
-
-    public static ConstructorMetadata GenerateConstructor(ConstructorInfo constructor)
-    {
-        return _constructorCache.GetOrAdd(constructor, _ => new ConstructorMetadata
-        {
-            Attributes = GetAttributeMetadatas(constructor.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Constructor, ".ctor", constructor.DeclaringType),
-            Name = ".ctor",
-            Type = constructor.DeclaringType!,
-            Parameters = GetParameters(constructor.GetParameters()),
-            IsStatic = constructor.IsStatic,
-            IsPublic = constructor.IsPublic,
-            IsPrivate = constructor.IsPrivate,
-            IsProtected = constructor.IsFamily,
-            IsInternal = constructor.IsAssembly,
-            ReflectionInformation = constructor
-        });
-    }
 
     private static AttributeMetadata[] GetAttributeMetadatas(Attribute[] attributes, TestAttributeTarget target, string? memberName = null, Type? type = null)
     {

@@ -76,27 +76,6 @@ public static class SourceInformationWriter
             sourceCodeWriter.Append("],");
         }
 
-        sourceCodeWriter.Append("Constructors = ");
-        var constructors = namedTypeSymbol.GetMembers().OfType<IMethodSymbol>()
-            .Where(m => m.MethodKind == MethodKind.Constructor)
-            .ToArray();
-
-        if(constructors.Length == 0)
-        {
-            sourceCodeWriter.Append("[],");
-        }
-        else
-        {
-            sourceCodeWriter.Append("[");
-
-            foreach (var constructor in constructors)
-            {
-                GenerateConstructorInformation(sourceCodeWriter, context, namedTypeSymbol, constructor);
-            }
-
-            sourceCodeWriter.Append("],");
-        }
-
         sourceCodeWriter.Append("}),");
     }
 
@@ -202,44 +181,6 @@ public static class SourceInformationWriter
             sourceCodeWriter.Append(",");
     }
 
-    private static void GenerateConstructorInformation(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IMethodSymbol constructor)
-    {
-        sourceCodeWriter.Append("new global::TUnit.Core.ConstructorMetadata");
-        sourceCodeWriter.Append("{");
-
-        sourceCodeWriter.Append($"Type = typeof({constructor.ContainingType.GloballyQualified()}),");
-        sourceCodeWriter.Append($"Name = \".ctor\",");
-        sourceCodeWriter.Append($"IsStatic = {constructor.IsStatic.ToString().ToLowerInvariant()},");
-        sourceCodeWriter.Append($"IsPublic = {(constructor.DeclaredAccessibility == Accessibility.Public).ToString().ToLowerInvariant()},");
-        sourceCodeWriter.Append($"IsPrivate = {(constructor.DeclaredAccessibility == Accessibility.Private).ToString().ToLowerInvariant()},");
-        sourceCodeWriter.Append($"IsProtected = {(constructor.DeclaredAccessibility == Accessibility.Protected).ToString().ToLowerInvariant()},");
-        sourceCodeWriter.Append($"IsInternal = {(constructor.DeclaredAccessibility == Accessibility.Internal).ToString().ToLowerInvariant()},");
-
-        sourceCodeWriter.Append("Attributes = ");
-        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, constructor.GetAttributes(), "Constructor", ".ctor", namedTypeSymbol.ToDisplayString());
-
-        sourceCodeWriter.Append("Parameters = ");
-        var parameters = constructor.Parameters;
-
-        if (parameters.Length == 0)
-        {
-            sourceCodeWriter.Append("[],");
-        }
-        else
-        {
-            sourceCodeWriter.Append("[");
-
-            foreach (var parameter in parameters)
-            {
-                GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor, null);
-            }
-
-            sourceCodeWriter.Append("],");
-        }
-
-        sourceCodeWriter.Append("}");
-            sourceCodeWriter.Append(",");
-    }
 
     private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {

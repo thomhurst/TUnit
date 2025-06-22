@@ -208,7 +208,6 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                             // Generate Parameters (for class constructor)
                             w4.AppendLine($"Parameters = System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
                             w4.AppendLine($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(classSymbol)},");
-                            w4.AppendLine($"Constructors = {CodeGenerationHelpers.GenerateConstructorMetadataArray(classSymbol)},");
                             w4.AppendLine("Parent = null");
                         });
                         w3.AppendLine(",");

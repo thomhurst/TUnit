@@ -313,39 +313,6 @@ internal static class CodeGenerationHelpers
     /// <summary>
     /// Generates C# code for ConstructorMetadata array from class constructors.
     /// </summary>
-    public static string GenerateConstructorMetadataArray(INamedTypeSymbol typeSymbol)
-    {
-        var constructors = typeSymbol.Constructors
-            .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
-            .ToList();
-
-        if (constructors.Count == 0)
-        {
-            return "System.Array.Empty<global::TUnit.Core.ConstructorMetadata>()";
-        }
-
-        using var writer = new CodeWriter("", includeHeader: false);
-        writer.SetIndentLevel(2);
-        using (writer.BeginArrayInitializer("new global::TUnit.Core.ConstructorMetadata[]"))
-        {
-            foreach (var ctor in constructors)
-            {
-                using (writer.BeginObjectInitializer("new global::TUnit.Core.ConstructorMetadata", ","))
-                {
-                    writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
-                    writer.AppendLine("Name = \".ctor\",");
-                    writer.AppendLine($"Parameters = {GenerateParameterMetadataArray(ctor)},");
-                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes(), ctor, writer._indentLevel)},");
-                    writer.AppendLine("IsStatic = false,");
-                    writer.AppendLine($"IsPublic = {(ctor.DeclaredAccessibility == Accessibility.Public ? "true" : "false")},");
-                    writer.AppendLine($"IsPrivate = {(ctor.DeclaredAccessibility == Accessibility.Private ? "true" : "false")},");
-                    writer.AppendLine($"IsProtected = {(ctor.DeclaredAccessibility == Accessibility.Protected ? "true" : "false")},");
-                    writer.AppendLine($"IsInternal = {(ctor.DeclaredAccessibility == Accessibility.Internal ? "true" : "false")}");
-                }
-            }
-        }
-        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
-    }
 
     /// <summary>
     /// Generates C# code for class-level data source providers.

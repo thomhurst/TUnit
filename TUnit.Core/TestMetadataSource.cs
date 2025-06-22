@@ -106,7 +106,6 @@ public class TestMetadataSource : ITestSource
                 },
                 Parameters = Array.Empty<ParameterMetadata>(),
                 Properties = Array.Empty<PropertyMetadata>(),
-                Constructors = Array.Empty<ConstructorMetadata>(),
                 Parent = null,
                 Attributes = Array.Empty<AttributeMetadata>()
             },

@@ -163,7 +163,6 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                     },
                     Parameters = [],
                     Properties = [],
-                    Constructors = [],
                     Name = nameof(DependencyCollectorTests),
                     Attributes = []
                 },
