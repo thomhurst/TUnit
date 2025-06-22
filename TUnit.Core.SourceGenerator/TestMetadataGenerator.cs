@@ -37,7 +37,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         var typeSymbol = methodSymbol.ContainingType;
 
         // Skip abstract classes, static methods, and open generic types
-        if (typeSymbol.IsAbstract || methodSymbol.IsStatic || (typeSymbol.IsGenericType && typeSymbol.TypeParameters.Length > 0))
+        if (typeSymbol.IsAbstract || methodSymbol.IsStatic || typeSymbol is { IsGenericType: true, TypeParameters.Length: > 0 })
         {
             return null;
         }
@@ -365,7 +365,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             return ContainsTypeParameter(arrayType.ElementType);
         }
 
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             return namedType.TypeArguments.Any(ContainsTypeParameter);
         }

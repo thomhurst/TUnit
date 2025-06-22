@@ -505,7 +505,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
             return ContainsTypeParameter(arrayType.ElementType);
         }
 
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             return namedType.TypeArguments.Any(ContainsTypeParameter);
         }

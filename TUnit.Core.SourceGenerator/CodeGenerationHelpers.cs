@@ -86,7 +86,7 @@ internal static class CodeGenerationHelpers
 
         return symbol.Kind switch
         {
-            SymbolKind.Method => symbol is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Constructor
+            SymbolKind.Method => symbol is IMethodSymbol { MethodKind: MethodKind.Constructor }
                 ? "Constructor"
                 : "Method",
             SymbolKind.NamedType => symbol is INamedTypeSymbol namedType ? namedType.TypeKind switch
@@ -184,11 +184,11 @@ internal static class CodeGenerationHelpers
         if (attr.ConstructorArguments.Length > 0)
         {
             var argStrings = new List<string>();
-            
+
             for (int i = 0; i < attr.ConstructorArguments.Length; i++)
             {
                 var arg = attr.ConstructorArguments[i];
-                
+
                 // Check if this is a params array parameter
                 if (i == attr.ConstructorArguments.Length - 1 && IsParamsArrayArgument(attr, i))
                 {
@@ -208,7 +208,7 @@ internal static class CodeGenerationHelpers
                     argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg));
                 }
             }
-            
+
             writer.Append(string.Join(", ", argStrings));
         }
 
@@ -225,7 +225,7 @@ internal static class CodeGenerationHelpers
 
         return writer.ToString().Trim();
     }
-    
+
     /// <summary>
     /// Determines if an argument is for a params array parameter.
     /// </summary>
@@ -233,14 +233,14 @@ internal static class CodeGenerationHelpers
     {
         // For known TUnit attributes with params, handle them explicitly
         var typeName = attr.AttributeClass!.GloballyQualified();
-        
+
         // ArgumentsAttribute and InlineDataAttribute use params object[]
-        if (typeName == "global::TUnit.Core.ArgumentsAttribute" || 
+        if (typeName == "global::TUnit.Core.ArgumentsAttribute" ||
             typeName == "global::TUnit.Core.InlineDataAttribute")
         {
             return true;
         }
-        
+
         // For other attributes, we'd need to check the constructor's parameter attributes
         // but that's more complex and not needed for TUnit's current attributes
         return false;
@@ -269,7 +269,7 @@ internal static class CodeGenerationHelpers
             return ContainsTypeParameter(arrayType.ElementType);
         }
 
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             return namedType.TypeArguments.Any(ContainsTypeParameter);
         }
@@ -621,7 +621,7 @@ internal static class CodeGenerationHelpers
             return 1;
         }
 
-        if (repeatAttr.ConstructorArguments[0].Value is int count && count > 0)
+        if (repeatAttr.ConstructorArguments[0].Value is int count and > 0)
         {
             return count;
         }
@@ -687,7 +687,7 @@ internal static class CodeGenerationHelpers
 
         if (typeSymbol is INamedTypeSymbol namedType)
         {
-            if (namedType.IsGenericType && !namedType.IsUnboundGenericType)
+            if (namedType is { IsGenericType: true, IsUnboundGenericType: false })
             {
                 // This is a constructed generic type (e.g., List<int>, Dictionary<string, T>)
                 var genericDef = GetGenericTypeDefinitionName(namedType);
