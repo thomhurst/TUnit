@@ -6,22 +6,22 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 
 public static class GlobalTestHooksWriter
 {
-    public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model)
+    public static void Execute(ICodeWriter sourceBuilder, HooksDataModel model)
     {
-        sourceBuilder.Write($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
-        sourceBuilder.Write("{");
+        sourceBuilder.Append($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
+        sourceBuilder.Append("{");
 
-        sourceBuilder.Write("MethodInfo = ");
+        sourceBuilder.Append("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
 
-        sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)})),");
+        sourceBuilder.Append($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)})),");
 
-        sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
-        sourceBuilder.Write($"Order = {model.Order},");
-        sourceBuilder.Write($"""FilePath = @"{model.FilePath}",""");
-        sourceBuilder.Write($"LineNumber = {model.LineNumber},");
+        sourceBuilder.Append($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+        sourceBuilder.Append($"Order = {model.Order},");
+        sourceBuilder.Append($"""FilePath = @"{model.FilePath}",""");
+        sourceBuilder.Append($"LineNumber = {model.LineNumber},");
 
-        sourceBuilder.Write("},");
+        sourceBuilder.Append("},");
     }
 
     private static string GetClassType(string hookType, HookLocationType hookLocationType)

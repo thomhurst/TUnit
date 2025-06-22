@@ -8,11 +8,11 @@ public record ClassPropertiesContainer(
     IReadOnlyCollection<(IPropertySymbol PropertySymbol, ArgumentsContainer ArgumentsContainer)> InnerContainers)
     : ArgumentsContainer(ArgumentsType.Property)
 {
-    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    public override void OpenScope(ICodeWriter sourceCodeWriter, ref int variableIndex)
     {
     }
 
-    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    public override void WriteVariableAssignments(ICodeWriter sourceCodeWriter, ref int variableIndex)
     {
         foreach (var (_, argumentsContainer) in InnerContainers)
         {
@@ -27,10 +27,10 @@ public record ClassPropertiesContainer(
             }
         }
 
-        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.AppendLine();
     }
 
-    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(ICodeWriter sourceCodeWriter)
     {
     }
 
@@ -39,21 +39,21 @@ public record ClassPropertiesContainer(
         return InnerContainers.SelectMany(x => x.ArgumentsContainer.GetArgumentTypes()).ToArray();
     }
 
-    public void WriteObjectInitializer(SourceCodeWriter sourceCodeWriter)
+    public void WriteObjectInitializer(ICodeWriter sourceCodeWriter)
     {
         if (!InnerContainers.Any())
         {
             return;
         }
         
-        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Append("{");
         
         foreach (var (propertySymbol, argumentsContainer) in InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
             var firstElement = argumentsContainer.DataVariables.ElementAt(0).Name;
-            sourceCodeWriter.Write($"{propertySymbol.Name} = global::TUnit.Core.Helpers.CastHelper.Cast<{propertySymbol.Type.GloballyQualified()}>({firstElement}),");
+            sourceCodeWriter.Append($"{propertySymbol.Name} = global::TUnit.Core.Helpers.CastHelper.Cast<{propertySymbol.Type.GloballyQualified()}>({firstElement}),");
         }
 
-        sourceCodeWriter.Write("}");
+        sourceCodeWriter.Append("}");
     }
 }

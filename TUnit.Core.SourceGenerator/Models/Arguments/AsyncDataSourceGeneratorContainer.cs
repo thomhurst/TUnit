@@ -20,7 +20,7 @@ public record AsyncDataSourceGeneratorContainer(
     public required string? PropertyName { get; init; }
     public required bool IsStronglyTyped { get; init; }
 
-    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    public override void OpenScope(ICodeWriter sourceCodeWriter, ref int variableIndex)
     {
         if (ArgumentsType is ArgumentsType.Property)
         {
@@ -32,19 +32,19 @@ public record AsyncDataSourceGeneratorContainer(
 
         var dataGeneratorMetadataVariableName = $"{VariableNamePrefix}DataGeneratorMetadata";
 
-        sourceCodeWriter.Write($"var {dataGeneratorMetadataVariableName} = new DataGeneratorMetadata");
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write($"Type = global::TUnit.Core.Enums.DataGeneratorType.{type},");
-        sourceCodeWriter.Write("TestBuilderContext = testBuilderContextAccessor,");
-        sourceCodeWriter.Write("TestInformation = testInformation,");
+        sourceCodeWriter.Append($"var {dataGeneratorMetadataVariableName} = new DataGeneratorMetadata");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append($"Type = global::TUnit.Core.Enums.DataGeneratorType.{type},");
+        sourceCodeWriter.Append("TestBuilderContext = testBuilderContextAccessor,");
+        sourceCodeWriter.Append("TestInformation = testInformation,");
 
-        sourceCodeWriter.Write("MembersToGenerate = ");
+        sourceCodeWriter.Append("MembersToGenerate = ");
         SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, ClassMetadata, Parameters, null, ArgumentsType);
 
-        sourceCodeWriter.Write("TestSessionId = sessionId,");
-        sourceCodeWriter.Write("TestClassInstance = classInstance,");
-        sourceCodeWriter.Write("ClassInstanceArguments = classInstanceArguments,");
-        sourceCodeWriter.Write("};");
+        sourceCodeWriter.Append("TestSessionId = sessionId,");
+        sourceCodeWriter.Append("TestClassInstance = classInstance,");
+        sourceCodeWriter.Append("ClassInstanceArguments = classInstanceArguments,");
+        sourceCodeWriter.Append("};");
 
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
@@ -52,33 +52,33 @@ public record AsyncDataSourceGeneratorContainer(
         var dataAttr = GenerateDataAttributeVariable("var", string.Empty,
             ref variableIndex);
 
-        sourceCodeWriter.Write($"{dataAttr.Type} {dataAttr.Name} = ");
+        sourceCodeWriter.Append($"{dataAttr.Type} {dataAttr.Name} = ");
         AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);
-        sourceCodeWriter.Write(";");
-        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.Append(";");
+        sourceCodeWriter.AppendLine();
 
-        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.AppendLine();
 
-        sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
-        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.Append($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
+        sourceCodeWriter.AppendLine();
 
-        sourceCodeWriter.Write($"var {arrayVariableName} = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){dataAttr.Name}).GenerateAsync({dataGeneratorMetadataVariableName});");
-        sourceCodeWriter.WriteLine();
-        sourceCodeWriter.Write($"await foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
-        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Append($"var {arrayVariableName} = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){dataAttr.Name}).GenerateAsync({dataGeneratorMetadataVariableName});");
+        sourceCodeWriter.AppendLine();
+        sourceCodeWriter.Append($"await foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
+        sourceCodeWriter.Append("{");
 
         if (ArgumentsType == ArgumentsType.ClassConstructor)
         {
-            sourceCodeWriter.Write($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
+            sourceCodeWriter.Append($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
         }
 
         if (ArgumentsType == ArgumentsType.Method)
         {
-            sourceCodeWriter.Write($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
+            sourceCodeWriter.Append($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
         }
     }
 
-    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    public override void WriteVariableAssignments(ICodeWriter sourceCodeWriter, ref int variableIndex)
     {
         var type = ArgumentsType switch
         {
@@ -93,34 +93,35 @@ public record AsyncDataSourceGeneratorContainer(
                 string.Empty,
                 ref variableIndex);
 
-            sourceCodeWriter.Write($"{attr.Type} {attr.Name} = ");
+            sourceCodeWriter.Append($"{attr.Type} {attr.Name} = ");
             AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);
-            sourceCodeWriter.Write(";");
-            sourceCodeWriter.WriteLine();
+            sourceCodeWriter.Append(";");
+            sourceCodeWriter.AppendLine();
 
-            sourceCodeWriter.Write($"testBuilderContext.DataAttributes.Add({attr.Name});");
-            sourceCodeWriter.WriteLine();
+            sourceCodeWriter.Append($"testBuilderContext.DataAttributes.Add({attr.Name});");
+            sourceCodeWriter.AppendLine();
 
             // Use the property type instead of var to avoid CS0815
             var propertyType = Property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var dataSourceVariable = GenerateVariable(propertyType, string.Empty, ref variableIndex);
 
-            sourceCodeWriter.Write($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
+            sourceCodeWriter.Append($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
 
-            sourceCodeWriter.Write(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Context, ClassMetadata, Property, sourceCodeWriter.TabLevel, false));
-            sourceCodeWriter.WriteLine();
+            var tabLevel = sourceCodeWriter is SourceCodeWriter scw ? scw.TabLevel : 0;
+            sourceCodeWriter.Append(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Context, ClassMetadata, Property, tabLevel, false));
+            sourceCodeWriter.AppendLine();
             
             // Initialize the property value if it implements IAsyncInitializer
-            sourceCodeWriter.Write($"if ({dataSourceVariable.Name} is global::TUnit.Core.Interfaces.IAsyncInitializer)");
-            sourceCodeWriter.Write("{");
-            sourceCodeWriter.Write($"await global::TUnit.Core.ObjectInitializer.InitializeAsync({dataSourceVariable.Name});");
-            sourceCodeWriter.Write("}");
+            sourceCodeWriter.Append($"if ({dataSourceVariable.Name} is global::TUnit.Core.Interfaces.IAsyncInitializer)");
+            sourceCodeWriter.Append("{");
+            sourceCodeWriter.Append($"await global::TUnit.Core.ObjectInitializer.InitializeAsync({dataSourceVariable.Name});");
+            sourceCodeWriter.Append("}");
             return;
         }
 
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
 
-        sourceCodeWriter.Write($"var {generatedDataVariableName} = await {generatedDataVariableName}Accessor();");
+        sourceCodeWriter.Append($"var {generatedDataVariableName} = await {generatedDataVariableName}Accessor();");
 
         if (GenericArguments.Length == 0)
         {
@@ -130,11 +131,11 @@ public record AsyncDataSourceGeneratorContainer(
 
                 if (IsStronglyTyped)
                 {
-                    sourceCodeWriter.Write(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"({ParameterOrPropertyTypes[i].GloballyQualified()}){generatedDataVariableName}[{i}]", ref refIndex).ToString());
+                    sourceCodeWriter.Append(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"({ParameterOrPropertyTypes[i].GloballyQualified()}){generatedDataVariableName}[{i}]", ref refIndex).ToString());
                 }
                 else
                 {
-                    sourceCodeWriter.Write(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"global::TUnit.Core.Helpers.CastHelper.Cast<{ParameterOrPropertyTypes[i].GloballyQualified()}>({generatedDataVariableName}[{i}])", ref refIndex).ToString());
+                    sourceCodeWriter.Append(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"global::TUnit.Core.Helpers.CastHelper.Cast<{ParameterOrPropertyTypes[i].GloballyQualified()}>({generatedDataVariableName}[{i}])", ref refIndex).ToString());
                 }
             }
         }
@@ -143,10 +144,10 @@ public record AsyncDataSourceGeneratorContainer(
             for (var i = 0; i < GenericArguments.Length; i++)
             {
                 var refIndex = i;
-                sourceCodeWriter.Write(GenerateVariable(GenericArguments[i], $"global::TUnit.Core.Helpers.CastHelper.Cast<{GenericArguments[i]}>({generatedDataVariableName}[{i}])", ref refIndex).ToString());
+                sourceCodeWriter.Append(GenerateVariable(GenericArguments[i], $"global::TUnit.Core.Helpers.CastHelper.Cast<{GenericArguments[i]}>({generatedDataVariableName}[{i}])", ref refIndex).ToString());
             }
 
-            sourceCodeWriter.WriteLine();
+            sourceCodeWriter.AppendLine();
         }
         else
         {
@@ -154,7 +155,7 @@ public record AsyncDataSourceGeneratorContainer(
             if (GenericArguments.Length == 1)
             {
                 var refIndex = 0;
-                sourceCodeWriter.Write(GenerateVariable(GenericArguments[0], $"global::TUnit.Core.Helpers.CastHelper.Cast<{GenericArguments[0]}>({generatedDataVariableName}[0])", ref refIndex).ToString());
+                sourceCodeWriter.Append(GenerateVariable(GenericArguments[0], $"global::TUnit.Core.Helpers.CastHelper.Cast<{GenericArguments[0]}>({generatedDataVariableName}[0])", ref refIndex).ToString());
             }
             else
             {
@@ -170,84 +171,88 @@ public record AsyncDataSourceGeneratorContainer(
 
     public static string GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property, int indentLevel, bool isNested)
     {
-        var sourceCodeWriter = new SourceCodeWriter(indentLevel);
+        var sourceCodeWriter = new CodeWriter("", includeHeader: false);
+        for (var i = 0; i < indentLevel; i++)
+        {
+            sourceCodeWriter._indentLevel++;
+        }
 
         var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var isReferenceType = property.Type.IsReferenceType;
         var isNullable = property.Type.NullableAnnotation == NullableAnnotation.Annotated;
 
-        sourceCodeWriter.Write("await (async () => {");
-        sourceCodeWriter.Write($"var enumerator = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){attributeVariableName}).GenerateAsync(");
+        sourceCodeWriter.Append("await (async () => {");
+        sourceCodeWriter.Append($"var enumerator = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){attributeVariableName}).GenerateAsync(");
         WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, namedTypeSymbol, property);
-        sourceCodeWriter.Write(").GetAsyncEnumerator();");
-        sourceCodeWriter.WriteLine();
-        sourceCodeWriter.Write("try");
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write("if (await enumerator.MoveNextAsync())");
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write("var result = await enumerator.Current();");
-        sourceCodeWriter.Write($"return ({propertyType})(result?.ElementAtOrDefault(0)");
+        sourceCodeWriter.Append(").GetAsyncEnumerator();");
+        sourceCodeWriter.AppendLine();
+        sourceCodeWriter.Append("try");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append("if (await enumerator.MoveNextAsync())");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append("var result = await enumerator.Current();");
+        sourceCodeWriter.Append($"return ({propertyType})(result?.ElementAtOrDefault(0)");
 
         if (isReferenceType && !isNullable)
         {
-            sourceCodeWriter.Write(")!; ");
+            sourceCodeWriter.Append(")!; ");
         }
         else if (property.Type.IsValueType && !isNullable)
         {
-            sourceCodeWriter.Write($" ?? default({propertyType}));");
+            sourceCodeWriter.Append($" ?? default({propertyType}));");
         }
         else
         {
-            sourceCodeWriter.Write(");");
+            sourceCodeWriter.Append(");");
         }
 
-        sourceCodeWriter.Write("} ");
-        sourceCodeWriter.Write($"return default({propertyType});");
-        sourceCodeWriter.Write("}");
-        sourceCodeWriter.Write("finally");
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write("await enumerator.DisposeAsync();");
-        sourceCodeWriter.Write("}");
-        sourceCodeWriter.Write("})()");
+        sourceCodeWriter.Append("} ");
+        sourceCodeWriter.Append($"return default({propertyType});");
+        sourceCodeWriter.Append("}");
+        sourceCodeWriter.Append("finally");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append("await enumerator.DisposeAsync();");
+        sourceCodeWriter.Append("}");
+        sourceCodeWriter.Append("})()");
         if (isNested)
         {
-            sourceCodeWriter.Write(",");
+            sourceCodeWriter.Append(",");
         }
         else
         {
-            sourceCodeWriter.Write(";");
+            sourceCodeWriter.Append(";");
         }
-        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.AppendLine();
 
         return sourceCodeWriter.ToString();
     }
 
-    public static void WriteDataGeneratorMetadataProperty(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
+    public static void WriteDataGeneratorMetadataProperty(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {
-        sourceCodeWriter.Write("new DataGeneratorMetadata");
-        sourceCodeWriter.WriteLine();
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write($"Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
-        sourceCodeWriter.Write("TestBuilderContext = testBuilderContextAccessor,");
-        sourceCodeWriter.Write("TestInformation = testInformation,");
+        sourceCodeWriter.Append("new DataGeneratorMetadata");
+        sourceCodeWriter.AppendLine();
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append($"Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
+        sourceCodeWriter.Append("TestBuilderContext = testBuilderContextAccessor,");
+        sourceCodeWriter.Append("TestInformation = testInformation,");
 
-        sourceCodeWriter.Write("MembersToGenerate = ");
+        sourceCodeWriter.Append("MembersToGenerate = ");
         SourceInformationWriter.GenerateMembers(sourceCodeWriter, context, namedTypeSymbol, ImmutableArray<IParameterSymbol>.Empty, property, ArgumentsType.Property);
 
-        sourceCodeWriter.Write("TestSessionId = sessionId,");
-        sourceCodeWriter.Write("TestClassInstance = classInstance,");
-        sourceCodeWriter.Write("ClassInstanceArguments = classInstanceArguments,");
-        sourceCodeWriter.Write("}");
+        sourceCodeWriter.Append("TestSessionId = sessionId,");
+        sourceCodeWriter.Append("TestClassInstance = classInstance,");
+        sourceCodeWriter.Append("ClassInstanceArguments = classInstanceArguments,");
+        sourceCodeWriter.Append("}");
     }
 
-    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(ICodeWriter sourceCodeWriter)
     {
         if (ArgumentsType is ArgumentsType.Property)
         {
             return;
         }
 
-        sourceCodeWriter.Write("}");
+        sourceCodeWriter.Append("}");
     }
 
     public override string[] GetArgumentTypes()

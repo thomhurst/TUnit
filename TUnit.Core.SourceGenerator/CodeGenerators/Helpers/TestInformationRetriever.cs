@@ -18,61 +18,62 @@ public static class TestInformationRetriever
 
     public static string GetTestId(TestGenerationContext testGenerationContext)
     {
-        using var writer = new SourceCodeWriter(1); // Inline expression
+        using var writer = new CodeWriter("", includeHeader: false);
+        writer._indentLevel++; // For inline expression
 
         if (testGenerationContext.ClassArguments is DataSourceAttributeContainer { Attribute.AttributeClass: not null } classDataAttributeContainer)
         {
-            writer.Write($"{classDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.ClassDataIndex}}}:");
+            writer.Append($"{classDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.ClassDataIndex}}}:");
         }
 
         if (testGenerationContext.ClassArguments is MethodDataSourceAttributeContainer classLevelMethodDataSourceAttributeContainer)
         {
-            writer.Write(classLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
+            writer.Append(classLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
                 ? $"CL-EMDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.ClassDataIndex}}}:"
                 : $"CL-MDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:");
         }
 
         if (testGenerationContext.ClassArguments is ArgumentsAttributeContainer classLevelArgumentsContainer)
         {
-            writer.Write($"CL-ARGS{classLevelArgumentsContainer.AttributeIndex}:");
+            writer.Append($"CL-ARGS{classLevelArgumentsContainer.AttributeIndex}:");
         }
         
         if (testGenerationContext.ClassArguments is ClassConstructorAttributeContainer classLevelClassConstructorAttribute)
         {
-            writer.Write($"CL-CCA{classLevelClassConstructorAttribute.AttributeIndex}:");
+            writer.Append($"CL-CCA{classLevelClassConstructorAttribute.AttributeIndex}:");
         }
         
         if (testGenerationContext.ClassArguments is AsyncDataSourceGeneratorContainer classLevelGeneratedArgumentsContainer)
         {
-            writer.Write($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
+            writer.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
         
         if (testGenerationContext.TestArguments is DataSourceAttributeContainer { Attribute.AttributeClass: not null } testMethodDataAttributeContainer)
         {
-            writer.Write($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
+            writer.Append($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
         }
 
         if (testGenerationContext.TestArguments is MethodDataSourceAttributeContainer testLevelMethodDataSourceAttributeContainer)
         {
-            writer.Write(testLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
+            writer.Append(testLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
                 ? $"TL-EMDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.TestMethodDataIndex}}}:"
                 : $"TL-MDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:");
         }
 
         if (testGenerationContext.TestArguments is ArgumentsAttributeContainer testLevelArgumentsContainer)
         {
-            writer.Write($"TL-ARGS{testLevelArgumentsContainer.AttributeIndex}:");
+            writer.Append($"TL-ARGS{testLevelArgumentsContainer.AttributeIndex}:");
         }
         
         if (testGenerationContext.TestArguments is AsyncDataSourceGeneratorContainer testLevelGeneratedArgumentsContainer)
         {
-            writer.Write($"TL-GAC{testLevelGeneratedArgumentsContainer.AttributeIndex}:");
+            writer.Append($"TL-GAC{testLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
         
         var fullyQualifiedClassName =
             testGenerationContext.ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
-        writer.Write(fullyQualifiedClassName);
+        writer.Append(fullyQualifiedClassName);
         
         var classParameters = testGenerationContext.ClassSymbol.Constructors.SafeFirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         
@@ -80,25 +81,25 @@ public static class TestInformationRetriever
 
         if (!string.IsNullOrEmpty(classParameterTypes))
         {
-            writer.Write(classParameterTypes);
+            writer.Append(classParameterTypes);
         }
         
-        writer.Write(".");
+        writer.Append(".");
         
         var testName = testGenerationContext.MethodSymbol.Name;
         
-        writer.Write(testName);
+        writer.Append(testName);
 
         var methodParameterTypes = GetTypes(testGenerationContext.MethodSymbol.Parameters);
 
         if (!string.IsNullOrEmpty(methodParameterTypes))
         {
-            writer.Write(methodParameterTypes);
+            writer.Append(methodParameterTypes);
         }
         
-        writer.Write(":");
+        writer.Append(":");
         
-        writer.Write(testGenerationContext.CurrentRepeatAttempt.ToString());
+        writer.Append(testGenerationContext.CurrentRepeatAttempt.ToString());
         
         return writer.ToString().Trim();
     }

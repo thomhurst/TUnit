@@ -7,46 +7,46 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public static class SourceInformationWriter
 {
-    public static void GenerateClassInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
+    public static void GenerateClassInformation(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
     {
-        sourceCodeWriter.Write($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{namedTypeSymbol.GloballyQualified()}\", () => new global::TUnit.Core.ClassMetadata");
-        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Append($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{namedTypeSymbol.GloballyQualified()}\", () => new global::TUnit.Core.ClassMetadata");
+        sourceCodeWriter.Append("{");
 
         var parent = namedTypeSymbol.ContainingType;
 
         if (parent != null)
         {
-            sourceCodeWriter.Write("Parent = ");
+            sourceCodeWriter.Append("Parent = ");
             GenerateClassInformation(sourceCodeWriter, context, parent);
         }
         else
         {
-            sourceCodeWriter.Write("Parent = null,");
+            sourceCodeWriter.Append("Parent = null,");
         }
 
-        sourceCodeWriter.Write($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
-        sourceCodeWriter.Write($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(namedTypeSymbol)},");
+        sourceCodeWriter.Append($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
+        sourceCodeWriter.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(namedTypeSymbol)},");
 
-        sourceCodeWriter.Write("Assembly = ");
+        sourceCodeWriter.Append("Assembly = ");
         GenerateAssemblyInformation(sourceCodeWriter, context, namedTypeSymbol.ContainingAssembly);
 
-        sourceCodeWriter.Write($"Name = \"{namedTypeSymbol.Name}\",");
-        sourceCodeWriter.Write($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
+        sourceCodeWriter.Append($"Name = \"{namedTypeSymbol.Name}\",");
+        sourceCodeWriter.Append($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
 
-        sourceCodeWriter.Write("Attributes = ");
+        sourceCodeWriter.Append("Attributes = ");
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray(), "Class", namedTypeSymbol.Name, namedTypeSymbol.ToDisplayString());
 
-        sourceCodeWriter.Write("Parameters = ");
+        sourceCodeWriter.Append("Parameters = ");
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters
             ?? ImmutableArray<IParameterSymbol>.Empty;
 
         if (parameters.Length == 0)
         {
-            sourceCodeWriter.Write("[],");
+            sourceCodeWriter.Append("[],");
         }
         else
         {
-            sourceCodeWriter.Write("[");
+            sourceCodeWriter.Append("[");
 
             foreach (var parameter in parameters)
             {
@@ -54,91 +54,91 @@ public static class SourceInformationWriter
                     null);
             }
 
-            sourceCodeWriter.Write("],");
+            sourceCodeWriter.Append("],");
         }
 
-        sourceCodeWriter.Write("Properties = ");
+        sourceCodeWriter.Append("Properties = ");
         var properties = namedTypeSymbol.GetMembersIncludingBase().OfType<IPropertySymbol>().ToArray();
 
         if(properties.Length == 0)
         {
-            sourceCodeWriter.Write("[],");
+            sourceCodeWriter.Append("[],");
         }
         else
         {
-            sourceCodeWriter.Write("[");
+            sourceCodeWriter.Append("[");
 
             foreach (var propertySymbol in properties.Where(x => x.DeclaredAccessibility == Accessibility.Public))
             {
                 GeneratePropertyInformation(sourceCodeWriter, context, propertySymbol, namedTypeSymbol);
             }
 
-            sourceCodeWriter.Write("],");
+            sourceCodeWriter.Append("],");
         }
 
-        sourceCodeWriter.Write("Constructors = ");
+        sourceCodeWriter.Append("Constructors = ");
         var constructors = namedTypeSymbol.GetMembers().OfType<IMethodSymbol>()
             .Where(m => m.MethodKind == MethodKind.Constructor)
             .ToArray();
 
         if(constructors.Length == 0)
         {
-            sourceCodeWriter.Write("[],");
+            sourceCodeWriter.Append("[],");
         }
         else
         {
-            sourceCodeWriter.Write("[");
+            sourceCodeWriter.Append("[");
 
             foreach (var constructor in constructors)
             {
                 GenerateConstructorInformation(sourceCodeWriter, context, namedTypeSymbol, constructor);
             }
 
-            sourceCodeWriter.Write("],");
+            sourceCodeWriter.Append("],");
         }
 
-        sourceCodeWriter.Write("}),");
+        sourceCodeWriter.Append("}),");
     }
 
-    private static void GenerateAssemblyInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, IAssemblySymbol assembly)
+    private static void GenerateAssemblyInformation(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, IAssemblySymbol assembly)
     {
-        sourceCodeWriter.Write(
+        sourceCodeWriter.Append(
             $"global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{assembly.Name}\", () => new global::TUnit.Core.AssemblyMetadata");
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write($"Name = \"{assembly.Name}\",");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append($"Name = \"{assembly.Name}\",");
 
-        sourceCodeWriter.Write("Attributes = ");
+        sourceCodeWriter.Append("Attributes = ");
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, assembly.GetAttributes(), "Assembly", assembly.Name);
 
-        sourceCodeWriter.Write("}),");
+        sourceCodeWriter.Append("}),");
     }
 
-    public static void GenerateMethodInformation(SourceCodeWriter sourceCodeWriter,
+    public static void GenerateMethodInformation(ICodeWriter sourceCodeWriter,
         GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol,
         IDictionary<string, string>? genericSubstitutions, char suffix)
     {
-        sourceCodeWriter.Write("new global::TUnit.Core.MethodMetadata");
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
-        sourceCodeWriter.Write($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(namedTypeSymbol)},");
-        sourceCodeWriter.Write($"Name = \"{methodSymbol.Name}\",");
-        sourceCodeWriter.Write($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
-        sourceCodeWriter.Write($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
-        sourceCodeWriter.Write($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
+        sourceCodeWriter.Append("new global::TUnit.Core.MethodMetadata");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
+        sourceCodeWriter.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(namedTypeSymbol)},");
+        sourceCodeWriter.Append($"Name = \"{methodSymbol.Name}\",");
+        sourceCodeWriter.Append($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
+        sourceCodeWriter.Append($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
+        sourceCodeWriter.Append($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
 
-        sourceCodeWriter.Write("Attributes = ");
+        sourceCodeWriter.Append("Attributes = ");
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, methodSymbol.GetAttributes(), "Method", methodSymbol.Name, namedTypeSymbol.ToDisplayString());
 
-        sourceCodeWriter.Write("Parameters = ");
+        sourceCodeWriter.Append("Parameters = ");
         var parameters = methodSymbol.Parameters;
 
         if (parameters.Length == 0)
         {
-            sourceCodeWriter.Write("[],");
+            sourceCodeWriter.Append("[],");
         }
         else
         {
-            sourceCodeWriter.Write("[");
+            sourceCodeWriter.Append("[");
 
             foreach (var parameter in parameters)
             {
@@ -146,26 +146,26 @@ public static class SourceInformationWriter
                     null);
             }
 
-            sourceCodeWriter.Write("],");
+            sourceCodeWriter.Append("],");
         }
 
-        sourceCodeWriter.Write("Class = ");
+        sourceCodeWriter.Append("Class = ");
         GenerateClassInformation(sourceCodeWriter, context, namedTypeSymbol);
 
-        sourceCodeWriter.Write("}");
-        sourceCodeWriter.Write($"{suffix}");
-        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.Append("}");
+        sourceCodeWriter.Append($"{suffix}");
+        sourceCodeWriter.AppendLine();
     }
 
-    public static void GenerateMembers(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? property, ArgumentsType argumentsType)
+    public static void GenerateMembers(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? property, ArgumentsType argumentsType)
     {
         if(parameters.Length == 0 && property is null)
         {
-            sourceCodeWriter.Write("[],");
+            sourceCodeWriter.Append("[],");
             return;
         }
 
-        sourceCodeWriter.Write("[");
+        sourceCodeWriter.Append("[");
 
         if (property is not null)
         {
@@ -177,68 +177,68 @@ public static class SourceInformationWriter
             GenerateParameterInformation(sourceCodeWriter, context, parameter, argumentsType, null);
         }
 
-        sourceCodeWriter.Write("],");
+        sourceCodeWriter.Append("],");
     }
 
-    public static void GeneratePropertyInformation(SourceCodeWriter sourceCodeWriter,
+    public static void GeneratePropertyInformation(ICodeWriter sourceCodeWriter,
         GeneratorAttributeSyntaxContext context, IPropertySymbol property, INamedTypeSymbol namedTypeSymbol)
     {
-        sourceCodeWriter.Write("new global::TUnit.Core.PropertyMetadata");
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write($"ReflectionInfo = typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\"),");
-        sourceCodeWriter.Write($"Type = typeof({property.Type.GloballyQualified()}),");
-        sourceCodeWriter.Write($"Name = \"{property.Name}\",");
-        sourceCodeWriter.Write($"IsStatic = {property.IsStatic.ToString().ToLower()},");
-        sourceCodeWriter.Write($"Getter = {GetPropertyAccessor(namedTypeSymbol, property)},");
+        sourceCodeWriter.Append("new global::TUnit.Core.PropertyMetadata");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append($"ReflectionInfo = typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\"),");
+        sourceCodeWriter.Append($"Type = typeof({property.Type.GloballyQualified()}),");
+        sourceCodeWriter.Append($"Name = \"{property.Name}\",");
+        sourceCodeWriter.Append($"IsStatic = {property.IsStatic.ToString().ToLower()},");
+        sourceCodeWriter.Append($"Getter = {GetPropertyAccessor(namedTypeSymbol, property)},");
 
-        sourceCodeWriter.Write("Attributes = ");
+        sourceCodeWriter.Append("Attributes = ");
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, property.GetAttributes(), "Property", property.Name, namedTypeSymbol.ToDisplayString());
 
         // For now, always set ClassMetadata to null to avoid circular references
         // The ClassMetadata will be available through the cache if needed at runtime
-        sourceCodeWriter.Write("ClassMetadata = null,");
+        sourceCodeWriter.Append("ClassMetadata = null,");
 
-        sourceCodeWriter.Write("}");
-            sourceCodeWriter.Write(",");
+        sourceCodeWriter.Append("}");
+            sourceCodeWriter.Append(",");
     }
 
-    private static void GenerateConstructorInformation(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IMethodSymbol constructor)
+    private static void GenerateConstructorInformation(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IMethodSymbol constructor)
     {
-        sourceCodeWriter.Write("new global::TUnit.Core.ConstructorMetadata");
-        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Append("new global::TUnit.Core.ConstructorMetadata");
+        sourceCodeWriter.Append("{");
 
-        sourceCodeWriter.Write($"Type = typeof({constructor.ContainingType.GloballyQualified()}),");
-        sourceCodeWriter.Write($"Name = \".ctor\",");
-        sourceCodeWriter.Write($"IsStatic = {constructor.IsStatic.ToString().ToLowerInvariant()},");
-        sourceCodeWriter.Write($"IsPublic = {(constructor.DeclaredAccessibility == Accessibility.Public).ToString().ToLowerInvariant()},");
-        sourceCodeWriter.Write($"IsPrivate = {(constructor.DeclaredAccessibility == Accessibility.Private).ToString().ToLowerInvariant()},");
-        sourceCodeWriter.Write($"IsProtected = {(constructor.DeclaredAccessibility == Accessibility.Protected).ToString().ToLowerInvariant()},");
-        sourceCodeWriter.Write($"IsInternal = {(constructor.DeclaredAccessibility == Accessibility.Internal).ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Append($"Type = typeof({constructor.ContainingType.GloballyQualified()}),");
+        sourceCodeWriter.Append($"Name = \".ctor\",");
+        sourceCodeWriter.Append($"IsStatic = {constructor.IsStatic.ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Append($"IsPublic = {(constructor.DeclaredAccessibility == Accessibility.Public).ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Append($"IsPrivate = {(constructor.DeclaredAccessibility == Accessibility.Private).ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Append($"IsProtected = {(constructor.DeclaredAccessibility == Accessibility.Protected).ToString().ToLowerInvariant()},");
+        sourceCodeWriter.Append($"IsInternal = {(constructor.DeclaredAccessibility == Accessibility.Internal).ToString().ToLowerInvariant()},");
 
-        sourceCodeWriter.Write("Attributes = ");
+        sourceCodeWriter.Append("Attributes = ");
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, constructor.GetAttributes(), "Constructor", ".ctor", namedTypeSymbol.ToDisplayString());
 
-        sourceCodeWriter.Write("Parameters = ");
+        sourceCodeWriter.Append("Parameters = ");
         var parameters = constructor.Parameters;
 
         if (parameters.Length == 0)
         {
-            sourceCodeWriter.Write("[],");
+            sourceCodeWriter.Append("[],");
         }
         else
         {
-            sourceCodeWriter.Write("[");
+            sourceCodeWriter.Append("[");
 
             foreach (var parameter in parameters)
             {
                 GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor, null);
             }
 
-            sourceCodeWriter.Write("],");
+            sourceCodeWriter.Append("],");
         }
 
-        sourceCodeWriter.Write("}");
-            sourceCodeWriter.Write(",");
+        sourceCodeWriter.Append("}");
+            sourceCodeWriter.Append(",");
     }
 
     private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
@@ -278,7 +278,7 @@ public static class SourceInformationWriter
         return false;
     }
 
-    public static void GenerateParameterInformation(SourceCodeWriter sourceCodeWriter,
+    public static void GenerateParameterInformation(ICodeWriter sourceCodeWriter,
         GeneratorAttributeSyntaxContext context,
         IParameterSymbol parameter, ArgumentsType argumentsType,
         IDictionary<string, string>? genericSubstitutions)
@@ -290,12 +290,12 @@ public static class SourceInformationWriter
             type = GetTypeOrSubstitution(parameter.Type);
         }
 
-        sourceCodeWriter.Write($"new global::TUnit.Core.ParameterMetadata<{type}>");
-        sourceCodeWriter.Write("{");
-        sourceCodeWriter.Write($"Name = \"{parameter.Name}\",");
-        sourceCodeWriter.Write($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},");
+        sourceCodeWriter.Append($"new global::TUnit.Core.ParameterMetadata<{type}>");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append($"Name = \"{parameter.Name}\",");
+        sourceCodeWriter.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},");
 
-        sourceCodeWriter.Write("Attributes = ");
+        sourceCodeWriter.Append("Attributes = ");
         var containingType = parameter.ContainingSymbol switch
         {
             IMethodSymbol method => method.ContainingType,
@@ -305,7 +305,7 @@ public static class SourceInformationWriter
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, parameter.GetAttributes(), "Parameter", parameter.Name, containingType?.ToDisplayString());
 
         // TODO: Struggling to get this to work with generic type parameters
-        sourceCodeWriter.Write("ReflectionInfo = null!,");
+        sourceCodeWriter.Append("ReflectionInfo = null!,");
 
         // if(argumentsType == ArgumentsType.ClassConstructor)
         // {
@@ -330,8 +330,8 @@ public static class SourceInformationWriter
         //     sourceCodeWriter.WriteLine($"ReflectionInfo = global::TUnit.Core.Helpers.RobustParameterInfoRetriever.GetMethodParameterInfo(typeof({containingType}), \"{methodName}\", {parameterIndex}, new Type[] {{{parameterTypesString}}}, {isStatic.ToString().ToLowerInvariant()}, {genericParameterCount}),");
         // }
 
-        sourceCodeWriter.Write("}");
-            sourceCodeWriter.Write(",");
+        sourceCodeWriter.Append("}");
+            sourceCodeWriter.Append(",");
 
         string GetTypeOrSubstitution(ITypeSymbol type)
         {

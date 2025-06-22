@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
+      "Bash(find*)",
       "Bash(ls:*)",
       "Bash(git checkout:*)",
       "Bash(git pull:*)",
@@ -51,7 +52,8 @@
       "Bash(dotnet restore:*)",
       "Bash(true)",
       "Bash(/home/thomh/dev/TUnit/update_test_assertions.sh:*)",
-      "Bash(./bin/Release/net8.0/Playground:*)"
+      "Bash(./bin/Release/net8.0/Playground:*)",
+      "mcp__zen__version"
     ],
     "deny": []
   }

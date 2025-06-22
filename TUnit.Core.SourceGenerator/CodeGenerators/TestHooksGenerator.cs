@@ -106,90 +106,90 @@ public class TestHooksGenerator : IIncrementalGenerator
             {
                 var className = $"Hooks_{groupedByTypeName.Key}";
 
-                using var sourceBuilder = new SourceCodeWriter();
+                using var sourceBuilder = new CodeWriter();
 
-                sourceBuilder.Write("using global::System.Linq;");
-                sourceBuilder.Write("using global::System.Reflection;");
-                sourceBuilder.Write("using global::System.Runtime.CompilerServices;");
-                sourceBuilder.Write("using global::TUnit.Core;");
-                sourceBuilder.Write("using global::TUnit.Core.Hooks;");
-                sourceBuilder.Write("using global::TUnit.Core.Interfaces;");
-                sourceBuilder.WriteLine();
-                sourceBuilder.Write("namespace TUnit.SourceGenerated;");
-                sourceBuilder.WriteLine();
-                sourceBuilder.Write("[global::System.Diagnostics.StackTraceHidden]");
-                sourceBuilder.Write("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
+                sourceBuilder.AppendLine("using global::System.Linq;");
+                sourceBuilder.AppendLine("using global::System.Reflection;");
+                sourceBuilder.AppendLine("using global::System.Runtime.CompilerServices;");
+                sourceBuilder.AppendLine("using global::TUnit.Core;");
+                sourceBuilder.AppendLine("using global::TUnit.Core.Hooks;");
+                sourceBuilder.AppendLine("using global::TUnit.Core.Interfaces;");
+                sourceBuilder.AppendLine();
+                sourceBuilder.AppendLine("namespace TUnit.SourceGenerated;");
+                sourceBuilder.AppendLine();
+                sourceBuilder.AppendLine("[global::System.Diagnostics.StackTraceHidden]");
+                sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
 
                 var distinctHookLevelsForClass = groupedByTypeName.Select(x => x.HookLevel).Distinct().ToList();
 
-                sourceBuilder.Write($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestHooksGenerator).Assembly.GetName().Version}\")]");
-                sourceBuilder.Write(
+                sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestHooksGenerator).Assembly.GetName().Version}\")]");
+                sourceBuilder.AppendLine(
                     $"file partial class {className} : {string.Join(", ", distinctHookLevelsForClass.Select(GetInterfaceType))}");
-                sourceBuilder.Write("{");
-                sourceBuilder.Write("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-                sourceBuilder.Write("public static void Initialise()");
-                sourceBuilder.Write("{");
-
-                sourceBuilder.Write($"var instance = new {className}();");
-                foreach (var hookLevel in distinctHookLevelsForClass)
+                using (sourceBuilder.Block())
                 {
-                    sourceBuilder.Write($"SourceRegistrar.{GetSourceRegisterMethodName(hookLevel)}(instance);");
-                }
-
-                sourceBuilder.Write("}");
-                sourceBuilder.WriteLine();
-
-                foreach (var hooksGroupedByLevel in groupedByTypeName.GroupBy(x => x.HookLevel))
-                {
-                    foreach (var isEvery in new[] { true, false })
+                    sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+                    sourceBuilder.AppendLine("public static void Initialise()");
+                    using (sourceBuilder.Block())
                     {
-                        if (isEvery && hooksGroupedByLevel.Key
-                                is "TUnit.Core.HookType.TestDiscovery"
-                                or "TUnit.Core.HookType.TestSession")
+                        sourceBuilder.AppendLine($"var instance = new {className}();");
+                        foreach (var hookLevel in distinctHookLevelsForClass)
                         {
-                            // These don't have an 'isEvery' option
-                            continue;
+                            sourceBuilder.AppendLine($"SourceRegistrar.{GetSourceRegisterMethodName(hookLevel)}(instance);");
                         }
+                    }
+                    sourceBuilder.AppendLine();
 
-                        foreach (var hookLocationType in new[] { HookLocationType.Before, HookLocationType.After })
+                    foreach (var hooksGroupedByLevel in groupedByTypeName.GroupBy(x => x.HookLevel))
+                    {
+                        foreach (var isEvery in new[] { true, false })
                         {
-                            sourceBuilder.Write(
-                                $"public global::System.Collections.Generic.IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}(string sessionId)");
-
-                            sourceBuilder.Write("{");
-                            sourceBuilder.Write("return");
-                            sourceBuilder.Write("[");
-
-                            foreach (var model in hooksGroupedByLevel.Where(x =>
-                                         x.HookLocationType == hookLocationType && x.IsEveryHook == isEvery))
+                            if (isEvery && hooksGroupedByLevel.Key
+                                    is "TUnit.Core.HookType.TestDiscovery"
+                                    or "TUnit.Core.HookType.TestSession")
                             {
-                                if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Test")
-                                {
-                                    TestHooksWriter.Execute(sourceBuilder, model);
-                                }
-                                else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Class")
-                                {
-                                    ClassHooksWriter.Execute(sourceBuilder, model);
-                                }
-                                else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Assembly")
-                                {
-                                    AssemblyHooksWriter.Execute(sourceBuilder, model);
-                                }
-                                else if (hooksGroupedByLevel.Key is "TUnit.Core.HookType.TestDiscovery"
-                                         or "TUnit.Core.HookType.TestSession")
-                                {
-                                    GlobalTestHooksWriter.Execute(sourceBuilder, model);
-                                }
+                                // These don't have an 'isEvery' option
+                                continue;
                             }
 
-                            sourceBuilder.Write("];");
-                            sourceBuilder.Write("}");
-                            sourceBuilder.WriteLine();
+                            foreach (var hookLocationType in new[] { HookLocationType.Before, HookLocationType.After })
+                            {
+                                sourceBuilder.AppendLine(
+                                    $"public global::System.Collections.Generic.IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}(string sessionId)");
+
+                                using (sourceBuilder.Block())
+                                {
+                                    sourceBuilder.AppendLine("return");
+                                    sourceBuilder.AppendLine("[");
+
+                                    foreach (var model in hooksGroupedByLevel.Where(x =>
+                                                 x.HookLocationType == hookLocationType && x.IsEveryHook == isEvery))
+                                    {
+                                        if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Test")
+                                        {
+                                            TestHooksWriter.Execute(sourceBuilder, model);
+                                        }
+                                        else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Class")
+                                        {
+                                            ClassHooksWriter.Execute(sourceBuilder, model);
+                                        }
+                                        else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Assembly")
+                                        {
+                                            AssemblyHooksWriter.Execute(sourceBuilder, model);
+                                        }
+                                        else if (hooksGroupedByLevel.Key is "TUnit.Core.HookType.TestDiscovery"
+                                                 or "TUnit.Core.HookType.TestSession")
+                                        {
+                                            GlobalTestHooksWriter.Execute(sourceBuilder, model);
+                                        }
+                                    }
+
+                                    sourceBuilder.AppendLine("];");
+                                }
+                                sourceBuilder.AppendLine();
+                            }
                         }
                     }
                 }
-
-                sourceBuilder.Write("}");
 
                 productionContext.AddSource($"{className}-{Guid.NewGuid():N}.Generated.cs", sourceBuilder.ToString());
             }

@@ -7,56 +7,56 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 
 public class TestHooksWriter : BaseHookWriter
 {
-    public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model)
+    public static void Execute(ICodeWriter sourceBuilder, HooksDataModel model)
     {
         if (model.IsEveryHook)
         {
             if (model.HookLocationType == HookLocationType.Before)
             {
-                sourceBuilder.Write("new global::TUnit.Core.Hooks.BeforeTestHookMethod");
+                sourceBuilder.Append("new global::TUnit.Core.Hooks.BeforeTestHookMethod");
             }
             else
             {
-                sourceBuilder.Write("new global::TUnit.Core.Hooks.AfterTestHookMethod");
+                sourceBuilder.Append("new global::TUnit.Core.Hooks.AfterTestHookMethod");
             }
 
-            sourceBuilder.Write("{");
-            sourceBuilder.Write("MethodInfo = ");
+            sourceBuilder.Append("{");
+            sourceBuilder.Append("MethodInfo = ");
             SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
 
-            sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
+            sourceBuilder.Append($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
 
-            sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
-            sourceBuilder.Write($"Order = {model.Order},");
-            sourceBuilder.Write($"""FilePath = @"{model.FilePath}",""");
-            sourceBuilder.Write($"LineNumber = {model.LineNumber},");
+            sourceBuilder.Append($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+            sourceBuilder.Append($"Order = {model.Order},");
+            sourceBuilder.Append($"""FilePath = @"{model.FilePath}",""");
+            sourceBuilder.Append($"LineNumber = {model.LineNumber},");
 
-            sourceBuilder.Write("},");
+            sourceBuilder.Append("},");
 
             return;
         }
 
-        sourceBuilder.Write("new global::TUnit.Core.Hooks.InstanceHookMethod");
-        sourceBuilder.Write("{");
-        sourceBuilder.Write($"ClassType = typeof({model.FullyQualifiedTypeName}),");
-        sourceBuilder.Write("MethodInfo = ");
+        sourceBuilder.Append("new global::TUnit.Core.Hooks.InstanceHookMethod");
+        sourceBuilder.Append("{");
+        sourceBuilder.Append($"ClassType = typeof({model.FullyQualifiedTypeName}),");
+        sourceBuilder.Append("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
 
 
         if (model.ClassType.IsGenericDefinition())
         {
-            sourceBuilder.Write(
+            sourceBuilder.Append(
                 $"Body = (classInstance, context, cancellationToken) => AsyncConvert.ConvertObject(() => classInstance.GetType().GetMethod(\"{model.MethodName}\", [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]).Invoke(classInstance, {GetArgsOrEmptyArray(model)})),");
         }
         else
         {
-            sourceBuilder.Write($"Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => (({model.FullyQualifiedTypeName})classInstance).{model.MethodName}({GetArgs(model)})),");
+            sourceBuilder.Append($"Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => (({model.FullyQualifiedTypeName})classInstance).{model.MethodName}({GetArgs(model)})),");
         }
 
-        sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
-        sourceBuilder.Write($"Order = {model.Order},");
+        sourceBuilder.Append($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+        sourceBuilder.Append($"Order = {model.Order},");
 
-        sourceBuilder.Write("},");
+        sourceBuilder.Append("},");
     }
 
     private static string GetArgsOrEmptyArray(HooksDataModel model)

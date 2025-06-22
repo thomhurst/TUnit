@@ -17,19 +17,19 @@ public class DisableReflectionScannerGenerator : IIncrementalGenerator
 
     private void GenerateCode(SourceProductionContext context)
     {
-        var sourceBuilder = new SourceCodeWriter();
+        var sourceBuilder = new CodeWriter();
 
-        sourceBuilder.Write($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DisableReflectionScannerGenerator).Assembly.GetName().Version}\")]");
-        sourceBuilder.Write("file static class DisableReflectionScanner_" + Guid.NewGuid().ToString("N"));
-        sourceBuilder.Write("{");
-        sourceBuilder.Write("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-        sourceBuilder.Write("public static void Initialize()");
-        sourceBuilder.Write("{");
-
-        sourceBuilder.Write("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
-
-        sourceBuilder.Write("}");
-        sourceBuilder.Write("}");
+        sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DisableReflectionScannerGenerator).Assembly.GetName().Version}\")]");
+        sourceBuilder.AppendLine("file static class DisableReflectionScanner_" + Guid.NewGuid().ToString("N"));
+        using (sourceBuilder.Block())
+        {
+            sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+            sourceBuilder.AppendLine("public static void Initialize()");
+            using (sourceBuilder.Block())
+            {
+                sourceBuilder.AppendLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
+            }
+        }
 
         context.AddSource("DisableReflectionScanner.g.cs", sourceBuilder.ToString());
     }

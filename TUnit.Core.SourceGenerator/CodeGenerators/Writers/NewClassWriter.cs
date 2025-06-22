@@ -5,20 +5,20 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public static class NewClassWriter
 {
-    public static void ConstructClass(SourceCodeWriter sourceCodeWriter, string typeName, BaseContainer argumentsContainer, ClassPropertiesContainer classPropertiesContainer)
+    public static void ConstructClass(ICodeWriter sourceCodeWriter, string typeName, BaseContainer argumentsContainer, ClassPropertiesContainer classPropertiesContainer)
     {
         if (argumentsContainer is ClassConstructorAttributeContainer classConstructorAttributeContainer)
         {
-            sourceCodeWriter.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>(sessionId, testBuilderContext);");
+            sourceCodeWriter.Append($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>(sessionId, testBuilderContext);");
             return;
         }
         
-        sourceCodeWriter.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{typeName}>(() => ");
+        sourceCodeWriter.Append($"var resettableClassFactoryDelegate = () => new ResettableLazy<{typeName}>(() => ");
 
-        sourceCodeWriter.Write($"new {typeName}({argumentsContainer.DataVariables.Select(x => x.Name).ToCommaSeparatedString()})");
+        sourceCodeWriter.Append($"new {typeName}({argumentsContainer.DataVariables.Select(x => x.Name).ToCommaSeparatedString()})");
 
         classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
         
-        sourceCodeWriter.Write(", sessionId, testBuilderContext);");
+        sourceCodeWriter.Append(", sessionId, testBuilderContext);");
     }
 }

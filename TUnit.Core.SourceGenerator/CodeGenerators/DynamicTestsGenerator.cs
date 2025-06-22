@@ -47,59 +47,55 @@ public class DynamicTestsGenerator : IIncrementalGenerator
         {
             var className = dynamicTestSource.Class.Name;
 
-            using var sourceBuilder = new SourceCodeWriter();
+            using var sourceBuilder = new CodeWriter();
 
-            sourceBuilder.Write("using global::System.Linq;");
-            sourceBuilder.Write("using global::System.Reflection;");
-            sourceBuilder.Write("using global::TUnit.Core;");
-            sourceBuilder.Write("using global::TUnit.Core.Extensions;");
-            sourceBuilder.WriteLine();
-            sourceBuilder.Write("namespace TUnit.SourceGenerated;");
-            sourceBuilder.WriteLine();
-            sourceBuilder.Write("[global::System.Diagnostics.StackTraceHidden]");
-            sourceBuilder.Write("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.Write($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DynamicTestsGenerator).Assembly.GetName().Version}\")]");
-            sourceBuilder.Write(
+            sourceBuilder.AppendLine("using global::System.Linq;");
+            sourceBuilder.AppendLine("using global::System.Reflection;");
+            sourceBuilder.AppendLine("using global::TUnit.Core;");
+            sourceBuilder.AppendLine("using global::TUnit.Core.Extensions;");
+            sourceBuilder.AppendLine();
+            sourceBuilder.AppendLine("namespace TUnit.SourceGenerated;");
+            sourceBuilder.AppendLine();
+            sourceBuilder.AppendLine("[global::System.Diagnostics.StackTraceHidden]");
+            sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
+            sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DynamicTestsGenerator).Assembly.GetName().Version}\")]");
+            sourceBuilder.AppendLine(
                 $"file partial class {className} : global::TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource");
-            sourceBuilder.Write("{");
+            using (sourceBuilder.Block())
+            {
+                sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+                sourceBuilder.AppendLine("public static void Initialise()");
+                using (sourceBuilder.Block())
+                {
+                    sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterDynamic(new {className}());");
+                }
 
-            sourceBuilder.Write("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-            sourceBuilder.Write("public static void Initialise()");
-            sourceBuilder.Write("{");
-            sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.RegisterDynamic(new {className}());");
-            sourceBuilder.Write("}");
+                sourceBuilder.AppendLine(
+                    "public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)");
+                using (sourceBuilder.Block())
+                {
+                    sourceBuilder.AppendLine("try");
+                    using (sourceBuilder.Block())
+                    {
+                        sourceBuilder.AppendLine(
+                            $"""
+                             var context = new global::TUnit.Core.DynamicTestBuilderContext(@"{dynamicTestSource.FilePath}", {dynamicTestSource.LineNumber});
+                             """);
 
-            sourceBuilder.Write(
-                "public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)");
-            sourceBuilder.Write("{");
+                        var receiver = dynamicTestSource.Method.IsStatic
+                            ? dynamicTestSource.Class.GloballyQualified()
+                            : $"new {dynamicTestSource.Class.GloballyQualified()}()";
 
-            sourceBuilder.Write("try");
-            sourceBuilder.Write("{");
-
-            sourceBuilder.Write
-            (
-                $"""
-                 var context = new global::TUnit.Core.DynamicTestBuilderContext(@"{dynamicTestSource.FilePath}", {dynamicTestSource.LineNumber});
-                 """
-            );
-
-            var receiver = dynamicTestSource.Method.IsStatic
-                ? dynamicTestSource.Class.GloballyQualified()
-                : $"new {dynamicTestSource.Class.GloballyQualified()}()";
-
-            sourceBuilder.Write($"{receiver}.{dynamicTestSource.Method.Name}(context);");
-
-            sourceBuilder.Write("return context.Tests;");
-
-            sourceBuilder.Write("}");
-            sourceBuilder.Write("catch (global::System.Exception exception)");
-            sourceBuilder.Write("{");
-            FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, dynamicTestSource);
-            sourceBuilder.Write("}");
-
-            sourceBuilder.Write("}");
-
-            sourceBuilder.Write("}");
+                        sourceBuilder.AppendLine($"{receiver}.{dynamicTestSource.Method.Name}(context);");
+                        sourceBuilder.AppendLine("return context.Tests;");
+                    }
+                    sourceBuilder.AppendLine("catch (global::System.Exception exception)");
+                    using (sourceBuilder.Block())
+                    {
+                        FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, dynamicTestSource);
+                    }
+                }
+            }
 
             context.AddSource($"Dynamic-{className}-{Guid.NewGuid():N}.Generated.cs", sourceBuilder.ToString());
         }

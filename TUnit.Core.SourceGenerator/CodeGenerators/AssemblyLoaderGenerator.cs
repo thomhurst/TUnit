@@ -52,32 +52,32 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
             }
         }
 
-        var sourceBuilder = new SourceCodeWriter();
-        sourceBuilder.Write($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(AssemblyLoaderGenerator).Assembly.GetName().Version}\")]");
-        sourceBuilder.Write("file static class AssemblyLoader" + Guid.NewGuid().ToString("N"));
-        sourceBuilder.Write("{");
-        sourceBuilder.Write("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-        sourceBuilder.Write("public static void Initialize()");
-        sourceBuilder.Write("{");
-
-        foreach (var assembly in visitedAssemblies)
+        var sourceBuilder = new CodeWriter();
+        sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(AssemblyLoaderGenerator).Assembly.GetName().Version}\")]");
+        sourceBuilder.AppendLine("file static class AssemblyLoader" + Guid.NewGuid().ToString("N"));
+        using (sourceBuilder.Block())
         {
-            WriteAssemblyLoad(sourceBuilder, assembly);
+            sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+            sourceBuilder.AppendLine("public static void Initialize()");
+            using (sourceBuilder.Block())
+            {
+                foreach (var assembly in visitedAssemblies)
+                {
+                    WriteAssemblyLoad(sourceBuilder, assembly);
+                }
+            }
         }
-
-        sourceBuilder.Write("}");
-        sourceBuilder.Write("}");
         context.AddSource("AssemblyLoader.g.cs", sourceBuilder.ToString());
     }
 
-    private static void WriteAssemblyLoad(SourceCodeWriter sourceBuilder, IAssemblySymbol assembly)
+    private static void WriteAssemblyLoad(ICodeWriter sourceBuilder, IAssemblySymbol assembly)
     {
         if (IsSystemAssembly(assembly))
         {
             return;
         }
 
-        sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
+        sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
     }
 
     private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)

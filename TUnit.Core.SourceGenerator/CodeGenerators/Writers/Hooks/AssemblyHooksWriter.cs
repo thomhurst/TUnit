@@ -6,7 +6,7 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 
 public static class AssemblyHooksWriter
 {
-    public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel? model)
+    public static void Execute(ICodeWriter sourceBuilder, HooksDataModel? model)
     {
         if (model is null)
         {
@@ -15,25 +15,25 @@ public static class AssemblyHooksWriter
 
         if (model.HookLocationType == HookLocationType.Before)
         {
-            sourceBuilder.Write("new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod");
+            sourceBuilder.Append("new global::TUnit.Core.Hooks.BeforeAssemblyHookMethod");
         }
         else
         {
-            sourceBuilder.Write("new global::TUnit.Core.Hooks.AfterAssemblyHookMethod");
+            sourceBuilder.Append("new global::TUnit.Core.Hooks.AfterAssemblyHookMethod");
         }
 
-        sourceBuilder.Write("{");
-        sourceBuilder.Write("MethodInfo = ");
+        sourceBuilder.Append("{");
+        sourceBuilder.Append("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
 
-        sourceBuilder.Write($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
+        sourceBuilder.Append($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
 
-        sourceBuilder.Write($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
-        sourceBuilder.Write($"Order = {model.Order},");
-        sourceBuilder.Write($"""FilePath = @"{model.FilePath}",""");
-        sourceBuilder.Write($"LineNumber = {model.LineNumber},");
+        sourceBuilder.Append($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+        sourceBuilder.Append($"Order = {model.Order},");
+        sourceBuilder.Append($"""FilePath = @"{model.FilePath}",""");
+        sourceBuilder.Append($"LineNumber = {model.LineNumber},");
 
-        sourceBuilder.Write("},");
+        sourceBuilder.Append("},");
     }
 
     private static string GetArgs(HooksDataModel model)
