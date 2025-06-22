@@ -1,5 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
@@ -10,6 +13,7 @@ namespace TUnit.Core.Helpers;
 [RequiresUnreferencedCode("InstanceHelper uses reflection to create instances and set properties which may require types that aren't statically referenced")]
 internal static class InstanceHelper
 {
+    private static readonly ConcurrentDictionary<(Type type, int constructorHash, int propertyCount), Func<object?[], IDictionary<string, object?>, object>> CachedCreators = new();
     public static object CreateInstance(MethodMetadata methodInformation, object?[]? args, IDictionary<string, object?>? testClassProperties, TestBuilderContext testBuilderContext)
     {
         var classInformation = methodInformation.Class;
@@ -65,13 +69,14 @@ internal static class InstanceHelper
                 type = type.MakeGenericType(substitutedTypes);
             }
 
-            var instance = Activator.CreateInstance(type, castedArgs)!;
-
-            foreach (var (propertyName, value) in testClassProperties ?? new Dictionary<string, object?>())
+            // Check if we have properties to set (including required properties)
+            if (testClassProperties?.Count > 0 || HasRequiredProperties(type))
             {
-                type.GetProperty(propertyName)!.SetValue(instance, value);
+                return CreateInstanceWithProperties(type, constructor, castedArgs, testClassProperties ?? new Dictionary<string, object?>());
             }
 
+            // Fast path: no properties to set, use simple Activator.CreateInstance
+            var instance = Activator.CreateInstance(type, castedArgs)!;
             return instance;
         }
         catch (TargetInvocationException targetInvocationException)
@@ -88,5 +93,98 @@ internal static class InstanceHelper
     private static ConstructorInfo FindBestMatchingConstructor(ConstructorInfo[] constructors)
     {
         return constructors.First();
+    }
+
+    private static bool HasRequiredProperties(Type type)
+    {
+        return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Any(p => p.GetCustomAttribute<RequiredMemberAttribute>() != null || p.GetCustomAttribute(typeof(RequiredMemberAttribute)) != null);
+    }
+
+    private static object CreateInstanceWithProperties(Type type, ConstructorInfo constructor, object?[]? castedArgs, IDictionary<string, object?> testClassProperties)
+    {
+        // Create cache key
+        var constructorHash = constructor.GetHashCode();
+        var propertyCount = testClassProperties.Count;
+        var cacheKey = (type, constructorHash, propertyCount);
+
+        // Try to get cached creator
+        if (CachedCreators.TryGetValue(cacheKey, out var cachedCreator))
+        {
+            return cachedCreator(castedArgs ?? Array.Empty<object?>(), testClassProperties);
+        }
+
+        // Build expression tree for object creation with property initialization
+        var creator = BuildObjectCreator(type, constructor, testClassProperties.Keys);
+        CachedCreators.TryAdd(cacheKey, creator);
+
+        return creator(castedArgs ?? Array.Empty<object?>(), testClassProperties);
+    }
+
+    private static Func<object?[], IDictionary<string, object?>, object> BuildObjectCreator(Type type, ConstructorInfo constructor, ICollection<string> propertyNames)
+    {
+        // Parameters for the lambda
+        var ctorArgsParam = Expression.Parameter(typeof(object?[]), "ctorArgs");
+        var propsParam = Expression.Parameter(typeof(IDictionary<string, object?>), "props");
+
+        // Constructor arguments
+        var ctorParams = constructor.GetParameters();
+        var ctorArgExpressions = new Expression[ctorParams.Length];
+        for (int i = 0; i < ctorParams.Length; i++)
+        {
+            var indexExpr = Expression.Constant(i);
+            var argExpr = Expression.ArrayIndex(ctorArgsParam, indexExpr);
+            ctorArgExpressions[i] = Expression.Convert(argExpr, ctorParams[i].ParameterType);
+        }
+
+        // Create new expression
+        var newExpr = Expression.New(constructor, ctorArgExpressions);
+
+        // Property bindings
+        var bindings = new List<MemberBinding>();
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+        foreach (var prop in properties)
+        {
+            // Check if property is settable and either required or in the property names
+            if (!prop.CanWrite) continue;
+            
+            var isRequired = prop.GetCustomAttribute<RequiredMemberAttribute>() != null || prop.GetCustomAttribute(typeof(RequiredMemberAttribute)) != null;
+            if (!isRequired && !propertyNames.Contains(prop.Name)) continue;
+
+            // Create expression to get value from dictionary
+            var propNameExpr = Expression.Constant(prop.Name);
+            var hasValueExpr = Expression.Call(propsParam, typeof(IDictionary<string, object?>).GetMethod("ContainsKey")!, propNameExpr);
+            var getValueExpr = Expression.Call(propsParam, typeof(IDictionary<string, object?>).GetMethod("get_Item")!, propNameExpr);
+            var defaultValueExpr = Expression.Default(prop.PropertyType);
+            
+            // Use conditional to handle missing values
+            var valueExpr = Expression.Condition(
+                hasValueExpr,
+                Expression.Convert(getValueExpr, prop.PropertyType),
+                defaultValueExpr
+            );
+
+            bindings.Add(Expression.Bind(prop, valueExpr));
+        }
+
+        // Create member init expression
+        var memberInitExpr = Expression.MemberInit(newExpr, bindings);
+
+        // Wrap in try-catch for better error messages
+        var returnLabel = Expression.Label(typeof(object));
+        var body = Expression.Block(
+            Expression.Return(returnLabel, Expression.Convert(memberInitExpr, typeof(object))),
+            Expression.Label(returnLabel, Expression.Default(typeof(object)))
+        );
+
+        // Compile lambda
+        var lambda = Expression.Lambda<Func<object?[], IDictionary<string, object?>, object>>(
+            body,
+            ctorArgsParam,
+            propsParam
+        );
+
+        return lambda.Compile();
     }
 }

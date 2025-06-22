@@ -265,8 +265,8 @@ public class InheritsTestsGenerator : IIncrementalGenerator
             }))
             .ToList();
             
-        // If all required properties have data sources, generate special factory
-        if (requiredPropertiesWithDataSource.Count == requiredProperties.Count && requiredProperties.Any())
+        // If there are any required properties, generate special factory
+        if (requiredProperties.Any())
         {
             return GenerateFactoryWithRequiredProperties(classSymbol, requiredProperties);
         }

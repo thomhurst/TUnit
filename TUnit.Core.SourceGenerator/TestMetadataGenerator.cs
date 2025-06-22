@@ -236,12 +236,12 @@ public class TestMetadataGenerator : IIncrementalGenerator
             }))
             .ToList();
             
-        // If all required properties have data sources, the runtime will handle them
-        // Generate a factory that creates the instance bypassing compile-time checks
-        if (requiredPropertiesWithDataSource.Count == requiredProperties.Count && requiredProperties.Any())
+        // If there are any required properties, we need special handling
+        // Generate a factory that creates the instance with required properties initialized
+        if (requiredProperties.Any())
         {
-            // Use a factory that creates the instance with required properties set to temporary values
-            // The runtime will replace these with actual data source values
+            // Use a factory that creates the instance with required properties set to default values
+            // The runtime will replace these with actual values if they have data sources
             return GenerateFactoryWithRequiredProperties(typeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor);
         }
         
