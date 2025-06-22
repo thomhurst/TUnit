@@ -496,7 +496,8 @@ internal static class CodeGenerationHelpers
         writer.Append("new global::TUnit.Core.DataSources.InlineDataSourceProvider(");
 
         var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue).ToList();
-        using (writer.BeginArrayInitializer("new object?[]", terminator: "", inline: true))
+
+        using (writer.BeginArrayInitializer("new object?[]", terminator: ""))
         {
             writer.Append(string.Join(", ", args));
         }
@@ -644,7 +645,7 @@ internal static class CodeGenerationHelpers
         using var writer = new CodeWriter("", includeHeader: false);
 
         // Generate inline array to avoid parser issues
-        using (writer.BeginArrayInitializer("new System.Attribute[]", terminator: "", inline: true))
+        using (writer.BeginArrayInitializer("new System.Attribute[]", terminator: ""))
         {
             var attributeStrings = new List<string>();
             foreach (var attr in allAttributes)
