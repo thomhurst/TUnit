@@ -57,23 +57,6 @@
         </None>
     </ItemGroup>
 
-    <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild">
-        <ItemGroup>
-            <FilesToDelete Include="$(ProjectDir)SourceGeneratedViewer\**\*" />
-        </ItemGroup>
-        <Delete Files="@(FilesToDelete)" ContinueOnError="true" />
-    </Target>
-
-    <PropertyGroup>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <Compile Remove="SourceGeneratedViewer\**" />
-        <None Include="SourceGeneratedViewer\**" />
-    </ItemGroup>
-
     <Import Project="..\TestProject.targets" />
 
 </Project>

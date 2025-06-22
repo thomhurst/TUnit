@@ -58,8 +58,8 @@ internal static class CodeGenerationHelpers
 
         using var writer = new CodeWriter("", includeHeader: false);
         for (var i = 0; i < 2; i++) { writer._indentLevel++; }
-        writer.Append("new global::TUnit.Core.AttributeMetadata[] {");
-        writer.AppendLine();
+        writer.AppendLine("new global::TUnit.Core.AttributeMetadata[]");
+        writer.AppendLine("{");
 
         foreach (var attr in relevantAttributes)
         {
@@ -80,7 +80,10 @@ internal static class CodeGenerationHelpers
     private static string GenerateAttributeMetadata(AttributeData attr)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 3; i++) { writer._indentLevel++; } // Start with indent level 3 for nested objects
+        for (var i = 0; i < 3; i++)
+        {
+            writer._indentLevel++; // Start with indent level 3 for nested objects
+        }
 
         // For known TUnit attributes, generate direct instantiation
         if (IsKnownTUnitAttribute(attr))
@@ -592,7 +595,7 @@ internal static class CodeGenerationHelpers
 
         // Generate as a single line array to avoid CS8802 parser issues
         var attributeStrings = new List<string>();
-        
+
         foreach (var attr in allAttributes)
         {
             if (IsKnownTUnitAttribute(attr))
@@ -644,7 +647,7 @@ internal static class CodeGenerationHelpers
                 // This is a constructed generic type (e.g., List<int>, Dictionary<string, T>)
                 var genericDef = GetGenericTypeDefinitionName(namedType);
                 var genericArgs = namedType.TypeArguments.Select(GenerateTypeReference).ToArray();
-                
+
                 using var writer = new CodeWriter("", includeHeader: false);
         for (var i = 0; i < 1; i++) { writer._indentLevel++; }
                 writer.Append($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
@@ -687,14 +690,14 @@ internal static class CodeGenerationHelpers
         // Build assembly qualified name
         var typeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
             .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
-        
+
         // For well-known types, use simplified names
-        if (typeSymbol.ContainingAssembly.Name == "System.Private.CoreLib" || 
+        if (typeSymbol.ContainingAssembly.Name == "System.Private.CoreLib" ||
             typeSymbol.ContainingAssembly.Name == "mscorlib")
         {
             return $"{typeName}, System.Private.CoreLib";
         }
-        
+
         return $"{typeName}, {typeSymbol.ContainingAssembly.Name}";
     }
 }
