@@ -33,7 +33,7 @@ internal static class CodeGenerationHelpers
             writer.AppendLine("{");
             writer.AppendLine($"Name = \"{param.Name}\",");
             writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
-            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes())},");
+            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes(), param)},");
             writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
             writer.AppendLine("},");
         }
@@ -45,7 +45,7 @@ internal static class CodeGenerationHelpers
     /// <summary>
     /// Generates C# code for an AttributeMetadata array from attributes.
     /// </summary>
-    public static string GenerateAttributeMetadataArray(ImmutableArray<AttributeData> attributes)
+    public static string GenerateAttributeMetadataArray(ImmutableArray<AttributeData> attributes, ISymbol? targetSymbol = null)
     {
         var relevantAttributes = attributes
             .Where(attr => !IsCompilerGeneratedAttribute(attr))
@@ -63,7 +63,7 @@ internal static class CodeGenerationHelpers
 
         foreach (var attr in relevantAttributes)
         {
-            var attributeCode = GenerateAttributeMetadata(attr);
+            var attributeCode = GenerateAttributeMetadata(attr, targetSymbol);
             if (!string.IsNullOrEmpty(attributeCode))
             {
                 writer.Append(attributeCode);
@@ -75,9 +75,44 @@ internal static class CodeGenerationHelpers
     }
 
     /// <summary>
+    /// Determines the TestAttributeTarget based on the symbol kind.
+    /// </summary>
+    private static string DetermineTargetElement(ISymbol? symbol)
+    {
+        if (symbol == null)
+        {
+            return "Assembly";
+        }
+
+        return symbol.Kind switch
+        {
+            SymbolKind.Method => symbol is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Constructor
+                ? "Constructor"
+                : "Method",
+            SymbolKind.NamedType => symbol is INamedTypeSymbol namedType ? namedType.TypeKind switch
+            {
+                TypeKind.Class => "Class",
+                TypeKind.Struct => "Struct",
+                TypeKind.Interface => "Interface",
+                TypeKind.Enum => "Enum",
+                TypeKind.Delegate => "Delegate",
+                _ => "Class"
+            } : "Class",
+            SymbolKind.Property => "Property",
+            SymbolKind.Field => "Field",
+            SymbolKind.Event => "Event",
+            SymbolKind.Parameter => "Parameter",
+            SymbolKind.Assembly => "Assembly",
+            SymbolKind.NetModule => "Module",
+            SymbolKind.TypeParameter => "GenericParameter",
+            _ => "Method"
+        };
+    }
+
+    /// <summary>
     /// Generates C# code for a single AttributeMetadata.
     /// </summary>
-    private static string GenerateAttributeMetadata(AttributeData attr)
+    private static string GenerateAttributeMetadata(AttributeData attr, ISymbol? targetSymbol = null)
     {
         using var writer = new CodeWriter("", includeHeader: false);
         for (var i = 0; i < 3; i++)
@@ -85,52 +120,61 @@ internal static class CodeGenerationHelpers
             writer._indentLevel++; // Start with indent level 3 for nested objects
         }
 
-        // For known TUnit attributes, generate direct instantiation
-        if (IsKnownTUnitAttribute(attr))
-        {
-            writer.AppendLine("new global::TUnit.Core.AttributeMetadata");
-            writer.AppendLine("{");
-            writer.AppendLine($"Instance = {GenerateAttributeInstantiation(attr)},");
-            writer.AppendLine("TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
-            writer.AppendLine("ConstructorArguments = null,");
-            writer.AppendLine("NamedArguments = null");
-            writer.AppendLine("},");
-        }
-        else
-        {
-            // For unknown attributes, generate runtime construction info
-            writer.AppendLine("new global::TUnit.Core.AttributeMetadata");
-            writer.AppendLine("{");
-            writer.AppendLine("Instance = global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(");
-            writer.AppendLine($"typeof({attr.AttributeClass!.GloballyQualified()}),");
-            writer.AppendLine($"{GenerateConstructorArgumentsArray(attr)},");
-            writer.AppendLine($"{GenerateNamedArgumentsDictionary(attr)}),");
-            writer.AppendLine("TargetElement = global::TUnit.Core.TestAttributeTarget.Method,");
-            writer.AppendLine("ConstructorArguments = null,");
-            writer.AppendLine("NamedArguments = null");
-            writer.AppendLine("},");
-        }
+        // Determine the target element based on the symbol
+        var targetElement = DetermineTargetElement(targetSymbol);
+
+        // Extract constructor arguments and named arguments
+        var constructorArgs = ExtractConstructorArgumentsArray(attr);
+        var namedArgs = ExtractNamedArgumentsDictionary(attr);
+
+        // Generate unified attribute metadata
+        writer.AppendLine("new global::TUnit.Core.AttributeMetadata");
+        writer.AppendLine("{");
+        writer.AppendLine($"Instance = {GenerateAttributeInstantiation(attr)},");
+        writer.AppendLine($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement},");
+        writer.AppendLine($"ConstructorArguments = {constructorArgs},");
+        writer.AppendLine($"NamedArguments = {namedArgs}");
+        writer.AppendLine("},");
 
         return writer.ToString();
     }
 
     /// <summary>
-    /// Determines if an attribute is a known TUnit attribute that we can safely instantiate.
+    /// Extracts constructor arguments as a C# array string.
     /// </summary>
-    private static bool IsKnownTUnitAttribute(AttributeData attr)
+    private static string ExtractConstructorArgumentsArray(AttributeData attr)
     {
-        var fullName = attr.AttributeClass!.GloballyQualified();
-        return fullName.StartsWith("TUnit.Core.") && (
-            fullName.EndsWith("TestAttribute") ||
-            fullName.EndsWith("TimeoutAttribute") ||
-            fullName.EndsWith("SkipAttribute") ||
-            fullName.EndsWith("RepeatAttribute") ||
-            fullName.EndsWith("ArgumentsAttribute") ||
-            fullName.EndsWith("InlineDataAttribute"));
+        if (attr.ConstructorArguments.Length == 0)
+        {
+            return "System.Array.Empty<object?>()";
+        }
+
+        var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
+        return $"new object?[] {{ {string.Join(", ", args)} }}";
     }
 
     /// <summary>
-    /// Generates direct instantiation code for known TUnit attributes.
+    /// Extracts named arguments as a C# dictionary string.
+    /// </summary>
+    private static string ExtractNamedArgumentsDictionary(AttributeData attr)
+    {
+        if (attr.NamedArguments.Length == 0)
+        {
+            return "null";
+        }
+
+        using var writer = new CodeWriter("", includeHeader: false);
+        writer.Append("new System.Collections.Generic.Dictionary<string, object?> { ");
+        foreach (var na in attr.NamedArguments)
+        {
+            writer.Append($"{{ \"{na.Key}\", {TypedConstantParser.GetRawTypedConstantValue(na.Value)} }}, ");
+        }
+        writer.Append("}");
+        return writer.ToString().Trim();
+    }
+
+    /// <summary>
+    /// Generates direct instantiation code for attributes.
     /// </summary>
     private static string GenerateAttributeInstantiation(AttributeData attr)
     {
@@ -142,8 +186,33 @@ internal static class CodeGenerationHelpers
         // Add constructor arguments
         if (attr.ConstructorArguments.Length > 0)
         {
-            var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
-            writer.Append(string.Join(", ", args));
+            var argStrings = new List<string>();
+            
+            for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+            {
+                var arg = attr.ConstructorArguments[i];
+                
+                // Check if this is a params array parameter
+                if (i == attr.ConstructorArguments.Length - 1 && IsParamsArrayArgument(attr, i))
+                {
+                    // For params arrays, expand the array elements
+                    if (arg.Kind == TypedConstantKind.Array)
+                    {
+                        var elements = arg.Values.Select(TypedConstantParser.GetRawTypedConstantValue);
+                        argStrings.AddRange(elements);
+                    }
+                    else
+                    {
+                        argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg));
+                    }
+                }
+                else
+                {
+                    argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg));
+                }
+            }
+            
+            writer.Append(string.Join(", ", argStrings));
         }
 
         writer.Append(")");
@@ -159,41 +228,27 @@ internal static class CodeGenerationHelpers
 
         return writer.ToString().Trim();
     }
-
+    
     /// <summary>
-    /// Generates an array of constructor arguments for runtime attribute construction.
+    /// Determines if an argument is for a params array parameter.
     /// </summary>
-    private static string GenerateConstructorArgumentsArray(AttributeData attr)
+    private static bool IsParamsArrayArgument(AttributeData attr, int argumentIndex)
     {
-        if (attr.ConstructorArguments.Length == 0)
+        // For known TUnit attributes with params, handle them explicitly
+        var typeName = attr.AttributeClass!.GloballyQualified();
+        
+        // ArgumentsAttribute and InlineDataAttribute use params object[]
+        if (typeName == "global::TUnit.Core.ArgumentsAttribute" || 
+            typeName == "global::TUnit.Core.InlineDataAttribute")
         {
-            return "System.Array.Empty<object?>()";
+            return true;
         }
-
-        var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
-        return $"new object?[] {{ {string.Join(", ", args)} }}";
+        
+        // For other attributes, we'd need to check the constructor's parameter attributes
+        // but that's more complex and not needed for TUnit's current attributes
+        return false;
     }
 
-    /// <summary>
-    /// Generates a dictionary of named arguments for runtime attribute construction.
-    /// </summary>
-    private static string GenerateNamedArgumentsDictionary(AttributeData attr)
-    {
-        if (attr.NamedArguments.Length == 0)
-        {
-            return "null";
-        }
-
-        using var writer = new CodeWriter("", includeHeader: false);
-        for (var i = 0; i < 1; i++) { writer._indentLevel++; }
-        writer.Append("new System.Collections.Generic.Dictionary<string, object?> { ");
-        foreach (var na in attr.NamedArguments)
-        {
-            writer.Append($"{{ \"{na.Key}\", {TypedConstantParser.GetRawTypedConstantValue(na.Value)} }}, ");
-        }
-        writer.Append("}");
-        return writer.ToString().Trim();
-    }
 
     /// <summary>
     /// Determines if an attribute should be excluded from metadata.
@@ -254,7 +309,7 @@ internal static class CodeGenerationHelpers
             writer.AppendLine($"ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
             writer.AppendLine("IsStatic = false,");
             writer.AppendLine($"Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
-            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes())}");
+            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes(), prop)}");
             writer.AppendLine("},");
         }
 
@@ -288,7 +343,7 @@ internal static class CodeGenerationHelpers
             writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
             writer.AppendLine("Name = \".ctor\",");
             writer.AppendLine($"Parameters = {GenerateParameterMetadataArray(ctor)},");
-            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes())},");
+            writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(ctor.GetAttributes(), ctor)},");
             writer.AppendLine("IsStatic = false,");
             writer.AppendLine($"IsPublic = {(ctor.DeclaredAccessibility == Accessibility.Public ? "true" : "false")},");
             writer.AppendLine($"IsPrivate = {(ctor.DeclaredAccessibility == Accessibility.Private ? "true" : "false")},");
@@ -598,15 +653,8 @@ internal static class CodeGenerationHelpers
 
         foreach (var attr in allAttributes)
         {
-            if (IsKnownTUnitAttribute(attr))
-            {
-                attributeStrings.Add(GenerateAttributeInstantiation(attr));
-            }
-            else
-            {
-                // For unknown attributes, use runtime helper
-                attributeStrings.Add($"global::TUnit.Core.Helpers.RuntimeAttributeHelper.CreateAttribute(typeof({attr.AttributeClass!.GloballyQualified()}), {GenerateConstructorArgumentsArray(attr)}, {GenerateNamedArgumentsDictionary(attr)})");
-            }
+            // Use unified approach for all attributes
+            attributeStrings.Add(GenerateAttributeInstantiation(attr));
         }
 
         // Return as a single line to avoid parser issues with multi-line arrays

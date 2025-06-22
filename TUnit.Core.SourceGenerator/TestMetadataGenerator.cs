@@ -140,9 +140,9 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"Name = \"{testInfo.TypeSymbol.Name}\",");
         writer.AppendLine($"Type = {testClassTypeValue} ?? typeof(object),");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
-        writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes())},");
+        writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes(), testInfo.TypeSymbol)},");
         writer.AppendLine($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\",");
-        writer.AppendLine($"Assembly = new AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes())} }},");
+        writer.AppendLine($"Assembly = new AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes(), testInfo.TypeSymbol.ContainingAssembly)} }},");
         writer.AppendLine("Parameters = System.Array.Empty<ParameterMetadata>(),");
         writer.AppendLine($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)},");
         writer.AppendLine($"Constructors = {CodeGenerationHelpers.GenerateConstructorMetadataArray(testInfo.TypeSymbol)},");
@@ -150,7 +150,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
         writer.AppendLine($"ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")},");
         writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)},");
-        writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes())}");
+        writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes(), testInfo.MethodSymbol)}");
         writer.AppendLine("},");
         writer.AppendLine($"TestFilePath = @\"{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
         writer.AppendLine($"TestLineNumber = {testInfo.LineNumber},");

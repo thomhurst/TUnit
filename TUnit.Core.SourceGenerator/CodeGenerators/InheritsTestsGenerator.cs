@@ -197,7 +197,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                         w4.AppendLine($"Name = \"{classSymbol.Name}\",");
                         w4.AppendLine($"Type = typeof({GetFullTypeName(classSymbol)}) ?? typeof(object),");
                         w4.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
-                        w4.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(classSymbol.GetAttributes())},");
+                        w4.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(classSymbol.GetAttributes(), classSymbol)},");
                         w4.AppendLine($"Namespace = \"{classSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
                         
                         // Generate Assembly metadata
@@ -217,7 +217,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                         w4.AppendLine("Parent = null");
                     });
                     w3.AppendLine("},");
-                    w3.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(methodSymbol.GetAttributes())},");
+                    w3.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(methodSymbol.GetAttributes(), methodSymbol)},");
                     w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)");
                 });
                 w2.AppendLine("},");
