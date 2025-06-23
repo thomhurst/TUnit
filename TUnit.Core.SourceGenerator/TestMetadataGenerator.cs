@@ -343,7 +343,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
     {
         var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
 
-        using (writer.BeginObjectInitializer("var staticDef = new StaticTestDefinition"))
+        using (writer.BeginObjectInitializer($"var staticDef_{testIndex} = new StaticTestDefinition"))
         {
             writer.AppendLine($"TestId = \"{className}.{methodName}_{testIndex}_{{{{TestIndex}}}}\",");
             writer.AppendLine($"DisplayName = \"{methodName}\",");
@@ -372,7 +372,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
 
         writer.AppendLine();
-        writer.AppendLine("testDescriptors.Add(staticDef);");
+        writer.AppendLine($"testDescriptors.Add(staticDef_{testIndex});");
     }
 
     private static void GenerateDynamicTestMetadata(
