@@ -1051,6 +1051,13 @@ public class TestMetadataGenerator : IIncrementalGenerator
             return "System.Type.EmptyTypes";
         }
         
+        // Check if any parameter contains type parameters
+        if (method.Parameters.Any(p => ContainsTypeParameter(p.Type)))
+        {
+            // Return null to indicate that parameter type matching should be done at runtime
+            return "null";
+        }
+        
         var parameterTypes = method.Parameters
             .Select(p => $"typeof({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))})")
             .ToArray();
@@ -1063,6 +1070,13 @@ public class TestMetadataGenerator : IIncrementalGenerator
         if (parameters.Length == 0)
         {
             return "System.Type.EmptyTypes";
+        }
+        
+        // Check if any parameter contains type parameters
+        if (parameters.Any(p => ContainsTypeParameter(p.Type)))
+        {
+            // Return null to indicate that parameter type matching should be done at runtime
+            return "null";
         }
         
         var parameterTypes = parameters

@@ -229,11 +229,11 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                         {
                             // For generic base types, we need to construct the closed generic type and then find the method
                             var closedBaseType = GetClosedGenericTypeName(baseClass, classSymbol);
-                            w3.AppendLine($"ReflectionInformation = typeof({closedBaseType}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)");
+                            w3.AppendLine($"ReflectionInformation = typeof({closedBaseType}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, {GenerateParameterTypesArray(methodSymbol)}, null)");
                         }
                         else
                         {
-                            w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)");
+                            w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, {GenerateParameterTypesArray(methodSymbol)}, null)");
                         }
                     });
                     w2.AppendLine(",");
@@ -577,6 +577,28 @@ public class InheritsTestsGenerator : IIncrementalGenerator
             .Replace("`", "_")
             .Replace("[", "_")
             .Replace("]", "_");
+    }
+
+    private static string GenerateParameterTypesArray(IMethodSymbol method)
+    {
+        if (method.Parameters.Length == 0)
+        {
+            return "System.Type.EmptyTypes";
+        }
+        
+        // If any parameter contains type parameters, we can't generate the parameter types array
+        // at compile time. The runtime will need to handle this.
+        if (method.Parameters.Any(p => ContainsTypeParameter(p.Type)))
+        {
+            // Return null to indicate that parameter type matching should be done at runtime
+            return "null";
+        }
+        
+        var parameterTypes = method.Parameters
+            .Select(p => $"typeof({GetFullTypeName(p.Type)})")
+            .ToArray();
+            
+        return $"new System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
     }
 
     private class InheritsTestsClassInfo
