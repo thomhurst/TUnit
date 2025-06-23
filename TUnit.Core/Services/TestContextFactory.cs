@@ -25,25 +25,29 @@ public class TestContextFactory : ITestContextFactory
         // Create a test builder context for this test
         var testBuilderContext = new TestBuilderContext
         {
-            TestAssemblyClassType = testDetails.ClassMetadata.Type,
-            TestAssemblyClassArguments = classArguments ?? Array.Empty<object?>(),
-            TestMethodParameterTypes = testDetails.TestMethodParameterTypes,
-            TestMethodArguments = methodArguments ?? Array.Empty<object?>()
+            ClassInformation = testDetails.ClassMetadata,
+            MethodInformation = testDetails.MethodMetadata,
+            TestMethodName = testDetails.MethodMetadata.Name
         };
 
+        // Create assembly hook context
+        var assemblyHookContext = AssemblyHookContext.Current ?? 
+            new AssemblyHookContext(TestSessionContext.Current!) 
+            { 
+                Assembly = testDetails.MethodMetadata.Class.Type.Assembly 
+            };
+        
         // Create class hook context
-        var classHookContext = new ClassHookContext
+        var classHookContext = new ClassHookContext(assemblyHookContext)
         {
-            TestAssemblyClassType = testDetails.ClassMetadata.Type,
-            TestAssemblyClassArguments = classArguments ?? Array.Empty<object?>(),
-            TestClass = classInstance
+            ClassType = testDetails.MethodMetadata.Class.Type
         };
 
         // Create the test context with proper initialization
         var testContext = new TestContext(
             _serviceProvider,
             testDetails,
-            null, // Original test definition - will be set later if needed
+            null, // No original test definition available in this context
             testBuilderContext,
             classHookContext);
 
@@ -69,11 +73,18 @@ public class TestContextFactory : ITestContextFactory
     /// <inheritdoc />
     public TestDetails CreateTestDetails(TestDefinition definition, string testName)
     {
+        // Create a test builder context for this test
+        var testBuilderContext = new TestBuilderContext
+        {
+            ClassInformation = definition.MethodMetadata.Class,
+            MethodInformation = definition.MethodMetadata,
+            TestMethodName = definition.MethodMetadata.Name
+        };
         // Create a resettable lazy for the class instance
         var lazyInstance = new ResettableLazy<object>(
             definition.TestClassFactory,
             definition.TestId,
-            testName);
+            testBuilderContext);
 
         // Create test details using the non-generic version
         var testDetails = new TestDetails<object>
@@ -85,6 +96,7 @@ public class TestContextFactory : ITestContextFactory
             TestMethodArguments = Array.Empty<object?>(),
             TestClassInjectedPropertyArguments = definition.PropertiesProvider(),
             MethodMetadata = definition.MethodMetadata,
+            // ClassMetadata is a computed property, no need to set it
             ReturnType = definition.MethodMetadata.ReturnType ?? typeof(void),
             TestFilePath = definition.TestFilePath,
             TestLineNumber = definition.TestLineNumber,
@@ -96,14 +108,14 @@ public class TestContextFactory : ITestContextFactory
         var categoryAttributes = definition.MethodMetadata.GetAttributes<CategoryAttribute>();
         foreach (var categoryAttribute in categoryAttributes)
         {
-            testDetails.Categories.Add(categoryAttribute.Category);
+            testDetails.MutableCategories.Add(categoryAttribute.Category);
         }
 
         // Set retry limit from attributes
         var retryAttribute = definition.MethodMetadata.GetAttribute<RetryAttribute>();
         if (retryAttribute != null)
         {
-            testDetails.SetRetryLimit(retryAttribute.Times);
+            testDetails.RetryLimit = retryAttribute.Times;
         }
 
         return testDetails;
@@ -112,10 +124,18 @@ public class TestContextFactory : ITestContextFactory
     private TestDetails CreateTestDetails(ExpandedTest expandedTest)
     {
         // Create a resettable lazy for the class instance
+        // Create a test builder context for this test
+        var testBuilderContext = new TestBuilderContext
+        {
+            ClassInformation = expandedTest.MethodMetadata.Class,
+            MethodInformation = expandedTest.MethodMetadata,
+            TestMethodName = expandedTest.MethodMetadata.Name
+        };
+        
         var lazyInstance = new ResettableLazy<object>(
             () => expandedTest.TestInstance,
             expandedTest.TestId,
-            expandedTest.TestName);
+            testBuilderContext);
 
         // Create test details using the non-generic version
         var testDetails = new TestDetails<object>
@@ -127,6 +147,7 @@ public class TestContextFactory : ITestContextFactory
             TestMethodArguments = expandedTest.MethodArguments ?? Array.Empty<object?>(),
             TestClassInjectedPropertyArguments = expandedTest.PropertyValues ?? new Dictionary<string, object?>(),
             MethodMetadata = expandedTest.MethodMetadata,
+            // ClassMetadata is a computed property, no need to set it
             ReturnType = expandedTest.MethodMetadata.ReturnType ?? typeof(void),
             TestFilePath = expandedTest.TestFilePath,
             TestLineNumber = expandedTest.TestLineNumber,
@@ -137,21 +158,21 @@ public class TestContextFactory : ITestContextFactory
         // Set timeout if specified
         if (expandedTest.Timeout.HasValue)
         {
-            testDetails.SetTimeout(expandedTest.Timeout.Value);
+            testDetails.Timeout = expandedTest.Timeout.Value;
         }
 
         // Add categories from attributes
         var categoryAttributes = expandedTest.MethodMetadata.GetAttributes<CategoryAttribute>();
         foreach (var categoryAttribute in categoryAttributes)
         {
-            testDetails.Categories.Add(categoryAttribute.Category);
+            testDetails.MutableCategories.Add(categoryAttribute.Category);
         }
 
         // Set retry limit from attributes
         var retryAttribute = expandedTest.MethodMetadata.GetAttribute<RetryAttribute>();
         if (retryAttribute != null)
         {
-            testDetails.SetRetryLimit(retryAttribute.Times);
+            testDetails.RetryLimit = retryAttribute.Times;
         }
 
         return testDetails;

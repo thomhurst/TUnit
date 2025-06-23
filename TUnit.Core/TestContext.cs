@@ -45,7 +45,7 @@ public partial class TestContext : Context
     /// <param name="testDefinition">The test definition.</param>
     /// <param name="testBuilderContext">The test builder context.</param>
     /// <param name="classHookContext"></param>
-    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, ITestDefinition testDefinition, TestBuilderContext testBuilderContext, ClassHookContext classHookContext) : base(classHookContext)
+    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, ITestDefinition? testDefinition, TestBuilderContext testBuilderContext, ClassHookContext classHookContext) : base(classHookContext)
     {
         _serviceProvider = serviceProvider;
         OriginalTestDefinition = testDefinition;

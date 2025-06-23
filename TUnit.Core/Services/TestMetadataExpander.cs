@@ -85,8 +85,9 @@ public class TestMetadataExpander : ITestMetadataExpander
             cancellationToken);
 
         // Create a factory function that uses the test class factory
-        Func<object?[], object> classFactory = dynamicMeta.TestClassFactory ?? 
-            (args => CreateTestInstance(testClassType, args));
+        Func<object?[], object> classFactory = dynamicMeta.TestClassFactory != null 
+            ? (args) => dynamicMeta.TestClassFactory(args) ?? throw new InvalidOperationException("Factory returned null")
+            : (args) => CreateTestInstance(testClassType, args ?? Array.Empty<object?>());
 
         // Create the test definition
         var definition = new TestDefinition
@@ -119,7 +120,7 @@ public class TestMetadataExpander : ITestMetadataExpander
             return new DataSourceProviderAdapter(providers[0]);
         }
 
-        return new CompositeDataProvider(providers.Select(p => new DataSourceProviderAdapter(p)).ToList());
+        return new CompositeDataProvider(providers.Select(p => (IDataProvider)new DataSourceProviderAdapter(p)).ToList());
     }
 
     private async Task<Func<IDictionary<string, object?>>> CreatePropertyProviderAsync(
@@ -135,9 +136,13 @@ public class TestMetadataExpander : ITestMetadataExpander
         var propertyValues = new Dictionary<string, object?>();
         foreach (var (property, dataSource) in propertyDataSources)
         {
-            var data = await _dataProviderService
-                .GetTestDataAsync(new[] { dataSource }, cancellationToken)
-                .FirstOrDefaultAsync(cancellationToken);
+            // Get first data item from the data source
+            object?[]? data = null;
+            await foreach (var item in _dataProviderService.GetTestDataAsync(new[] { dataSource }, cancellationToken))
+            {
+                data = item;
+                break;
+            }
             
             if (data?.Length > 0)
             {
@@ -189,7 +194,7 @@ public class TestMetadataExpander : ITestMetadataExpander
     private Type ResolveTypeReference(TypeReference typeRef)
     {
         // For now, simple implementation that assumes the type can be loaded
-        var typeName = typeRef.FullName;
+        var typeName = typeRef.AssemblyQualifiedName ?? throw new InvalidOperationException("TypeReference must have AssemblyQualifiedName");
         var type = Type.GetType(typeName);
         
         if (type == null)
@@ -336,7 +341,7 @@ public class TestMetadataExpander : ITestMetadataExpander
                     }
                     
                     // Get timeout from attributes
-                    var timeout = definition.MethodMetadata.GetAttribute<TimeoutAttribute>()?.Duration;
+                    var timeout = definition.MethodMetadata.GetAttribute<TimeoutAttribute>()?.Timeout;
                     
                     // Check if test is skipped
                     var skipAttribute = definition.MethodMetadata.GetAttribute<SkipAttribute>();

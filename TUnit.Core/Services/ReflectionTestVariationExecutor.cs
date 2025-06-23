@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Enums;
+using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Models;
 
@@ -94,13 +95,13 @@ public class ReflectionTestVariationExecutor : ITestVariationExecutor
     {
         // Convert MethodMetadata back to MethodInfo
         // This is a simplified implementation - might need enhancement based on MethodMetadata structure
-        var type = methodMetadata.DeclaringType;
-        var method = type.GetMethod(methodMetadata.MethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+        var type = methodMetadata.DeclaringType();
+        var method = type.GetMethod(methodMetadata.MethodName(), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
         
         if (method == null)
         {
             throw new InvalidOperationException(
-                $"Could not find method {methodMetadata.MethodName} on type {type.FullName}");
+                $"Could not find method {methodMetadata.MethodName()} on type {type.FullName}");
         }
 
         return method;

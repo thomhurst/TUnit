@@ -161,7 +161,7 @@ public class AotTestFactoryGenerator
         code.AppendLine("    }");
         
         // Generate delegate property for this specific method signature
-        var delegateType = GenerateMethodDelegateType(methodMetadata, fullClassName);
+        var delegateType = GenerateMethodDelegateType(methodMetadata, fullClassName ?? "UnknownClass");
         code.AppendLine();
         code.AppendLine($"    public static readonly {delegateType} Invoker = InvokeAsync;");
         

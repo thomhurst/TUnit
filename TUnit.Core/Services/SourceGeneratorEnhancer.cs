@@ -31,6 +31,7 @@ public class SourceGeneratorEnhancer
     /// <param name="classMetadata">The test class metadata</param>
     /// <param name="testMethods">The test methods in the class</param>
     /// <returns>Complete source code for AOT-safe test execution</returns>
+#pragma warning disable CS1998 // Async method lacks await
     public async Task<string> GenerateAotSafeTestClassAsync(
         ClassMetadata classMetadata, 
         IEnumerable<MethodMetadata> testMethods)
@@ -304,7 +305,7 @@ public class SourceGeneratorEnhancer
     /// </summary>
     private static bool HasPropertyInjectionAttribute(System.Reflection.PropertyInfo property)
     {
-        return property.GetCustomAttributes().Any(attr => 
+        return property.GetCustomAttributes(true).Any(attr => 
             attr.GetType().Name.Contains("Inject") || 
             attr.GetType().Name.Contains("Property"));
     }
@@ -336,7 +337,7 @@ public class SourceGeneratorEnhancer
     private static string IndentCode(string code, int indentLevel)
     {
         var indent = new string(' ', indentLevel * 4);
-        var lines = code.Split('\n');
+        var lines = code.Split(new[] { '\n' }, StringSplitOptions.None);
         return string.Join('\n', lines.Select(line => 
             string.IsNullOrWhiteSpace(line) ? line : indent + line));
     }

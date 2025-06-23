@@ -37,8 +37,8 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
                 yield return await CreateStaticTestVariationAsync(staticTest);
                 break;
 
-            case DynamicTest dynamicTest:
-                await foreach (var variation in ExpandDynamicTestAsync(dynamicTest, cancellationToken))
+            case DynamicTestMetadata dynamicTestMetadata:
+                await foreach (var variation in ExpandDynamicTestAsync(dynamicTestMetadata, cancellationToken))
                 {
                     yield return variation;
                 }
@@ -59,24 +59,24 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
         return testDescriptor switch
         {
             StaticTestDefinition => 1,
-            DynamicTest dynamicTest => await EstimateDynamicTestCountAsync(dynamicTest),
-            TestDefinition testDefinition => EstimateTestDefinitionCount(testDefinition),
+            DynamicTestMetadata dynamicTestMetadata => await EstimateDynamicTestCountAsync(dynamicTestMetadata),
+            // Note: TestDefinition is not an ITestDescriptor, so this case is removed
             _ => 1
         };
     }
 
-    private async Task<TestVariation> CreateStaticTestVariationAsync(StaticTestDefinition staticTest)
+    private Task<TestVariation> CreateStaticTestVariationAsync(StaticTestDefinition staticTest)
     {
         var testName = _testNameFormatter.FormatTestName(
             staticTest.TestMethodMetadata.DisplayName() ?? staticTest.TestMethodMetadata.MethodName());
 
-        return new TestVariation
+        return Task.FromResult(new TestVariation
         {
             TestId = staticTest.TestId,
             TestName = testName,
             ExecutionMode = TestExecutionMode.SourceGeneration,
             MethodMetadata = staticTest.TestMethodMetadata,
-            ClassMetadata = staticTest.ClassMetadata,
+            ClassMetadata = staticTest.TestMethodMetadata.Class, // Use class from method metadata
             ClassArguments = Array.Empty<object?>(),
             MethodArguments = Array.Empty<object?>(),
             PropertyValues = new Dictionary<string, object?>(),
@@ -86,26 +86,26 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
             Attributes = staticTest.TestMethodMetadata.Attributes,
             SourceGeneratedData = new SourceGeneratedTestData
             {
-                ClassInstanceFactory = staticTest.TestClassFactory,
+                ClassInstanceFactory = () => staticTest.ClassFactory?.Invoke(Array.Empty<object?>()) ?? throw new InvalidOperationException("No class factory available"),
                 // Method invoker will be resolved from source-generated registry
                 MethodInvoker = null, // TODO: Get from source-generated registry
                 PropertySetters = new Dictionary<string, Action<object, object?>>(),
                 CompiledDataSources = Array.Empty<object?[]>()
             }
-        };
+        });
     }
 
     private async IAsyncEnumerable<TestVariation> ExpandDynamicTestAsync(
-        DynamicTest dynamicTest, 
+        DynamicTestMetadata dynamicTest, 
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // Resolve data sources at compile-time
-        var classData = await _dataResolver.ResolveClassDataAsync(dynamicTest.ClassMetadata);
-        var methodData = await _dataResolver.ResolveMethodDataAsync(dynamicTest.TestMethodMetadata);
-        var propertyData = await _dataResolver.ResolvePropertyDataAsync(dynamicTest.ClassMetadata);
+        var classData = await _dataResolver.ResolveClassDataAsync(dynamicTest.MethodMetadata.Class);
+        var methodData = await _dataResolver.ResolveMethodDataAsync(dynamicTest.MethodMetadata);
+        var propertyData = await _dataResolver.ResolvePropertyDataAsync(dynamicTest.MethodMetadata.Class);
 
         // Handle repeat attribute
-        var repeatCount = GetRepeatCount(dynamicTest.TestMethodMetadata);
+        var repeatCount = GetRepeatCount(dynamicTest.MethodMetadata);
 
         var testIndex = 0;
 
@@ -124,7 +124,7 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
                 for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
                 {
                     var testName = _testNameFormatter.FormatTestName(
-                        dynamicTest.TestMethodMetadata.DisplayName ?? dynamicTest.TestMethodMetadata.MethodName,
+                        dynamicTest.MethodMetadata.DisplayName() ?? dynamicTest.MethodMetadata.MethodName(),
                         classArgs,
                         methodArgs,
                         propertyData);
@@ -141,8 +141,8 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
                         TestId = testId,
                         TestName = testName,
                         ExecutionMode = TestExecutionMode.SourceGeneration,
-                        MethodMetadata = dynamicTest.TestMethodMetadata,
-                        ClassMetadata = dynamicTest.ClassMetadata,
+                        MethodMetadata = dynamicTest.MethodMetadata,
+                        ClassMetadata = dynamicTest.MethodMetadata.Class,
                         ClassArguments = classArgs,
                         MethodArguments = methodArgs,
                         PropertyValues = propertyData,
@@ -152,11 +152,11 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
                         RepeatIndex = repeatIndex,
                         ClassDataIndex = classDataIndex,
                         MethodDataIndex = methodDataIndex,
-                        Categories = ExtractCategories(dynamicTest.TestMethodMetadata),
-                        Attributes = dynamicTest.TestMethodMetadata.Attributes,
+                        Categories = ExtractCategories(dynamicTest.MethodMetadata),
+                        Attributes = dynamicTest.MethodMetadata.Attributes,
                         SourceGeneratedData = new SourceGeneratedTestData
                         {
-                            ClassInstanceFactory = dynamicTest.TestClassFactory,
+                            ClassInstanceFactory = () => dynamicTest.TestClassFactory?.Invoke(Array.Empty<object?>()) ?? throw new InvalidOperationException("No class factory available"),
                             MethodInvoker = null, // TODO: Get from source-generated registry
                             PropertySetters = new Dictionary<string, Action<object, object?>>(),
                             CompiledDataSources = new List<object?[]> { classArgs, methodArgs }.AsReadOnly()
@@ -167,13 +167,14 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
         }
     }
 
+#pragma warning disable CS1998 // Async method lacks await
     private async IAsyncEnumerable<TestVariation> ExpandTestDefinitionAsync(
         TestDefinition testDefinition, 
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // Similar to dynamic test expansion but for TestDefinition
         var baseTestName = _testNameFormatter.FormatTestName(
-            testDefinition.MethodMetadata.DisplayName ?? testDefinition.MethodMetadata.MethodName);
+            testDefinition.MethodMetadata.DisplayName() ?? testDefinition.MethodMetadata.MethodName());
 
         yield return new TestVariation
         {
@@ -181,7 +182,7 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
             TestName = baseTestName,
             ExecutionMode = TestExecutionMode.SourceGeneration,
             MethodMetadata = testDefinition.MethodMetadata,
-            ClassMetadata = testDefinition.ClassMetadata,
+            ClassMetadata = testDefinition.MethodMetadata.Class,
             ClassArguments = Array.Empty<object?>(),
             MethodArguments = Array.Empty<object?>(),
             PropertyValues = testDefinition.PropertiesProvider(),
@@ -199,12 +200,12 @@ public class SourceGenerationTestVariationExpander : ITestVariationExpander
         };
     }
 
-    private async Task<int> EstimateDynamicTestCountAsync(DynamicTest dynamicTest)
+    private async Task<int> EstimateDynamicTestCountAsync(DynamicTestMetadata dynamicTest)
     {
         // Get data source counts from compile-time resolution
-        var classData = await _dataResolver.ResolveClassDataAsync(dynamicTest.ClassMetadata);
-        var methodData = await _dataResolver.ResolveMethodDataAsync(dynamicTest.TestMethodMetadata);
-        var repeatCount = GetRepeatCount(dynamicTest.TestMethodMetadata);
+        var classData = await _dataResolver.ResolveClassDataAsync(dynamicTest.MethodMetadata.Class);
+        var methodData = await _dataResolver.ResolveMethodDataAsync(dynamicTest.MethodMetadata);
+        var repeatCount = GetRepeatCount(dynamicTest.MethodMetadata);
 
         var classDataCount = Math.Max(1, classData.Count);
         var methodDataCount = Math.Max(1, methodData.Count);

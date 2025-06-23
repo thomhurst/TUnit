@@ -84,7 +84,7 @@ public class CompileTimeSafetyAnalyzer
                 {
                     Severity = SafetyIssueSeverity.Warning,
                     Message = $"Parameter '{parameter.Name}' has complex type '{parameter.Type.Name}' that may not be AOT-safe",
-                    Location = $"{methodMetadata.DeclaringType()().Name}.{methodMetadata.MethodName()()}",
+                    Location = $"{methodMetadata.DeclaringType().Name}.{methodMetadata.MethodName()}",
                     IssueType = SafetyIssueType.ComplexParameterType
                 });
 
@@ -119,7 +119,7 @@ public class CompileTimeSafetyAnalyzer
                 {
                     Severity = SafetyIssueSeverity.Error,
                     Message = $"Data attribute '{dataAttribute.GetType().Name}' requires runtime evaluation and is not AOT-safe",
-                    Location = $"{methodMetadata.DeclaringType()().Name}.{methodMetadata.MethodName()()}",
+                    Location = $"{methodMetadata.DeclaringType().Name}.{methodMetadata.MethodName()}",
                     IssueType = SafetyIssueType.RuntimeDataAttribute
                 });
 
