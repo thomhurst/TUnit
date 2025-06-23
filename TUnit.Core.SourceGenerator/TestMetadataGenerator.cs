@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -382,7 +383,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"Timeout = {CodeGenerationHelpers.ExtractTimeout(testInfo.MethodSymbol)},");
             writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testInfo.MethodSymbol)},");
             writer.AppendLine($"TestClassType = typeof({className}),");
-            writer.AppendLine($"TestMethodInfo = typeof({className}).GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)!,");
+            writer.AppendLine($"TestMethodInfo = typeof({className}).GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, {GenerateParameterTypesArray(testInfo.MethodSymbol)}, null)!,");
 
             // Generate class factory with CastHelper
             writer.AppendLine($"ClassFactory = {GenerateStaticClassFactory(testInfo.TypeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor)},");
@@ -974,7 +975,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 writer.Append($"new TUnit.Core.ParameterMetadata(typeof({paramType})) {{ ");
                 writer.Append($"Name = \"{param.Name}\", ");
                 writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)}, ");
-                writer.Append($"ReflectionInfo = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}).GetConstructors()[0].GetParameters()[{i}], ");
+                writer.Append($"ReflectionInfo = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}).GetConstructor({GenerateParameterTypesArray(constructor.Parameters)})!.GetParameters()[{i}], ");
                 writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(param.GetAttributes(), param, 0)} ");
                 writer.Append("}");
             }
@@ -1008,7 +1009,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.Append($"new TUnit.Core.ParameterMetadata(typeof({paramType})) {{ ");
             writer.Append($"Name = \"{param.Name}\", ");
             writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)}, ");
-            writer.Append($"ReflectionInfo = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}).GetMethod(\"{testInfo.MethodSymbol.Name}\")!.GetParameters()[{i}], ");
+            writer.Append($"ReflectionInfo = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}).GetMethod(\"{testInfo.MethodSymbol.Name}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, {GenerateParameterTypesArray(testInfo.MethodSymbol)}, null)!.GetParameters()[{i}], ");
             writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(param.GetAttributes(), param, 0)} ");
             writer.Append("}");
         }
@@ -1041,5 +1042,33 @@ public class TestMetadataGenerator : IIncrementalGenerator
         // Remove the trailing comma and newline
         var result = writer.ToString().TrimEnd('\r', '\n', ',');
         return result;
+    }
+    
+    private static string GenerateParameterTypesArray(IMethodSymbol method)
+    {
+        if (method.Parameters.Length == 0)
+        {
+            return "System.Type.EmptyTypes";
+        }
+        
+        var parameterTypes = method.Parameters
+            .Select(p => $"typeof({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))})")
+            .ToArray();
+            
+        return $"new System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
+    }
+    
+    private static string GenerateParameterTypesArray(ImmutableArray<IParameterSymbol> parameters)
+    {
+        if (parameters.Length == 0)
+        {
+            return "System.Type.EmptyTypes";
+        }
+        
+        var parameterTypes = parameters
+            .Select(p => $"typeof({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))})")
+            .ToArray();
+            
+        return $"new System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
     }
 }
