@@ -10,6 +10,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.OutputDevice;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
@@ -88,8 +89,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var instanceTracker = Register(new InstanceTracker());
 
-        var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions);
-
+        // Register dual-mode detection and services
+        var isReflectionRequested = IsReflectionScannerEnabledByCommandLine(CommandLineOptions);
+        var modeDetector = Register<IModeDetector>(new ModeDetector(isReflectionRequested));
+        var detectedMode = modeDetector.DetectMode();
+        
+        var isReflectionScannerEnabled = detectedMode == TestExecutionMode.Reflection;
 
         HooksCollector = Register<HooksCollectorBase>
         (
@@ -99,37 +104,47 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         );
 
         var dependencyCollector = new DependencyCollector();
-
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
 
-        // Register new services with AOT-safe alternatives
+        // Register core services
         var testNameFormatter = Register<ITestNameFormatter>(new TestNameFormatter());
         var dataProviderService = Register<IDataProviderService>(new DataProviderService());
         
-        // Use AOT-safe services when dynamic code is not supported
+        // Register mode-specific services
         ITestInstanceFactory testInstanceFactory;
-        ITestMetadataExpander testMetadataExpander;
+        ITestVariationExpander testVariationExpander;
+        ITestVariationExecutor testVariationExecutor;
         
-#if NET
-        if (!RuntimeFeature.IsDynamicCodeSupported)
+        if (detectedMode == TestExecutionMode.SourceGeneration)
         {
-            // AOT mode - use simplified services
+            // Source generation mode - AOT-safe services
             testInstanceFactory = Register<ITestInstanceFactory>(new AotTestInstanceFactory());
-            testMetadataExpander = Register<ITestMetadataExpander>(new AotTestMetadataExpander(testNameFormatter));
+            var dataResolver = Register<ICompileTimeDataResolver>(new SourceGenerationDataResolver());
+            var testRegistry = Register<ISourceGeneratedTestRegistry>(GlobalSourceGeneratedTestRegistry.Instance);
+            
+            var sourceGenerationExpander = new SourceGenerationTestVariationExpander(testNameFormatter, dataResolver);
+            var sourceGenerationExecutor = new SourceGenerationTestVariationExecutor(testRegistry);
+            
+            testVariationExpander = Register<ITestVariationExpander>(sourceGenerationExpander);
+            testVariationExecutor = Register<ITestVariationExecutor>(sourceGenerationExecutor);
         }
         else
-#endif
         {
-            // Normal mode - use full reflection-based services
+            // Reflection mode - full flexibility services
             testInstanceFactory = Register<ITestInstanceFactory>(new TestInstanceFactory());
-            testMetadataExpander = Register<ITestMetadataExpander>(new TestMetadataExpander(
-                dataProviderService, testNameFormatter, testInstanceFactory));
+            
+            var reflectionExpander = new ReflectionTestVariationExpander(
+                dataProviderService, testNameFormatter, testInstanceFactory);
+            var reflectionExecutor = new ReflectionTestVariationExecutor(testInstanceFactory);
+            
+            testVariationExpander = Register<ITestVariationExpander>(reflectionExpander);
+            testVariationExecutor = Register<ITestVariationExecutor>(reflectionExecutor);
         }
         
         var testContextFactory = Register<ITestContextFactory>(new TestContextFactory(this));
 
-        // Create the new simplified TestBuilder instead of UnifiedTestBuilder
-        var testBuilder = Register(new TestBuilder(testMetadataExpander, testContextFactory, this));
+        // Create the new TestVariationBuilder that works with TestVariations
+        var testBuilder = Register(new TestVariationBuilder(testVariationExpander, testContextFactory, this));
         
         var testsConstructor = Register<BaseTestsConstructor>
         (

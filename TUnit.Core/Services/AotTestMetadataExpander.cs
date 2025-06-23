@@ -28,7 +28,6 @@ public class AotTestMetadataExpander : ITestMetadataExpander
         return metadata switch
         {
             StaticTestDefinition staticDef => await ExpandStaticTestAsync(staticDef, cancellationToken),
-            TestDefinition testDef => new[] { testDef }, // Already a TestDefinition, return as-is
             DynamicTestMetadata => throw new NotSupportedException(
                 "Dynamic test metadata is not supported in AOT mode. Use source generation instead."),
             _ => throw new NotSupportedException($"Unsupported test descriptor type: {metadata.GetType().Name}")
@@ -42,6 +41,7 @@ public class AotTestMetadataExpander : ITestMetadataExpander
     {
         // In AOT mode, test expansion should be handled by source-generated code
         // This method should not be called in AOT scenarios
+        await Task.Yield(); // Make method truly async to avoid warning
         yield break;
     }
 

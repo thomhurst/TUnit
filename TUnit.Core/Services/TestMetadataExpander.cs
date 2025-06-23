@@ -35,7 +35,6 @@ public class TestMetadataExpander : ITestMetadataExpander
         {
             StaticTestDefinition staticDef => await ExpandStaticTestAsync(staticDef, cancellationToken),
             DynamicTestMetadata dynamicMeta => await ExpandDynamicTestAsync(dynamicMeta, cancellationToken),
-            TestDefinition testDef => new[] { testDef }, // Already a TestDefinition, return as-is
             _ => throw new NotSupportedException($"Unsupported test descriptor type: {metadata.GetType().Name}")
         };
     }
