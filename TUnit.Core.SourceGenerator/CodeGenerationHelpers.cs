@@ -33,7 +33,16 @@ internal static class CodeGenerationHelpers
                     writer.AppendLine($"Name = \"{param.Name}\",");
                     writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
                     writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes(), param, writer._indentLevel)},");
-                    writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance, null, {GenerateParameterTypesArray(method)}, null)!.GetParameters()[{parameterIndex}]");
+                    var paramTypesArray = GenerateParameterTypesArray(method);
+                    if (paramTypesArray == "null")
+                    {
+                        // For methods with generic parameters, use GetMethods and find by name
+                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethods(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault(m => m.Name == \"{method.Name}\" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance, null, {paramTypesArray}, null)!.GetParameters()[{parameterIndex}]");
+                    }
                 }
             }
         }

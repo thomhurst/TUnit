@@ -294,7 +294,7 @@ internal static class DataGeneratorHandler
         {
             // Convert ValueTask to Task first
             #pragma warning disable IL2075
-            var asTaskMethod = type.GetMethod("AsTask");
+            var asTaskMethod = type.GetMethod("AsTask", Type.EmptyTypes);
             #pragma warning restore IL2075
             var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
 
@@ -325,7 +325,7 @@ internal static class DataGeneratorHandler
                 throw new TaskCanceledException();
             }
 
-            var resultProperty = taskType.GetProperty("Result");
+            var resultProperty = taskType.GetProperty("Result", BindingFlags.Public | BindingFlags.Instance);
             return resultProperty?.GetValue(t);
         });
     }

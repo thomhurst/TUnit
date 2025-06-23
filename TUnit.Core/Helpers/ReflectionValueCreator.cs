@@ -107,7 +107,7 @@ internal static class ReflectionValueCreator
             var taskType = task.GetType();
             if (taskType.IsGenericType)
             {
-                var resultProperty = taskType.GetProperty("Result");
+                var resultProperty = taskType.GetProperty("Result", BindingFlags.Public | BindingFlags.Instance);
                 return resultProperty?.GetValue(task);
             }
             return null;
@@ -118,19 +118,19 @@ internal static class ReflectionValueCreator
         if (valueTaskType.IsGenericType)
         {
             // Get the AsTask method and convert to Task
-            var asTaskMethod = valueTaskType.GetMethod("AsTask");
+            var asTaskMethod = valueTaskType.GetMethod("AsTask", Type.EmptyTypes);
             var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
 
             await convertedTask.ConfigureAwait(false);
 
             var taskType = convertedTask.GetType();
-            var resultProperty = taskType.GetProperty("Result");
+            var resultProperty = taskType.GetProperty("Result", BindingFlags.Public | BindingFlags.Instance);
             return resultProperty?.GetValue(convertedTask);
         }
         else
         {
             // Non-generic ValueTask
-            var asTaskMethod = valueTaskType.GetMethod("AsTask");
+            var asTaskMethod = valueTaskType.GetMethod("AsTask", Type.EmptyTypes);
             var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
 
             await convertedTask.ConfigureAwait(false);

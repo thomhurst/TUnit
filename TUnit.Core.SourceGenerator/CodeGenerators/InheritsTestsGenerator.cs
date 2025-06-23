@@ -229,11 +229,29 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                         {
                             // For generic base types, we need to construct the closed generic type and then find the method
                             var closedBaseType = GetClosedGenericTypeName(baseClass, classSymbol);
-                            w3.AppendLine($"ReflectionInformation = typeof({closedBaseType}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, {GenerateParameterTypesArray(methodSymbol)}, null)");
+                            var paramTypesArray = GenerateParameterTypesArray(methodSymbol);
+                            if (paramTypesArray == "null")
+                            {
+                                // For methods with generic parameters, use GetMethods and find by name
+                                w3.AppendLine($"ReflectionInformation = typeof({closedBaseType}).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(m => m.Name == \"{methodSymbol.Name}\" && m.GetParameters().Length == {methodSymbol.Parameters.Length})");
+                            }
+                            else
+                            {
+                                w3.AppendLine($"ReflectionInformation = typeof({closedBaseType}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, {paramTypesArray}, null)");
+                            }
                         }
                         else
                         {
-                            w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, {GenerateParameterTypesArray(methodSymbol)}, null)");
+                            var paramTypesArray = GenerateParameterTypesArray(methodSymbol);
+                            if (paramTypesArray == "null")
+                            {
+                                // For methods with generic parameters, use GetMethods and find by name
+                                w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(m => m.Name == \"{methodSymbol.Name}\" && m.GetParameters().Length == {methodSymbol.Parameters.Length})");
+                            }
+                            else
+                            {
+                                w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, {paramTypesArray}, null)");
+                            }
                         }
                     });
                     w2.AppendLine(",");
