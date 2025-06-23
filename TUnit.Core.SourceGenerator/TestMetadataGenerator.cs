@@ -68,7 +68,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         {
             return;
         }
-        
+
         try
         {
 
@@ -118,7 +118,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             {
                 // Determine if we can use StaticTestDefinition (AOT-compatible)
                 bool canUseStaticDefinition = DetermineIfStaticTestDefinition(testInfo);
-                
+
                 if (canUseStaticDefinition)
                 {
                     writer.AppendLine("var testDescriptors = new System.Collections.Generic.List<ITestDescriptor>();");
@@ -166,11 +166,11 @@ public class TestMetadataGenerator : IIncrementalGenerator
         // 1. The type is not generic
         if (testInfo.TypeSymbol.IsGenericType)
             return false;
-            
+
         // 2. The method is not generic
         if (testInfo.MethodSymbol.IsGenericMethod)
             return false;
-            
+
         // 3. No data sources that require runtime resolution
         // Check method parameters for data attributes
         foreach (var param in testInfo.MethodSymbol.Parameters)
@@ -182,11 +182,11 @@ public class TestMetadataGenerator : IIncrementalGenerator
                     return false;
             }
         }
-        
+
         // Check class constructor parameters for data attributes
         var constructors = testInfo.TypeSymbol.Constructors
             .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public);
-            
+
         foreach (var constructor in constructors)
         {
             foreach (var param in constructor.Parameters)
@@ -198,7 +198,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
-        
+
         // Check properties for data attributes
         var properties = testInfo.TypeSymbol.GetMembers().OfType<IPropertySymbol>();
         foreach (var prop in properties)
@@ -209,23 +209,23 @@ public class TestMetadataGenerator : IIncrementalGenerator
                     return false;
             }
         }
-        
+
         // All checks passed - can use static definition
         return true;
     }
-    
+
     private static bool IsRuntimeDataSourceAttribute(AttributeData attr)
     {
         var attrName = attr.AttributeClass?.Name;
-        
+
         // GeneratedData still requires runtime resolution
         // But MethodDataSource can now be handled at compile time
         return attrName is "GeneratedDataAttribute";
     }
 
     private static void GenerateStaticTestDefinition(
-        CodeWriter writer, 
-        TestMethodInfo testInfo, 
+        CodeWriter writer,
+        TestMethodInfo testInfo,
         string className,
         string methodName,
         List<IPropertySymbol> requiredProperties,
@@ -233,7 +233,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         bool hasParameterlessConstructor)
     {
         var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
-        
+
         using (writer.BeginObjectInitializer("var staticDef = new StaticTestDefinition"))
         {
             writer.AppendLine($"TestId = \"{className}.{methodName}_{{{{TestIndex}}}}\",");
@@ -247,28 +247,28 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testInfo.MethodSymbol)},");
             writer.AppendLine($"TestClassType = typeof({className}),");
             writer.AppendLine($"TestMethodInfo = typeof({className}).GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)!,");
-            
+
             // Generate class factory with CastHelper
             writer.AppendLine($"ClassFactory = {GenerateStaticClassFactory(testInfo.TypeSymbol, className, constructorWithParameters, hasParameterlessConstructor)},");
-            
+
             // Generate method invoker with CastHelper
             writer.AppendLine($"MethodInvoker = {GenerateStaticMethodInvoker(testInfo.MethodSymbol, className)},");
-            
+
             // Generate property values provider
             writer.AppendLine($"PropertyValuesProvider = {GenerateStaticPropertyValuesProvider(testInfo.TypeSymbol)},");
-            
+
             // Generate data providers
             writer.AppendLine($"ClassDataProvider = {GenerateClassDataProvider(testInfo.TypeSymbol)},");
             writer.AppendLine($"MethodDataProvider = {GenerateMethodDataProvider(testInfo.MethodSymbol)}");
         }
-        
+
         writer.AppendLine();
         writer.AppendLine("testDescriptors.Add(staticDef);");
     }
 
     private static void GenerateDynamicTestMetadata(
-        CodeWriter writer, 
-        TestMethodInfo testInfo, 
+        CodeWriter writer,
+        TestMethodInfo testInfo,
         string className,
         string methodName,
         List<IPropertySymbol> requiredProperties,
@@ -337,7 +337,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
     {
         using var writer = new CodeWriter("", includeHeader: false);
         writer.Append("args => ");
-        
+
         if (constructorWithParameters != null && !hasParameterlessConstructor)
         {
             writer.Append($"new {className}(");
@@ -355,25 +355,25 @@ public class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.Append($"new {className}()");
         }
-        
+
         return writer.ToString().Trim();
     }
 
     private static string GenerateStaticMethodInvoker(IMethodSymbol methodSymbol, string className)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        
+
         var methodName = methodSymbol.Name;
-        
+
         writer.Append("async (instance, args) => ");
         writer.Append("{");
-        
+
         // Cast instance to the correct type
         writer.Append($" var typedInstance = ({className})instance;");
-        
+
         // Use AsyncConvert.Convert to handle the method invocation
         writer.Append($" await TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}(");
-        
+
         // Add parameters with CastHelper
         if (methodSymbol.Parameters.Length > 0)
         {
@@ -386,39 +386,39 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 }));
             writer.Append(paramList);
         }
-        
+
         writer.Append("));");
         writer.Append(" }");
-        
+
         return writer.ToString().Trim();
     }
 
     private static string GenerateStaticPropertyValuesProvider(INamedTypeSymbol typeSymbol)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        
+
         // Find properties with MethodDataSource attribute (used for property data sources)
         var propertiesWithDataSource = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute"))
             .ToList();
-            
+
         if (!propertiesWithDataSource.Any())
         {
             // No properties with data sources - return empty dictionary
             return "() => new[] { new System.Collections.Generic.Dictionary<string, object?>() }";
         }
-        
+
         // Generate a provider that combines all property data sources
         writer.Append("() => ");
         writer.Append("{");
-        
+
         // Generate calls to get data for each property
         foreach (var prop in propertiesWithDataSource)
         {
             var dataSourceAttr = prop.GetAttributes()
                 .First(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
-                
+
             if (dataSourceAttr.ConstructorArguments.Length > 0)
             {
                 var sourceName = dataSourceAttr.ConstructorArguments[0].Value?.ToString();
@@ -426,7 +426,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 {
                     // Find the data source (method or property)
                     var member = typeSymbol.GetMembers(sourceName!).FirstOrDefault();
-                    
+
                     if (member is IMethodSymbol method)
                     {
                         writer.Append($" var {prop.Name}Data = ");
@@ -442,10 +442,10 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
-        
+
         // Combine all data sources into dictionaries
         writer.Append(" return ");
-        
+
         if (propertiesWithDataSource.Count == 1)
         {
             var prop = propertiesWithDataSource[0];
@@ -456,13 +456,13 @@ public class TestMetadataGenerator : IIncrementalGenerator
             // TODO: Handle multiple property data sources (cartesian product)
             writer.Append("new[] { new System.Collections.Generic.Dictionary<string, object?>() }");
         }
-        
+
         writer.Append(";");
         writer.Append(" }");
-        
+
         return writer.ToString().Trim();
     }
-    
+
     private static void GenerateDataSourceCall(CodeWriter writer, IMethodSymbol method, INamedTypeSymbol containingType)
     {
         if (method.IsStatic)
@@ -474,7 +474,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.Append($"new {containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}().{method.Name}()");
         }
     }
-    
+
     private static void GeneratePropertyDataSourceCall(CodeWriter writer, IPropertySymbol property, INamedTypeSymbol containingType)
     {
         if (property.IsStatic)
@@ -703,18 +703,18 @@ public class TestMetadataGenerator : IIncrementalGenerator
     private static string GenerateClassDataProvider(INamedTypeSymbol typeSymbol)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        
+
         // Check for class-level Arguments attributes
         var classArgumentsAttrs = typeSymbol.GetAttributes()
             .Where(attr => attr.AttributeClass?.Name == "ArgumentsAttribute")
             .ToList();
-            
+
         if (classArgumentsAttrs.Any())
         {
             // For now, just use the first one
             // TODO: Handle multiple data providers
             writer.Append("new TUnit.Core.ArgumentsDataProvider(");
-            
+
             var args = classArgumentsAttrs.First().ConstructorArguments;
             // ArgumentsAttribute constructor takes params object?[]
             if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
@@ -724,7 +724,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 for (int i = 0; i < values.Length; i++)
                 {
                     if (i > 0) writer.Append(", ");
-                    writer.Append(FormatConstantValue(values[i]));
+                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(values[i]));
                 }
             }
             else
@@ -733,35 +733,35 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 for (int i = 0; i < args.Length; i++)
                 {
                     if (i > 0) writer.Append(", ");
-                    writer.Append(FormatConstantValue(args[i]));
+                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(args[i]));
                 }
             }
-            
+
             writer.Append(")");
         }
         else
         {
             writer.Append("new TUnit.Core.EmptyDataProvider()");
         }
-        
+
         return writer.ToString().Trim();
     }
-    
+
     private static string GenerateMethodDataProvider(IMethodSymbol methodSymbol)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        
+
         // Check for method-level Arguments attributes
         var methodArgumentsAttrs = methodSymbol.GetAttributes()
             .Where(attr => attr.AttributeClass?.Name == "ArgumentsAttribute")
             .ToList();
-            
+
         if (methodArgumentsAttrs.Any())
         {
             // For now, just use the first one
             // TODO: Handle multiple data providers
             writer.Append("new TUnit.Core.ArgumentsDataProvider(");
-            
+
             var args = methodArgumentsAttrs.First().ConstructorArguments;
             // ArgumentsAttribute constructor takes params object?[]
             if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
@@ -771,7 +771,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 for (int i = 0; i < values.Length; i++)
                 {
                     if (i > 0) writer.Append(", ");
-                    writer.Append(FormatConstantValue(values[i]));
+                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(values[i]));
                 }
             }
             else
@@ -780,35 +780,18 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 for (int i = 0; i < args.Length; i++)
                 {
                     if (i > 0) writer.Append(", ");
-                    writer.Append(FormatConstantValue(args[i]));
+                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(args[i]));
                 }
             }
-            
+
             writer.Append(")");
         }
         else
         {
             writer.Append("new TUnit.Core.EmptyDataProvider()");
         }
-        
+
         return writer.ToString().Trim();
-    }
-    
-    private static string FormatConstantValue(TypedConstant constant)
-    {
-        if (constant.IsNull)
-            return "null";
-            
-        if (constant.Type?.SpecialType == SpecialType.System_String)
-            return $"\"{constant.Value}\"";
-            
-        if (constant.Type?.SpecialType == SpecialType.System_Char)
-            return $"'{constant.Value}'";
-            
-        if (constant.Type?.SpecialType == SpecialType.System_Boolean)
-            return constant.Value?.ToString()?.ToLower() ?? "false";
-            
-        return constant.Value?.ToString() ?? "null";
     }
 
     private class TestMethodInfo

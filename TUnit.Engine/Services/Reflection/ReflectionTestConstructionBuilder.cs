@@ -334,3 +334,11 @@ internal class ReflectionTestConstructionBuilder
         });
     }
 }
+
+internal class SingleArgumentsDataProvider(object?[] objects) : IDataProvider
+{
+    public Task<IEnumerable<object?[]>> GetData()
+    {
+        return Task.FromResult<IEnumerable<object?[]>>([objects]);
+    }
+}
