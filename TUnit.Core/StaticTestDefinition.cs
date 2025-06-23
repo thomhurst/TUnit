@@ -49,16 +49,6 @@ public sealed class StaticTestDefinition : ITestDescriptor
     public required Func<object, object?[], Task> MethodInvoker { get; init; }
     
     /// <summary>
-    /// Provides class constructor arguments for each test iteration.
-    /// </summary>
-    public required Func<IEnumerable<object?[]>> ClassArgumentsProvider { get; init; }
-    
-    /// <summary>
-    /// Provides method arguments for each test iteration.
-    /// </summary>
-    public required Func<IEnumerable<object?[]>> MethodArgumentsProvider { get; init; }
-    
-    /// <summary>
     /// Provides property values for each test iteration. Key is property name.
     /// </summary>
     public required Func<IEnumerable<IDictionary<string, object?>>> PropertyValuesProvider { get; init; }

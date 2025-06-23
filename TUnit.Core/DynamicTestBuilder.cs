@@ -510,8 +510,6 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
             TestLineNumber = metadata.TestLineNumber,
             TestClassFactory = testClassFactory,
             TestMethodInvoker = testMethodInvoker,
-            ClassArgumentsProvider = () => combination.ClassArguments,
-            MethodArgumentsProvider = () => unwrappedMethodArgs,
             PropertiesProvider = propertiesProvider
         };
     }

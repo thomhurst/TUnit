@@ -69,16 +69,6 @@ public sealed record TestDefinition : TestDefinitionBase
     public required Func<object, CancellationToken, ValueTask> TestMethodInvoker { get; init; }
 
     /// <summary>
-    /// Provider for test class constructor arguments.
-    /// </summary>
-    public required Func<object?[]> ClassArgumentsProvider { get; init; }
-
-    /// <summary>
-    /// Provider for test method arguments.
-    /// </summary>
-    public required Func<object?[]> MethodArgumentsProvider { get; init; }
-
-    /// <summary>
     /// Provider for properties to inject into the test class.
     /// </summary>
     public required Func<IDictionary<string, object?>> PropertiesProvider { get; init; }
@@ -130,16 +120,6 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     public required Func<TTestClass, CancellationToken, ValueTask> TestMethodInvoker { get; init; }
 
     /// <summary>
-    /// Provider for test class constructor arguments.
-    /// </summary>
-    public required Func<object?[]> ClassArgumentsProvider { get; init; }
-
-    /// <summary>
-    /// Provider for test method arguments.
-    /// </summary>
-    public required Func<object?[]> MethodArgumentsProvider { get; init; }
-
-    /// <summary>
     /// Provider for properties to inject into the test class.
     /// </summary>
     public required Func<IDictionary<string, object?>> PropertiesProvider { get; init; }
@@ -162,8 +142,6 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
             TestLineNumber = definition.TestLineNumber,
             TestClassFactory = () => definition.TestClassFactory(),
             TestMethodInvoker = (obj, ct) => definition.TestMethodInvoker((TTestClass)obj, ct),
-            ClassArgumentsProvider = definition.ClassArgumentsProvider,
-            MethodArgumentsProvider = definition.MethodArgumentsProvider,
             PropertiesProvider = definition.PropertiesProvider
         };
     }

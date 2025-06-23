@@ -194,8 +194,6 @@ public record DynamicTest<
 
                     return AsyncConvert.ConvertObject(TestBody.Invoke(@class, arguments));
                 },
-                ClassArgumentsProvider = () => TestClassArguments ?? [],
-                MethodArgumentsProvider = () => TestMethodArguments,
                 PropertiesProvider = () => Properties ?? new Dictionary<string, object?>()
             };
 

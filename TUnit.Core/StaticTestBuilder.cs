@@ -115,8 +115,6 @@ public class StaticTestBuilder : ITestDefinitionBuilder
             TestLineNumber = staticDef.TestLineNumber,
             TestClassFactory = testClassFactory,
             TestMethodInvoker = testMethodInvoker,
-            ClassArgumentsProvider = () => classArgs,
-            MethodArgumentsProvider = () => methodArgs,
             PropertiesProvider = () => propertyValues
         };
     }

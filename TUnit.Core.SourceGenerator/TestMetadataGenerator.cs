@@ -254,10 +254,6 @@ public class TestMetadataGenerator : IIncrementalGenerator
             // Generate method invoker with CastHelper
             writer.AppendLine($"MethodInvoker = {GenerateStaticMethodInvoker(testInfo.MethodSymbol, className)},");
             
-            // Generate argument providers
-            writer.AppendLine($"ClassArgumentsProvider = {GenerateStaticClassArgumentsProvider(testInfo.TypeSymbol)},");
-            writer.AppendLine($"MethodArgumentsProvider = {GenerateStaticMethodArgumentsProvider(testInfo.MethodSymbol)},");
-            
             // Generate property values provider
             writer.AppendLine($"PropertyValuesProvider = {GenerateStaticPropertyValuesProvider(testInfo.TypeSymbol)},");
             
@@ -367,7 +363,6 @@ public class TestMetadataGenerator : IIncrementalGenerator
     {
         using var writer = new CodeWriter("", includeHeader: false);
         
-        var isAsync = IsAsyncMethod(methodSymbol);
         var methodName = methodSymbol.Name;
         
         writer.Append("async (instance, args) => ");
@@ -376,14 +371,8 @@ public class TestMetadataGenerator : IIncrementalGenerator
         // Cast instance to the correct type
         writer.Append($" var typedInstance = ({className})instance;");
         
-        // Build method call
-        writer.Append($" ");
-        if (isAsync)
-        {
-            writer.Append("await ");
-        }
-        
-        writer.Append($"typedInstance.{methodName}(");
+        // Use AsyncConvert.Convert to handle the method invocation
+        writer.Append($" await TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}(");
         
         // Add parameters with CastHelper
         if (methodSymbol.Parameters.Length > 0)
@@ -398,184 +387,11 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.Append(paramList);
         }
         
-        writer.Append(");");
-        
-        // If method is not async, wrap in Task.CompletedTask
-        if (!isAsync)
-        {
-            writer.Append(" return System.Threading.Tasks.Task.CompletedTask;");
-        }
-        
+        writer.Append("));");
         writer.Append(" }");
         
         return writer.ToString().Trim();
     }
-
-    private static string GenerateStaticClassArgumentsProvider(INamedTypeSymbol typeSymbol)
-    {
-        using var writer = new CodeWriter("", includeHeader: false);
-        writer.Append("() => ");
-        
-        // Check for ArgumentsAttribute on the class
-        var classArgumentsAttrs = typeSymbol.GetAttributes()
-            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToList();
-            
-        if (classArgumentsAttrs.Any())
-        {
-            writer.Append("new[] { ");
-            bool first = true;
-            foreach (var attr in classArgumentsAttrs)
-            {
-                if (!first) writer.Append(", ");
-                first = false;
-                
-                // Extract the arguments from the attribute
-                writer.Append(GenerateArgumentsArray(attr));
-            }
-            writer.Append(" }");
-        }
-        else
-        {
-            // No arguments - return single empty array
-            writer.Append("new[] { System.Array.Empty<object?>() }");
-        }
-        
-        return writer.ToString().Trim();
-    }
-
-    private static string GenerateStaticMethodArgumentsProvider(IMethodSymbol methodSymbol)
-    {
-        using var writer = new CodeWriter("", includeHeader: false);
-        
-        // Check for MethodDataSource attribute
-        var methodDataSourceAttr = methodSymbol.GetAttributes()
-            .FirstOrDefault(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
-            
-        if (methodDataSourceAttr != null)
-        {
-            // Generate a call to the data source method
-            if (methodDataSourceAttr.ConstructorArguments.Length > 0)
-            {
-                var methodName = methodDataSourceAttr.ConstructorArguments[0].Value?.ToString();
-                if (!string.IsNullOrEmpty(methodName))
-                {
-                    // Find the data source method
-                    var containingType = methodSymbol.ContainingType;
-                    var dataSourceMethod = containingType.GetMembers(methodName!)
-                        .OfType<IMethodSymbol>()
-                        .FirstOrDefault();
-                        
-                    if (dataSourceMethod != null)
-                    {
-                        return GenerateDataSourceProvider(dataSourceMethod, methodSymbol, containingType);
-                    }
-                    else
-                    {
-                        // Data source method not found - generate error comment
-                        return $"() => {{ throw new InvalidOperationException(\"Data source method '{methodName}' not found on type '{containingType.ToDisplayString()}'\"); }}";
-                    }
-                }
-            }
-        }
-        
-        // Check for ArgumentsAttribute on the method
-        writer.Append("() => ");
-        var methodArgumentsAttrs = methodSymbol.GetAttributes()
-            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToList();
-            
-        if (methodArgumentsAttrs.Any())
-        {
-            writer.Append("new[] { ");
-            bool first = true;
-            foreach (var attr in methodArgumentsAttrs)
-            {
-                if (!first) writer.Append(", ");
-                first = false;
-                
-                // Extract the arguments from the attribute
-                writer.Append(GenerateArgumentsArray(attr));
-            }
-            writer.Append(" }");
-        }
-        else
-        {
-            // No arguments - return single empty array
-            writer.Append("new[] { System.Array.Empty<object?>() }");
-        }
-        
-        return writer.ToString().Trim();
-    }
-    
-    private static string GenerateArgumentsArray(AttributeData attr)
-    {
-        using var writer = new CodeWriter("", includeHeader: false);
-        writer.Append("new object?[] { ");
-        
-        // Get constructor arguments
-        bool first = true;
-        if (attr.ConstructorArguments.Length > 0)
-        {
-            var args = attr.ConstructorArguments[0];
-            if (args.Kind == Microsoft.CodeAnalysis.TypedConstantKind.Array)
-            {
-                // It's an array of values
-                foreach (var value in args.Values)
-                {
-                    if (!first) writer.Append(", ");
-                    first = false;
-                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(value));
-                }
-            }
-            else
-            {
-                // Single value
-                writer.Append(TypedConstantParser.GetRawTypedConstantValue(args));
-            }
-        }
-        
-        writer.Append(" }");
-        return writer.ToString();
-    }
-    
-    private static string GenerateDataSourceProvider(
-        IMethodSymbol dataSourceMethod, 
-        IMethodSymbol targetMethod,
-        INamedTypeSymbol containingType)
-    {
-        using var writer = new CodeWriter("", includeHeader: false);
-        writer.Append("() => ");
-        writer.Append("{");
-        
-        // Generate instance creation if needed
-        string callTarget;
-        if (dataSourceMethod.IsStatic)
-        {
-            callTarget = containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
-                .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
-        }
-        else
-        {
-            writer.Append($" var instance = new {containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}();");
-            callTarget = "instance";
-        }
-        
-        // Call the data source method
-        writer.Append($" var data = {callTarget}.{dataSourceMethod.Name}();");
-        
-        // Generate conversion expression
-        var conversion = CompileTimeArgumentConverter.GenerateConversionExpression(
-            dataSourceMethod.ReturnType,
-            targetMethod,
-            "data");
-            
-        writer.Append($" return {conversion};");
-        writer.Append(" }");
-        
-        return writer.ToString().Trim();
-    }
-
 
     private static string GenerateStaticPropertyValuesProvider(INamedTypeSymbol typeSymbol)
     {
