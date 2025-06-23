@@ -97,10 +97,41 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
             };
         }
         
+        // Check if the method is a generic method definition or if it's defined on a generic type
+        var methodInfo = metadata.MethodMetadata.ReflectionInformation;
+        var declaringType = methodInfo.DeclaringType;
+        
+        // If the declaring type is generic and different from our test class type,
+        // we're dealing with an inherited generic method
+        if (declaringType != null && declaringType.IsGenericTypeDefinition && declaringType != testClassType)
+        {
+            // We can't compile this at this stage - defer to runtime
+            return new CompiledFactories
+            {
+                ClassFactory = GetOrCompileConstructor(testClassType),
+                MethodInvoker = null!, // Will be resolved at runtime
+                PropertySetters = metadata.PropertyDataSources.Keys
+                    .ToDictionary(p => p, GetOrCompilePropertySetter)
+            };
+        }
+        
+        Func<object?, object?[], object?> methodInvoker;
+        
+        if (methodInfo.IsGenericMethodDefinition)
+        {
+            // For generic methods, we can't pre-compile the invoker
+            // We'll create a dynamic invoker that handles type inference at runtime
+            methodInvoker = CreateGenericMethodInvoker(methodInfo);
+        }
+        else
+        {
+            methodInvoker = GetOrCompileMethodInvoker(methodInfo);
+        }
+        
         return new CompiledFactories
         {
             ClassFactory = GetOrCompileConstructor(testClassType),
-            MethodInvoker = GetOrCompileMethodInvoker(metadata.MethodMetadata.ReflectionInformation),
+            MethodInvoker = methodInvoker,
             PropertySetters = metadata.PropertyDataSources.Keys
                 .ToDictionary(p => p, GetOrCompilePropertySetter)
         };
@@ -142,6 +173,46 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
 
             return lambda.Compile();
         });
+    }
+
+    private Func<object?, object?[], object?> CreateGenericMethodInvoker(MethodInfo genericMethodDefinition)
+    {
+        return (instance, args) =>
+        {
+            // Infer type arguments from the actual argument types
+            var typeArgs = new Type[genericMethodDefinition.GetGenericArguments().Length];
+            var methodParams = genericMethodDefinition.GetParameters();
+            
+            // Simple type inference based on argument types
+            for (int i = 0; i < methodParams.Length && i < args.Length; i++)
+            {
+                if (args[i] != null)
+                {
+                    var paramType = methodParams[i].ParameterType;
+                    if (paramType.IsGenericParameter)
+                    {
+                        var genericParamPosition = Array.IndexOf(genericMethodDefinition.GetGenericArguments(), paramType);
+                        if (genericParamPosition >= 0)
+                        {
+                            typeArgs[genericParamPosition] = args[i]!.GetType();
+                        }
+                    }
+                }
+            }
+            
+            // Fill in any remaining type arguments with object
+            for (int i = 0; i < typeArgs.Length; i++)
+            {
+                typeArgs[i] ??= typeof(object);
+            }
+            
+            // Make the generic method concrete
+            var concreteMethod = genericMethodDefinition.MakeGenericMethod(typeArgs);
+            
+            // Now we can compile and cache the concrete method
+            var invoker = GetOrCompileMethodInvoker(concreteMethod);
+            return invoker(instance, args);
+        };
     }
 
     private Func<object?, object?[], object?> GetOrCompileMethodInvoker(MethodInfo method)
@@ -369,7 +440,41 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
         // Create test method invoker
         Func<object, CancellationToken, ValueTask> testMethodInvoker = async (instance, cancellationToken) =>
         {
-            var result = factories.MethodInvoker(instance, combination.MethodArguments);
+            object? result;
+            
+            // If we're dealing with a generic type that was resolved at runtime, 
+            // or if the method invoker is null (deferred compilation)
+            if ((metadata.TestClassType == null || factories.MethodInvoker == null) && instance != null)
+            {
+                var concreteType = instance.GetType();
+                var method = metadata.MethodMetadata.ReflectionInformation;
+                
+                // Find the corresponding method on the concrete type
+                var concreteMethod = concreteType.GetMethod(
+                    method.Name, 
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                
+                if (concreteMethod != null && concreteMethod.IsGenericMethodDefinition)
+                {
+                    // Use our generic method invoker
+                    var genericInvoker = CreateGenericMethodInvoker(concreteMethod);
+                    result = genericInvoker(instance, combination.MethodArguments);
+                }
+                else if (concreteMethod != null)
+                {
+                    // Get or compile invoker for the concrete method
+                    var invoker = GetOrCompileMethodInvoker(concreteMethod);
+                    result = invoker(instance, combination.MethodArguments);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Could not find method {method.Name} on type {concreteType}");
+                }
+            }
+            else
+            {
+                result = factories.MethodInvoker?.Invoke(instance, combination.MethodArguments);
+            }
 
             // Handle async methods
             if (result is Task task)

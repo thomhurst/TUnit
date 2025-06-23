@@ -181,7 +181,17 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                     w2.AppendBlock("MethodMetadata = new MethodMetadata", w3 =>
                     {
                         w3.AppendLine($"Name = \"{methodSymbol.Name}\",");
-                        w3.AppendLine($"Type = typeof({GetFullTypeName(baseClass)}) ?? typeof(object),");
+                        
+                        // For methods on generic types, use the concrete derived type
+                        if (baseClass.IsGenericType)
+                        {
+                            w3.AppendLine($"Type = typeof({GetFullTypeName(classSymbol)}) ?? typeof(object),");
+                        }
+                        else
+                        {
+                            w3.AppendLine($"Type = typeof({GetFullTypeName(baseClass)}) ?? typeof(object),");
+                        }
+                        
                         w3.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(baseClass)},");
                         w3.AppendLine($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(methodSymbol)},");
                         w3.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
@@ -212,7 +222,19 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                         });
                         w3.AppendLine(",");
                         w3.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(methodSymbol.GetAttributes(), methodSymbol, w3.IndentLevel)},");
-                        w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)");
+                        
+                        // For methods on generic types, we need to look up the method on the base type where it's declared
+                        // The runtime will handle finding the correct method on the derived type
+                        if (baseClass.IsGenericType)
+                        {
+                            // For generic base types, we need to construct the closed generic type and then find the method
+                            var closedBaseType = GetClosedGenericTypeName(baseClass, classSymbol);
+                            w3.AppendLine($"ReflectionInformation = typeof({closedBaseType}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)");
+                        }
+                        else
+                        {
+                            w3.AppendLine($"ReflectionInformation = typeof({GetFullTypeName(baseClass)}).GetMethod(\"{methodSymbol.Name}\", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)");
+                        }
                     });
                     w2.AppendLine(",");
 
@@ -246,6 +268,27 @@ public class InheritsTestsGenerator : IIncrementalGenerator
     {
         return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
             .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+    }
+    
+    private static string GetClosedGenericTypeName(INamedTypeSymbol genericBaseClass, INamedTypeSymbol derivedClass)
+    {
+        // For a generic base class like GenericTestExample<T>, and a derived class like IntGenericTests : GenericTestExample<int>
+        // We need to construct the closed generic type name like GenericTestExample<int>
+        
+        // Find the base type in the derived class hierarchy that matches our generic base class
+        var currentType = derivedClass.BaseType;
+        while (currentType != null)
+        {
+            if (currentType.OriginalDefinition.Equals(genericBaseClass.OriginalDefinition, SymbolEqualityComparer.Default))
+            {
+                // Found it - return the closed generic type
+                return GetFullTypeName(currentType);
+            }
+            currentType = currentType.BaseType;
+        }
+        
+        // Fallback - shouldn't happen
+        return GetFullTypeName(genericBaseClass);
     }
 
     private static string GenerateTestClassFactory(INamedTypeSymbol classSymbol)
