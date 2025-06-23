@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -101,13 +102,31 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
 
-        // Register new services
+        // Register new services with AOT-safe alternatives
         var testNameFormatter = Register<ITestNameFormatter>(new TestNameFormatter());
         var dataProviderService = Register<IDataProviderService>(new DataProviderService());
-        var testInstanceFactory = Register<ITestInstanceFactory>(new TestInstanceFactory());
+        
+        // Use AOT-safe services when dynamic code is not supported
+        ITestInstanceFactory testInstanceFactory;
+        ITestMetadataExpander testMetadataExpander;
+        
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            // AOT mode - use simplified services
+            testInstanceFactory = Register<ITestInstanceFactory>(new AotTestInstanceFactory());
+            testMetadataExpander = Register<ITestMetadataExpander>(new AotTestMetadataExpander(testNameFormatter));
+        }
+        else
+#endif
+        {
+            // Normal mode - use full reflection-based services
+            testInstanceFactory = Register<ITestInstanceFactory>(new TestInstanceFactory());
+            testMetadataExpander = Register<ITestMetadataExpander>(new TestMetadataExpander(
+                dataProviderService, testNameFormatter, testInstanceFactory));
+        }
+        
         var testContextFactory = Register<ITestContextFactory>(new TestContextFactory(this));
-        var testMetadataExpander = Register<ITestMetadataExpander>(new TestMetadataExpander(
-            dataProviderService, testNameFormatter, testInstanceFactory));
 
         // Create the new simplified TestBuilder instead of UnifiedTestBuilder
         var testBuilder = Register(new TestBuilder(testMetadataExpander, testContextFactory, this));

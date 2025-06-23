@@ -66,6 +66,49 @@ public class TestContextFactory : ITestContextFactory
         return await Task.FromResult(testContext);
     }
 
+    /// <inheritdoc />
+    public TestDetails CreateTestDetails(TestDefinition definition, string testName)
+    {
+        // Create a resettable lazy for the class instance
+        var lazyInstance = new ResettableLazy<object>(
+            definition.TestClassFactory,
+            definition.TestId,
+            testName);
+
+        // Create test details using the non-generic version
+        var testDetails = new TestDetails<object>
+        {
+            TestId = definition.TestId,
+            TestName = testName,
+            LazyClassInstance = lazyInstance,
+            TestClassArguments = Array.Empty<object?>(),
+            TestMethodArguments = Array.Empty<object?>(),
+            TestClassInjectedPropertyArguments = definition.PropertiesProvider(),
+            MethodMetadata = definition.MethodMetadata,
+            ReturnType = definition.MethodMetadata.ReturnType ?? typeof(void),
+            TestFilePath = definition.TestFilePath,
+            TestLineNumber = definition.TestLineNumber,
+            DataAttributes = Array.Empty<AttributeMetadata>(),
+            DynamicAttributes = Array.Empty<AttributeMetadata>()
+        };
+
+        // Add categories from attributes
+        var categoryAttributes = definition.MethodMetadata.GetAttributes<CategoryAttribute>();
+        foreach (var categoryAttribute in categoryAttributes)
+        {
+            testDetails.Categories.Add(categoryAttribute.Category);
+        }
+
+        // Set retry limit from attributes
+        var retryAttribute = definition.MethodMetadata.GetAttribute<RetryAttribute>();
+        if (retryAttribute != null)
+        {
+            testDetails.SetRetryLimit(retryAttribute.Times);
+        }
+
+        return testDetails;
+    }
+
     private TestDetails CreateTestDetails(ExpandedTest expandedTest)
     {
         // Create a resettable lazy for the class instance

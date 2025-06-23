@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Interfaces;
 
@@ -6,7 +7,10 @@ namespace TUnit.Core.Services;
 /// <summary>
 /// Default implementation of test instance factory using simple reflection.
 /// No expression compilation for better maintainability.
+/// Note: This implementation requires dynamic code support and is not AOT-safe.
 /// </summary>
+[RequiresDynamicCode("Test instance creation requires runtime type instantiation and method invocation")]
+[RequiresUnreferencedCode("Test instance creation may require types and members not preserved by trimming")]
 public class TestInstanceFactory : ITestInstanceFactory
 {
     /// <inheritdoc />
