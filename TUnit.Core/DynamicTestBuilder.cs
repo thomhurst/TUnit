@@ -32,10 +32,10 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
         {
             throw new ArgumentException($"DynamicTestBuilder can only process DynamicTestMetadata, not {testDescriptor.GetType().Name}");
         }
-        
+
         return await BuildTestsFromDynamicMetadataAsync(metadata, cancellationToken);
     }
-    
+
     /// <summary>
     /// Builds all test definitions from the given dynamic metadata.
     /// Handles all data source combinations, tuple unwrapping, and property initialization.
@@ -96,11 +96,11 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
                 PropertySetters = new Dictionary<PropertyInfo, Action<object, object?>>()
             };
         }
-        
+
         // Check if the method is a generic method definition or if it's defined on a generic type
         var methodInfo = metadata.MethodMetadata.ReflectionInformation;
         var declaringType = methodInfo.DeclaringType;
-        
+
         // If the declaring type is generic and different from our test class type,
         // we're dealing with an inherited generic method
         if (declaringType != null && declaringType.IsGenericTypeDefinition && declaringType != testClassType)
@@ -114,9 +114,9 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
                     .ToDictionary(p => p, GetOrCompilePropertySetter)
             };
         }
-        
+
         Func<object?, object?[], object?> methodInvoker;
-        
+
         if (methodInfo.IsGenericMethodDefinition)
         {
             // For generic methods, we can't pre-compile the invoker
@@ -127,7 +127,7 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
         {
             methodInvoker = GetOrCompileMethodInvoker(methodInfo);
         }
-        
+
         return new CompiledFactories
         {
             ClassFactory = GetOrCompileConstructor(testClassType),
@@ -182,7 +182,7 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
             // Infer type arguments from the actual argument types
             var typeArgs = new Type[genericMethodDefinition.GetGenericArguments().Length];
             var methodParams = genericMethodDefinition.GetParameters();
-            
+
             // Simple type inference based on argument types
             for (int i = 0; i < methodParams.Length && i < args.Length; i++)
             {
@@ -199,16 +199,16 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
                     }
                 }
             }
-            
+
             // Fill in any remaining type arguments with object
             for (int i = 0; i < typeArgs.Length; i++)
             {
                 typeArgs[i] ??= typeof(object);
             }
-            
+
             // Make the generic method concrete
             var concreteMethod = genericMethodDefinition.MakeGenericMethod(typeArgs);
-            
+
             // Now we can compile and cache the concrete method
             var invoker = GetOrCompileMethodInvoker(concreteMethod);
             return invoker(instance, args);
@@ -394,7 +394,7 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
         Func<object> testClassFactory = () =>
         {
             object instance;
-            
+
             // Handle generic types - resolve TypeReference at runtime
             if (metadata.TestClassType == null && metadata.TestClassTypeReference != null)
             {
@@ -406,7 +406,7 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
                 var ctor = GetOrCompileConstructor(resolvedType);
                 instance = ctor(combination.ClassArguments);
                 #pragma warning restore IL3050, IL2026, IL2072
-                
+
                 // Apply property values
                 if (instance != null && combination.PropertyValues.Any())
                 {
@@ -441,19 +441,19 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
         Func<object, CancellationToken, ValueTask> testMethodInvoker = async (instance, cancellationToken) =>
         {
             object? result;
-            
-            // If we're dealing with a generic type that was resolved at runtime, 
+
+            // If we're dealing with a generic type that was resolved at runtime,
             // or if the method invoker is null (deferred compilation)
             if ((metadata.TestClassType == null || factories.MethodInvoker == null) && instance != null)
             {
                 var concreteType = instance.GetType();
                 var method = metadata.MethodMetadata.ReflectionInformation;
-                
+
                 // Find the corresponding method on the concrete type
                 var concreteMethod = concreteType.GetMethod(
-                    method.Name, 
+                    method.Name,
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-                
+
                 if (concreteMethod != null && concreteMethod.IsGenericMethodDefinition)
                 {
                     // Use our generic method invoker
@@ -476,15 +476,7 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
                 result = factories.MethodInvoker?.Invoke(instance, combination.MethodArguments);
             }
 
-            // Handle async methods
-            if (result is Task task)
-            {
-                await task;
-            }
-            else if (result is ValueTask valueTask)
-            {
-                await valueTask;
-            }
+            await AsyncConvert.ConvertObject(result);
         };
 
         // Create property setter that also applies the values
