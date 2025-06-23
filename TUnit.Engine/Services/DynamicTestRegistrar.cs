@@ -4,7 +4,7 @@ using TUnit.Core;
 namespace TUnit.Engine.Services;
 
 internal class DynamicTestRegistrar(
-    UnifiedTestBuilder unifiedTestBuilder,
+    TestBuilder testBuilder,
     TestRegistrar testRegistrar,
     TestGrouper testGrouper,
     ITUnitMessageBus messageBus,
@@ -18,7 +18,7 @@ internal class DynamicTestRegistrar(
                                         | DynamicallyAccessedMemberTypes.PublicProperties)]
         TClass>(DynamicTest<TClass> dynamicTest) where TClass : class
     {
-        var newTests = unifiedTestBuilder.BuildTests(dynamicTest).ToArray();
+        var newTests = (await testBuilder.BuildTestsAsync(dynamicTest, engineCancellationToken.Token)).ToArray();
 
         var grouped = testGrouper.OrganiseTests(newTests);
         

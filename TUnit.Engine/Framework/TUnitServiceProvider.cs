@@ -11,6 +11,7 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Services;
 using TUnit.Engine.Capabilities;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Hooks;
@@ -100,7 +101,16 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
 
-        var unifiedTestBuilder = Register(new UnifiedTestBuilder(ContextManager, this));
+        // Register new services
+        var testNameFormatter = Register<ITestNameFormatter>(new TestNameFormatter());
+        var dataProviderService = Register<IDataProviderService>(new DataProviderService());
+        var testInstanceFactory = Register<ITestInstanceFactory>(new TestInstanceFactory());
+        var testContextFactory = Register<ITestContextFactory>(new TestContextFactory(this));
+        var testMetadataExpander = Register<ITestMetadataExpander>(new TestMetadataExpander(
+            dataProviderService, testNameFormatter, testInstanceFactory));
+
+        // Create the new simplified TestBuilder instead of UnifiedTestBuilder
+        var testBuilder = Register(new TestBuilder(testMetadataExpander, testContextFactory, this));
         
         var testsConstructor = Register<BaseTestsConstructor>
         (
@@ -141,7 +151,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor));
 
-        DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(unifiedTestBuilder, testRegistrar,
+        DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(testBuilder, testRegistrar,
             TestGrouper, TUnitMessageBus, TestsExecutor, EngineCancellationToken));
 
         TestFinder = Register(new TestsFinder(TestDiscoverer));

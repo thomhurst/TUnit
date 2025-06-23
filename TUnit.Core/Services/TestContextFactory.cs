@@ -1,0 +1,116 @@
+using TUnit.Core.Interfaces;
+using TUnit.Core.Extensions;
+
+namespace TUnit.Core.Services;
+
+/// <summary>
+/// Default implementation of test context factory.
+/// </summary>
+public class TestContextFactory : ITestContextFactory
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public TestContextFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    /// <inheritdoc />
+    public TestContext CreateContext(
+        TestDetails testDetails,
+        object? classInstance,
+        object?[]? classArguments,
+        object?[]? methodArguments)
+    {
+        // Create a test builder context for this test
+        var testBuilderContext = new TestBuilderContext
+        {
+            TestAssemblyClassType = testDetails.ClassMetadata.Type,
+            TestAssemblyClassArguments = classArguments ?? Array.Empty<object?>(),
+            TestMethodParameterTypes = testDetails.TestMethodParameterTypes,
+            TestMethodArguments = methodArguments ?? Array.Empty<object?>()
+        };
+
+        // Create class hook context
+        var classHookContext = new ClassHookContext
+        {
+            TestAssemblyClassType = testDetails.ClassMetadata.Type,
+            TestAssemblyClassArguments = classArguments ?? Array.Empty<object?>(),
+            TestClass = classInstance
+        };
+
+        // Create the test context with proper initialization
+        var testContext = new TestContext(
+            _serviceProvider,
+            testDetails,
+            null, // Original test definition - will be set later if needed
+            testBuilderContext,
+            classHookContext);
+
+        return testContext;
+    }
+
+    /// <inheritdoc />
+    public async Task<TestContext> CreateTestContextAsync(ExpandedTest expandedTest)
+    {
+        // Create test details from the expanded test
+        var testDetails = CreateTestDetails(expandedTest);
+
+        // Create the test context
+        var testContext = CreateContext(
+            testDetails,
+            expandedTest.TestInstance,
+            expandedTest.ClassArguments,
+            expandedTest.MethodArguments);
+
+        return await Task.FromResult(testContext);
+    }
+
+    private TestDetails CreateTestDetails(ExpandedTest expandedTest)
+    {
+        // Create a resettable lazy for the class instance
+        var lazyInstance = new ResettableLazy<object>(
+            () => expandedTest.TestInstance,
+            expandedTest.TestId,
+            expandedTest.TestName);
+
+        // Create test details using the non-generic version
+        var testDetails = new TestDetails<object>
+        {
+            TestId = expandedTest.TestId,
+            TestName = expandedTest.TestName,
+            LazyClassInstance = lazyInstance,
+            TestClassArguments = expandedTest.ClassArguments ?? Array.Empty<object?>(),
+            TestMethodArguments = expandedTest.MethodArguments ?? Array.Empty<object?>(),
+            TestClassInjectedPropertyArguments = expandedTest.PropertyValues ?? new Dictionary<string, object?>(),
+            MethodMetadata = expandedTest.MethodMetadata,
+            ReturnType = expandedTest.MethodMetadata.ReturnType ?? typeof(void),
+            TestFilePath = expandedTest.TestFilePath,
+            TestLineNumber = expandedTest.TestLineNumber,
+            DataAttributes = Array.Empty<AttributeMetadata>(),
+            DynamicAttributes = Array.Empty<AttributeMetadata>()
+        };
+
+        // Set timeout if specified
+        if (expandedTest.Timeout.HasValue)
+        {
+            testDetails.SetTimeout(expandedTest.Timeout.Value);
+        }
+
+        // Add categories from attributes
+        var categoryAttributes = expandedTest.MethodMetadata.GetAttributes<CategoryAttribute>();
+        foreach (var categoryAttribute in categoryAttributes)
+        {
+            testDetails.Categories.Add(categoryAttribute.Category);
+        }
+
+        // Set retry limit from attributes
+        var retryAttribute = expandedTest.MethodMetadata.GetAttribute<RetryAttribute>();
+        if (retryAttribute != null)
+        {
+            testDetails.SetRetryLimit(retryAttribute.Times);
+        }
+
+        return testDetails;
+    }
+}

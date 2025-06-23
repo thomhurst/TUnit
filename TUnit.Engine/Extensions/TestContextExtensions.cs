@@ -80,7 +80,7 @@ public static class TestContextExtensions
             MethodDataProvider = nonGenericDef.MethodDataProvider
         };
 
-        var newTests = testContext.GetService<UnifiedTestBuilder>().BuildTests(newTestDefinition);
+        var newTests = testContext.GetService<TestBuilder>().BuildTests(newTestDefinition);
         var newTest = newTests.First();
 
         var startTime = DateTimeOffset.UtcNow;

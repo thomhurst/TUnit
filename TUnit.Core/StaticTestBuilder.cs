@@ -36,7 +36,7 @@ public class StaticTestBuilder : ITestDefinitionBuilder
         var firstPropertyValues = propertyValuesList.Any() ? propertyValuesList.First() : new Dictionary<string, object?>();
         
         // Create a single test definition with data providers
-        // The UnifiedTestBuilder will expand these into multiple DiscoveredTests
+        // The TestBuilder will expand these into multiple DiscoveredTests
         var testDefinition = new TestDefinition
         {
             TestId = staticDef.TestId,

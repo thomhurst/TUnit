@@ -26,7 +26,8 @@ internal class ReflectionTestsConstructor(
     ContextManager contextManager,
     IServiceProvider serviceProvider) : BaseTestsConstructor(extension, dependencyCollector)
 {
-    private readonly UnifiedTestBuilder _unifiedBuilder = new(contextManager, serviceProvider);
+    private readonly TestBuilder _testBuilder = serviceProvider.GetService(typeof(TestBuilder)) as TestBuilder 
+        ?? throw new InvalidOperationException("TestBuilder not found in service provider");
 
     protected override async Task<DiscoveredTest[]> DiscoverTestsAsync(ExecuteRequestContext context)
     {
@@ -45,7 +46,7 @@ internal class ReflectionTestsConstructor(
         var discoveredTests = new List<DiscoveredTest>();
 
         // Process standard tests
-        var (tests, failures) = _unifiedBuilder.BuildTests(discoveryResult);
+        var (tests, failures) = _testBuilder.BuildTests(discoveryResult);
         discoveredTests.AddRange(tests);
 
         // Log discovery failures
@@ -57,7 +58,7 @@ internal class ReflectionTestsConstructor(
         // Process dynamic tests
         foreach (var dynamicTest in dynamicTests)
         {
-            discoveredTests.AddRange(_unifiedBuilder.BuildTests(dynamicTest));
+            discoveredTests.AddRange(_testBuilder.BuildTests(dynamicTest));
         }
 
         return discoveredTests.ToArray();
