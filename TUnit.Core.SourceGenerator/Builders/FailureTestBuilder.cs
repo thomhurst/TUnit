@@ -69,7 +69,7 @@ internal class FailureTestBuilder
             writer.AppendLine($"TestClassType = typeof({context.ClassName}),");
             writer.AppendLine($"TestMethodInfo = null,");
             writer.AppendLine($"ClassFactory = args => new {context.ClassName}(),");
-            writer.AppendLine($"MethodInvoker = async (instance, args) => throw new InvalidOperationException(errorMessage),");
+            writer.AppendLine($"MethodInvoker = async (instance, args, cancellationToken) => throw new InvalidOperationException(errorMessage),");
             writer.AppendLine($"PropertyValuesProvider = () => new[] {{ new System.Collections.Generic.Dictionary<string, object?>() }},");
             writer.AppendLine($"ClassDataProvider = new TUnit.Core.EmptyDataProvider(),");
             writer.AppendLine($"MethodDataProvider = new TUnit.Core.EmptyDataProvider()");

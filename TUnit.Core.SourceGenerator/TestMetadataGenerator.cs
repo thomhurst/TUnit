@@ -174,7 +174,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"TestClassType = typeof({context.ClassName}),");
                 writer.AppendLine($"TestMethodInfo = null,");
                 writer.AppendLine($"ClassFactory = args => throw new InvalidOperationException(errorMessage),");
-                writer.AppendLine($"MethodInvoker = async (instance, args) => throw new InvalidOperationException(errorMessage),");
+                writer.AppendLine($"MethodInvoker = async (instance, args, cancellationToken) => {{ await Task.CompletedTask; throw new InvalidOperationException(errorMessage); }},");
                 writer.AppendLine($"PropertyValuesProvider = () => new[] {{ new System.Collections.Generic.Dictionary<string, object?>() }},");
                 writer.AppendLine($"ClassDataProvider = new TUnit.Core.EmptyDataProvider(),");
                 writer.AppendLine($"MethodDataProvider = new TUnit.Core.EmptyDataProvider()");

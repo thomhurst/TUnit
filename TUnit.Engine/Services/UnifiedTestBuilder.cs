@@ -140,7 +140,7 @@ internal class UnifiedTestBuilder(
                     Func<TTestClass, CancellationToken, ValueTask> methodInvoker = definition.OriginalMethodInvoker != null
                         ? async (instance, ct) => 
                         {
-                            await definition.OriginalMethodInvoker(instance, methodArgs);
+                            await definition.OriginalMethodInvoker(instance, methodArgs, ct);
                         }
                         : definition.TestMethodInvoker;
 
@@ -247,7 +247,7 @@ internal class UnifiedTestBuilder(
                     Func<object, CancellationToken, ValueTask> methodInvoker = definition.OriginalMethodInvoker != null
                         ? async (obj, ct) => 
                         {
-                            await definition.OriginalMethodInvoker(obj, methodArgs);
+                            await definition.OriginalMethodInvoker(obj, methodArgs, ct);
                         }
                         : definition.TestMethodInvoker;
                         

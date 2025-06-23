@@ -44,7 +44,7 @@ public class StaticTestBuilder : ITestDefinitionBuilder
             TestFilePath = staticDef.TestFilePath,
             TestLineNumber = staticDef.TestLineNumber,
             TestClassFactory = () => staticDef.ClassFactory(Array.Empty<object?>()),
-            TestMethodInvoker = async (instance, ct) => await staticDef.MethodInvoker(instance, Array.Empty<object?>()),
+            TestMethodInvoker = async (instance, ct) => await staticDef.MethodInvoker(instance, Array.Empty<object?>(), ct),
             PropertiesProvider = () => firstPropertyValues,
             ClassDataProvider = staticDef.ClassDataProvider,
             MethodDataProvider = staticDef.MethodDataProvider,

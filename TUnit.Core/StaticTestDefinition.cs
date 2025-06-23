@@ -44,9 +44,9 @@ public sealed class StaticTestDefinition : ITestDescriptor
     
     /// <summary>
     /// Invoker for the test method. Generated at compile time.
-    /// Takes test instance and method arguments array, returns Task.
+    /// Takes test instance, method arguments array, and cancellation token, returns Task.
     /// </summary>
-    public required Func<object, object?[], Task> MethodInvoker { get; init; }
+    public required Func<object, object?[], CancellationToken, Task> MethodInvoker { get; init; }
     
     /// <summary>
     /// Provides property values for each test iteration. Key is property name.

@@ -166,7 +166,9 @@ internal class StaticTestDefinitionBuilder : ITestDefinitionBuilder
     {
         using var writer = new CodeWriter("", includeHeader: false);
         
-        writer.Append("async (instance, args) => ");
+        // The lambda signature for StaticTestDefinition.MethodInvoker is:
+        // Func<object, object?[], CancellationToken, Task>
+        writer.Append("async (instance, args, cancellationToken) => ");
         
         if (IsAsyncMethod(methodSymbol))
         {
@@ -176,18 +178,22 @@ internal class StaticTestDefinitionBuilder : ITestDefinitionBuilder
         writer.Append($"(({className})instance).{methodSymbol.Name}(");
         
         // Generate method arguments with CastHelper
+        var argIndex = 0;
         var parameterList = string.Join(", ", methodSymbol.Parameters
             .Select((param, i) =>
             {
                 var typeName = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
                     .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
                 
-                if (param.Type.Name == "CancellationToken")
+                if (param.Type.Name == "CancellationToken" && param.Type.ContainingNamespace?.ToDisplayString() == "System.Threading")
                 {
+                    // CancellationToken is passed as a parameter to the lambda
                     return "cancellationToken";
                 }
                 
-                return $"TUnit.Core.Helpers.CastHelper.Cast<{typeName}>(args[{i}])";
+                var result = $"TUnit.Core.Helpers.CastHelper.Cast<{typeName}>(args[{argIndex}])";
+                argIndex++;
+                return result;
             }));
         
         writer.Append(parameterList);

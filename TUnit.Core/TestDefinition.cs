@@ -101,7 +101,7 @@ public sealed record TestDefinition : TestDefinitionBase
     /// <summary>
     /// Original invoker for the test method with arguments.
     /// </summary>
-    public Func<object, object?[], Task>? OriginalMethodInvoker { get; init; }
+    public Func<object, object?[], CancellationToken, Task>? OriginalMethodInvoker { get; init; }
 
     /// <summary>
     /// Builds discovered tests using the provided builder.
@@ -172,7 +172,7 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     /// <summary>
     /// Original invoker for the test method with arguments.
     /// </summary>
-    public Func<TTestClass, object?[], Task>? OriginalMethodInvoker { get; init; }
+    public Func<TTestClass, object?[], CancellationToken, Task>? OriginalMethodInvoker { get; init; }
 
     /// <summary>
     /// Gets the type of the test class for AOT.
@@ -199,7 +199,7 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
                 ? args => definition.OriginalClassFactory(args) 
                 : null,
             OriginalMethodInvoker = definition.OriginalMethodInvoker != null 
-                ? (obj, args) => definition.OriginalMethodInvoker((TTestClass)obj, args)
+                ? (obj, args, ct) => definition.OriginalMethodInvoker((TTestClass)obj, args, ct)
                 : null
         };
     }
