@@ -24,32 +24,38 @@ internal class UnifiedTestBuilder(
     }
 
     /// <summary>
-    /// Builds a discovered test from a test definition using polymorphic dispatch.
+    /// Builds discovered tests from a test definition using polymorphic dispatch.
     /// </summary>
-    public DiscoveredTest BuildTest(ITestDefinition definition)
+    public IEnumerable<DiscoveredTest> BuildTests(ITestDefinition definition)
     {
         // Use polymorphic dispatch - the definition knows how to build itself
         if (definition is TestDefinitionBase testDef)
         {
-            return testDef.BuildTest(this);
+            return testDef.BuildTests(this);
         }
 
         throw new NotSupportedException($"Unknown test definition type: {definition.GetType()}");
     }
 
     /// <summary>
-    /// Builds a discovered test from a non-generic test definition.
+    /// Builds discovered tests from a non-generic test definition.
     /// </summary>
-    public DiscoveredTest BuildTest(TestDefinition definition)
+    public IEnumerable<DiscoveredTest> BuildTests(TestDefinition definition)
     {
-        return BuildUntypedTest(definition);
+        return new[] { BuildUntypedTest(definition) };
     }
 
     /// <summary>
-    /// Builds a typed discovered test from a generic test definition.
+    /// Builds typed discovered tests from a generic test definition.
     /// This method is AOT-safe as it uses only generic constraints and no reflection.
     /// </summary>
-    public DiscoveredTest<TTestClass> BuildTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
+    public IEnumerable<DiscoveredTest<TTestClass>> BuildTests<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
+        TestDefinition<TTestClass> definition) where TTestClass : class
+    {
+        return new[] { BuildTypedTest(definition) };
+    }
+    
+    private DiscoveredTest<TTestClass> BuildTypedTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
         TestDefinition<TTestClass> definition) where TTestClass : class
     {
         var resettableLazy = new ResettableLazy<TTestClass>(
@@ -61,8 +67,8 @@ internal class UnifiedTestBuilder(
         var testDetails = TestDetails.CreateWithRawAttributes(
             testId: definition.TestId,
             lazyClassInstance: resettableLazy,
-            testClassArguments: definition.ClassArgumentsProvider(),
-            testMethodArguments: definition.MethodArgumentsProvider(),
+            testClassArguments: Array.Empty<object?>(),
+            testMethodArguments: Array.Empty<object?>(),
             testClassInjectedPropertyArguments: definition.PropertiesProvider(),
             testMethod: definition.MethodMetadata,
             testName: definition.MethodMetadata.Name,
@@ -119,8 +125,8 @@ internal class UnifiedTestBuilder(
             testMethod: definition.MethodMetadata,
             testFilePath: definition.TestFilePath,
             testLineNumber: definition.TestLineNumber,
-            testClassArguments: definition.ClassArgumentsProvider(),
-            testMethodArguments: definition.MethodArgumentsProvider(),
+            testClassArguments: Array.Empty<object?>(),
+            testMethodArguments: Array.Empty<object?>(),
             testClassInjectedPropertyArguments: definition.PropertiesProvider(),
             returnType: definition.MethodMetadata.ReturnType ?? typeof(void),
             dataAttributes: definition.MethodMetadata.Attributes.Select(a => a.Instance).ToArray(),
@@ -195,8 +201,8 @@ internal class UnifiedTestBuilder(
             {
                 try
                 {
-                    var test = BuildTestFromDefinition(definition);
-                    tests.Add(test);
+                    var builtTests = BuildTestsFromDefinition(definition);
+                    tests.AddRange(builtTests);
                 }
                 catch (Exception ex)
                 {
@@ -215,11 +221,11 @@ internal class UnifiedTestBuilder(
         return (tests, failures);
     }
 
-    private DiscoveredTest BuildTestFromDefinition(ITestDefinition definition)
+    private IEnumerable<DiscoveredTest> BuildTestsFromDefinition(ITestDefinition definition)
     {
         if (definition is TestDefinitionBase testDef)
         {
-            return testDef.BuildTest(this);
+            return testDef.BuildTests(this);
         }
 
         throw new NotSupportedException($"Unknown test definition type: {definition.GetType()}");

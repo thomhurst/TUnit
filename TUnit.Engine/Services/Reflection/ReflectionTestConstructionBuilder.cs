@@ -253,9 +253,9 @@ internal class ReflectionTestConstructionBuilder
                 }
                 return new ValueTask();
             },
-            ClassArgumentsProvider = () => invokedClassInstanceArguments,
-            MethodArgumentsProvider = () => testMethodArguments,
-            PropertiesProvider = () => propertyArgs
+            PropertiesProvider = () => propertyArgs,
+            ClassDataProvider = new SingleArgumentsDataProvider(invokedClassInstanceArguments),
+            MethodDataProvider = new SingleArgumentsDataProvider(testMethodArguments)
         };
     }
 

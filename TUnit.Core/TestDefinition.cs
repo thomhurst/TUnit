@@ -8,9 +8,9 @@ namespace TUnit.Core;
 public abstract record TestDefinitionBase : ITestDefinition
 {
     /// <summary>
-    /// Internal method to build a discovered test.
+    /// Internal method to build discovered tests.
     /// </summary>
-    internal abstract DiscoveredTest BuildTest(ITestBuilder builder);
+    internal abstract IEnumerable<DiscoveredTest> BuildTests(ITestBuilder builder);
 
     /// <summary>
     /// Unique identifier for the test.
@@ -92,13 +92,14 @@ public sealed record TestDefinition : TestDefinitionBase
     /// Data provider for method-level test data.
     /// </summary>
     public override required IDataProvider MethodDataProvider { get; init; }
+    
 
     /// <summary>
-    /// Builds a discovered test using the provided builder.
+    /// Builds discovered tests using the provided builder.
     /// </summary>
-    internal override DiscoveredTest BuildTest(ITestBuilder builder)
+    internal override IEnumerable<DiscoveredTest> BuildTests(ITestBuilder builder)
     {
-        return builder.BuildTest(this);
+        return builder.BuildTests(this);
     }
 }
 
@@ -153,6 +154,7 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     /// Data provider for method-level test data.
     /// </summary>
     public override required IDataProvider MethodDataProvider { get; init; }
+    
 
     /// <summary>
     /// Gets the type of the test class for AOT.
@@ -179,14 +181,14 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     }
 
     /// <summary>
-    /// Builds a discovered test using the provided builder.
+    /// Builds discovered tests using the provided builder.
     /// This method dispatches to the generic version on the builder, avoiding reflection.
     /// </summary>
-    internal override DiscoveredTest BuildTest(ITestBuilder builder)
+    internal override IEnumerable<DiscoveredTest> BuildTests(ITestBuilder builder)
     {
         // This is the key: we know our generic type at compile time here,
         // so we can call the generic method directly without reflection
-        return builder.BuildTest(this);
+        return builder.BuildTests(this);
     }
 }
 
@@ -233,14 +235,14 @@ public interface ITestDefinition
 internal interface ITestBuilder
 {
     /// <summary>
-    /// Builds a discovered test from a non-generic test definition.
+    /// Builds discovered tests from a non-generic test definition.
     /// </summary>
-    DiscoveredTest BuildTest(TestDefinition definition);
+    IEnumerable<DiscoveredTest> BuildTests(TestDefinition definition);
 
     /// <summary>
-    /// Builds a discovered test from a generic test definition.
+    /// Builds discovered tests from a generic test definition.
     /// </summary>
-    DiscoveredTest<TTestClass> BuildTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
+    IEnumerable<DiscoveredTest<TTestClass>> BuildTests<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
         TestDefinition<TTestClass> definition) where TTestClass : class;
 }
 

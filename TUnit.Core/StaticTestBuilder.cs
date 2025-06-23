@@ -116,8 +116,8 @@ public class StaticTestBuilder : ITestDefinitionBuilder
             TestClassFactory = testClassFactory,
             TestMethodInvoker = testMethodInvoker,
             PropertiesProvider = () => propertyValues,
-            ClassDataProvider = staticDef.ClassDataProvider,
-            MethodDataProvider = staticDef.MethodDataProvider
+            ClassDataProvider = new SingleArgumentsDataProvider(classArgs),
+            MethodDataProvider = new SingleArgumentsDataProvider(methodArgs)
         };
     }
     

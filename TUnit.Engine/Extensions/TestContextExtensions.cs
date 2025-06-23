@@ -75,12 +75,13 @@ public static class TestContextExtensions
                     ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
                 }
             },
-            ClassArgumentsProvider = nonGenericDef.ClassArgumentsProvider,
-            MethodArgumentsProvider = () => methodArguments ?? [],
-            PropertiesProvider = nonGenericDef.PropertiesProvider
+            PropertiesProvider = nonGenericDef.PropertiesProvider,
+            ClassDataProvider = nonGenericDef.ClassDataProvider,
+            MethodDataProvider = nonGenericDef.MethodDataProvider
         };
 
-        var newTest = testContext.GetService<UnifiedTestBuilder>().BuildTest(newTestDefinition);
+        var newTests = testContext.GetService<UnifiedTestBuilder>().BuildTests(newTestDefinition);
+        var newTest = newTests.First();
 
         var startTime = DateTimeOffset.UtcNow;
 
