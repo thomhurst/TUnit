@@ -31,6 +31,16 @@ public abstract record TestDefinitionBase : ITestDefinition
     /// Line number in the source file where the test is defined.
     /// </summary>
     public abstract int TestLineNumber { get; init; }
+
+    /// <summary>
+    /// Data provider for class-level test data.
+    /// </summary>
+    public abstract IDataProvider ClassDataProvider { get; init; }
+
+    /// <summary>
+    /// Data provider for method-level test data.
+    /// </summary>
+    public abstract IDataProvider MethodDataProvider { get; init; }
 }
 
 /// <summary>
@@ -72,6 +82,16 @@ public sealed record TestDefinition : TestDefinitionBase
     /// Provider for properties to inject into the test class.
     /// </summary>
     public required Func<IDictionary<string, object?>> PropertiesProvider { get; init; }
+
+    /// <summary>
+    /// Data provider for class-level test data.
+    /// </summary>
+    public override required IDataProvider ClassDataProvider { get; init; }
+
+    /// <summary>
+    /// Data provider for method-level test data.
+    /// </summary>
+    public override required IDataProvider MethodDataProvider { get; init; }
 
     /// <summary>
     /// Builds a discovered test using the provided builder.
@@ -125,6 +145,16 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     public required Func<IDictionary<string, object?>> PropertiesProvider { get; init; }
 
     /// <summary>
+    /// Data provider for class-level test data.
+    /// </summary>
+    public override required IDataProvider ClassDataProvider { get; init; }
+
+    /// <summary>
+    /// Data provider for method-level test data.
+    /// </summary>
+    public override required IDataProvider MethodDataProvider { get; init; }
+
+    /// <summary>
     /// Gets the type of the test class for AOT.
     /// </summary>
     public Type TestClassType => typeof(TTestClass);
@@ -142,7 +172,9 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
             TestLineNumber = definition.TestLineNumber,
             TestClassFactory = () => definition.TestClassFactory(),
             TestMethodInvoker = (obj, ct) => definition.TestMethodInvoker((TTestClass)obj, ct),
-            PropertiesProvider = definition.PropertiesProvider
+            PropertiesProvider = definition.PropertiesProvider,
+            ClassDataProvider = definition.ClassDataProvider,
+            MethodDataProvider = definition.MethodDataProvider
         };
     }
 
@@ -183,6 +215,15 @@ public interface ITestDefinition
     /// </summary>
     int TestLineNumber { get; }
 
+    /// <summary>
+    /// Data provider for class-level test data.
+    /// </summary>
+    IDataProvider ClassDataProvider { get; }
+
+    /// <summary>
+    /// Data provider for method-level test data.
+    /// </summary>
+    IDataProvider MethodDataProvider { get; }
 }
 
 /// <summary>

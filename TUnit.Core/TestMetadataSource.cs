@@ -138,7 +138,9 @@ public class TestMetadataSource : ITestSource
             TestLineNumber = descriptor.TestLineNumber,
             TestClassFactory = () => throw new InvalidOperationException("Skipped test should not be instantiated"),
             TestMethodInvoker = (_, _) => throw new InvalidOperationException("Skipped test should not be invoked"),
-            PropertiesProvider = () => new Dictionary<string, object?>()
+            PropertiesProvider = () => new Dictionary<string, object?>(),
+            ClassDataProvider = new EmptyDataProvider(),
+            MethodDataProvider = new EmptyDataProvider()
         };
     }
 }
