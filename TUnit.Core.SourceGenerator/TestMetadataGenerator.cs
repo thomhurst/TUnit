@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Helpers;
 
@@ -59,7 +60,8 @@ public class TestMetadataGenerator : IIncrementalGenerator
             TypeSymbol = typeSymbol,
             FilePath = filePath,
             LineNumber = lineNumber,
-            TestAttribute = context.Attributes[0]
+            TestAttribute = context.Attributes[0],
+            Context = context
         };
     }
 
@@ -422,30 +424,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
             writer.AppendLine($"TestClassType = {testClassTypeValue},");
 
-            using (writer.BeginObjectInitializer("MethodMetadata = new MethodMetadata", ","))
-            {
-                writer.AppendLine($"Name = \"{testInfo.MethodSymbol.Name}\",");
-                writer.AppendLine($"Type = {testClassTypeValue} ?? typeof(object),");
-                writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
-                writer.AppendLine($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)},");
-                writer.AppendLine($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length},");
-
-                using (writer.BeginObjectInitializer("Class = new ClassMetadata", ","))
-                {
-                    writer.AppendLine($"Name = \"{testInfo.TypeSymbol.Name}\",");
-                    writer.AppendLine($"Type = {testClassTypeValue} ?? typeof(object),");
-                    writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
-                    writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes(), testInfo.TypeSymbol, writer._indentLevel)},");
-                    writer.AppendLine($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\",");
-                    writer.AppendLine($"Assembly = new AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes(), testInfo.TypeSymbol.ContainingAssembly, writer._indentLevel)} }},");
-                    writer.AppendLine("Parameters = System.Array.Empty<ParameterMetadata>(),");
-                    writer.AppendLine($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)},");
-                    writer.AppendLine("Parent = null");
-                }
-                writer.AppendLine($"ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")},");
-                writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)},");
-                writer.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes(), testInfo.MethodSymbol, writer._indentLevel)}");
-            }
+            writer.AppendLine($"MethodMetadata = {GenerateMethodMetadataUsingWriter(testInfo)},");
             writer.AppendLine($"TestFilePath = @\"{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
             writer.AppendLine($"TestLineNumber = {testInfo.LineNumber},");
             writer.AppendLine($"TestClassFactory = {GenerateTestClassFactory(testInfo.TypeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor)},");
@@ -1004,27 +983,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.Append(" }, ");
         
         // Set other required properties
-        writer.Append($"TestInformation = new TUnit.Core.MethodMetadata {{ ");
-        writer.Append($"Name = \"{testInfo.MethodSymbol.Name}\", ");
-        writer.Append($"Type = typeof({className}), ");
-        writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)}, ");
-        writer.Append($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)}, ");
-        writer.Append($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length}, ");
-        writer.Append($"Class = TUnit.Core.ClassMetadata.GetOrAdd(\"{className}\", () => new TUnit.Core.ClassMetadata {{ ");
-        writer.Append($"Name = \"{testInfo.TypeSymbol.Name}\", ");
-        writer.Append($"Type = typeof({className}), ");
-        writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)}, ");
-        writer.Append($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\", ");
-        writer.Append($"Assembly = new TUnit.Core.AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes(), testInfo.TypeSymbol.ContainingAssembly, 0)} }}, ");
-        writer.Append($"Parameters = System.Array.Empty<TUnit.Core.ParameterMetadata>(), ");
-        writer.Append($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)}, ");
-        writer.Append($"Parent = null, ");
-        writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes(), testInfo.TypeSymbol, 0)} ");
-        writer.Append("}), ");
-        writer.Append($"ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")}, ");
-        writer.Append($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)}, ");
-        writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes(), testInfo.MethodSymbol, 0)} ");
-        writer.Append("}, ");
+        writer.Append($"TestInformation = {GenerateMethodMetadataUsingWriter(testInfo)}, ");
         writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.ClassParameters ");
         writer.Append("})");
     }
@@ -1057,27 +1016,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.Append(" }, ");
         
         // Set other required properties
-        writer.Append($"TestInformation = new TUnit.Core.MethodMetadata {{ ");
-        writer.Append($"Name = \"{testInfo.MethodSymbol.Name}\", ");
-        writer.Append($"Type = typeof({className}), ");
-        writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)}, ");
-        writer.Append($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)}, ");
-        writer.Append($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length}, ");
-        writer.Append($"Class = TUnit.Core.ClassMetadata.GetOrAdd(\"{className}\", () => new TUnit.Core.ClassMetadata {{ ");
-        writer.Append($"Name = \"{testInfo.TypeSymbol.Name}\", ");
-        writer.Append($"Type = typeof({className}), ");
-        writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)}, ");
-        writer.Append($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\", ");
-        writer.Append($"Assembly = new TUnit.Core.AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes(), testInfo.TypeSymbol.ContainingAssembly, 0)} }}, ");
-        writer.Append($"Parameters = System.Array.Empty<TUnit.Core.ParameterMetadata>(), ");
-        writer.Append($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)}, ");
-        writer.Append($"Parent = null, ");
-        writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes(), testInfo.TypeSymbol, 0)} ");
-        writer.Append("}), ");
-        writer.Append($"ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")}, ");
-        writer.Append($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)}, ");
-        writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes(), testInfo.MethodSymbol, 0)} ");
-        writer.Append("}, ");
+        writer.Append($"TestInformation = {GenerateMethodMetadataUsingWriter(testInfo)}, ");
         writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.TestParameters ");
         writer.Append("})");
     }
@@ -1089,5 +1028,18 @@ public class TestMetadataGenerator : IIncrementalGenerator
         public string FilePath { get; set; } = "";
         public int LineNumber { get; set; }
         public AttributeData TestAttribute { get; set; } = null!;
+        public GeneratorAttributeSyntaxContext Context { get; set; }
+    }
+    
+    private static string GenerateMethodMetadataUsingWriter(TestMethodInfo testInfo)
+    {
+        using var writer = new CodeWriter("", includeHeader: false);
+        
+        // Use the existing writer to generate the metadata
+        SourceInformationWriter.GenerateMethodInformation(writer, testInfo.Context, testInfo.TypeSymbol, testInfo.MethodSymbol, null, ',');
+        
+        // Remove the trailing comma and newline
+        var result = writer.ToString().TrimEnd('\r', '\n', ',');
+        return result;
     }
 }
