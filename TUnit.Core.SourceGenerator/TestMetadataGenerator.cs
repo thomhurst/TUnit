@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator;
@@ -676,28 +677,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
 
     private static string GetDefaultValueForType(ITypeSymbol type)
     {
-        if (type.IsReferenceType || type.NullableAnnotation == NullableAnnotation.Annotated)
-        {
-            return "null!";
-        }
-
-        return type.SpecialType switch
-        {
-            SpecialType.System_Boolean => "false",
-            SpecialType.System_Char => "'\\0'",
-            SpecialType.System_SByte => "(sbyte)0",
-            SpecialType.System_Byte => "(byte)0",
-            SpecialType.System_Int16 => "(short)0",
-            SpecialType.System_UInt16 => "(ushort)0",
-            SpecialType.System_Int32 => "0",
-            SpecialType.System_UInt32 => "0u",
-            SpecialType.System_Int64 => "0L",
-            SpecialType.System_UInt64 => "0ul",
-            SpecialType.System_Decimal => "0m",
-            SpecialType.System_Single => "0f",
-            SpecialType.System_Double => "0d",
-            _ => $"default({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))})"
-        };
+        return $"default({type.GloballyQualified()})";
     }
 
     private static string GenerateClassDataProvider(INamedTypeSymbol typeSymbol)
