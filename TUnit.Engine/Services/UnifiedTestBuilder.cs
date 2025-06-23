@@ -39,10 +39,11 @@ internal class UnifiedTestBuilder(
 
     /// <summary>
     /// Builds discovered tests from a non-generic test definition.
+    /// Expands data from data providers to create multiple tests.
     /// </summary>
     public IEnumerable<DiscoveredTest> BuildTests(TestDefinition definition)
     {
-        return new[] { BuildUntypedTest(definition) };
+        return BuildUntypedTestsAsync(definition).GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -52,120 +53,241 @@ internal class UnifiedTestBuilder(
     public IEnumerable<DiscoveredTest<TTestClass>> BuildTests<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
         TestDefinition<TTestClass> definition) where TTestClass : class
     {
-        return new[] { BuildTypedTest(definition) };
+        return BuildTypedTestsAsync(definition).GetAwaiter().GetResult();
     }
     
-    private DiscoveredTest<TTestClass> BuildTypedTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
+    private async Task<IEnumerable<DiscoveredTest<TTestClass>>> BuildTypedTestsAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTestClass>(
         TestDefinition<TTestClass> definition) where TTestClass : class
     {
-        var resettableLazy = new ResettableLazy<TTestClass>(
-            definition.TestClassFactory,
-            definition.TestId,
-            new TestBuilderContext()
-        );
-
-        var testDetails = TestDetails.CreateWithRawAttributes(
-            testId: definition.TestId,
-            lazyClassInstance: resettableLazy,
-            testClassArguments: Array.Empty<object?>(),
-            testMethodArguments: Array.Empty<object?>(),
-            testClassInjectedPropertyArguments: definition.PropertiesProvider(),
-            testMethod: definition.MethodMetadata,
-            testName: definition.MethodMetadata.Name,
-            returnType: definition.MethodMetadata.ReturnType ?? typeof(void),
-            testFilePath: definition.TestFilePath,
-            testLineNumber: definition.TestLineNumber,
-            dynamicAttributes: [],
-            dataAttributes: definition.MethodMetadata.Attributes.Select(a => a.Instance).ToArray()
-        );
-
-        var classType = definition.MethodMetadata.Class.Type;
-        var classHookContext = contextManager.GetClassHookContext(classType);
-
-        // Create test execution context for runtime state
-        var executionContext = new TestExecutionContext(definition);
-
-        var testBuilderContext = new TestBuilderContext();
-        var testContext = new TestContext(
-            serviceProvider,
-            testDetails,
-            definition,
-            testBuilderContext,
-            classHookContext
-        );
-
-        // Link the execution context for runtime state tracking
-        testContext.ObjectBag["ExecutionContext"] = executionContext;
-
-        RunTestDiscoveryHooks(testDetails, testContext);
-
-        var discoveredTest = new DiscoveredTest<TTestClass>(resettableLazy)
+        var discoveredTests = new List<DiscoveredTest<TTestClass>>();
+        
+        // Get all test data combinations from data providers
+        var classDataRows = await definition.ClassDataProvider.GetData();
+        var methodDataRows = await definition.MethodDataProvider.GetData();
+        
+        // If no data rows, create single test with empty arguments
+        var classArgsList = classDataRows.Any() ? classDataRows.ToList() : new List<object?[]> { Array.Empty<object?>() };
+        var methodArgsList = methodDataRows.Any() ? methodDataRows.ToList() : new List<object?[]> { Array.Empty<object?>() };
+        
+        // Get property values if available
+        var propertyValues = definition.PropertiesProvider();
+        
+        // Get repeat count
+        var repeatCount = definition.MethodMetadata.GetAttribute<RepeatAttribute>()?.Times ?? 0;
+        
+        var testIndex = 0;
+        
+        // Generate test for each combination of class and method data
+        foreach (var classArgs in classArgsList)
         {
-            TestContext = testContext,
-            TestBody = definition.TestMethodInvoker
-        };
+            foreach (var methodArgs in methodArgsList)
+            {
+                for (var repeatIndex = 0; repeatIndex <= repeatCount; repeatIndex++)
+                {
+                    var testId = definition.TestId
+                        .Replace("{TestIndex}", testIndex.ToString())
+                        .Replace("{RepeatIndex}", repeatIndex.ToString())
+                        .Replace("{ClassDataIndex}", classArgsList.IndexOf(classArgs).ToString())
+                        .Replace("{MethodDataIndex}", methodArgsList.IndexOf(methodArgs).ToString());
+                    
+                    // Create closure that captures the class arguments
+                    Func<TTestClass> classFactory = definition.OriginalClassFactory != null 
+                        ? () => definition.OriginalClassFactory(classArgs)
+                        : definition.TestClassFactory;
+                        
+                    var resettableLazy = new ResettableLazy<TTestClass>(
+                        classFactory,
+                        testId,
+                        new TestBuilderContext()
+                    );
 
-        testContext.InternalDiscoveredTest = discoveredTest;
+                    var testDetails = TestDetails.CreateWithRawAttributes(
+                        testId: testId,
+                        lazyClassInstance: resettableLazy,
+                        testClassArguments: classArgs,
+                        testMethodArguments: methodArgs,
+                        testClassInjectedPropertyArguments: propertyValues,
+                        testMethod: definition.MethodMetadata,
+                        testName: BuildTestName(definition.MethodMetadata.Name, methodArgs),
+                        returnType: definition.MethodMetadata.ReturnType ?? typeof(void),
+                        testFilePath: definition.TestFilePath,
+                        testLineNumber: definition.TestLineNumber,
+                        dynamicAttributes: [],
+                        dataAttributes: definition.MethodMetadata.Attributes.Select(a => a.Instance).ToArray()
+                    );
 
-        return discoveredTest;
+                    var classType = definition.MethodMetadata.Class.Type;
+                    var classHookContext = contextManager.GetClassHookContext(classType);
+
+                    // Create test execution context for runtime state
+                    var executionContext = new TestExecutionContext(definition);
+
+                    var testBuilderContext = new TestBuilderContext();
+                    var testContext = new TestContext(
+                        serviceProvider,
+                        testDetails,
+                        definition,
+                        testBuilderContext,
+                        classHookContext
+                    );
+
+                    // Link the execution context for runtime state tracking
+                    testContext.ObjectBag["ExecutionContext"] = executionContext;
+
+                    RunTestDiscoveryHooks(testDetails, testContext);
+
+                    // Create closure that captures the method arguments
+                    Func<TTestClass, CancellationToken, ValueTask> methodInvoker = definition.OriginalMethodInvoker != null
+                        ? async (instance, ct) => 
+                        {
+                            await definition.OriginalMethodInvoker(instance, methodArgs);
+                        }
+                        : definition.TestMethodInvoker;
+
+                    var discoveredTest = new DiscoveredTest<TTestClass>(resettableLazy)
+                    {
+                        TestContext = testContext,
+                        TestBody = methodInvoker
+                    };
+
+                    testContext.InternalDiscoveredTest = discoveredTest;
+                    discoveredTests.Add(discoveredTest);
+                    testIndex++;
+                }
+            }
+        }
+        
+        return discoveredTests;
     }
 
-    private DiscoveredTest BuildUntypedTest(TestDefinition definition)
+    private async Task<IEnumerable<DiscoveredTest>> BuildUntypedTestsAsync(TestDefinition definition)
     {
-        var resettableLazy = new ResettableLazy<object>(
-            definition.TestClassFactory,
-            definition.TestId,
-            new TestBuilderContext()
-        );
-
-        var testDetails = TestDetails.CreateWithRawAttributes(
-            lazyClassInstance: resettableLazy,
-            testId: definition.TestId,
-            testName: definition.MethodMetadata.Name,
-            testMethod: definition.MethodMetadata,
-            testFilePath: definition.TestFilePath,
-            testLineNumber: definition.TestLineNumber,
-            testClassArguments: Array.Empty<object?>(),
-            testMethodArguments: Array.Empty<object?>(),
-            testClassInjectedPropertyArguments: definition.PropertiesProvider(),
-            returnType: definition.MethodMetadata.ReturnType ?? typeof(void),
-            dataAttributes: definition.MethodMetadata.Attributes.Select(a => a.Instance).ToArray(),
-            dynamicAttributes: []
-        );
-
-        // Get class hook context
-        var classType = definition.MethodMetadata.Class.Type;
-        var classHookContext = contextManager.GetClassHookContext(classType);
-
-        // Create test execution context
-        var executionContext = new TestExecutionContext(definition);
-
-        // Create test context
-        var testBuilderContext = new TestBuilderContext();
-
-        var testContext = new TestContext(
-            serviceProvider,
-            testDetails,
-            definition,
-            testBuilderContext,
-            classHookContext
-        );
-
-        // Link the execution context for runtime state tracking
-        testContext.ObjectBag["ExecutionContext"] = executionContext;
-
-        // Run discovery hooks
-        RunTestDiscoveryHooks(testDetails, testContext);
-
-        // Build discovered test
-        var discoveredTest = new UnifiedDiscoveredTest(resettableLazy, definition.TestMethodInvoker)
+        var discoveredTests = new List<DiscoveredTest>();
+        
+        // Get all test data combinations from data providers
+        var classDataRows = await definition.ClassDataProvider.GetData();
+        var methodDataRows = await definition.MethodDataProvider.GetData();
+        
+        // If no data rows, create single test with empty arguments
+        var classArgsList = classDataRows.Any() ? classDataRows.ToList() : new List<object?[]> { Array.Empty<object?>() };
+        var methodArgsList = methodDataRows.Any() ? methodDataRows.ToList() : new List<object?[]> { Array.Empty<object?>() };
+        
+        // Get property values if available
+        var propertyValues = definition.PropertiesProvider();
+        
+        // Get repeat count
+        var repeatCount = definition.MethodMetadata.GetAttribute<RepeatAttribute>()?.Times ?? 0;
+        
+        var testIndex = 0;
+        
+        // Generate test for each combination of class and method data
+        foreach (var classArgs in classArgsList)
         {
-            TestContext = testContext
+            foreach (var methodArgs in methodArgsList)
+            {
+                for (var repeatIndex = 0; repeatIndex <= repeatCount; repeatIndex++)
+                {
+                    var testId = definition.TestId
+                        .Replace("{TestIndex}", testIndex.ToString())
+                        .Replace("{RepeatIndex}", repeatIndex.ToString())
+                        .Replace("{ClassDataIndex}", classArgsList.IndexOf(classArgs).ToString())
+                        .Replace("{MethodDataIndex}", methodArgsList.IndexOf(methodArgs).ToString());
+                    
+                    // Create closure that captures the class arguments
+                    Func<object> classFactory = definition.OriginalClassFactory != null 
+                        ? () => definition.OriginalClassFactory(classArgs)
+                        : definition.TestClassFactory;
+                        
+                    var resettableLazy = new ResettableLazy<object>(
+                        classFactory,
+                        testId,
+                        new TestBuilderContext()
+                    );
+
+                    var testDetails = TestDetails.CreateWithRawAttributes(
+                        lazyClassInstance: resettableLazy,
+                        testId: testId,
+                        testName: BuildTestName(definition.MethodMetadata.Name, methodArgs),
+                        testMethod: definition.MethodMetadata,
+                        testFilePath: definition.TestFilePath,
+                        testLineNumber: definition.TestLineNumber,
+                        testClassArguments: classArgs,
+                        testMethodArguments: methodArgs,
+                        testClassInjectedPropertyArguments: propertyValues,
+                        returnType: definition.MethodMetadata.ReturnType ?? typeof(void),
+                        dataAttributes: definition.MethodMetadata.Attributes.Select(a => a.Instance).ToArray(),
+                        dynamicAttributes: []
+                    );
+
+                    // Get class hook context
+                    var classType = definition.MethodMetadata.Class.Type;
+                    var classHookContext = contextManager.GetClassHookContext(classType);
+
+                    // Create test execution context
+                    var executionContext = new TestExecutionContext(definition);
+
+                    // Create test context
+                    var testBuilderContext = new TestBuilderContext();
+
+                    var testContext = new TestContext(
+                        serviceProvider,
+                        testDetails,
+                        definition,
+                        testBuilderContext,
+                        classHookContext
+                    );
+
+                    // Link the execution context for runtime state tracking
+                    testContext.ObjectBag["ExecutionContext"] = executionContext;
+
+                    // Run discovery hooks
+                    RunTestDiscoveryHooks(testDetails, testContext);
+
+                    // Create closure that captures the method arguments
+                    Func<object, CancellationToken, ValueTask> methodInvoker = definition.OriginalMethodInvoker != null
+                        ? async (obj, ct) => 
+                        {
+                            await definition.OriginalMethodInvoker(obj, methodArgs);
+                        }
+                        : definition.TestMethodInvoker;
+                        
+                    // Build discovered test
+                    var discoveredTest = new UnifiedDiscoveredTest(resettableLazy, methodInvoker)
+                    {
+                        TestContext = testContext
+                    };
+
+                    testContext.InternalDiscoveredTest = discoveredTest;
+                    discoveredTests.Add(discoveredTest);
+                    testIndex++;
+                }
+            }
+        }
+        
+        return discoveredTests;
+    }
+    
+    private static string BuildTestName(string baseName, object?[] methodArgs)
+    {
+        if (methodArgs.Length == 0)
+        {
+            return baseName;
+        }
+        
+        var argStrings = methodArgs.Select(FormatArgumentValue).ToArray();
+        return $"{baseName}({string.Join(", ", argStrings)})";
+    }
+    
+    private static string FormatArgumentValue(object? arg)
+    {
+        return arg switch
+        {
+            null => "null",
+            string s => $"\"{s}\"",
+            char c => $"'{c}'",
+            bool b => b.ToString().ToLowerInvariant(),
+            _ => arg.ToString() ?? "null"
         };
-
-        testContext.InternalDiscoveredTest = discoveredTest;
-
-        return discoveredTest;
     }
 
 
@@ -196,25 +318,21 @@ internal class UnifiedTestBuilder(
 
         foreach (var definition in discoveryResult.TestDefinitions)
         {
-            var repeatCount = definition.MethodMetadata.GetAttribute<RepeatAttribute>()?.Times ?? 0;
-            for (var repeatAttempt = 1; repeatAttempt <= repeatCount + 1; repeatAttempt++)
+            try
             {
-                try
+                var builtTests = BuildTestsFromDefinition(definition);
+                tests.AddRange(builtTests);
+            }
+            catch (Exception ex)
+            {
+                failures.Add(new DiscoveryFailure
                 {
-                    var builtTests = BuildTestsFromDefinition(definition);
-                    tests.AddRange(builtTests);
-                }
-                catch (Exception ex)
-                {
-                    failures.Add(new DiscoveryFailure
-                    {
-                        TestId = definition.TestId,
-                        Exception = ex,
-                        TestFilePath = definition.TestFilePath,
-                        TestLineNumber = definition.TestLineNumber,
-                        TestMethodName = definition.MethodMetadata.Name,
-                    });
-                }
+                    TestId = definition.TestId,
+                    Exception = ex,
+                    TestFilePath = definition.TestFilePath,
+                    TestLineNumber = definition.TestLineNumber,
+                    TestMethodName = definition.MethodMetadata.Name,
+                });
             }
         }
 

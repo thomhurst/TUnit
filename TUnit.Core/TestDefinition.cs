@@ -93,6 +93,15 @@ public sealed record TestDefinition : TestDefinitionBase
     /// </summary>
     public override required IDataProvider MethodDataProvider { get; init; }
     
+    /// <summary>
+    /// Original factory to create test class instances with arguments.
+    /// </summary>
+    public Func<object?[], object>? OriginalClassFactory { get; init; }
+    
+    /// <summary>
+    /// Original invoker for the test method with arguments.
+    /// </summary>
+    public Func<object, object?[], Task>? OriginalMethodInvoker { get; init; }
 
     /// <summary>
     /// Builds discovered tests using the provided builder.
@@ -155,6 +164,15 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
     /// </summary>
     public override required IDataProvider MethodDataProvider { get; init; }
     
+    /// <summary>
+    /// Original factory to create test class instances with arguments.
+    /// </summary>
+    public Func<object?[], TTestClass>? OriginalClassFactory { get; init; }
+    
+    /// <summary>
+    /// Original invoker for the test method with arguments.
+    /// </summary>
+    public Func<TTestClass, object?[], Task>? OriginalMethodInvoker { get; init; }
 
     /// <summary>
     /// Gets the type of the test class for AOT.
@@ -176,7 +194,13 @@ public sealed record TestDefinition<[DynamicallyAccessedMembers(DynamicallyAcces
             TestMethodInvoker = (obj, ct) => definition.TestMethodInvoker((TTestClass)obj, ct),
             PropertiesProvider = definition.PropertiesProvider,
             ClassDataProvider = definition.ClassDataProvider,
-            MethodDataProvider = definition.MethodDataProvider
+            MethodDataProvider = definition.MethodDataProvider,
+            OriginalClassFactory = definition.OriginalClassFactory != null 
+                ? args => definition.OriginalClassFactory(args) 
+                : null,
+            OriginalMethodInvoker = definition.OriginalMethodInvoker != null 
+                ? (obj, args) => definition.OriginalMethodInvoker((TTestClass)obj, args)
+                : null
         };
     }
 

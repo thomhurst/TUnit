@@ -21,135 +21,38 @@ public class StaticTestBuilder : ITestDefinitionBuilder
     }
     
     /// <summary>
-    /// Builds all test definitions from the given static definition.
-    /// All delegates and types are pre-compiled by the source generator.
+    /// Builds a single test definition from the given static definition.
+    /// Data expansion is handled by UnifiedTestBuilder when BuildTests is called.
     /// </summary>
     private async Task<IEnumerable<TestDefinition>> BuildTestsFromStaticDefinitionAsync(
         StaticTestDefinition staticDef, 
         CancellationToken cancellationToken = default)
     {
-        var testDefinitions = new List<TestDefinition>();
-        
-        // Get all test data combinations from data providers
-        var classArgsList = (await staticDef.ClassDataProvider.GetData()).ToList();
-        var methodArgsList = (await staticDef.MethodDataProvider.GetData()).ToList();
-        var propertyValuesList = staticDef.PropertyValuesProvider().ToList();
-        
-        // Default to single iteration if no data
-        if (!propertyValuesList.Any()) propertyValuesList.Add(new Dictionary<string, object?>());
-        
-        var testIndex = 0;
-        
-        // Generate test definitions for all combinations
-        foreach (var classArgs in classArgsList)
-        {
-            foreach (var methodArgs in methodArgsList)
-            {
-                foreach (var propertyValues in propertyValuesList)
-                {
-                    for (var repeatIndex = 0; repeatIndex < staticDef.RepeatCount; repeatIndex++)
-                    {
-                        var testDefinition = BuildSingleTestDefinition(
-                            staticDef, 
-                            classArgs, 
-                            methodArgs, 
-                            propertyValues,
-                            testIndex,
-                            repeatIndex);
-                        
-                        testDefinitions.Add(testDefinition);
-                        testIndex++;
-                        
-                        // Check cancellation periodically
-                        if (testIndex % 100 == 0)
-                        {
-                            cancellationToken.ThrowIfCancellationRequested();
-                        }
-                    }
-                }
-            }
-        }
-        
-        return await Task.FromResult(testDefinitions);
-    }
-    
-    private TestDefinition BuildSingleTestDefinition(
-        StaticTestDefinition staticDef,
-        object?[] classArgs,
-        object?[] methodArgs,
-        IDictionary<string, object?> propertyValues,
-        int testIndex,
-        int repeatIndex)
-    {
-        // Build test ID from template
-        var testId = staticDef.TestId
-            .Replace("{TestIndex}", testIndex.ToString())
-            .Replace("{RepeatIndex}", repeatIndex.ToString());
-        
-        // Build display name
-        var displayName = BuildDisplayName(staticDef.DisplayName, methodArgs);
-        
-        // Create test class factory
-        Func<object> testClassFactory = () =>
-        {
-            // Use the pre-compiled factory from source generator
-            var instance = staticDef.ClassFactory(classArgs);
-            
-            // TODO: Handle property setting if needed
-            
-            return instance!;
-        };
-        
-        // Use the pre-compiled method invoker
-        Func<object, CancellationToken, ValueTask> testMethodInvoker = 
-            async (instance, ct) => await staticDef.MethodInvoker(instance, methodArgs);
-        
         // Create metadata for the test method
         var methodMetadata = CreateMethodMetadata(staticDef);
         
-        return new TestDefinition
+        // Get property values provider
+        var propertyValuesList = staticDef.PropertyValuesProvider().ToList();
+        var firstPropertyValues = propertyValuesList.Any() ? propertyValuesList.First() : new Dictionary<string, object?>();
+        
+        // Create a single test definition with data providers
+        // The UnifiedTestBuilder will expand these into multiple DiscoveredTests
+        var testDefinition = new TestDefinition
         {
-            TestId = testId,
+            TestId = staticDef.TestId,
             MethodMetadata = methodMetadata,
             TestFilePath = staticDef.TestFilePath,
             TestLineNumber = staticDef.TestLineNumber,
-            TestClassFactory = testClassFactory,
-            TestMethodInvoker = testMethodInvoker,
-            PropertiesProvider = () => propertyValues,
-            ClassDataProvider = new SingleArgumentsDataProvider(classArgs),
-            MethodDataProvider = new SingleArgumentsDataProvider(methodArgs)
+            TestClassFactory = () => staticDef.ClassFactory(Array.Empty<object?>()),
+            TestMethodInvoker = async (instance, ct) => await staticDef.MethodInvoker(instance, Array.Empty<object?>()),
+            PropertiesProvider = () => firstPropertyValues,
+            ClassDataProvider = staticDef.ClassDataProvider,
+            MethodDataProvider = staticDef.MethodDataProvider,
+            OriginalClassFactory = staticDef.ClassFactory,
+            OriginalMethodInvoker = staticDef.MethodInvoker
         };
-    }
-    
-    private static string BuildDisplayName(string template, object?[] args)
-    {
-        if (args.Length == 0)
-        {
-            return template;
-        }
         
-        try
-        {
-            var formattedArgs = args.Select(FormatArgumentValue).ToArray();
-            return string.Format(template, formattedArgs);
-        }
-        catch
-        {
-            // If formatting fails, return the template as-is
-            return template;
-        }
-    }
-    
-    private static string FormatArgumentValue(object? arg)
-    {
-        return arg switch
-        {
-            null => "null",
-            string s => $"\"{s}\"",
-            char c => $"'{c}'",
-            bool b => b.ToString().ToLowerInvariant(),
-            _ => arg.ToString() ?? "null"
-        };
+        return await Task.FromResult(new[] { testDefinition });
     }
     
     private static MethodMetadata CreateMethodMetadata(StaticTestDefinition staticDef)
