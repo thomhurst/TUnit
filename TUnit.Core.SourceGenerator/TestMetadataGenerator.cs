@@ -173,6 +173,20 @@ public class TestMetadataGenerator : IIncrementalGenerator
             return false;
 
         // 3. No data sources that require runtime resolution
+        // Check class-level attributes for data sources
+        foreach (var attr in testInfo.TypeSymbol.GetAttributes())
+        {
+            if (IsRuntimeDataSourceAttribute(attr))
+                return false;
+        }
+        
+        // Check method-level attributes for data sources
+        foreach (var attr in testInfo.MethodSymbol.GetAttributes())
+        {
+            if (IsRuntimeDataSourceAttribute(attr))
+                return false;
+        }
+        
         // Check method parameters for data attributes
         foreach (var param in testInfo.MethodSymbol.Parameters)
         {
@@ -235,6 +249,17 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 or "AsyncNonTypedDataSourceGeneratorAttribute" or "NonTypedDataSourceGeneratorAttribute")
                 return true;
             baseType = baseType.BaseType;
+        }
+        
+        // Check if MethodDataSourceAttribute refers to an instance method
+        if (attrName == "MethodDataSourceAttribute")
+        {
+            var args = attr.ConstructorArguments;
+            if (args.Length == 1 || (args.Length == 2 && args[0].Value == null))
+            {
+                // Method on test class - need to check if it's static
+                return true; // For now, assume it could be instance method
+            }
         }
         
         return false;
@@ -358,7 +383,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"TestMethodInfo = typeof({className}).GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)!,");
 
             // Generate class factory with CastHelper
-            writer.AppendLine($"ClassFactory = {GenerateStaticClassFactory(testInfo.TypeSymbol, className, constructorWithParameters, hasParameterlessConstructor)},");
+            writer.AppendLine($"ClassFactory = {GenerateStaticClassFactory(testInfo.TypeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor)},");
 
             // Generate method invoker with CastHelper
             writer.AppendLine($"MethodInvoker = {GenerateStaticMethodInvoker(testInfo.MethodSymbol, className)},");
@@ -441,6 +466,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
     private static string GenerateStaticClassFactory(
         INamedTypeSymbol typeSymbol,
         string className,
+        List<IPropertySymbol> requiredProperties,
         IMethodSymbol? constructorWithParameters,
         bool hasParameterlessConstructor)
     {
@@ -463,6 +489,19 @@ public class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             writer.Append($"new {className}()");
+        }
+
+        // Add required properties initialization if any
+        if (requiredProperties.Any())
+        {
+            writer.Append(" { ");
+            var propertyInitializers = requiredProperties.Select(prop =>
+            {
+                var defaultValue = GetDefaultValueForType(prop.Type);
+                return $"{prop.Name} = {defaultValue}";
+            });
+            writer.Append(string.Join(", ", propertyInitializers));
+            writer.Append(" }");
         }
 
         return writer.ToString().Trim();
@@ -645,12 +684,8 @@ public class TestMetadataGenerator : IIncrementalGenerator
             return "null!"; // Will be replaced at runtime by TestBuilder
         }
 
-        // If there are required properties with data sources, we need special handling
-        var requiredPropertiesWithDataSource = requiredProperties
-            .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name?.EndsWith("DataSourceAttribute") == true))
-            .ToList();
-
-        if (requiredPropertiesWithDataSource.Any())
+        // If there are any required properties, we need special handling
+        if (requiredProperties.Any())
         {
             return GenerateFactoryWithRequiredProperties(typeSymbol, className, requiredProperties, constructorWithParameters, hasParameterlessConstructor);
         }
@@ -812,7 +847,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (IsAsyncDataSourceGenerator(attribute))
         {
-            GenerateAsyncDataSourceProvider(writer, attribute, className, testInfo);
+            GenerateAsyncDataSourceProviderForClass(writer, attribute, className, testInfo);
         }
         else
         {
@@ -905,16 +940,93 @@ public class TestMetadataGenerator : IIncrementalGenerator
             // Type and method name
             var type = args[0].Value as ITypeSymbol;
             var methodName = args[1].Value?.ToString();
-            writer.Append($"{type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}.{methodName}()");
+            
+            // Find the method to check if it's static
+            var method = type?.GetMembers(methodName!).OfType<IMethodSymbol>().FirstOrDefault();
+            if (method != null && method.IsStatic)
+            {
+                writer.Append($"{type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}.{methodName}()");
+            }
+            else
+            {
+                // Instance method - create instance first
+                writer.Append($"new {type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}().{methodName}()");
+            }
         }
         else if (args.Length == 1 || (args.Length == 2 && args[0].Value == null))
         {
-            // Just method name - refers to a static method on the test class
+            // Just method name - refers to a method on the test class
             var methodName = args.Length == 1 ? args[0].Value?.ToString() : args[1].Value?.ToString();
+            // For static definitions, we can't use instance methods without an instance
+            // This is a limitation that should be handled by using DynamicTestMetadata instead
             writer.Append($"{className}.{methodName}()");
         }
         
         writer.Append(")");
+    }
+    
+    private static void GenerateAsyncDataSourceProviderForClass(CodeWriter writer, AttributeData attribute, string className, TestMethodInfo testInfo)
+    {
+        // Create async generator with compile-time metadata for class constructor parameters
+        var attrType = attribute.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+        
+        writer.Append($"new TUnit.Core.AsyncDataGeneratorProvider(new {attrType}(), ");
+        writer.Append("new TUnit.Core.CompileTimeDataGeneratorMetadata { ");
+        
+        // Generate MembersToGenerate array from constructor parameters
+        writer.Append("MembersToGenerate = new TUnit.Core.MemberMetadata[] { ");
+        
+        // Find the constructor
+        var constructors = testInfo.TypeSymbol.Constructors
+            .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
+            .OrderBy(c => c.Parameters.Length)
+            .ToList();
+        
+        var constructor = constructors.FirstOrDefault(c => c.Parameters.Length > 0) ?? constructors.FirstOrDefault();
+        
+        if (constructor != null)
+        {
+            var parameters = constructor.Parameters;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (i > 0) writer.Append(", ");
+                var param = parameters[i];
+                var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+                writer.Append($"new TUnit.Core.ParameterMetadata(typeof({paramType})) {{ ");
+                writer.Append($"Name = \"{param.Name}\", ");
+                writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)}, ");
+                writer.Append($"ReflectionInfo = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}).GetConstructors()[0].GetParameters()[{i}], ");
+                writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(param.GetAttributes(), param, 0)} ");
+                writer.Append("}");
+            }
+        }
+        
+        writer.Append(" }, ");
+        
+        // Set other required properties
+        writer.Append($"TestInformation = new TUnit.Core.MethodMetadata {{ ");
+        writer.Append($"Name = \"{testInfo.MethodSymbol.Name}\", ");
+        writer.Append($"Type = typeof({className}), ");
+        writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)}, ");
+        writer.Append($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)}, ");
+        writer.Append($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length}, ");
+        writer.Append($"Class = TUnit.Core.ClassMetadata.GetOrAdd(\"{className}\", () => new TUnit.Core.ClassMetadata {{ ");
+        writer.Append($"Name = \"{testInfo.TypeSymbol.Name}\", ");
+        writer.Append($"Type = typeof({className}), ");
+        writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)}, ");
+        writer.Append($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\", ");
+        writer.Append($"Assembly = new TUnit.Core.AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes(), testInfo.TypeSymbol.ContainingAssembly, 0)} }}, ");
+        writer.Append($"Parameters = System.Array.Empty<TUnit.Core.ParameterMetadata>(), ");
+        writer.Append($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)}, ");
+        writer.Append($"Parent = null, ");
+        writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes(), testInfo.TypeSymbol, 0)} ");
+        writer.Append("}), ");
+        writer.Append($"ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")}, ");
+        writer.Append($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)}, ");
+        writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes(), testInfo.MethodSymbol, 0)} ");
+        writer.Append("}, ");
+        writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.ClassParameters ");
+        writer.Append("})");
     }
     
     private static void GenerateAsyncDataSourceProvider(CodeWriter writer, AttributeData attribute, string className, TestMethodInfo testInfo)
@@ -934,17 +1046,39 @@ public class TestMetadataGenerator : IIncrementalGenerator
             if (i > 0) writer.Append(", ");
             var param = parameters[i];
             var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
-            writer.Append($"new TUnit.Core.MemberMetadata {{ Type = typeof({paramType}), Name = \"{param.Name}\" }}");
+            writer.Append($"new TUnit.Core.ParameterMetadata(typeof({paramType})) {{ ");
+            writer.Append($"Name = \"{param.Name}\", ");
+            writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)}, ");
+            writer.Append($"ReflectionInfo = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}).GetMethod(\"{testInfo.MethodSymbol.Name}\")!.GetParameters()[{i}], ");
+            writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(param.GetAttributes(), param, 0)} ");
+            writer.Append("}");
         }
         
         writer.Append(" }, ");
         
         // Set other required properties
         writer.Append($"TestInformation = new TUnit.Core.MethodMetadata {{ ");
-        writer.Append($"Class = new TUnit.Core.ClassMetadata {{ Type = typeof({className}) }}, ");
-        writer.Append($"Name = \"{testInfo.MethodSymbol.Name}\" ");
+        writer.Append($"Name = \"{testInfo.MethodSymbol.Name}\", ");
+        writer.Append($"Type = typeof({className}), ");
+        writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)}, ");
+        writer.Append($"Parameters = {CodeGenerationHelpers.GenerateParameterMetadataArray(testInfo.MethodSymbol)}, ");
+        writer.Append($"GenericTypeCount = {testInfo.MethodSymbol.TypeParameters.Length}, ");
+        writer.Append($"Class = TUnit.Core.ClassMetadata.GetOrAdd(\"{className}\", () => new TUnit.Core.ClassMetadata {{ ");
+        writer.Append($"Name = \"{testInfo.TypeSymbol.Name}\", ");
+        writer.Append($"Type = typeof({className}), ");
+        writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)}, ");
+        writer.Append($"Namespace = \"{testInfo.TypeSymbol.ContainingNamespace}\", ");
+        writer.Append($"Assembly = new TUnit.Core.AssemblyMetadata {{ Name = \"{testInfo.TypeSymbol.ContainingAssembly.Name}\", Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.ContainingAssembly.GetAttributes(), testInfo.TypeSymbol.ContainingAssembly, 0)} }}, ");
+        writer.Append($"Parameters = System.Array.Empty<TUnit.Core.ParameterMetadata>(), ");
+        writer.Append($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(testInfo.TypeSymbol)}, ");
+        writer.Append($"Parent = null, ");
+        writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.TypeSymbol.GetAttributes(), testInfo.TypeSymbol, 0)} ");
+        writer.Append("}), ");
+        writer.Append($"ReturnType = {(ContainsTypeParameter(testInfo.MethodSymbol.ReturnType) ? "null" : $"typeof({GetReturnTypeName(testInfo.MethodSymbol)})")}, ");
+        writer.Append($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.MethodSymbol.ReturnType)}, ");
+        writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(testInfo.MethodSymbol.GetAttributes(), testInfo.MethodSymbol, 0)} ");
         writer.Append("}, ");
-        writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.Parameters ");
+        writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.TestParameters ");
         writer.Append("})");
     }
 
