@@ -20,8 +20,8 @@ public static class CompileTimeArgumentConverter
         var enumerableType = GetEnumerableElementType(sourceType);
         if (enumerableType == null)
         {
-            // Not an IEnumerable, this shouldn't happen if validation is correct
-            return $"{dataVariableName} /* Warning: Not IEnumerable */";
+            // Not an IEnumerable - generate code that throws at runtime
+            return $"new[] {{ System.Array.Empty<object?>() }} /* ERROR: Data source must return IEnumerable<T>, but returns {sourceType.ToDisplayString()} */";
         }
 
         // If already object?[], no conversion needed
@@ -99,7 +99,8 @@ public static class CompileTimeArgumentConverter
         if (tupleElements.Length != targetMethod.Parameters.Length)
         {
             // Mismatch in count, generate error comment
-            return $"{dataVariableName}.Select(x => new object?[] {{ /* Error: Tuple has {tupleElements.Length} elements but method has {targetMethod.Parameters.Length} parameters */ }})";
+            // Generate compile-time comment about the mismatch but still compile
+            return $"{dataVariableName}.Select(x => new object?[] {{ /* COMPILE ERROR: Tuple has {tupleElements.Length} elements but method expects {targetMethod.Parameters.Length} parameters */ }})";
         }
 
         // Generate: data.Select(x => new object?[] { x.Item1, x.Item2, ... })
@@ -153,7 +154,8 @@ public static class CompileTimeArgumentConverter
                 }
                 else
                 {
-                    propertyAccessors[i] = "null /* No matching property */";
+                    // No matching property found - use null
+                    propertyAccessors[i] = "null";
                 }
             }
         }

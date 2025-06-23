@@ -219,7 +219,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         var attrName = attr.AttributeClass?.Name;
         
         // GeneratedData still requires runtime resolution
-        // But MethodDataSource and PropertyDataSource can now be handled at compile time
+        // But MethodDataSource can now be handled at compile time
         return attrName is "GeneratedDataAttribute";
     }
 
