@@ -217,8 +217,8 @@ public void CollectDependencies_ShouldThrowDependencyConflictException_ForComple
                     MethodMetadata = testDetails.MethodMetadata,
                     TestFilePath = "test.cs",
                     TestLineNumber = 1,
-                    ClassArgumentsProvider = () => [],
-                    MethodArgumentsProvider = () => [],
+                    ClassDataProvider = new EmptyDataProvider(),
+                    MethodDataProvider = new EmptyDataProvider(),
                     PropertiesProvider = () => new Dictionary<string, object?>()
                 },
                 new TestBuilderContext(),

@@ -112,8 +112,8 @@ public class TestExtensionsTests
             .With(x => x.MethodMetadata, testDetails.MethodMetadata)
             .With(x => x.TestClassFactory, () => Activator.CreateInstance<T>())
             .With(x => x.TestMethodInvoker, (obj, ct) => new ValueTask())
-            .With(x => x.ClassArgumentsProvider, () => Array.Empty<object?>())
-            .With(x => x.MethodArgumentsProvider, () => Array.Empty<object?>())
+            .With(x => x.ClassDataProvider, new EmptyDataProvider())
+            .With(x => x.MethodDataProvider, new EmptyDataProvider())
             .With(x => x.PropertiesProvider, () => new Dictionary<string, object?>())
             .Create();
     }
