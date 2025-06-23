@@ -124,7 +124,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 {
                     writer.AppendLine("var testDescriptors = new System.Collections.Generic.List<ITestDescriptor>();");
                     writer.AppendLine();
-                    GenerateStaticTestDefinition(writer, testInfo, className, methodName, requiredProperties, constructorWithParameters, hasParameterlessConstructor);
+                    GenerateStaticTestDefinitions(writer, testInfo, className, methodName, requiredProperties, constructorWithParameters, hasParameterlessConstructor);
                     writer.AppendLine();
                     writer.AppendLine("TestSourceRegistrar.RegisterTests(testDescriptors);");
                 }
@@ -219,12 +219,52 @@ public class TestMetadataGenerator : IIncrementalGenerator
     {
         var attrName = attr.AttributeClass?.Name;
 
-        // GeneratedData still requires runtime resolution
-        // But MethodDataSource can now be handled at compile time
-        return attrName is "GeneratedDataAttribute";
+        // These require runtime resolution:
+        // - GeneratedDataAttribute (dynamic generation)
+        // - Attributes inheriting from AsyncDataSourceGeneratorAttribute (async generation)
+        // - Attributes inheriting from DataSourceGeneratorAttribute (dynamic generation)
+        if (attrName is "GeneratedDataAttribute")
+            return true;
+            
+        // Check if it inherits from async/sync data source generator attributes
+        var baseType = attr.AttributeClass?.BaseType;
+        while (baseType != null)
+        {
+            var baseName = baseType.Name;
+            if (baseName is "AsyncDataSourceGeneratorAttribute" or "DataSourceGeneratorAttribute" 
+                or "AsyncNonTypedDataSourceGeneratorAttribute" or "NonTypedDataSourceGeneratorAttribute")
+                return true;
+            baseType = baseType.BaseType;
+        }
+        
+        return false;
+    }
+    
+    private static bool IsCompileTimeDataSourceAttribute(AttributeData attr)
+    {
+        var attrName = attr.AttributeClass?.Name;
+        
+        // These can be handled at compile time through code generation:
+        // - ArgumentsAttribute (direct data)
+        // - MethodDataSourceAttribute (generate lambda to call method)
+        // - Attributes inheriting from AsyncDataSourceGeneratorAttribute (generate lambda to instantiate and call)
+        
+        if (attrName is "ArgumentsAttribute" or "MethodDataSourceAttribute")
+            return true;
+            
+        // Check if it inherits from AsyncDataSourceGeneratorAttribute
+        var baseType = attr.AttributeClass?.BaseType;
+        while (baseType != null)
+        {
+            if (baseType.Name == "AsyncDataSourceGeneratorAttribute")
+                return true;
+            baseType = baseType.BaseType;
+        }
+        
+        return false;
     }
 
-    private static void GenerateStaticTestDefinition(
+    private static void GenerateStaticTestDefinitions(
         CodeWriter writer,
         TestMethodInfo testInfo,
         string className,
@@ -233,11 +273,79 @@ public class TestMetadataGenerator : IIncrementalGenerator
         IMethodSymbol? constructorWithParameters,
         bool hasParameterlessConstructor)
     {
+        // Get all data source attributes that can be handled at compile time
+        var classDataAttrs = testInfo.TypeSymbol.GetAttributes()
+            .Where(attr => IsCompileTimeDataSourceAttribute(attr))
+            .ToList();
+            
+        var methodDataAttrs = testInfo.MethodSymbol.GetAttributes()
+            .Where(attr => IsCompileTimeDataSourceAttribute(attr))
+            .ToList();
+
+        // If no attributes, create one test with empty data providers
+        if (!classDataAttrs.Any() && !methodDataAttrs.Any())
+        {
+            GenerateSingleStaticTestDefinition(writer, testInfo, className, methodName, 
+                requiredProperties, constructorWithParameters, hasParameterlessConstructor,
+                null, null, 0);
+            return;
+        }
+
+        // Generate test definitions for each combination
+        var testIndex = 0;
+        
+        // If we have class data but no method data
+        if (classDataAttrs.Any() && !methodDataAttrs.Any())
+        {
+            foreach (var classAttr in classDataAttrs)
+            {
+                GenerateSingleStaticTestDefinition(writer, testInfo, className, methodName,
+                    requiredProperties, constructorWithParameters, hasParameterlessConstructor,
+                    classAttr, null, testIndex++);
+            }
+        }
+        // If we have method data but no class data
+        else if (!classDataAttrs.Any() && methodDataAttrs.Any())
+        {
+            foreach (var methodAttr in methodDataAttrs)
+            {
+                GenerateSingleStaticTestDefinition(writer, testInfo, className, methodName,
+                    requiredProperties, constructorWithParameters, hasParameterlessConstructor,
+                    null, methodAttr, testIndex++);
+            }
+        }
+        // If we have both class and method data - create cartesian product
+        else
+        {
+            foreach (var classAttr in classDataAttrs)
+            {
+                foreach (var methodAttr in methodDataAttrs)
+                {
+                    GenerateSingleStaticTestDefinition(writer, testInfo, className, methodName,
+                        requiredProperties, constructorWithParameters, hasParameterlessConstructor,
+                        classAttr, methodAttr, testIndex++);
+                }
+            }
+        }
+    }
+
+    private static void GenerateSingleStaticTestDefinition(
+        CodeWriter writer,
+        TestMethodInfo testInfo,
+        string className,
+        string methodName,
+        List<IPropertySymbol> requiredProperties,
+        IMethodSymbol? constructorWithParameters,
+        bool hasParameterlessConstructor,
+        AttributeData? classArguments,
+        AttributeData? methodArguments,
+        int testIndex)
+    {
         var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(testInfo.MethodSymbol);
 
         using (writer.BeginObjectInitializer("var staticDef = new StaticTestDefinition"))
         {
-            writer.AppendLine($"TestId = \"{className}.{methodName}_{{{{TestIndex}}}}\",");
+            writer.AppendLine($"TestId = \"{className}.{methodName}_{testIndex}_{{{{TestIndex}}}}\",");
             writer.AppendLine($"DisplayName = \"{methodName}\",");
             writer.AppendLine($"TestFilePath = @\"{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
             writer.AppendLine($"TestLineNumber = {testInfo.LineNumber},");
@@ -259,8 +367,8 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"PropertyValuesProvider = {GenerateStaticPropertyValuesProvider(testInfo.TypeSymbol)},");
 
             // Generate data providers
-            writer.AppendLine($"ClassDataProvider = {GenerateClassDataProvider(testInfo.TypeSymbol)},");
-            writer.AppendLine($"MethodDataProvider = {GenerateMethodDataProvider(testInfo.MethodSymbol)}");
+            writer.AppendLine($"ClassDataProvider = {GenerateClassDataProviderForAttribute(classArguments, className)},");
+            writer.AppendLine($"MethodDataProvider = {GenerateMethodDataProviderForAttribute(methodArguments, className)}");
         }
 
         writer.AppendLine();
@@ -680,44 +788,31 @@ public class TestMetadataGenerator : IIncrementalGenerator
         return $"default({type.GloballyQualified()})";
     }
 
-    private static string GenerateClassDataProvider(INamedTypeSymbol typeSymbol)
+    private static string GenerateClassDataProviderForAttribute(AttributeData? attribute, string className)
     {
         using var writer = new CodeWriter("", includeHeader: false);
 
-        // Check for class-level Arguments attributes
-        var classArgumentsAttrs = typeSymbol.GetAttributes()
-            .Where(attr => attr.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToList();
-
-        if (classArgumentsAttrs.Any())
+        if (attribute == null)
         {
-            // For now, just use the first one
-            // TODO: Handle multiple data providers
+            writer.Append("new TUnit.Core.EmptyDataProvider()");
+            return writer.ToString().Trim();
+        }
+
+        var attrName = attribute.AttributeClass?.Name;
+        
+        if (attrName == "ArgumentsAttribute")
+        {
             writer.Append("new TUnit.Core.ArgumentsDataProvider(");
-
-            var args = classArgumentsAttrs.First().ConstructorArguments;
-            // ArgumentsAttribute constructor takes params object?[]
-            if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
-            {
-                // Handle params array case
-                var values = args[0].Values;
-                for (int i = 0; i < values.Length; i++)
-                {
-                    if (i > 0) writer.Append(", ");
-                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(values[i]));
-                }
-            }
-            else
-            {
-                // Handle individual arguments
-                for (int i = 0; i < args.Length; i++)
-                {
-                    if (i > 0) writer.Append(", ");
-                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(args[i]));
-                }
-            }
-
+            GenerateArgumentsForAttribute(writer, attribute);
             writer.Append(")");
+        }
+        else if (attrName == "MethodDataSourceAttribute")
+        {
+            GenerateMethodDataSourceProvider(writer, attribute, className);
+        }
+        else if (IsAsyncDataSourceGenerator(attribute))
+        {
+            GenerateAsyncDataSourceProvider(writer, attribute);
         }
         else
         {
@@ -727,44 +822,31 @@ public class TestMetadataGenerator : IIncrementalGenerator
         return writer.ToString().Trim();
     }
 
-    private static string GenerateMethodDataProvider(IMethodSymbol methodSymbol)
+    private static string GenerateMethodDataProviderForAttribute(AttributeData? attribute, string className)
     {
         using var writer = new CodeWriter("", includeHeader: false);
 
-        // Check for method-level Arguments attributes
-        var methodArgumentsAttrs = methodSymbol.GetAttributes()
-            .Where(attr => attr.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToList();
-
-        if (methodArgumentsAttrs.Any())
+        if (attribute == null)
         {
-            // For now, just use the first one
-            // TODO: Handle multiple data providers
+            writer.Append("new TUnit.Core.EmptyDataProvider()");
+            return writer.ToString().Trim();
+        }
+
+        var attrName = attribute.AttributeClass?.Name;
+        
+        if (attrName == "ArgumentsAttribute")
+        {
             writer.Append("new TUnit.Core.ArgumentsDataProvider(");
-
-            var args = methodArgumentsAttrs.First().ConstructorArguments;
-            // ArgumentsAttribute constructor takes params object?[]
-            if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
-            {
-                // Handle params array case
-                var values = args[0].Values;
-                for (int i = 0; i < values.Length; i++)
-                {
-                    if (i > 0) writer.Append(", ");
-                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(values[i]));
-                }
-            }
-            else
-            {
-                // Handle individual arguments
-                for (int i = 0; i < args.Length; i++)
-                {
-                    if (i > 0) writer.Append(", ");
-                    writer.Append(TypedConstantParser.GetRawTypedConstantValue(args[i]));
-                }
-            }
-
+            GenerateArgumentsForAttribute(writer, attribute);
             writer.Append(")");
+        }
+        else if (attrName == "MethodDataSourceAttribute")
+        {
+            GenerateMethodDataSourceProvider(writer, attribute, className);
+        }
+        else if (IsAsyncDataSourceGenerator(attribute))
+        {
+            GenerateAsyncDataSourceProvider(writer, attribute);
         }
         else
         {
@@ -772,6 +854,78 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return writer.ToString().Trim();
+    }
+
+    private static void GenerateArgumentsForAttribute(CodeWriter writer, AttributeData attribute)
+    {
+        var args = attribute.ConstructorArguments;
+        // ArgumentsAttribute constructor takes params object?[]
+        if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
+        {
+            // Handle params array case
+            var values = args[0].Values;
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (i > 0) writer.Append(", ");
+                writer.Append(TypedConstantParser.GetRawTypedConstantValue(values[i]));
+            }
+        }
+        else
+        {
+            // Handle individual arguments
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (i > 0) writer.Append(", ");
+                writer.Append(TypedConstantParser.GetRawTypedConstantValue(args[i]));
+            }
+        }
+    }
+    
+    private static bool IsAsyncDataSourceGenerator(AttributeData attribute)
+    {
+        var baseType = attribute.AttributeClass?.BaseType;
+        while (baseType != null)
+        {
+            if (baseType.Name == "AsyncDataSourceGeneratorAttribute")
+                return true;
+            baseType = baseType.BaseType;
+        }
+        return false;
+    }
+    
+    private static void GenerateMethodDataSourceProvider(CodeWriter writer, AttributeData attribute, string className)
+    {
+        // MethodDataSourceAttribute constructor: (Type? type, string methodName) or (string methodName)
+        var args = attribute.ConstructorArguments;
+        
+        writer.Append("new TUnit.Core.MethodDataProvider(() => ");
+        
+        if (args.Length == 2 && args[0].Value != null)
+        {
+            // Type and method name
+            var type = args[0].Value as ITypeSymbol;
+            var methodName = args[1].Value?.ToString();
+            writer.Append($"{type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}.{methodName}()");
+        }
+        else if (args.Length == 1 || (args.Length == 2 && args[0].Value == null))
+        {
+            // Just method name - refers to a static method on the test class
+            var methodName = args.Length == 1 ? args[0].Value?.ToString() : args[1].Value?.ToString();
+            writer.Append($"{className}.{methodName}()");
+        }
+        
+        writer.Append(")");
+    }
+    
+    private static void GenerateAsyncDataSourceProvider(CodeWriter writer, AttributeData attribute)
+    {
+        // For async generators, we need to instantiate the attribute and call GenerateAsync
+        var attrType = attribute.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+        
+        writer.Append("new TUnit.Core.AsyncDataGeneratorProvider(new ");
+        writer.Append(attrType ?? "object");
+        writer.Append("()");
+        writer.Append(")");
     }
 
     private class TestMethodInfo
