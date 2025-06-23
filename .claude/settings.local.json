@@ -55,7 +55,9 @@
       "Bash(./bin/Release/net8.0/Playground:*)",
       "mcp__zen__version",
       "Bash(awk:*)",
-      "Bash(dotnet exec:*)"
+      "Bash(dotnet exec:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }

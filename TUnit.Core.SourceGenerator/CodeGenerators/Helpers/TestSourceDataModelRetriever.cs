@@ -100,17 +100,16 @@ public static class TestSourceDataModelRetriever
     {
         for (var i = 0; i < runCount; i++)
         {
-            yield return GetTestSourceDataModel(new TestGenerationContext
-            {
-                Context = context,
-                MethodSymbol = methodSymbol,
-                ClassSymbol = namedTypeSymbol,
-                ClassArguments = new EmptyArgumentsContainer(),
-                TestArguments = testArguments,
-                CurrentRepeatAttempt = i,
-                TestAttribute = testAttribute,
-                PropertyArguments = classPropertiesContainer
-            });
+            yield return GetTestSourceDataModel(new TestGenerationContext(
+                context,
+                methodSymbol,
+                namedTypeSymbol,
+                new EmptyArgumentsContainer(),
+                testArguments,
+                i,
+                testAttribute,
+                classPropertiesContainer
+            ));
         }
     }
 
@@ -122,17 +121,16 @@ public static class TestSourceDataModelRetriever
     {
         for (var i = 0; i < runCount; i++)
         {
-            yield return GetTestSourceDataModel(new TestGenerationContext
-            {
-                Context = context,
-                MethodSymbol = methodSymbol,
-                ClassSymbol = namedTypeSymbol,
-                ClassArguments = classArguments,
-                TestArguments = testArguments,
-                CurrentRepeatAttempt = i,
-                TestAttribute = testAttribute,
-                PropertyArguments = classPropertiesContainer
-            });
+            yield return GetTestSourceDataModel(new TestGenerationContext(
+                context,
+                methodSymbol,
+                namedTypeSymbol,
+                classArguments,
+                testArguments,
+                i,
+                testAttribute,
+                classPropertiesContainer
+            ));
         }
     }
 
@@ -216,3 +214,14 @@ public static class TestSourceDataModelRetriever
         }
     }
 }
+
+public record TestGenerationContext(
+    GeneratorAttributeSyntaxContext Context,
+    IMethodSymbol MethodSymbol,
+    INamedTypeSymbol ClassSymbol,
+    BaseContainer ClassArguments,
+    BaseContainer TestArguments,
+    int CurrentRepeatAttempt,
+    AttributeData TestAttribute,
+    ClassPropertiesContainer PropertyArguments
+);
