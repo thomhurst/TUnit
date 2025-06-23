@@ -195,8 +195,8 @@ public record DynamicTest<
                     return AsyncConvert.ConvertObject(TestBody.Invoke(@class, arguments));
                 },
                 PropertiesProvider = () => Properties ?? new Dictionary<string, object?>(),
-                ClassDataProvider = new ArgumentsDataProvider(new ArgumentsAttribute(TestClassArguments ?? Array.Empty<object?>())),
-                MethodDataProvider = new ArgumentsDataProvider(new ArgumentsAttribute(TestMethodArguments))
+                ClassDataProvider = new ArgumentsDataProvider(TestClassArguments ?? Array.Empty<object?>()),
+                MethodDataProvider = new ArgumentsDataProvider(TestMethodArguments)
             };
 
             if (Exception != null)

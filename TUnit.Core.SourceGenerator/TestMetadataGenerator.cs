@@ -713,7 +713,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         {
             // For now, just use the first one
             // TODO: Handle multiple data providers
-            writer.Append("new TUnit.Core.ArgumentsDataProvider(new TUnit.Core.ArgumentsAttribute(");
+            writer.Append("new TUnit.Core.ArgumentsDataProvider(");
             
             var args = classArgumentsAttrs.First().ConstructorArguments;
             // ArgumentsAttribute constructor takes params object?[]
@@ -737,7 +737,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
             
-            writer.Append("))");
+            writer.Append(")");
         }
         else
         {
@@ -760,7 +760,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         {
             // For now, just use the first one
             // TODO: Handle multiple data providers
-            writer.Append("new TUnit.Core.ArgumentsDataProvider(new TUnit.Core.ArgumentsAttribute(");
+            writer.Append("new TUnit.Core.ArgumentsDataProvider(");
             
             var args = methodArgumentsAttrs.First().ConstructorArguments;
             // ArgumentsAttribute constructor takes params object?[]
@@ -784,7 +784,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
             
-            writer.Append("))");
+            writer.Append(")");
         }
         else
         {

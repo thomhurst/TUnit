@@ -511,8 +511,8 @@ public class DynamicTestBuilder : ITestDefinitionBuilder
             TestClassFactory = testClassFactory,
             TestMethodInvoker = testMethodInvoker,
             PropertiesProvider = propertiesProvider,
-            ClassDataProvider = new ArgumentsDataProvider(new ArgumentsAttribute(combination.ClassArguments)),
-            MethodDataProvider = new ArgumentsDataProvider(new ArgumentsAttribute(unwrappedMethodArgs))
+            ClassDataProvider = new ArgumentsDataProvider(combination.ClassArguments),
+            MethodDataProvider = new ArgumentsDataProvider(unwrappedMethodArgs)
         };
     }
 
