@@ -367,8 +367,8 @@ public class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"PropertyValuesProvider = {GenerateStaticPropertyValuesProvider(testInfo.TypeSymbol)},");
 
             // Generate data providers
-            writer.AppendLine($"ClassDataProvider = {GenerateClassDataProviderForAttribute(classArguments, className)},");
-            writer.AppendLine($"MethodDataProvider = {GenerateMethodDataProviderForAttribute(methodArguments, className)}");
+            writer.AppendLine($"ClassDataProvider = {GenerateClassDataProviderForAttribute(classArguments, className, testInfo)},");
+            writer.AppendLine($"MethodDataProvider = {GenerateMethodDataProviderForAttribute(methodArguments, className, testInfo)}");
         }
 
         writer.AppendLine();
@@ -788,7 +788,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         return $"default({type.GloballyQualified()})";
     }
 
-    private static string GenerateClassDataProviderForAttribute(AttributeData? attribute, string className)
+    private static string GenerateClassDataProviderForAttribute(AttributeData? attribute, string className, TestMethodInfo testInfo)
     {
         using var writer = new CodeWriter("", includeHeader: false);
 
@@ -812,7 +812,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (IsAsyncDataSourceGenerator(attribute))
         {
-            GenerateAsyncDataSourceProvider(writer, attribute);
+            GenerateAsyncDataSourceProvider(writer, attribute, className, testInfo);
         }
         else
         {
@@ -822,7 +822,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         return writer.ToString().Trim();
     }
 
-    private static string GenerateMethodDataProviderForAttribute(AttributeData? attribute, string className)
+    private static string GenerateMethodDataProviderForAttribute(AttributeData? attribute, string className, TestMethodInfo testInfo)
     {
         using var writer = new CodeWriter("", includeHeader: false);
 
@@ -846,7 +846,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (IsAsyncDataSourceGenerator(attribute))
         {
-            GenerateAsyncDataSourceProvider(writer, attribute);
+            GenerateAsyncDataSourceProvider(writer, attribute, className, testInfo);
         }
         else
         {
@@ -917,15 +917,35 @@ public class TestMetadataGenerator : IIncrementalGenerator
         writer.Append(")");
     }
     
-    private static void GenerateAsyncDataSourceProvider(CodeWriter writer, AttributeData attribute)
+    private static void GenerateAsyncDataSourceProvider(CodeWriter writer, AttributeData attribute, string className, TestMethodInfo testInfo)
     {
-        // For async generators, we need to instantiate the attribute and call GenerateAsync
+        // Create async generator with compile-time metadata
         var attrType = attribute.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
         
-        writer.Append("new TUnit.Core.AsyncDataGeneratorProvider(new ");
-        writer.Append(attrType ?? "object");
-        writer.Append("()");
-        writer.Append(")");
+        writer.Append($"new TUnit.Core.AsyncDataGeneratorProvider(new {attrType}(), ");
+        writer.Append("new TUnit.Core.CompileTimeDataGeneratorMetadata { ");
+        
+        // Generate MembersToGenerate array from method parameters
+        writer.Append("MembersToGenerate = new TUnit.Core.MemberMetadata[] { ");
+        
+        var parameters = testInfo.MethodSymbol.Parameters;
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (i > 0) writer.Append(", ");
+            var param = parameters[i];
+            var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+            writer.Append($"new TUnit.Core.MemberMetadata {{ Type = typeof({paramType}), Name = \"{param.Name}\" }}");
+        }
+        
+        writer.Append(" }, ");
+        
+        // Set other required properties
+        writer.Append($"TestInformation = new TUnit.Core.MethodMetadata {{ ");
+        writer.Append($"Class = new TUnit.Core.ClassMetadata {{ Type = typeof({className}) }}, ");
+        writer.Append($"Name = \"{testInfo.MethodSymbol.Name}\" ");
+        writer.Append("}, ");
+        writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.Parameters ");
+        writer.Append("})");
     }
 
     private class TestMethodInfo
