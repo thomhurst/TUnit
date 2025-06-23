@@ -33,7 +33,7 @@ internal static class CodeGenerationHelpers
                     writer.AppendLine($"Name = \"{param.Name}\",");
                     writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
                     writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes(), param, writer._indentLevel)},");
-                    writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance).GetParameters()[{parameterIndex}]");
+                    writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance, null, {GenerateParameterTypesArray(method)}, null)!.GetParameters()[{parameterIndex}]");
                 }
             }
         }
@@ -485,7 +485,30 @@ internal static class CodeGenerationHelpers
         var methodName = attr.ConstructorArguments[0].Value?.ToString() ?? "";
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
-        return $"new global::TUnit.Core.DataSources.MethodDataSourceProvider(typeof({containingType.GloballyQualified()}).GetMethod(\"{methodName}\", BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic), null, {isShared.ToString().ToLowerInvariant()})";
+        // Note: We use GetMethods().FirstOrDefault() instead of GetMethod() to handle potential overloads
+        // The runtime will need to determine the correct overload based on the data source attribute usage
+        return $"new global::TUnit.Core.DataSources.MethodDataSourceProvider(typeof({containingType.GloballyQualified()}).GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic).FirstOrDefault(m => m.Name == \"{methodName}\"), null, {isShared.ToString().ToLowerInvariant()})";
+    }
+
+    private static string GenerateParameterTypesArray(IMethodSymbol method)
+    {
+        if (method.Parameters.Length == 0)
+        {
+            return "System.Type.EmptyTypes";
+        }
+        
+        // Check if any parameter contains type parameters
+        if (method.Parameters.Any(p => ContainsTypeParameter(p.Type)))
+        {
+            // Return null to indicate that parameter type matching should be done at runtime
+            return "null";
+        }
+        
+        var parameterTypes = method.Parameters
+            .Select(p => $"typeof({p.Type.GloballyQualified()})")
+            .ToArray();
+            
+        return $"new System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
     }
 
     private static string GenerateClassDataSourceProvider(AttributeData attr)
