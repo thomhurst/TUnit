@@ -38,13 +38,15 @@ public sealed class StaticTestDefinition : ITestDescriptor
     
     /// <summary>
     /// Factory to create test class instances. Generated at compile time.
+    /// Takes constructor arguments array and returns typed instance.
     /// </summary>
-    public required Func<object?[], object> TestClassFactory { get; init; }
+    public required Func<object?[], object> ClassFactory { get; init; }
     
     /// <summary>
     /// Invoker for the test method. Generated at compile time.
+    /// Takes test instance and method arguments array, returns Task.
     /// </summary>
-    public required Func<object, object?[], ValueTask> TestMethodInvoker { get; init; }
+    public required Func<object, object?[], Task> MethodInvoker { get; init; }
     
     /// <summary>
     /// Provides class constructor arguments for each test iteration.
@@ -57,12 +59,17 @@ public sealed class StaticTestDefinition : ITestDescriptor
     public required Func<IEnumerable<object?[]>> MethodArgumentsProvider { get; init; }
     
     /// <summary>
-    /// Property setters for data-driven properties. Key is property name.
-    /// </summary>
-    public required IReadOnlyDictionary<string, Action<object, object?>> PropertySetters { get; init; }
-    
-    /// <summary>
     /// Provides property values for each test iteration. Key is property name.
     /// </summary>
     public required Func<IEnumerable<IDictionary<string, object?>>> PropertyValuesProvider { get; init; }
+    
+    /// <summary>
+    /// Data provider for class-level test data.
+    /// </summary>
+    public required IDataProvider ClassDataProvider { get; init; }
+    
+    /// <summary>
+    /// Data provider for method-level test data.
+    /// </summary>
+    public required IDataProvider MethodDataProvider { get; init; }
 }

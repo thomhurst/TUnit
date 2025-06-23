@@ -30,14 +30,12 @@ public class StaticTestBuilder : ITestDefinitionBuilder
     {
         var testDefinitions = new List<TestDefinition>();
         
-        // Get all test data combinations
-        var classArgsList = staticDef.ClassArgumentsProvider().ToList();
-        var methodArgsList = staticDef.MethodArgumentsProvider().ToList();
+        // Get all test data combinations from data providers
+        var classArgsList = (await staticDef.ClassDataProvider.GetData()).ToList();
+        var methodArgsList = (await staticDef.MethodDataProvider.GetData()).ToList();
         var propertyValuesList = staticDef.PropertyValuesProvider().ToList();
         
         // Default to single iteration if no data
-        if (!classArgsList.Any()) classArgsList.Add(Array.Empty<object?>());
-        if (!methodArgsList.Any()) methodArgsList.Add(Array.Empty<object?>());
         if (!propertyValuesList.Any()) propertyValuesList.Add(new Dictionary<string, object?>());
         
         var testIndex = 0;
@@ -91,30 +89,20 @@ public class StaticTestBuilder : ITestDefinitionBuilder
         // Build display name
         var displayName = BuildDisplayName(staticDef.DisplayName, methodArgs);
         
-        // Create test class factory that also sets properties
+        // Create test class factory
         Func<object> testClassFactory = () =>
         {
             // Use the pre-compiled factory from source generator
-            var instance = staticDef.TestClassFactory(classArgs);
+            var instance = staticDef.ClassFactory(classArgs);
             
-            // Apply property values using pre-compiled setters
-            if (instance != null && propertyValues.Any())
-            {
-                foreach (var (propertyName, value) in propertyValues)
-                {
-                    if (staticDef.PropertySetters.TryGetValue(propertyName, out var setter))
-                    {
-                        setter(instance, value);
-                    }
-                }
-            }
+            // TODO: Handle property setting if needed
             
             return instance!;
         };
         
         // Use the pre-compiled method invoker
         Func<object, CancellationToken, ValueTask> testMethodInvoker = 
-            (instance, ct) => staticDef.TestMethodInvoker(instance, methodArgs);
+            async (instance, ct) => await staticDef.MethodInvoker(instance, methodArgs);
         
         // Create metadata for the test method
         var methodMetadata = CreateMethodMetadata(staticDef);
