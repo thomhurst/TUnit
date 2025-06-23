@@ -147,7 +147,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
         }
         catch (Exception ex)
         {
-            // Report diagnostic instead of throwing
+            // Report diagnostic
             var diagnostic = Diagnostic.Create(
                 new DiagnosticDescriptor(
                     "TSG001",
@@ -161,7 +161,108 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 testInfo.MethodSymbol.Name,
                 ex.Message);
             context.ReportDiagnostic(diagnostic);
+            
+            // Generate a failure test metadata that will fail at runtime with the source generation error
+            GenerateFailureTestMetadata(context, testInfo, ex);
         }
+    }
+
+    private static void GenerateFailureTestMetadata(SourceProductionContext context, TestMethodInfo testInfo, Exception ex)
+    {
+        using var writer = new CodeWriter();
+        
+        var guid = Guid.NewGuid().ToString("N");
+        var className = GetFullTypeName(testInfo.TypeSymbol);
+        var methodName = testInfo.MethodSymbol.Name;
+        var safeClassName = SanitizeForFilename(className);
+        var safeMethodName = SanitizeForFilename(methodName);
+        
+        writer.AppendLine("#nullable enable");
+        writer.AppendLine("#pragma warning disable CS9113 // Parameter is unread.");
+        writer.AppendLine();
+        writer.AppendLine("using System;");
+        writer.AppendLine("using System.Collections.Generic;");
+        writer.AppendLine("using System.Linq;");
+        writer.AppendLine("using System.Reflection;");
+        writer.AppendLine("using System.Threading.Tasks;");
+        writer.AppendLine("using global::TUnit.Core;");
+        writer.AppendLine("using global::TUnit.Core.SourceGenerator;");
+        writer.AppendLine();
+        writer.AppendLine("namespace TUnit.Generated;");
+        
+        using (writer.BeginBlock($"internal static class TestMetadataRegistry_{safeClassName}_{safeMethodName}_Failure_{guid}"))
+        {
+            writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+            using (writer.BeginBlock("public static void Initialize()"))
+            {
+                writer.AppendLine("var testMetadata = new System.Collections.Generic.List<DynamicTestMetadata>();");
+                
+                using (writer.BeginObjectInitializer("var metadata = new DynamicTestMetadata"))
+                {
+                    writer.AppendLine($"TestIdTemplate = \"{className}.{methodName}_SourceGenerationFailure_{{{{TestIndex}}}}\",");
+                    writer.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
+                    writer.AppendLine($"TestClassType = typeof({className}),");
+                    
+                    // Generate a method metadata that will indicate this is a failure
+                    writer.AppendLine($"MethodMetadata = new global::TUnit.Core.MethodMetadata");
+                    writer.AppendLine("{");
+                    writer.AppendLine($"    Type = typeof({className}),");
+                    writer.AppendLine($"    TypeReference = {CodeGenerationHelpers.GenerateTypeReference(testInfo.TypeSymbol)},");
+                    writer.AppendLine($"    Name = \"{methodName}_SourceGenerationFailure\",");
+                    writer.AppendLine($"    GenericTypeCount = 0,");
+                    writer.AppendLine($"    ReturnType = typeof(global::System.Threading.Tasks.Task),");
+                    writer.AppendLine($"    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete(\"System.Threading.Tasks.Task, System.Private.CoreLib\"),");
+                    writer.AppendLine($"    Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }},");
+                    writer.AppendLine($"    Parameters = new global::TUnit.Core.ParameterMetadata[] {{ }},");
+                    writer.AppendLine($"    Class = {GenerateMinimalClassMetadata(testInfo.TypeSymbol)},");
+                    writer.AppendLine($"    ReflectionInformation = null");
+                    writer.AppendLine("},");
+                    
+                    writer.AppendLine($"TestFilePath = @\"{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
+                    writer.AppendLine($"TestLineNumber = {testInfo.LineNumber},");
+                    
+                    // Generate a factory that will throw the source generation exception
+                    var errorMessage = $"Source generation failed for test '{methodName}': {ex.GetType().Name}: {ex.Message.Replace("\"", "\\\"")}";
+                    writer.AppendLine($"TestClassFactory = args => throw new InvalidOperationException(\"{errorMessage}\"),");
+                    
+                    writer.AppendLine($"ClassDataSources = System.Array.Empty<global::TUnit.Core.IDataSourceProvider>(),");
+                    writer.AppendLine($"MethodDataSources = System.Array.Empty<global::TUnit.Core.IDataSourceProvider>(),");
+                    writer.AppendLine($"PropertyDataSources = new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>(),");
+                    writer.AppendLine($"DisplayNameTemplate = \"{methodName} [SOURCE GENERATION FAILED]\",");
+                    writer.AppendLine($"RepeatCount = 1,");
+                    writer.AppendLine($"IsAsync = true,");
+                    writer.AppendLine($"IsSkipped = true,");
+                    writer.AppendLine($"SkipReason = \"Source generation failed: {ex.Message.Replace("\"", "\\\"")}\",");
+                    writer.AppendLine($"Timeout = null");
+                }
+                
+                writer.AppendLine();
+                writer.AppendLine("testMetadata.Add(metadata);");
+                writer.AppendLine("TestSourceRegistrar.RegisterTests(testMetadata.Cast<ITestDescriptor>().ToList());");
+            }
+        }
+        
+        context.AddSource($"{safeClassName}_{safeMethodName}_Failure_{guid}.g.cs", writer.ToString());
+    }
+    
+    private static string GenerateMinimalClassMetadata(INamedTypeSymbol classSymbol)
+    {
+        using var writer = new CodeWriter("", includeHeader: false);
+        
+        writer.AppendLine("new global::TUnit.Core.ClassMetadata");
+        writer.AppendLine("{");
+        writer.AppendLine($"    Parent = null,");
+        writer.AppendLine($"    Type = typeof({GetFullTypeName(classSymbol)}),");
+        writer.AppendLine($"    TypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
+        writer.AppendLine($"    Assembly = new global::TUnit.Core.AssemblyMetadata {{ Name = \"{classSymbol.ContainingAssembly.Name}\", Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }} }},");
+        writer.AppendLine($"    Name = \"{classSymbol.Name}\",");
+        writer.AppendLine($"    Namespace = \"{classSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
+        writer.AppendLine($"    Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }},");
+        writer.AppendLine($"    Parameters = new global::TUnit.Core.ParameterMetadata[] {{ }},");
+        writer.AppendLine($"    Properties = new global::TUnit.Core.PropertyMetadata[] {{ }}");
+        writer.AppendLine("}");
+        
+        return writer.ToString().Trim();
     }
 
     private static bool DetermineIfStaticTestDefinition(TestMethodInfo testInfo)

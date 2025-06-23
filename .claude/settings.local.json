@@ -53,7 +53,8 @@
       "Bash(true)",
       "Bash(/home/thomh/dev/TUnit/update_test_assertions.sh:*)",
       "Bash(./bin/Release/net8.0/Playground:*)",
-      "mcp__zen__version"
+      "mcp__zen__version",
+      "Bash(awk:*)"
     ],
     "deny": []
   }
