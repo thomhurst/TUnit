@@ -18,25 +18,34 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 		global::TUnit.Core.SourceRegistrar.Register(new Inherited_DerivedTest());
 	}
 
-	public async global::System.Threading.Tasks.Task<global::System.Collections.Generic.IReadOnlyList<TestMetadata>> CollectTestsAsync(string sessionId)
+	public async global::System.Threading.Tasks.Task<global::TUnit.Core.DiscoveryResult> DiscoverTestsAsync(string sessionId)
 	{
-		var results = new global::System.Collections.Generic.List<TestMetadata>();
-		results.AddRange(await Tests0(sessionId));
-		results.AddRange(await Tests1(sessionId));
-		results.AddRange(await Tests2(sessionId));
-		results.AddRange(await Tests3(sessionId));
-		results.AddRange(await Tests4(sessionId));
-		return results;
+		var testDefinitions = new global::System.Collections.Generic.List<global::TUnit.Core.ITestDefinition>();
+		var discoveryFailures = new global::System.Collections.Generic.List<global::TUnit.Core.DiscoveryFailure>();
+		var result0 = await Tests0(sessionId);
+		testDefinitions.AddRange(result0.TestDefinitions);
+		discoveryFailures.AddRange(result0.DiscoveryFailures);
+		var result1 = await Tests1(sessionId);
+		testDefinitions.AddRange(result1.TestDefinitions);
+		discoveryFailures.AddRange(result1.DiscoveryFailures);
+		var result2 = await Tests2(sessionId);
+		testDefinitions.AddRange(result2.TestDefinitions);
+		discoveryFailures.AddRange(result2.DiscoveryFailures);
+		var result3 = await Tests3(sessionId);
+		testDefinitions.AddRange(result3.TestDefinitions);
+		discoveryFailures.AddRange(result3.DiscoveryFailures);
+		return new global::TUnit.Core.DiscoveryResult { TestDefinitions = testDefinitions, DiscoveryFailures = discoveryFailures };
 	}
 
-	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests0(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::TUnit.Core.DiscoveryResult> Tests0(string sessionId)
 	{
-		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var testDefinitions = new global::System.Collections.Generic.List<global::TUnit.Core.ITestDefinition>();
+		var discoveryFailures = new global::System.Collections.Generic.List<global::TUnit.Core.DiscoveryFailure>();
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.TestMethod
+			var testInformation = new global::TUnit.Core.MethodMetadata
 			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 				Name = "Test1",
@@ -46,28 +55,69 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				[
 				],
 				Parameters = [],
-				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.TestClass
+				Class = global::TUnit.Core.ClassMetadata.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.ClassMetadata
 				{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Tests1889", () => new global::TUnit.Core.TestAssembly
+					Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("Tests1889", () => new global::TUnit.Core.AssemblyMetadata
 					{
 						Name = "Tests1889",
 						Attributes = 
 						[
-							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							new global::TUnit.Core.AttributeMetadata
+							{
+								Instance = new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute(),
+								TargetElement = global::TUnit.Core.TestAttributeTarget.Assembly,
+								TargetMemberName = "Tests1889",
+							}
+
 						],
 					}),
 					Name = "DerivedTest",
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
-						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+						new global::TUnit.Core.AttributeMetadata
+						{
+							Instance = new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+							TargetElement = global::TUnit.Core.TestAttributeTarget.Class,
+							TargetMemberName = "DerivedTest",
+							TargetType = typeof(TUnit.TestProject.Bugs._1889.DerivedTest),
+							ConstructorArguments = new object?[]
+							{
+								(global::TUnit.TestProject.Attributes.ExpectedResult)(0),
+							}
+							,
+						}
+						,
 
-						new global::TUnit.Core.InheritsTestsAttribute()
+						new global::TUnit.Core.AttributeMetadata
+						{
+							Instance = new global::TUnit.Core.InheritsTestsAttribute(),
+							TargetElement = global::TUnit.Core.TestAttributeTarget.Class,
+							TargetMemberName = "DerivedTest",
+							TargetType = typeof(TUnit.TestProject.Bugs._1889.DerivedTest),
+						}
+
 					],
 					Parameters = [],
 					Properties = [],
+					Constructors = 
+					[
+						new global::TUnit.Core.ConstructorMetadata
+						{
+							Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+							Name = ".ctor",
+							IsStatic = false,
+							IsPublic = true,
+							IsPrivate = false,
+							IsProtected = false,
+							IsInternal = false,
+							Attributes = [],
+							Parameters = [],
+						}
+						,
+					],
 				}),
 			};
 
@@ -76,7 +126,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 			{
 				TestMethodName = "Test1",
 				ClassInformation = testInformation.Class,
-				MethodInformation = testInformation			};
+				MethodInformation = testInformation
+			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -86,51 +137,52 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+			testDefinitions.Add(new TestDefinition<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 			{
 				TestId = $"TUnit.TestProject.Bugs._1889.DerivedTest.Test1:0",
-				TestClassArguments = [],
-				TestMethodArguments = [],
-				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-				{
-				},
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
+				MethodMetadata = testInformation,
+				RepeatCount = 0,
 				TestLineNumber = 5,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
+				TestClassFactory = () => resettableClassFactory.Value,
+				TestMethodInvoker = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
+				ClassArgumentsProvider = () => new object?[] {  },
+				MethodArgumentsProvider = () => new object?[] {  },
+				PropertiesProvider = () => new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				}
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
 			testBuilderContext = new global::TUnit.Core.TestBuilderContext
 			{
 				TestMethodName = "Test1",
 				ClassInformation = testInformation.Class,
-				MethodInformation = testInformation			};
+				MethodInformation = testInformation
+			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+			discoveryFailures.Add(new DiscoveryFailure
 			{
 				TestId = $"TUnit.TestProject.Bugs._1889.DerivedTest.Test1:0",
-				MethodName = $"Test1",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test1 failed to initialize", exception),
 				TestLineNumber = 5,
+				TestClassName = "DerivedTest",
+				TestMethodName = "Test1"
 			});
 		}
-		return nodes;
+		return new global::TUnit.Core.DiscoveryResult { TestDefinitions = testDefinitions, DiscoveryFailures = discoveryFailures };
 	}
 
-	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests1(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::TUnit.Core.DiscoveryResult> Tests1(string sessionId)
 	{
-		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var testDefinitions = new global::System.Collections.Generic.List<global::TUnit.Core.ITestDefinition>();
+		var discoveryFailures = new global::System.Collections.Generic.List<global::TUnit.Core.DiscoveryFailure>();
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.TestMethod
+			var testInformation = new global::TUnit.Core.MethodMetadata
 			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 				Name = "Test2",
@@ -141,35 +193,77 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.TestParameter<bool>
+					new global::TUnit.Core.ParameterMetadata<bool>
 					{
 						Name = "condition",
 						Attributes = [],
 						ReflectionInfo = null!,
-					},
+					}
+					,
 				],
-				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.TestClass
+				Class = global::TUnit.Core.ClassMetadata.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.ClassMetadata
 				{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Tests1889", () => new global::TUnit.Core.TestAssembly
+					Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("Tests1889", () => new global::TUnit.Core.AssemblyMetadata
 					{
 						Name = "Tests1889",
 						Attributes = 
 						[
-							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							new global::TUnit.Core.AttributeMetadata
+							{
+								Instance = new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute(),
+								TargetElement = global::TUnit.Core.TestAttributeTarget.Assembly,
+								TargetMemberName = "Tests1889",
+							}
+
 						],
 					}),
 					Name = "DerivedTest",
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
-						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+						new global::TUnit.Core.AttributeMetadata
+						{
+							Instance = new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+							TargetElement = global::TUnit.Core.TestAttributeTarget.Class,
+							TargetMemberName = "DerivedTest",
+							TargetType = typeof(TUnit.TestProject.Bugs._1889.DerivedTest),
+							ConstructorArguments = new object?[]
+							{
+								(global::TUnit.TestProject.Attributes.ExpectedResult)(0),
+							}
+							,
+						}
+						,
 
-						new global::TUnit.Core.InheritsTestsAttribute()
+						new global::TUnit.Core.AttributeMetadata
+						{
+							Instance = new global::TUnit.Core.InheritsTestsAttribute(),
+							TargetElement = global::TUnit.Core.TestAttributeTarget.Class,
+							TargetMemberName = "DerivedTest",
+							TargetType = typeof(TUnit.TestProject.Bugs._1889.DerivedTest),
+						}
+
 					],
 					Parameters = [],
 					Properties = [],
+					Constructors = 
+					[
+						new global::TUnit.Core.ConstructorMetadata
+						{
+							Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+							Name = ".ctor",
+							IsStatic = false,
+							IsPublic = true,
+							IsPrivate = false,
+							IsProtected = false,
+							IsInternal = false,
+							Attributes = [],
+							Parameters = [],
+						}
+						,
+					],
 				}),
 			};
 
@@ -178,7 +272,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 			{
 				TestMethodName = "Test2",
 				ClassInformation = testInformation.Class,
-				MethodInformation = testInformation			};
+				MethodInformation = testInformation
+			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -189,12 +284,13 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				TestInformation = testInformation,
 				MembersToGenerate = 
 				[
-					new global::TUnit.Core.TestParameter<bool>
+					new global::TUnit.Core.ParameterMetadata<bool>
 					{
 						Name = "condition",
 						Attributes = [],
 						ReflectionInfo = null!,
-					},
+					}
+					,
 				],
 				TestSessionId = sessionId,
 				TestClassInstance = classInstance,
@@ -205,7 +301,7 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 
 			testBuilderContext.DataAttributes.Add(methodDataAttribute);
 
-			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
+			var methodArgGeneratedDataArray = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute).GenerateAsync(methodArgDataGeneratorMetadata);
 
 			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
@@ -218,185 +314,53 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+				testDefinitions.Add(new TestDefinition<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 				{
 					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1889.DerivedTest.Test2(bool):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg],
-					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-					{
-					},
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg)),
+					MethodMetadata = testInformation,
+					RepeatCount = 0,
 					TestLineNumber = 10,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
+					TestClassFactory = () => resettableClassFactory.Value,
+					TestMethodInvoker = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg)),
+					ClassArgumentsProvider = () => new object?[] {  },
+					MethodArgumentsProvider = () => new object?[] { methodArg },
+					PropertiesProvider = () => new global::System.Collections.Generic.Dictionary<string, object?>
+					{
+					}
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
 				testBuilderContext = new global::TUnit.Core.TestBuilderContext
 				{
 					TestMethodName = "Test2",
 					ClassInformation = testInformation.Class,
-					MethodInformation = testInformation				};
+					MethodInformation = testInformation
+				};
 				testBuilderContextAccessor.Current = testBuilderContext;
 			}
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+			discoveryFailures.Add(new DiscoveryFailure
 			{
 				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1889.DerivedTest.Test2(bool):0",
-				MethodName = $"Test2",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test2 failed to initialize", exception),
 				TestLineNumber = 10,
+				TestClassName = "DerivedTest",
+				TestMethodName = "Test2"
 			});
 		}
-		return nodes;
+		return new global::TUnit.Core.DiscoveryResult { TestDefinitions = testDefinitions, DiscoveryFailures = discoveryFailures };
 	}
 
-	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests2(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::TUnit.Core.DiscoveryResult> Tests2(string sessionId)
 	{
-		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var testDefinitions = new global::System.Collections.Generic.List<global::TUnit.Core.ITestDefinition>();
+		var discoveryFailures = new global::System.Collections.Generic.List<global::TUnit.Core.DiscoveryFailure>();
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.TestMethod
-			{
-				Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-				Name = "Test2",
-				GenericTypeCount = 0,
-				ReturnType = typeof(void),
-				Attributes = 
-				[
-				],
-				Parameters = 
-				[
-					new global::TUnit.Core.TestParameter<bool>
-					{
-						Name = "condition",
-						Attributes = [],
-						ReflectionInfo = null!,
-					},
-				],
-				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.TestClass
-				{
-					Parent = null,
-					Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Tests1889", () => new global::TUnit.Core.TestAssembly
-					{
-						Name = "Tests1889",
-						Attributes = 
-						[
-							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
-						],
-					}),
-					Name = "DerivedTest",
-					Namespace = "TUnit.TestProject.Bugs._1889",
-					Attributes = 
-					[
-						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-
-						new global::TUnit.Core.InheritsTestsAttribute()
-					],
-					Parameters = [],
-					Properties = [],
-				}),
-			};
-
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext
-			{
-				TestMethodName = "Test2",
-				ClassInformation = testInformation.Class,
-				MethodInformation = testInformation			};
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
-			object?[]? classInstanceArguments = null;
-			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
-			{
-				Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-				TestBuilderContext = testBuilderContextAccessor,
-				TestInformation = testInformation,
-				MembersToGenerate = 
-				[
-					new global::TUnit.Core.TestParameter<bool>
-					{
-						Name = "condition",
-						Attributes = [],
-						ReflectionInfo = null!,
-					},
-				],
-				TestSessionId = sessionId,
-				TestClassInstance = classInstance,
-				ClassInstanceArguments = classInstanceArguments,
-			};
-			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute();
-
-
-			testBuilderContext.DataAttributes.Add(methodDataAttribute);
-
-			var methodArgGeneratedDataArray = global::TUnit.Core.Helpers.AsyncDataSourceHelper.WrapAsyncEnumerable(((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)methodDataAttribute), methodArgDataGeneratorMetadata);
-
-			await foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
-			{
-				testMethodDataIndex++;
-				classInstanceArguments = [];
-
-				var methodArgGeneratedData = await methodArgGeneratedDataAccessor();
-				bool methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[0]);
-				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1889.DerivedTest>(() => new global::TUnit.TestProject.Bugs._1889.DerivedTest(), sessionId, testBuilderContext);
-				var resettableClassFactory = resettableClassFactoryDelegate();
-
-
-				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
-				{
-					TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1889.DerivedTest.Test2(bool):0",
-					TestClassArguments = [],
-					TestMethodArguments = [methodArg],
-					TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-					{
-					},
-					CurrentRepeatAttempt = 0,
-					RepeatLimit = 0,
-					ResettableClassFactory = resettableClassFactory,
-					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test2(methodArg)),
-					TestLineNumber = 10,
-					TestMethod = testInformation,
-					TestBuilderContext = testBuilderContext,
-				});
-				resettableClassFactory = resettableClassFactoryDelegate();
-				testBuilderContext = new global::TUnit.Core.TestBuilderContext
-				{
-					TestMethodName = "Test2",
-					ClassInformation = testInformation.Class,
-					MethodInformation = testInformation				};
-				testBuilderContextAccessor.Current = testBuilderContext;
-			}
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
-			{
-				TestId = $"global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.Bugs._1889.DerivedTest.Test2(bool):0",
-				MethodName = $"Test2",
-				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test2 failed to initialize", exception),
-				TestLineNumber = 10,
-			});
-		}
-		return nodes;
-	}
-
-	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests3(string sessionId)
-	{
-		global::System.Collections.Generic.List<TestMetadata> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testInformation = new global::TUnit.Core.TestMethod
+			var testInformation = new global::TUnit.Core.MethodMetadata
 			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 				Name = "Test3",
@@ -407,35 +371,77 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.TestParameter<bool>
+					new global::TUnit.Core.ParameterMetadata<bool>
 					{
 						Name = "condition",
 						Attributes = [],
 						ReflectionInfo = null!,
-					},
+					}
+					,
 				],
-				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.TestClass
+				Class = global::TUnit.Core.ClassMetadata.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.ClassMetadata
 				{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Tests1889", () => new global::TUnit.Core.TestAssembly
+					Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("Tests1889", () => new global::TUnit.Core.AssemblyMetadata
 					{
 						Name = "Tests1889",
 						Attributes = 
 						[
-							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							new global::TUnit.Core.AttributeMetadata
+							{
+								Instance = new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute(),
+								TargetElement = global::TUnit.Core.TestAttributeTarget.Assembly,
+								TargetMemberName = "Tests1889",
+							}
+
 						],
 					}),
 					Name = "DerivedTest",
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
-						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+						new global::TUnit.Core.AttributeMetadata
+						{
+							Instance = new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+							TargetElement = global::TUnit.Core.TestAttributeTarget.Class,
+							TargetMemberName = "DerivedTest",
+							TargetType = typeof(TUnit.TestProject.Bugs._1889.DerivedTest),
+							ConstructorArguments = new object?[]
+							{
+								(global::TUnit.TestProject.Attributes.ExpectedResult)(0),
+							}
+							,
+						}
+						,
 
-						new global::TUnit.Core.InheritsTestsAttribute()
+						new global::TUnit.Core.AttributeMetadata
+						{
+							Instance = new global::TUnit.Core.InheritsTestsAttribute(),
+							TargetElement = global::TUnit.Core.TestAttributeTarget.Class,
+							TargetMemberName = "DerivedTest",
+							TargetType = typeof(TUnit.TestProject.Bugs._1889.DerivedTest),
+						}
+
 					],
 					Parameters = [],
 					Properties = [],
+					Constructors = 
+					[
+						new global::TUnit.Core.ConstructorMetadata
+						{
+							Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+							Name = ".ctor",
+							IsStatic = false,
+							IsPublic = true,
+							IsPrivate = false,
+							IsProtected = false,
+							IsInternal = false,
+							Attributes = [],
+							Parameters = [],
+						}
+						,
+					],
 				}),
 			};
 
@@ -444,7 +450,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 			{
 				TestMethodName = "Test3",
 				ClassInformation = testInformation.Class,
-				MethodInformation = testInformation			};
+				MethodInformation = testInformation
+			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -456,51 +463,52 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+			testDefinitions.Add(new TestDefinition<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1889.DerivedTest.Test3(bool):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-				{
-				},
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg)),
+				MethodMetadata = testInformation,
+				RepeatCount = 0,
 				TestLineNumber = 16,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
+				TestClassFactory = () => resettableClassFactory.Value,
+				TestMethodInvoker = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg)),
+				ClassArgumentsProvider = () => new object?[] {  },
+				MethodArgumentsProvider = () => new object?[] { methodArg },
+				PropertiesProvider = () => new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				}
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
 			testBuilderContext = new global::TUnit.Core.TestBuilderContext
 			{
 				TestMethodName = "Test3",
 				ClassInformation = testInformation.Class,
-				MethodInformation = testInformation			};
+				MethodInformation = testInformation
+			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+			discoveryFailures.Add(new DiscoveryFailure
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1889.DerivedTest.Test3(bool):0",
-				MethodName = $"Test3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test3 failed to initialize", exception),
 				TestLineNumber = 16,
+				TestClassName = "DerivedTest",
+				TestMethodName = "Test3"
 			});
 		}
-		return nodes;
+		return new global::TUnit.Core.DiscoveryResult { TestDefinitions = testDefinitions, DiscoveryFailures = discoveryFailures };
 	}
 
-	private async global::System.Threading.Tasks.Task<global::System.Collections.Generic.List<TestMetadata>> Tests4(string sessionId)
+	private async global::System.Threading.Tasks.Task<global::TUnit.Core.DiscoveryResult> Tests3(string sessionId)
 	{
-		global::System.Collections.Generic.List<TestMetadata> nodes = [];
+		var testDefinitions = new global::System.Collections.Generic.List<global::TUnit.Core.ITestDefinition>();
+		var discoveryFailures = new global::System.Collections.Generic.List<global::TUnit.Core.DiscoveryFailure>();
 		var classDataIndex = 0;
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testInformation = new global::TUnit.Core.TestMethod
+			var testInformation = new global::TUnit.Core.MethodMetadata
 			{
 				Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
 				Name = "Test3",
@@ -511,35 +519,77 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 				],
 				Parameters = 
 				[
-					new global::TUnit.Core.TestParameter<bool>
+					new global::TUnit.Core.ParameterMetadata<bool>
 					{
 						Name = "condition",
 						Attributes = [],
 						ReflectionInfo = null!,
-					},
+					}
+					,
 				],
-				Class = global::TUnit.Core.TestClass.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.TestClass
+				Class = global::TUnit.Core.ClassMetadata.GetOrAdd("global::TUnit.TestProject.Bugs._1889.DerivedTest", () => new global::TUnit.Core.ClassMetadata
 				{
 					Parent = null,
 					Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-					Assembly = global::TUnit.Core.TestAssembly.GetOrAdd("Tests1889", () => new global::TUnit.Core.TestAssembly
+					Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("Tests1889", () => new global::TUnit.Core.AssemblyMetadata
 					{
 						Name = "Tests1889",
 						Attributes = 
 						[
-							new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+							new global::TUnit.Core.AttributeMetadata
+							{
+								Instance = new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute(),
+								TargetElement = global::TUnit.Core.TestAttributeTarget.Assembly,
+								TargetMemberName = "Tests1889",
+							}
+
 						],
 					}),
 					Name = "DerivedTest",
 					Namespace = "TUnit.TestProject.Bugs._1889",
 					Attributes = 
 					[
-						new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+						new global::TUnit.Core.AttributeMetadata
+						{
+							Instance = new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+							TargetElement = global::TUnit.Core.TestAttributeTarget.Class,
+							TargetMemberName = "DerivedTest",
+							TargetType = typeof(TUnit.TestProject.Bugs._1889.DerivedTest),
+							ConstructorArguments = new object?[]
+							{
+								(global::TUnit.TestProject.Attributes.ExpectedResult)(0),
+							}
+							,
+						}
+						,
 
-						new global::TUnit.Core.InheritsTestsAttribute()
+						new global::TUnit.Core.AttributeMetadata
+						{
+							Instance = new global::TUnit.Core.InheritsTestsAttribute(),
+							TargetElement = global::TUnit.Core.TestAttributeTarget.Class,
+							TargetMemberName = "DerivedTest",
+							TargetType = typeof(TUnit.TestProject.Bugs._1889.DerivedTest),
+						}
+
 					],
 					Parameters = [],
 					Properties = [],
+					Constructors = 
+					[
+						new global::TUnit.Core.ConstructorMetadata
+						{
+							Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+							Name = ".ctor",
+							IsStatic = false,
+							IsPublic = true,
+							IsPrivate = false,
+							IsProtected = false,
+							IsInternal = false,
+							Attributes = [],
+							Parameters = [],
+						}
+						,
+					],
 				}),
 			};
 
@@ -548,7 +598,8 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 			{
 				TestMethodName = "Test3",
 				ClassInformation = testInformation.Class,
-				MethodInformation = testInformation			};
+				MethodInformation = testInformation
+			};
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 			global::TUnit.TestProject.Bugs._1889.DerivedTest? classInstance = null;
 			object?[]? classInstanceArguments = null;
@@ -560,41 +611,41 @@ file partial class Inherited_DerivedTest : global::TUnit.Core.Interfaces.SourceG
 			var resettableClassFactory = resettableClassFactoryDelegate();
 
 
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+			testDefinitions.Add(new TestDefinition<global::TUnit.TestProject.Bugs._1889.DerivedTest>
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1889.DerivedTest.Test3(bool):0",
-				TestClassArguments = [],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = new global::System.Collections.Generic.Dictionary<string, object?>
-				{
-				},
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg)),
+				MethodMetadata = testInformation,
+				RepeatCount = 0,
 				TestLineNumber = 16,
-				TestMethod = testInformation,
-				TestBuilderContext = testBuilderContext,
+				TestClassFactory = () => resettableClassFactory.Value,
+				TestMethodInvoker = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test3(methodArg)),
+				ClassArgumentsProvider = () => new object?[] {  },
+				MethodArgumentsProvider = () => new object?[] { methodArg },
+				PropertiesProvider = () => new global::System.Collections.Generic.Dictionary<string, object?>
+				{
+				}
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
 			testBuilderContext = new global::TUnit.Core.TestBuilderContext
 			{
 				TestMethodName = "Test3",
 				ClassInformation = testInformation.Class,
-				MethodInformation = testInformation			};
+				MethodInformation = testInformation
+			};
 			testBuilderContextAccessor.Current = testBuilderContext;
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedTestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+			discoveryFailures.Add(new DiscoveryFailure
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1889.DerivedTest.Test3(bool):0",
-				MethodName = $"Test3",
 				Exception = new TUnit.Core.Exceptions.TestFailedInitializationException("DerivedTest.Test3 failed to initialize", exception),
 				TestLineNumber = 16,
+				TestClassName = "DerivedTest",
+				TestMethodName = "Test3"
 			});
 		}
-		return nodes;
+		return new global::TUnit.Core.DiscoveryResult { TestDefinitions = testDefinitions, DiscoveryFailures = discoveryFailures };
 	}
 
 }

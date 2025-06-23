@@ -7,6 +7,7 @@ file static class AssemblyLoader_Guid
 	public static void Initialize()
 	{
 		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("AssemblyLoaderTests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"));
+		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("JetBrains.Microsoft.Extensions.DotNetDeltaApplier, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"));
 		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("TUnit.Engine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b8d4030011dbd70c"));
 		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("Argon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=00a55352ff068a54"));
 		global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load("DiffEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090"));
