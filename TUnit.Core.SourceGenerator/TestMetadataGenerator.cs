@@ -172,7 +172,7 @@ public class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"Timeout = null,");
                 writer.AppendLine($"RepeatCount = 1,");
                 writer.AppendLine($"TestClassType = typeof({context.ClassName}),");
-                writer.AppendLine($"TestMethodInfo = null,");
+                writer.AppendLine($"TestMethodMetadata = {GenerateFailureMethodMetadataInline(context)},");
                 writer.AppendLine($"ClassFactory = args => throw new InvalidOperationException(errorMessage),");
                 writer.AppendLine($"MethodInvoker = async (instance, args, cancellationToken) => {{ await Task.CompletedTask; throw new InvalidOperationException(errorMessage); }},");
                 writer.AppendLine($"PropertyValuesProvider = () => new[] {{ new System.Collections.Generic.Dictionary<string, object?>() }},");
@@ -278,5 +278,47 @@ public class TestMetadataGenerator : IIncrementalGenerator
         {
             // If we can't even generate the failure test, just swallow the exception
         }
+    }
+
+    private static string GenerateFailureMethodMetadataInline(TestMetadataGenerationContext context)
+    {
+        var assemblyQualifiedName = $"{context.ClassName}, {context.TestInfo.TypeSymbol.ContainingAssembly.Name}";
+        
+        // Generate inline metadata using the same pattern as FailureTestBuilder
+        using var writer = new CodeWriter("", includeHeader: false);
+        
+        using (writer.BeginObjectInitializer("new global::TUnit.Core.MethodMetadata", ""))
+        {
+            writer.AppendLine($"Type = typeof({context.ClassName}),");
+            writer.AppendLine($"TypeReference = global::TUnit.Core.TypeReference.CreateConcrete(\"{assemblyQualifiedName}\"),");
+            writer.AppendLine($"Name = \"{context.MethodName}_RuntimeFailure\",");
+            writer.AppendLine($"GenericTypeCount = 0,");
+            writer.AppendLine($"ReturnType = typeof(global::System.Threading.Tasks.Task),");
+            writer.AppendLine($"ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete(\"System.Threading.Tasks.Task, System.Private.CoreLib\"),");
+            writer.AppendLine($"Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }},");
+            writer.AppendLine($"Parameters = new global::TUnit.Core.ParameterMetadata[] {{ }},");
+            
+            using (writer.BeginObjectInitializer("Class = new global::TUnit.Core.ClassMetadata", ","))
+            {
+                writer.AppendLine($"Name = \"{context.TestInfo.TypeSymbol.Name}\",");
+                writer.AppendLine($"Type = typeof({context.ClassName}),");
+                writer.AppendLine($"TypeReference = global::TUnit.Core.TypeReference.CreateConcrete(\"{assemblyQualifiedName}\"),");
+                writer.AppendLine($"Namespace = \"{context.TestInfo.TypeSymbol.ContainingNamespace.ToDisplayString()}\",");
+                writer.AppendLine($"Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }},");
+                writer.AppendLine($"Properties = new global::TUnit.Core.PropertyMetadata[] {{ }},");
+                writer.AppendLine($"Parameters = new global::TUnit.Core.ParameterMetadata[] {{ }},");
+                writer.AppendLine($"Parent = null,");
+                
+                writer.AppendLine($"Assembly = new global::TUnit.Core.AssemblyMetadata");
+                writer.AppendLine("{");
+                writer.AppendLine($"    Name = \"{context.TestInfo.TypeSymbol.ContainingAssembly.Name}\",");
+                writer.AppendLine($"    Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }}");
+                writer.AppendLine("}");
+            }
+            
+            writer.AppendLine($"ReflectionInformation = null");
+        }
+        
+        return writer.ToString().Trim();
     }
 }

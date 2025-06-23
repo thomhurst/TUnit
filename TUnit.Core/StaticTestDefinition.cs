@@ -32,9 +32,9 @@ public sealed class StaticTestDefinition : ITestDescriptor
     public required Type TestClassType { get; init; }
     
     /// <summary>
-    /// The test method info. Always known at compile time for static tests.
+    /// The test method metadata. Always known at compile time for static tests.
     /// </summary>
-    public required MethodInfo TestMethodInfo { get; init; }
+    public required MethodMetadata TestMethodMetadata { get; init; }
     
     /// <summary>
     /// Factory to create test class instances. Generated at compile time.

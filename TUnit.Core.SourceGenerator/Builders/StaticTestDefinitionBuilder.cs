@@ -103,7 +103,7 @@ internal class StaticTestDefinitionBuilder : ITestDefinitionBuilder
             writer.AppendLine($"Timeout = {CodeGenerationHelpers.ExtractTimeout(testInfo.MethodSymbol)},");
             writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testInfo.MethodSymbol)},");
             writer.AppendLine($"TestClassType = typeof({context.ClassName}),");
-            writer.AppendLine($"TestMethodInfo = typeof({context.ClassName}).GetMethod(\"{context.MethodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, {GenerateParameterTypesArray(testInfo.MethodSymbol)}, null)!,");
+            writer.AppendLine($"TestMethodMetadata = {GenerateMethodMetadataUsingWriter(testInfo, context)},");
 
             // Generate class factory with CastHelper
             writer.AppendLine($"ClassFactory = {GenerateStaticClassFactory(context)},");
@@ -291,5 +291,17 @@ internal class StaticTestDefinitionBuilder : ITestDefinitionBuilder
     private static string GetDefaultValueForType(ITypeSymbol type)
     {
         return $"default({type.GloballyQualified()})";
+    }
+
+    private static string GenerateMethodMetadataUsingWriter(TestMethodInfo testInfo, TestMetadataGenerationContext context)
+    {
+        using var writer = new CodeWriter("", includeHeader: false);
+        
+        // Use the existing writer to generate the metadata
+        SourceInformationWriter.GenerateMethodInformation(writer, testInfo.Context, testInfo.TypeSymbol, testInfo.MethodSymbol, null, ',');
+        
+        // Remove the trailing comma and newline
+        var result = writer.ToString().TrimEnd('\r', '\n', ',');
+        return result;
     }
 }

@@ -57,33 +57,7 @@ public class StaticTestBuilder : ITestDefinitionBuilder
     
     private static MethodMetadata CreateMethodMetadata(StaticTestDefinition staticDef)
     {
-        return new MethodMetadata
-        {
-            Name = staticDef.TestMethodInfo.Name,
-            ReflectionInformation = staticDef.TestMethodInfo,
-            Parameters = Array.Empty<ParameterMetadata>(),
-            GenericTypeCount = 0,
-            Class = new ClassMetadata 
-            { 
-                Type = staticDef.TestClassType,
-                Name = staticDef.TestClassType.Name,
-                Namespace = staticDef.TestClassType.Namespace ?? string.Empty,
-                TypeReference = TypeReference.CreateConcrete(staticDef.TestClassType.AssemblyQualifiedName!),
-                Assembly = new AssemblyMetadata
-                {
-                    Name = staticDef.TestClassType.Assembly.GetName().Name ?? string.Empty,
-                    Attributes = Array.Empty<AttributeMetadata>()
-                },
-                Parameters = Array.Empty<ParameterMetadata>(),
-                Properties = Array.Empty<PropertyMetadata>(),
-                Parent = null,
-                Attributes = Array.Empty<AttributeMetadata>()
-            },
-            ReturnTypeReference = TypeReference.CreateConcrete(staticDef.TestMethodInfo.ReturnType.AssemblyQualifiedName!),
-            ReturnType = staticDef.TestMethodInfo.ReturnType,
-            TypeReference = TypeReference.CreateConcrete(staticDef.TestClassType.AssemblyQualifiedName!),
-            Type = staticDef.TestClassType,
-            Attributes = Array.Empty<AttributeMetadata>()
-        };
+        // Simply return the pre-built metadata from the static definition
+        return staticDef.TestMethodMetadata;
     }
 }
