@@ -17,7 +17,7 @@ public class DiscoveredTestContext : TestContext
         if (!string.IsNullOrWhiteSpace(category) && !_categories.Contains(category))
         {
             _categories.Add(category);
-            if (TestDetails != null && !TestDetails.Categories.Contains(category))
+            if (!TestDetails.Categories.Contains(category))
             {
                 TestDetails.Categories.Add(category);
             }
@@ -26,15 +26,12 @@ public class DiscoveredTestContext : TestContext
     
     public void AddProperty(string key, string value)
     {
-        if (TestDetails != null)
+        if (!TestDetails.CustomProperties.TryGetValue(key, out var values))
         {
-            if (!TestDetails.CustomProperties.TryGetValue(key, out var values))
-            {
-                values = new List<string>();
-                TestDetails.CustomProperties[key] = values;
-            }
-            values.Add(value);
+            values = new List<string>();
+            TestDetails.CustomProperties[key] = values;
         }
+        values.Add(value);
     }
     
     public void SetProperty(string key, string value)
@@ -49,18 +46,12 @@ public class DiscoveredTestContext : TestContext
     
     public void SetDisplayName(string displayName)
     {
-        if (TestDetails != null)
-        {
-            TestDetails.DisplayName = displayName;
-        }
+        TestDetails.DisplayName = displayName;
     }
     
     public void SetRetryLimit(int retryLimit)
     {
-        if (TestDetails != null)
-        {
-            TestDetails.RetryLimit = retryLimit;
-        }
+        TestDetails.RetryLimit = retryLimit;
     }
     
     public void SetRetryCount(int retryCount, Func<TestContext, Exception, int, Task<bool>> shouldRetry)

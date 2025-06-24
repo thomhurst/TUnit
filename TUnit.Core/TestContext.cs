@@ -95,7 +95,7 @@ public class TestContext
     /// <summary>
     /// Test details - simplified for new architecture
     /// </summary>
-    public TestDetails? TestDetails { get; set; }
+    public TestDetails TestDetails { get; set; } = null!;
     
     /// <summary>
     /// Test result

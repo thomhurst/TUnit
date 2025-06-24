@@ -38,7 +38,7 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     public ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
-            () => Body!.Invoke(context.TestDetails?.ClassInstance ?? throw new InvalidOperationException("ClassInstance is null"), context, cancellationToken)
+            () => Body!.Invoke(context.TestDetails.ClassInstance ?? throw new InvalidOperationException("ClassInstance is null"), context, cancellationToken)
         );
     }
 }

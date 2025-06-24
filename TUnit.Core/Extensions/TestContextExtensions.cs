@@ -22,7 +22,7 @@ public static class TestContextExtensions
     /// </summary>
     public static string GetClassTypeName(this TestContext context)
     {
-        return context.TestDetails?.ClassType?.Name ?? "Unknown";
+        return context.TestDetails.ClassType.Name;
     }
     
     /// <summary>
