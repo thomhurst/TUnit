@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -32,9 +33,9 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
         ConstraintKeys = constraintKeys;
     }
 
-    public ValueTask OnTestDiscovered(TestContext testContext)
+    public ValueTask OnTestDiscovered(TestDiscoveryContext context)
     {
-        testContext.SetParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
+        context.SetParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
         {
             Order = Order
         });

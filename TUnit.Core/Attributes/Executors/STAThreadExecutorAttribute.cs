@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Versioning;
+using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Executors;
@@ -9,12 +10,10 @@ public class STAThreadExecutorAttribute : TUnitAttribute, ITestRegisteredEventRe
 {
     public int Order => 0;
 
-    public ValueTask OnTestRegistered(TestContext context)
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         var executor = new STAThreadExecutor();
-
-        context.InternalDiscoveredTest!.TestExecutor = executor;
-
+        context.SetTestExecutor(executor);
         return default;
     }
 }

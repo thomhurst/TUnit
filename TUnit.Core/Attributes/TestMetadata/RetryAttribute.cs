@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -93,9 +94,9 @@ public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
 
 
     /// <inheritdoc />
-    public ValueTask OnTestDiscovered(TestContext testContext)
+    public ValueTask OnTestDiscovered(TestDiscoveryContext context)
     {
-        testContext.SetRetryCount(Times, ShouldRetry);
+        context.SetRetryCount(Times, ShouldRetry);
         return default;
     }
 }

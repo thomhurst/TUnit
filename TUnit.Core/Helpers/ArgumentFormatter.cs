@@ -2,9 +2,9 @@
 
 internal static class ArgumentFormatter
 {
-    public static string GetConstantValue(TestContext testContext, object? o)
+    public static string Format(object? o, List<Func<object?, string?>> formatters)
     {
-        foreach (var formatter in testContext.ArgumentDisplayFormatters)
+        foreach (var formatter in formatters)
         {
             var result = formatter(o);
             if (result != null)
@@ -13,6 +13,16 @@ internal static class ArgumentFormatter
             }
         }
 
+        return FormatDefault(o);
+    }
+    
+    public static string GetConstantValue(TestContext testContext, object? o)
+    {
+        return Format(o, testContext.ArgumentDisplayFormatters);
+    }
+    
+    private static string FormatDefault(object? o)
+    {
         if (o is null)
         {
             return "null";

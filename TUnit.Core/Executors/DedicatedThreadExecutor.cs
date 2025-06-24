@@ -1,3 +1,4 @@
+using TUnit.Core.Contexts;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
@@ -288,14 +289,9 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         }
     }
 
-    public ValueTask OnTestRegistered(TestContext context)
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        // Use the stub type cast for compatibility
-        if (context is TestRegisteredContext registeredContext)
-        {
-            registeredContext.SetParallelLimiter(new ProcessorCountParallelLimit());
-        }
-
+        context.SetParallelLimiter(new ProcessorCountParallelLimit());
         return default;
     }
 }

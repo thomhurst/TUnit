@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -79,9 +80,9 @@ public class ParallelGroupAttribute(string group) : TUnitAttribute, ITestDiscove
     public string Group { get; } = group;
 
     /// <inheritdoc />
-    public ValueTask OnTestDiscovered(TestContext testContext)
+    public ValueTask OnTestDiscovered(TestDiscoveryContext context)
     {
-        testContext.SetParallelConstraint(new ParallelGroupConstraint(Group, Order));
+        context.SetParallelConstraint(new ParallelGroupConstraint(Group, Order));
         return default;
     }
 }

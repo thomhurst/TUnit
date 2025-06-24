@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Helpers;
+﻿using TUnit.Core.Contexts;
+using TUnit.Core.Helpers;
 
 #pragma warning disable CS9113 // Parameter is unread - Used for source generator
 
@@ -32,9 +33,9 @@ namespace TUnit.Core;
 public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormatterAttribute
 {
     /// <inheritdoc />
-    protected override string FormatDisplayName(TestContext testContext)
+    protected override string FormatDisplayName(TestDiscoveryContext context)
     {
-        var testDetails = testContext.TestDetails;
+        var testDetails = context.TestDetails;
         
         var mutableDisplayName = displayName;
         
@@ -47,7 +48,7 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
         foreach (var parameter in parameters)
         {
             mutableDisplayName = mutableDisplayName.Replace($"${parameter.ParameterInfo.Name}",
-                ArgumentFormatter.GetConstantValue(testContext, parameter.TestArgument));
+                ArgumentFormatter.Format(parameter.TestArgument, context.ArgumentDisplayFormatters));
         }
 
         return mutableDisplayName;

@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Contexts;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -57,9 +58,9 @@ public sealed class ParallelLimiterAttribute<TParallelLimit> : TUnitAttribute, I
     public int Order => 0;
 
     /// <inheritdoc />
-    public ValueTask OnTestRegistered(TestContext testRegisteredContext)
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        testRegisteredContext.SetParallelLimiter(new TParallelLimit());
+        context.SetParallelLimiter(new TParallelLimit());
         return default;
     }
 };

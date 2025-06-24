@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -43,9 +44,9 @@ public class PropertyAttribute(string name, string value) : TUnitAttribute, ITes
     public string Value { get; } = value;
 
     /// <inheritdoc />
-    public ValueTask OnTestDiscovered(TestContext testContext)
+    public ValueTask OnTestDiscovered(TestDiscoveryContext context)
     {
-        testContext.AddProperty(Name, Value);
+        context.AddProperty(Name, Value);
         return default;
     }
 }

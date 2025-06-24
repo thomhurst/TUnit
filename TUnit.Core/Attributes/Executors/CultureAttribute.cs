@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Executors;
@@ -12,10 +13,9 @@ public class CultureAttribute(CultureInfo cultureInfo) : TUnitAttribute, ITestRe
     
     public int Order => 0;
 
-    public ValueTask OnTestRegistered(TestContext context)
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        context.InternalDiscoveredTest!.TestExecutor = new CultureExecutor(cultureInfo);
-
+        context.SetTestExecutor(new CultureExecutor(cultureInfo));
         return default;
     }
 }

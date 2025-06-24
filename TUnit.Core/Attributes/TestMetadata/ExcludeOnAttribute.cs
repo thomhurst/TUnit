@@ -1,4 +1,6 @@
 ﻿using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using TUnit.Core.Contexts;
 using TUnit.Core.Enums;
 
 namespace TUnit.Core;
@@ -48,7 +50,7 @@ namespace TUnit.Core;
 public sealed class ExcludeOnAttribute(OS OperatingSystem) : SkipAttribute($"This test is excluded on the following operating systems: `{OperatingSystem}`.")
 {
     /// <inheritdoc />
-    public override Task<bool> ShouldSkip(TestContext context)
+    public override Task<bool> ShouldSkip(TestRegisteredContext context)
     {
         // Check if the current platform matches any of the excluded operating systems
         bool shouldSkip =

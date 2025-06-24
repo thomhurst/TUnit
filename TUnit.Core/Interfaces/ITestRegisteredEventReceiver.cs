@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using TUnit.Core.Contexts;
 
 namespace TUnit.Core.Interfaces;
 
@@ -10,5 +11,5 @@ public interface ITestRegisteredEventReceiver : IEventReceiver
     /// <summary>
     /// Called when a test is registered
     /// </summary>
-    ValueTask OnTestRegistered(TestContext context);
+    ValueTask OnTestRegistered(TestRegisteredContext context);
 }

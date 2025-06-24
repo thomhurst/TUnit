@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -28,16 +29,17 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
     public int Order => int.MinValue;
     
     /// <inheritdoc />
-    public async ValueTask OnTestRegistered(TestContext context)
+    public async ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         if (await ShouldSkip(context))
         {
-            context.SkipReason = Reason;
+            // Store skip reason in Items to be retrieved during execution
+            context.Items["SkipReason"] = Reason;
         }
     }
     
     /// <summary>
     /// Determines whether the test should be skipped
     /// </summary>
-    public virtual Task<bool> ShouldSkip(TestContext context) => Task.FromResult(true);
+    public virtual Task<bool> ShouldSkip(TestRegisteredContext context) => Task.FromResult(true);
 }
