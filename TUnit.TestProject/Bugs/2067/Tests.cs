@@ -12,7 +12,7 @@ public class Tests(DataClass dataClass)
     {
         Console.WriteLine(dataClass);
     }
-    
+
     [After(TestSession)]
 #pragma warning disable TUnit0042
     public static async Task AssertAllDataClassesDisposed(TestSessionContext context)
@@ -26,16 +26,16 @@ public class Tests(DataClass dataClass)
         {
             return;
         }
-        
+
         var dataClasses = tests
-            .SelectMany(x => x.TestDetails.TestClassArguments)
+            .SelectMany(x => x.TestDetails.ClassMetadataArguments)
             .OfType<DataClass>()
             .ToArray();
 
         using var _ = Assert.Multiple();
 
         var dataClass = await Assert.That(dataClasses).HasSingleItem();
-        
+
         await Assert.That(dataClass).IsNotNull();
         await Assert.That(dataClass!.IsRegistered).IsTrue();
         await Assert.That(dataClass.IsInitialized).IsTrue();

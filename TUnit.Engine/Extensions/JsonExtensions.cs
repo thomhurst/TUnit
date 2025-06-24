@@ -13,7 +13,7 @@ public static class JsonExtensions
             Assemblies = context.Assemblies.Select(x => x.ToJsonModel()).ToArray()
         };
     }
-    
+
     public static TestAssemblyJson ToJsonModel(this AssemblyHookContext context)
     {
         return new TestAssemblyJson
@@ -39,7 +39,7 @@ public static class JsonExtensions
         {
             throw new InvalidOperationException("TestDetails is null");
         }
-        
+
         return new TestJson
         {
             Categories = testDetails.Categories,
@@ -47,7 +47,7 @@ public static class JsonExtensions
             Result = context.Result?.ToJsonModel(),
             Timeout = testDetails.Timeout,
             CustomProperties = testDetails.CustomProperties.ToDictionary(
-                kvp => kvp.Key, 
+                kvp => kvp.Key,
                 kvp => (IReadOnlyList<string>)kvp.Value.AsReadOnly()),
             DisplayName = context.GetTestDisplayName(),
             ObjectBag = context.ObjectBag,
@@ -55,15 +55,15 @@ public static class JsonExtensions
             ReturnType = testDetails.ReturnType?.FullName ?? "void",
             TestId = testDetails.TestId,
             TestName = testDetails.TestName,
-            TestClassArguments = testDetails.TestClassArguments,
+            TestClassArguments = TestDetails.ClassMetadataArguments,
             TestFilePath = testDetails.TestFilePath,
             TestLineNumber = testDetails.TestLineNumber,
             TestMethodArguments = testDetails.TestMethodArguments,
-            TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? Array.Empty<string>(),
+            TestClassParameterTypes = TestDetails.ClassMetadataParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? Array.Empty<string>(),
             TestMethodParameterTypes = testDetails.TestMethodParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? Array.Empty<string>(),
         };
     }
-    
+
     public static TestResultJson ToJsonModel(this TestResult result)
     {
         return new TestResultJson
@@ -77,7 +77,7 @@ public static class JsonExtensions
             ComputerName = result.ComputerName
         };
     }
-    
+
     public static ExceptionJson ToJsonModel(this Exception exception)
     {
         return new ExceptionJson

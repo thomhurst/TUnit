@@ -64,7 +64,7 @@ public sealed class VerifySettingsTask
     public async Task ToTask()
     {
         var testContext = TestContext.Current!;
-        var testClassName = testContext.TestDetails.TestClass.Name;
+        var testClassName = testContext.TestDetails.ClassMetadata.Name;
         var testName = testContext.TestDetails.TestName;
         var name = $"{testClassName}.{testName}{_uniqueSuffix}";
         var dir = Sourcy.DotNet.Projects.TUnit_PublicAPI.DirectoryName!;
