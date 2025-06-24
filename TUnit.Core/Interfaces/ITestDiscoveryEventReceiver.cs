@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using TUnit.Core.Contexts;
 
 namespace TUnit.Core.Interfaces;
 
@@ -11,5 +10,5 @@ public interface ITestDiscoveryEventReceiver : IEventReceiver
     /// <summary>
     /// Called when a test is discovered
     /// </summary>
-    ValueTask OnTestDiscovered(TestDiscoveryContext context);
+    ValueTask OnTestDiscovered(DiscoveredTestContext context);
 }

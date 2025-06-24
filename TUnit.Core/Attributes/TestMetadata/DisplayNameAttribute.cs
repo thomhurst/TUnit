@@ -1,5 +1,4 @@
-﻿using TUnit.Core.Contexts;
-using TUnit.Core.Helpers;
+﻿using TUnit.Core.Helpers;
 
 #pragma warning disable CS9113 // Parameter is unread - Used for source generator
 
@@ -33,7 +32,7 @@ namespace TUnit.Core;
 public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormatterAttribute
 {
     /// <inheritdoc />
-    protected override string FormatDisplayName(TestDiscoveryContext context)
+    protected override string FormatDisplayName(DiscoveredTestContext context)
     {
         var testDetails = context.TestDetails;
         

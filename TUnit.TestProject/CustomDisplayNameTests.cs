@@ -76,9 +76,10 @@ public class CustomDisplayNameTests
             yield return () => "Super Secret Password";
         }
 
-        public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+        public ValueTask OnTestDiscovered(DiscoveredTestContext context)
         {
-            discoveredTestContext.SetDisplayName($"{discoveredTestContext.TestDetails.TestName}(REDACTED)");
+            context.SetDisplayName($"{context.TestDetails.TestName}(REDACTED)");
+            return default;
         }
 
         public int Order => 0;

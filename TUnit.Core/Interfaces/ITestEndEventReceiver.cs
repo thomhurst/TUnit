@@ -10,5 +10,5 @@ public interface ITestEndEventReceiver : IEventReceiver
     /// <summary>
     /// Called when a test ends
     /// </summary>
-    ValueTask OnTestEnd(TestContext context);
+    ValueTask OnTestEnd(AfterTestContext context);
 }

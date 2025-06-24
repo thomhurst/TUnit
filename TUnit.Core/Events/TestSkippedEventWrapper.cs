@@ -6,8 +6,8 @@ public class TestSkippedEventWrapper(AsyncEvent<TestContext>.Invocation invocati
 {
     public int Order => invocation.Order;
 
-    public ValueTask OnTestSkipped(TestContext testContext)
+    public ValueTask OnTestSkipped(TestRegisteredContext context)
     {
-        return invocation.InvokeAsync(sender: this, eventArgs: testContext);
+        return invocation.InvokeAsync(sender: this, eventArgs: context);
     }
 }

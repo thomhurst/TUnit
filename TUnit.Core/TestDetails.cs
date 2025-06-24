@@ -28,3 +28,10 @@ public class TestDetails
     public Dictionary<string, List<string>> CustomProperties { get; } = new Dictionary<string, List<string>>();
     public Type[]? TestClassParameterTypes { get; set; }
 }
+
+/// <summary>
+/// Generic version of TestDetails for compatibility with tests
+/// </summary>
+public class TestDetails<T> : TestDetails where T : class
+{
+}

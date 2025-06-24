@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 #pragma warning disable CS9113 // Parameter is unread - Used for source generator
@@ -22,10 +21,9 @@ public abstract class DisplayNameFormatterAttribute : TUnitAttribute, ITestDisco
     public int Order => 0;
 
     /// <inheritdoc />
-    public ValueTask OnTestDiscovered(TestDiscoveryContext context)
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         var displayName = FormatDisplayName(context);
-
         context.SetDisplayName(displayName);
         return default;
     }
@@ -39,5 +37,5 @@ public abstract class DisplayNameFormatterAttribute : TUnitAttribute, ITestDisco
     /// <returns>
     /// A string containing the formatted display name for the test.
     /// </returns>
-    protected abstract string FormatDisplayName(TestDiscoveryContext context);
+    protected abstract string FormatDisplayName(DiscoveredTestContext context);
 }

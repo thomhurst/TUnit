@@ -135,7 +135,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             {
                 if (classGroup.Key is INamedTypeSymbol namedType)
                 {
-                    GenerateTestClassHelpers(writer, namedType, classGroup.ToList());
+                    GenerateTestClassHelpers(writer, namedType, classGroup.Cast<TestMethodInfo>().ToList());
                 }
             }
         }

@@ -59,7 +59,11 @@
       "Bash(mkdir:*)",
       "Bash(touch:*)",
       "Bash(./remove_old_files.sh)",
-      "Bash(./bin/Release/net8.0/SimplifiedArchitectureTest:*)"
+      "Bash(./bin/Release/net8.0/SimplifiedArchitectureTest:*)",
+      "mcp__desktop-commander__list_directory",
+      "mcp__desktop-commander__search_code",
+      "mcp__desktop-commander__read_multiple_files",
+      "mcp__desktop-commander__read_file"
     ],
     "deny": []
   }

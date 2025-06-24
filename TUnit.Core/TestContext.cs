@@ -239,6 +239,14 @@ public class TestContext
     {
         return GetOutput();
     }
+    
+    /// <summary>
+    /// Sets the parallel limiter for the test
+    /// </summary>
+    public void SetParallelLimiter(IParallelLimit parallelLimit)
+    {
+        Items["ParallelLimiter"] = parallelLimit;
+    }
 }
 
 /// <summary>

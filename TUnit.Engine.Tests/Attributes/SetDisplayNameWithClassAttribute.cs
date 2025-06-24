@@ -5,9 +5,12 @@ namespace TUnit.Engine.Tests.Attributes;
 
 public class SetDisplayNameWithClassAttribute : Attribute, ITestDiscoveryEventReceiver
 {
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public int Order => 0;
+    
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        discoveredTestContext.SetDisplayName(
-            $"{discoveredTestContext.TestDetails.TestClass.Name}.{discoveredTestContext.TestContext.GetTestDisplayName()}");
+        context.SetDisplayName(
+            $"{context.TestDetails.TestClass.Name}.{context.TestContext.GetTestDisplayName()}");
+        return default;
     }
 }

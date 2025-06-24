@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Contexts;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Executors;
