@@ -15,9 +15,9 @@ using TUnit.Engine.Services;
 namespace TUnit.Engine.Framework;
 
 /// <summary>
-/// Simplified service provider that uses the new architecture
+/// Service provider for the TUnit framework
 /// </summary>
-internal class SimplifiedTUnitServiceProvider : IServiceProvider, IAsyncDisposable
+internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 {
     private readonly Dictionary<Type, object> _services = new();
     
@@ -30,7 +30,7 @@ internal class SimplifiedTUnitServiceProvider : IServiceProvider, IAsyncDisposab
     public TUnitMessageBus MessageBus { get; }
     public EngineCancellationToken CancellationToken { get; }
     
-    public SimplifiedTUnitServiceProvider(
+    public TUnitServiceProvider(
         IExtension extension,
         ExecuteRequestContext context,
         IMessageBus messageBus,
@@ -58,9 +58,9 @@ internal class SimplifiedTUnitServiceProvider : IServiceProvider, IAsyncDisposab
         CancellationToken = Register(new EngineCancellationToken());
         
         // Create test services using new architecture
-        var testInvoker = Register<ITestInvoker>(new DefaultTestInvoker());
-        var hookInvoker = Register<IHookInvoker>(new DefaultHookInvoker());
-        var dataSourceResolver = Register<IDataSourceResolver>(new DefaultDataSourceResolver());
+        var testInvoker = Register<ITestInvoker>(new TestInvoker());
+        var hookInvoker = Register<IHookInvoker>(new HookInvoker());
+        var dataSourceResolver = Register<IDataSourceResolver>(new DataSourceResolver());
         
         TestFactory = Register(new TestFactory(testInvoker, hookInvoker, dataSourceResolver));
         
@@ -77,7 +77,7 @@ internal class SimplifiedTUnitServiceProvider : IServiceProvider, IAsyncDisposab
         
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new ExecutionContextAwareSingleTestExecutor(Logger));
+            new SingleTestExecutor(Logger));
         
         TestExecutor = Register(new UnifiedTestExecutor(
             singleTestExecutor,

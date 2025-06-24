@@ -13,13 +13,13 @@ namespace TUnit.Engine;
 /// <summary>
 /// Test executor that properly handles ExecutionContext restoration for AsyncLocal support
 /// </summary>
-public class ExecutionContextAwareSingleTestExecutor : ISingleTestExecutor
+public class SingleTestExecutor : ISingleTestExecutor
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestResultFactory _resultFactory;
     private SessionUid? _sessionUid;
     
-    public ExecutionContextAwareSingleTestExecutor(TUnitFrameworkLogger logger)
+    public SingleTestExecutor(TUnitFrameworkLogger logger)
     {
         _logger = logger;
         _resultFactory = new TestResultFactory();

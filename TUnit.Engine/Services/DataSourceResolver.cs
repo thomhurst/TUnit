@@ -8,9 +8,9 @@ using TUnit.Core;
 namespace TUnit.Engine;
 
 /// <summary>
-/// Default implementation of data source resolver
+/// Implementation of data source resolver
 /// </summary>
-public class DefaultDataSourceResolver : IDataSourceResolver
+public class DataSourceResolver : IDataSourceResolver
 {
     public async Task<IEnumerable<object?[]>> ResolveDataSource(TestDataSource dataSource)
     {

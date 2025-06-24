@@ -278,9 +278,9 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         var discoveryService = new TestDiscoveryService(
             TestMetadataRegistry.GetSources(),
             new TestFactory(
-                new DefaultTestInvoker(),
-                new DefaultHookInvoker(),
-                new DefaultDataSourceResolver()),
+                new TestInvoker(),
+                new HookInvoker(),
+                new DataSourceResolver()),
             enableDynamicDiscovery: false);
         
         var tests = await discoveryService.DiscoverTests();

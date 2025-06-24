@@ -6,9 +6,9 @@ using TUnit.Core;
 namespace TUnit.Engine;
 
 /// <summary>
-/// Default implementation of hook invoker
+/// Implementation of hook invoker
 /// </summary>
-public class DefaultHookInvoker : IHookInvoker
+public class HookInvoker : IHookInvoker
 {
     public async Task InvokeHook(HookMetadata hook, HookContext context)
     {

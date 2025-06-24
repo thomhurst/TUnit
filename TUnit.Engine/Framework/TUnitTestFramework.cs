@@ -19,7 +19,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly IExtension _extension;
     private readonly IServiceProvider _frameworkServiceProvider;
     private readonly ITestFrameworkCapabilities _capabilities;
-    private readonly ConcurrentDictionary<string, SimplifiedTUnitServiceProvider> _serviceProvidersPerSession = new();
+    private readonly ConcurrentDictionary<string, TUnitServiceProvider> _serviceProvidersPerSession = new();
     private readonly IRequestHandler _requestHandler;
 
     public TUnitTestFramework(
@@ -76,11 +76,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return new CloseTestSessionResult { IsSuccess = true };
     }
 
-    private SimplifiedTUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
+    private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
     {
         return _serviceProvidersPerSession.GetOrAdd(
             context.Request.Session.SessionUid.Value,
-            _ => new SimplifiedTUnitServiceProvider(
+            _ => new TUnitServiceProvider(
                 _extension, 
                 context, 
                 context.MessageBus, 
@@ -113,7 +113,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 /// </summary>
 internal interface IRequestHandler
 {
-    Task HandleRequestAsync(TestExecutionRequest request, SimplifiedTUnitServiceProvider serviceProvider, ExecuteRequestContext context);
+    Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context);
 }
 
 /// <summary>
@@ -121,7 +121,7 @@ internal interface IRequestHandler
 /// </summary>
 internal sealed class TestRequestHandler : IRequestHandler
 {
-    public async Task HandleRequestAsync(TestExecutionRequest request, SimplifiedTUnitServiceProvider serviceProvider, ExecuteRequestContext context)
+    public async Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context)
     {
         switch (request)
         {
@@ -142,7 +142,7 @@ internal sealed class TestRequestHandler : IRequestHandler
     }
 
     private async Task HandleDiscoveryRequestAsync(
-        SimplifiedTUnitServiceProvider serviceProvider,
+        TUnitServiceProvider serviceProvider,
         DiscoverTestExecutionRequest request,
         ExecuteRequestContext context)
     {
@@ -158,7 +158,7 @@ internal sealed class TestRequestHandler : IRequestHandler
     }
 
     private async Task HandleRunRequestAsync(
-        SimplifiedTUnitServiceProvider serviceProvider,
+        TUnitServiceProvider serviceProvider,
         RunTestExecutionRequest request,
         ExecuteRequestContext context)
     {

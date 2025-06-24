@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 namespace TUnit.Engine;
 
 /// <summary>
-/// Default implementation of test invoker
+/// Implementation of test invoker
 /// </summary>
-public class DefaultTestInvoker : ITestInvoker
+public class TestInvoker : ITestInvoker
 {
     public async Task InvokeTestMethod(object instance, MethodInfo method, object?[] arguments)
     {
