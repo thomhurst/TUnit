@@ -97,26 +97,15 @@ public class TestExtensionsTests
             ClassType = typeof(T)
         };
 
-        var testBuilderContext = new TestBuilderContext();
-        var testDefinition = CreateDummyTestDefinition(testDetails);
         return _fixture.Build<TestContext>()
-            .FromFactory(() => new TestContext(null!, testDetails, testDefinition, testBuilderContext, classContext))
+            .FromFactory(() => new TestContext(testDetails.TestName, testDetails.DisplayName ?? testDetails.TestName))
             .OmitAutoProperties()
+            .With(x => x.TestDetails, testDetails)
+            .With(x => x.ClassContext, classContext)
+            .With(x => x.CancellationToken, CancellationToken.None)
             .Create();
     }
 
-    private TestDefinition CreateDummyTestDefinition<T>(TestDetails<T> testDetails) where T : class
-    {
-        return _fixture.Build<TestDefinition>()
-            .OmitAutoProperties()
-            .With(x => x.MethodMetadata, testDetails.MethodMetadata)
-            .With(x => x.TestClassFactory, () => Activator.CreateInstance<T>())
-            .With(x => x.TestMethodInvoker, (obj, ct) => new ValueTask())
-            .With(x => x.ClassDataProvider, new EmptyDataProvider())
-            .With(x => x.MethodDataProvider, new EmptyDataProvider())
-            .With(x => x.PropertiesProvider, () => new Dictionary<string, object?>())
-            .Create();
-    }
 
     public class InnerClass;
 }

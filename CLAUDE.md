@@ -127,7 +127,7 @@ When working on TUnit:
 5. **Platform Integration**: Ensure compatibility with Microsoft.Testing.Platform capabilities
 6. **Performance**: TUnit prioritizes performance - use expression compilation and caching in TestBuilder
 7. **Async Support**: All public APIs should support async operations properly
-8. **Async Best Practices**: 
+8. **Async Best Practices**:
    - Never use `GetAwaiter().GetResult()` or `.Result` on tasks - always use proper async/await to avoid deadlocks
    - When in a sync context that needs async functionality, refactor method signatures to be async rather than trying to execute async code synchronously
    - TUnit supports async all the way through the stack - embrace it!
@@ -140,3 +140,8 @@ When working on TUnit:
 - CI/CD: `.github/workflows/`
 - Documentation source: `docs/`
 - Pipeline automation: `TUnit.Pipeline/`
+
+## Memories
+
+- Remember to use the test filter syntax from the claude instructions, including slashes.
+- Remember to not add redundant comments and instead write self descriptive code.
