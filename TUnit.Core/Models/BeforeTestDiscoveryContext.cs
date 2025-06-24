@@ -16,9 +16,6 @@ public class BeforeTestDiscoveryContext : Context
         internal set => Contexts.Value = value;
     }
     
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BeforeTestDiscoveryContext"/> class.
-    /// </summary>
     internal BeforeTestDiscoveryContext() : base(GlobalContext.Current)
     {
         Current = this;

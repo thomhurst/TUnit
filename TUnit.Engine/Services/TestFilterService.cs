@@ -23,8 +23,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 
             if (testExecutionRequest is RunTestExecutionRequest)
             {
-                // For now, return all tests since we don't have Attributes on TestDetails
-                // TODO: Add explicit test filtering
+                // Return all tests since we don't have Attributes on TestDetails
                 return testNodes.ToArray();
             }
 
@@ -34,8 +33,6 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
         var filteredTests = testNodes.Where(x => MatchesTest(testExecutionFilter, x)).ToArray();
-        
-        // TODO: Handle explicit attribute filtering
         
         return filteredTests;
     }
@@ -51,8 +48,6 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(executableTest), BuildPropertyBag(executableTest)),
             _ => UnhandledFilter(testExecutionFilter)
         };
-
-        // TODO: Handle test removal from context if needed
 
         return shouldRunTest;
 #pragma warning restore TPEXP

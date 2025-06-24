@@ -6,7 +6,7 @@ namespace TUnit.Core.Services;
 
 /// <summary>
 /// Generates AOT-safe test factories and invokers for source generation.
-/// This class creates the code that will be emitted by source generators.
+/// Creates the code that will be emitted by source generators.
 /// </summary>
 public class AotTestFactoryGenerator
 {

@@ -494,8 +494,7 @@ internal static class CodeGenerationHelpers
         var methodName = attr.ConstructorArguments[0].Value?.ToString() ?? "";
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
-        // Note: We use GetMethods().FirstOrDefault() instead of GetMethod() to handle potential overloads
-        // The runtime will need to determine the correct overload based on the data source attribute usage
+        // We use GetMethods().FirstOrDefault() instead of GetMethod() to handle potential overloads
         return $"new global::TUnit.Core.DataSources.MethodDataSourceProvider(typeof({containingType.GloballyQualified()}).GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic).FirstOrDefault(m => m.Name == \"{methodName}\"), null, {isShared.ToString().ToLowerInvariant()})";
     }
 

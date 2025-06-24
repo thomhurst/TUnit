@@ -6,7 +6,7 @@ namespace TUnit.Core.Services;
 
 /// <summary>
 /// Enhances existing source generators with dual-mode AOT-safe capabilities.
-/// This class provides utilities to augment TUnit's source generation with AOT safety.
+/// Provides utilities to augment TUnit's source generation with AOT safety.
 /// </summary>
 public class SourceGeneratorEnhancer
 {
@@ -26,7 +26,7 @@ public class SourceGeneratorEnhancer
 
     /// <summary>
     /// Generates complete AOT-safe source code for a test class.
-    /// This method creates all necessary factories, invokers, and registration code.
+    /// Creates all necessary factories, invokers, and registration code.
     /// </summary>
     /// <param name="classMetadata">The test class metadata</param>
     /// <param name="testMethods">The test methods in the class</param>

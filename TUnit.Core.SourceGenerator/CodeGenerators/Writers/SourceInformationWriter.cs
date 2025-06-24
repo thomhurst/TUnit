@@ -245,7 +245,6 @@ public static class SourceInformationWriter
         };
         AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, parameter.GetAttributes(), "Parameter", parameter.Name, containingType?.ToDisplayString());
 
-        // TODO: Struggling to get this to work with generic type parameters
         sourceCodeWriter.Append("ReflectionInfo = null!,");
 
         // if(argumentsType == ArgumentsType.ClassConstructor)

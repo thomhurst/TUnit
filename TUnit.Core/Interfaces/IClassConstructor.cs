@@ -17,7 +17,7 @@ public interface IClassConstructor
     /// parameters and dependencies.
     /// </returns>
     /// <remarks>
-    /// This method is called by the test framework to create instances of test classes.
+    /// Called by the test framework to create instances of test classes.
     /// It allows for custom dependency injection or specialized test class instantiation.
     /// Implementations can use the provided <see cref="TestBuilderContext"/> from the <paramref name="classConstructorMetadata"/>
     /// to access shared data and event subscriptions for the current test execution.

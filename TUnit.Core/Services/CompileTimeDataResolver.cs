@@ -113,7 +113,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
 
     /// <summary>
     /// Resolves MethodDataSource attributes by generating AOT-safe factory invocation.
-    /// This method generates code that will be used by the source generator.
+    /// Generates code that will be used by the source generator.
     /// </summary>
     private Task<IEnumerable<object?[]>> ResolveMethodDataSourceAttributeAsync(MethodDataSourceAttribute methodDataAttr, Type contextType)
     {
@@ -121,7 +121,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
         // Instead, we mark it as resolvable and the source generator will emit 
         // AOT-safe factory code that calls the method directly.
         
-        // This method should not be called during actual compilation,
+        // Should not be called during actual compilation,
         // as MethodDataSource resolution happens through generated factories.
         throw new InvalidOperationException(
             "MethodDataSource resolution should be handled by generated AOT-safe factories, not at compile-time. " +
@@ -130,7 +130,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
 
     /// <summary>
     /// Resolves AsyncDataSourceGenerator attributes by generating AOT-safe factory invocation.
-    /// This method generates code that will be used by the source generator.
+    /// Generates code that will be used by the source generator.
     /// </summary>
     private Task<IEnumerable<object?[]>> ResolveAsyncDataSourceAttributeAsync(IAsyncDataSourceGeneratorAttribute asyncDataAttr, Type contextType)
     {
@@ -138,7 +138,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
         // Instead, we mark it as resolvable and the source generator will emit 
         // AOT-safe factory code that instantiates and calls the generator directly.
         
-        // This method should not be called during actual compilation,
+        // Should not be called during actual compilation,
         // as AsyncDataSourceGenerator resolution happens through generated factories.
         throw new InvalidOperationException(
             "AsyncDataSourceGenerator resolution should be handled by generated AOT-safe factories, not at compile-time. " +

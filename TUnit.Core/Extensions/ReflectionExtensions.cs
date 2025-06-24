@@ -77,7 +77,7 @@ public static class ReflectionExtensions
     /// <param name="inherit">Whether to search the inheritance chain</param>
     /// <returns>An array of attributes</returns>
     /// <remarks>
-    /// This method works around the limitation in .NET Framework where GetCustomAttributes
+    /// Works around the limitation in .NET Framework where GetCustomAttributes
     /// throws NotSupportedException for generic attributes.
     /// </remarks>
     public static Attribute[] GetCustomAttributesSafe(this ICustomAttributeProvider provider, bool inherit = true)

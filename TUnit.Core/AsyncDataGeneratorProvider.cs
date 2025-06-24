@@ -8,9 +8,6 @@ public class AsyncDataGeneratorProvider : IDataProvider
     private readonly IAsyncDataSourceGeneratorAttribute _generator;
     private readonly DataGeneratorMetadata _metadata;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AsyncDataGeneratorProvider"/> class.
-    /// </summary>
     /// <param name="generator">The async data source generator attribute.</param>
     /// <param name="metadata">The metadata for data generation.</param>
     public AsyncDataGeneratorProvider(IAsyncDataSourceGeneratorAttribute generator, DataGeneratorMetadata metadata)

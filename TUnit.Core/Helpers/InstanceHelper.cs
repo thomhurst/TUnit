@@ -127,7 +127,6 @@ internal static class InstanceHelper
         var ctorArgsParam = Expression.Parameter(typeof(object?[]), "ctorArgs");
         var propsParam = Expression.Parameter(typeof(IDictionary<string, object?>), "props");
 
-        // Constructor arguments
         var ctorParams = constructor.GetParameters();
         var ctorArgExpressions = new Expression[ctorParams.Length];
         for (int i = 0; i < ctorParams.Length; i++)

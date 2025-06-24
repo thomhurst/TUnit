@@ -26,7 +26,6 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.AddMaximumFailedTestsService(extension);
         
-        // TODO: testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new HideTestOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));

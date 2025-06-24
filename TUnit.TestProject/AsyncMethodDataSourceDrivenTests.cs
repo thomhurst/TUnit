@@ -58,8 +58,7 @@ public class AsyncMethodDataSourceDrivenTests
     // Data source methods
     public static int[] AsyncDataMethod()
     {
-        // Note: For now, TUnit doesn't support async enumerable data sources
-        // so we use synchronous methods that return arrays
+        // TUnit doesn't support async enumerable data sources
         return [1, 2, 3];
     }
 

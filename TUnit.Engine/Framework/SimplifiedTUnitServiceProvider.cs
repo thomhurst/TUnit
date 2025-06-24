@@ -103,8 +103,7 @@ internal class SimplifiedTUnitServiceProvider : IServiceProvider, IAsyncDisposab
     
     private bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions)
     {
-        // For now, default to false since GetOptionValue may not be available
-        // TODO: Implement proper command line option reading
+        // Default to false since GetOptionValue may not be available
         return false;
     }
     

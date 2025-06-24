@@ -14,8 +14,6 @@ internal static class TestDataContainer
     private static readonly ScopedContainer<Assembly> AssemblyContainer = new();
     private static readonly ScopedContainer<string> KeyContainer = new();
 
-    // Note: Dependency tracking has been moved to the framework level
-
     /// <summary>
     /// Gets an instance for the specified class.
     /// </summary>

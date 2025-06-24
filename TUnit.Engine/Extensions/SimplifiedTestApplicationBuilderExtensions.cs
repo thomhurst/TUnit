@@ -41,8 +41,5 @@ public static class SimplifiedTestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionScannerCommandProvider(extension));
         
-        // Register tree node filter for test filtering
-        // TODO: Fix AddTreeNodeFilterService - not available in current version
-        // testApplicationBuilder.AddTreeNodeFilterService(extension);
     }
 }

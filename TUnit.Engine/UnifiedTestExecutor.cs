@@ -262,8 +262,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     
     private int GetMaxParallelism()
     {
-        // TODO: Get from command line options when API is available
-        // For now, default to processor count
+        // Default to processor count
         return Environment.ProcessorCount;
     }
     

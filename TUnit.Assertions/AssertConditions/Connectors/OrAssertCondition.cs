@@ -14,8 +14,7 @@ internal class OrAssertCondition : BaseAssertCondition
         _condition2 = condition2;
     }
 
-    // This method is not used, as the GetExpectationWithReason is overwritten
-    // and uses the expectation from the two conditions.
+    // Not used, as GetExpectationWithReason is overridden
     internal protected override string GetExpectation() => "";
 
     internal override string GetExpectationWithReason()

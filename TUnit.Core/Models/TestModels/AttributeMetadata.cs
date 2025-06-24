@@ -36,9 +36,6 @@ public record AttributeMetadata
     /// </summary>
     public ClassMetadata? ClassMetadata { get; init; }
 
-    /// <summary>
-    /// Constructor arguments used when the attribute was applied
-    /// </summary>
     public object?[]? ConstructorArguments { get; init; }
 
     /// <summary>

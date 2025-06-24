@@ -275,7 +275,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers a strongly typed class factory for maximum performance.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     public static void RegisterStronglyTypedClassFactory<T>(string testId, Func<T> factory) where T : class
     {
@@ -284,7 +284,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers a strongly typed parameterized class factory.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     public static void RegisterStronglyTypedClassFactory<T>(string testId, Delegate factory) where T : class
     {
@@ -293,7 +293,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers a strongly typed method invoker for maximum performance.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     public static void RegisterStronglyTypedMethodInvoker<T>(string testId, Delegate invoker) where T : class
     {
@@ -302,7 +302,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers an AOT-safe method data resolver for MethodDataSource support.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     public static void RegisterMethodDataResolver(string testId, Func<IReadOnlyList<object?[]>> resolver)
     {
@@ -311,7 +311,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers an AOT-safe async method data resolver for MethodDataSource support.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     public static void RegisterAsyncMethodDataResolver(string testId, Func<Task<IReadOnlyList<object?[]>>> resolver)
     {
@@ -320,7 +320,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers an AOT-safe async data source resolver for AsyncDataSourceGenerator support.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     public static void RegisterAsyncDataSourceResolver(string testId, Func<DataGeneratorMetadata, CancellationToken, Task<IReadOnlyList<Func<Task<object?[]?>>>>> resolver)
     {
@@ -329,7 +329,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers an AOT-safe async data executor for AsyncDataSourceGenerator support.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     public static void RegisterAsyncDataExecutor(string testId, Func<DataGeneratorMetadata, CancellationToken, Task<IReadOnlyList<object?[]?>>> executor)
     {
@@ -338,7 +338,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers a simple test class factory (backward compatibility).
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     /// <param name="testId">Unique identifier for the test</param>
     /// <param name="factory">Factory delegate for creating test instances</param>
@@ -349,7 +349,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers a parameterized test class factory.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     /// <param name="testId">Unique identifier for the test</param>
     /// <param name="factory">Factory delegate for creating test instances with arguments</param>
@@ -360,7 +360,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers a test method invoker.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     /// <param name="testId">Unique identifier for the test</param>
     /// <param name="invoker">Invoker delegate for calling test methods</param>
@@ -371,7 +371,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers a property setter for dependency injection.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     /// <param name="testId">Unique identifier for the test</param>
     /// <param name="propertyName">Name of the property to set</param>
@@ -383,7 +383,7 @@ public static class GlobalSourceGeneratedTestRegistry
 
     /// <summary>
     /// Registers pre-resolved data for a test.
-    /// This method is called from source-generated code.
+    /// Called from source-generated code.
     /// </summary>
     /// <param name="testId">Unique identifier for the test</param>
     /// <param name="resolvedData">The pre-resolved test data</param>

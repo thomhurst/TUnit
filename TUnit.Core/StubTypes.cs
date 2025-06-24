@@ -3,7 +3,6 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 // Legacy compatibility types - These exist to support attributes that haven't been updated yet.
-// TODO: Update attributes to use TestContext directly and remove these types.
 
 public class DiscoveredTestContext : TestContext
 {

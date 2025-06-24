@@ -4,7 +4,7 @@ using TUnit.Core.Services;
 namespace TUnit.Core.Examples;
 
 /// <summary>
-/// Example of how AOT-safe AsyncDataSourceGenerator generation works.
+/// How AOT-safe AsyncDataSourceGenerator generation works.
 /// 
 /// Given this test class with custom AsyncDataSourceGenerators:
 /// 
@@ -114,7 +114,7 @@ public static class GeneratedAotAsyncDataSourceExample
 }
 
 /// <summary>
-/// Example AsyncDataSourceGenerator that would trigger the above generation.
+/// AsyncDataSourceGenerator that would trigger the above generation.
 /// </summary>
 public class MyAsyncApiDataSource : AsyncDataSourceGeneratorAttribute<string>
 {
@@ -138,7 +138,7 @@ public class MyAsyncApiDataSource : AsyncDataSourceGeneratorAttribute<string>
 }
 
 /// <summary>
-/// Example test class that would trigger the above generation.
+/// Test class that would trigger the above generation.
 /// </summary>
 public class MyAsyncTests
 {

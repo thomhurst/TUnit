@@ -7,9 +7,6 @@ public class ArgumentsDataProvider : IDataProvider
 {
     private readonly object?[] _arguments;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ArgumentsDataProvider"/> class.
-    /// </summary>
     /// <param name="arguments">The arguments for the test data.</param>
     public ArgumentsDataProvider(params object?[] arguments)
     {

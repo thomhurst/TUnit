@@ -80,7 +80,7 @@ public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
     /// The task result is true if the test should be retried; otherwise, false.
     /// </returns>
     /// <remarks>
-    /// This method can be overridden in derived classes to implement conditional retry logic
+    /// Can be overridden in derived classes to implement conditional retry logic
     /// based on the specific exception type or other criteria.
     /// 
     /// The default implementation always returns true, meaning the test will always be retried

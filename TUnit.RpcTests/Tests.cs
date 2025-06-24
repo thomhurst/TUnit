@@ -93,13 +93,6 @@ public class Tests
         {
             await Assert.That(originalDiscovered).HasCount().GreaterThanOrEqualTo(3400);
             
-            // TODO:
-            // await Assert.That(newDiscovered).HasCount().EqualToZero();
-            // await Assert.That(finished).HasCount().GreaterThanOrEqualTo(1186);
-            // await Assert.That(passed).HasCount().GreaterThanOrEqualTo(929);
-            // await Assert.That(failed).HasCount().GreaterThanOrEqualTo(88);
-            // await Assert.That(skipped).HasCount().GreaterThanOrEqualTo(7);
-            
             await client.ExitAsync();
         }
     }
