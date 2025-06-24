@@ -75,9 +75,9 @@ internal class SimplifiedTUnitServiceProvider : IServiceProvider, IAsyncDisposab
             TestFactory,
             enableDynamicDiscovery));
         
-        // Create single test executor
+        // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new DefaultSingleTestExecutor(Logger));
+            new ExecutionContextAwareSingleTestExecutor(Logger));
         
         TestExecutor = Register(new UnifiedTestExecutor(
             singleTestExecutor,

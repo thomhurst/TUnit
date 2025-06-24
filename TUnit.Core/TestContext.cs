@@ -12,7 +12,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Simplified test context for the new architecture
 /// </summary>
-public class TestContext
+public class TestContext : Context
 {
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
     internal static readonly Dictionary<string, string> InternalParametersDictionary = new();
@@ -23,7 +23,7 @@ public class TestContext
     /// <summary>
     /// Gets or sets the current test context.
     /// </summary>
-    public static TestContext? Current
+    public static new TestContext? Current
     {
         get => TestContexts.Value;
         internal set => TestContexts.Value = value;
@@ -137,13 +137,13 @@ public class TestContext
     /// </summary>
     private IServiceProvider? _serviceProvider;
     
-    public TestContext(string testName, string displayName)
+    public TestContext(string testName, string displayName) : base(null)
     {
         TestName = testName;
         DisplayName = displayName;
     }
     
-    public TestContext(string testName, string displayName, TestRequest request, CancellationToken cancellationToken, IServiceProvider serviceProvider)
+    public TestContext(string testName, string displayName, TestRequest request, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
     {
         TestName = testName;
         DisplayName = displayName;
@@ -176,7 +176,7 @@ public class TestContext
     /// <summary>
     /// Gets the captured error output
     /// </summary>
-    public string GetErrorOutput() => _errorWriter.ToString();
+    public new string GetErrorOutput() => _errorWriter.ToString();
     
     /// <summary>
     /// Gets service from the service provider
@@ -187,11 +187,19 @@ public class TestContext
     }
     
     /// <summary>
-    /// Adds async local values (simplified)
+    /// Adds async local values (delegates to base class)
     /// </summary>
-    internal void AddAsyncLocalValues(object values)
+    public new void AddAsyncLocalValues()
     {
-        // Simplified implementation
+        base.AddAsyncLocalValues();
+    }
+    
+    /// <summary>
+    /// Restores the async local context for TestContext
+    /// </summary>
+    internal override void RestoreContextAsyncLocal()
+    {
+        TestContexts.Value = this;
     }
     
     /// <summary>
@@ -232,13 +240,6 @@ public class TestContext
     /// </summary>
     public bool ReportResult { get; set; } = true;
     
-    /// <summary>
-    /// Gets the standard output captured during test execution
-    /// </summary>
-    public string? GetStandardOutput()
-    {
-        return GetOutput();
-    }
     
     /// <summary>
     /// Sets the parallel limiter for the test

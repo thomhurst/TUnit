@@ -8,5 +8,5 @@ public static class TestingPlatformBuilderHook
     public static void AddExtensions(
         ITestApplicationBuilder testApplicationBuilder,
         string[] _) =>
-        testApplicationBuilder.AddSimplifiedTUnit();
+        testApplicationBuilder.AddTUnit();
 }
