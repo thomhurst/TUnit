@@ -32,7 +32,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(collected, GenerateTestRegistry);
     }
 
-    private static TestMethodInfo? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
+    private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
@@ -58,7 +58,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         var filePath = location.SourceTree?.FilePath ?? "";
         var lineNumber = location.GetLineSpan().StartLinePosition.Line + 1;
 
-        return new TestMethodInfo
+        return new TestMethodMetadata
         {
             MethodSymbol = methodSymbol,
             TypeSymbol = typeSymbol,
@@ -69,7 +69,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateTestRegistry(SourceProductionContext context, ImmutableArray<TestMethodInfo?> testMethods)
+    private static void GenerateTestRegistry(SourceProductionContext context, ImmutableArray<TestMethodMetadata?> testMethods)
     {
         var validTests = testMethods.Where(t => t != null).ToList();
         if (!validTests.Any())
@@ -135,7 +135,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             {
                 if (classGroup.Key is INamedTypeSymbol namedType)
                 {
-                    GenerateTestClassHelpers(writer, namedType, classGroup.Cast<TestMethodInfo>().ToList());
+                    GenerateTestClassHelpers(writer, namedType, classGroup.Cast<TestMethodMetadata>().ToList());
                 }
             }
         }
@@ -143,7 +143,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         context.AddSource("UnifiedTestMetadataRegistry.g.cs", writer.ToString());
     }
     
-    private static void GenerateTestMetadata(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var context = TestMetadataGenerationContext.Create(testInfo);
         var testId = $"{context.ClassName}.{context.MethodName}";
@@ -215,7 +215,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine(");");
     }
     
-    private static void GenerateTestClassHelpers(CodeWriter writer, INamedTypeSymbol classSymbol, List<TestMethodInfo> testMethods)
+    private static void GenerateTestClassHelpers(CodeWriter writer, INamedTypeSymbol classSymbol, List<TestMethodMetadata> testMethods)
     {
         var className = classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "");
         var safeClassName = className.Replace(".", "_").Replace("<", "_").Replace(">", "_");
@@ -240,7 +240,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
     
-    private static void GenerateTestInvoker(CodeWriter writer, TestMethodInfo testInfo, TestMetadataGenerationContext context)
+    private static void GenerateTestInvoker(CodeWriter writer, TestMethodMetadata testInfo, TestMetadataGenerationContext context)
     {
         var methodName = $"{context.SafeClassName}_{context.SafeMethodName}_Invoker";
         
@@ -284,7 +284,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         // Implementation would follow similar pattern to GenerateTestInvoker
     }
     
-    private static void GenerateCategories(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GenerateCategories(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var categories = GetCategories(testInfo);
         if (categories.Any())
@@ -299,7 +299,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
     }
     
-    private static void GenerateSkipStatus(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GenerateSkipStatus(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var skipAttribute = testInfo.MethodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "SkipAttribute");
@@ -317,7 +317,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
     }
     
-    private static void GenerateTimeout(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GenerateTimeout(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var timeoutAttribute = testInfo.MethodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "TimeoutAttribute");
@@ -333,7 +333,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
     }
     
-    private static void GenerateDependencies(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GenerateDependencies(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var dependsOnAttributes = testInfo.MethodSymbol.GetAttributes()
             .Where(a => a.AttributeClass?.Name == "DependsOnAttribute");
@@ -364,7 +364,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
     }
     
-    private static void GenerateDataSources(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GenerateDataSources(CodeWriter writer, TestMethodMetadata testInfo)
     {
         writer.AppendLine("DataSources = new TestDataSource[]");
         writer.AppendLine("{");
@@ -396,7 +396,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
     
-    private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testInfo)
     {
         // Find properties with data source attributes
         var properties = testInfo.TypeSymbol.GetMembers()
@@ -431,7 +431,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
     }
     
-    private static void GenerateParameterTypes(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GenerateParameterTypes(CodeWriter writer, TestMethodMetadata testInfo)
     {
         if (testInfo.MethodSymbol.Parameters.Length > 0)
         {
@@ -446,7 +446,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
     }
     
-    private static void GenerateHooks(CodeWriter writer, TestMethodInfo testInfo)
+    private static void GenerateHooks(CodeWriter writer, TestMethodMetadata testInfo)
     {
         writer.AppendLine("Hooks = new TestHooks");
         writer.AppendLine("{");
@@ -512,7 +512,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         return value switch
         {
             null => "null",
-            string s => $"\"{s}\"",
+            string s => $"@\"{s.Replace("\"", "\"\"")}\"",
             char c => $"'{c}'",
             bool b => b.ToString().ToLower(),
             ITypeSymbol type => $"typeof({type.ToDisplayString()})",
@@ -520,7 +520,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         };
     }
     
-    private static List<string> GetCategories(TestMethodInfo testInfo)
+    private static List<string> GetCategories(TestMethodMetadata testInfo)
     {
         var categories = new List<string>();
         
@@ -542,20 +542,20 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         return categories;
     }
     
-    private static int GetRetryCount(TestMethodInfo testInfo)
+    private static int GetRetryCount(TestMethodMetadata testInfo)
     {
-        var retryAttribute = testInfo.MethodSymbol.GetAttributes()
-            .FirstOrDefault(a => a.AttributeClass?.Name == "RetryAttribute");
+        var repeatAttribute = testInfo.MethodSymbol.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
         
-        if (retryAttribute != null && retryAttribute.ConstructorArguments.Length > 0)
+        if (repeatAttribute != null && repeatAttribute.ConstructorArguments.Length > 0)
         {
-            return (int)(retryAttribute.ConstructorArguments[0].Value ?? 0);
+            return (int)(repeatAttribute.ConstructorArguments[0].Value ?? 0);
         }
         
         return 0;
     }
     
-    private static bool GetCanRunInParallel(TestMethodInfo testInfo)
+    private static bool GetCanRunInParallel(TestMethodMetadata testInfo)
     {
         var notInParallelAttribute = testInfo.MethodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "NotInParallelAttribute");

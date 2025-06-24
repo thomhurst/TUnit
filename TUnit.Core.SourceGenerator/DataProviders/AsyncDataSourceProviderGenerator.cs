@@ -168,7 +168,7 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
         return false;
     }
 
-    private static string GenerateMethodMetadataUsingWriter(TestMethodInfo testInfo)
+    private static string GenerateMethodMetadataUsingWriter(TestMethodMetadata testInfo)
     {
         using var writer = new CodeWriter("", includeHeader: false);
         

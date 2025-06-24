@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis;
 namespace TUnit.Core.SourceGenerator.Models;
 
 /// <summary>
-/// Contains all the information about a test method discovered by the source generator.
+/// Contains all the metadata about a test method discovered by the source generator.
 /// </summary>
-public class TestMethodInfo
+public class TestMethodMetadata
 {
     public required IMethodSymbol MethodSymbol { get; init; }
     public required INamedTypeSymbol TypeSymbol { get; init; }

@@ -8,7 +8,7 @@ namespace TUnit.Core.SourceGenerator.Models;
 /// </summary>
 public class TestMetadataGenerationContext
 {
-    public required TestMethodInfo TestInfo { get; init; }
+    public required TestMethodMetadata TestInfo { get; init; }
     public required string ClassName { get; init; }
     public required string MethodName { get; init; }
     public required List<IPropertySymbol> RequiredProperties { get; init; }
@@ -22,7 +22,7 @@ public class TestMetadataGenerationContext
     /// <summary>
     /// Creates a TestMetadataGenerationContext from the test method info
     /// </summary>
-    public static TestMetadataGenerationContext Create(TestMethodInfo testInfo)
+    public static TestMetadataGenerationContext Create(TestMethodMetadata testInfo)
     {
         var className = GetFullTypeName(testInfo.TypeSymbol);
         var methodName = testInfo.MethodSymbol.Name;
@@ -79,7 +79,7 @@ public class TestMetadataGenerationContext
         return sanitized;
     }
     
-    private static bool DetermineIfStaticTestDefinition(TestMethodInfo testInfo)
+    private static bool DetermineIfStaticTestDefinition(TestMethodMetadata testInfo)
     {
         // Can use static definition if:
         // 1. The type is not generic
