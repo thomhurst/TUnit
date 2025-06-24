@@ -215,11 +215,7 @@ public class SingleTestExecutor : ISingleTestExecutor
     
     private SessionUid CreateSessionUid(ExecutableTest test)
     {
-        if (test.Context?.Request?.Session?.SessionUid != null)
-        {
-            return new SessionUid(test.Context.Request.Session.SessionUid.ToString());
-        }
-        return new SessionUid(Guid.NewGuid().ToString());
+        return _sessionUid ?? new SessionUid(Guid.NewGuid().ToString());
     }
     
     private async Task InvokeTestWithTimeout(ExecutableTest test, object instance, CancellationToken cancellationToken)

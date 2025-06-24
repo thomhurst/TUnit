@@ -82,10 +82,6 @@ public class TestContext : Context
     /// </summary>
     public Dictionary<string, object?> Items { get; } = new();
     
-    /// <summary>
-    /// Request information
-    /// </summary>
-    public TestRequest? Request { get; set; }
     
     /// <summary>
     /// Cancellation token for the test
@@ -143,11 +139,10 @@ public class TestContext : Context
         DisplayName = displayName;
     }
     
-    public TestContext(string testName, string displayName, TestRequest request, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
+    public TestContext(string testName, string displayName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
     {
         TestName = testName;
         DisplayName = displayName;
-        Request = request;
         CancellationToken = cancellationToken;
         _serviceProvider = serviceProvider;
     }
@@ -248,20 +243,4 @@ public class TestContext : Context
     {
         Items["ParallelLimiter"] = parallelLimit;
     }
-}
-
-/// <summary>
-/// Test request information
-/// </summary>
-public class TestRequest
-{
-    public required TestSession Session { get; init; }
-}
-
-/// <summary>
-/// Test session information
-/// </summary>
-public class TestSession
-{
-    public required Guid SessionUid { get; init; }
 }
