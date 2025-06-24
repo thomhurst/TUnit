@@ -34,29 +34,40 @@ public class TestExtensionsTests
         await Assert.That(name).IsEqualTo("TestExtensionsTests+InnerClass");
     }
 
-    private TestDetails<T> CreateTestDetails<T>() where T : class =>
-        _fixture.Build<TestDetails<T>>()
+    private TestDetails<T> CreateTestDetails<T>() where T : class
+    {
+        var classMetadata = new ClassMetadata
+        {
+            Parent = ReflectionToSourceModelHelpers.GetParent(typeof(T)),
+            Name = typeof(T).Name,
+            Namespace = "TUnit.UnitTests",
+            Assembly = new AssemblyMetadata
+            {
+                Attributes = [],
+                Name = "TUnit.UnitTests",
+            },
+            Attributes = [],
+            Parameters = [],
+            Properties = [],
+            Type = typeof(T),
+            TypeReference = TypeReference.CreateConcrete($"{typeof(T).FullName}, {typeof(T).Assembly.GetName().Name}"),
+        };
+        
+        return _fixture.Build<TestDetails<T>>()
             .OmitAutoProperties()
+            .With(x => x.TestId, "test-id")
+            .With(x => x.TestName, "TestName")
+            .With(x => x.ClassType, typeof(T))
+            .With(x => x.MethodName, "DummyMethod")
+            .With(x => x.ClassInstance, null)
+            .With(x => x.TestMethodArguments, Array.Empty<object?>())
             .With(x => x.TestClassArguments, [])
+            .With(x => x.ReturnType, typeof(void))
+            .With(x => x.ClassMetadata, classMetadata)
             .With(x => x.MethodMetadata, new MethodMetadata
             {
                 Attributes = [],
-                Class = new ClassMetadata
-                {
-                    Parent = ReflectionToSourceModelHelpers.GetParent(typeof(T)),
-                    Name = typeof(T).Name,
-                    Namespace = "TUnit.UnitTests",
-                    Assembly = new AssemblyMetadata
-                    {
-                        Attributes = [],
-                        Name = "TUnit.UnitTests",
-                    },
-                    Attributes = [],
-                    Parameters = [],
-                    Properties = [],
-                    Type = typeof(T),
-                    TypeReference = TypeReference.CreateConcrete($"{typeof(T).FullName}, {typeof(T).Assembly.GetName().Name}"),
-                },
+                Class = classMetadata,
                 Name = "DummyMethod",
                 Parameters = [],
                 Type = typeof(T),
@@ -66,6 +77,7 @@ public class TestExtensionsTests
                 GenericTypeCount = 0,
             })
             .Create();
+    }
 
 
     private TestContext CreateTestContext<

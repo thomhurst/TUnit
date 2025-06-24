@@ -302,6 +302,67 @@ public sealed class TestFactory
     
     private TestContext CreateTestContext(ExecutableTest test)
     {
+        // Create ClassMetadata
+        var classMetadata = ClassMetadata.GetOrAdd(test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name, () => new ClassMetadata
+        {
+            Name = test.Metadata.TestClassType.Name,
+            Type = test.Metadata.TestClassType,
+            TypeReference = TypeReference.CreateConcrete(test.Metadata.TestClassType.AssemblyQualifiedName ?? test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name),
+            Namespace = test.Metadata.TestClassType.Namespace,
+            Assembly = AssemblyMetadata.GetOrAdd(test.Metadata.TestClassType.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata
+            {
+                Name = test.Metadata.TestClassType.Assembly.GetName().Name ?? "Unknown",
+                Attributes = Array.Empty<AttributeMetadata>()
+            }),
+            Parameters = Array.Empty<ParameterMetadata>(), // TODO: Get from constructor if needed
+            Properties = Array.Empty<PropertyMetadata>(), // TODO: Get from type if needed
+            Parent = null, // TODO: Get base type if needed
+            Attributes = Array.Empty<AttributeMetadata>() // TODO: Get from type attributes if needed
+        });
+        
+        // Create MethodMetadata
+        MethodMetadata methodMetadata;
+        if (test.Metadata.MethodInfo != null)
+        {
+            var methodInfo = test.Metadata.MethodInfo;
+            methodMetadata = new MethodMetadata
+            {
+                Name = methodInfo.Name,
+                Type = test.Metadata.TestClassType,
+                TypeReference = TypeReference.CreateConcrete(test.Metadata.TestClassType.AssemblyQualifiedName ?? test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name),
+                Class = classMetadata,
+                #pragma warning disable IL2072 // ParameterType comes from test method parameters which are known at compile time
+                Parameters = methodInfo.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
+                #pragma warning restore IL2072
+                {
+                    Name = p.Name ?? "param" + p.Position,
+                    TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName ?? p.ParameterType.FullName ?? p.ParameterType.Name),
+                    Attributes = new AttributeMetadata[0],
+                    ReflectionInfo = p
+                }).ToArray(),
+                GenericTypeCount = methodInfo.IsGenericMethodDefinition ? methodInfo.GetGenericArguments().Length : 0,
+                ReturnTypeReference = TypeReference.CreateConcrete(methodInfo.ReturnType.AssemblyQualifiedName ?? methodInfo.ReturnType.FullName ?? methodInfo.ReturnType.Name),
+                ReturnType = methodInfo.ReturnType,
+                Attributes = Array.Empty<AttributeMetadata>() // TODO: Get from method attributes if needed
+            };
+        }
+        else
+        {
+            // Create minimal MethodMetadata when MethodInfo is not available
+            methodMetadata = new MethodMetadata
+            {
+                Name = test.Metadata.TestMethodName,
+                Type = test.Metadata.TestClassType,
+                TypeReference = TypeReference.CreateConcrete(test.Metadata.TestClassType.AssemblyQualifiedName ?? test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name),
+                Class = classMetadata,
+                Parameters = Array.Empty<ParameterMetadata>(),
+                GenericTypeCount = 0,
+                ReturnTypeReference = TypeReference.CreateConcrete(typeof(Task).AssemblyQualifiedName ?? typeof(Task).FullName ?? "System.Threading.Tasks.Task"),
+                ReturnType = typeof(Task),
+                Attributes = Array.Empty<AttributeMetadata>()
+            };
+        }
+        
         var testDetails = new TestDetails
         {
             TestId = test.TestId,
@@ -315,7 +376,9 @@ public sealed class TestFactory
             TestFilePath = test.Metadata.FilePath ?? "Unknown",
             TestLineNumber = test.Metadata.LineNumber ?? 0,
             TestMethodParameterTypes = test.Metadata.ParameterTypes,
-            ReturnType = test.Metadata.MethodInfo?.ReturnType
+            ReturnType = test.Metadata.MethodInfo?.ReturnType ?? typeof(Task),
+            ClassMetadata = classMetadata,
+            MethodMetadata = methodMetadata
         };
         
         // Add categories

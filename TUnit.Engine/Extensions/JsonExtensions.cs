@@ -55,11 +55,11 @@ public static class JsonExtensions
             ReturnType = testDetails.ReturnType?.FullName ?? "void",
             TestId = testDetails.TestId,
             TestName = testDetails.TestName,
-            TestClassArguments = TestDetails.ClassMetadataArguments,
+            TestClassArguments = testDetails.TestClassArguments,
             TestFilePath = testDetails.TestFilePath,
             TestLineNumber = testDetails.TestLineNumber,
             TestMethodArguments = testDetails.TestMethodArguments,
-            TestClassParameterTypes = TestDetails.ClassMetadataParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? Array.Empty<string>(),
+            TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? Array.Empty<string>(),
             TestMethodParameterTypes = testDetails.TestMethodParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? Array.Empty<string>(),
         };
     }

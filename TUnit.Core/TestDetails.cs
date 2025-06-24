@@ -17,11 +17,11 @@ public class TestDetails
     public string? DisplayName { get; set; }
     
     // Added for compatibility
-    public MethodMetadata? MethodMetadata { get; set; }
-    public ClassMetadata? ClassMetadata { get; set; }
+    public required MethodMetadata MethodMetadata { get; set; }
+    public required ClassMetadata ClassMetadata { get; set; }
     public string TestFilePath { get; set; } = "";
     public int TestLineNumber { get; set; }
-    public Type? ReturnType { get; set; }
+    public required Type ReturnType { get; set; }
     public IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; } = new Dictionary<string, object?>();
     public Type[]? TestMethodParameterTypes { get; set; }
     public List<string> Categories { get; } = new List<string>();
