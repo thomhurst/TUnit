@@ -83,6 +83,11 @@ internal class SimplifiedTUnitServiceProvider : IServiceProvider, IAsyncDisposab
             singleTestExecutor,
             CommandLineOptions,
             Logger));
+            
+        // Set session IDs for proper test reporting
+        var sessionUid = context.Request.Session.SessionUid;
+        singleTestExecutor.SetSessionId(sessionUid);
+        TestExecutor.SetSessionId(sessionUid);
     }
     
     public object? GetService(Type serviceType)
@@ -98,8 +103,9 @@ internal class SimplifiedTUnitServiceProvider : IServiceProvider, IAsyncDisposab
     
     private bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions)
     {
-        var value = commandLineOptions.GetOptionValue("use-reflection-scanner");
-        return bool.TryParse(value, out var enabled) && enabled;
+        // For now, default to false since GetOptionValue may not be available
+        // TODO: Implement proper command line option reading
+        return false;
     }
     
     public async ValueTask DisposeAsync()

@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Threading.Tasks;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -6,8 +7,9 @@ public class RunOnDiscoveryAttribute : TUnitAttribute, ITestDiscoveryEventReceiv
 {
     public int Order => 0;
 
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(TestContext testContext)
     {
-        discoveredTestContext.RunOnTestDiscovery = true;
+        testContext.RunOnTestDiscovery = true;
+        return default;
     }
 }

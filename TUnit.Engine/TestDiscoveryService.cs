@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 
@@ -14,11 +16,19 @@ namespace TUnit.Engine;
 /// <summary>
 /// Streamlined test discovery service that directly loads test metadata from sources
 /// </summary>
-public sealed class TestDiscoveryService : ITestDiscoverer
+public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
 {
     private readonly ITestMetadataSource[] _sources;
     private readonly TestFactory _testFactory;
     private readonly bool _enableDynamicDiscovery;
+    
+    public string Uid => "TUnit";
+    public string Version => "1.0.0";
+    public string DisplayName => "TUnit Test Discovery";
+    public string Description => "TUnit Test Discovery Service";
+    public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
+    
+    public Task<bool> IsEnabledAsync() => Task.FromResult(true);
     
     public TestDiscoveryService(
         ITestMetadataSource[] sources,
@@ -100,14 +110,13 @@ public sealed class TestDiscoveryService : ITestDiscoverer
         var properties = new PropertyBag();
         
         // Add standard properties
-        properties.Add(TestNodeProperties.FullyQualifiedName, test.TestId);
-        properties.Add(TestNodeProperties.DisplayName, test.DisplayName);
+        properties.Add(new KeyValuePairStringProperty(TestNodeProperties.FullyQualifiedName, test.TestId));
+        properties.Add(new KeyValuePairStringProperty(TestNodeProperties.DisplayName, test.DisplayName));
         
         // Add location info if available
         if (test.Metadata.FilePath != null)
         {
-            properties.Add(TestNodeProperties.TestFileLocation, 
-                new TestFileLocationProperty(
+            properties.Add(new TestFileLocationProperty(
                     test.Metadata.FilePath,
                     new LinePositionSpan(
                         new LinePosition(test.Metadata.LineNumber ?? 0, 0),
@@ -117,8 +126,10 @@ public sealed class TestDiscoveryService : ITestDiscoverer
         // Add categories
         if (test.Metadata.Categories.Length > 0)
         {
-            properties.Add(TestNodeProperties.Traits, 
-                test.Metadata.Categories.Select(c => new Trait("Category", c)).ToArray());
+            foreach (var category in test.Metadata.Categories)
+            {
+                properties.Add(new KeyValuePairStringProperty("Category", category));
+            }
         }
         
         return new TestNode
@@ -153,39 +164,15 @@ public sealed class TestDiscoveryService : ITestDiscoverer
         }
     }
     
-    private async Task<IEnumerable<TestMetadata>> DiscoverTestsDynamically()
+    private Task<IEnumerable<TestMetadata>> DiscoverTestsDynamically()
     {
         // This would use reflection to find tests in assemblies
         // Only used for dynamic scenarios where source generation isn't available
-        return Array.Empty<TestMetadata>();
+        return Task.FromResult<IEnumerable<TestMetadata>>(Array.Empty<TestMetadata>());
     }
 }
 
-/// <summary>
-/// Source of test metadata
-/// </summary>
-public interface ITestMetadataSource
-{
-    Task<IEnumerable<TestMetadata>> GetTestMetadata();
-}
 
-/// <summary>
-/// Source-generated test metadata source
-/// </summary>
-public sealed class SourceGeneratedTestMetadataSource : ITestMetadataSource
-{
-    private readonly Func<IEnumerable<TestMetadata>> _metadataProvider;
-    
-    public SourceGeneratedTestMetadataSource(Func<IEnumerable<TestMetadata>> metadataProvider)
-    {
-        _metadataProvider = metadataProvider;
-    }
-    
-    public Task<IEnumerable<TestMetadata>> GetTestMetadata()
-    {
-        return Task.FromResult(_metadataProvider());
-    }
-}
 
 /// <summary>
 /// Assembly-based test metadata source for dynamic discovery

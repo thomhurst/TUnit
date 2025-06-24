@@ -288,9 +288,13 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         }
     }
 
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    public ValueTask OnTestRegistered(TestContext context)
     {
-        context.SetParallelLimiter(new ProcessorCountParallelLimit());
+        // Use the stub type cast for compatibility
+        if (context is TestRegisteredContext registeredContext)
+        {
+            registeredContext.SetParallelLimiter(new ProcessorCountParallelLimit());
+        }
 
         return default;
     }

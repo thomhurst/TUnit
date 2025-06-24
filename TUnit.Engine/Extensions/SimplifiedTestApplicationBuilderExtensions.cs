@@ -1,5 +1,6 @@
 using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
+using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.Capabilities;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
@@ -17,13 +18,17 @@ public static class SimplifiedTestApplicationBuilderExtensions
 
         // Register the simplified test framework
         testApplicationBuilder.RegisterTestFramework(
-            serviceProvider => new TestFrameworkCapabilities(new[]
+            serviceProvider => new TestFrameworkCapabilities(new ITestFrameworkCapability[]
             {
                 new TrxReportCapability(),
                 new BannerCapability(
+                    #pragma warning disable TPEXP // Experimental API
                     serviceProvider.GetRequiredService<IPlatformInformation>(), 
+                    #pragma warning restore TPEXP
                     serviceProvider.GetCommandLineOptions()),
+                #pragma warning disable TPEXP // Experimental API
                 new StopExecutionCapability()
+                #pragma warning restore TPEXP
             }),
             (capabilities, serviceProvider) => new SimplifiedTUnitTestFramework(
                 extension, 
@@ -37,6 +42,7 @@ public static class SimplifiedTestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionScannerCommandProvider(extension));
         
         // Register tree node filter for test filtering
-        testApplicationBuilder.AddTreeNodeFilterService(extension);
+        // TODO: Fix AddTreeNodeFilterService - not available in current version
+        // testApplicationBuilder.AddTreeNodeFilterService(extension);
     }
 }

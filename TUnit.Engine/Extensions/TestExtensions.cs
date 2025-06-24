@@ -9,7 +9,7 @@ internal static class TestExtensions
 {
     internal static TestNode ToTestNode(this TestContext testContext)
     {
-        var testDetails = testContext.TestDetails;
+        var testDetails = testContext.TestDetails ?? throw new ArgumentNullException(nameof(testContext.TestDetails));
 
         var testNode = new TestNode
         {
@@ -17,19 +17,18 @@ internal static class TestExtensions
             DisplayName = testContext.GetTestDisplayName(),
             Properties = new PropertyBag(
             [
-                new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan
-                {
-                    Start = new LinePosition(testDetails.TestLineNumber, 0),
-                    End = new LinePosition(testDetails.TestLineNumber, 0)
-                }),
+                new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
+                    new LinePosition(testDetails.TestLineNumber, 0),
+                    new LinePosition(testDetails.TestLineNumber, 0)
+                )),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.ClassMetadata.Type.Namespace ?? "GlobalNamespace",
-                    AssemblyFullName: testDetails.ClassMetadata.Type.Assembly.FullName ?? "UnknownAssembly",
+                    Namespace: testDetails.ClassMetadata?.Type.Namespace ?? testDetails.ClassType?.Namespace ?? "GlobalNamespace",
+                    AssemblyFullName: testDetails.ClassMetadata?.Type.Assembly.FullName ?? testDetails.ClassType?.Assembly.FullName ?? "UnknownAssembly",
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
-                    ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
-                    ReturnTypeFullName: testDetails.ReturnType.FullName!,
-                    MethodArity: testDetails.MethodMetadata.GenericTypeCount
+                    ParameterTypeFullNames: testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? Array.Empty<string>(),
+                    ReturnTypeFullName: testDetails.ReturnType?.FullName ?? "void",
+                    MethodArity: testDetails.MethodMetadata?.GenericTypeCount ?? 0
                     ),
 
                 // Custom TUnit Properties
@@ -37,10 +36,14 @@ internal static class TestExtensions
                 ..ExtractProperties(testDetails),
 
                 // Artifacts
-                ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
+                ..testContext.Artifacts.Where(x => x.Value is FileArtifact).Select(x => 
+                {
+                    var artifact = (FileArtifact)x.Value!;
+                    return new FileArtifactProperty(new System.IO.FileInfo(artifact.File), artifact.DisplayName, artifact.Description);
+                }),
 
                 // TRX Report Properties
-                new TrxFullyQualifiedTypeNameProperty(testDetails.ClassMetadata.Type.FullName!),
+                new TrxFullyQualifiedTypeNameProperty(testDetails.ClassMetadata?.Type.FullName ?? testDetails.ClassType?.FullName ?? "UnknownType"),
                 new TrxCategoriesProperty([..testDetails.Categories]),
             ])
         };

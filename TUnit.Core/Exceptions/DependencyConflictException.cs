@@ -8,6 +8,6 @@ public class DependencyConflictException : TUnitException
 
     private static string GetMessage(List<TestDetails> testChain)
     {
-        return $"DependsOn Conflict: {string.Join(" > ", testChain.Select(x => $"{x.MethodMetadata.Class.Name}.{x.TestName}"))}";
+        return $"DependsOn Conflict: {string.Join(" > ", testChain.Select(x => $"{x.MethodMetadata?.Class?.Name ?? x.ClassType?.Name ?? "Unknown"}.{x.TestName}"))}";
     }
 }

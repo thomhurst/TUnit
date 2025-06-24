@@ -2,13 +2,18 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
+using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 
 namespace TUnit.Engine;
@@ -16,12 +21,13 @@ namespace TUnit.Engine;
 /// <summary>
 /// Simplified test executor that works directly with ExecutableTest
 /// </summary>
-public sealed class UnifiedTestExecutor : ITestExecutor
+public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
 {
     private readonly ISingleTestExecutor _singleTestExecutor;
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitFrameworkLogger _logger;
     private readonly int _maxParallelism;
+    private SessionUid? _sessionUid;
     
     public UnifiedTestExecutor(
         ISingleTestExecutor singleTestExecutor,
@@ -32,6 +38,23 @@ public sealed class UnifiedTestExecutor : ITestExecutor
         _commandLineOptions = commandLineOptions;
         _logger = logger;
         _maxParallelism = GetMaxParallelism();
+    }
+    
+    // IDataProducer implementation
+    public string Uid => "TUnit.UnifiedTestExecutor";
+    public string Version => "1.0.0";
+    public string DisplayName => "TUnit Test Executor";
+    public string Description => "Unified test executor for TUnit";
+    public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
+    
+    public Task<bool> IsEnabledAsync() => Task.FromResult(true);
+    
+    /// <summary>
+    /// Sets the session ID for test reporting
+    /// </summary>
+    public void SetSessionId(SessionUid sessionUid)
+    {
+        _sessionUid = sessionUid;
     }
     
     /// <summary>
@@ -115,8 +138,9 @@ public sealed class UnifiedTestExecutor : ITestExecutor
                 break;
             
             // Execute tests with satisfied dependencies
-            while (remaining.TryDequeue(out var test))
+            while (remaining.Count > 0)
             {
+                var test = remaining.Dequeue();
                 await ExecuteSingleTest(test, messageBus, cancellationToken);
                 completed.Add(test.TestId);
             }
@@ -135,7 +159,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor
             // If no progress can be made, we have a circular dependency
             if (remaining.Count == 0 && waiting.Count > 0)
             {
-                _logger.LogError("Circular dependency detected in tests. Skipping remaining tests.");
+                await _logger.LogErrorAsync("Circular dependency detected in tests. Skipping remaining tests.");
                 foreach (var test in waiting)
                 {
                     await ReportTestSkipped(test, "Circular dependency detected", messageBus);
@@ -153,62 +177,45 @@ public sealed class UnifiedTestExecutor : ITestExecutor
         test.State = TestState.Running;
         test.StartTime = DateTimeOffset.UtcNow;
         
+        // Ensure test context is initialized
+        if (test.Context == null)
+        {
+            test.Context = new TestContext(test.TestId, test.DisplayName);
+        }
+        
         // Report test started
         await messageBus.PublishAsync(
             this,
             new TestNodeUpdateMessage(
-                test.TestId,
-                new TestNodeStateProperty(TestNodeState.Running)));
+                _sessionUid ?? new Microsoft.Testing.Platform.TestHost.SessionUid(Guid.NewGuid().ToString()),
+                test.Context.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
         
         try
         {
             // Execute the test
-            await _singleTestExecutor.ExecuteTest(test, cancellationToken);
+            var updateMessage = await _singleTestExecutor.ExecuteTestAsync(test, messageBus, cancellationToken);
             
-            // Report result based on test state
-            var testNodeState = test.State switch
-            {
-                TestState.Passed => TestNodeState.Passed,
-                TestState.Failed => TestNodeState.Failed,
-                TestState.Skipped => TestNodeState.Skipped,
-                TestState.Timeout => TestNodeState.Timeout,
-                _ => TestNodeState.Failed
-            };
-            
-            var properties = new PropertyBag();
-            if (test.Result?.Exception != null)
-            {
-                properties.Add(new FailedTestNodeStateProperty(test.Result.Exception));
-            }
-            
-            if (test.Duration.HasValue)
-            {
-                properties.Add(new DurationProperty(test.Duration.Value));
-            }
-            
-            await messageBus.PublishAsync(
-                this,
-                new TestNodeUpdateMessage(
-                    test.TestId,
-                    new TestNodeStateProperty(testNodeState, properties)));
+            // Publish the result
+            await messageBus.PublishAsync(this, updateMessage);
         }
         catch (Exception ex)
         {
             test.State = TestState.Failed;
             test.Result = new TestResult
             {
-                State = TestState.Failed,
+                Status = Core.Enums.Status.Failed,
+                Start = test.StartTime,
+                End = DateTimeOffset.Now,
+                Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),
                 Exception = ex,
-                Message = $"Test execution failed: {ex.Message}"
+                ComputerName = Environment.MachineName
             };
             
             await messageBus.PublishAsync(
                 this,
                 new TestNodeUpdateMessage(
-                    test.TestId,
-                    new TestNodeStateProperty(
-                        TestNodeState.Failed,
-                        new PropertyBag(new FailedTestNodeStateProperty(ex)))));
+                    _sessionUid ?? new Microsoft.Testing.Platform.TestHost.SessionUid(Guid.NewGuid().ToString()),
+                    test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(ex))));
         }
         finally
         {
@@ -224,17 +231,26 @@ public sealed class UnifiedTestExecutor : ITestExecutor
         test.State = TestState.Skipped;
         test.Result = new TestResult
         {
-            State = TestState.Skipped,
-            Message = reason
+            Status = Core.Enums.Status.Skipped,
+            Start = test.StartTime ?? DateTimeOffset.Now,
+            End = DateTimeOffset.Now,
+            Duration = TimeSpan.Zero,
+            Exception = null,
+            ComputerName = Environment.MachineName,
+            OverrideReason = reason
         };
+        
+        // Ensure test context is initialized
+        if (test.Context == null)
+        {
+            test.Context = new TestContext(test.TestId, test.DisplayName);
+        }
         
         await messageBus.PublishAsync(
             this,
             new TestNodeUpdateMessage(
-                test.TestId,
-                new TestNodeStateProperty(
-                    TestNodeState.Skipped,
-                    new PropertyBag(new SkippedTestNodeStateProperty(reason)))));
+                _sessionUid ?? new Microsoft.Testing.Platform.TestHost.SessionUid(Guid.NewGuid().ToString()),
+                test.Context.ToTestNode().WithProperty(new SkippedTestNodeStateProperty(reason))));
     }
     
     private List<ExecutableTest> ApplyFilter(List<ExecutableTest> tests, ITestExecutionFilter filter)
@@ -246,13 +262,8 @@ public sealed class UnifiedTestExecutor : ITestExecutor
     
     private int GetMaxParallelism()
     {
-        // Get from command line options or default to processor count
-        var maxParallelismOption = _commandLineOptions.GetOptionValue("maximum-parallel-tests");
-        if (int.TryParse(maxParallelismOption, out var max) && max > 0)
-        {
-            return max;
-        }
-        
+        // TODO: Get from command line options when API is available
+        // For now, default to processor count
         return Environment.ProcessorCount;
     }
     
@@ -260,7 +271,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor
     /// Implementation of ITestExecutor for Microsoft.Testing.Platform
     /// </summary>
     public async Task ExecuteAsync(
-        ExecuteTestsExecutionRequest request,
+        RunTestExecutionRequest request,
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
@@ -277,174 +288,5 @@ public sealed class UnifiedTestExecutor : ITestExecutor
         
         // Execute tests
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
-    }
-}
-
-/// <summary>
-/// Executes a single test
-/// </summary>
-public interface ISingleTestExecutor
-{
-    Task ExecuteTest(ExecutableTest test, CancellationToken cancellationToken);
-}
-
-/// <summary>
-/// Default implementation of single test executor
-/// </summary>
-public sealed class DefaultSingleTestExecutor : ISingleTestExecutor
-{
-    private readonly TUnitFrameworkLogger _logger;
-    
-    public DefaultSingleTestExecutor(TUnitFrameworkLogger logger)
-    {
-        _logger = logger;
-    }
-    
-    public async Task ExecuteTest(ExecutableTest test, CancellationToken cancellationToken)
-    {
-        object? instance = null;
-        
-        try
-        {
-            // Skip if requested
-            if (test.Metadata.IsSkipped)
-            {
-                test.State = TestState.Skipped;
-                test.Result = new TestResult
-                {
-                    State = TestState.Skipped,
-                    Message = test.Metadata.SkipReason ?? "Test skipped"
-                };
-                return;
-            }
-            
-            // Create context
-            test.Context = new TestContext(test.Metadata.TestName, test.DisplayName);
-            
-            // Run before class hooks
-            var hookContext = new HookContext(test.Context, test.Metadata.TestClassType, null);
-            foreach (var hook in test.Hooks.BeforeClass)
-            {
-                await hook(hookContext);
-            }
-            
-            // Create instance
-            instance = await test.CreateInstance();
-            
-            // Run after class hooks
-            hookContext = new HookContext(test.Context, test.Metadata.TestClassType, instance);
-            foreach (var hook in test.Hooks.AfterClass)
-            {
-                await hook(instance, hookContext);
-            }
-            
-            // Run before test hooks
-            foreach (var hook in test.Hooks.BeforeTest)
-            {
-                await hook(instance, hookContext);
-            }
-            
-            // Execute test with timeout if specified
-            if (test.Metadata.TimeoutMs.HasValue)
-            {
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                cts.CancelAfter(test.Metadata.TimeoutMs.Value);
-                
-                try
-                {
-                    await test.InvokeTest(instance).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
-                {
-                    throw new TimeoutException($"Test exceeded timeout of {test.Metadata.TimeoutMs}ms");
-                }
-            }
-            else
-            {
-                await test.InvokeTest(instance).ConfigureAwait(false);
-            }
-            
-            // Run after test hooks
-            foreach (var hook in test.Hooks.AfterTest)
-            {
-                await hook(instance, hookContext);
-            }
-            
-            // Success
-            test.State = TestState.Passed;
-            test.Result = new TestResult
-            {
-                State = TestState.Passed,
-                Output = test.Context.GetOutput()
-            };
-        }
-        catch (Exception ex)
-        {
-            test.State = TestState.Failed;
-            test.Result = new TestResult
-            {
-                State = TestState.Failed,
-                Exception = ex,
-                Message = ex.Message,
-                Output = test.Context?.GetOutput()
-            };
-            
-            _logger.LogError($"Test {test.DisplayName} failed: {ex}");
-        }
-        finally
-        {
-            // Dispose if necessary
-            if (instance is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-            else if (instance is IAsyncDisposable asyncDisposable)
-            {
-                await asyncDisposable.DisposeAsync();
-            }
-        }
-    }
-}
-
-// Default implementations for dependencies
-public sealed class DefaultTestInvoker : ITestInvoker
-{
-    public async Task InvokeTestMethod(object instance, MethodInfo method, object?[] arguments)
-    {
-        var result = method.Invoke(instance, arguments);
-        if (result is Task task)
-        {
-            await task;
-        }
-    }
-}
-
-public sealed class DefaultHookInvoker : IHookInvoker
-{
-    public async Task InvokeHook(HookMetadata hook, HookContext context)
-    {
-        if (hook.MethodInfo == null) return;
-        
-        var instance = hook.IsStatic ? null : context.TestInstance;
-        var result = hook.MethodInfo.Invoke(instance, new object[] { context });
-        
-        if (result is Task task)
-        {
-            await task;
-        }
-    }
-}
-
-public sealed class DefaultDataSourceResolver : IDataSourceResolver
-{
-    public async Task<IEnumerable<object?[]>> ResolveDataSource(TestDataSource dataSource)
-    {
-        if (dataSource is StaticTestDataSource staticSource)
-        {
-            return staticSource.GetData();
-        }
-        
-        // Dynamic sources would need reflection to resolve
-        return Array.Empty<object?[]>();
     }
 }

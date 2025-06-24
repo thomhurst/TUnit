@@ -12,9 +12,9 @@ public class CultureAttribute(CultureInfo cultureInfo) : TUnitAttribute, ITestRe
     
     public int Order => 0;
 
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    public ValueTask OnTestRegistered(TestContext context)
     {
-        context.DiscoveredTest.TestExecutor = new CultureExecutor(cultureInfo);
+        context.InternalDiscoveredTest!.TestExecutor = new CultureExecutor(cultureInfo);
 
         return default;
     }

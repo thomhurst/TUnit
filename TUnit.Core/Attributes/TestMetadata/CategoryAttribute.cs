@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -58,8 +59,9 @@ public class CategoryAttribute(string category) : TUnitAttribute, ITestDiscovery
     public string Category { get; } = category;
     
     /// <inheritdoc />
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(TestContext testContext)
     {
-        discoveredTestContext.AddCategory(Category);
+        testContext.AddCategory(Category);
+        return default;
     }
 }

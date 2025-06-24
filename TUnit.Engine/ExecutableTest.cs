@@ -130,15 +130,3 @@ public enum TestState
     Cancelled
 }
 
-/// <summary>
-/// Test execution result
-/// </summary>
-public sealed class TestResult
-{
-    public required TestState State { get; init; }
-    public string? Message { get; init; }
-    public Exception? Exception { get; init; }
-    public string? Output { get; init; }
-    public string? ErrorOutput { get; init; }
-    public Dictionary<string, object?> Artifacts { get; init; } = new();
-}

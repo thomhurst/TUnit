@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Threading.Tasks;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -8,9 +9,10 @@ public abstract class ArgumentDisplayFormatterAttribute : TUnitAttribute, ITestD
 
     public abstract ArgumentDisplayFormatter Formatter { get; }
     
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(TestContext testContext)
     {
-        discoveredTestContext.AddArgumentDisplayFormatter(Formatter);
+        testContext.AddArgumentDisplayFormatter(Formatter);
+        return default;
     }
 }
 

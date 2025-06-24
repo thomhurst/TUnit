@@ -9,11 +9,11 @@ public class STAThreadExecutorAttribute : TUnitAttribute, ITestRegisteredEventRe
 {
     public int Order => 0;
 
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    public ValueTask OnTestRegistered(TestContext context)
     {
         var executor = new STAThreadExecutor();
 
-        context.DiscoveredTest.TestExecutor = executor;
+        context.InternalDiscoveredTest!.TestExecutor = executor;
 
         return default;
     }

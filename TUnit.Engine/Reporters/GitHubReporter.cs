@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -82,7 +83,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
         var failed = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable()
-                .Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
+                .Any(p => p is FailedTestNodeStateProperty)).ToArray();
         var cancelled = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
         var timeout = last
@@ -144,12 +145,17 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         {
             var name = testNodeUpdateMessage.TestNode.DisplayName;
 
-            var stateProperty = testNodeUpdateMessage.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
-            
-            if (stateProperty is PassedTestNodeStateProperty)
+            var passedProperty = testNodeUpdateMessage.TestNode.Properties.OfType<PassedTestNodeStateProperty>().FirstOrDefault();
+            if (passedProperty != null)
             {
                 continue;
             }
+            
+            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p => 
+                p is FailedTestNodeStateProperty || 
+                p is SkippedTestNodeStateProperty || 
+                p is TimeoutTestNodeStateProperty || 
+                p is CancelledTestNodeStateProperty);
             
             var status = GetStatus(stateProperty);
 
@@ -157,7 +163,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             
             var timingProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
             
-            var duration = timingProperty?.GlobalTiming.Duration;
+            var duration = timingProperty?.Duration;
             
             stringBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
         }
@@ -187,10 +193,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 #endif
     }
 
-    private string GetDetails(TestNodeStateProperty? stateProperty, PropertyBag properties)
+    private string GetDetails(IProperty? stateProperty, PropertyBag properties)
     {
         if (stateProperty is FailedTestNodeStateProperty 
-            or ErrorTestNodeStateProperty 
             or TimeoutTestNodeStateProperty
             or CancelledTestNodeStateProperty)
         {
@@ -199,43 +204,37 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
         if (stateProperty is SkippedTestNodeStateProperty skippedTestNodeStateProperty)
         {
-            return skippedTestNodeStateProperty.Explanation ?? "Skipped (No reason provided)";
+            return skippedTestNodeStateProperty.Reason ?? "Skipped (No reason provided)";
         }
 
         if (stateProperty is InProgressTestNodeStateProperty)
         {
             var timingProperty = properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
 
-            var start = timingProperty?.GlobalTiming.StartTime;
-            var end = timingProperty?.GlobalTiming.EndTime;
-
-            return $"Start: {start} | End: {end}";
+            return $"Duration: {timingProperty?.Duration}";
         }
         
         return "Unknown Test State";
     }
 
-    private string? GetError(TestNodeStateProperty? stateProperty)
+    private string? GetError(IProperty? stateProperty)
     {
         return stateProperty switch
         {
-            ErrorTestNodeStateProperty errorTestNodeStateProperty => errorTestNodeStateProperty.Exception?.ToString() ??
-                                                                     errorTestNodeStateProperty.Explanation,
             FailedTestNodeStateProperty failedTestNodeStateProperty =>
-                failedTestNodeStateProperty.Exception?.ToString() ?? failedTestNodeStateProperty.Explanation,
-            TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Exception
-                ?.ToString() ?? timeoutTestNodeStateProperty.Explanation,
-            CancelledTestNodeStateProperty cancelledTestNodeStateProperty => cancelledTestNodeStateProperty.Exception?.ToString() ?? cancelledTestNodeStateProperty.Explanation,
+                failedTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
+            TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Message,
+            CancelledTestNodeStateProperty => "Test was cancelled",
             _ => null
         };
     }
 
-    private static string GetStatus(TestNodeStateProperty? stateProperty)
+    private static string GetStatus(IProperty? stateProperty)
     {
         return stateProperty switch
         {
             CancelledTestNodeStateProperty => "Cancelled",
-            ErrorTestNodeStateProperty or FailedTestNodeStateProperty => "Failed",
+            FailedTestNodeStateProperty => "Failed",
             InProgressTestNodeStateProperty => "In Progress (never finished)",
             PassedTestNodeStateProperty => "Passed",
             SkippedTestNodeStateProperty => "Skipped",

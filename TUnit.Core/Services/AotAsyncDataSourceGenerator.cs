@@ -267,7 +267,10 @@ public class AotAsyncDataSourceGenerator
     /// </summary>
     /// <param name="asyncDataSourceType">The type of the AsyncDataSourceGenerator</param>
     /// <returns>True if AOT-safe generation is possible</returns>
-    public bool CanGenerateAotSafe(Type asyncDataSourceType)
+    public bool CanGenerateAotSafe(
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] 
+        Type asyncDataSourceType)
     {
         // Check if type implements the required interface
         if (!typeof(IAsyncDataSourceGeneratorAttribute).IsAssignableFrom(asyncDataSourceType))

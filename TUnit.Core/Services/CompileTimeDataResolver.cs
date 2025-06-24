@@ -166,7 +166,9 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
         // We can resolve any AsyncDataSourceGenerator that the generator can handle
         // This is determined by the generator characteristics (parameterless constructor, not abstract, etc.)
         
+        #pragma warning disable IL2072 // Attribute types are known at compile time
         return _asyncDataSourceGenerator.CanGenerateAotSafe(asyncDataAttr.GetType());
+        #pragma warning restore IL2072
     }
 
     private static bool IsGenericDataSource(IDataAttribute dataAttribute)

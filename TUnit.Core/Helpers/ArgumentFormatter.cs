@@ -4,9 +4,13 @@ internal static class ArgumentFormatter
 {
     public static string GetConstantValue(TestContext testContext, object? o)
     {
-        if (testContext.ArgumentDisplayFormatters.FirstOrDefault(x => x.CanHandle(o)) is { } validFormatter)
+        foreach (var formatter in testContext.ArgumentDisplayFormatters)
         {
-            return validFormatter.FormatValue(o);
+            var result = formatter(o);
+            if (result != null)
+            {
+                return result;
+            }
         }
 
         if (o is null)

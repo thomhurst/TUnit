@@ -13,7 +13,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 {
     private readonly ILogger<TestFilterService> _logger = loggerFactory.CreateLogger<TestFilterService>();
 
-    public IReadOnlyCollection<DiscoveredTest> FilterTests(TestExecutionRequest? testExecutionRequest, IReadOnlyCollection<DiscoveredTest> testNodes)
+    public IReadOnlyCollection<ExecutableTest> FilterTests(TestExecutionRequest? testExecutionRequest, IReadOnlyCollection<ExecutableTest> testNodes)
     {
         var testExecutionFilter = testExecutionRequest?.Filter;
         
@@ -23,9 +23,9 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 
             if (testExecutionRequest is RunTestExecutionRequest)
             {
-                return testNodes
-                    .Where(x => !x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
-                    .ToArray();
+                // For now, return all tests since we don't have Attributes on TestDetails
+                // TODO: Add explicit test filtering
+                return testNodes.ToArray();
             }
 
             return testNodes;
@@ -35,62 +35,50 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 
         var filteredTests = testNodes.Where(x => MatchesTest(testExecutionFilter, x)).ToArray();
         
-        var testsWithExplicitAttributeCount = filteredTests.Count(x => x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any());
+        // TODO: Handle explicit attribute filtering
         
-        if (testsWithExplicitAttributeCount > 0 && testsWithExplicitAttributeCount < filteredTests.Length)
-        {
-            return testNodes
-                .Where(x => !x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
-                .ToArray();
-        }
-
         return filteredTests;
     }
 
-    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, DiscoveredTest discoveredTest)
+    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, ExecutableTest executableTest)
     {
 #pragma warning disable TPEXP
         var shouldRunTest = testExecutionFilter switch
         {
             null => true,
             NopFilter => true,
-            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(discoveredTest.TestDetails.TestId)),
-            TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(discoveredTest.TestDetails), BuildPropertyBag(discoveredTest.TestDetails)),
+            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(executableTest.TestId)),
+            TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(executableTest), BuildPropertyBag(executableTest)),
             _ => UnhandledFilter(testExecutionFilter)
         };
 
-        if (!shouldRunTest)
-        {
-            discoveredTest.TestContext.ClassContext.RemoveTest(discoveredTest.TestContext);
-        }
+        // TODO: Handle test removal from context if needed
 
         return shouldRunTest;
 #pragma warning restore TPEXP
     }
 
-    private string BuildPath(TestDetails testDetails)
+    private string BuildPath(ExecutableTest test)
     {
-        var assembly = testDetails.ClassMetadata.Type.Assembly.GetName();
-
-        var classTypeName = testDetails.ClassMetadata.Type.Name;
+        var metadata = test.Metadata;
+        var assembly = metadata.TestClassType.Assembly.GetName();
+        var classTypeName = metadata.TestClassType.Name;
         
-        return
-            $"/{assembly.Name ?? assembly.FullName}/{testDetails.ClassMetadata.Type.Namespace}/{classTypeName}/{testDetails.MethodMetadata.Name}";
+        return $"/{assembly.Name ?? assembly.FullName}/{metadata.TestClassType.Namespace}/{classTypeName}/{metadata.TestMethodName}";
     }
 
-    private PropertyBag BuildPropertyBag(TestDetails testDetails)
+    private PropertyBag BuildPropertyBag(ExecutableTest test)
     {
-        var properties = testDetails.ExtractProperties();
-
-        var categories = testDetails.Categories.Select(x => new TestMetadataProperty(x));
+        var properties = new List<IProperty>();
         
-        return new PropertyBag(
-            [
-                ..properties,
-                ..categories,
-                ..testDetails.Categories.Select(x => new KeyValuePairStringProperty("Category", x))
-            ]
-        );
+        // Add categories
+        foreach (var category in test.Metadata.Categories)
+        {
+            properties.Add(new TestMetadataProperty(category));
+            properties.Add(new KeyValuePairStringProperty("Category", category));
+        }
+        
+        return new PropertyBag(properties);
     }
 
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)

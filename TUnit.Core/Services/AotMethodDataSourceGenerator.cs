@@ -24,7 +24,11 @@ public class AotMethodDataSourceGenerator
     /// <param name="methodDataSourceAttribute">The MethodDataSource attribute</param>
     /// <param name="declaringType">The type that declares the data source method</param>
     /// <returns>Generated AOT-safe factory code</returns>
-    public string GenerateMethodDataSourceFactory(MethodDataSourceAttribute methodDataSourceAttribute, Type declaringType)
+    public string GenerateMethodDataSourceFactory(
+        MethodDataSourceAttribute methodDataSourceAttribute, 
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] 
+        Type declaringType)
     {
         var methodName = methodDataSourceAttribute.MethodNameProvidingDataSource;
         var dataSourceMethod = FindDataSourceMethod(declaringType, methodName);
@@ -196,7 +200,11 @@ public class AotMethodDataSourceGenerator
     /// <summary>
     /// Finds a data source method on the given type.
     /// </summary>
-    private static System.Reflection.MethodInfo? FindDataSourceMethod(Type declaringType, string methodName)
+    private static System.Reflection.MethodInfo? FindDataSourceMethod(
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] 
+        Type declaringType, 
+        string methodName)
     {
         return declaringType.GetMethod(methodName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
     }
@@ -230,7 +238,11 @@ public class AotMethodDataSourceGenerator
     /// <param name="methodDataSourceAttribute">The MethodDataSource attribute</param>
     /// <param name="declaringType">The type that declares the data source method</param>
     /// <returns>True if AOT-safe generation is possible</returns>
-    public bool CanGenerateAotSafe(MethodDataSourceAttribute methodDataSourceAttribute, Type declaringType)
+    public bool CanGenerateAotSafe(
+        MethodDataSourceAttribute methodDataSourceAttribute, 
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] 
+        Type declaringType)
     {
         var methodName = methodDataSourceAttribute.MethodNameProvidingDataSource;
         var dataSourceMethod = FindDataSourceMethod(declaringType, methodName);

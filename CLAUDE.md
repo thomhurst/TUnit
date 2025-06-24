@@ -59,24 +59,26 @@ npm run build    # Build static site
 
 ## High-Level Architecture
 
-### Core Components
+**Note: TUnit now uses a simplified architecture. See [SIMPLIFIED_ARCHITECTURE.md](docs/SIMPLIFIED_ARCHITECTURE.md) for details.**
+
+### Core Components (Simplified Architecture)
 
 1. **TUnit.Core.SourceGenerator**: Source generators that discover tests at compile-time
-   - Entry: `TestMetadataGenerator` - the clean source generator
-   - Generates only `TestMetadata` data structures, no execution logic
-   - All complex logic is handled by runtime `TestBuilder`
-   - Other generators handle hooks, polyfills, and infrastructure
+   - Entry: `UnifiedTestMetadataGenerator` - generates test metadata and registration
+   - Generates `TestMetadata` instances with AOT-friendly invokers
+   - Creates compile-time test registry for zero-reflection discovery
 
 2. **TUnit.Core**: Core abstractions and attributes
    - Test attributes: `[Test]`, `[Arguments]`, `[Before]`, `[After]`
-   - Interfaces: `IDataAttribute`, `ITestExecutor`, `IHookExecutor`
-   - Context objects: `TestContext`, test state management
-   - **TestBuilder**: Runtime engine that expands TestMetadata into executable tests
-   - **TestMetadata**: Compile-time data structure containing test information
+   - **TestMetadata**: Unified compile-time test representation
+   - **TestContext**: Simplified context for test execution
+   - Interfaces for extensibility: `ITestMetadataSource`, `IDataAttribute`
 
-3. **TUnit.Engine**: Test execution engine
-   - Entry: `TestingPlatformBuilderHook` integrates with Microsoft.Testing.Platform
-   - Discovery: `TUnitTestDiscoverer` → `BaseTestsConstructor` → `TestsCollector`
+3. **TUnit.Engine**: Simplified test execution engine
+   - Entry: `SimplifiedTUnitTestFramework` integrates with Microsoft.Testing.Platform
+   - Discovery: `TestDiscoveryService` → `TestFactory` → `ExecutableTest`
+   - Execution: `UnifiedTestExecutor` with clear parallel/serial paths
+   - Single test execution: `DefaultSingleTestExecutor`
    - Test Building: `TestMetadataSource` → `TestBuilder` → `TestDefinition`
    - Execution: `TestsExecutor` → `SingleTestExecutor` → `TestInvoker`
    - Parallel execution management with dependency resolution

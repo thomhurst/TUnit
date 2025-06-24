@@ -338,7 +338,7 @@ public class SourceGeneratorEnhancer
     {
         var indent = new string(' ', indentLevel * 4);
         var lines = code.Split(new[] { '\n' }, StringSplitOptions.None);
-        return string.Join('\n', lines.Select(line => 
+        return string.Join("\n", lines.Select(line => 
             string.IsNullOrWhiteSpace(line) ? line : indent + line));
     }
 }

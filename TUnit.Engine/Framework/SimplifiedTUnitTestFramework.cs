@@ -116,6 +116,15 @@ internal sealed class SimplifiedTUnitTestFramework : ITestFramework, IDataProduc
         // Discover all tests
         var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
         
+        // Report discovered tests during run (some runners need this)
+        foreach (var test in allTests)
+        {
+            if (context.CancellationToken.IsCancellationRequested)
+                break;
+                
+            await serviceProvider.MessageBus.Discovered(test.Context!);
+        }
+        
         // Execute tests
         await serviceProvider.TestExecutor.ExecuteTests(
             allTests,
@@ -138,11 +147,15 @@ internal sealed class SimplifiedTUnitTestFramework : ITestFramework, IDataProduc
                 }));
     }
 
-    public async Task CloseTestSessionAsync(CloseTestSessionContext context)
+    public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {
         if (ServiceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
             await serviceProvider.DisposeAsync();
         }
+        
+        return new CloseTestSessionResult { IsSuccess = true };
     }
+    
+    public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
 }

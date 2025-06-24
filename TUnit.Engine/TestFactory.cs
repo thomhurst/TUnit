@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
@@ -72,7 +73,7 @@ public sealed class TestFactory
         // Create hooks
         var hooks = CreateHooks(metadata);
         
-        return new ExecutableTest
+        var executableTest = new ExecutableTest
         {
             TestId = testId,
             DisplayName = displayName,
@@ -83,6 +84,11 @@ public sealed class TestFactory
             PropertyValues = propertyValues,
             Hooks = hooks
         };
+        
+        // Create test context for discovery
+        executableTest.Context = CreateTestContext(executableTest);
+        
+        return executableTest;
     }
     
     private async Task<List<(object?[] arguments, string displayText)>> ExpandTestData(TestMetadata metadata)
@@ -158,8 +164,10 @@ public sealed class TestFactory
         // Reflection fallback
         return async () =>
         {
+            #pragma warning disable IL2072 // Test class types are known at compile time through source generation
             var instance = Activator.CreateInstance(metadata.TestClassType) 
-                ?? throw new TestException($"Failed to create instance of {metadata.TestClassType}");
+                ?? throw new InvalidOperationException($"Failed to create instance of {metadata.TestClassType}");
+            #pragma warning restore IL2072
             await InjectProperties(instance, propertyValues);
             return instance;
         };
@@ -176,7 +184,7 @@ public sealed class TestFactory
         // Reflection fallback
         if (metadata.MethodInfo == null)
         {
-            throw new TestException($"No invoker or MethodInfo available for test {metadata.TestName}");
+            throw new InvalidOperationException($"No invoker or MethodInfo available for test {metadata.TestName}");
         }
         
         return instance => _testInvoker.InvokeTestMethod(instance, metadata.MethodInfo, arguments);
@@ -186,58 +194,57 @@ public sealed class TestFactory
     {
         return new TestLifecycleHooks
         {
-            BeforeClass = CreateHookInvokers(metadata.Hooks.BeforeClass, requiresInstance: false),
-            AfterClass = CreateHookInvokers(metadata.Hooks.AfterClass, requiresInstance: true),
-            BeforeTest = CreateHookInvokers(metadata.Hooks.BeforeTest, requiresInstance: true),
-            AfterTest = CreateHookInvokers(metadata.Hooks.AfterTest, requiresInstance: true)
+            BeforeClass = CreateBeforeClassHookInvokers(metadata.Hooks.BeforeClass),
+            AfterClass = CreateInstanceHookInvokers(metadata.Hooks.AfterClass),
+            BeforeTest = CreateInstanceHookInvokers(metadata.Hooks.BeforeTest),
+            AfterTest = CreateInstanceHookInvokers(metadata.Hooks.AfterTest)
         };
     }
     
-    private Func<HookContext, Task>[] CreateHookInvokers(HookMetadata[] hooks, bool requiresInstance)
+    private Func<HookContext, Task>[] CreateBeforeClassHookInvokers(HookMetadata[] hooks)
     {
-        if (requiresInstance)
+        return hooks.Select(h => new Func<HookContext, Task>(async context =>
         {
-            // These will be cast to Func<object, HookContext, Task> at usage
-            return hooks
-                .OrderBy(h => h.Order)
-                .Select(h => CreateHookInvoker(h))
-                .Cast<Func<HookContext, Task>>()
-                .ToArray();
-        }
-        
-        return hooks
-            .OrderBy(h => h.Order)
-            .Select(h => CreateHookInvoker(h))
-            .ToArray();
+            if (h.Invoker != null)
+            {
+                await h.Invoker(null, context);
+            }
+            else if (h.MethodInfo != null)
+            {
+                await _hookInvoker.InvokeHookAsync(null, h.MethodInfo, context);
+            }
+        })).ToArray();
     }
     
-    private Func<HookContext, Task> CreateHookInvoker(HookMetadata hook)
+    private Func<object, HookContext, Task>[] CreateInstanceHookInvokers(HookMetadata[] hooks)
     {
-        if (hook.Invoker != null)
+        return hooks.Select(h => new Func<object, HookContext, Task>(async (instance, context) =>
         {
-            // AOT-safe path
-            return context => hook.Invoker(null, context);
-        }
-        
-        // Reflection fallback
-        if (hook.MethodInfo == null)
-        {
-            throw new TestException($"No invoker or MethodInfo available for hook {hook.Name}");
-        }
-        
-        return context => _hookInvoker.InvokeHook(hook, context);
+            if (h.Invoker != null)
+            {
+                await h.Invoker(instance, context);
+            }
+            else if (h.MethodInfo != null)
+            {
+                await _hookInvoker.InvokeHookAsync(instance, h.MethodInfo, context);
+            }
+        })).ToArray();
     }
     
-    private async Task InjectProperties(object instance, Dictionary<string, object?> propertyValues)
+    
+    private Task InjectProperties(object instance, Dictionary<string, object?> propertyValues)
     {
-        foreach (var (propName, value) in propertyValues)
+        foreach (var kvp in propertyValues)
         {
-            var property = instance.GetType().GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
+            #pragma warning disable IL2075 // Test instance types are known at compile time
+            var property = instance.GetType().GetProperty(kvp.Key, BindingFlags.Public | BindingFlags.Instance);
+            #pragma warning restore IL2075
             if (property?.CanWrite == true)
             {
-                property.SetValue(instance, value);
+                property.SetValue(instance, kvp.Value);
             }
         }
+        return Task.CompletedTask;
     }
     
     private static string GenerateTestId(TestMetadata metadata, object?[] arguments, Dictionary<string, object?> propertyValues)
@@ -291,6 +298,39 @@ public sealed class TestFactory
             bool b => b.ToString().ToLower(),
             _ => arg.ToString() ?? "null"
         };
+    }
+    
+    private TestContext CreateTestContext(ExecutableTest test)
+    {
+        var testDetails = new TestDetails
+        {
+            TestId = test.TestId,
+            TestName = test.Metadata.TestName,
+            ClassType = test.Metadata.TestClassType,
+            MethodName = test.Metadata.TestMethodName,
+            ClassInstance = null, // Will be set during execution
+            TestMethodArguments = test.Arguments,
+            TestClassArguments = Array.Empty<object?>(),
+            DisplayName = test.DisplayName,
+            TestFilePath = test.Metadata.FilePath ?? "Unknown",
+            TestLineNumber = test.Metadata.LineNumber ?? 0,
+            TestMethodParameterTypes = test.Metadata.ParameterTypes,
+            ReturnType = test.Metadata.MethodInfo?.ReturnType
+        };
+        
+        // Add categories
+        foreach (var category in test.Metadata.Categories)
+        {
+            testDetails.Categories.Add(category);
+        }
+        
+        var context = new TestContext(test.Metadata.TestName, test.DisplayName)
+        {
+            TestDetails = testDetails,
+            CancellationToken = CancellationToken.None
+        };
+        
+        return context;
     }
     
     private static IEnumerable<List<object?[]>> CartesianProduct(List<IEnumerable<object?[]>> sets)
@@ -357,28 +397,4 @@ public sealed class TestFactory
         
         return results;
     }
-}
-
-/// <summary>
-/// Resolves test data sources
-/// </summary>
-public interface IDataSourceResolver
-{
-    Task<IEnumerable<object?[]>> ResolveDataSource(TestDataSource dataSource);
-}
-
-/// <summary>
-/// Invokes test methods
-/// </summary>
-public interface ITestInvoker
-{
-    Task InvokeTestMethod(object instance, MethodInfo method, object?[] arguments);
-}
-
-/// <summary>
-/// Invokes hook methods
-/// </summary>
-public interface IHookInvoker
-{
-    Task InvokeHook(HookMetadata hook, HookContext context);
 }

@@ -8,7 +8,7 @@ using LogLevel = TUnit.Core.Logging.LogLevel;
 
 namespace TUnit.Engine.Logging;
 
-internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, ICommandLineOptions commandLineOptions)
+public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, ICommandLineOptions commandLineOptions)
     : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
 {
     private readonly bool _hideTestOutput = commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput);
@@ -83,5 +83,15 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
     public bool IsEnabled(LogLevel logLevel)
     {
         return !_hideTestOutput && logger.IsEnabled(MTPLoggerAdapter.Map(logLevel));
+    }
+    
+    public async Task LogErrorAsync(string message)
+    {
+        await LogAsync(LogLevel.Error, message, null, (s, _) => s);
+    }
+    
+    public async Task LogErrorAsync(Exception exception)
+    {
+        await LogAsync(LogLevel.Error, exception.Message, exception, (s, e) => e?.ToString() ?? s);
     }
 }

@@ -57,7 +57,9 @@
       "Bash(awk:*)",
       "Bash(dotnet exec:*)",
       "Bash(mkdir:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(./remove_old_files.sh)",
+      "Bash(./bin/Release/net8.0/SimplifiedArchitectureTest:*)"
     ],
     "deny": []
   }

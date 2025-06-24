@@ -57,7 +57,7 @@ internal static class Timings
             var stepTimings = testContext.Timings.Select(x =>
                 new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
 
-            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [.. stepTimings]);
+            return new TimingProperty(end - overallStart);
         }
     }
 }

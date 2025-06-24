@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Threading.Tasks;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -44,8 +45,12 @@ public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITest
     public TimeSpan Timeout { get; } = TimeSpan.FromMilliseconds(timeoutInMilliseconds);
     
     /// <inheritdoc />
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(TestContext testContext)
     {
-        discoveredTestContext.TestDetails.Timeout = Timeout;
+        if (testContext.TestDetails != null)
+        {
+            testContext.TestDetails.Timeout = Timeout;
+        }
+        return default;
     }
 }

@@ -47,7 +47,7 @@ namespace TUnit.Core;
 public sealed class RunOnAttribute(OS OperatingSystem) : SkipAttribute($"Test is restricted to run on the following operating systems: `{OperatingSystem}`.")
 {
     /// <inheritdoc />
-    public override Task<bool> ShouldSkip(BeforeTestContext context)
+    public override Task<bool> ShouldSkip(TestContext context)
     {
         // Check if the current platform matches any of the allowed operating systems
         bool shouldRun =

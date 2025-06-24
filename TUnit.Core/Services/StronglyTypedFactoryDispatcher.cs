@@ -148,10 +148,24 @@ public class StronglyTypedFactoryDispatcher
             await task;
             
             // Extract result from Task<T> if present
-            if (task.GetType().IsGenericType && task.GetType().GetGenericTypeDefinition() == typeof(Task<>))
+            var taskType = task.GetType();
+            if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>))
             {
-                var resultProperty = task.GetType().GetProperty("Result");
-                return resultProperty?.GetValue(task);
+                // Get Result property in an AOT-safe way
+                #pragma warning disable IL2075 // Task<T> type is known
+                var resultProperty = taskType.GetProperty("Result");
+                #pragma warning restore IL2075
+                if (resultProperty != null)
+                {
+                    try
+                    {
+                        return resultProperty.GetValue(task);
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                }
             }
             
             return null; // Task (void)

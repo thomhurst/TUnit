@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -107,8 +108,8 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("RegisterAllTests();");
                 writer.AppendLine();
                 writer.AppendLine("// Register with the discovery service");
-                writer.AppendLine("var source = new SourceGeneratedTestMetadataSource(() => _allTests);");
-                writer.AppendLine("TestMetadataRegistry.RegisterSource(source);");
+                writer.AppendLine("var source = new global::TUnit.Engine.SourceGeneratedTestMetadataSource(() => _allTests);");
+                writer.AppendLine("global::TUnit.Engine.TestMetadataRegistry.RegisterSource(source);");
             }
             
             writer.AppendLine();
@@ -129,10 +130,13 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine();
             
             // Generate helper methods for each test class
-            var testClasses = validTests.Where(t => t != null).GroupBy(t => t!.TypeSymbol);
+            var testClasses = validTests.Where(t => t != null).GroupBy(t => t!.TypeSymbol, SymbolEqualityComparer.Default);
             foreach (var classGroup in testClasses)
             {
-                GenerateTestClassHelpers(writer, classGroup.Key, classGroup.ToList());
+                if (classGroup.Key is INamedTypeSymbol namedType)
+                {
+                    GenerateTestClassHelpers(writer, namedType, classGroup.ToList());
+                }
             }
         }
         
@@ -364,7 +368,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     {
         writer.AppendLine("DataSources = new TestDataSource[]");
         writer.AppendLine("{");
-        writer.IncreaseIndent();
+        writer.Indent();
         
         // Arguments attributes
         var argumentsAttributes = testInfo.MethodSymbol.GetAttributes()
@@ -373,9 +377,9 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         foreach (var attr in argumentsAttributes)
         {
             writer.AppendLine("new StaticTestDataSource(");
-            writer.IncreaseIndent();
-            writer.AppendLine($"new object?[] {{ {FormatAttributeArguments(attr)} }}");
-            writer.DecreaseIndent();
+            writer.Indent();
+            writer.AppendLine($"new object?[][] {{ new object?[] {{ {FormatAttributeArguments(attr)} }} }}");
+            writer.Unindent();
             writer.AppendLine("),");
         }
         
@@ -388,7 +392,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             GenerateDynamicDataSource(writer, attr);
         }
         
-        writer.DecreaseIndent();
+        writer.Unindent();
         writer.AppendLine("},");
     }
     
@@ -403,22 +407,22 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine("PropertyDataSources = new PropertyDataSource[]");
             writer.AppendLine("{");
-            writer.IncreaseIndent();
+            writer.Indent();
             
             foreach (var prop in properties)
             {
                 var dataSourceAttr = prop.GetAttributes().First(a => a.AttributeClass?.Name?.EndsWith("DataSourceAttribute") == true);
                 writer.AppendLine("new PropertyDataSource");
                 writer.AppendLine("{");
-                writer.IncreaseIndent();
+                writer.Indent();
                 writer.AppendLine($"PropertyName = \"{prop.Name}\",");
                 writer.AppendLine($"PropertyType = typeof({prop.Type.ToDisplayString()}),");
                 writer.AppendLine("DataSource = // Generate based on attribute");
-                writer.DecreaseIndent();
+                writer.Unindent();
                 writer.AppendLine("},");
             }
             
-            writer.DecreaseIndent();
+            writer.Unindent();
             writer.AppendLine("},");
         }
         else
@@ -446,7 +450,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     {
         writer.AppendLine("Hooks = new TestHooks");
         writer.AppendLine("{");
-        writer.IncreaseIndent();
+        writer.Indent();
         
         // Generate each hook type
         writer.AppendLine("BeforeClass = Array.Empty<HookMetadata>(),");
@@ -454,7 +458,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("BeforeTest = Array.Empty<HookMetadata>(),");
         writer.AppendLine("AfterTest = Array.Empty<HookMetadata>()");
         
-        writer.DecreaseIndent();
+        writer.Unindent();
         writer.AppendLine("},");
     }
     
@@ -462,7 +466,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     {
         writer.AppendLine("new DynamicTestDataSource");
         writer.AppendLine("{");
-        writer.IncreaseIndent();
+        writer.Indent();
         
         // Extract source type and member name from attribute
         if (attr.ConstructorArguments.Length >= 2)
@@ -478,13 +482,28 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             }
         }
         
-        writer.DecreaseIndent();
+        writer.Unindent();
         writer.AppendLine("},");
     }
     
     private static string FormatAttributeArguments(AttributeData attr)
     {
-        var args = attr.ConstructorArguments.Select(arg => FormatAttributeArgument(arg.Value));
+        var args = new List<string>();
+        foreach (var arg in attr.ConstructorArguments)
+        {
+            if (arg.Kind == TypedConstantKind.Array)
+            {
+                // Handle params array
+                foreach (var item in arg.Values)
+                {
+                    args.Add(FormatAttributeArgument(item.Value));
+                }
+            }
+            else
+            {
+                args.Add(FormatAttributeArgument(arg.Value));
+            }
+        }
         return string.Join(", ", args);
     }
     
@@ -515,7 +534,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 var category = attr.ConstructorArguments[0].Value?.ToString();
                 if (!string.IsNullOrEmpty(category))
                 {
-                    categories.Add(category);
+                    categories.Add(category!);
                 }
             }
         }
