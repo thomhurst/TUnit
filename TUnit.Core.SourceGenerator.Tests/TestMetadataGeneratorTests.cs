@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 using Xunit;
+using TUnit.Core.SourceGenerator;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
@@ -25,7 +26,7 @@ public class TestClass
         
         await Assert.That(diagnostics).IsEmpty();
         
-        var generator = new TestMetadataGenerator();
+        var generator = new UnifiedTestMetadataGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var generatorDiagnostics);
@@ -35,10 +36,10 @@ public class TestClass
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify key elements are generated
-        await Assert.That(generatedSource.Contains("TestMetadataRegistry")).IsTrue();
-        await Assert.That(generatedSource.Contains("CreateTestMetadata_0")).IsTrue();
+        await Assert.That(generatedSource.Contains("UnifiedTestMetadataRegistry")).IsTrue();
+        await Assert.That(generatedSource.Contains("new TestMetadata")).IsTrue();
         await Assert.That(generatedSource.Contains("TestClass.SimpleTest")).IsTrue();
-        await Assert.That(generatedSource.Contains("TestSourceRegistrar.RegisterMetadata")).IsTrue();
+        await Assert.That(generatedSource.Contains("TestMetadataRegistry.RegisterSource")).IsTrue();
     }
     
     [Fact]
@@ -59,7 +60,7 @@ public class TestClass
 
         var (compilation, _) = await CreateCompilationAsync(source);
         
-        var generator = new TestMetadataGenerator();
+        var generator = new UnifiedTestMetadataGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
@@ -67,9 +68,9 @@ public class TestClass
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify data sources are generated
-        await Assert.That(generatedSource.Contains("InlineDataSourceProvider(1, 2, 3)")).IsTrue();
-        await Assert.That(generatedSource.Contains("InlineDataSourceProvider(4, 5, 6)")).IsTrue();
-        await Assert.That(generatedSource.Contains("GetMethodDataSources_0")).IsTrue();
+        await Assert.That(generatedSource.Contains("StaticTestDataSource")).IsTrue();
+        await Assert.That(generatedSource.Contains("new object[] { 1, 2, 3 }")).IsTrue();
+        await Assert.That(generatedSource.Contains("new object[] { 4, 5, 6 }")).IsTrue();
     }
     
     [Fact]
@@ -96,7 +97,7 @@ public class TestClass
 
         var (compilation, _) = await CreateCompilationAsync(source);
         
-        var generator = new TestMetadataGenerator();
+        var generator = new UnifiedTestMetadataGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
@@ -104,7 +105,7 @@ public class TestClass
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify method data source is generated
-        await Assert.That(generatedSource.Contains("MethodDataSourceProvider")).IsTrue();
+        await Assert.That(generatedSource.Contains("DynamicTestDataSource")).IsTrue();
         await Assert.That(generatedSource.Contains("GetTestData")).IsTrue();
     }
     
@@ -126,7 +127,7 @@ public class TestClass
 
         var (compilation, _) = await CreateCompilationAsync(source);
         
-        var generator = new TestMetadataGenerator();
+        var generator = new UnifiedTestMetadataGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
@@ -134,8 +135,8 @@ public class TestClass
         var generatedSource = outputCompilation.SyntaxTrees.Last().ToString();
         
         // Verify repeat and timeout are generated
-        await Assert.That(generatedSource.Contains("RepeatCount = 5")).IsTrue();
-        await Assert.That(generatedSource.Contains("Timeout = TimeSpan.FromMilliseconds(1000)")).IsTrue();
+        await Assert.That(generatedSource.Contains("RetryCount = 5")).IsTrue();
+        await Assert.That(generatedSource.Contains("TimeoutMs = 1000")).IsTrue();
     }
     
     [Fact]
@@ -155,7 +156,7 @@ public class TestClass
 
         var (compilation, _) = await CreateCompilationAsync(source);
         
-        var generator = new TestMetadataGenerator();
+        var generator = new UnifiedTestMetadataGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
         
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
