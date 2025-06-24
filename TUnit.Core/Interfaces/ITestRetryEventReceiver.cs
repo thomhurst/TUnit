@@ -2,5 +2,5 @@ namespace TUnit.Core.Interfaces;
 
 public interface ITestRetryEventReceiver : IEventReceiver
 {
-    ValueTask OnTestRetry(AfterTestContext context, int retryAttempt);
+    ValueTask OnTestRetry(TestContext context, int retryAttempt);
 }

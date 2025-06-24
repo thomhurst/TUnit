@@ -28,14 +28,14 @@ public class DataClass :
     }
 
 
-    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
+    public ValueTask OnTestStart(TestContext beforeTestContext)
     {
         IsStarted = true;
         return default;
     }
 
 
-    public ValueTask OnTestEnd(AfterTestContext testContext)
+    public ValueTask OnTestEnd(TestContext testContext)
     {
         IsEnded = true;
         return default;

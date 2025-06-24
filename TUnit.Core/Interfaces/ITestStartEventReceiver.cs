@@ -10,5 +10,5 @@ public interface ITestStartEventReceiver : IEventReceiver
     /// <summary>
     /// Called when a test starts
     /// </summary>
-    ValueTask OnTestStart(BeforeTestContext context);
+    ValueTask OnTestStart(TestContext context);
 }

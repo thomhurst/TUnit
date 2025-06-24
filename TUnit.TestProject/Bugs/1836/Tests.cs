@@ -25,7 +25,7 @@ public class TestDbContext : IAsyncInitializer, IAsyncDisposable, ITestEndEventR
         return Task.CompletedTask;
     }
 
-    public ValueTask OnTestEnd(AfterTestContext testContext)
+    public ValueTask OnTestEnd(TestContext testContext)
     {
         if (!_isConnectionOpen)
         {

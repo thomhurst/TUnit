@@ -2,5 +2,5 @@
 
 public interface ITestSkippedEventReceiver : IEventReceiver
 {
-    ValueTask OnTestSkipped(TestRegisteredContext context);
+    ValueTask OnTestSkipped(TestContext context);
 }

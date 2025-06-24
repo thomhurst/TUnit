@@ -65,7 +65,8 @@
       "mcp__desktop-commander__read_multiple_files",
       "mcp__desktop-commander__read_file",
       "mcp__desktop-commander__edit_block",
-      "Bash(dotnet format:*)"
+      "Bash(dotnet format:*)",
+      "mcp__desktop-commander__execute_command"
     ],
     "deny": []
   }

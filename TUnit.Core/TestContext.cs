@@ -77,10 +77,6 @@ public class TestContext : Context
     /// </summary>
     public string DisplayName { get; }
     
-    /// <summary>
-    /// Test-specific items/data
-    /// </summary>
-    public Dictionary<string, object?> Items { get; } = new();
     
     
     /// <summary>
@@ -94,6 +90,11 @@ public class TestContext : Context
     public TestDetails TestDetails { get; set; } = null!;
     
     /// <summary>
+    /// Current phase of the test
+    /// </summary>
+    public TestPhase Phase { get; set; } = TestPhase.Execution;
+    
+    /// <summary>
     /// Test result
     /// </summary>
     public TestResult? Result { get; set; }
@@ -102,6 +103,26 @@ public class TestContext : Context
     /// Skip reason if test was skipped
     /// </summary>
     public string? SkipReason { get; set; }
+    
+    /// <summary>
+    /// Parallel limiter for the test
+    /// </summary>
+    public IParallelLimit? ParallelLimiter { get; private set; }
+    
+    /// <summary>
+    /// Display name formatter type
+    /// </summary>
+    public Type? DisplayNameFormatter { get; set; }
+    
+    /// <summary>
+    /// Retry decision function
+    /// </summary>
+    public Func<TestContext, Exception, int, Task<bool>>? ShouldRetryFunc { get; set; }
+    
+    /// <summary>
+    /// Parallel execution constraint
+    /// </summary>
+    public IParallelConstraint? ParallelConstraint { get; set; }
     
     /// <summary>
     /// Class context
@@ -241,6 +262,24 @@ public class TestContext : Context
     /// </summary>
     public void SetParallelLimiter(IParallelLimit parallelLimit)
     {
-        Items["ParallelLimiter"] = parallelLimit;
+        ParallelLimiter = parallelLimit;
+    }
+    
+    /// <summary>
+    /// Adds a cancellation token to be linked with the test's cancellation token
+    /// </summary>
+    public void AddLinkedCancellationToken(CancellationToken cancellationToken)
+    {
+        if (LinkedCancellationTokens == null)
+        {
+            LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+        }
+        else
+        {
+            var existingToken = LinkedCancellationTokens.Token;
+            LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(existingToken, cancellationToken);
+        }
+        
+        CancellationToken = LinkedCancellationTokens.Token;
     }
 }

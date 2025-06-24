@@ -27,11 +27,11 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
         yield return () => new Random().Next();
     }
 
-    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
+    public ValueTask OnTestStart(TestContext testContext)
     {
-        if (!IsReregisteredTest(beforeTestContext.TestContext))
+        if (!IsReregisteredTest(testContext))
         {
-            beforeTestContext.AddLinkedCancellationToken(_cancellationTokenSource.Token);
+            testContext.AddLinkedCancellationToken(_cancellationTokenSource.Token);
         }
 
         return default;
@@ -39,10 +39,8 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
 
     [Experimental("WIP")]
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Dynamic Code Only attribute on test")]
-    public async ValueTask OnTestEnd(AfterTestContext afterTestContext)
+    public async ValueTask OnTestEnd(TestContext testContext)
     {
-        var testContext = afterTestContext.TestContext;
-
         if (testContext.Result?.Status == Status.Failed)
         {
             await _cancellationTokenSource.CancelAsync();

@@ -24,7 +24,7 @@ public class OverrideResultsTests
     
     public class OverridePassAttribute : Attribute, ITestEndEventReceiver
     {
-        public ValueTask OnTestEnd(AfterTestContext afterTestContext)
+        public ValueTask OnTestEnd(TestContext afterTestContext)
         {
             afterTestContext.OverrideResult(Status.Passed, "Because I said so");
             return default;

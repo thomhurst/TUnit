@@ -6,7 +6,7 @@ public class TestRetryEventWrapper(AsyncEvent<(TestContext, int RetryAttempt)>.I
 {
     public int Order => invocation.Order;
 
-    public ValueTask OnTestRetry(AfterTestContext context, int retryAttempt)
+    public ValueTask OnTestRetry(TestContext context, int retryAttempt)
     {
         return invocation.InvokeAsync(sender: this, eventArgs: (context, retryAttempt));
     }

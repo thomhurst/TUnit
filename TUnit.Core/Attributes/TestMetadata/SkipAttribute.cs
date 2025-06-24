@@ -32,8 +32,8 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
     {
         if (await ShouldSkip(context))
         {
-            // Store skip reason in Items to be retrieved during execution
-            context.Items["SkipReason"] = Reason;
+            // Store skip reason directly on TestContext
+            context.TestContext.SkipReason = Reason;
         }
     }
     

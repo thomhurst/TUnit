@@ -15,7 +15,7 @@ public class AfterTestAttributeTests
 
     public class WriteFileAfterTestAttribute : Attribute, ITestEndEventReceiver
     {
-        public async ValueTask OnTestEnd(AfterTestContext testContext)
+        public async ValueTask OnTestEnd(TestContext testContext)
         {
             Console.WriteLine(@"Writing file inside WriteFileAfterTestAttribute!");
 

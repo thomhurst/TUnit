@@ -38,7 +38,7 @@ public class DependencyInjectionClassConstructor2 : IClassConstructor, ITestEndE
         return ActivatorUtilities.GetServiceOrCreateInstance(_scope.ServiceProvider, type);
     }
 
-    public ValueTask OnTestEnd(AfterTestContext testContext)
+    public ValueTask OnTestEnd(TestContext testContext)
     {
         return _scope.DisposeAsync();
     }
