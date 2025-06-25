@@ -431,9 +431,11 @@ public sealed class TestFactory
         var properties = propertyDataMap.Keys.ToList();
         var indices = new int[properties.Count];
         
-        while (true)
+        const int maxIterations = 1_000_000;
+        int iterationCount = 0;
+        
+        while (iterationCount < maxIterations)
         {
-            // Create combination for current indices
             var combination = new Dictionary<string, object?>();
             for (int i = 0; i < properties.Count; i++)
             {
@@ -443,7 +445,6 @@ public sealed class TestFactory
             }
             results.Add(combination);
             
-            // Increment indices
             int position = properties.Count - 1;
             while (position >= 0)
             {
@@ -457,6 +458,12 @@ public sealed class TestFactory
             }
             
             if (position < 0) break;
+            iterationCount++;
+        }
+        
+        if (iterationCount >= maxIterations)
+        {
+            throw new InvalidOperationException($"Property data combination generation exceeded maximum iterations ({maxIterations}). This may indicate an infinite loop or excessively large data set.");
         }
         
         return results;

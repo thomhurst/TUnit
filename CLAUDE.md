@@ -145,3 +145,4 @@ When working on TUnit:
 
 - Remember to use the test filter syntax from the claude instructions, including slashes.
 - Remember to not add redundant comments and instead write self descriptive code.
+- Don't add unnecessary comments

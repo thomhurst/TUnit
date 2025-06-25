@@ -91,12 +91,6 @@ public class AotMethodDataSourceGenerator
         code.AppendLine("    }");
         code.AppendLine();
         
-        // Also generate a sync wrapper for compatibility
-        code.AppendLine($"    public static {returnType} GetData()");
-        code.AppendLine("    {");
-        code.AppendLine("        return GetDataAsync().GetAwaiter().GetResult();");
-        code.AppendLine("    }");
-        code.AppendLine();
     }
 
     /// <summary>
@@ -166,11 +160,6 @@ public class AotMethodDataSourceGenerator
         code.AppendLine("    }");
         code.AppendLine();
 
-        // Generate sync version for compatibility
-        code.AppendLine("    public static IReadOnlyList<object?[]> ResolveAllMethodData()");
-        code.AppendLine("    {");
-        code.AppendLine("        return ResolveAllMethodDataAsync().GetAwaiter().GetResult();");
-        code.AppendLine("    }");
 
         code.AppendLine("}");
         return code.ToString();
