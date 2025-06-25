@@ -66,7 +66,22 @@
       "mcp__desktop-commander__read_file",
       "mcp__desktop-commander__edit_block",
       "Bash(dotnet format:*)",
-      "mcp__desktop-commander__execute_command"
+      "mcp__desktop-commander__execute_command",
+      "Bash(kill:*)",
+      "mcp__serena__activate_project",
+      "mcp__serena__initial_instructions",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__onboarding",
+      "mcp__serena__list_dir",
+      "mcp__serena__read_file",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__find_symbol",
+      "mcp__serena__write_memory",
+      "mcp__serena__think_about_collected_information",
+      "mcp__serena__think_about_whether_you_are_done",
+      "mcp__serena__summarize_changes",
+      "mcp__serena__find_file"
     ],
     "deny": []
   }
