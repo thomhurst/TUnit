@@ -184,7 +184,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             GenerateParameterTypes(writer, testInfo);
             
             // AOT factories (if possible)
-            if (context.CanUseStaticDefinition)
+            if (context.CanUseStaticDefinition && HasParameterlessConstructor(testInfo.TypeSymbol))
             {
                 writer.AppendLine($"InstanceFactory = () => new {context.ClassName}(),");
                 writer.AppendLine($"TestInvoker = {context.SafeClassName}_{context.SafeMethodName}_Invoker,");
@@ -227,7 +227,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         foreach (var testInfo in testMethods)
         {
             var context = TestMetadataGenerationContext.Create(testInfo);
-            if (context.CanUseStaticDefinition)
+            if (context.CanUseStaticDefinition && HasParameterlessConstructor(testInfo.TypeSymbol))
             {
                 GenerateTestInvoker(writer, testInfo, context);
             }
@@ -588,5 +588,24 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
         
         return hooks;
+    }
+    
+    private static bool HasParameterlessConstructor(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+        {
+            return false;
+        }
+        
+        var constructors = namedType.Constructors;
+        
+        // If no constructors are explicitly defined, there's an implicit parameterless constructor
+        if (!constructors.Any() || constructors.All(c => c.IsImplicitlyDeclared))
+        {
+            return true;
+        }
+        
+        // Check if there's an explicit parameterless constructor
+        return constructors.Any(c => c.Parameters.Length == 0 && c.DeclaredAccessibility == Accessibility.Public);
     }
 }

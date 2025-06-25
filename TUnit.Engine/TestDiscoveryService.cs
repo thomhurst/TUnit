@@ -10,6 +10,7 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
 
@@ -67,6 +68,13 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
         {
             var executableTests = await _testFactory.CreateTests(metadata);
             allTests.AddRange(executableTests);
+        }
+        
+        // Register all discovered tests with the registry
+        var registry = TestRegistry.Instance;
+        foreach (var test in allTests)
+        {
+            registry.RegisterTest(test);
         }
         
         // Resolve dependencies between tests

@@ -59,7 +59,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Diagnostics.StackTraceHidden]");
             sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
             sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DynamicTestsGenerator).Assembly.GetName().Version}\")]");
-            using (sourceBuilder.BeginBlock($"file partial class {className} : global::TUnit.Core.Interfaces.SourceGenerator.IDynamicTestSource"))
+            using (sourceBuilder.BeginBlock($"file partial class {className} : global::TUnit.Core.IDynamicTestSource"))
             {
                 sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
                 using (sourceBuilder.BeginBlock("public static void Initialise()"))

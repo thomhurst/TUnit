@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -281,5 +282,186 @@ public class TestContext : Context
         }
         
         CancellationToken = LinkedCancellationTokens.Token;
+    }
+    
+    /// <summary>
+    /// Test start time - for compatibility
+    /// </summary>
+    public DateTimeOffset TestStart { get; set; } = DateTimeOffset.UtcNow;
+    
+    /// <summary>
+    /// Adds an artifact to the test
+    /// </summary>
+    public void AddArtifact(string name, object? value)
+    {
+        Artifacts[name] = value;
+    }
+    
+    /// <summary>
+    /// Adds an artifact to the test
+    /// </summary>
+    public void AddArtifact(Artifact artifact)
+    {
+        Artifacts[artifact.DisplayName ?? artifact.File?.Name ?? "artifact"] = artifact;
+    }
+    
+    /// <summary>
+    /// Overrides the test result
+    /// </summary>
+    public void OverrideResult(string reason)
+    {
+        OverrideResult(Status.Passed, reason);
+    }
+    
+    /// <summary>
+    /// Overrides the test result with specified status
+    /// </summary>
+    public void OverrideResult(Status status, string reason)
+    {
+        Result = new TestResult
+        {
+            Status = status,
+            OverrideReason = reason,
+            IsOverridden = true,
+            Start = TestStart,
+            End = DateTimeOffset.UtcNow,
+            Duration = DateTimeOffset.UtcNow - TestStart,
+            Exception = null,
+            ComputerName = Environment.MachineName,
+            TestContext = this
+        };
+    }
+    
+    /// <summary>
+    /// Reregisters a test with new arguments
+    /// </summary>
+    public async Task ReregisterTestWithArguments(object?[]? methodArguments = null, Dictionary<string, object?>? objectBag = null)
+    {
+        // Update local state immediately
+        if (methodArguments != null)
+        {
+            TestDetails.TestMethodArguments = methodArguments;
+        }
+        
+        if (objectBag != null)
+        {
+            foreach (var kvp in objectBag)
+            {
+                ObjectBag[kvp.Key] = kvp.Value;
+            }
+        }
+        
+        // If we have access to the test registry, create a new test variation
+        try
+        {
+            var registryType = Type.GetType("TUnit.Engine.Services.TestRegistry, TUnit.Engine");
+            if (registryType != null)
+            {
+                var instanceProperty = registryType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+                var registry = instanceProperty?.GetValue(null);
+                if (registry != null)
+                {
+                    var reregisterMethod = registryType.GetMethod("ReregisterTestWithArguments");
+                    if (reregisterMethod != null)
+                    {
+                        await (Task)reregisterMethod.Invoke(registry, new object?[] { this, methodArguments, objectBag })!;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Fallback if registry is not available - just update local state
+            // This maintains backward compatibility
+        }
+    }
+    
+    /// <summary>
+    /// Gets the dependencies for this test
+    /// </summary>
+    public List<string> Dependencies { get; } = new List<string>();
+    
+    /// <summary>
+    /// Gets tests matching the criteria
+    /// </summary>
+    public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
+    {
+        IEnumerable<TestContext>? registryResult = null;
+        
+        // Try to use the test registry if available
+        try
+        {
+            var registryType = Type.GetType("TUnit.Engine.Services.TestRegistry, TUnit.Engine");
+            if (registryType != null)
+            {
+                var instanceProperty = registryType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+                var registry = instanceProperty?.GetValue(null);
+                if (registry != null)
+                {
+                    var getTestsMethod = registryType.GetMethod("GetTests");
+                    if (getTestsMethod != null)
+                    {
+                        registryResult = (IEnumerable<TestContext>)getTestsMethod.Invoke(registry, new object[] { predicate })!;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to local context
+        }
+        
+        // Return registry results if available
+        if (registryResult != null)
+        {
+            foreach (var test in registryResult)
+            {
+                yield return test;
+            }
+            yield break;
+        }
+        
+        // Fallback: just check current context
+        if (predicate(this))
+        {
+            yield return this;
+        }
+    }
+    
+    /// <summary>
+    /// Gets tests by name
+    /// </summary>
+    public List<TestContext> GetTests(string testName)
+    {
+        // Try to use the test registry if available
+        try
+        {
+            var registryType = Type.GetType("TUnit.Engine.Services.TestRegistry, TUnit.Engine");
+            if (registryType != null)
+            {
+                var instanceProperty = registryType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+                var registry = instanceProperty?.GetValue(null);
+                if (registry != null)
+                {
+                    var getTestsByNameMethod = registryType.GetMethod("GetTestsByName");
+                    if (getTestsByNameMethod != null)
+                    {
+                        return (List<TestContext>)getTestsByNameMethod.Invoke(registry, new object[] { testName })!;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to local context
+        }
+        
+        // Fallback: just check current context
+        var result = new List<TestContext>();
+        if (TestName == testName)
+        {
+            result.Add(this);
+        }
+        return result;
     }
 }

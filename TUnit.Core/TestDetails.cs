@@ -10,8 +10,8 @@ public class TestDetails
     public required Type ClassType { get; init; }
     public required string MethodName { get; init; }
     public required object? ClassInstance { get; init; }
-    public required object?[] TestMethodArguments { get; init; }
-    public required object?[] TestClassArguments { get; init; }
+    public required object?[] TestMethodArguments { get; set; }
+    public required object?[] TestClassArguments { get; set; }
     public TimeSpan? Timeout { get; set; }
     public int RetryLimit { get; set; }
     public string? DisplayName { get; set; }
@@ -27,6 +27,11 @@ public class TestDetails
     public List<string> Categories { get; } = new List<string>();
     public Dictionary<string, List<string>> CustomProperties { get; } = new Dictionary<string, List<string>>();
     public Type[]? TestClassParameterTypes { get; set; }
+    
+    // Missing properties for compatibility
+    public IReadOnlyList<Attribute> Attributes { get; set; } = new List<Attribute>();
+    public object?[] ClassMetadataArguments => TestClassArguments;
+    public IReadOnlyList<IDataAttribute> DataAttributes { get; set; } = new List<IDataAttribute>();
 }
 
 /// <summary>

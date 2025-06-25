@@ -9,7 +9,7 @@ public class DependsOnTestsOtherClass2
     [Test]
     public async Task Test1()
     {
-        Test1Start = TestContext.Current!.TestStart!.Value.DateTime;
+        Test1Start = TestContext.Current!.TestStart.DateTime;
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
 }
@@ -22,7 +22,7 @@ public class DependsOnTestsWithClass2
     [Test, DependsOn(typeof(DependsOnTestsOtherClass2))]
     public async Task Test2()
     {
-        _test2Start = TestContext.Current!.TestStart!.Value.DateTime;
+        _test2Start = TestContext.Current!.TestStart.DateTime;
         await Task.CompletedTask;
     }
 

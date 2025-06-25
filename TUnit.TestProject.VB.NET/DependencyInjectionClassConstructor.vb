@@ -18,7 +18,7 @@ Public Class DependencyInjectionClassConstructor
         Return ActivatorUtilities.GetServiceOrCreateInstance(_scope.Value.ServiceProvider, type)
     End Function
 
-    Public Function OnTestEnd(testContext As AfterTestContext) As ValueTask Implements ITestEndEventReceiver.OnTestEnd
+    Public Function OnTestEnd(testContext As TestContext) As ValueTask Implements ITestEndEventReceiver.OnTestEnd
         Return _scope.Value.DisposeAsync()
     End Function
 

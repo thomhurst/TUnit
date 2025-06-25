@@ -390,7 +390,8 @@ public sealed class TestFactory
         var context = new TestContext(test.Metadata.TestName, test.DisplayName)
         {
             TestDetails = testDetails,
-            CancellationToken = CancellationToken.None
+            CancellationToken = CancellationToken.None,
+            InternalDiscoveredTest = null // Will be set by TestDiscoveryService when needed
         };
         
         return context;

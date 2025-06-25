@@ -64,6 +64,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         TestFactory = Register(new TestFactory(testInvoker, hookInvoker, dataSourceResolver));
         
+        // Initialize the test registry singleton
+        TestRegistry.Initialize(TestFactory);
+        
         // Get test metadata sources from registry
         var sources = TestMetadataRegistry.GetSources();
         

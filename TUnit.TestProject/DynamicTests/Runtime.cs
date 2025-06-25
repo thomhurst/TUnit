@@ -25,7 +25,7 @@ public class Runtime(int a, int b, int c)
     {
         var context = TestContext.Current!;
         
-        await context.AddDynamicTest(new DynamicTest<Runtime>
+        await context.AddDynamicTest(new DynamicTestInstance<Runtime>
         {
             TestMethod = @class => @class.SomeMethod(0, 0, 0),
             TestClassArguments = [a + 10, b + 10, c + 10],

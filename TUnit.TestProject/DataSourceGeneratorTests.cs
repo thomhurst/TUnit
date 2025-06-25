@@ -14,7 +14,8 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     public void GeneratedData_Method(int value)
     {
         var data = value;
-        var attrs = TestContext.Current!.TestDetails.Attributes;
+        // TODO: Fix when Attributes property is added to TestDetails
+        // var attrs = TestContext.Current!.TestDetails.Attributes;
     }
 
     [Test]

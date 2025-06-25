@@ -108,4 +108,12 @@ public class DiscoveredTestContext
             testContext.ArgumentDisplayFormatters.Add(formatter);
         }
     }
+    
+    /// <summary>
+    /// Gets the test display name
+    /// </summary>
+    public string GetTestDisplayName()
+    {
+        return DisplayName;
+    }
 }

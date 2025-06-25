@@ -13,7 +13,7 @@ public class DependsOnTests3
     [Test]
     public async Task Test1()
     {
-        _test1Start = TestContext.Current!.TestStart!.Value.DateTime;
+        _test1Start = TestContext.Current!.TestStart.DateTime;
 
         await Task.Delay(TimeSpan.FromSeconds(1));
 
@@ -23,7 +23,7 @@ public class DependsOnTests3
     [Test]
     public async Task Test2()
     {
-        _test2Start = TestContext.Current!.TestStart!.Value.DateTime;
+        _test2Start = TestContext.Current!.TestStart.DateTime;
 
         await Task.Delay(TimeSpan.FromSeconds(1));
 
@@ -35,7 +35,7 @@ public class DependsOnTests3
     [DependsOn(nameof(Test2))]
     public async Task Test3()
     {
-        _test3Start = TestContext.Current!.TestStart!.Value.DateTime;
+        _test3Start = TestContext.Current!.TestStart.DateTime;
         await Task.Delay(TimeSpan.FromSeconds(1));
 
         var test1 = TestContext.Current.GetTests(nameof(Test1));
