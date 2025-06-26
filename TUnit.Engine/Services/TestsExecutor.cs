@@ -160,7 +160,7 @@ internal class TestsExecutor
         await queue
             .ForEachAsync(async test =>
             {
-                if (test.TestContext.SkipReason != null)
+                if (test.TestContext.SkipReason == null)
                 {
                     await _assemblyHookOrchestrator.ExecuteBeforeAssemblyHooks(test.TestContext);
 
