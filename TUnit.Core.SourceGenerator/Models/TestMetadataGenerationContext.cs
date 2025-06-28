@@ -24,6 +24,11 @@ public class TestMetadataGenerationContext
     /// </summary>
     public static TestMetadataGenerationContext Create(TestMethodMetadata testInfo)
     {
+        if (testInfo?.TypeSymbol == null || testInfo.MethodSymbol == null)
+        {
+            throw new ArgumentNullException(nameof(testInfo), "TestInfo or its required properties cannot be null");
+        }
+        
         var className = GetFullTypeName(testInfo.TypeSymbol);
         var methodName = testInfo.MethodSymbol.Name;
         var safeClassName = SanitizeForFilename(className);

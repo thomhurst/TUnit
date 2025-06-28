@@ -87,7 +87,8 @@
       "mcp__serena__insert_before_symbol",
       "mcp__serena__read_memory",
       "mcp__serena__think_about_task_adherence",
-      "mcp__serena__switch_modes"
+      "mcp__serena__switch_modes",
+      "Bash(./debug_discovery.sh:*)"
     ],
     "deny": []
   }
