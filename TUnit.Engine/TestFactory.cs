@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -21,6 +22,7 @@ public sealed class TestFactory
     private readonly ITestInvoker _testInvoker;
     private readonly IHookInvoker _hookInvoker;
     private readonly IDataSourceResolver _dataSourceResolver;
+    private static readonly string DebugLogPath = Path.Combine(Path.GetTempPath(), "tunit-debug-process.log");
     
     public TestFactory(
         ITestInvoker testInvoker,
@@ -307,15 +309,32 @@ public sealed class TestFactory
         };
     }
     
+    private static void WriteDebugLog(string message)
+    {
+        try
+        {
+            var debugLogDir = Path.GetDirectoryName(DebugLogPath);
+            if (debugLogDir != null && !Directory.Exists(debugLogDir))
+            {
+                Directory.CreateDirectory(debugLogDir);
+            }
+            File.AppendAllText(DebugLogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - {message}\n");
+        }
+        catch
+        {
+            // Ignore debug logging errors
+        }
+    }
+
     private void ProcessTestDiscoveryAttributes(ExecutableTest test, TestContext context)
     {
         // Debug output
-        System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"Processing attributes for test: {test.TestId}\n");
+        WriteDebugLog($"Processing attributes for test: {test.TestId}");
         
         if (test.Metadata.MethodInfo == null)
         {
             // Can't process attributes without reflection info
-            System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"  No MethodInfo available\n");
+            WriteDebugLog("  No MethodInfo available");
             return;
         }
         
@@ -328,16 +347,16 @@ public sealed class TestFactory
         
         // Process class-level attributes
         var classAttributes = test.Metadata.TestClassType.GetCustomAttributes(true);
-        System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"  Found {classAttributes.Length} class attributes\n");
+        WriteDebugLog($"  Found {classAttributes.Length} class attributes");
         
         foreach (var attribute in classAttributes)
         {
-            System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"    Attribute: {attribute.GetType().Name}\n");
+            WriteDebugLog($"    Attribute: {attribute.GetType().Name}");
             if (attribute is ITestDiscoveryEventReceiver receiver)
             {
                 try
                 {
-                    System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"      Processing ITestDiscoveryEventReceiver\n");
+                    WriteDebugLog("      Processing ITestDiscoveryEventReceiver");
                     var task = receiver.OnTestDiscovered(discoveredContext);
                     if (task.IsCompletedSuccessfully)
                     {
@@ -347,12 +366,12 @@ public sealed class TestFactory
                     {
                         task.AsTask().GetAwaiter().GetResult();
                     }
-                    System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"      Properties after processing: {context.TestDetails.CustomProperties.Count}\n");
+                    WriteDebugLog($"      Properties after processing: {context.TestDetails.CustomProperties.Count}");
                 }
                 catch (Exception ex)
                 {
                     // Log the error
-                    System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"      Error processing attribute: {ex.Message}\n");
+                    WriteDebugLog($"      Error processing attribute: {ex.Message}");
                 }
             }
         }
