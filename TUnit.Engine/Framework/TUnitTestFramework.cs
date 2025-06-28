@@ -31,6 +31,50 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _frameworkServiceProvider = frameworkServiceProvider;
         _capabilities = capabilities;
         _requestHandler = new TestRequestHandler();
+
+        // Configure Debug/Trace listeners to prevent UI dialogs from blocking test execution
+        ConfigureDebugListeners();
+
+        // Set up global exception handlers to prevent hangs
+        ConfigureGlobalExceptionHandlers();
+    }
+
+    private static void ConfigureDebugListeners()
+    {
+        // Remove default listeners that can show UI dialogs
+        System.Diagnostics.Trace.Listeners.Clear();
+
+        // Add our custom listener that converts assertions to exceptions
+        var assertionListener = new Diagnostics.TUnitAssertionListener();
+        System.Diagnostics.Trace.Listeners.Add(assertionListener);
+
+        // Configure to not show assert UI dialogs
+        System.Diagnostics.Trace.AutoFlush = true;
+    }
+
+    private static void ConfigureGlobalExceptionHandlers()
+    {
+        // Handle unhandled exceptions on any thread
+        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        {
+            var exception = args.ExceptionObject as Exception;
+            Console.Error.WriteLine($"Unhandled exception in AppDomain: {exception}");
+
+            // Force exit to prevent hanging
+            if (args.IsTerminating)
+            {
+                Environment.Exit(1);
+            }
+        };
+
+        // Handle unobserved task exceptions
+        TaskScheduler.UnobservedTaskException += (sender, args) =>
+        {
+            Console.Error.WriteLine($"Unobserved task exception: {args.Exception}");
+
+            // Mark as observed to prevent process termination
+            args.SetObserved();
+        };
     }
 
     public string Uid => _extension.Uid;
@@ -55,14 +99,27 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             serviceProvider.CancellationToken.Initialise(context.CancellationToken);
             await _requestHandler.HandleRequestAsync((TestExecutionRequest)context.Request, serviceProvider, context);
         }
-        catch (Exception e) when (IsCancellationException(e) && context.CancellationToken.IsCancellationRequested)
+        catch (Exception e) when (IsCancellationException(e))
         {
-            await serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
+            // Check if this is a normal cancellation or fail-fast cancellation
+            if (context.CancellationToken.IsCancellationRequested)
+            {
+                await serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
+            }
+            else
+            {
+                // This is likely a fail-fast cancellation
+                await serviceProvider.Logger.LogErrorAsync("Test execution stopped due to fail-fast.");
+            }
         }
         catch (Exception e)
         {
             await serviceProvider.Logger.LogErrorAsync(e);
             await ReportUnhandledException(context, e);
+        }
+        finally
+        {
+            context.Complete();
         }
     }
 
@@ -72,7 +129,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             await serviceProvider.DisposeAsync();
         }
-        
+
         return new CloseTestSessionResult { IsSuccess = true };
     }
 
@@ -81,10 +138,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return _serviceProvidersPerSession.GetOrAdd(
             context.Request.Session.SessionUid.Value,
             _ => new TUnitServiceProvider(
-                _extension, 
-                context, 
-                context.MessageBus, 
-                _frameworkServiceProvider, 
+                _extension,
+                context,
+                context.MessageBus,
+                _frameworkServiceProvider,
                 _capabilities));
     }
 
@@ -128,14 +185,14 @@ internal sealed class TestRequestHandler : IRequestHandler
             case DiscoverTestExecutionRequest discoverRequest:
                 await HandleDiscoveryRequestAsync(serviceProvider, discoverRequest, context);
                 break;
-                
+
             case RunTestExecutionRequest runRequest:
                 await HandleRunRequestAsync(serviceProvider, runRequest, context);
                 break;
-                
+
             default:
                 throw new ArgumentOutOfRangeException(
-                    nameof(request), 
+                    nameof(request),
                     request.GetType().Name,
                     "Unknown request type");
         }
@@ -147,12 +204,12 @@ internal sealed class TestRequestHandler : IRequestHandler
         ExecuteRequestContext context)
     {
         var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
-        
+
         foreach (var test in allTests)
         {
             if (context.CancellationToken.IsCancellationRequested)
                 break;
-                
+
             await serviceProvider.MessageBus.Discovered(test.Context!);
         }
     }
@@ -163,16 +220,16 @@ internal sealed class TestRequestHandler : IRequestHandler
         ExecuteRequestContext context)
     {
         var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
-        
+
         // Report discovered tests during run (some runners need this)
         foreach (var test in allTests)
         {
             if (context.CancellationToken.IsCancellationRequested)
                 break;
-                
+
             await serviceProvider.MessageBus.Discovered(test.Context!);
         }
-        
+
         // Execute tests
         await serviceProvider.TestExecutor.ExecuteTests(
             allTests,

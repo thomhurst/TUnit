@@ -16,6 +16,7 @@ using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
+using TUnit.Engine.CommandLineProviders;
 
 namespace TUnit.Engine;
 
@@ -29,6 +30,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestScheduler _testScheduler;
     private SessionUid? _sessionUid;
+    private readonly CancellationTokenSource _failFastCancellationSource = new();
     
     public UnifiedTestExecutor(
         ISingleTestExecutor singleTestExecutor,
@@ -78,14 +80,32 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             testList = ApplyFilter(testList, filter);
         }
         
-        // Create executor adapter
-        var executorAdapter = new TestExecutorAdapter(
+        // Check if fail-fast is enabled
+        var isFailFastEnabled = IsFailFastEnabled();
+        
+        // Create executor adapter with fail-fast support
+        var executorAdapter = new FailFastTestExecutorAdapter(
             _singleTestExecutor,
             messageBus,
-            _sessionUid ?? new SessionUid(Guid.NewGuid().ToString()));
+            _sessionUid ?? new SessionUid(Guid.NewGuid().ToString()),
+            isFailFastEnabled,
+            _failFastCancellationSource,
+            _logger);
+        
+        // Combine cancellation tokens
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, 
+            _failFastCancellationSource.Token);
         
         // Schedule and execute tests
-        await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, cancellationToken);
+        await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
+    }
+    
+    private bool IsFailFastEnabled()
+    {
+        return _commandLineOptions.TryGetOptionArgumentList(
+            FailFastCommandProvider.FailFast, 
+            out _);
     }
     
     private ITestScheduler CreateDefaultScheduler()

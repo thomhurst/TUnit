@@ -142,13 +142,24 @@ public sealed class DagTestScheduler : ITestScheduler
         try
         {
             await Task.WhenAll(workers);
-            progressCts.Cancel();
-            await progressTask;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            await _logger.LogInformationAsync("Test execution cancelled by user");
-            throw;
+            // This is expected when cancellation is requested (either user or fail-fast)
+            await _logger.LogInformationAsync("Test execution cancelled");
+        }
+        finally
+        {
+            // Always cancel progress monitoring and wait for it to complete
+            progressCts.Cancel();
+            try
+            {
+                await progressTask;
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected when progress monitoring is cancelled
+            }
         }
     }
     
@@ -222,7 +233,15 @@ public sealed class DagTestScheduler : ITestScheduler
             else
             {
                 // Wait for new work
-                await Task.Delay(10, cancellationToken);
+                try
+                {
+                    await Task.Delay(10, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Expected when cancellation is requested
+                    break;
+                }
             }
         }
     }
@@ -266,6 +285,12 @@ public sealed class DagTestScheduler : ITestScheduler
         {
             state.State = TestState.Failed;
             await _logger.LogErrorAsync($"Test {state.Test.TestId} timed out after {_testTimeout}");
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Test was cancelled (either by user or fail-fast)
+            state.State = TestState.Skipped;
+            await _logger.LogInformationAsync($"Test {state.Test.TestId} was cancelled");
         }
         catch (Exception ex)
         {

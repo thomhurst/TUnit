@@ -41,7 +41,15 @@ public sealed class DefaultProgressMonitor : IProgressMonitor
         
         while (!cancellationToken.IsCancellationRequested && !tracker.AllTestsCompleted)
         {
-            await Task.Delay(_checkInterval, cancellationToken);
+            try
+            {
+                await Task.Delay(_checkInterval, cancellationToken);
+            }
+            catch (TaskCanceledException)
+            {
+                // Expected when cancellation is requested
+                break;
+            }
             
             var currentCompleted = tracker.CompletedCount;
             if (currentCompleted > lastCompletedCount)
