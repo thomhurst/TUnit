@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
@@ -8,6 +9,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
 
@@ -221,8 +223,22 @@ internal sealed class TestRequestHandler : IRequestHandler
     {
         var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
 
-        // Report discovered tests during run (some runners need this)
-        foreach (var test in allTests)
+        // Apply filter to tests before reporting discovery
+        var testsToRun = allTests;
+        if (request.Filter != null)
+        {
+            // Create a null logger factory for now - filtering will still work
+            var loggerFactory = new NullLoggerFactory();
+            var filterService = new TestFilterService(loggerFactory);
+            testsToRun = filterService.FilterTests(request, allTests.ToArray()).ToList();
+            
+            // Debug logging
+            System.IO.File.AppendAllText("/tmp/tunit-framework-debug.log", 
+                $"TUnitTestFramework: Filtered {testsToRun.Count()} tests from {allTests.Count()} total\n");
+        }
+
+        // Report only the tests that will actually run
+        foreach (var test in testsToRun)
         {
             if (context.CancellationToken.IsCancellationRequested)
                 break;
@@ -230,7 +246,7 @@ internal sealed class TestRequestHandler : IRequestHandler
             await serviceProvider.MessageBus.Discovered(test.Context!);
         }
 
-        // Execute tests
+        // Execute tests (executor will apply the same filter internally)
         await serviceProvider.TestExecutor.ExecuteTests(
             allTests,
             request.Filter,

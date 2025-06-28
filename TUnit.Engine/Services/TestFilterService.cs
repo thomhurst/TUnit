@@ -85,18 +85,12 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
                 {
                     _logger.LogDebug($"Adding property: {propertyEntry.Key}={value}");
                     properties.Add(new KeyValuePairStringProperty(propertyEntry.Key, value));
-                    
-                    // Debug output to file
-                    System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"  Property: {propertyEntry.Key}={value}\n");
                 }
             }
         }
         else
         {
             _logger.LogDebug("No custom properties found in test context");
-            
-            // Debug output to file
-            System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"  No custom properties for test {test.TestId}\n");
         }
         
         _logger.LogDebug($"Total properties in bag: {properties.Count}");
@@ -114,15 +108,8 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         var propertyBag = BuildPropertyBag(executableTest);
         _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
         
-        // Debug output to file
-        System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"Checking filter for path: {path}\n");
-        System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"  Filter pattern: {treeNodeFilter}\n");
-        
         var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
         _logger.LogDebug($"Filter match result: {matches}");
-        
-        // Debug output to file
-        System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"  Match result: {matches}\n");
         
         return matches;
     }
