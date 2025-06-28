@@ -17,6 +17,8 @@ using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Services;
+using Microsoft.Testing.Platform.Logging;
 
 namespace TUnit.Engine;
 
@@ -29,6 +31,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestScheduler _testScheduler;
+    private readonly ILoggerFactory _loggerFactory;
     private SessionUid? _sessionUid;
     private readonly CancellationTokenSource _failFastCancellationSource = new();
     
@@ -36,11 +39,13 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         ISingleTestExecutor singleTestExecutor,
         ICommandLineOptions commandLineOptions,
         TUnitFrameworkLogger logger,
+        ILoggerFactory? loggerFactory = null,
         ITestScheduler? testScheduler = null)
     {
         _singleTestExecutor = singleTestExecutor;
         _commandLineOptions = commandLineOptions;
         _logger = logger;
+        _loggerFactory = loggerFactory ?? new NullLoggerFactory();
         
         // Use provided scheduler or create default
         _testScheduler = testScheduler ?? CreateDefaultScheduler();
@@ -115,9 +120,24 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     
     private List<ExecutableTest> ApplyFilter(List<ExecutableTest> tests, ITestExecutionFilter filter)
     {
-        // Apply filter logic based on filter type
-        // This would need to be implemented based on the actual filter requirements
-        return tests;
+        // Debug: Applying filter to {tests.Count} tests of type {filter.GetType().Name}
+        
+        // Use TestFilterService to apply the filter
+        var filterService = new TestFilterService(_loggerFactory);
+        
+        // Filter tests directly - TestFilterService handles the request internally
+        var filteredTests = new List<ExecutableTest>();
+        foreach (var test in tests)
+        {
+            if (filterService.MatchesTest(filter, test))
+            {
+                filteredTests.Add(test);
+            }
+        }
+        
+        // Debug: Filter matched {filteredTests.Count} tests
+        
+        return filteredTests;
     }
     
 
@@ -144,4 +164,25 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         // Execute tests
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
     }
+}
+
+/// <summary>
+/// Null logger factory implementation for testing
+/// </summary>
+internal class NullLoggerFactory : ILoggerFactory
+{
+    public ILogger<T> CreateLogger<T>() => new NullLogger<T>();
+    public ILogger CreateLogger(string categoryName) => new NullLogger<object>();
+}
+
+internal class NullLogger<T> : ILogger<T>
+{
+    public Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        => Task.CompletedTask;
+
+    public void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    {
+    }
+
+    public bool IsEnabled(LogLevel logLevel) => false;
 }

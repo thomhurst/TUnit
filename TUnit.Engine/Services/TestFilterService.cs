@@ -45,7 +45,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             null => true,
             NopFilter => true,
             TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(executableTest.TestId)),
-            TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(executableTest), BuildPropertyBag(executableTest)),
+            TreeNodeFilter treeNodeFilter => CheckTreeNodeFilter(treeNodeFilter, executableTest),
             _ => UnhandledFilter(testExecutionFilter)
         };
 
@@ -66,6 +66,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
     {
         var properties = new List<IProperty>();
         
+        
         // Add categories
         foreach (var category in test.Metadata.Categories)
         {
@@ -73,9 +74,59 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             properties.Add(new KeyValuePairStringProperty("Category", category));
         }
         
+        // Add custom properties from TestContext if available
+        if (test.Context?.TestDetails?.CustomProperties != null)
+        {
+            _logger.LogDebug($"Found {test.Context.TestDetails.CustomProperties.Count} custom properties");
+            foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
+            {
+                // CustomProperties is Dictionary<string, List<string>>
+                foreach (var value in propertyEntry.Value)
+                {
+                    _logger.LogDebug($"Adding property: {propertyEntry.Key}={value}");
+                    properties.Add(new KeyValuePairStringProperty(propertyEntry.Key, value));
+                    
+                    // Debug output to file
+                    System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"  Property: {propertyEntry.Key}={value}\n");
+                }
+            }
+        }
+        else
+        {
+            _logger.LogDebug("No custom properties found in test context");
+            
+            // Debug output to file
+            System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"  No custom properties for test {test.TestId}\n");
+        }
+        
+        _logger.LogDebug($"Total properties in bag: {properties.Count}");
+        
         return new PropertyBag(properties);
     }
 
+    private bool CheckTreeNodeFilter(
+#pragma warning disable TPEXP
+        TreeNodeFilter treeNodeFilter,
+#pragma warning restore TPEXP
+        ExecutableTest executableTest)
+    {
+        var path = BuildPath(executableTest);
+        var propertyBag = BuildPropertyBag(executableTest);
+        _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
+        
+        // Debug output to file
+        System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"Checking filter for path: {path}\n");
+        System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"  Filter pattern: {treeNodeFilter}\n");
+        
+        var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
+        _logger.LogDebug($"Filter match result: {matches}");
+        
+        // Debug output to file
+        System.IO.File.AppendAllText("/tmp/tunit-debug.log", $"  Match result: {matches}\n");
+        
+        return matches;
+    }
+    
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
     {
         _logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");

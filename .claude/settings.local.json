@@ -88,7 +88,9 @@
       "mcp__serena__read_memory",
       "mcp__serena__think_about_task_adherence",
       "mcp__serena__switch_modes",
-      "Bash(./debug_discovery.sh:*)"
+      "Bash(./debug_discovery.sh:*)",
+      "Bash(/dev/null)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Interfaces;
 
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Configuration;
@@ -306,6 +307,82 @@ public sealed class TestFactory
         };
     }
     
+    private void ProcessTestDiscoveryAttributes(ExecutableTest test, TestContext context)
+    {
+        // Debug output
+        System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"Processing attributes for test: {test.TestId}\n");
+        
+        if (test.Metadata.MethodInfo == null)
+        {
+            // Can't process attributes without reflection info
+            System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"  No MethodInfo available\n");
+            return;
+        }
+        
+        // Create a DiscoveredTestContext wrapper to allow attributes to add properties
+        var discoveredContext = new DiscoveredTestContext(
+            context.TestName,
+            context.DisplayName,
+            context.TestDetails
+        );
+        
+        // Process class-level attributes
+        var classAttributes = test.Metadata.TestClassType.GetCustomAttributes(true);
+        System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"  Found {classAttributes.Length} class attributes\n");
+        
+        foreach (var attribute in classAttributes)
+        {
+            System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"    Attribute: {attribute.GetType().Name}\n");
+            if (attribute is ITestDiscoveryEventReceiver receiver)
+            {
+                try
+                {
+                    System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"      Processing ITestDiscoveryEventReceiver\n");
+                    var task = receiver.OnTestDiscovered(discoveredContext);
+                    if (task.IsCompletedSuccessfully)
+                    {
+                        task.GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        task.AsTask().GetAwaiter().GetResult();
+                    }
+                    System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"      Properties after processing: {context.TestDetails.CustomProperties.Count}\n");
+                }
+                catch (Exception ex)
+                {
+                    // Log the error
+                    System.IO.File.AppendAllText("/tmp/tunit-debug-process.log", $"      Error processing attribute: {ex.Message}\n");
+                }
+            }
+        }
+        
+        // Process method-level attributes
+        var methodAttributes = test.Metadata.MethodInfo.GetCustomAttributes(true);
+        foreach (var attribute in methodAttributes)
+        {
+            if (attribute is ITestDiscoveryEventReceiver receiver)
+            {
+                try
+                {
+                    var task = receiver.OnTestDiscovered(discoveredContext);
+                    if (task.IsCompletedSuccessfully)
+                    {
+                        task.GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        task.AsTask().GetAwaiter().GetResult();
+                    }
+                }
+                catch
+                {
+                    // Ignore attribute processing errors
+                }
+            }
+        }
+    }
+    
     private TestContext CreateTestContext(ExecutableTest test)
     {
         // Create ClassMetadata
@@ -399,6 +476,9 @@ public sealed class TestFactory
             CancellationToken = CancellationToken.None,
             InternalDiscoveredTest = null // Will be set by TestDiscoveryService when needed
         };
+        
+        // Process attributes that implement ITestDiscoveryEventReceiver
+        ProcessTestDiscoveryAttributes(test, context);
         
         return context;
     }

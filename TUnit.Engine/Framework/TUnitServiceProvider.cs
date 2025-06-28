@@ -85,7 +85,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         TestExecutor = Register(new UnifiedTestExecutor(
             singleTestExecutor,
             CommandLineOptions,
-            Logger));
+            Logger,
+            loggerFactory));
             
         // Set session IDs for proper test reporting
         var sessionUid = context.Request.Session.SessionUid;
