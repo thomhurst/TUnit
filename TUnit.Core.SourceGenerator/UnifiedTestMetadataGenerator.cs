@@ -201,7 +201,12 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             throw new InvalidOperationException($"Failed to create context for {testInfo?.TypeSymbol?.Name}.{testInfo?.MethodSymbol?.Name}: {ex.Message}", ex);
         }
         
-        var testId = $"{context.ClassName}.{context.MethodName}";
+        var paramTypeNames = testInfo.MethodSymbol.Parameters
+            .Select(p => p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))
+            .ToArray();
+        var testId = paramTypeNames.Length > 0 
+            ? $"{context.ClassName}.{context.MethodName}({string.Join(",", paramTypeNames)})"
+            : $"{context.ClassName}.{context.MethodName}";
         
         using (writer.BeginBlock("_allTests.Add(new TestMetadata"))
         {
