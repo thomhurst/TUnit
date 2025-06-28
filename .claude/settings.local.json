@@ -81,7 +81,13 @@
       "mcp__serena__think_about_collected_information",
       "mcp__serena__think_about_whether_you_are_done",
       "mcp__serena__summarize_changes",
-      "mcp__serena__find_file"
+      "mcp__serena__find_file",
+      "mcp__serena__replace_symbol_body",
+      "mcp__serena__replace_regex",
+      "mcp__serena__insert_before_symbol",
+      "mcp__serena__read_memory",
+      "mcp__serena__think_about_task_adherence",
+      "mcp__serena__switch_modes"
     ],
     "deny": []
   }

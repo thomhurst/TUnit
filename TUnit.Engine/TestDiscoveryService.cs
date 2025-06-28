@@ -12,6 +12,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Services;
 
+using TUnit.Engine.Helpers;
 namespace TUnit.Engine;
 
 /// <summary>
@@ -46,12 +47,31 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
     /// </summary>
     public async Task<IEnumerable<ExecutableTest>> DiscoverTests()
     {
+        const int DiscoveryTimeoutSeconds = 30; // 30 seconds default - enough for most discovery scenarios
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
+        
+        try
+        {
+            return await DiscoverTestsWithTimeout(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException(
+                $"Test discovery timed out after {DiscoveryTimeoutSeconds} seconds. " +
+                "This may indicate an issue with data sources or excessive test generation.");
+        }
+    }
+    
+    private async Task<IEnumerable<ExecutableTest>> DiscoverTestsWithTimeout(CancellationToken cancellationToken)
+    {
         var allTests = new List<ExecutableTest>();
+        const int MaxTestsPerDiscovery = 50_000;
         
         // Load metadata from all sources
         var allMetadata = new List<TestMetadata>();
         foreach (var source in _sources)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var metadata = await source.GetTestMetadata();
             allMetadata.AddRange(metadata);
         }
@@ -59,6 +79,7 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
         // Optionally discover tests via reflection (for dynamic scenarios)
         if (_enableDynamicDiscovery)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var dynamicMetadata = await DiscoverTestsDynamically();
             allMetadata.AddRange(dynamicMetadata);
         }
@@ -66,14 +87,35 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
         // Create executable tests from metadata
         foreach (var metadata in allMetadata)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var executableTests = await _testFactory.CreateTests(metadata);
             allTests.AddRange(executableTests);
+            
+            if (allTests.Count > MaxTestsPerDiscovery)
+            {
+                throw new InvalidOperationException(
+                    $"Test discovery exceeded maximum test count of {MaxTestsPerDiscovery:N0}. " +
+                    "Consider reducing data source sizes or using test filters.");
+            }
         }
         
         // Register all discovered tests with the registry
-        var registry = TestRegistry.Instance;
+        TestRegistry registry;
+        try
+        {
+            registry = TestRegistry.Instance;
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Registry not initialized - this is a framework initialization issue
+            throw new InvalidOperationException(
+                "TestRegistry has not been initialized. This usually indicates the test framework " +
+                "has not been properly set up. Ensure TUnit framework initialization completes " +
+                "before running discovery.", ex);
+        }
         foreach (var test in allTests)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             registry.RegisterTest(test);
         }
         

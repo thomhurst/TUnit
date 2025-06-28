@@ -15,6 +15,7 @@ using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Scheduling;
 
 namespace TUnit.Engine;
 
@@ -26,18 +27,21 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     private readonly ISingleTestExecutor _singleTestExecutor;
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitFrameworkLogger _logger;
-    private readonly int _maxParallelism;
+    private readonly ITestScheduler _testScheduler;
     private SessionUid? _sessionUid;
     
     public UnifiedTestExecutor(
         ISingleTestExecutor singleTestExecutor,
         ICommandLineOptions commandLineOptions,
-        TUnitFrameworkLogger logger)
+        TUnitFrameworkLogger logger,
+        ITestScheduler? testScheduler = null)
     {
         _singleTestExecutor = singleTestExecutor;
         _commandLineOptions = commandLineOptions;
         _logger = logger;
-        _maxParallelism = GetMaxParallelism();
+        
+        // Use provided scheduler or create default
+        _testScheduler = testScheduler ?? CreateDefaultScheduler();
     }
     
     // IDataProducer implementation
@@ -74,183 +78,19 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             testList = ApplyFilter(testList, filter);
         }
         
-        // Group tests by parallelization capability
-        var parallelTests = testList.Where(t => t.Metadata.CanRunInParallel && !t.Dependencies.Any()).ToList();
-        var serialTests = testList.Where(t => !t.Metadata.CanRunInParallel || t.Dependencies.Any()).ToList();
+        // Create executor adapter
+        var executorAdapter = new TestExecutorAdapter(
+            _singleTestExecutor,
+            messageBus,
+            _sessionUid ?? new SessionUid(Guid.NewGuid().ToString()));
         
-        // Execute parallel tests
-        await ExecuteParallelTests(parallelTests, messageBus, cancellationToken);
-        
-        // Execute serial tests (respecting dependencies)
-        await ExecuteSerialTests(serialTests, messageBus, cancellationToken);
+        // Schedule and execute tests
+        await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, cancellationToken);
     }
     
-    private async Task ExecuteParallelTests(
-        List<ExecutableTest> tests,
-        IMessageBus messageBus,
-        CancellationToken cancellationToken)
+    private ITestScheduler CreateDefaultScheduler()
     {
-        if (!tests.Any()) return;
-        
-        using var semaphore = new SemaphoreSlim(_maxParallelism, _maxParallelism);
-        var tasks = new List<Task>();
-        
-        foreach (var test in tests)
-        {
-            if (cancellationToken.IsCancellationRequested)
-                break;
-                
-            await semaphore.WaitAsync(cancellationToken);
-            
-            var task = Task.Run(async () =>
-            {
-                try
-                {
-                    await ExecuteSingleTest(test, messageBus, cancellationToken);
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            }, cancellationToken);
-            
-            tasks.Add(task);
-        }
-        
-        await Task.WhenAll(tasks);
-    }
-    
-    private async Task ExecuteSerialTests(
-        List<ExecutableTest> tests,
-        IMessageBus messageBus,
-        CancellationToken cancellationToken)
-    {
-        if (!tests.Any()) return;
-        
-        // Build dependency graph
-        var completed = new HashSet<string>();
-        var remaining = new Queue<ExecutableTest>(tests.Where(t => !t.Dependencies.Any()));
-        var waiting = tests.Where(t => t.Dependencies.Any()).ToList();
-        
-        while (remaining.Count > 0 || waiting.Count > 0)
-        {
-            if (cancellationToken.IsCancellationRequested)
-                break;
-            
-            // Execute tests with satisfied dependencies
-            while (remaining.Count > 0)
-            {
-                var test = remaining.Dequeue();
-                await ExecuteSingleTest(test, messageBus, cancellationToken);
-                completed.Add(test.TestId);
-            }
-            
-            // Check for newly runnable tests
-            var newlyRunnable = waiting
-                .Where(t => t.Dependencies.All(d => completed.Contains(d.TestId)))
-                .ToList();
-            
-            foreach (var test in newlyRunnable)
-            {
-                remaining.Enqueue(test);
-                waiting.Remove(test);
-            }
-            
-            // If no progress can be made, we have a circular dependency
-            if (remaining.Count == 0 && waiting.Count > 0)
-            {
-                await _logger.LogErrorAsync("Circular dependency detected in tests. Skipping remaining tests.");
-                foreach (var test in waiting)
-                {
-                    await ReportTestSkipped(test, "Circular dependency detected", messageBus);
-                }
-                break;
-            }
-        }
-    }
-    
-    private async Task ExecuteSingleTest(
-        ExecutableTest test,
-        IMessageBus messageBus,
-        CancellationToken cancellationToken)
-    {
-        test.State = TestState.Running;
-        test.StartTime = DateTimeOffset.UtcNow;
-        
-        // Ensure test context is initialized
-        if (test.Context == null)
-        {
-            test.Context = new TestContext(test.TestId, test.DisplayName);
-        }
-        
-        // Report test started
-        await messageBus.PublishAsync(
-            this,
-            new TestNodeUpdateMessage(
-                _sessionUid ?? new Microsoft.Testing.Platform.TestHost.SessionUid(Guid.NewGuid().ToString()),
-                test.Context.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
-        
-        try
-        {
-            // Execute the test
-            var updateMessage = await _singleTestExecutor.ExecuteTestAsync(test, messageBus, cancellationToken);
-            
-            // Publish the result
-            await messageBus.PublishAsync(this, updateMessage);
-        }
-        catch (Exception ex)
-        {
-            test.State = TestState.Failed;
-            test.Result = new TestResult
-            {
-                Status = Core.Enums.Status.Failed,
-                Start = test.StartTime,
-                End = DateTimeOffset.Now,
-                Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),
-                Exception = ex,
-                ComputerName = Environment.MachineName
-            };
-            
-            await messageBus.PublishAsync(
-                this,
-                new TestNodeUpdateMessage(
-                    _sessionUid ?? new Microsoft.Testing.Platform.TestHost.SessionUid(Guid.NewGuid().ToString()),
-                    test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(ex))));
-        }
-        finally
-        {
-            test.EndTime = DateTimeOffset.UtcNow;
-        }
-    }
-    
-    private async Task ReportTestSkipped(
-        ExecutableTest test,
-        string reason,
-        IMessageBus messageBus)
-    {
-        test.State = TestState.Skipped;
-        test.Result = new TestResult
-        {
-            Status = Core.Enums.Status.Skipped,
-            Start = test.StartTime ?? DateTimeOffset.Now,
-            End = DateTimeOffset.Now,
-            Duration = TimeSpan.Zero,
-            Exception = null,
-            ComputerName = Environment.MachineName,
-            OverrideReason = reason
-        };
-        
-        // Ensure test context is initialized
-        if (test.Context == null)
-        {
-            test.Context = new TestContext(test.TestId, test.DisplayName);
-        }
-        
-        await messageBus.PublishAsync(
-            this,
-            new TestNodeUpdateMessage(
-                _sessionUid ?? new Microsoft.Testing.Platform.TestHost.SessionUid(Guid.NewGuid().ToString()),
-                test.Context.ToTestNode().WithProperty(new SkippedTestNodeStateProperty(reason))));
+        return TestSchedulerFactory.CreateDefault(_logger);
     }
     
     private List<ExecutableTest> ApplyFilter(List<ExecutableTest> tests, ITestExecutionFilter filter)
@@ -260,11 +100,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         return tests;
     }
     
-    private int GetMaxParallelism()
-    {
-        // Default to processor count
-        return Environment.ProcessorCount;
-    }
+
     
     /// <summary>
     /// Implementation of ITestExecutor for Microsoft.Testing.Platform

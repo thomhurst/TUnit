@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using TUnit.Engine.Helpers;
 using System.Threading.Tasks;
 using TUnit.Core;
 
@@ -41,6 +42,26 @@ public class DataSourceResolver : IDataSourceResolver
     
     private async Task<IEnumerable<object?[]>> ResolveDynamicDataAsync(DynamicTestDataSource dynamicSource)
     {
+        const int DataSourceTimeoutSeconds = 30;
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DataSourceTimeoutSeconds));
+        
+        try
+        {
+            return await ResolveDynamicDataWithTimeoutAsync(dynamicSource, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException(
+                $"Data source '{dynamicSource.SourceMemberName}' on type '{dynamicSource.SourceType.FullName}' " +
+                $"timed out after {DataSourceTimeoutSeconds} seconds. " +
+                "Consider optimizing the data source or using cached data.");
+        }
+    }
+    
+    private async Task<IEnumerable<object?[]>> ResolveDynamicDataWithTimeoutAsync(
+        DynamicTestDataSource dynamicSource, 
+        CancellationToken cancellationToken)
+    {
         // Create instance if needed
         object? instance = null;
         if (!dynamicSource.IsShared)
@@ -63,17 +84,27 @@ public class DataSourceResolver : IDataSourceResolver
             throw new InvalidOperationException($"Could not find member '{dynamicSource.SourceMemberName}' on type '{dynamicSource.SourceType.FullName}'");
         }
         
-        object? rawData = member switch
+        // Execute member access with timeout
+        var rawDataTask = Task.Run(() => member switch
         {
             PropertyInfo property => property.GetValue(instance),
             MethodInfo method => method.Invoke(instance, Array.Empty<object>()),
             FieldInfo field => field.GetValue(instance),
             _ => throw new InvalidOperationException($"Unsupported member type: {member.GetType().Name}")
-        };
+        }, cancellationToken);
+        
+        var rawData = await rawDataTask.ConfigureAwait(false);
         
         // Handle async results
         if (rawData is Task task)
         {
+            // Add timeout for async data sources
+            var completedTask = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, cancellationToken));
+            if (completedTask != task)
+            {
+                throw new OperationCanceledException();
+            }
+            
             await task;
             #pragma warning disable IL2075 // Task<T> types are known
             var resultProperty = task.GetType().GetProperty("Result");
@@ -81,17 +112,32 @@ public class DataSourceResolver : IDataSourceResolver
             rawData = resultProperty?.GetValue(task);
         }
         
-        // Convert to object?[][]
+        // Convert to object?[][] with size limits
+        const int MaxDataSourceItems = 10_000;
+        var result = new List<object?[]>();
+        
         if (rawData is IEnumerable<object?[]> objectArrays)
         {
-            return objectArrays;
+            foreach (var item in objectArrays)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                result.Add(item);
+                
+                if (result.Count > MaxDataSourceItems)
+                {
+                    throw new InvalidOperationException(
+                        $"Data source '{dynamicSource.SourceMemberName}' exceeded maximum item count of {MaxDataSourceItems:N0}");
+                }
+            }
+            return result;
         }
         
         if (rawData is System.Collections.IEnumerable enumerable)
         {
-            var result = new List<object?[]>();
             foreach (var item in enumerable)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 if (item is object?[] array)
                 {
                     result.Add(array);
@@ -99,6 +145,12 @@ public class DataSourceResolver : IDataSourceResolver
                 else
                 {
                     result.Add(new[] { item });
+                }
+                
+                if (result.Count > MaxDataSourceItems)
+                {
+                    throw new InvalidOperationException(
+                        $"Data source '{dynamicSource.SourceMemberName}' exceeded maximum item count of {MaxDataSourceItems:N0}");
                 }
             }
             return result;

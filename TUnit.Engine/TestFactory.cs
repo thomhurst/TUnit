@@ -8,6 +8,8 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Configuration;
 namespace TUnit.Engine;
 
 /// <summary>
@@ -111,6 +113,7 @@ public sealed class TestFactory
         }
         
         // Generate cartesian product for matrix/combinatorial tests
+        DiscoveryDiagnostics.RecordDataSourceStart($"{metadata.TestName}", allDataSets.Count);
         var combinations = CartesianProduct(allDataSets);
         
         foreach (var combination in combinations)
@@ -119,6 +122,9 @@ public sealed class TestFactory
             var displayText = GenerateArgumentsDisplayText(flattened);
             results.Add((flattened, displayText));
         }
+        
+        DiscoveryDiagnostics.RecordTestExpansion(metadata.TestName, results.Count);
+        DiscoveryDiagnostics.RecordDataSourceEnd($"{metadata.TestName}", results.Count);
         
         return results;
     }
@@ -399,6 +405,27 @@ public sealed class TestFactory
     
     private static IEnumerable<List<object?[]>> CartesianProduct(List<IEnumerable<object?[]>> sets)
     {
+        return CartesianProductWithLimits(sets, 0, new CartesianProductState());
+    }
+    
+    private static IEnumerable<List<object?[]>> CartesianProductWithLimits(
+        List<IEnumerable<object?[]>> sets, 
+        int depth,
+        CartesianProductState state)
+    {
+        var maxDepth = DiscoveryConfiguration.MaxCartesianDepth;
+        var maxTotalCombinations = DiscoveryConfiguration.MaxCartesianCombinations;
+        
+        // Record diagnostics
+        DiscoveryDiagnostics.RecordCartesianProductDepth(depth, sets.Count);
+        
+        if (depth > maxDepth)
+        {
+            throw new InvalidOperationException(
+                $"Cartesian product exceeded maximum recursion depth of {maxDepth}. " +
+                "This may indicate an excessive number of data source combinations.");
+        }
+        
         if (!sets.Any())
         {
             yield return new List<object?[]>();
@@ -407,17 +434,31 @@ public sealed class TestFactory
         
         var first = sets.First();
         var rest = sets.Skip(1).ToList();
-        var restProduct = CartesianProduct(rest).ToList();
+        var restProduct = CartesianProductWithLimits(rest, depth + 1, state).ToList();
         
         foreach (var item in first)
         {
             foreach (var restItem in restProduct)
             {
+                state.TotalCombinations++;
+                
+                if (state.TotalCombinations > maxTotalCombinations)
+                {
+                    throw new InvalidOperationException(
+                        $"Cartesian product exceeded maximum combinations limit of {maxTotalCombinations:N0}. " +
+                        "Consider reducing the number of data sources or their sizes.");
+                }
+                
                 var result = new List<object?[]> { item };
                 result.AddRange(restItem);
                 yield return result;
             }
         }
+    }
+    
+    private class CartesianProductState
+    {
+        public int TotalCombinations { get; set; }
     }
     
     private static List<Dictionary<string, object?>> GeneratePropertyCombinations(Dictionary<string, List<object?>> propertyDataMap)
