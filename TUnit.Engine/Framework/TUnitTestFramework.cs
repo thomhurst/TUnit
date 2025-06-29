@@ -119,6 +119,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             await serviceProvider.Logger.LogErrorAsync(e);
             await ReportUnhandledException(context, e);
+            throw;
         }
         finally
         {
