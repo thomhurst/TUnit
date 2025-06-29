@@ -761,6 +761,22 @@ public sealed class TestFactory
         // Get all test data combinations
         var testDataSets = await ExpandTestData(metadata);
 
+        // Check if this is a generic method with no test data
+        if (testDataSets.Count == 1 && testDataSets[0].arguments.Length == 0)
+        {
+            // Generic methods require arguments to infer type parameters
+            var methodInfo = metadata.MethodInfo;
+            if (methodInfo?.IsGenericMethodDefinition == true)
+            {
+                // Include diagnostic information about data sources
+                var dataSources = metadata.DataSources?.Length ?? 0;
+                throw new GenericTypeResolutionException(
+                    $"Generic test method '{metadata.TestClassType.FullName}.{metadata.TestMethodName}' requires " +
+                    $"test data to infer generic type parameters. Found {dataSources} data sources but no arguments. " +
+                    $"Add [Arguments] attributes or other data sources.");
+            }
+        }
+
         // For each data set, try to resolve generic types
         foreach (var (arguments, argumentsDisplayText) in testDataSets)
         {
@@ -788,8 +804,18 @@ public sealed class TestFactory
         // Resolve generic method types first (they might inform class types)
         if (methodInfo?.IsGenericMethodDefinition == true && metadata.GenericMethodInfo != null)
         {
-            var genericArguments = _genericTypeResolver.ResolveGenericMethodArguments(methodInfo, arguments);
-            methodInfo = methodInfo.MakeGenericMethod(genericArguments);
+            try
+            {
+                var genericArguments = _genericTypeResolver.ResolveGenericMethodArguments(methodInfo, arguments);
+                methodInfo = methodInfo.MakeGenericMethod(genericArguments);
+            }
+            catch (GenericTypeResolutionException ex)
+            {
+                // Add more context about the test being created
+                var testName = metadata.TestId ?? $"{metadata.TestClassType.Name}.{methodInfo.Name}";
+                throw new GenericTypeResolutionException(
+                    $"Failed to resolve generic types for test '{testName}': {ex.Message}", ex);
+            }
         }
 
         // Resolve generic class types

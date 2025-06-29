@@ -38,6 +38,17 @@ public class GenericTypeResolver : IGenericTypeResolver
                 var argumentType = argumentValue.GetType();
                 InferTypeMapping(parameterType, argumentType, typeMapping);
             }
+            else if (parameterType.IsGenericParameter)
+            {
+                // For null arguments with generic parameters, we need more context
+                // Try to infer from constraints or other arguments
+                var constraints = parameterType.GetGenericParameterConstraints();
+                if (constraints.Length == 1 && !constraints[0].IsInterface)
+                {
+                    // If there's exactly one non-interface constraint, we might be able to use it
+                    typeMapping[parameterType] = constraints[0];
+                }
+            }
         }
 
         // Resolve all generic parameters
@@ -47,9 +58,20 @@ public class GenericTypeResolver : IGenericTypeResolver
             var genericParam = genericParameters[i];
             if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
             {
+                // Try to use constraints as a fallback
+                var constraints = genericParam.GetGenericParameterConstraints();
+                var attributes = genericParam.GenericParameterAttributes;
+                
+                // Provide more specific error message with context
+                var methodName = $"{genericMethodDefinition.DeclaringType?.FullName}.{genericMethodDefinition.Name}";
+                var argInfo = runtimeArguments.Length > 0 
+                    ? $"Arguments: {string.Join(", ", runtimeArguments.Select(a => a?.GetType()?.Name ?? "null"))}" 
+                    : "No arguments provided";
+                
                 throw new GenericTypeResolutionException(
-                    $"Could not resolve type for generic parameter '{genericParam.Name}'. " +
-                    "Ensure test arguments provide enough type information.");
+                    $"Could not resolve type for generic parameter '{genericParam.Name}' in method '{methodName}'. " +
+                    $"{argInfo}. " +
+                    "Ensure test arguments provide enough type information to infer all generic parameters.");
             }
             resolvedTypes[i] = resolvedType;
         }
