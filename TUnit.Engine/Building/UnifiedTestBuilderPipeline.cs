@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Engine.Building.Interfaces;
 
 namespace TUnit.Engine.Building;
@@ -43,18 +44,66 @@ public sealed class UnifiedTestBuilderPipeline
         
         foreach (var metadata in resolvedMetadata)
         {
-            // Stage 3: Expand data sources for this test
-            var expandedDataSets = await _dataSourceExpander.ExpandDataSourcesAsync(metadata);
-            
-            // Stage 4: Build executable test for each variation
-            foreach (var expandedData in expandedDataSets)
+            try
             {
-                var executableTest = await _testBuilder.BuildTestAsync(expandedData);
-                executableTests.Add(executableTest);
+                // Stage 3: Expand data sources for this test
+                var expandedDataSets = await _dataSourceExpander.ExpandDataSourcesAsync(metadata);
+                
+                // Stage 4: Build executable test for each variation
+                foreach (var expandedData in expandedDataSets)
+                {
+                    var executableTest = await _testBuilder.BuildTestAsync(expandedData);
+                    executableTests.Add(executableTest);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Create a failed test node for data source expansion failures
+                var failedTest = CreateFailedTestForDataSourceError(metadata, ex);
+                executableTests.Add(failedTest);
             }
         }
         
         return executableTests;
+    }
+    
+    private static ExecutableTest CreateFailedTestForDataSourceError(TestMetadata metadata, Exception exception)
+    {
+        var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataSourceError";
+        var displayName = $"{metadata.TestName} [DATA SOURCE ERROR]";
+        
+        return new ExecutableTest
+        {
+            TestId = testId,
+            DisplayName = displayName,
+            Metadata = metadata,
+            Arguments = Array.Empty<object?>(),
+            ClassArguments = Array.Empty<object?>(),
+            // Create instance that throws the exception
+            CreateInstance = () => throw new InvalidOperationException(
+                $"Failed to expand data source for test '{displayName}': {exception.Message}", exception),
+            // Test method that throws the exception
+            InvokeTest = instance => throw new InvalidOperationException(
+                $"Failed to expand data source for test '{displayName}': {exception.Message}", exception),
+            Hooks = new TestLifecycleHooks
+            {
+                BeforeClass = Array.Empty<Func<HookContext, Task>>(),
+                AfterClass = Array.Empty<Func<object, HookContext, Task>>(),
+                BeforeTest = Array.Empty<Func<object, HookContext, Task>>(),
+                AfterTest = Array.Empty<Func<object, HookContext, Task>>()
+            },
+            State = TestState.Failed,
+            Result = new TestResult
+            {
+                Status = Status.Failed,
+                Start = DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = TimeSpan.Zero,
+                Exception = exception,
+                ComputerName = Environment.MachineName,
+                TestContext = null
+            }
+        };
     }
 }
 

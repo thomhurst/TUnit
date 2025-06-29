@@ -124,7 +124,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             dataSources.Add(new DynamicTestDataSource(false)
             {
                 SourceType = mds.ClassProvidingDataSource ?? method.DeclaringType!,
-                SourceMemberName = mds.MethodNameProvidingDataSource
+                SourceMemberName = mds.MethodNameProvidingDataSource,
+                Arguments = mds.Arguments
             });
         }
         
@@ -166,7 +167,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     dataSources.Add(new DynamicTestDataSource(false)
                     {
                         SourceType = methodDataSource.ClassProvidingDataSource ?? testClass,
-                        SourceMemberName = methodDataSource.MethodNameProvidingDataSource
+                        SourceMemberName = methodDataSource.MethodNameProvidingDataSource,
+                        Arguments = methodDataSource.Arguments
                     });
                 }
             }

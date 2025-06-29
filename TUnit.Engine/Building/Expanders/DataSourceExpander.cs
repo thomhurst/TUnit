@@ -421,7 +421,7 @@ public sealed class DynamicDataSourceResolver : IDynamicDataSourceResolver
         var rawDataTask = Task.Run(() => member switch
         {
             PropertyInfo property => property.GetValue(instance),
-            MethodInfo method => method.Invoke(instance, Array.Empty<object>()),
+            MethodInfo method => method.Invoke(instance, dataSource.Arguments),
             FieldInfo field => field.GetValue(instance),
             _ => throw new InvalidOperationException($"Unsupported member type: {member.GetType().Name}")
         }, cancellationToken);

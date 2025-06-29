@@ -373,29 +373,31 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             
             var dataSourceMethodParameterTypes = dataSourceMethod.Parameters.Select(x => x.Type).ToArray();
 
-            if (!isTuples && testParameterTypes.Length > 1)
+            // Note: We no longer check if test has multiple parameters when data source doesn't return tuples
+            // because the data source method can return arrays of arrays (object[][]) to satisfy multiple parameters
+
+            // Skip type checking if unwrappedTypes is empty (indicating object[] which can contain any types)
+            if (unwrappedTypes.Length == 0)
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Rules.TooManyArgumentsInTestMethod,
-                        attribute.GetLocation())
-                );
+                // object[] can contain any types - skip compile-time type checking
                 return;
             }
-
-            var conversions = unwrappedTypes.ZipAll(testParameterTypes,
-                (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter));
-            
-            if (!conversions.All(x => x))
+            else
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Rules.WrongArgumentTypeTestData,
-                        attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes),
-                        string.Join(", ", testParameterTypes))
-                );
-                return;
+                var conversions = unwrappedTypes.ZipAll(testParameterTypes,
+                    (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter));
+                
+                if (!conversions.All(x => x))
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            Rules.WrongArgumentTypeTestData,
+                            attribute.GetLocation(),
+                            string.Join(", ", unwrappedTypes),
+                            string.Join(", ", testParameterTypes))
+                    );
+                    return;
+                }
             }
 
             var argumentsToParamsConversions = argumentForMethodCallTypes.ZipAll(dataSourceMethodParameterTypes,
@@ -549,6 +551,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             isTuples = true;
             return tupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
+        }
+        
+        // Handle object[] case - when a data source returns IEnumerable<object[]>,
+        // each object[] contains the arguments for one test invocation
+        if (type is IArrayTypeSymbol arrayType && 
+            arrayType.ElementType.SpecialType == SpecialType.System_Object)
+        {
+            // Return empty array to indicate that type checking should be skipped
+            // since object[] can contain any types that will be checked at runtime
+            return ImmutableArray<ITypeSymbol>.Empty;
         }
         
         return ImmutableArray.Create(type);

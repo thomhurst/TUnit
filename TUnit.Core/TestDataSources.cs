@@ -66,6 +66,7 @@ public sealed class DynamicTestDataSource : TestDataSource
 {
     public required Type SourceType { get; init; }
     public required string SourceMemberName { get; init; }
+    public object?[] Arguments { get; init; } = Array.Empty<object?>();
     private readonly bool _isShared;
     
     public override bool IsShared => _isShared;

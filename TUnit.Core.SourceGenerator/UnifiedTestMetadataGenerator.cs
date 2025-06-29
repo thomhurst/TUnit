@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Helpers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 namespace TUnit.Core.SourceGenerator;
 
@@ -929,8 +930,16 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
         
         var isShared = attr.NamedArguments.FirstOrDefault(a => a.Key == "IsShared").Value.Value as bool? ?? true;
+        var argumentsArg = attr.NamedArguments.FirstOrDefault(a => a.Key == "Arguments");
+        var argumentsValue = "";
         
-        return $"new DynamicTestDataSource({isShared.ToString().ToLower()}) {{ SourceType = typeof({sourceType.ToDisplayString()}), SourceMemberName = \"{memberName}\" }}";
+        if (!argumentsArg.Equals(default(KeyValuePair<string, TypedConstant>)) && argumentsArg.Value.Values.Length > 0)
+        {
+            var argStrings = argumentsArg.Value.Values.Select(v => TypedConstantParser.GetRawTypedConstantValue(v)).ToArray();
+            argumentsValue = $", Arguments = new object?[] {{ {string.Join(", ", argStrings)} }}";
+        }
+        
+        return $"new DynamicTestDataSource({isShared.ToString().ToLower()}) {{ SourceType = typeof({sourceType.ToDisplayString()}), SourceMemberName = \"{memberName}\"{argumentsValue} }}";
     }
     
     private static void GenerateDynamicDataSource(CodeWriter writer, AttributeData attr)
@@ -949,6 +958,15 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             {
                 writer.AppendLine($"SourceType = typeof({sourceType.ToDisplayString()}),");
                 writer.AppendLine($"SourceMemberName = \"{memberName}\",");
+                
+                // Check for Arguments property
+                var argumentsArg = attr.NamedArguments.FirstOrDefault(a => a.Key == "Arguments");
+                if (!argumentsArg.Equals(default(KeyValuePair<string, TypedConstant>)) && argumentsArg.Value.Values.Length > 0)
+                {
+                    var argStrings = argumentsArg.Value.Values.Select(v => TypedConstantParser.GetRawTypedConstantValue(v)).ToArray();
+                    writer.AppendLine($"Arguments = new object?[] {{ {string.Join(", ", argStrings)} }},");
+                }
+                
                 writer.AppendLine($"IsShared = {(attr.ConstructorArguments.Length > 2 ? attr.ConstructorArguments[2].Value?.ToString() ?? "false" : "false")}");
             }
         }
