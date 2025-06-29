@@ -41,7 +41,7 @@ public class GenericTypeTests
         Assert.That(array).IsNotNull();
         Assert.That(array.Length).IsGreaterThan(0);
     }
-    
+
     [Test]
     [Arguments(new List<int> { 1, 2, 3 })]
     [Arguments(new List<string> { "x", "y", "z" })]
@@ -98,7 +98,6 @@ public class IntGenericClassTests : GenericClassTests<int>
 {
 }
 
-[InheritsTests]
 [InheritsTests]
 public class StringGenericClassTests : GenericClassTests<string>
 {
