@@ -13,8 +13,6 @@ public abstract class DataSourceGeneratorAttribute<T> : AsyncDataSourceGenerator
         }
         await Task.CompletedTask;
     }
-
-
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
@@ -30,8 +28,6 @@ public abstract class DataSourceGeneratorAttribute<T1, T2> : AsyncDataSourceGene
         }
         await Task.CompletedTask;
     }
-
-
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
@@ -48,8 +44,6 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : AsyncDataSource
 
         await Task.CompletedTask;
     }
-
-
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
@@ -65,8 +59,6 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : AsyncDataSo
         }
         await Task.CompletedTask;
     }
-
-
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
@@ -82,6 +74,4 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : AsyncDa
         }
         await Task.CompletedTask;
     }
-
-
 }

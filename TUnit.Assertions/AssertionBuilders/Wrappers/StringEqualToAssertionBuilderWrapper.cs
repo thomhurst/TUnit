@@ -40,6 +40,4 @@ public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertionBuild
 
         return this;
     }
-
-
 }
