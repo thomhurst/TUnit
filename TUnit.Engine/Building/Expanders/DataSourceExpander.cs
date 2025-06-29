@@ -121,27 +121,40 @@ public sealed class DataSourceExpander : IDataSourceExpander
         TestDataSource dataSource,
         DataSourceLevel level)
     {
-        if (dataSource is StaticTestDataSource)
+        try
         {
-            // Static data sources can return their factories directly
+            if (dataSource is StaticTestDataSource)
+            {
+                // Static data sources can return their factories directly
+                return dataSource.GetDataFactories();
+            }
+
+            if (dataSource is AotFriendlyTestDataSource aotFriendlySource)
+            {
+                // AOT-friendly sources use direct method invocation, no reflection needed
+                return aotFriendlySource.GetDataFactories();
+            }
+
+            if (dataSource is DynamicTestDataSource dynamicSource)
+            {
+                // Dynamic sources need resolution - these are only used when AOT-friendly resolution isn't possible
+                // The source generator now preferentially creates AotFriendlyTestDataSource when possible
+                return await _dynamicResolver.ResolveAsync(dynamicSource, level);
+            }
+
+            // Handle other data source types (e.g., AttributeDataSource)
             return dataSource.GetDataFactories();
         }
-
-        if (dataSource is AotFriendlyTestDataSource aotFriendlySource)
+        catch (Exception ex)
         {
-            // AOT-friendly sources use direct method invocation, no reflection needed
-            return aotFriendlySource.GetDataFactories();
+            // If data source resolution fails, return a factory that captures the error
+            // This allows the test to still be discovered but fail when executed
+            var errorMessage = $"Failed to resolve data source: {ex.Message}";
+            return new[]
+            {
+                new Func<object?[]>(() => throw new InvalidOperationException(errorMessage, ex))
+            };
         }
-
-        if (dataSource is DynamicTestDataSource dynamicSource)
-        {
-            // Dynamic sources need resolution - these are only used when AOT-friendly resolution isn't possible
-            // The source generator now preferentially creates AotFriendlyTestDataSource when possible
-            return await _dynamicResolver.ResolveAsync(dynamicSource, level);
-        }
-
-        // Handle other data source types (e.g., AttributeDataSource)
-        return dataSource.GetDataFactories();
     }
 
     private IEnumerable<TestCombination> GenerateTestCombinations(
@@ -169,7 +182,21 @@ public sealed class DataSourceExpander : IDataSourceExpander
                     var methodFactory = CombineFactories(methodFactories);
 
                     // Generate display text
-                    var displayText = GenerateDisplayText(classFactory(), methodFactory());
+                    string displayText;
+                    try
+                    {
+                        displayText = GenerateDisplayText(classFactory(), methodFactory());
+                    }
+                    catch (Exception ex)
+                    {
+                        // If we can't generate display text, use a fallback
+                        displayText = $"[Data Source Error: {ex.Message}]";
+                        
+                        // Replace the factories with ones that throw the error
+                        var errorMessage = $"Data source failed during test discovery: {ex.Message}";
+                        classFactory = () => throw new InvalidOperationException(errorMessage, ex);
+                        methodFactory = () => throw new InvalidOperationException(errorMessage, ex);
+                    }
 
                     // Combine indices
                     var indices = CombineIndices(classIndices, methodIndices);
