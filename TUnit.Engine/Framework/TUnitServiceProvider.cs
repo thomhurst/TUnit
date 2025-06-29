@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -9,6 +10,8 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.OutputDevice;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Services;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
@@ -30,6 +33,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitMessageBus MessageBus { get; }
     public EngineCancellationToken CancellationToken { get; }
     
+    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
+    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
     public TUnitServiceProvider(
         IExtension extension,
         ExecuteRequestContext context,
@@ -61,8 +66,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testInvoker = Register<ITestInvoker>(new TestInvoker());
         var hookInvoker = Register<IHookInvoker>(new HookInvoker());
         var dataSourceResolver = Register<IDataSourceResolver>(new DataSourceResolver());
+        var genericTypeResolver = Register<IGenericTypeResolver>(new GenericTypeResolver());
         
-        TestFactory = Register(new TestFactory(testInvoker, hookInvoker, dataSourceResolver));
+        TestFactory = Register(new TestFactory(testInvoker, hookInvoker, dataSourceResolver, genericTypeResolver));
         
         // Initialize the test registry singleton
         TestRegistry.Initialize(TestFactory);

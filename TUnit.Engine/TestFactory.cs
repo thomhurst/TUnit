@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,21 +23,26 @@ public sealed class TestFactory
     private readonly ITestInvoker _testInvoker;
     private readonly IHookInvoker _hookInvoker;
     private readonly IDataSourceResolver _dataSourceResolver;
+    private readonly IGenericTypeResolver _genericTypeResolver;
     private static readonly string DebugLogPath = Path.Combine(Path.GetTempPath(), "tunit-debug-process.log");
     
     public TestFactory(
         ITestInvoker testInvoker,
         IHookInvoker hookInvoker,
-        IDataSourceResolver dataSourceResolver)
+        IDataSourceResolver dataSourceResolver,
+        IGenericTypeResolver genericTypeResolver)
     {
         _testInvoker = testInvoker;
         _hookInvoker = hookInvoker;
         _dataSourceResolver = dataSourceResolver;
+        _genericTypeResolver = genericTypeResolver;
     }
     
     /// <summary>
     /// Creates executable tests from metadata, expanding data-driven tests
     /// </summary>
+    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
+    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     public async Task<IEnumerable<ExecutableTest>> CreateTests(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
@@ -60,6 +66,8 @@ public sealed class TestFactory
         return tests;
     }
     
+    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
+    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private ExecutableTest CreateExecutableTest(
         TestMetadata metadata,
         object?[] arguments,
@@ -157,11 +165,13 @@ public sealed class TestFactory
         return results;
     }
     
+    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
+    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, Dictionary<string, object?> propertyValues)
     {
         if (metadata.InstanceFactory != null)
         {
-            // AOT-safe path
+            // AOT-safe path - source generated
             return async () =>
             {
                 var instance = metadata.InstanceFactory();
@@ -171,32 +181,83 @@ public sealed class TestFactory
         }
         
         // Reflection fallback
+        return CreateReflectionInstanceFactory(metadata, propertyValues);
+    }
+    
+    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
+    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
+    private Func<Task<object>> CreateReflectionInstanceFactory(TestMetadata metadata, Dictionary<string, object?> propertyValues)
+    {
         return async () =>
         {
+            var classType = metadata.TestClassType;
+            
+            // Handle generic classes
+            if (classType.IsGenericTypeDefinition)
+            {
+                try
+                {
+                    // For generic classes, we need to infer types from the test method arguments or properties
+                    // This is a simplified approach - in practice, we might need constructor arguments
+                    var genericArguments = _genericTypeResolver.ResolveGenericClassArguments(classType, Array.Empty<object?>());
+                    classType = classType.MakeGenericType(genericArguments);
+                }
+                catch (GenericTypeResolutionException ex)
+                {
+                    throw new InvalidOperationException($"Failed to resolve generic types for test class {metadata.TestClassType.Name}: {ex.Message}", ex);
+                }
+            }
+            
             #pragma warning disable IL2072 // Test class types are known at compile time through source generation
-            var instance = Activator.CreateInstance(metadata.TestClassType) 
-                ?? throw new InvalidOperationException($"Failed to create instance of {metadata.TestClassType}");
+            var instance = Activator.CreateInstance(classType) 
+                ?? throw new InvalidOperationException($"Failed to create instance of {classType}");
             #pragma warning restore IL2072
             await InjectProperties(instance, propertyValues);
             return instance;
         };
     }
     
+    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
+    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private Func<object, Task> CreateTestInvoker(TestMetadata metadata, object?[] arguments)
     {
         if (metadata.TestInvoker != null)
         {
-            // AOT-safe path
+            // AOT-safe path - source generated
             return instance => metadata.TestInvoker(instance, arguments);
         }
         
         // Reflection fallback
+        return CreateReflectionTestInvoker(metadata, arguments);
+    }
+    
+    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
+    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
+    private Func<object, Task> CreateReflectionTestInvoker(TestMetadata metadata, object?[] arguments)
+    {
         if (metadata.MethodInfo == null)
         {
             throw new InvalidOperationException($"No invoker or MethodInfo available for test {metadata.TestName}");
         }
         
-        return instance => _testInvoker.InvokeTestMethod(instance, metadata.MethodInfo, arguments);
+        var methodInfo = metadata.MethodInfo;
+        
+        // Handle generic methods
+        if (methodInfo.IsGenericMethodDefinition)
+        {
+            try
+            {
+                var genericArguments = _genericTypeResolver.ResolveGenericMethodArguments(methodInfo, arguments);
+                methodInfo = methodInfo.MakeGenericMethod(genericArguments);
+            }
+            catch (GenericTypeResolutionException ex)
+            {
+                throw new InvalidOperationException($"Failed to resolve generic types for test {metadata.TestName}: {ex.Message}", ex);
+            }
+        }
+        
+        var concreteMethodInfo = methodInfo;
+        return instance => _testInvoker.InvokeTestMethod(instance, concreteMethodInfo, arguments);
     }
     
     private TestLifecycleHooks CreateHooks(TestMetadata metadata)

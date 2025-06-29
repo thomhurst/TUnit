@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -45,6 +46,8 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
     /// <summary>
     /// Discovers all tests from configured sources
     /// </summary>
+    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
+    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     public async Task<IEnumerable<ExecutableTest>> DiscoverTests()
     {
         const int DiscoveryTimeoutSeconds = 30; // 30 seconds default - enough for most discovery scenarios
@@ -62,6 +65,8 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
         }
     }
     
+    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
+    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private async Task<IEnumerable<ExecutableTest>> DiscoverTestsWithTimeout(CancellationToken cancellationToken)
     {
         var allTests = new List<ExecutableTest>();

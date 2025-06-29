@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -13,6 +14,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Services;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
@@ -148,6 +150,8 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     /// <summary>
     /// Implementation of ITestExecutor for Microsoft.Testing.Platform
     /// </summary>
+    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
+    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
     public async Task ExecuteAsync(
         RunTestExecutionRequest request,
         IMessageBus messageBus,
@@ -159,7 +163,8 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             new TestFactory(
                 new TestInvoker(),
                 new HookInvoker(),
-                new DataSourceResolver()),
+                new DataSourceResolver(),
+                new GenericTypeResolver()),
             enableDynamicDiscovery: false);
         
         var tests = await discoveryService.DiscoverTests();

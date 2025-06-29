@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Models;
+using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator;
 
@@ -44,17 +45,19 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Skip abstract classes, static methods, and open generic types
-        if (namedTypeSymbol.IsAbstract || methodSymbol.IsStatic || namedTypeSymbol is { IsGenericType: true, TypeParameters.Length: > 0 })
+        // Skip abstract classes and static methods
+        if (namedTypeSymbol.IsAbstract || methodSymbol.IsStatic)
         {
             return null;
         }
         
-        // Skip generic test methods - they can't be represented statically
-        if (methodSymbol.IsGenericMethod)
+        // Skip open generic types (e.g., MyClass<T>)
+        if (namedTypeSymbol.IsGenericType && namedTypeSymbol.TypeArguments.Any(t => t is ITypeParameterSymbol))
         {
             return null;
         }
+        
+        // Note: We now support generic methods - they will be resolved at runtime
 
         // Skip non-public methods
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
@@ -152,7 +155,14 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 
                 foreach (var testInfo in validTests)
                 {
-                    GenerateTestMetadata(writer, testInfo);
+                    if (testInfo.MethodSymbol.IsGenericMethod)
+                    {
+                        GenerateGenericTestMetadata(writer, testInfo);
+                    }
+                    else
+                    {
+                        GenerateTestMetadata(writer, testInfo);
+                    }
                     writer.AppendLine();
                 }
                 
@@ -270,7 +280,13 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("Hooks = new TestHooks { BeforeClass = Array.Empty<HookMetadata>(), AfterClass = Array.Empty<HookMetadata>(), BeforeTest = Array.Empty<HookMetadata>(), AfterTest = Array.Empty<HookMetadata>() },");
             
             // Always provide MethodInfo for reflection fallback
-            if (testInfo.MethodSymbol.Parameters.Length == 0)
+            if (testInfo.MethodSymbol.IsGenericMethod)
+            {
+                // For generic methods, we need to get the generic method definition
+                // We can't specify parameter types because they may contain generic type parameters
+                writer.AppendLine($"MethodInfo = typeof({context.ClassName}).GetMethod(\"{context.MethodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance),");
+            }
+            else if (testInfo.MethodSymbol.Parameters.Length == 0)
             {
                 writer.AppendLine($"MethodInfo = typeof({context.ClassName}).GetMethod(\"{context.MethodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, Type.EmptyTypes, null),");
             }
@@ -293,6 +309,210 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"LineNumber = {testInfo.LineNumber}");
         }
         writer.AppendLine(");");
+    }
+    
+    private static void GenerateGenericTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        // Get all Arguments attributes
+        var argumentsAttributes = testInfo.MethodSymbol.GetAttributes()
+            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+            .ToList();
+            
+        if (!argumentsAttributes.Any())
+        {
+            // No arguments, cannot infer generic types
+            writer.AppendLine($"// Skipping generic test {testInfo.MethodSymbol.Name} - no Arguments attributes to infer types");
+            return;
+        }
+        
+        // Generate a concrete test for each set of arguments
+        foreach (var attr in argumentsAttributes)
+        {
+            GenerateConcreteGenericTest(writer, testInfo, attr);
+        }
+    }
+    
+    private static void GenerateConcreteGenericTest(CodeWriter writer, TestMethodMetadata testInfo, AttributeData argumentsAttribute)
+    {
+        // Extract argument types from the attribute
+        var argumentTypes = ExtractArgumentTypes(argumentsAttribute);
+        if (argumentTypes == null || argumentTypes.Length == 0)
+        {
+            writer.AppendLine($"// Could not extract argument types from {argumentsAttribute}");
+            return;
+        }
+        
+        // Resolve generic type parameters
+        var typeMapping = CompileTimeGenericResolver.ResolveGenericArguments(testInfo.MethodSymbol, argumentTypes);
+        if (typeMapping == null)
+        {
+            writer.AppendLine($"// Could not resolve generic types for {testInfo.MethodSymbol.Name} with argument types: {string.Join(", ", argumentTypes.Select(t => t.ToDisplayString()))}");
+            return;
+        }
+        
+        // Validate constraints
+        if (!CompileTimeGenericResolver.ValidateConstraints(testInfo.MethodSymbol, typeMapping))
+        {
+            writer.AppendLine($"// Generic constraints not satisfied for {testInfo.MethodSymbol.Name}");
+            return;
+        }
+        
+        // Generate the test metadata for this concrete instantiation
+        var suffix = CompileTimeGenericResolver.GetGenericInstantiationSuffix(typeMapping);
+        var concreteTestId = $"{testInfo.TypeSymbol.ToDisplayString()}.{testInfo.MethodSymbol.Name}_{suffix}";
+        
+        TestMetadataGenerationContext context;
+        try
+        {
+            context = TestMetadataGenerationContext.Create(testInfo);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to create context for {testInfo?.TypeSymbol?.Name}.{testInfo?.MethodSymbol?.Name}: {ex.Message}", ex);
+        }
+        
+        using (writer.BeginBlock("_allTests.Add(new TestMetadata"))
+        {
+            writer.AppendLine($"TestId = \"{concreteTestId}\",");
+            writer.AppendLine($"TestName = \"{context.MethodName}_{suffix}\",");
+            writer.AppendLine($"TestClassType = typeof({context.ClassName}),");
+            writer.AppendLine($"TestMethodName = \"{context.MethodName}\",");
+            
+            // Categories
+            GenerateCategories(writer, testInfo);
+            
+            // Skip status
+            GenerateSkipStatus(writer, testInfo);
+            
+            // Timeout
+            GenerateTimeout(writer, testInfo);
+            
+            // Retry count
+            writer.AppendLine($"RetryCount = {GetRetryCount(testInfo)},");
+            
+            // Parallel execution
+            writer.AppendLine($"CanRunInParallel = {GetCanRunInParallel(testInfo).ToString().ToLower()},");
+            
+            // Dependencies
+            writer.AppendLine("DependsOn = Array.Empty<string>(),");
+            
+            // Data sources - include the specific arguments
+            writer.AppendLine("DataSources = new TestDataSource[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            GenerateStaticDataSourceForArguments(writer, argumentsAttribute);
+            writer.Unindent();
+            writer.AppendLine("},");
+            
+            // Properties
+            GeneratePropertyDataSources(writer, testInfo);
+            
+            // Instance factory (null for reflection)
+            writer.AppendLine("InstanceFactory = null,");
+            
+            // Generate AOT-safe invoker for generic method
+            GenerateGenericTestInvoker(writer, testInfo, typeMapping);
+            
+            // Parameter info
+            writer.AppendLine($"ParameterCount = {testInfo.MethodSymbol.Parameters.Length},");
+            GenerateConcreteParameterTypes(writer, testInfo, typeMapping);
+            
+            // Hooks
+            writer.AppendLine("Hooks = new TestHooks { BeforeClass = Array.Empty<HookMetadata>(), AfterClass = Array.Empty<HookMetadata>(), BeforeTest = Array.Empty<HookMetadata>(), AfterTest = Array.Empty<HookMetadata>() },");
+            
+            // MethodInfo for reflection fallback
+            writer.AppendLine($"MethodInfo = typeof({context.ClassName}).GetMethod(\"{context.MethodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance),");
+            
+            // Source location
+            writer.AppendLine($"FilePath = @\"{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
+            writer.AppendLine($"LineNumber = {testInfo.LineNumber}");
+        }
+        writer.AppendLine(");");
+    }
+    
+    private static void GenerateGenericTestInvoker(CodeWriter writer, TestMethodMetadata testInfo, Dictionary<ITypeParameterSymbol, ITypeSymbol> typeMapping)
+    {
+        var className = testInfo.TypeSymbol.ToDisplayString();
+        var methodName = testInfo.MethodSymbol.Name;
+        var typeArgs = string.Join(", ", typeMapping.Values.Select(t => $"typeof({t.ToDisplayString()})"));
+        
+        writer.AppendLine("TestInvoker = async (instance, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"var method = typeof({className}).GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);");
+        writer.AppendLine($"var genericMethod = method.MakeGenericMethod({typeArgs});");
+        writer.AppendLine("var result = genericMethod.Invoke(instance, args);");
+        writer.AppendLine("if (result is Task task) await task;");
+        writer.AppendLine("else if (result is ValueTask valueTask) await valueTask.AsTask();");
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+    
+    private static void GenerateStaticDataSourceForArguments(CodeWriter writer, AttributeData argumentsAttribute)
+    {
+        writer.Append("new StaticTestDataSource(new object?[] { ");
+        
+        var args = new List<string>();
+        foreach (var arg in argumentsAttribute.ConstructorArguments)
+        {
+            if (arg.Kind == TypedConstantKind.Array)
+            {
+                // Handle params array
+                foreach (var item in arg.Values)
+                {
+                    args.Add(FormatAttributeArgument(item.Value));
+                }
+            }
+            else
+            {
+                args.Add(FormatAttributeArgument(arg.Value));
+            }
+        }
+        
+        writer.Append(string.Join(", ", args));
+        writer.AppendLine(" })");
+    }
+    
+    private static ITypeSymbol[]? ExtractArgumentTypes(AttributeData attributeData)
+    {
+        var types = new List<ITypeSymbol>();
+        
+        foreach (var arg in attributeData.ConstructorArguments)
+        {
+            if (arg.Kind == TypedConstantKind.Array)
+            {
+                // Handle params array
+                foreach (var item in arg.Values)
+                {
+                    var type = GetTypeFromValue(item);
+                    if (type != null)
+                    {
+                        types.Add(type);
+                    }
+                }
+            }
+            else
+            {
+                var type = GetTypeFromValue(arg);
+                if (type != null)
+                {
+                    types.Add(type);
+                }
+            }
+        }
+        
+        return types.ToArray();
+    }
+    
+    private static ITypeSymbol? GetTypeFromValue(TypedConstant constant)
+    {
+        if (constant.Type == null)
+        {
+            return null;
+        }
+        
+        // For typed constants, the Type property gives us the actual type
+        return constant.Type;
     }
     
     private static void GenerateTestClassHelpers(CodeWriter writer, INamedTypeSymbol classSymbol, List<TestMethodMetadata> testMethods)
@@ -547,6 +767,36 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             var types = testInfo.MethodSymbol.Parameters.Select(p =>
             {
                 var typeName = p.Type.ToDisplayString();
+                // Remove nullable annotations for typeof()
+                typeName = typeName.Replace("?", "");
+                return $"typeof({typeName})";
+            });
+            writer.Append(string.Join(", ", types));
+            writer.AppendLine(" },");
+        }
+        else
+        {
+            writer.AppendLine("ParameterTypes = Array.Empty<Type>(),");
+        }
+    }
+    
+    private static void GenerateConcreteParameterTypes(CodeWriter writer, TestMethodMetadata testInfo, Dictionary<ITypeParameterSymbol, ITypeSymbol> typeMapping)
+    {
+        if (testInfo.MethodSymbol.Parameters.Length > 0)
+        {
+            writer.Append("ParameterTypes = new Type[] { ");
+            var types = testInfo.MethodSymbol.Parameters.Select(p =>
+            {
+                var paramType = p.Type;
+                
+                // If the parameter type is a generic type parameter, resolve it
+                if (paramType is ITypeParameterSymbol typeParam && typeMapping.TryGetValue(typeParam, out var resolvedType))
+                {
+                    return $"typeof({resolvedType.ToDisplayString()})";
+                }
+                
+                // Otherwise use the parameter type as-is
+                var typeName = paramType.ToDisplayString();
                 // Remove nullable annotations for typeof()
                 typeName = typeName.Replace("?", "");
                 return $"typeof({typeName})";

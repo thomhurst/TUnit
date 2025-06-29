@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,6 +93,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return Task.FromResult(new CreateTestSessionResult { IsSuccess = true });
     }
 
+    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
+    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
         var serviceProvider = GetOrCreateServiceProvider(context);
@@ -135,6 +138,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return new CloseTestSessionResult { IsSuccess = true };
     }
 
+    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
+    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
     private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
     {
         return _serviceProvidersPerSession.GetOrAdd(
