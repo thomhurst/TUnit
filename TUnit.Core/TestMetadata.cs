@@ -139,57 +139,8 @@ public sealed class TestMetadata
     public GenericMethodInfo? GenericMethodInfo { get; init; }
 }
 
-/// <summary>
-/// Represents a source of test data
-/// </summary>
-public abstract class TestDataSource
-{
-    /// <summary>
-    /// Gets the test data items
-    /// </summary>
-    public abstract IEnumerable<object?[]> GetData();
-}
-
-/// <summary>
-/// Static test data (e.g., from [Arguments] attribute)
-/// </summary>
-public sealed class StaticTestDataSource : TestDataSource
-{
-    private readonly object?[][] _data;
-    
-    public StaticTestDataSource(params object?[][] data)
-    {
-        _data = data;
-    }
-    
-    public override IEnumerable<object?[]> GetData() => _data;
-}
-
-/// <summary>
-/// Dynamic test data (e.g., from method or property)
-/// </summary>
-public sealed class DynamicTestDataSource : TestDataSource
-{
-    public required Type SourceType { get; init; }
-    public required string SourceMemberName { get; init; }
-    public bool IsShared { get; init; }
-    
-    public override IEnumerable<object?[]> GetData()
-    {
-        // This will be implemented by TestFactory
-        throw new NotImplementedException("Dynamic data sources are resolved by TestFactory");
-    }
-}
-
-/// <summary>
-/// Property that requires data injection
-/// </summary>
-public sealed class PropertyDataSource
-{
-    public required string PropertyName { get; init; }
-    public required Type PropertyType { get; init; }
-    public required TestDataSource DataSource { get; init; }
-}
+// TestDataSource classes have been moved to TestDataSources.cs
+// Import the classes from the new location
 
 /// <summary>
 /// Test lifecycle hooks
