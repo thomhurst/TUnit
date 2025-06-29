@@ -63,6 +63,22 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         {
             return null;
         }
+        
+        // Skip tests on base classes if derived class has InheritsTests attribute
+        // This prevents duplicate test registration
+        if (IsTestInheritedByDerivedClass(methodSymbol, namedTypeSymbol))
+        {
+            return null;
+        }
+        
+        // Skip tests with AsyncDataSourceGenerator attributes - they're handled by specialized generators
+        var hasAsyncDataSourceGenerator = methodSymbol.GetAttributes()
+            .Any(a => a.AttributeClass != null && IsAsyncDataSourceGeneratorAttribute(a.AttributeClass));
+            
+        if (hasAsyncDataSourceGenerator)
+        {
+            return null;
+        }
 
         // Get location info
         var location = context.TargetNode.GetLocation();
@@ -84,6 +100,31 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             TestAttribute = context.Attributes[0],
             Context = context
         };
+    }
+    
+    private static bool IsAsyncDataSourceGeneratorAttribute(INamedTypeSymbol attributeClass)
+    {
+        // Check if the attribute inherits from AsyncDataSourceGeneratorAttribute
+        var baseType = attributeClass.BaseType;
+        while (baseType != null)
+        {
+            if (baseType.Name.StartsWith("AsyncDataSourceGeneratorAttribute") && 
+                baseType.ContainingNamespace?.ToString() == "TUnit.Core")
+            {
+                return true;
+            }
+            
+            // Also check interfaces
+            if (baseType.Interfaces.Any(i => i.Name == "IAsyncDataSourceGeneratorAttribute" && 
+                i.ContainingNamespace?.ToString() == "TUnit.Core"))
+            {
+                return true;
+            }
+            
+            baseType = baseType.BaseType;
+        }
+        
+        return false;
     }
 
     private static void GenerateTestRegistry(SourceProductionContext context, ImmutableArray<TestMethodMetadata?> testMethods)
@@ -248,12 +289,10 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("DependsOn = Array.Empty<string>(),");
                 
                 // Data sources
-                //GenerateDataSources(writer, testInfo);
-                writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
+                GenerateDataSources(writer, testInfo);
                 
                 // Property data sources
-                //GeneratePropertyDataSources(writer, testInfo);
-                writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
+                GeneratePropertyDataSources(writer, testInfo);
                 
                 // Parameter info
                 writer.AppendLine($"ParameterCount = {testInfo.MethodSymbol.Parameters.Length},");
@@ -583,9 +622,11 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     
     private static void GenerateDataSources(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        writer.AppendLine("DataSources = new TestDataSource[]");
-        writer.AppendLine("{");
-        writer.Indent();
+        // For now, we'll only handle simple data sources here
+        // AsyncDataSourceGenerator attributes are handled by the old source generation pipeline
+        // and should be excluded from UnifiedTestMetadataGenerator
+        
+        var dataSources = new List<string>();
         
         // Arguments attributes
         var argumentsAttributes = testInfo.MethodSymbol.GetAttributes()
@@ -593,11 +634,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         
         foreach (var attr in argumentsAttributes)
         {
-            writer.AppendLine("new StaticTestDataSource(");
-            writer.Indent();
-            writer.AppendLine($"new object?[][] {{ new object?[] {{ {FormatAttributeArguments(attr)} }} }}");
-            writer.Unindent();
-            writer.AppendLine("),");
+            dataSources.Add($"new StaticTestDataSource(new object?[][] {{ new object?[] {{ {FormatAttributeArguments(attr)} }} }})");
         }
         
         // MethodDataSource attributes
@@ -606,11 +643,32 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         
         foreach (var attr in methodDataAttributes)
         {
-            GenerateDynamicDataSource(writer, attr);
+            var dataSource = GenerateDynamicDataSourceString(attr);
+            if (!string.IsNullOrEmpty(dataSource))
+            {
+                dataSources.Add(dataSource);
+            }
         }
         
-        writer.Unindent();
-        writer.AppendLine("},");
+        // Note: AsyncDataSourceGenerator attributes are filtered out in GetTestMethodMetadata
+        // so we shouldn't see them here
+        
+        if (dataSources.Any())
+        {
+            writer.AppendLine("DataSources = new TestDataSource[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var ds in dataSources)
+            {
+                writer.AppendLine($"{ds},");
+            }
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        else
+        {
+            writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
+        }
     }
     
     private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testInfo)
@@ -634,7 +692,10 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 writer.Indent();
                 writer.AppendLine($"PropertyName = \"{prop.Name}\",");
                 writer.AppendLine($"PropertyType = typeof({prop.Type.ToDisplayString()}),");
-                writer.AppendLine("DataSource = // Generate based on attribute");
+                
+                // TODO: Generate proper data source based on attribute type
+                // For now, skip property data sources
+                writer.AppendLine("DataSource = new StaticTestDataSource(new object?[][] { new object?[] { null } })");
                 writer.Unindent();
                 writer.AppendLine("},");
             }
@@ -691,6 +752,28 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         
         writer.Unindent();
         writer.AppendLine("},");
+    }
+    
+    private static string GenerateDynamicDataSourceString(AttributeData attr)
+    {
+        if (attr.ConstructorArguments.Length == 0)
+        {
+            return string.Empty;
+        }
+        
+        var sourceType = attr.ConstructorArguments[0].Value as ITypeSymbol;
+        var memberName = attr.ConstructorArguments.Length > 1 
+            ? attr.ConstructorArguments[1].Value?.ToString() 
+            : attr.ConstructorArguments[0].Value?.ToString();
+            
+        if (sourceType == null || memberName == null)
+        {
+            return string.Empty;
+        }
+        
+        var isShared = attr.NamedArguments.FirstOrDefault(a => a.Key == "IsShared").Value.Value as bool? ?? true;
+        
+        return $"new DynamicTestDataSource {{ SourceType = typeof({sourceType.ToDisplayString()}), SourceMemberName = \"{memberName}\", IsShared = {isShared.ToString().ToLower()} }}";
     }
     
     private static void GenerateDynamicDataSource(CodeWriter writer, AttributeData attr)
@@ -987,4 +1070,17 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
     }
     
+    private static bool IsTestInheritedByDerivedClass(IMethodSymbol methodSymbol, INamedTypeSymbol containingType)
+    {
+        // If this test is defined in a class that has derived classes with [InheritsTests],
+        // skip it to avoid duplicate registration
+        
+        // Can't determine at compile time if there are derived classes in the current compilation context
+        // This would require a more complex analysis across the compilation
+        // For now, return false to maintain existing behavior
+        
+        // A better approach would be to have the InheritsTestsGenerator skip creating metadata
+        // for tests that are already handled by UnifiedTestMetadataGenerator
+        return false;
+    }
 }

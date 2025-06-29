@@ -305,7 +305,32 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
     
     private void ResolveDependencies(List<ExecutableTest> tests)
     {
-        var testMap = tests.ToDictionary(t => t.TestId);
+        // Handle potential duplicates more gracefully
+        var testMap = new Dictionary<string, ExecutableTest>();
+        var duplicates = new List<string>();
+        
+        foreach (var test in tests)
+        {
+            if (testMap.ContainsKey(test.TestId))
+            {
+                duplicates.Add(test.TestId);
+                // Keep the first occurrence
+                continue;
+            }
+            testMap[test.TestId] = test;
+        }
+        
+        if (duplicates.Count > 0)
+        {
+            var duplicatesList = string.Join("\n  - ", duplicates.Distinct());
+            throw new InvalidOperationException(
+                $"Duplicate test IDs detected during discovery. This usually indicates that the same test is being registered by multiple generators.\n" +
+                $"Duplicate test IDs:\n  - {duplicatesList}\n\n" +
+                $"This can happen when:\n" +
+                $"1. A test is defined in both a base class and derived class with [InheritsTests]\n" +
+                $"2. Multiple source generators are processing the same test\n" +
+                $"3. Data-driven tests are generating the same test ID");
+        }
         
         foreach (var test in tests)
         {
