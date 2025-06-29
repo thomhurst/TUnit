@@ -334,12 +334,12 @@ internal static class CodeGenerationHelpers
 
         if (dataSourceAttributes.Count == 0)
         {
-            return "System.Array.Empty<global::TUnit.Core.IDataSourceProvider>()";
+            return "System.Array.Empty<global::TUnit.Core.TestDataSource>()";
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
         writer.SetIndentLevel(2);
-        using (writer.BeginArrayInitializer("new global::TUnit.Core.IDataSourceProvider[]"))
+        using (writer.BeginArrayInitializer("new global::TUnit.Core.TestDataSource[]"))
         {
             foreach (var attr in dataSourceAttributes)
             {
@@ -370,12 +370,12 @@ internal static class CodeGenerationHelpers
 
         if (dataSourceAttributes.Count == 0)
         {
-            return "System.Array.Empty<global::TUnit.Core.IDataSourceProvider>()";
+            return "System.Array.Empty<global::TUnit.Core.TestDataSource>()";
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
         writer.SetIndentLevel(2);
-        using (writer.BeginArrayInitializer("new global::TUnit.Core.IDataSourceProvider[]"))
+        using (writer.BeginArrayInitializer("new global::TUnit.Core.TestDataSource[]"))
         {
             foreach (var attr in dataSourceAttributes)
             {
@@ -383,42 +383,6 @@ internal static class CodeGenerationHelpers
                 if (!string.IsNullOrEmpty(providerCode))
                 {
                     writer.AppendLine($"{providerCode},");
-                }
-            }
-        }
-        return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
-    }
-
-    /// <summary>
-    /// Generates C# code for property data source providers dictionary.
-    /// </summary>
-    public static string GeneratePropertyDataSourceDictionary(INamedTypeSymbol typeSymbol)
-    {
-        var propertiesWithDataSources = typeSymbol.GetMembers()
-            .OfType<IPropertySymbol>()
-            .Where(p => p.DeclaredAccessibility == Accessibility.Public &&
-                       p.GetAttributes().Any(IsDataSourceAttribute))
-            .ToList();
-
-        if (propertiesWithDataSources.Count == 0)
-        {
-            return "new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>()";
-        }
-
-        using var writer = new CodeWriter("", includeHeader: false);
-        writer.SetIndentLevel(2); // Start with indent level 2 for inline dictionaries
-        using (writer.BeginObjectInitializer("new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>", ""))
-        {
-            foreach (var prop in propertiesWithDataSources)
-            {
-                var dataSourceAttr = prop.GetAttributes().FirstOrDefault(IsDataSourceAttribute);
-                if (dataSourceAttr != null)
-                {
-                    var providerCode = GenerateDataSourceProvider(dataSourceAttr, typeSymbol);
-                    if (!string.IsNullOrEmpty(providerCode))
-                    {
-                        writer.AppendLine($"{{ typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"), {providerCode} }},");
-                    }
                 }
             }
         }
@@ -471,16 +435,11 @@ internal static class CodeGenerationHelpers
     private static string GenerateInlineDataProvider(AttributeData attr)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        writer.Append("new global::TUnit.Core.DataSources.InlineDataSourceProvider(");
+        writer.Append("new global::TUnit.Core.StaticTestDataSource(new object?[][] { new object?[] { ");
 
         var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue).ToList();
-
-        using (writer.BeginArrayInitializer("new object?[]", terminator: ""))
-        {
-            writer.Append(string.Join(", ", args));
-        }
-
-        writer.Append(")");
+        writer.Append(string.Join(", ", args));
+        writer.Append(" } })");
         return writer.ToString().Trim();
     }
 
@@ -494,8 +453,7 @@ internal static class CodeGenerationHelpers
         var methodName = attr.ConstructorArguments[0].Value?.ToString() ?? "";
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
-        // We use GetMethods().FirstOrDefault() instead of GetMethod() to handle potential overloads
-        return $"new global::TUnit.Core.DataSources.MethodDataSourceProvider(typeof({containingType.GloballyQualified()}).GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic).FirstOrDefault(m => m.Name == \"{methodName}\"), null, {isShared.ToString().ToLowerInvariant()})";
+        return $"new global::TUnit.Core.DynamicTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ SourceType = typeof({containingType.GloballyQualified()}), SourceMemberName = \"{methodName}\" }}";
     }
 
     private static string GenerateParameterTypesArray(IMethodSymbol method)
@@ -534,7 +492,7 @@ internal static class CodeGenerationHelpers
 
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
-        return $"new global::TUnit.Core.DataSources.ClassDataSourceProvider(typeof({dataSourceType.GloballyQualified()}), {isShared.ToString().ToLowerInvariant()})";
+        return $"new global::TUnit.Core.DynamicTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ SourceType = typeof({dataSourceType.GloballyQualified()}), SourceMemberName = \"GetData\" }}";
     }
 
     private static string GeneratePropertyDataSourceProvider(AttributeData attr, INamedTypeSymbol containingType)
@@ -547,13 +505,14 @@ internal static class CodeGenerationHelpers
         var propertyName = attr.ConstructorArguments[0].Value?.ToString() ?? "";
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
-        return $"new global::TUnit.Core.DataSources.PropertyDataSourceProvider(typeof({containingType.GloballyQualified()}), \"{propertyName}\", {isShared.ToString().ToLowerInvariant()})";
+        return $"new global::TUnit.Core.DynamicTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ SourceType = typeof({containingType.GloballyQualified()}), SourceMemberName = \"{propertyName}\" }}";
     }
 
     private static string GenerateCustomDataProvider(AttributeData attr)
     {
-        // For custom data attributes, create an instance of the attribute and wrap it
-        return $"new global::TUnit.Core.DataSources.AttributeDataSourceProvider({GenerateAttributeInstantiation(attr)})";
+        // For custom data attributes, create a DynamicTestDataSource
+        // This is a simplified approach - may need more sophisticated handling
+        return $"new global::TUnit.Core.DynamicTestDataSource(false) {{ SourceType = typeof({attr.AttributeClass!.GloballyQualified()}), SourceMemberName = \"GetData\" }}";
     }
 
     /// <summary>

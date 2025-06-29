@@ -261,7 +261,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                     w2.AppendLine($"TestLineNumber = {classInfo.LineNumber},");
                     w2.AppendLine($"ClassDataSources = {CodeGenerationHelpers.GenerateClassDataSourceProviders(classSymbol)},");
                     w2.AppendLine($"MethodDataSources = {CodeGenerationHelpers.GenerateMethodDataSourceProviders(methodSymbol)},");
-                    w2.AppendLine($"PropertyDataSources = {CodeGenerationHelpers.GeneratePropertyDataSourceDictionary(classSymbol)},");
+                    w2.AppendLine($"PropertyDataSources = new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.Interfaces.IDataSource>(),");
 
                     // Extract timeout, skip info, and repeat count
                     var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(methodSymbol);

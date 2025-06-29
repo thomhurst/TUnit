@@ -306,12 +306,23 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 throw new InvalidOperationException($"Failed to generate metadata fields for {context.ClassName}.{context.MethodName}: {ex.Message}", ex);
             }
             
+            // Check if we should skip instance factory generation (same logic as in GenerateInstanceFactory)
+            var hasPropertyDataSources = testInfo.TypeSymbol.GetMembers()
+                .OfType<IPropertySymbol>()
+                .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name?.EndsWith("DataSourceAttribute") == true));
+            
+            var shouldSkipInstanceFactory = hasPropertyDataSources || context.RequiredProperties.Count > 0;
+            
             // AOT factories (if possible)
             if (context.CanUseStaticDefinition && 
                 !testInfo.MethodSymbol.IsGenericMethod && !testInfo.TypeSymbol.IsGenericType)
             {
-                // Generate instance factory based on constructor
-                if (context.HasParameterlessConstructor)
+                // Generate instance factory based on constructor (unless we need to skip it)
+                if (shouldSkipInstanceFactory)
+                {
+                    writer.AppendLine("InstanceFactory = null, // Let TestBuilder handle property injection");
+                }
+                else if (context.HasParameterlessConstructor)
                 {
                     writer.AppendLine($"InstanceFactory = (args) => new {context.ClassName}(),");
                 }
@@ -542,6 +553,18 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     {
         if (context.ConstructorWithParameters == null)
         {
+            return;
+        }
+        
+        // Skip instance factory generation for classes with property data sources
+        // These should be handled by the runtime TestBuilder with property injection
+        var hasPropertyDataSources = testInfo.TypeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name?.EndsWith("DataSourceAttribute") == true));
+        
+        if (hasPropertyDataSources || context.RequiredProperties.Count > 0)
+        {
+            // Let the TestBuilder handle property injection at runtime
             return;
         }
         

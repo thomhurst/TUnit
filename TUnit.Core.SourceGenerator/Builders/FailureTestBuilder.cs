@@ -125,9 +125,9 @@ internal class FailureTestBuilder
             
             writer.AppendLine($"TestFilePath = @\"{context.TestInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
             writer.AppendLine($"TestLineNumber = {context.TestInfo.LineNumber},");
-            writer.AppendLine($"ClassDataSources = System.Array.Empty<global::TUnit.Core.IDataSourceProvider>(),");
-            writer.AppendLine($"MethodDataSources = System.Array.Empty<global::TUnit.Core.IDataSourceProvider>(),");
-            writer.AppendLine($"PropertyDataSources = new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.IDataSourceProvider>(),");
+            writer.AppendLine($"ClassDataSources = System.Array.Empty<global::TUnit.Core.TestDataSource>(),");
+            writer.AppendLine($"MethodDataSources = System.Array.Empty<global::TUnit.Core.TestDataSource>(),");
+            writer.AppendLine($"PropertyDataSources = new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.TestDataSource>(),");
             writer.AppendLine($"DisplayNameTemplate = \"{context.MethodName} [RUNTIME INITIALIZATION FAILED]\",");
             writer.AppendLine($"RepeatCount = 1,");
             writer.AppendLine($"IsAsync = true,");
