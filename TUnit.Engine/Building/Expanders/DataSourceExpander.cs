@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
@@ -487,6 +488,14 @@ public sealed class DynamicDataSourceResolver : IDynamicDataSourceResolver
             return funcEnumerable;
         }
 
+        // Handle single tuple - check this before IEnumerable since tuples implement IEnumerable
+        if (rawData != null && IsTupleType(rawData.GetType()))
+        {
+            var tupleValues = GetTupleValues(rawData);
+            factories.Add(() => tupleValues);
+            return factories;
+        }
+
         // Handle regular collections
         if (rawData is string stringValue)
         {
@@ -510,6 +519,12 @@ public sealed class DynamicDataSourceResolver : IDynamicDataSourceResolver
                         return copy;
                     });
                 }
+                else if (item != null && IsTupleType(item.GetType()))
+                {
+                    // Handle tuple items in collections
+                    var tupleValues = GetTupleValues(item);
+                    factories.Add(() => tupleValues);
+                }
                 else
                 {
                     // Single value - wrap in array
@@ -522,5 +537,52 @@ public sealed class DynamicDataSourceResolver : IDynamicDataSourceResolver
 
         throw new InvalidOperationException(
             $"Data source '{sourceName}' did not return a valid collection or IDataSource implementation");
+    }
+
+    private static bool IsTupleType(Type type)
+    {
+        if (!type.IsGenericType)
+            return false;
+
+        var genericTypeDef = type.GetGenericTypeDefinition();
+        return genericTypeDef == typeof(ValueTuple<>) ||
+               genericTypeDef == typeof(ValueTuple<,>) ||
+               genericTypeDef == typeof(ValueTuple<,,>) ||
+               genericTypeDef == typeof(ValueTuple<,,,>) ||
+               genericTypeDef == typeof(ValueTuple<,,,,>) ||
+               genericTypeDef == typeof(ValueTuple<,,,,,>) ||
+               genericTypeDef == typeof(ValueTuple<,,,,,,>) ||
+               genericTypeDef == typeof(ValueTuple<,,,,,,,>) ||
+               genericTypeDef == typeof(ValueTuple<,,,,,,,>);
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", 
+        Justification = "Tuple field access is safe for AOT as tuple types are well-known")]
+    private static object?[] GetTupleValues(object tuple)
+    {
+        var type = tuple.GetType();
+        if (!IsTupleType(type))
+            return new[] { tuple };
+
+#if NETSTANDARD2_0
+        // For netstandard2.0, use reflection to access tuple fields
+        var fields = type.GetFields();
+        return fields.Select(f => f.GetValue(tuple)).ToArray();
+#else
+        // Use ITuple interface to access tuple values (available in .NET Core 2.1+)
+        if (tuple is ITuple iTuple)
+        {
+            var values = new object?[iTuple.Length];
+            for (int i = 0; i < iTuple.Length; i++)
+            {
+                values[i] = iTuple[i];
+            }
+            return values;
+        }
+
+        // Fallback: use reflection
+        var fields = type.GetFields();
+        return fields.Select(f => f.GetValue(tuple)).ToArray();
+#endif
     }
 }
