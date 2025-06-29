@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
@@ -12,23 +13,20 @@ public class AttributeWriter
         ImmutableArray<AttributeData> attributeDatas)
     {
         var dataAttributeInterface =
-            context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute
+            context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute
                 .WithoutGlobalPrefix);
-        
+
         attributeDatas = attributeDatas.RemoveAll(x => x.AttributeClass?.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataAttributeInterface)) == true);
-        
+
         if (attributeDatas.Length == 0)
         {
             sourceCodeWriter.Write("[],");
-            sourceCodeWriter.WriteLine();
             return;
         }
 
-        sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("[");
+        sourceCodeWriter.Write("[");
         for (var index = 0; index < attributeDatas.Length; index++)
         {
-            sourceCodeWriter.WriteTabs();
             var attributeData = attributeDatas[index];
 
             if (attributeData.ApplicationSyntaxReference is null)
@@ -45,18 +43,26 @@ public class AttributeWriter
 
             sourceCodeWriter.WriteLine();
         }
-        sourceCodeWriter.WriteLine("],");
+        sourceCodeWriter.Write("],");
     }
 
     public static void WriteAttribute(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         AttributeData attributeData)
     {
+        sourceCodeWriter.Write(GetAttributeObjectInitializer(context, attributeData, sourceCodeWriter.TabLevel));
+    }
+
+    public static string GetAttributeObjectInitializer(GeneratorAttributeSyntaxContext context,
+        AttributeData attributeData, int indentLevel)
+    {
+        var sourceCodeWriter = new SourceCodeWriter(indentLevel);
+
         var syntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
 
         if (syntax is null)
         {
             WriteAttributeWithoutSyntax(sourceCodeWriter, context, attributeData);
-            return;
+            return sourceCodeWriter.ToString();
         }
 
         var arguments = syntax.ChildNodes()
@@ -76,19 +82,61 @@ public class AttributeWriter
 
         sourceCodeWriter.Write($"new {attributeName}({formattedConstructorArgs})");
 
-        if (formattedProperties.Length == 0)
+        if (formattedProperties.Length == 0
+            && !HasNestedDataGeneratorProperties(attributeData))
         {
-            return;
+            return sourceCodeWriter.ToString();
         }
 
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.Write("{");
         foreach (var property in formattedProperties)
         {
-            sourceCodeWriter.WriteLine($"{property},");
+            sourceCodeWriter.Write($"{property},");
         }
 
+        WriteDataSourceGeneratorProperties(sourceCodeWriter, context, attributeData);
+
         sourceCodeWriter.Write("}");
+
+        return sourceCodeWriter.ToString();
+    }
+
+    private static bool HasNestedDataGeneratorProperties(AttributeData attributeData)
+    {
+        if (attributeData.AttributeClass is not { } attributeClass)
+        {
+            return false;
+        }
+
+        if (attributeClass.GetMembersIncludingBase().OfType<IPropertySymbol>().Any(x => x.GetAttributes().Any(a => a.IsDataSourceAttribute())))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void WriteDataSourceGeneratorProperties(SourceCodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, AttributeData attributeData)
+    {
+        foreach (var propertySymbol in attributeData.AttributeClass?.GetMembers().OfType<IPropertySymbol>() ?? [])
+        {
+            if (propertySymbol.DeclaredAccessibility != Accessibility.Public)
+            {
+                continue;
+            }
+
+            if (propertySymbol.GetAttributes().FirstOrDefault(x => x.IsDataSourceAttribute()) is not { } dataSourceAttribute)
+            {
+                continue;
+            }
+
+            sourceCodeWriter.Write($"{propertySymbol.Name} = ");
+
+            var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute, sourceCodeWriter.TabLevel);
+
+            sourceCodeWriter.Write(AsyncDataSourceGeneratorContainer.GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(innerAttribute, context, attributeData.AttributeClass!, propertySymbol, sourceCodeWriter.TabLevel, true));
+        }
     }
 
     private static string FormatConstructorArgument(GeneratorAttributeSyntaxContext context, AttributeArgumentSyntax attributeArgumentSyntax)
@@ -125,8 +173,8 @@ public class AttributeWriter
         }
 
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"{formattedNamedArgs}");
+        sourceCodeWriter.Write("{");
+        sourceCodeWriter.Write($"{formattedNamedArgs}");
         sourceCodeWriter.Write("}");
     }
 }

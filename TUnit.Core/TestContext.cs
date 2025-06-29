@@ -17,7 +17,7 @@ public partial class TestContext : Context
     /// <typeparam name="T">The type of the service.</typeparam>
     /// <returns>The service instance.</returns>
     internal T GetService<T>() => (T) _serviceProvider.GetService(typeof(T))!;
-    
+
     internal readonly List<Artifact> Artifacts = [];
     internal readonly List<CancellationToken> LinkedCancellationTokens = [];
     internal readonly TestMetadata OriginalMetadata;
@@ -52,7 +52,7 @@ public partial class TestContext : Context
         Events = originalMetadata.TestBuilderContext.Events;
         classHookContext.AddTest(this);
     }
-    
+
     public ClassHookContext ClassContext => (ClassHookContext) Parent!;
     public AssemblyHookContext AssemblyContext => ClassContext.AssemblyContext;
 
@@ -60,7 +60,7 @@ public partial class TestContext : Context
     /// Gets the events associated with the test context.
     /// </summary>
     public TestContextEvents Events { get; }
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether the test is registered.
     /// </summary>
@@ -70,7 +70,7 @@ public partial class TestContext : Context
     /// Gets or sets the start time of the test.
     /// </summary>
     public DateTimeOffset? TestStart { get; internal set; }
-    
+
     internal Task? TestTask { get; set; }
 
     /// <summary>
@@ -90,27 +90,27 @@ public partial class TestContext : Context
     /// Gets the argument display formatters for the test.
     /// </summary>
     public List<ArgumentDisplayFormatter> ArgumentDisplayFormatters { get; } = [];
-    
+
     /// <summary>
     /// Gets the timings for the test.
     /// </summary>
     public List<Timing> Timings { get; } = [];
-    
+
     /// <summary>
     /// Gets the object bag for the test.
     /// </summary>
     public Dictionary<string, object?> ObjectBag { get; }
-    
+
     /// <summary>
     /// Gets or sets the result of the test.
     /// </summary>
     public TestResult? Result { get; internal set; }
-    
+
     /// <summary>
     /// Gets or sets the cancellation token for the test.
     /// </summary>
     public CancellationToken CancellationToken { get; internal set; }
-    
+
     /// <summary>
     /// Gets or sets the internal discovered test.
     /// </summary>
@@ -123,7 +123,7 @@ public partial class TestContext : Context
     {
         ReportResult = false;
     }
-    
+
     /// <summary>
     /// Adds an artifact to the test context.
     /// </summary>
@@ -132,19 +132,14 @@ public partial class TestContext : Context
     {
         Artifacts.Add(artifact);
     }
-    
+
     /// <summary>
     /// Gets or sets the reason for skipping the test.
     /// </summary>
     internal string? SkipReason { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the event objects.
-    /// </summary>
-    internal object?[]? EventObjects { get; set; }
 
     internal bool RunOnTestDiscovery { get; set; }
-    
+
     internal override void RestoreContextAsyncLocal()
     {
         Current = this;

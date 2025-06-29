@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using TUnit.Core.Enums;
 
 namespace TUnit.Core;

@@ -21,13 +21,13 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         Interlocked.Increment(ref _configuredWebHostCalled);
-        
+
         builder.ConfigureAppConfiguration((context, configBuilder) =>
         {
             var testName = TestContext.Current!.TestDetails.TestName;
-            
+
             var connectionString = testName + "-DummyConnectionString";
-            
+
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "ConnectionStrings:DefaultConnection", connectionString }
