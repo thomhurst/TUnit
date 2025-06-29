@@ -16,12 +16,12 @@ public class TestBuilderException : Exception
     public TestBuilderException(string message, Exception innerException) : base(message, innerException)
     {
     }
-    
+
     /// <summary>
     /// Gets or sets the test metadata that caused the exception.
     /// </summary>
     public DynamicTestMetadata? TestMetadata { get; set; }
-    
+
     /// <summary>
     /// Gets or sets additional context about the error.
     /// </summary>
@@ -37,8 +37,8 @@ public class InvalidTestMetadataException : TestBuilderException
     {
         TestMetadata = metadata;
     }
-    
-    public InvalidTestMetadataException(string message, DynamicTestMetadata metadata, Exception innerException) 
+
+    public InvalidTestMetadataException(string message, DynamicTestMetadata metadata, Exception innerException)
         : base(message, innerException)
     {
         TestMetadata = metadata;
@@ -50,18 +50,18 @@ public class InvalidTestMetadataException : TestBuilderException
 /// </summary>
 public class DataSourceException : TestBuilderException
 {
-    public DataSourceException(string dataSourceName, Exception innerException) 
+    public DataSourceException(string dataSourceName, Exception innerException)
         : base($"Data source '{dataSourceName}' failed to provide data", innerException)
     {
         DataSourceName = dataSourceName;
     }
-    
-    public DataSourceException(string dataSourceName, string message) 
+
+    public DataSourceException(string dataSourceName, string message)
         : base($"Data source '{dataSourceName}': {message}")
     {
         DataSourceName = dataSourceName;
     }
-    
+
     /// <summary>
     /// Gets the name of the data source that failed.
     /// </summary>
@@ -73,18 +73,18 @@ public class DataSourceException : TestBuilderException
 /// </summary>
 public class TestInstantiationException : TestBuilderException
 {
-    public TestInstantiationException(Type testClassType, Exception innerException) 
+    public TestInstantiationException(Type testClassType, Exception innerException)
         : base($"Failed to instantiate test class '{testClassType.Name}'", innerException)
     {
         TestClassType = testClassType;
     }
-    
-    public TestInstantiationException(Type testClassType, string message) 
+
+    public TestInstantiationException(Type testClassType, string message)
         : base($"Failed to instantiate test class '{testClassType.Name}': {message}")
     {
         TestClassType = testClassType;
     }
-    
+
     /// <summary>
     /// Gets the type of test class that failed to instantiate.
     /// </summary>
@@ -96,18 +96,18 @@ public class TestInstantiationException : TestBuilderException
 /// </summary>
 public class PropertyInjectionException : TestBuilderException
 {
-    public PropertyInjectionException(string propertyName, Type propertyType, Exception innerException) 
+    public PropertyInjectionException(string propertyName, Type propertyType, Exception innerException)
         : base($"Failed to inject property '{propertyName}' of type '{propertyType.Name}'", innerException)
     {
         PropertyName = propertyName;
         PropertyType = propertyType;
     }
-    
+
     /// <summary>
     /// Gets the name of the property that failed injection.
     /// </summary>
     public string PropertyName { get; }
-    
+
     /// <summary>
     /// Gets the type of the property.
     /// </summary>

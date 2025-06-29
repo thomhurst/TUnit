@@ -32,7 +32,7 @@ public class GenericTypeResolver : IGenericTypeResolver
         {
             var parameterType = methodParameters[i].ParameterType;
             var argumentValue = runtimeArguments[i];
-            
+
             if (argumentValue != null)
             {
                 var argumentType = argumentValue.GetType();
@@ -61,13 +61,13 @@ public class GenericTypeResolver : IGenericTypeResolver
                 // Try to use constraints as a fallback
                 var constraints = genericParam.GetGenericParameterConstraints();
                 var attributes = genericParam.GenericParameterAttributes;
-                
+
                 // Provide more specific error message with context
                 var methodName = $"{genericMethodDefinition.DeclaringType?.FullName}.{genericMethodDefinition.Name}";
-                var argInfo = runtimeArguments.Length > 0 
-                    ? $"Arguments: {string.Join(", ", runtimeArguments.Select(a => a?.GetType()?.Name ?? "null"))}" 
+                var argInfo = runtimeArguments.Length > 0
+                    ? $"Arguments: {string.Join(", ", runtimeArguments.Select(a => a?.GetType()?.Name ?? "null"))}"
                     : "No arguments provided";
-                
+
                 throw new GenericTypeResolutionException(
                     $"Could not resolve type for generic parameter '{genericParam.Name}' in method '{methodName}'. " +
                     $"{argInfo}. " +
@@ -84,7 +84,7 @@ public class GenericTypeResolver : IGenericTypeResolver
 
     /// <inheritdoc />
     public Type[] ResolveGenericClassArguments(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type genericTypeDefinition, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type genericTypeDefinition,
         object?[] constructorArguments)
     {
         if (!genericTypeDefinition.IsGenericTypeDefinition)
@@ -109,7 +109,7 @@ public class GenericTypeResolver : IGenericTypeResolver
                 {
                     var parameterType = parameters[i].ParameterType;
                     var argumentValue = constructorArguments[i];
-                    
+
                     if (argumentValue != null)
                     {
                         var argumentType = argumentValue.GetType();
@@ -252,7 +252,7 @@ public class GenericTypeResolver : IGenericTypeResolver
                     throw new GenericTypeResolutionException(
                         $"Type '{resolvedType.Name}' does not satisfy the 'new()' constraint for generic parameter '{genericParam.Name}' - type is abstract");
                 }
-                
+
                 // For value types, they always have a default constructor
                 if (!resolvedType.IsValueType)
                 {
@@ -288,7 +288,7 @@ public class GenericTypeResolver : IGenericTypeResolver
             }
         }
     }
-    
+
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Type is preserved through DynamicallyAccessedMembers")]
     private static bool HasPublicParameterlessConstructor([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
     {

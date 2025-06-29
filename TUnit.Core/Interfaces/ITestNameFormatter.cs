@@ -14,8 +14,8 @@ public interface ITestNameFormatter
     /// <param name="propertyValues">Property values for data injection</param>
     /// <returns>The formatted test name</returns>
     string FormatTestName(
-        string template, 
-        object?[]? classArgs = null, 
+        string template,
+        object?[]? classArgs = null,
         object?[]? methodArgs = null,
         IDictionary<string, object?>? propertyValues = null);
 
@@ -36,9 +36,9 @@ public interface ITestNameFormatter
     /// <param name="methodDataIndex">The method data index</param>
     /// <returns>The formatted test ID</returns>
     string BuildTestId(
-        string template, 
-        int testIndex, 
-        int repeatIndex = 0, 
-        int classDataIndex = 0, 
+        string template,
+        int testIndex,
+        int repeatIndex = 0,
+        int classDataIndex = 0,
         int methodDataIndex = 0);
 }

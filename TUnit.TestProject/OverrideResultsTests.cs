@@ -21,7 +21,7 @@ public class OverrideResultsTests
             .And
             .ContainsOnly(t => t.Result?.Status == Status.Passed);
     }
-    
+
     public class OverridePassAttribute : Attribute, ITestEndEventReceiver
     {
         public ValueTask OnTestEnd(TestContext afterTestContext)

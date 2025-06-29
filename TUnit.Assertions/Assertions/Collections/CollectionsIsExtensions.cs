@@ -13,9 +13,9 @@ namespace TUnit.Assertions.Extensions;
 [UnconditionalSuppressMessage("Usage", "TUnitAssertions0003:Compiler argument populated")]
 public static class CollectionsIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual,  
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-        TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
     {
         return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), doNotPopulateThisValue);
@@ -32,14 +32,14 @@ public static class CollectionsIsExtensions
         return IsEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue, doNotPopulateThisValue2);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual,  
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-        TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(collectionOrdering))] string doNotPopulateThisValue2 = null)
+    TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(collectionOrdering))] string doNotPopulateThisValue2 = null)
         where TActual : IEnumerable<TInner>
     {
         return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue, doNotPopulateThisValue2);
     }
-    
+
     public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(collectionOrdering))] string doNotPopulateThisValue2 = null)
         where TActual : IEnumerable<TInner>
     {
@@ -53,27 +53,27 @@ public static class CollectionsIsExtensions
     {
         return IsOrderedBy(valueSource, x => x, Comparer<TInner>.Default, null);
     }
-    
+
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsInDescendingOrder<TInner>(
         this IValueSource<IEnumerable<TInner>> valueSource)
     {
         return IsOrderedByDescending(valueSource, x => x, Comparer<TInner>.Default, null);
     }
-    
+
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsInOrder<TInner>(
         this IValueSource<IEnumerable<TInner>> valueSource,
         IComparer<TInner> comparer)
     {
         return IsOrderedBy(valueSource, x => x, comparer, null);
     }
-    
+
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsInDescendingOrder<TInner>(
         this IValueSource<IEnumerable<TInner>> valueSource,
         IComparer<TInner> comparer)
     {
         return IsOrderedByDescending(valueSource, x => x, comparer, null);
     }
-    
+
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedBy<TInner, TComparisonItem>(
         this IValueSource<IEnumerable<TInner>> valueSource,
         Func<TInner, TComparisonItem> comparisonItemSelector,
@@ -81,7 +81,7 @@ public static class CollectionsIsExtensions
     {
         return IsOrderedBy(valueSource, comparisonItemSelector, Comparer<TComparisonItem>.Default, doNotPopulateThisValue);
     }
-    
+
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedByDescending<TInner, TComparisonItem>(
         this IValueSource<IEnumerable<TInner>> valueSource,
         Func<TInner, TComparisonItem> comparisonItemSelector,
@@ -89,7 +89,7 @@ public static class CollectionsIsExtensions
     {
         return IsOrderedByDescending(valueSource, comparisonItemSelector, Comparer<TComparisonItem>.Default, doNotPopulateThisValue);
     }
-    
+
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedBy<TInner, TComparisonItem>(
         this IValueSource<IEnumerable<TInner>> valueSource,
         Func<TInner, TComparisonItem> comparisonItemSelector,
@@ -100,7 +100,7 @@ public static class CollectionsIsExtensions
         return valueSource.RegisterAssertion(
             new EnumerableOrderedByAssertCondition<IEnumerable<TInner>, TInner, TComparisonItem>(comparer, comparisonItemSelector, Order.Ascending), [doNotPopulateThisValue, doNotPopulateThisValue2]);
     }
-    
+
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsOrderedByDescending<TInner, TComparisonItem>(
         this IValueSource<IEnumerable<TInner>> valueSource,
         Func<TInner, TComparisonItem> comparisonItemSelector,

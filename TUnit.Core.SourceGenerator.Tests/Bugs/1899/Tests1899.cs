@@ -18,7 +18,7 @@ internal class Tests1899 : TestsBase
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(1);
         });
-    
+
     [Test]
     public Task BaseClass() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject.Library",

@@ -8,15 +8,15 @@ public sealed class TestExecutionState
     public ExecutableTest Test { get; }
     public TestState State { get; set; }
     private int _remainingDependencies;
-    public int RemainingDependencies 
-    { 
+    public int RemainingDependencies
+    {
         get => _remainingDependencies;
         set => _remainingDependencies = value;
     }
     public HashSet<string> Dependents { get; }
     public DateTime EnqueueTime { get; set; }
     public CancellationTokenSource? TimeoutCts { get; set; }
-    
+
     public TestExecutionState(ExecutableTest test)
     {
         Test = test;
@@ -25,7 +25,7 @@ public sealed class TestExecutionState
         Dependents = new HashSet<string>();
         EnqueueTime = DateTime.UtcNow;
     }
-    
+
     /// <summary>
     /// Atomically decrements the remaining dependencies count
     /// </summary>

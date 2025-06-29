@@ -11,7 +11,7 @@ public class GenericBase<T>
     {
         Console.WriteLine($"BaseTest with type: {typeof(T).Name}");
     }
-    
+
     [Test]
     [Arguments("test")]
     [Arguments(42)]

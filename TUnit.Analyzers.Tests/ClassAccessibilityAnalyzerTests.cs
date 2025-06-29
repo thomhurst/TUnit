@@ -8,8 +8,8 @@ public class ClassAccessibilityAnalyzerTests
     public async Task Inner_Internal_Class_Flagged()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using TUnit.Core;
 
                 public static class Outer
@@ -25,9 +25,9 @@ public class ClassAccessibilityAnalyzerTests
                 """,
                 Verifier.Diagnostic(Rules.TypeMustBePublic)
                     .WithLocation(0)
-			);
+            );
     }
-    
+
     [Test]
     public async Task Public_No_Errors()
     {

@@ -12,7 +12,7 @@ internal class DataSourceGeneratorTests : TestsBase
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(1);
         });
-    
+
     [Test]
     public Task Untyped() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",

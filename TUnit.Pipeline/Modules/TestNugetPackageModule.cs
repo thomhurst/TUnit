@@ -38,14 +38,14 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
             yield return "net9.0";
             yield return "net8.0";
             yield return "net6.0";
-        
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return "net481";
                 yield return "net48";
                 yield return "net472";
                 yield return "net462";
-            }   
+            }
         }
     }
 

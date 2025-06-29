@@ -37,7 +37,7 @@ public class EnumerableMethodDataTupleTypeTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task Valid_Enumerable_Tuple_Raises_No_Error()
     {

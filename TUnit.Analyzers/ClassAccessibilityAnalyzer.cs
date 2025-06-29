@@ -16,12 +16,12 @@ public class ClassAccessibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         );
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
@@ -33,7 +33,7 @@ public class ClassAccessibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var compilation = context.Compilation;
-        
+
         if (!namedTypeSymbol.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Any(x => x.IsTestMethod(compilation) || x.IsHookMethod(compilation, out _, out _, out _)))

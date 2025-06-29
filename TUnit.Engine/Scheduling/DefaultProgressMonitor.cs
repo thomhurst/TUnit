@@ -8,7 +8,7 @@ public sealed class DefaultProgressMonitor : IProgressMonitor
     private readonly TimeSpan _stallTimeout;
     private readonly TimeSpan _checkInterval;
     private readonly Action<string>? _onStallDetected;
-    
+
     public DefaultProgressMonitor(
         TimeSpan? stallTimeout = null,
         TimeSpan? checkInterval = null,
@@ -18,12 +18,12 @@ public sealed class DefaultProgressMonitor : IProgressMonitor
         _checkInterval = checkInterval ?? TimeSpan.FromSeconds(30);
         _onStallDetected = onStallDetected;
     }
-    
+
     public async Task MonitorProgressAsync(TestCompletionTracker tracker, CancellationToken cancellationToken)
     {
         var lastProgress = DateTime.UtcNow;
         var lastCompletedCount = 0;
-        
+
         while (!cancellationToken.IsCancellationRequested && !tracker.AllTestsCompleted)
         {
             try
@@ -35,7 +35,7 @@ public sealed class DefaultProgressMonitor : IProgressMonitor
                 // Expected when cancellation is requested
                 break;
             }
-            
+
             var currentCompleted = tracker.CompletedCount;
             if (currentCompleted > lastCompletedCount)
             {
@@ -46,9 +46,9 @@ public sealed class DefaultProgressMonitor : IProgressMonitor
             {
                 var message = $"Test execution stalled - no progress in {_stallTimeout.TotalMinutes} minutes. " +
                     $"Completed: {currentCompleted}/{tracker.TotalCount}";
-                
+
                 _onStallDetected?.Invoke(message);
-                
+
                 throw new TimeoutException(message);
             }
         }

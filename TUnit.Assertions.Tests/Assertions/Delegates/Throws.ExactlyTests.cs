@@ -89,12 +89,12 @@ public partial class Throws
 
             await Assert.That(sut).ThrowsNothing();
         }
-        
+
         [Test]
         public async Task Can_Convert_To_Value_Assertion_Builder_On_Casted_Exception_Type()
         {
             Exception exception = CreateCustomException("Foo bar message");
-            
+
             Action action = () => throw exception;
 
             await Assert.That(action)
@@ -104,12 +104,12 @@ public partial class Throws
                 .And
                 .IsAssignableTo<CustomException>();
         }
-        
+
         [Test]
         public async Task Conversion_To_Value_Assertion_Builder_On_Casted_Exception_Type_Throws_When_Wrong_Type()
         {
             Exception exception = CreateCustomException("Foo bar message", new ArgumentNullException());
-            
+
             Action action = () => throw exception;
 
             var assertionException = await Assert.ThrowsAsync<AssertionException>(async () =>
@@ -127,12 +127,12 @@ public partial class Throws
                                                                          but a CustomException was thrown
                                                                          """);
         }
-        
+
         [Test]
         public async Task Conversion_To_Value_Assertion_Builder_On_Casted_Exception_Type_Throws_When_InvalidMessage()
         {
             Exception exception = CreateCustomException("Foo bar message");
-            
+
             Action action = () => throw exception;
 
             var assertionException = await Assert.ThrowsAsync<AssertionException>(async () =>

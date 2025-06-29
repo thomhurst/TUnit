@@ -8,8 +8,8 @@ public class TUnitAssertionFailedException : Exception
     public TUnitAssertionFailedException(string message) : base(message)
     {
     }
-    
-    public TUnitAssertionFailedException(string message, Exception innerException) 
+
+    public TUnitAssertionFailedException(string message, Exception innerException)
         : base(message, innerException)
     {
     }

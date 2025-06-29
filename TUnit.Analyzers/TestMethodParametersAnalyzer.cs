@@ -15,12 +15,12 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
         );
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -32,12 +32,12 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var parameters = methodSymbol.Parameters.WithoutCancellationTokenParameter().ToArray();
-        
+
         if (parameters.Length == 0)
         {
             return;
         }
-        
+
         if (!methodSymbol.HasDataDrivenAttributes())
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.NoDataSourceProvided, methodSymbol.Locations.FirstOrDefault()));

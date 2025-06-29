@@ -40,7 +40,7 @@ public static class TypedConstantParser
     {
         if (typedConstant.Kind == TypedConstantKind.Type)
         {
-            var type = (INamedTypeSymbol)typedConstant.Value!;
+            var type = (INamedTypeSymbol) typedConstant.Value!;
             return type.GloballyQualified();
         }
 
@@ -71,7 +71,7 @@ public static class TypedConstantParser
             case TypedConstantKind.Enum:
                 return $"({typedConstant.Type!.GloballyQualified()})({typedConstant.Value})";
             case TypedConstantKind.Type:
-                return $"typeof({((ITypeSymbol)typedConstant.Value!).GloballyQualified()})";
+                return $"typeof({((ITypeSymbol) typedConstant.Value!).GloballyQualified()})";
             case TypedConstantKind.Array:
                 var elements = typedConstant.Values.Select(GetRawTypedConstantValue);
                 var elementType = (typedConstant.Type as IArrayTypeSymbol)?.ElementType.GloballyQualified() ?? "object";

@@ -49,7 +49,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
-        var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
+        var testNodeUpdateMessage = (TestNodeUpdateMessage) value;
 
         _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, []).Add(testNodeUpdateMessage);
 
@@ -108,22 +108,22 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         stringBuilder.AppendLine($"| {passedCount} | Passed |");
         stringBuilder.AppendLine($"| {failed.Length} | Failed |");
 
-        if(skipped.Length > 0)
+        if (skipped.Length > 0)
         {
             stringBuilder.AppendLine($"| {skipped.Length} | Skipped |");
         }
 
-        if(timeout.Length > 0)
+        if (timeout.Length > 0)
         {
             stringBuilder.AppendLine($"| {timeout.Length} | Timed Out |");
         }
 
-        if(cancelled.Length > 0)
+        if (cancelled.Length > 0)
         {
             stringBuilder.AppendLine($"| {cancelled.Length} | Cancelled |");
         }
 
-        if(inProgress.Length > 0)
+        if (inProgress.Length > 0)
         {
             stringBuilder.AppendLine($"| {inProgress.Length} | In Progress (never completed) |");
         }

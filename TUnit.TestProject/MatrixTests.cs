@@ -144,7 +144,7 @@ public class MatrixTests
     {
         await Task.CompletedTask;
     }
-    
+
     [Test]
     [MatrixDataSource]
     [MatrixExclusion(1, 1)]

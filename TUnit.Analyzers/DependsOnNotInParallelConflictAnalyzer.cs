@@ -14,12 +14,12 @@ public class DependsOnNotInParallelConflictAnalyzer : ConcurrentDiagnosticAnalyz
             Rules.DependsOnNotInParallelConflict);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSyntax, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSyntax(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;

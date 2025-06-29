@@ -9,5 +9,5 @@ public record Argument
     }
 
     public string Type { get; }
-    public string Invocation { get; } 
+    public string Invocation { get; }
 }

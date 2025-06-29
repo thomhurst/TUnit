@@ -40,7 +40,7 @@ internal static class MethodInfoHelper
             throw;
         }
     }
-    
+
     public static object? InvokeInstanceHook(this MethodInfo methodInfo, object instance, TestContext context, CancellationToken cancellationToken)
     {
         List<object?> args = [];
@@ -65,11 +65,11 @@ internal static class MethodInfoHelper
                 return instance.GetType()
                     .GetMembers()
                     .OfType<MethodInfo>()
-                    .First(x => x.Name == methodInfo.Name 
+                    .First(x => x.Name == methodInfo.Name
                         && x.GetParameters().Length == methodInfo.GetParameters().Length)
                     .Invoke(instance, args.ToArray());
             }
-            
+
             return methodInfo.Invoke(instance, args.ToArray());
         }
         catch (TargetInvocationException targetInvocationException)

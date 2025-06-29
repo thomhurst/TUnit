@@ -18,14 +18,14 @@ public static class TestApplicationBuilderExtensions
         TUnitExtension extension = new();
 
         var githubReporter = new GitHubReporter(extension);
-        
+
         testApplicationBuilder.RegisterTestFramework(
-            serviceProvider  => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
+            serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
-        
+
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.AddMaximumFailedTestsService(extension);
-        
+
         testApplicationBuilder.CommandLine.AddProvider(() => new HideTestOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));

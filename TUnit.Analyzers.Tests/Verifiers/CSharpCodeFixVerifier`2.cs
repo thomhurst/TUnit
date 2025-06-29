@@ -1,9 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
-using System.Diagnostics.CodeAnalysis;
 using TUnit.Analyzers.Tests.Extensions;
 
 namespace TUnit.Analyzers.Tests.Verifiers;
@@ -29,7 +29,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     {
         return VerifyAnalyzerAsync(source, _ => { }, expected);
     }
-    
+
     /// <inheritdoc cref="CodeFixVerifier{TAnalyzer, TCodeFix, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
     public static async Task VerifyAnalyzerAsync(
         [StringSyntax("c#")] string source,
@@ -53,9 +53,9 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
-        
+
         configureTest(test);
-        
+
         await test.RunAsync(CancellationToken.None);
     }
 
@@ -105,9 +105,9 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
-        
+
         configureTest(test);
-        
+
         await test.RunAsync(CancellationToken.None);
     }
 }

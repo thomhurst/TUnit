@@ -7,7 +7,7 @@ public class MatrixAttribute(params object?[]? objects) : TestDataAttribute
     {
     }
 
-    public virtual object?[] GetObjects(object? instance) => objects ?? [ null ];
+    public virtual object?[] GetObjects(object? instance) => objects ?? [null];
 
     public object?[]? Excluding { get; init; }
 }

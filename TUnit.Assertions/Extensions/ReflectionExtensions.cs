@@ -9,7 +9,7 @@ internal static class ReflectionExtensions
     {
         return obj.GetType().GetProperty(propertyName)?.GetValue(obj);
     }
-    
+
     [RequiresUnreferencedCode("Reflection")]
     public static object? GetMethodReturnValue(this object obj, string methodName)
     {

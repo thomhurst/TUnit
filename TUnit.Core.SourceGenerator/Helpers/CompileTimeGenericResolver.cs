@@ -73,14 +73,14 @@ internal static class CompileTimeGenericResolver
         }
 
         // Generic types (e.g., List<T>, Dictionary<K,V>)
-        if (parameterType is INamedTypeSymbol paramNamed && 
+        if (parameterType is INamedTypeSymbol paramNamed &&
             argumentType is INamedTypeSymbol argNamed &&
-            paramNamed.IsGenericType && 
+            paramNamed.IsGenericType &&
             argNamed.IsGenericType)
         {
             // Check if they're the same generic type definition
             if (!SymbolEqualityComparer.Default.Equals(
-                paramNamed.OriginalDefinition, 
+                paramNamed.OriginalDefinition,
                 argNamed.OriginalDefinition))
             {
                 return false;
@@ -174,7 +174,7 @@ internal static class CompileTimeGenericResolver
                 {
                     var hasParameterlessConstructor = namedType.Constructors
                         .Any(c => c.Parameters.Length == 0 && c.DeclaredAccessibility == Accessibility.Public);
-                    
+
                     if (!hasParameterlessConstructor)
                     {
                         return false;

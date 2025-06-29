@@ -11,13 +11,13 @@ public record SourceGeneratedParameterInformation([DynamicallyAccessedMembers(Dy
 
 public record SourceGeneratedParameterInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)]T> : ParameterMetadata<T>;
+    | DynamicallyAccessedMemberTypes.PublicProperties)] T> : ParameterMetadata<T>;
 
 [DebuggerDisplay("{Type} {Name})")]
 public record ParameterMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
-    T>() : ParameterMetadata(typeof(T));
+T>() : ParameterMetadata(typeof(T));
 
 [DebuggerDisplay("{Type} {Name})")]
 public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors

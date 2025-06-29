@@ -4,8 +4,8 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class InvokableAssertionBuilder<TActual> : 
-    AssertionBuilder, IInvokableAssertionBuilder 
+public class InvokableAssertionBuilder<TActual> :
+    AssertionBuilder, IInvokableAssertionBuilder
 {
     protected readonly ISource Source;
 
@@ -13,7 +13,7 @@ public class InvokableAssertionBuilder<TActual> :
         source.ExpressionBuilder, source.Assertions)
     {
         Source = source;
-        
+
         if (source is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
         {
             AwaitedAssertionData = invokableAssertionBuilder.AwaitedAssertionData;
@@ -25,9 +25,9 @@ public class InvokableAssertionBuilder<TActual> :
         var assertionData = await ProcessAssertionsAsync();
         return await mapper(assertionData);
     }
-    
-    public TaskAwaiter GetAwaiter() => ((Task)ProcessAssertionsAsync()).GetAwaiter();
-    
+
+    public TaskAwaiter GetAwaiter() => ((Task) ProcessAssertionsAsync()).GetAwaiter();
+
     public async Task<IEnumerable<AssertionResult>> GetAssertionResults()
     {
         await this;
@@ -42,7 +42,7 @@ public class InvokableAssertionBuilder<TActual> :
         {
             return expression;
         }
-        
+
         return $"{expression[..100]}...";
     }
 

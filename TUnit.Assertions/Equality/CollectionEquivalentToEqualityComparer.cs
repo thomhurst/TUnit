@@ -9,9 +9,9 @@ public class CollectionEquivalentToEqualityComparer<[DynamicallyAccessedMembers(
     public CollectionEquivalentToEqualityComparer() : this(new CompareOptions())
     {
     }
-    
+
     public override int? EnumerableIndex { get; protected set; } = 0;
-    
+
     public override bool Equals(T? x, T? y)
     {
         try

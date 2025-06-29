@@ -1,17 +1,17 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Building;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
-using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Services;
-using Microsoft.Testing.Platform.Logging;
 
 namespace TUnit.Engine;
 
@@ -149,11 +149,11 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
 
         if (enableDynamicDiscovery)
         {
-            #pragma warning disable IL3050 // Calling method with RequiresDynamicCodeAttribute
-            #pragma warning disable IL2026 // Calling method with RequiresUnreferencedCodeAttribute
+#pragma warning disable IL3050 // Calling method with RequiresDynamicCodeAttribute
+#pragma warning disable IL2026 // Calling method with RequiresUnreferencedCodeAttribute
             await ExecuteAsyncWithReflection(request, messageBus, cancellationToken);
-            #pragma warning restore IL2026
-            #pragma warning restore IL3050
+#pragma warning restore IL2026
+#pragma warning restore IL3050
         }
         else
         {
@@ -171,7 +171,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     {
         // Create unified pipeline for AOT mode
         var sources = TestMetadataRegistry.GetSources();
-        var metadataSource = new SourceGeneratedTestMetadataSource(() => 
+        var metadataSource = new SourceGeneratedTestMetadataSource(() =>
             sources.SelectMany(s => s.GetTestMetadata().GetAwaiter().GetResult()).ToList());
 
         var pipeline = UnifiedTestBuilderPipelineFactory.CreateAotPipeline(

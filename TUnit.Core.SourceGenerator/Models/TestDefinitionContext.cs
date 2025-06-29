@@ -12,19 +12,19 @@ internal class TestDefinitionContext
     public required AttributeData? ClassDataAttribute { get; init; }
     public required AttributeData? MethodDataAttribute { get; init; }
     public required int TestIndex { get; init; }
-    
+
     /// <summary>
     /// Creates contexts for all test definitions based on data attributes
     /// </summary>
     public static IEnumerable<TestDefinitionContext> CreateContexts(TestMetadataGenerationContext generationContext)
     {
         var testInfo = generationContext.TestInfo;
-        
+
         // Get all data source attributes that can be handled at compile time
         var classDataAttrs = testInfo.TypeSymbol.GetAttributes()
             .Where(attr => IsCompileTimeDataSourceAttribute(attr))
             .ToList();
-            
+
         var methodDataAttrs = testInfo.MethodSymbol.GetAttributes()
             .Where(attr => IsCompileTimeDataSourceAttribute(attr))
             .ToList();
@@ -90,19 +90,19 @@ internal class TestDefinitionContext
             }
         }
     }
-    
+
     private static bool IsCompileTimeDataSourceAttribute(AttributeData attr)
     {
         var attrName = attr.AttributeClass?.Name;
-        
+
         // These can be handled at compile time through code generation:
         // - ArgumentsAttribute (direct data)
         // - MethodDataSourceAttribute (generate lambda to call method)
         // - Attributes inheriting from AsyncDataSourceGeneratorAttribute (generate lambda to instantiate and call)
-        
+
         if (attrName is "ArgumentsAttribute" or "MethodDataSourceAttribute")
             return true;
-            
+
         // Check if it inherits from AsyncDataSourceGeneratorAttribute
         var baseType = attr.AttributeClass?.BaseType;
         while (baseType != null)
@@ -111,7 +111,7 @@ internal class TestDefinitionContext
                 return true;
             baseType = baseType.BaseType;
         }
-        
+
         return false;
     }
 }

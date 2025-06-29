@@ -14,7 +14,7 @@ public class ExpectedStateTests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Outcome.ShouldBe("Completed")
             ]);
     }
-    
+
     [Test]
     public async Task Fail()
     {

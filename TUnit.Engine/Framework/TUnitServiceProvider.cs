@@ -69,7 +69,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Get test metadata sources from registry
         var sources = TestMetadataRegistry.GetSources();
-        var metadataSource = new SourceGeneratedTestMetadataSource(() => 
+        var metadataSource = new SourceGeneratedTestMetadataSource(() =>
             sources.SelectMany(s => s.GetTestMetadata().GetAwaiter().GetResult()).ToList());
 
         // Check if reflection discovery is enabled

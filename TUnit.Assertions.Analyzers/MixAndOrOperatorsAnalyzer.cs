@@ -20,20 +20,20 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.Await);
     }
-    
+
     private static void AnalyzeOperation(OperationAnalysisContext context)
     {
         if (context.Operation is not IAwaitOperation awaitOperation)
         {
             return;
         }
-        
+
         if (awaitOperation.Operation.Type?.AllInterfaces.Any(x => x.GloballyQualifiedNonGeneric()
         is "global::TUnit.Assertions.AssertionBuilders.IInvokableAssertionBuilder") != true)
         {
             return;
         }
-    
+
         var chainedMethodCalls = awaitOperation?.Descendants().OfType<IPropertyReferenceOperation>().ToArray() ?? [];
 
         if (chainedMethodCalls.Any(x => x.Property.Name == "And")

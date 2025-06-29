@@ -15,7 +15,7 @@ public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.WrongArgumentTypeTestData);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
         context.RegisterSymbolAction(AnalyzeClass, SymbolKind.NamedType);
     }
@@ -36,7 +36,7 @@ public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
     }
 
     private void AnalyzeMethod(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -49,7 +49,7 @@ public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
 
         CheckMatrixErrors(context, methodSymbol.GetAttributes(), methodSymbol.Parameters);
     }
-    
+
     private void CheckMatrixErrors(SymbolAnalysisContext context, ImmutableArray<AttributeData> attributes,
         ImmutableArray<IParameterSymbol> parameters)
     {
@@ -65,40 +65,40 @@ public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
                     context.Symbol.Locations.FirstOrDefault())
             );
         }
-        
+
         foreach (var parameterSymbol in parameters)
         {
             var matrixAttribute = parameterSymbol.GetAttributes().FirstOrDefault(x => x.IsMatrixAttribute(context.Compilation));
 
-            if (matrixAttribute is null 
+            if (matrixAttribute is null
                 or { ConstructorArguments.IsDefaultOrEmpty: true })
             {
                 continue;
             }
 
             var arrayArgument = matrixAttribute.ConstructorArguments[0];
-            
+
             if (arrayArgument.Kind != TypedConstantKind.Array)
             {
                 continue;
             }
-            
+
             foreach (var arrayItem in arrayArgument.Values)
             {
                 if (arrayItem.Type is null)
                 {
                     continue;
                 }
-                
+
                 var conversion = context.Compilation.ClassifyConversion(arrayItem.Type, parameterSymbol.Type);
 
                 if (!conversion.Exists)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData, 
+                    context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         context.Symbol.Locations.FirstOrDefault(),
                         arrayItem.Type,
                         parameterSymbol.Type));
-                    
+
                     return;
                 }
             }

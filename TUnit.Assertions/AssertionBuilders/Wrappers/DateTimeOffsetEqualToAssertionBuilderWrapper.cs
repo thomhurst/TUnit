@@ -14,9 +14,9 @@ public class DateTimeOffsetEqualToAssertionBuilderWrapper : InvokableValueAssert
         var assertion = (DateTimeOffsetEqualsExpectedValueAssertCondition) Assertions.Peek();
 
         assertion.SetTolerance(tolerance);
-        
+
         AppendCallerMethod([doNotPopulateThis]);
-        
+
         return this;
     }
 }

@@ -15,12 +15,12 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
         );
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
@@ -41,7 +41,7 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         if (!namedTypeSymbol
                 .GetSelfAndBaseTypes()
                 .SelectMany(x => x.GetAttributes())

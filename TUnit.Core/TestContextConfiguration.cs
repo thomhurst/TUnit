@@ -14,7 +14,7 @@ public static class TestContextConfiguration
     private const string ParallelConstraintKey = "ParallelConstraint";
     private const string ParallelLimiterKey = "ParallelLimiter";
     private const string SkipReasonKey = "SkipReason";
-    
+
     /// <summary>
     /// Gets the display name formatter type if set
     /// </summary>
@@ -22,7 +22,7 @@ public static class TestContextConfiguration
     {
         return context.DisplayNameFormatter;
     }
-    
+
     /// <summary>
     /// Gets the retry function if set
     /// </summary>
@@ -30,7 +30,7 @@ public static class TestContextConfiguration
     {
         return context.ShouldRetryFunc;
     }
-    
+
     /// <summary>
     /// Gets the parallel constraint if set
     /// </summary>
@@ -38,7 +38,7 @@ public static class TestContextConfiguration
     {
         return context.ParallelConstraint;
     }
-    
+
     /// <summary>
     /// Gets the parallel limiter if set
     /// </summary>
@@ -46,7 +46,7 @@ public static class TestContextConfiguration
     {
         return context.ParallelLimiter;
     }
-    
+
     /// <summary>
     /// Gets the skip reason if set
     /// </summary>
@@ -54,7 +54,7 @@ public static class TestContextConfiguration
     {
         return context.SkipReason;
     }
-    
+
     /// <summary>
     /// Sets the skip reason
     /// </summary>

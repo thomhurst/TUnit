@@ -40,7 +40,7 @@ public static class ReflectionExtensions
 
     internal static bool HasAttribute<T>(this MemberInfo member, bool inherit = true)
     {
-        return ((ICustomAttributeProvider)member).HasAttribute<T>(inherit);
+        return ((ICustomAttributeProvider) member).HasAttribute<T>(inherit);
     }
 
     /// <summary>

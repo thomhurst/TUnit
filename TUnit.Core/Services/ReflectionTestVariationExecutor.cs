@@ -97,7 +97,7 @@ public class ReflectionTestVariationExecutor : ITestVariationExecutor
         // This is a simplified implementation - might need enhancement based on MethodMetadata structure
         var type = methodMetadata.DeclaringType();
         var method = type.GetMethod(methodMetadata.MethodName(), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-        
+
         if (method == null)
         {
             throw new InvalidOperationException(

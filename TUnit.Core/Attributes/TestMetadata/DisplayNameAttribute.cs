@@ -35,15 +35,15 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
     protected override string FormatDisplayName(DiscoveredTestContext context)
     {
         var testDetails = context.TestDetails;
-        
+
         var mutableDisplayName = displayName;
-        
+
         var parameters = testDetails
             ?.MethodMetadata
             ?.Parameters
-            ?.Zip(testDetails.TestMethodArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument)) 
+            ?.Zip(testDetails.TestMethodArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument))
             ?? Enumerable.Empty<(ParameterMetadata ParameterInfo, object? TestArgument)>();
-        
+
         foreach (var parameter in parameters)
         {
             mutableDisplayName = mutableDisplayName.Replace($"${parameter.ParameterInfo.Name}",

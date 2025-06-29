@@ -13,7 +13,7 @@ internal class BrowserService : IWorkerService
     }
 
     public static Task<BrowserService> Register(
-        WorkerAwareTest test, 
+        WorkerAwareTest test,
         IBrowserType browserType,
         BrowserTypeLaunchOptions options)
     {

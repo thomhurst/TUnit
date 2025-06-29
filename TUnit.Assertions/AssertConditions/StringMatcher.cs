@@ -20,7 +20,7 @@ public abstract class StringMatcher
     /// </summary>
     public static implicit operator StringMatcher(string pattern) => AsWildcard(pattern);
 
-    
+
     public static implicit operator StringMatcher(Regex pattern) => AsRegex(pattern.ToString());
 
     /// <summary>

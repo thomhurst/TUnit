@@ -17,10 +17,10 @@ public class TestContext : Context
 {
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
     internal static readonly Dictionary<string, string> InternalParametersDictionary = new();
-    
+
     private readonly StringWriter _outputWriter = new();
     private readonly StringWriter _errorWriter = new();
-    
+
     /// <summary>
     /// Gets or sets the current test context.
     /// </summary>
@@ -29,17 +29,17 @@ public class TestContext : Context
         get => TestContexts.Value;
         internal set => TestContexts.Value = value;
     }
-    
+
     /// <summary>
     /// Gets the parameters for the test context.
     /// </summary>
     public static IReadOnlyDictionary<string, string> Parameters => InternalParametersDictionary;
-    
+
     /// <summary>
     /// Gets or sets the configuration for the test context.
     /// </summary>
     public static IConfiguration Configuration { get; internal set; } = null!;
-    
+
     /// <summary>
     /// Gets the output directory for the test context.
     /// </summary>
@@ -58,7 +58,7 @@ public class TestContext : Context
                    ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
     }
-    
+
     /// <summary>
     /// Gets or sets the working directory for the test context.
     /// </summary>
@@ -67,100 +67,100 @@ public class TestContext : Context
         get => Environment.CurrentDirectory;
         set => Environment.CurrentDirectory = value;
     }
-    
+
     /// <summary>
     /// Test name
     /// </summary>
     public string TestName { get; }
-    
+
     /// <summary>
     /// Display name including parameters
     /// </summary>
     public string DisplayName { get; }
-    
-    
-    
+
+
+
     /// <summary>
     /// Cancellation token for the test
     /// </summary>
     public CancellationToken CancellationToken { get; set; }
-    
+
     /// <summary>
     /// Test details - simplified for new architecture
     /// </summary>
     public TestDetails TestDetails { get; set; } = null!;
-    
+
     /// <summary>
     /// Current phase of the test
     /// </summary>
     public TestPhase Phase { get; set; } = TestPhase.Execution;
-    
+
     /// <summary>
     /// Test result
     /// </summary>
     public TestResult? Result { get; set; }
-    
+
     /// <summary>
     /// Skip reason if test was skipped
     /// </summary>
     public string? SkipReason { get; set; }
-    
+
     /// <summary>
     /// Parallel limiter for the test
     /// </summary>
     public IParallelLimit? ParallelLimiter { get; private set; }
-    
+
     /// <summary>
     /// Display name formatter type
     /// </summary>
     public Type? DisplayNameFormatter { get; set; }
-    
+
     /// <summary>
     /// Retry decision function
     /// </summary>
     public Func<TestContext, Exception, int, Task<bool>>? ShouldRetryFunc { get; set; }
-    
+
     /// <summary>
     /// Parallel execution constraint
     /// </summary>
     public IParallelConstraint? ParallelConstraint { get; set; }
-    
+
     /// <summary>
     /// Class context
     /// </summary>
     public ClassHookContext? ClassContext { get; set; }
-    
+
     /// <summary>
     /// Linked cancellation tokens
     /// </summary>
     public CancellationTokenSource? LinkedCancellationTokens { get; set; }
-    
+
     /// <summary>
     /// Argument display formatters
     /// </summary>
     public List<Func<object?, string?>> ArgumentDisplayFormatters { get; } = new();
-    
+
     /// <summary>
     /// Test context events
     /// </summary>
     public TestContextEvents Events { get; } = new();
-    
+
     /// <summary>
     /// Internal discovered test reference
     /// </summary>
     internal DiscoveredTest? InternalDiscoveredTest { get; set; }
-    
+
     /// <summary>
     /// Service provider (simplified)
     /// </summary>
     private IServiceProvider? _serviceProvider;
-    
+
     public TestContext(string testName, string displayName) : base(null)
     {
         TestName = testName;
         DisplayName = displayName;
     }
-    
+
     public TestContext(string testName, string displayName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
     {
         TestName = testName;
@@ -168,7 +168,7 @@ public class TestContext : Context
         CancellationToken = cancellationToken;
         _serviceProvider = serviceProvider;
     }
-    
+
     /// <summary>
     /// Writes to test output
     /// </summary>
@@ -176,7 +176,7 @@ public class TestContext : Context
     {
         _outputWriter.WriteLine(message);
     }
-    
+
     /// <summary>
     /// Writes to test error output
     /// </summary>
@@ -184,17 +184,17 @@ public class TestContext : Context
     {
         _errorWriter.WriteLine(message);
     }
-    
+
     /// <summary>
     /// Gets the captured output
     /// </summary>
     public string GetOutput() => _outputWriter.ToString();
-    
+
     /// <summary>
     /// Gets the captured error output
     /// </summary>
     public new string GetErrorOutput() => _errorWriter.ToString();
-    
+
     /// <summary>
     /// Gets service from the service provider
     /// </summary>
@@ -202,7 +202,7 @@ public class TestContext : Context
     {
         return _serviceProvider?.GetService(typeof(T)) as T;
     }
-    
+
     /// <summary>
     /// Adds async local values (delegates to base class)
     /// </summary>
@@ -210,7 +210,7 @@ public class TestContext : Context
     {
         base.AddAsyncLocalValues();
     }
-    
+
     /// <summary>
     /// Restores the async local context for TestContext
     /// </summary>
@@ -218,27 +218,27 @@ public class TestContext : Context
     {
         TestContexts.Value = this;
     }
-    
+
     /// <summary>
     /// Run on test discovery callback
     /// </summary>
     internal bool RunOnTestDiscovery { get; set; }
-    
+
     /// <summary>
     /// Lock object for thread safety
     /// </summary>
     public object Lock { get; } = new object();
-    
+
     /// <summary>
     /// Test timings
     /// </summary>
     public List<Timing> Timings { get; } = new();
-    
+
     /// <summary>
     /// Test artifacts
     /// </summary>
     public Dictionary<string, object?> Artifacts { get; } = new Dictionary<string, object?>();
-    
+
     /// <summary>
     /// Gets the test display name
     /// </summary>
@@ -246,18 +246,18 @@ public class TestContext : Context
     {
         return DisplayName;
     }
-    
+
     /// <summary>
     /// Object bag for storing arbitrary data
     /// </summary>
     public Dictionary<string, object?> ObjectBag { get; } = new Dictionary<string, object?>();
-    
+
     /// <summary>
     /// Whether to report this test result
     /// </summary>
     public bool ReportResult { get; set; } = true;
-    
-    
+
+
     /// <summary>
     /// Sets the parallel limiter for the test
     /// </summary>
@@ -265,7 +265,7 @@ public class TestContext : Context
     {
         ParallelLimiter = parallelLimit;
     }
-    
+
     /// <summary>
     /// Adds a cancellation token to be linked with the test's cancellation token
     /// </summary>
@@ -280,15 +280,15 @@ public class TestContext : Context
             var existingToken = LinkedCancellationTokens.Token;
             LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(existingToken, cancellationToken);
         }
-        
+
         CancellationToken = LinkedCancellationTokens.Token;
     }
-    
+
     /// <summary>
     /// Test start time - for compatibility
     /// </summary>
     public DateTimeOffset TestStart { get; set; } = DateTimeOffset.UtcNow;
-    
+
     /// <summary>
     /// Adds an artifact to the test
     /// </summary>
@@ -296,7 +296,7 @@ public class TestContext : Context
     {
         Artifacts[name] = value;
     }
-    
+
     /// <summary>
     /// Adds an artifact to the test
     /// </summary>
@@ -304,7 +304,7 @@ public class TestContext : Context
     {
         Artifacts[artifact.DisplayName ?? artifact.File?.Name ?? "artifact"] = artifact;
     }
-    
+
     /// <summary>
     /// Overrides the test result
     /// </summary>
@@ -312,7 +312,7 @@ public class TestContext : Context
     {
         OverrideResult(Status.Passed, reason);
     }
-    
+
     /// <summary>
     /// Overrides the test result with specified status
     /// </summary>
@@ -331,7 +331,7 @@ public class TestContext : Context
             TestContext = this
         };
     }
-    
+
     /// <summary>
     /// Reregisters a test with new arguments
     /// </summary>
@@ -342,7 +342,7 @@ public class TestContext : Context
         {
             TestDetails.TestMethodArguments = methodArguments;
         }
-        
+
         if (objectBag != null)
         {
             foreach (var kvp in objectBag)
@@ -350,7 +350,7 @@ public class TestContext : Context
                 ObjectBag[kvp.Key] = kvp.Value;
             }
         }
-        
+
         // If we have access to the test registry, create a new test variation
         try
         {
@@ -364,7 +364,7 @@ public class TestContext : Context
                     var reregisterMethod = registryType.GetMethod("ReregisterTestWithArguments");
                     if (reregisterMethod != null)
                     {
-                        await (Task)reregisterMethod.Invoke(registry, new object?[] { this, methodArguments, objectBag })!;
+                        await (Task) reregisterMethod.Invoke(registry, new object?[] { this, methodArguments, objectBag })!;
                     }
                 }
             }
@@ -375,19 +375,19 @@ public class TestContext : Context
             // This maintains backward compatibility
         }
     }
-    
+
     /// <summary>
     /// Gets the dependencies for this test
     /// </summary>
     public List<string> Dependencies { get; } = new List<string>();
-    
+
     /// <summary>
     /// Gets tests matching the criteria
     /// </summary>
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
         IEnumerable<TestContext>? registryResult = null;
-        
+
         // Try to use the test registry if available
         try
         {
@@ -401,7 +401,7 @@ public class TestContext : Context
                     var getTestsMethod = registryType.GetMethod("GetTests");
                     if (getTestsMethod != null)
                     {
-                        registryResult = (IEnumerable<TestContext>)getTestsMethod.Invoke(registry, new object[] { predicate })!;
+                        registryResult = (IEnumerable<TestContext>) getTestsMethod.Invoke(registry, new object[] { predicate })!;
                     }
                 }
             }
@@ -410,7 +410,7 @@ public class TestContext : Context
         {
             // Fallback to local context
         }
-        
+
         // Return registry results if available
         if (registryResult != null)
         {
@@ -420,14 +420,14 @@ public class TestContext : Context
             }
             yield break;
         }
-        
+
         // Fallback: just check current context
         if (predicate(this))
         {
             yield return this;
         }
     }
-    
+
     /// <summary>
     /// Gets tests by name
     /// </summary>
@@ -446,7 +446,7 @@ public class TestContext : Context
                     var getTestsByNameMethod = registryType.GetMethod("GetTestsByName");
                     if (getTestsByNameMethod != null)
                     {
-                        return (List<TestContext>)getTestsByNameMethod.Invoke(registry, new object[] { testName })!;
+                        return (List<TestContext>) getTestsByNameMethod.Invoke(registry, new object[] { testName })!;
                     }
                 }
             }
@@ -455,7 +455,7 @@ public class TestContext : Context
         {
             // Fallback to local context
         }
-        
+
         // Fallback: just check current context
         var result = new List<TestContext>();
         if (TestName == testName)

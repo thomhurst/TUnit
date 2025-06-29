@@ -12,12 +12,12 @@ public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.NoMainMethod);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -27,7 +27,7 @@ public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         if (methodSymbol.Name != "Main")
         {
             return;
@@ -37,7 +37,7 @@ public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         if (!HasKnownParameters(context, methodSymbol))
         {
             return;
@@ -57,7 +57,7 @@ public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
             context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task")!,
             context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1")!.Construct(context.Compilation.GetSpecialType(SpecialType.System_Int32))
         ];
-        
+
         return knownReturnTypes.Any(x => x.Equals(methodSymbol.ReturnType, SymbolEqualityComparer.Default));
     }
 
@@ -68,7 +68,7 @@ public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
 
-        return methodSymbol.Parameters.Length == 1 
+        return methodSymbol.Parameters.Length == 1
                && methodSymbol.Parameters
                    .First()
                    .Type

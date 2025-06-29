@@ -13,12 +13,12 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic, Rules.UnknownParameters, Rules.GlobalHooksSeparateClass);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -48,14 +48,14 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
-        
+
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
-        
+
         if (!IsAssemblyHookContextParameter(methodSymbol))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.UnknownParameters,
@@ -78,7 +78,7 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return true;
         }
-        
+
         foreach (var parameter in methodSymbol.Parameters)
         {
             if (parameter.Type.GloballyQualified() ==
@@ -86,7 +86,7 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 continue;
             }
-            
+
             if (parameter.Type.GloballyQualified() ==
                 WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
             {

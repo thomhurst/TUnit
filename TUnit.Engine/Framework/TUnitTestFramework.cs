@@ -100,7 +100,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         try
         {
             serviceProvider.CancellationToken.Initialise(context.CancellationToken);
-            await _requestHandler.HandleRequestAsync((TestExecutionRequest)context.Request, serviceProvider, context);
+            await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context);
         }
         catch (Exception e) when (IsCancellationException(e))
         {

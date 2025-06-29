@@ -109,7 +109,7 @@ public record AsyncDataSourceGeneratorContainer(
 
             sourceCodeWriter.Append(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Context, ClassMetadata, Property, false));
             sourceCodeWriter.AppendLine();
-            
+
             // Initialize the property value if it implements IAsyncInitializer
             sourceCodeWriter.Append($"if ({dataSourceVariable.Name} is global::TUnit.Core.Interfaces.IAsyncInitializer)");
             sourceCodeWriter.Append("{");

@@ -3,8 +3,8 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators;
-using TUnit.Core.SourceGenerator.Tests.Options;
 using TUnit.Core.SourceGenerator.Tests.Extensions;
+using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 

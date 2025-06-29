@@ -12,12 +12,12 @@ public static class GenericIsInExtensions
     {
         return IsIn(valueSource, expected, EqualityComparer<TActual>.Default);
     }
-    
+
     public static InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this IValueSource<TActual> valueSource, IEnumerable<TActual> expected)
     {
         return IsIn(valueSource, expected, EqualityComparer<TActual>.Default);
     }
-    
+
     public static InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this IValueSource<TActual> valueSource, IEnumerable<TActual> expected, IEqualityComparer<TActual> equalityComparer)
     {
         var expectedArray = expected as TActual[] ?? expected.ToArray();

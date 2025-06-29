@@ -7,7 +7,7 @@ public static class TestMetadataRegistry
 {
     private static readonly List<ITestMetadataSource> _sources = new();
     private static readonly object _lock = new();
-    
+
     /// <summary>
     /// Registers a test metadata source
     /// </summary>
@@ -18,7 +18,7 @@ public static class TestMetadataRegistry
             _sources.Add(source);
         }
     }
-    
+
     /// <summary>
     /// Gets all registered sources
     /// </summary>
@@ -29,7 +29,7 @@ public static class TestMetadataRegistry
             return _sources.ToArray();
         }
     }
-    
+
     /// <summary>
     /// Clears all registered sources (useful for testing)
     /// </summary>

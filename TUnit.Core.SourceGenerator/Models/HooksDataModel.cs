@@ -13,16 +13,16 @@ public record HooksDataModel
     public required string[] ParameterTypes { get; init; }
     public required string HookLevel { get; init; }
     public required string? HookExecutor { get; init; }
-    
+
     public required string FilePath { get; init; }
-    
+
     public required int LineNumber { get; init; }
-    
+
     public required int Order { get; init; }
     public required bool IsEveryHook { get; init; }
-    
+
     public required bool IsVoid { get; init; }
-    
+
     public required IMethodSymbol Method { get; init; }
     public required INamedTypeSymbol ClassType { get; set; }
 

@@ -13,33 +13,33 @@ public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertionBuild
         var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
         assertion.WithTrimming();
-        
+
         AppendCallerMethod([]);
-        
+
         return this;
     }
-    
+
     public StringEqualToAssertionBuilderWrapper WithNullAndEmptyEquality()
     {
         var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
         assertion.WithNullAndEmptyEquality();
-        
+
         AppendCallerMethod([]);
-        
+
         return this;
     }
-    
+
     public StringEqualToAssertionBuilderWrapper IgnoringWhitespace()
     {
         var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
         assertion.IgnoringWhitespace();
-        
+
         AppendCallerMethod([]);
-        
+
         return this;
     }
-    
+
 
 }

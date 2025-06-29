@@ -15,26 +15,26 @@ namespace TUnit.Engine.Building.Collectors;
 public sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private readonly Assembly[] _assemblies;
-    
+
     public ReflectionTestDataCollector(params Assembly[] assemblies)
     {
         _assemblies = assemblies ?? throw new ArgumentNullException(nameof(assemblies));
     }
-    
+
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync()
     {
         var testMetadata = new List<TestMetadata>();
-        
+
         foreach (var assembly in _assemblies)
         {
             var types = assembly.GetTypes()
                 .Where(t => !t.IsAbstract && t.IsClass && !t.IsGenericTypeDefinition);
-            
+
             foreach (var type in types)
             {
                 var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
                     .Where(m => m.GetCustomAttribute<TestAttribute>() != null);
-                
+
                 foreach (var method in methods)
                 {
                     var metadata = CreateTestMetadata(type, method);
@@ -45,38 +45,38 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
             }
         }
-        
+
         return await Task.FromResult(testMetadata);
     }
-    
+
     private TestMetadata? CreateTestMetadata(Type testClass, MethodInfo testMethod)
     {
         var testAttribute = testMethod.GetCustomAttribute<TestAttribute>();
         if (testAttribute == null) return null;
-        
+
         // Get test information
         var testId = GenerateTestId(testClass, testMethod);
         var displayName = testMethod.Name;
-        
+
         // Collect data sources
         var methodDataSources = CollectMethodDataSources(testMethod);
         var classDataSources = CollectClassDataSources(testClass);
         var propertyDataSources = CollectPropertyDataSources(testClass);
-        
+
         // Get test properties
         var categories = testMethod.GetCustomAttributes<CategoryAttribute>()
             .Select(c => c.Category)
             .ToArray();
-        
+
         var skipAttribute = testMethod.GetCustomAttribute<SkipAttribute>();
         var timeoutAttribute = testMethod.GetCustomAttribute<TimeoutAttribute>();
         var retryAttribute = testMethod.GetCustomAttribute<RetryAttribute>();
         var notInParallelAttribute = testMethod.GetCustomAttribute<NotInParallelAttribute>();
         var dependsOnAttributes = testMethod.GetCustomAttributes<DependsOnAttribute>();
-        
+
         // Create hooks metadata
         var hooks = CollectHooks(testClass, testMethod);
-        
+
         return new TestMetadata
         {
             TestId = testId,
@@ -86,7 +86,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             Categories = categories,
             IsSkipped = skipAttribute != null,
             SkipReason = skipAttribute?.Reason,
-            TimeoutMs = (int?)timeoutAttribute?.Timeout.TotalMilliseconds,
+            TimeoutMs = (int?) timeoutAttribute?.Timeout.TotalMilliseconds,
             RetryCount = retryAttribute?.Times ?? 0,
             CanRunInParallel = notInParallelAttribute == null,
             DependsOn = dependsOnAttributes.Select(d => d.TestName!).ToArray(),
@@ -105,18 +105,18 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             GenericMethodInfo = testMethod.IsGenericMethodDefinition ? CreateGenericMethodInfo(testMethod) : null
         };
     }
-    
+
     private TestDataSource[] CollectMethodDataSources(MethodInfo method)
     {
         var dataSources = new List<TestDataSource>();
-        
+
         // Arguments attributes
         var argumentsAttributes = method.GetCustomAttributes<ArgumentsAttribute>();
         foreach (var args in argumentsAttributes)
         {
             dataSources.Add(new StaticTestDataSource(new object?[][] { args.Values }));
         }
-        
+
         // Method data source attributes
         var methodDataSources = method.GetCustomAttributes<MethodDataSourceAttribute>();
         foreach (var mds in methodDataSources)
@@ -128,7 +128,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 Arguments = mds.Arguments
             });
         }
-        
+
         // Data source attributes implementing IDataSource
         var dataSourceAttributes = method.GetCustomAttributes()
             .OfType<IDataSource>();
@@ -136,19 +136,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             dataSources.Add(new AttributeDataSource(ds));
         }
-        
+
         return dataSources.ToArray();
     }
-    
+
     private TestDataSource[] CollectClassDataSources(Type testClass)
     {
         var dataSources = new List<TestDataSource>();
-        
+
         // Class constructor arguments
         var constructor = testClass.GetConstructors()
             .OrderByDescending(c => c.GetParameters().Length)
             .FirstOrDefault();
-            
+
         if (constructor != null)
         {
             var parameters = constructor.GetParameters();
@@ -160,7 +160,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     dataSources.Add(new StaticTestDataSource(new object?[][] { argumentsAttr.Values }));
                 }
-                
+
                 var methodDataSource = param.GetCustomAttribute<MethodDataSourceAttribute>();
                 if (methodDataSource != null)
                 {
@@ -173,23 +173,23 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
             }
         }
-        
+
         return dataSources.ToArray();
     }
-    
+
     private PropertyDataSource[] CollectPropertyDataSources(Type testClass)
     {
         var propertyDataSources = new List<PropertyDataSource>();
-        
+
         var properties = testClass.GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => p.CanWrite);
-            
+
         foreach (var property in properties)
         {
             var dataSourceAttr = property.GetCustomAttributes()
                 .OfType<IDataSource>()
                 .FirstOrDefault();
-                
+
             if (dataSourceAttr != null)
             {
                 propertyDataSources.Add(new PropertyDataSource
@@ -200,10 +200,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 });
             }
         }
-        
+
         return propertyDataSources.ToArray();
     }
-    
+
     private TestHooks CollectHooks(Type testClass, MethodInfo testMethod)
     {
         var hooks = new TestHooks
@@ -213,11 +213,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             BeforeTest = CollectHooksOfType<BeforeAttribute>(testClass, HookLevel.Test),
             AfterTest = CollectHooksOfType<AfterAttribute>(testClass, HookLevel.Test)
         };
-        
+
         return hooks;
     }
-    
-    private HookMetadata[] CollectHooksOfType<TAttribute>(Type testClass, HookLevel level) 
+
+    private HookMetadata[] CollectHooksOfType<TAttribute>(Type testClass, HookLevel level)
         where TAttribute : Attribute
     {
         var hookMethods = testClass.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
@@ -233,15 +233,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 IsStatic = m.IsStatic
             })
             .ToArray();
-            
+
         return hookMethods;
     }
-    
+
     private static string GenerateTestId(Type testClass, MethodInfo testMethod)
     {
         return $"{testClass.FullName}.{testMethod.Name}";
     }
-    
+
     private static GenericTypeInfo CreateGenericTypeInfo(Type type)
     {
         var genericArgs = type.GetGenericArguments();
@@ -251,7 +251,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             Constraints = genericArgs.Select(CreateGenericConstraints).ToArray()
         };
     }
-    
+
     private static GenericMethodInfo CreateGenericMethodInfo(MethodInfo method)
     {
         var genericArgs = method.GetGenericArguments();
@@ -262,7 +262,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             ParameterPositions = new int[0] // Would need more analysis to determine
         };
     }
-    
+
     private static GenericParameterConstraints CreateGenericConstraints(Type genericParam)
     {
         return new GenericParameterConstraints
@@ -284,12 +284,12 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 internal sealed class AttributeDataSource : TestDataSource
 {
     private readonly IDataSource _dataSource;
-    
+
     public AttributeDataSource(IDataSource dataSource)
     {
         _dataSource = dataSource;
     }
-    
+
     public override IEnumerable<Func<object?[]>> GetDataFactories()
     {
         // Create a context for the data source
@@ -300,9 +300,9 @@ internal sealed class AttributeDataSource : TestDataSource
             null,
             null,
             null);
-            
+
         return _dataSource.GenerateDataFactories(context);
     }
-    
+
     public override bool IsShared => _dataSource.IsShared;
 }

@@ -13,7 +13,7 @@ public class RunSourceGeneratorTestsModule : TestBaseModule
     protected override Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Core.SourceGenerator.Tests.csproj").AssertExists();
-        
+
         return Task.FromResult(new DotNetRunOptions
         {
             WorkingDirectory = project.Folder!,
@@ -24,7 +24,7 @@ public class RunSourceGeneratorTestsModule : TestBaseModule
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
             },
-            Arguments = [ "--", "--fail-fast" ]
+            Arguments = ["--", "--fail-fast"]
         });
     }
 }

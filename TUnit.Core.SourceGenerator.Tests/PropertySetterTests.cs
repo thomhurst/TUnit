@@ -10,7 +10,7 @@ internal class PropertySetterTests : TestsBase
         async generatedFiles =>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(1);
-            
+
             // Static
         });
 }

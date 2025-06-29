@@ -25,9 +25,9 @@ public static class TestContextFactory
             TestDetails = discoveryContext.TestDetails,
             Phase = TestPhase.Execution
         };
-        
+
         discoveryContext.TransferTo(testContext);
-        
+
         return testContext;
     }
 }

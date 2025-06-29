@@ -8,12 +8,12 @@ public class TestSessionContext : Context
         get => Contexts.Value;
         internal set => Contexts.Value = value;
     }
-    
+
     internal TestSessionContext(TestDiscoveryContext beforeTestDiscoveryContext) : base(beforeTestDiscoveryContext)
     {
         Current = this;
     }
-    
+
     public BeforeTestDiscoveryContext TestDiscoveryContext => (BeforeTestDiscoveryContext) Parent!;
 
     public required string Id { get; init; }
@@ -21,18 +21,18 @@ public class TestSessionContext : Context
     public required string? TestFilter { get; init; }
 
     private readonly List<AssemblyHookContext> _assemblies = [];
-    
+
     public void AddAssembly(AssemblyHookContext assemblyHookContext)
     {
         _assemblies.Add(assemblyHookContext);
     }
-    
+
     public IReadOnlyList<AssemblyHookContext> Assemblies => _assemblies;
-    
+
     public IReadOnlyList<ClassHookContext> TestClasses => Assemblies.SelectMany(x => x.TestClasses).ToArray();
 
     public IReadOnlyList<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests).ToArray();
-    
+
     internal bool FirstTestStarted { get; set; }
 
     internal readonly List<Artifact> Artifacts = [];
@@ -46,7 +46,7 @@ public class TestSessionContext : Context
     {
         _assemblies.Remove(assemblyContext);
     }
-    
+
     internal override void RestoreContextAsyncLocal()
     {
         Current = this;

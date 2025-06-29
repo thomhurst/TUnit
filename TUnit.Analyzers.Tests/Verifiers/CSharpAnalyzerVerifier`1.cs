@@ -1,8 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
-using System.Diagnostics.CodeAnalysis;
 using Polly.CircuitBreaker;
 using TUnit.TestProject.Library;
 
@@ -28,7 +28,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
     {
         return VerifyAnalyzerAsync(source, _ => { }, expected);
     }
-    
+
     /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
     public static async Task VerifyAnalyzerAsync([StringSyntax("c#")] string source, Action<Test> configureTest, params DiagnosticResult[] expected)
     {
@@ -48,9 +48,9 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
-        
+
         configureTest(test);
-        
+
         await test.RunAsync(CancellationToken.None);
     }
 }

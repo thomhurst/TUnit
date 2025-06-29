@@ -6,11 +6,11 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class OrAssertionBuilder : AssertionBuilder, IOrAssertionBuilder
 {
-    internal OrAssertionBuilder(AssertionBuilder assertionBuilder) : base(((ISource)assertionBuilder).AssertionDataTask, (
-        (ISource)assertionBuilder).ActualExpression!, (
-        (ISource)assertionBuilder).ExpressionBuilder, ((ISource)assertionBuilder).Assertions)
+    internal OrAssertionBuilder(AssertionBuilder assertionBuilder) : base(((ISource) assertionBuilder).AssertionDataTask, (
+        (ISource) assertionBuilder).ActualExpression!, (
+        (ISource) assertionBuilder).ExpressionBuilder, ((ISource) assertionBuilder).Assertions)
     {
-        if (((ISource)assertionBuilder).Assertions.Any(a => a is AndAssertCondition))
+        if (((ISource) assertionBuilder).Assertions.Any(a => a is AndAssertCondition))
         {
             throw new MixedAndOrAssertionsException();
         }

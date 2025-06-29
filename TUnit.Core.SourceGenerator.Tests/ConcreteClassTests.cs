@@ -17,7 +17,7 @@ internal class ConcreteClassTests : TestsBase
                     "TUnit.TestProject",
                     "AbstractTests",
                     "AbstractBaseClass.cs"),
-                
+
                 Path.Combine(Git.RootDirectory.FullName,
                     "TUnit.TestProject",
                     "AbstractTests",

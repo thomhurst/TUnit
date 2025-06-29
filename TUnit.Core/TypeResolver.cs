@@ -76,8 +76,8 @@ public sealed class TypeResolver
             }
 
             var elementType = Resolve(typeReference.ElementType);
-            return typeReference.ArrayRank == 1 
-                ? elementType.MakeArrayType() 
+            return typeReference.ArrayRank == 1
+                ? elementType.MakeArrayType()
                 : elementType.MakeArrayType(typeReference.ArrayRank);
         }
 
@@ -166,7 +166,7 @@ public sealed class TypeResolver
     }
 
     private static Dictionary<(int position, bool isMethodParameter), Type> BuildGenericParameterMap(
-        Type? declaringType, 
+        Type? declaringType,
         MethodInfo? declaringMethod)
     {
         var map = new Dictionary<(int position, bool isMethodParameter), Type>();

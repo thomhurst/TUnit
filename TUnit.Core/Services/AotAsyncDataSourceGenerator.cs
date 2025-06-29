@@ -45,7 +45,7 @@ public class AotAsyncDataSourceGenerator
 
         // Generate factory method that creates and invokes the async data source
         GenerateAsyncDataSourceFactoryMethod(code, asyncDataSourceType, asyncDataSourceTypeName);
-        
+
         // Generate delegate property for direct access
         GenerateAsyncFactoryDelegate(code, asyncDataSourceTypeName);
 
@@ -60,20 +60,20 @@ public class AotAsyncDataSourceGenerator
     {
         code.AppendLine($"    public static async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataAsync(DataGeneratorMetadata metadata, [EnumeratorCancellation] CancellationToken cancellationToken = default)");
         code.AppendLine("    {");
-        
+
         // Create instance of the async data source generator
         code.AppendLine($"        var generator = new {asyncDataSourceTypeName}();");
         code.AppendLine();
-        
+
         // Call the GenerateAsync method
         code.AppendLine("        await foreach (var dataSourceFunc in generator.GenerateAsync(metadata).WithCancellation(cancellationToken))");
         code.AppendLine("        {");
         code.AppendLine("            yield return dataSourceFunc;");
         code.AppendLine("        }");
-        
+
         code.AppendLine("    }");
         code.AppendLine();
-        
+
         // Generate sync wrapper for compatibility
         code.AppendLine($"    public static async Task<IReadOnlyList<Func<Task<object?[]?>>>> GenerateDataListAsync(DataGeneratorMetadata metadata, CancellationToken cancellationToken = default)");
         code.AppendLine("    {");
@@ -117,7 +117,7 @@ public class AotAsyncDataSourceGenerator
         var methodAsyncDataSources = testMethod.GetAsyncDataSourceGeneratorAttributes();
         var classAsyncDataSources = testClass.GetAsyncDataSourceGeneratorAttributes();
         var allAsyncDataSources = methodAsyncDataSources.Concat(classAsyncDataSources).ToArray();
-        
+
         code.AppendLine("    public static async Task<IReadOnlyList<Func<Task<object?[]?>>>> ResolveAllAsyncDataAsync(DataGeneratorMetadata metadata, CancellationToken cancellationToken = default)");
         code.AppendLine("    {");
         code.AppendLine("        var allDataSources = new List<Func<Task<object?[]?>>>();");
@@ -127,7 +127,7 @@ public class AotAsyncDataSourceGenerator
         {
             var sourceTypeName = asyncDataSource.GetType().Name;
             var factoryClassName = $"{sourceTypeName}_AotFactory";
-            
+
             code.AppendLine($"        // Generate data from {sourceTypeName}");
             code.AppendLine($"        var data_{sourceTypeName} = await {factoryClassName}.GenerateDataListAsync(metadata, cancellationToken);");
             code.AppendLine($"        allDataSources.AddRange(data_{sourceTypeName});");
@@ -203,14 +203,14 @@ public class AotAsyncDataSourceGenerator
 
         // Collect all unique AsyncDataSource types across all test methods and the class
         var allAsyncDataSourceTypes = new HashSet<Type>();
-        
+
         // Class-level async data sources
         var classAsyncDataSources = classMetadata.GetAsyncDataSourceGeneratorAttributes();
         foreach (var asyncDataSource in classAsyncDataSources)
         {
             allAsyncDataSourceTypes.Add(asyncDataSource.GetType());
         }
-        
+
         // Method-level async data sources
         foreach (var method in testMethods)
         {
@@ -242,7 +242,7 @@ public class AotAsyncDataSourceGenerator
         {
             var methodAsyncDataSources = method.GetAsyncDataSourceGeneratorAttributes();
             var classAsyncDataSources2 = classMetadata.GetAsyncDataSourceGeneratorAttributes();
-            
+
             if (methodAsyncDataSources.Any() || classAsyncDataSources2.Any())
             {
                 try
@@ -269,7 +269,7 @@ public class AotAsyncDataSourceGenerator
     /// <returns>True if AOT-safe generation is possible</returns>
     public bool CanGenerateAotSafe(
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] 
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
         Type asyncDataSourceType)
     {
         // Check if type implements the required interface
@@ -277,20 +277,20 @@ public class AotAsyncDataSourceGenerator
         {
             return false;
         }
-        
+
         // Check if type has a parameterless constructor (required for instantiation)
         var constructor = asyncDataSourceType.GetConstructor(Type.EmptyTypes);
         if (constructor == null)
         {
             return false;
         }
-        
+
         // Check if type is not abstract
         if (asyncDataSourceType.IsAbstract)
         {
             return false;
         }
-        
+
         return true;
     }
 }

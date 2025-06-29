@@ -13,7 +13,7 @@ internal interface IDataProviderGenerator
     /// Determines if this generator can handle the given attribute
     /// </summary>
     bool CanGenerate(AttributeData attribute);
-    
+
     /// <summary>
     /// Generates the data provider code for the given attribute
     /// </summary>

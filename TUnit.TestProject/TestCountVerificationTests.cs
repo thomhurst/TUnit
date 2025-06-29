@@ -10,7 +10,7 @@ public class TestCountVerificationTests(int value)
     {
         await Task.CompletedTask;
     }
-    
+
     public class TestDataSource
     {
         public static implicit operator int(TestDataSource _) => 10;

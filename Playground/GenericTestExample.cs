@@ -10,7 +10,7 @@ public class GenericTestExample<T>
         // This is a test in a generic class
         Console.WriteLine($"Running test with type: {typeof(T).Name}");
     }
-    
+
     [Test]
     [Arguments(5)]
     [Arguments("hello")]

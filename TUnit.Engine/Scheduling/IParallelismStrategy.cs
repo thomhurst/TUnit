@@ -9,7 +9,7 @@ public interface IParallelismStrategy
     /// Gets the current parallelism level
     /// </summary>
     int CurrentParallelism { get; }
-    
+
     /// <summary>
     /// Adapts parallelism based on system metrics
     /// </summary>

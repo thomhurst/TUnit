@@ -15,7 +15,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
         _mapper = mapper;
         _assertionBuilder = assertionBuilder;
         _assertionBuilderExpression = assertionBuilderExpression;
-        
+
         SetSubject(mapperExpression);
     }
 
@@ -31,16 +31,16 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
         {
             return AssertionResult.Fail("is null");
         }
-        
+
         var innerItemTask = _mapper(actualValue);
 
         var innerItem = innerItemTask == null ? default : await innerItemTask;
-        
+
         var innerAssertionBuilder = new ValueAssertionBuilder<TExpected?>(innerItem, "");
 
         var assertion = _assertionBuilder(innerAssertionBuilder);
-        
-        foreach (var baseAssertCondition in ((ISource)assertion).Assertions)
+
+        foreach (var baseAssertCondition in ((ISource) assertion).Assertions)
         {
             var result = await baseAssertCondition.GetAssertionResult(innerItem, exception, assertionMetadata, "");
 
@@ -49,7 +49,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
                 return result;
             }
         }
-        
+
         return AssertionResult.Passed;
     }
 }

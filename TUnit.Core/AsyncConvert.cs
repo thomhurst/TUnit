@@ -80,12 +80,12 @@ public static class AsyncConvert
 
         if (invoke is Task task)
         {
-            if(task is { IsCompleted: true, IsFaulted: false })
+            if (task is { IsCompleted: true, IsFaulted: false })
             {
                 return default;
             }
 
-            if(task.IsFaulted || !task.IsCompleted)
+            if (task.IsFaulted || !task.IsCompleted)
             {
                 return new ValueTask(task);
             }
@@ -129,7 +129,7 @@ public static class AsyncConvert
             .GetRuntimeMethods()
             .First(m => m.Name == "StartAsTask");
 
-        var fSharpTask = (Task)startAsTaskOpenGenericMethod.MakeGenericMethod(type.GetGenericArguments()[0])
+        var fSharpTask = (Task) startAsTaskOpenGenericMethod.MakeGenericMethod(type.GetGenericArguments()[0])
             .Invoke(null, [invoke, null, null])!;
 
         return new ValueTask(fSharpTask);
@@ -170,7 +170,7 @@ public static class AsyncConvert
             return true;
         }
 
-        if(!isCompleted.HasValue)
+        if (!isCompleted.HasValue)
         {
             task = null;
             return false;

@@ -20,7 +20,7 @@ public class AsyncDataGeneratorProvider : IDataProvider
     public async Task<IEnumerable<object?[]>> GetData()
     {
         var results = new List<object?[]>();
-        
+
         await foreach (var dataFactory in _generator.GenerateAsync(_metadata))
         {
             var data = await dataFactory();
@@ -29,7 +29,7 @@ public class AsyncDataGeneratorProvider : IDataProvider
                 results.Add(data);
             }
         }
-        
+
         return results;
     }
 }

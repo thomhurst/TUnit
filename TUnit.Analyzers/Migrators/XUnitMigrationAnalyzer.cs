@@ -70,7 +70,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                     return;
                 }
             }
-            
+
             var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
 
             if (namedTypeSymbol is null)
@@ -100,8 +100,8 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
         foreach (var attributeData in symbol.GetAttributes())
         {
             var @namespace = attributeData.AttributeClass?.ContainingNamespace?.Name;
-            
-            if(@namespace == "Xunit")
+
+            if (@namespace == "Xunit")
             {
                 Flag(context);
                 return true;

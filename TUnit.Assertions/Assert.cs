@@ -175,7 +175,7 @@ public static class Assert
         {
             TUnit.Assertions.Fail.Test(reason);
         }
-        catch (AssertionException e) when (AssertionScope.GetCurrentAssertionScope() is {} assertionScope)
+        catch (AssertionException e) when (AssertionScope.GetCurrentAssertionScope() is { } assertionScope)
         {
             assertionScope.AddException(e);
         }

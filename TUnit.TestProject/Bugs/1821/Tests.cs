@@ -12,7 +12,7 @@ public class Tests(MyData data)
     {
         await Assert.That(value).IsEqualTo("Hello World!");
     }
-    
+
     [Test]
     [MatrixDataSource]
     public async Task MatrixDataSource([MatrixInstanceMethod<Tests>(nameof(DataSource))] string value)

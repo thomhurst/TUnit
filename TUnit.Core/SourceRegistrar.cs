@@ -94,7 +94,7 @@ public class SourceRegistrar
     {
         Sources.TestDiscoveryHookSources.Enqueue(testSource);
     }
-    
+
     /// <summary>
     /// Registers a global initializer.
     /// </summary>
@@ -103,7 +103,7 @@ public class SourceRegistrar
     {
         Sources.GlobalInitializers.Enqueue(initializer);
     }
-    
+
     /// <summary>
     /// Registers a property source (for property injection).
     /// </summary>

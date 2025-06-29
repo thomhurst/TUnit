@@ -10,6 +10,6 @@ public class ObjectTests
 
         await Assert.That(myModel).IsEqualTo(myModel2);
     }
-    
+
     public record MyModel(string One, string Two);
 }

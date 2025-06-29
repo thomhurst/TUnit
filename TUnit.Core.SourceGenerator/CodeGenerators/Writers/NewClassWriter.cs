@@ -12,13 +12,13 @@ public static class NewClassWriter
             sourceCodeWriter.Append($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>(sessionId, testBuilderContext);");
             return;
         }
-        
+
         sourceCodeWriter.Append($"var resettableClassFactoryDelegate = () => new ResettableLazy<{typeName}>(() => ");
 
         sourceCodeWriter.Append($"new {typeName}({argumentsContainer.DataVariables.Select(x => x.Name).ToCommaSeparatedString()})");
 
         classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
-        
+
         sourceCodeWriter.Append(", sessionId, testBuilderContext);");
     }
 }

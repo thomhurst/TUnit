@@ -70,7 +70,7 @@ public record AttributeMetadata
             return true;
         }
 
-        return Instance.Equals(other.Instance) && 
+        return Instance.Equals(other.Instance) &&
                TargetElement == other.TargetElement &&
                TargetMemberName == other.TargetMemberName &&
                TargetType == other.TargetType;

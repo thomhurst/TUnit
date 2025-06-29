@@ -13,20 +13,20 @@ public class BetweenAssertionBuilderWrapper<TActual> : InvokableValueAssertionBu
         var assertion = (BetweenAssertCondition<TActual>) Assertions.Peek();
 
         assertion.Inclusive();
-        
+
         AppendCallerMethod([]);
-        
+
         return this;
     }
-    
+
     public BetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds()
     {
         var assertion = (BetweenAssertCondition<TActual>) Assertions.Peek();
 
         assertion.Exclusive();
-        
+
         AppendCallerMethod([]);
-        
+
         return this;
     }
 }

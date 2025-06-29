@@ -37,7 +37,7 @@ public class DependsOnAttribute<T> : DependsOnAttribute
     public DependsOnAttribute(string testName) : base(typeof(T), testName)
     {
     }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DependsOnAttribute{T}"/> class.
     /// Specifies a dependency on a specific test method with parameter types in the specified class.
@@ -152,7 +152,7 @@ public class DependsOnAttribute : TUnitAttribute
     public DependsOnAttribute(Type testClass, string testName) : this(testClass, testName, null!)
     {
     }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DependsOnAttribute"/> class.
     /// Specifies a dependency on a specific overloaded test method in a specific class.
@@ -166,7 +166,7 @@ public class DependsOnAttribute : TUnitAttribute
         TestName = testName;
         ParameterTypes = parameterTypes;
     }
-    
+
     /// <summary>
     /// Gets the class containing the test method this test depends on.
     /// </summary>

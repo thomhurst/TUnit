@@ -10,7 +10,7 @@ public static class ExpressionHelpers
 
         if (body == null)
         {
-            var unaryExpression = (UnaryExpression)exp.Body;
+            var unaryExpression = (UnaryExpression) exp.Body;
 
             body = unaryExpression.Operand as MemberExpression;
         }

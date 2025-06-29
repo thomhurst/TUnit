@@ -48,7 +48,7 @@ public partial class Tests
 
     private T RoundTripSerialize<T>(T original)
     {
-        var jsonTypeInfo = (JsonTypeInfo<T>)SourceGenerationContext.Default.GetTypeInfo(original!.GetType())!;
+        var jsonTypeInfo = (JsonTypeInfo<T>) SourceGenerationContext.Default.GetTypeInfo(original!.GetType())!;
         return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(original, jsonTypeInfo), jsonTypeInfo)!;
     }
 

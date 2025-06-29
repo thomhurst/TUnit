@@ -8,7 +8,7 @@ public class RepeatAttributeCountTest
     {
         await Task.CompletedTask;
     }
-    
+
     [Test]
     [Repeat(2)]
     [Arguments(1)]

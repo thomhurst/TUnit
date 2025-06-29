@@ -68,18 +68,18 @@ public class AotTestFactoryGenerator
                 var parameters = constructor.GetParameters();
                 var paramList = string.Join(", ", parameters.Select(p => $"{GetTypeName(p.ParameterType)} {p.Name}"));
                 var argList = string.Join(", ", parameters.Select(p => p.Name));
-                
+
                 code.AppendLine();
                 code.AppendLine($"    public static {fullClassName} CreateInstance({paramList})");
                 code.AppendLine("    {");
                 code.AppendLine($"        return new {fullClassName}({argList});");
                 code.AppendLine("    }");
             }
-            
+
             // Generate factory delegate properties
             code.AppendLine();
             code.AppendLine($"    public static readonly Func<{fullClassName}> DefaultFactory = () => new {fullClassName}();");
-            
+
             foreach (var constructor in parameterizedConstructors)
             {
                 var parameters = constructor.GetParameters();
@@ -87,7 +87,7 @@ public class AotTestFactoryGenerator
                 var argList = string.Join(", ", parameters.Select(p => p.Name));
                 var delegateSignature = parameters.Length > 0 ? $"Func<{typeList}, {fullClassName}>" : $"Func<{fullClassName}>";
                 var factoryName = $"Factory{parameters.Length}Args";
-                
+
                 code.AppendLine($"    public static readonly {delegateSignature} {factoryName} = ({string.Join(", ", parameters.Select(p => p.Name))}) => new {fullClassName}({argList});");
             }
         }
@@ -124,7 +124,7 @@ public class AotTestFactoryGenerator
         var parameters = methodMetadata.Parameters;
         var paramList = string.Join(", ", parameters.Select(p => $"{GetTypeName(p.Type)} {p.Name}"));
         var fullParamList = parameters.Length > 0 ? $"{fullClassName} instance, {paramList}" : $"{fullClassName} instance";
-        
+
         code.AppendLine($"    public static async Task<{returnTypeName}> InvokeAsync({fullParamList})");
         code.AppendLine("    {");
 
@@ -159,12 +159,12 @@ public class AotTestFactoryGenerator
         }
 
         code.AppendLine("    }");
-        
+
         // Generate delegate property for this specific method signature
         var delegateType = GenerateMethodDelegateType(methodMetadata, fullClassName ?? "UnknownClass");
         code.AppendLine();
         code.AppendLine($"    public static readonly {delegateType} Invoker = InvokeAsync;");
-        
+
         code.AppendLine("}");
         return code.ToString();
     }
@@ -230,21 +230,21 @@ public class AotTestFactoryGenerator
 
         var code = new StringBuilder();
         code.AppendLine($"// Strongly typed registration for test {testId}");
-        
+
         // Register strongly typed class factory
         code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterStronglyTypedClassFactory<{fullClassName}>(\"{testId}\", {className}StronglyTypedFactory.DefaultFactory);");
-        
+
         // Register parameterized factories if available
         var constructors = classMetadata.Type.GetConstructors();
         var parameterizedConstructors = constructors.Where(c => c.GetParameters().Length > 0).ToArray();
-        
+
         foreach (var constructor in parameterizedConstructors)
         {
             var parameters = constructor.GetParameters();
             var factoryName = $"Factory{parameters.Length}Args";
             code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterStronglyTypedClassFactory<{fullClassName}>(\"{testId}_{parameters.Length}args\", {className}StronglyTypedFactory.{factoryName});");
         }
-        
+
         // Register strongly typed method invoker
         code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterStronglyTypedMethodInvoker<{fullClassName}>(\"{testId}\", {className}_{methodName}StronglyTypedInvoker.Invoker);");
 
@@ -294,8 +294,8 @@ public class AotTestFactoryGenerator
     private static bool HasPropertyInjectionAttribute(System.Reflection.PropertyInfo property)
     {
         // Check for common property injection attributes
-        return property.GetCustomAttributes(false).Any(attr => 
-            attr.GetType().Name.Contains("Inject") || 
+        return property.GetCustomAttributes(false).Any(attr =>
+            attr.GetType().Name.Contains("Inject") ||
             attr.GetType().Name.Contains("Property"));
     }
 
@@ -307,12 +307,12 @@ public class AotTestFactoryGenerator
         var parameters = methodMetadata.Parameters;
         var returnType = methodMetadata.ReturnType ?? typeof(void);
         var isAsync = typeof(Task).IsAssignableFrom(returnType);
-        
+
         var paramTypes = new List<string> { className };
         paramTypes.AddRange(parameters.Select(p => GetTypeName(p.Type)));
-        
+
         var returnTypeName = isAsync ? GetTypeName(returnType) : $"Task<{GetTypeName(returnType)}>";
-        
+
         return $"Func<{string.Join(", ", paramTypes)}, {returnTypeName}>";
     }
 
@@ -323,44 +323,44 @@ public class AotTestFactoryGenerator
     {
         if (type == typeof(void))
             return "void";
-            
+
         if (type == typeof(string))
             return "string";
-            
+
         if (type == typeof(int))
             return "int";
-            
+
         if (type == typeof(bool))
             return "bool";
-            
+
         if (type == typeof(double))
             return "double";
-            
+
         if (type == typeof(float))
             return "float";
-            
+
         if (type == typeof(long))
             return "long";
-            
+
         if (type == typeof(short))
             return "short";
-            
+
         if (type == typeof(byte))
             return "byte";
-            
+
         if (type == typeof(char))
             return "char";
-            
+
         if (type == typeof(decimal))
             return "decimal";
-            
+
         if (type.IsGenericType)
         {
             var genericTypeName = type.Name.Split('`')[0];
             var genericArgs = string.Join(", ", type.GetGenericArguments().Select(GetTypeName));
             return $"{genericTypeName}<{genericArgs}>";
         }
-        
+
         return type.FullName?.Replace('+', '.') ?? type.Name;
     }
 
@@ -389,7 +389,7 @@ public class AotTestFactoryGenerator
 
         // Collect all unique MethodDataSource attributes across all test methods
         var allMethodDataSources = new HashSet<string>();
-        
+
         foreach (var method in testMethods)
         {
             var methodDataSources = method.GetMethodDataSourceAttributes();

@@ -23,12 +23,12 @@ public interface IDataSourceAnalyzer
     /// Analyzes data source attributes on a method and returns bindings.
     /// </summary>
     DataSourceBinding? AnalyzeMethodDataSource(IMethodSymbol method);
-    
+
     /// <summary>
     /// Analyzes data source attributes on a class and returns bindings.
     /// </summary>
     DataSourceBinding? AnalyzeClassDataSource(INamedTypeSymbol type);
-    
+
     /// <summary>
     /// Analyzes data source attributes on properties and returns bindings.
     /// </summary>

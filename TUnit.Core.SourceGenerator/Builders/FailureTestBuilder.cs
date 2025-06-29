@@ -36,7 +36,7 @@ internal class FailureTestBuilder
         writer.AppendLine("    {");
         writer.AppendLine($"        var errorMessage = @\"{errorMessage.Replace("\\", "\\\\").Replace("\"", "\\\"")}\";");
         writer.AppendLine();
-        
+
         if (context.CanUseStaticDefinition)
         {
             GenerateStaticFailureDefinition(writer, context);
@@ -45,7 +45,7 @@ internal class FailureTestBuilder
         {
             GenerateDynamicFailureMetadata(writer, context);
         }
-        
+
         writer.AppendLine("    }");
         writer.AppendLine("}");
     }
@@ -54,7 +54,7 @@ internal class FailureTestBuilder
     {
         writer.AppendLine("        var testDescriptors = new System.Collections.Generic.List<ITestDescriptor>();");
         writer.AppendLine();
-        
+
         using (writer.BeginObjectInitializer("        var failureDef = new StaticTestDefinition", ";"))
         {
             writer.AppendLine($"TestId = \"{context.ClassName}.{context.MethodName}_RuntimeFailure_{{{{TestIndex}}}}\",");
@@ -74,7 +74,7 @@ internal class FailureTestBuilder
             writer.AppendLine($"ClassDataProvider = new TUnit.Core.EmptyDataProvider(),");
             writer.AppendLine($"MethodDataProvider = new TUnit.Core.EmptyDataProvider()");
         }
-        
+
         writer.AppendLine("        testDescriptors.Add(failureDef);");
         writer.AppendLine("        TestSourceRegistrar.RegisterTests(testDescriptors);");
     }
@@ -83,14 +83,14 @@ internal class FailureTestBuilder
     {
         writer.AppendLine("        var testMetadata = new System.Collections.Generic.List<DynamicTestMetadata>();");
         writer.AppendLine();
-        
+
         using (writer.BeginObjectInitializer("        var failureMetadata = new DynamicTestMetadata", ";"))
         {
             writer.AppendLine($"TestIdTemplate = \"{context.ClassName}.{context.MethodName}_RuntimeFailure_{{{{TestIndex}}}}\",");
             writer.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(context.TestInfo.TypeSymbol)},");
             writer.AppendLine($"TestClassType = typeof({context.ClassName}),");
             writer.AppendLine($"TestClassFactory = args => throw new InvalidOperationException(errorMessage),");
-            
+
             using (writer.BeginObjectInitializer("MethodMetadata = new global::TUnit.Core.MethodMetadata", ","))
             {
                 writer.AppendLine($"Type = typeof({context.ClassName}),");
@@ -101,7 +101,7 @@ internal class FailureTestBuilder
                 writer.AppendLine($"ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete(\"System.Threading.Tasks.Task, System.Private.CoreLib\"),");
                 writer.AppendLine($"Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }},");
                 writer.AppendLine($"Parameters = new global::TUnit.Core.ParameterMetadata[] {{ }},");
-                
+
                 using (writer.BeginObjectInitializer("Class = new global::TUnit.Core.ClassMetadata", ","))
                 {
                     writer.AppendLine($"Name = \"{context.TestInfo.TypeSymbol.Name}\",");
@@ -112,17 +112,17 @@ internal class FailureTestBuilder
                     writer.AppendLine($"Properties = new global::TUnit.Core.PropertyMetadata[] {{ }},");
                     writer.AppendLine($"Parameters = new global::TUnit.Core.ParameterMetadata[] {{ }},");
                     writer.AppendLine($"Parent = null,");
-                    
+
                     writer.AppendLine($"Assembly = new global::TUnit.Core.AssemblyMetadata");
                     writer.AppendLine("{");
                     writer.AppendLine($"    Name = \"{context.TestInfo.TypeSymbol.ContainingAssembly.Name}\",");
                     writer.AppendLine($"    Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }}");
                     writer.AppendLine("}");
                 }
-                
+
                 writer.AppendLine($"ReflectionInformation = null");
             }
-            
+
             writer.AppendLine($"TestFilePath = @\"{context.TestInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
             writer.AppendLine($"TestLineNumber = {context.TestInfo.LineNumber},");
             writer.AppendLine($"ClassDataSources = System.Array.Empty<global::TUnit.Core.TestDataSource>(),");
@@ -135,7 +135,7 @@ internal class FailureTestBuilder
             writer.AppendLine($"SkipReason = null,");
             writer.AppendLine($"Timeout = null");
         }
-        
+
         writer.AppendLine("        testMetadata.Add(failureMetadata);");
         writer.AppendLine("        TestSourceRegistrar.RegisterTests(testMetadata.Cast<ITestDescriptor>().ToList());");
     }
@@ -143,7 +143,7 @@ internal class FailureTestBuilder
     private static string GenerateFailureMethodMetadata(TestMetadataGenerationContext context)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        
+
         using (writer.BeginObjectInitializer("new global::TUnit.Core.MethodMetadata", ""))
         {
             writer.AppendLine($"Type = typeof({context.ClassName}),");
@@ -154,7 +154,7 @@ internal class FailureTestBuilder
             writer.AppendLine($"ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete(\"System.Threading.Tasks.Task, System.Private.CoreLib\"),");
             writer.AppendLine($"Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }},");
             writer.AppendLine($"Parameters = new global::TUnit.Core.ParameterMetadata[] {{ }},");
-            
+
             using (writer.BeginObjectInitializer("Class = new global::TUnit.Core.ClassMetadata", ","))
             {
                 writer.AppendLine($"Name = \"{context.TestInfo.TypeSymbol.Name}\",");
@@ -165,17 +165,17 @@ internal class FailureTestBuilder
                 writer.AppendLine($"Properties = new global::TUnit.Core.PropertyMetadata[] {{ }},");
                 writer.AppendLine($"Parameters = new global::TUnit.Core.ParameterMetadata[] {{ }},");
                 writer.AppendLine($"Parent = null,");
-                
+
                 writer.AppendLine($"Assembly = new global::TUnit.Core.AssemblyMetadata");
                 writer.AppendLine("{");
                 writer.AppendLine($"    Name = \"{context.TestInfo.TypeSymbol.ContainingAssembly.Name}\",");
                 writer.AppendLine($"    Attributes = new global::TUnit.Core.AttributeMetadata[] {{ }}");
                 writer.AppendLine("}");
             }
-            
+
             writer.AppendLine($"ReflectionInformation = null");
         }
-        
+
         return writer.ToString().Trim();
     }
 }

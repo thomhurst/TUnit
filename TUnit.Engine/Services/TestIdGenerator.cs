@@ -17,7 +17,7 @@ internal static class TestIdGenerator
         sb.Append('.');
         sb.Append(methodName);
         sb.Append('(');
-        
+
         // Add class arguments
         if (classArgs.Length > 0)
         {
@@ -25,7 +25,7 @@ internal static class TestIdGenerator
             AppendArguments(sb, classArgs);
             sb.Append(';');
         }
-        
+
         // Add method arguments
         if (methodArgs.Length > 0)
         {
@@ -33,16 +33,16 @@ internal static class TestIdGenerator
             AppendArguments(sb, methodArgs);
             sb.Append(';');
         }
-        
+
         // Add repeat attempt
         if (repeatAttempt > 0)
         {
             sb.Append("repeat:");
             sb.Append(repeatAttempt);
         }
-        
+
         sb.Append(')');
-        
+
         // Generate a hash for long IDs
         var testIdBase = sb.ToString();
         if (testIdBase.Length > 200)
@@ -50,10 +50,10 @@ internal static class TestIdGenerator
             var hash = ComputeHash(testIdBase);
             return $"{testClass.FullName}.{methodName}_{hash}";
         }
-        
+
         return testIdBase;
     }
-    
+
     private static void AppendArguments(StringBuilder sb, object?[] args)
     {
         for (var i = 0; i < args.Length; i++)
@@ -65,7 +65,7 @@ internal static class TestIdGenerator
             sb.Append(args[i]?.ToString() ?? "null");
         }
     }
-    
+
     private static string ComputeHash(string input)
     {
         var inputBytes = Encoding.UTF8.GetBytes(input);

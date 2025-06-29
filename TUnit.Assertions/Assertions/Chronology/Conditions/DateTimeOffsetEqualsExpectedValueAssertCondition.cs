@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Chronology;
 
-public class DateTimeOffsetEqualsExpectedValueAssertCondition(DateTimeOffset expected) : ExpectedValueAssertCondition<DateTimeOffset, DateTimeOffset>(expected) 
+public class DateTimeOffsetEqualsExpectedValueAssertCondition(DateTimeOffset expected) : ExpectedValueAssertCondition<DateTimeOffset, DateTimeOffset>(expected)
 {
     private TimeSpan? _tolerance;
 

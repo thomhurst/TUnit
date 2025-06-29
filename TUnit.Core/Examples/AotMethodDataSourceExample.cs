@@ -70,11 +70,11 @@ public class MyTests
 {
     // [Test]
     // [MethodDataSource(nameof(GetTestData))]
-    public void MyTest(string input, int number) 
-    { 
+    public void MyTest(string input, int number)
+    {
         // Test implementation
     }
-    
+
     public static IEnumerable<object[]> GetTestData()
     {
         yield return new object[] { "test1", 1 };

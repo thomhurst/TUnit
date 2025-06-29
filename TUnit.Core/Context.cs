@@ -14,7 +14,7 @@ public abstract class Context : IContext, IDisposable
     {
         get;
     }
-    
+
     /// <summary>
     /// Gets the current context.
     /// </summary>
@@ -31,10 +31,10 @@ public abstract class Context : IContext, IDisposable
 
     [field: AllowNull, MaybeNull]
     public TextWriter OutputWriter => field ??= TextWriter.Synchronized(new StringWriter(_outputStringBuilder ??= new StringBuilder()));
-    
+
     [field: AllowNull, MaybeNull]
     public TextWriter ErrorOutputWriter => field ??= TextWriter.Synchronized(new StringWriter(_errorOutputStringBuilder ??= new StringBuilder()));
- 
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Context"/> class.
     /// </summary>
@@ -79,7 +79,7 @@ public abstract class Context : IContext, IDisposable
         }
 #endif
     }
-    
+
     /// <summary>
     /// Gets the standard output.
     /// </summary>
@@ -88,7 +88,7 @@ public abstract class Context : IContext, IDisposable
     {
         return _outputStringBuilder?.ToString().Trim() ?? string.Empty;
     }
-    
+
     /// <summary>
     /// Gets the error output.
     /// </summary>
@@ -97,7 +97,7 @@ public abstract class Context : IContext, IDisposable
     {
         return _errorOutputStringBuilder?.ToString().Trim() ?? string.Empty;
     }
-    
+
     /// <summary>
     /// Gets the default logger.
     /// </summary>

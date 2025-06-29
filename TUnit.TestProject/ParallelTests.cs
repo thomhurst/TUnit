@@ -40,7 +40,7 @@ public class ParallelTests
         {
             return;
         }
-        
+
         foreach (var testDateTimeRange in TestDateTimeRanges)
         {
             await Assert.That(TestDateTimeRanges

@@ -16,20 +16,20 @@ public static partial class DoesExtensions
     {
         return Contains(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
-    
+
     public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         var assertionBuilder = valueSource.RegisterAssertion(new StringContainsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
-        
+
         return new StringContainsAssertionBuilderWrapper(assertionBuilder);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return StartsWith(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
@@ -40,20 +40,20 @@ public static partial class DoesExtensions
                     self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
-                
+
                 return actual.StartsWith(expected, stringComparison);
             },
             (actual, _, _) => $"\"{actual}\" does not start with \"{expected}\"",
             $"to start with {expected}")
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
-    
-        
+
+
     public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return EndsWith(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
@@ -66,12 +66,12 @@ public static partial class DoesExtensions
             $"end with {expected}")
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> Matches(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
     {
         return Matches(valueSource, new Regex(regex), expression);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> Matches(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, Regex>(regex,

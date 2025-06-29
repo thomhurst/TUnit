@@ -17,7 +17,7 @@ public static class TestContextExtensions
     {
         return context.GetService<T>();
     }
-    
+
     /// <summary>
     /// Gets the class type name
     /// </summary>
@@ -25,7 +25,7 @@ public static class TestContextExtensions
     {
         return context.TestDetails.ClassType.Name;
     }
-    
+
     /// <summary>
     /// Gets the test display name
     /// </summary>
@@ -33,7 +33,7 @@ public static class TestContextExtensions
     {
         return context.DisplayName;
     }
-    
+
     /// <summary>
     /// Adds a dynamic test to the test context
     /// </summary>
@@ -54,7 +54,7 @@ public static class TestContextExtensions
                     if (addDynamicTestMethod != null)
                     {
                         var genericMethod = addDynamicTestMethod.MakeGenericMethod(typeof(T));
-                        await (Task)genericMethod.Invoke(registry, new object[] { context, dynamicTest })!;
+                        await (Task) genericMethod.Invoke(registry, new object[] { context, dynamicTest })!;
                         return;
                     }
                 }
@@ -66,7 +66,7 @@ public static class TestContextExtensions
             // Log this for debugging if needed
         }
     }
-    
+
     /// <summary>
     /// Adds a test to the test context (synonym for AddDynamicTest)
     /// </summary>

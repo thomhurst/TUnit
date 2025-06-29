@@ -47,7 +47,7 @@ public static class JsonExtensions
             Timeout = testDetails.Timeout,
             CustomProperties = testDetails.CustomProperties.ToDictionary(
                 kvp => kvp.Key,
-                kvp => (IReadOnlyList<string>)kvp.Value.AsReadOnly()),
+                kvp => (IReadOnlyList<string>) kvp.Value.AsReadOnly()),
             DisplayName = context.GetTestDisplayName(),
             ObjectBag = context.ObjectBag,
             RetryLimit = testDetails.RetryLimit,

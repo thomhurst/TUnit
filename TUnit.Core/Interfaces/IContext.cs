@@ -22,7 +22,7 @@ public interface IContext
     /// </remarks>
     /// <value>A <see cref="TextWriter"/> instance for writing standard output.</value>
     TextWriter OutputWriter { get; }
-    
+
     /// <summary>
     /// Gets the error output writer for the context.
     /// </summary>
@@ -32,7 +32,7 @@ public interface IContext
     /// </remarks>
     /// <value>A <see cref="TextWriter"/> instance for writing error output.</value>
     TextWriter ErrorOutputWriter { get; }
-    
+
     /// <summary>
     /// Gets the default logger for the context.
     /// </summary>

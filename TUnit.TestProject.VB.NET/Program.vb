@@ -7,7 +7,7 @@ Public Class Tests
     Public Sub Test()
         TestContext.Current.OutputWriter.WriteLine("Test method executed")
     End Sub
-    
+
 #If Not NETFRAMEWORK Then
     <Test>
     Public Async Function TestAsync() As Task

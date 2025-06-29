@@ -12,7 +12,7 @@ public abstract class ValueAssertCondition<TActual>
     {
         _transformations.Add(actualTransformation);
     }
-    
+
     public void WithComparer(Func<TActual?, AssertionDecision> comparer)
     {
         _customComparers.Add(comparer);
@@ -32,7 +32,7 @@ public abstract class ValueAssertCondition<TActual>
         {
             actualValue = actualTransformation(actualValue);
         }
-        
+
         foreach (var result in _customComparers.Select(customComparer => customComparer(actualValue)))
         {
             switch (result)
@@ -46,9 +46,9 @@ public abstract class ValueAssertCondition<TActual>
 
         return Passes(actualValue);
     }
-    
+
     protected abstract AssertionResult Passes(TActual? actualValue);
-    
+
     protected abstract string GetFailureMessage(TActual? actualValue);
 
     internal protected override string GetExpectation()

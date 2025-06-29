@@ -11,7 +11,7 @@ public abstract record BaseContainer
     public abstract void WriteVariableAssignments(ICodeWriter sourceCodeWriter, ref int variableIndex);
     public abstract void CloseScope(ICodeWriter sourceCodeWriter);
     public abstract string[] GetArgumentTypes();
-    
+
     public virtual void BeforeWriteTestNode(ICodeWriter sourceCodeWriter)
     {
     }

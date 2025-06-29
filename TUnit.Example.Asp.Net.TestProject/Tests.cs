@@ -22,7 +22,7 @@ public class Tests(WebApplicationFactory webApplicationFactory)
         // during initialization. We just want to ensure it was called at least once.
         await Assert.That(webApplicationFactory.ConfiguredWebHostCalled).IsGreaterThanOrEqualTo(1);
     }
-    
-    
+
+
 
 }

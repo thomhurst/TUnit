@@ -245,7 +245,7 @@ public class SatisfiesTests
         var myModel3 = new MyModel { Value = "!" };
         List<MyModel?> models = [myModel, myModel2, myModel3];
 
-        await Assert.That(async () =>        
+        await Assert.That(async () =>
                 await Assert.That(models).All().Satisfy(model => model!.Value, item => item.Contains("o")!)
         ).Throws<AssertionException>().WithMessageMatching("""
                                                            *Expected items mapped by model => model!.Value to satisfy item => item.Contains("o")!

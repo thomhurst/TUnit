@@ -15,7 +15,7 @@ public class TestDetails
     public TimeSpan? Timeout { get; set; }
     public int RetryLimit { get; set; }
     public string? DisplayName { get; set; }
-    
+
     // Added for compatibility
     public required MethodMetadata MethodMetadata { get; set; }
     public required ClassMetadata ClassMetadata { get; set; }
@@ -27,7 +27,7 @@ public class TestDetails
     public List<string> Categories { get; } = new List<string>();
     public Dictionary<string, List<string>> CustomProperties { get; } = new Dictionary<string, List<string>>();
     public Type[]? TestClassParameterTypes { get; set; }
-    
+
     // Missing properties for compatibility
     public IReadOnlyList<Attribute> Attributes { get; set; } = new List<Attribute>();
     public object?[] ClassMetadataArguments => TestClassArguments;

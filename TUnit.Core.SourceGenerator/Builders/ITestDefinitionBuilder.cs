@@ -12,7 +12,7 @@ internal interface ITestDefinitionBuilder
     /// Determines if this builder can handle the given context
     /// </summary>
     bool CanBuild(TestMetadataGenerationContext context);
-    
+
     /// <summary>
     /// Builds test definitions and writes them to the code writer
     /// </summary>

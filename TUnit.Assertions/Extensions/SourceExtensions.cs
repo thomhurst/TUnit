@@ -15,22 +15,22 @@ public static class SourceExtensions
         {
             source.AppendExpression(BuildExpression(caller, argumentExpressions));
         }
-        
+
         var invokeableAssertionBuilder = source.WithAssertion(assertCondition);
 
         if (invokeableAssertionBuilder is InvokableValueAssertionBuilder<TActual> invokableValueAssertionBuilder)
         {
             return invokableValueAssertionBuilder;
         }
-        
-        if(invokeableAssertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
+
+        if (invokeableAssertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
         {
             return new InvokableValueAssertionBuilder<TActual>(invokableAssertionBuilder);
         }
-        
+
         return new InvokableValueAssertionBuilder<TActual>(new InvokableAssertionBuilder<TActual>(invokeableAssertionBuilder));
     }
-    
+
     public static InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TFromType, TToType>(this IValueSource<TFromType> source,
         ConvertToAssertCondition<TFromType, TToType> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
     {
@@ -44,7 +44,7 @@ public static class SourceExtensions
         {
             delegateSource.AppendExpression(BuildExpression(caller, argumentExpressions));
         }
-        
+
         var source = delegateSource.WithAssertion(assertCondition);
 
         if (source is InvokableDelegateAssertionBuilder unTypedInvokableDelegateAssertionBuilder)
@@ -59,7 +59,7 @@ public static class SourceExtensions
 
         return new InvokableDelegateAssertionBuilder(new InvokableAssertionBuilder<object?>(source));
     }
-    
+
     public static InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TToType>(this IDelegateSource source) where TToType : Exception
     {
         return new ConvertedDelegateAssertionBuilder<TToType>(source);
@@ -70,14 +70,14 @@ public static class SourceExtensions
         var assertionBuilder = new StringBuilder();
 
         argumentExpressions = argumentExpressions.OfType<string>().ToArray();
-        
-        if(caller is not null)
+
+        if (caller is not null)
         {
             assertionBuilder.Append(caller);
         }
 
         assertionBuilder.Append('(');
-        
+
         for (var index = 0; index < argumentExpressions.Length; index++)
         {
             var argumentExpression = argumentExpressions[index];
@@ -86,7 +86,7 @@ public static class SourceExtensions
             {
                 continue;
             }
-            
+
             assertionBuilder.Append(argumentExpression);
 
             if (index < argumentExpressions.Length - 1)

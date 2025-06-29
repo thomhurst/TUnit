@@ -22,7 +22,7 @@ public class DisposableTests : IDisposable
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Class)]
     public static async Task AssertDisposed(ClassHookContext context)
     {

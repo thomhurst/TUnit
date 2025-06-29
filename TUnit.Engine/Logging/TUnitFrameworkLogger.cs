@@ -12,9 +12,9 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
     : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
 {
     private readonly bool _hideTestOutput = commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput);
-    
+
     private readonly MTPLoggerAdapter _adapter = new(logger);
-    
+
     public Task<bool> IsEnabledAsync()
     {
         return Task.FromResult(true);
@@ -24,14 +24,14 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
     public string Version => extension.Version;
     public string DisplayName => extension.DisplayName;
     public string Description => extension.Description;
-    
+
     public async ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         if (!IsEnabled(logLevel))
         {
             return;
         }
-        
+
         var text = formatter(state, exception);
 
         await outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
@@ -41,7 +41,7 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
                 ConsoleColor = GetConsoleColor(logLevel)
             }
         });
-        
+
         await _adapter.LogAsync(logLevel, state, exception, formatter);
     }
 
@@ -51,7 +51,7 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
         {
             return;
         }
-        
+
         var text = formatter(state, exception);
 
         outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
@@ -61,7 +61,7 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
                 ConsoleColor = GetConsoleColor(logLevel)
             }
         });
-        
+
         _adapter.Log(logLevel, state, exception, formatter);
     }
 
@@ -71,7 +71,7 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
         {
             return ConsoleColor.DarkYellow;
         }
-        
+
         if (logLevel >= LogLevel.Error)
         {
             return ConsoleColor.DarkRed;
@@ -84,12 +84,12 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
     {
         return !_hideTestOutput && logger.IsEnabled(MTPLoggerAdapter.Map(logLevel));
     }
-    
+
     public async Task LogErrorAsync(string message)
     {
         await LogAsync(LogLevel.Error, message, null, (s, _) => s);
     }
-    
+
     public async Task LogErrorAsync(Exception exception)
     {
         await LogAsync(LogLevel.Error, exception.Message, exception, (s, e) => e?.ToString() ?? s);

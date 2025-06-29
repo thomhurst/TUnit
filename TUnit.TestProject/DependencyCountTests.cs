@@ -20,25 +20,25 @@ public class DependencyCountTests
         // TODO: Fix when Dependencies property is added to TestContext
         // await Assert.That(TestContext.Current!.Dependencies).HasCount().EqualTo(3);
     }
-    
+
     [Test]
     public Task Test3()
     {
         return Task.CompletedTask;
     }
-    
+
     [Test, DependsOn(nameof(Test3))]
     public async Task Test4()
     {
         await Assert.That(TestContext.Current!.Dependencies).HasCount().EqualTo(1);
     }
-    
+
     [Test, DependsOn(nameof(Test1))]
     public Task Test5()
     {
         return Task.CompletedTask;
     }
-    
+
     [Test, DependsOn(nameof(Test5))]
     public async Task Test6()
     {

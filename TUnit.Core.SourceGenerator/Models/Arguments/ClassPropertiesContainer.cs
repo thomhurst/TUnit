@@ -45,9 +45,9 @@ public record ClassPropertiesContainer(
         {
             return;
         }
-        
+
         sourceCodeWriter.Append("{");
-        
+
         foreach (var (propertySymbol, argumentsContainer) in InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
             var firstElement = argumentsContainer.DataVariables.ElementAt(0).Name;

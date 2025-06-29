@@ -11,18 +11,18 @@ public class MixedDataSourceBugTest(int classValue)
     {
         await Task.CompletedTask;
     }
-    
+
     public static IEnumerable<string> GetData()
     {
         yield return "A";
         yield return "B";
     }
-    
+
     public class ClassData1
     {
         public static implicit operator int(ClassData1 _) => 100;
     }
-    
+
     public class ClassData2
     {
         public static implicit operator int(ClassData2 _) => 200;

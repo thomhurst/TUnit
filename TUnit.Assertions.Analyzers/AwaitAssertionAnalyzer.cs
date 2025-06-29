@@ -20,7 +20,7 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
     }
-    
+
     private void AnalyzeOperation(OperationAnalysisContext context)
     {
         if (context.Operation is not IInvocationOperation invocationOperation)
@@ -31,12 +31,12 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         var methodSymbol = invocationOperation.TargetMethod;
 
         var fullyQualifiedNonGenericMethodName = methodSymbol.GloballyQualifiedNonGeneric();
-        
+
         if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple")
         {
             CheckMultipleInvocation(context, invocationOperation);
         }
-        
+
         if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That")
         {
             CheckAssertInvocation(context, invocationOperation);
@@ -61,7 +61,7 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-            
+
         context.ReportDiagnostic(
             Diagnostic.Create(Rules.DisposableUsingMultiple, context.Operation.Syntax.GetLocation())
         );
@@ -77,18 +77,18 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 return false;
             }
-            
+
             if (parent is IUsingOperation or IAwaitOperation)
             {
                 return true;
             }
-            
+
             parent = parent.Parent;
         }
-        
+
         return false;
     }
-    
+
     private static bool HasUsing(IInvocationOperation invocationOperation)
     {
         var parent = invocationOperation.Parent;
@@ -99,15 +99,15 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 return false;
             }
-            
+
             if (parent is IUsingOperation or IUsingDeclarationOperation)
             {
                 return true;
             }
-            
+
             parent = parent.Parent;
         }
-        
+
         return false;
     }
 }

@@ -12,7 +12,7 @@ public sealed class TestCompletionTracker
     private readonly object _lock = new object();
     private int _completedCount;
     private int _totalCount;
-    
+
     public TestCompletionTracker(
         Dictionary<string, TestExecutionState> graph,
         ConcurrentQueue<TestExecutionState> readyQueue)
@@ -21,22 +21,22 @@ public sealed class TestCompletionTracker
         _readyQueue = readyQueue;
         _totalCount = graph.Count;
     }
-    
+
     public int CompletedCount => _completedCount;
     public int TotalCount => _totalCount;
     public bool AllTestsCompleted => _completedCount >= _totalCount;
-    
+
     public void OnTestCompleted(TestExecutionState completedTest)
     {
         Interlocked.Increment(ref _completedCount);
-        
+
         // Process dependents
         foreach (var dependentId in completedTest.Dependents)
         {
             if (_graph.TryGetValue(dependentId, out var dependentState))
             {
                 var remaining = dependentState.DecrementRemainingDependencies();
-                
+
                 if (remaining == 0)
                 {
                     // Test is ready to run
@@ -45,7 +45,7 @@ public sealed class TestCompletionTracker
             }
         }
     }
-    
+
     public IEnumerable<TestExecutionState> GetIncompleteTests()
     {
         lock (_lock)

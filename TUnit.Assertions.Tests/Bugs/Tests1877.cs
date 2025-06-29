@@ -21,6 +21,6 @@ public class Tests1877
 
         await Assert.That(x).IsEquivalentTo(y, CollectionOrdering.Any);
     }
-    
+
     public record MyRecord(string Value);
 }

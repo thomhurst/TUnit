@@ -24,13 +24,13 @@ public class StronglyTypedFactoryDispatcher
     public object CreateTestInstance(TestVariation testVariation)
     {
         var testId = testVariation.TestId;
-        
+
         // Try strongly typed factory first
         if (_registry.HasStronglyTypedFactory(testId))
         {
             return CreateInstanceUsingStronglyTypedFactory(testVariation);
         }
-        
+
         // Fall back to weakly typed factory
         return CreateInstanceUsingWeaklyTypedFactory(testVariation);
     }
@@ -45,13 +45,13 @@ public class StronglyTypedFactoryDispatcher
     public async Task<object?> InvokeTestMethod(TestVariation testVariation, object instance)
     {
         var testId = testVariation.TestId;
-        
+
         // Try strongly typed invoker first
         if (_registry.HasStronglyTypedFactory(testId))
         {
             return await InvokeMethodUsingStronglyTypedInvoker(testVariation, instance);
         }
-        
+
         // Fall back to weakly typed invoker
         return await InvokeMethodUsingWeaklyTypedInvoker(testVariation, instance);
     }
@@ -63,7 +63,7 @@ public class StronglyTypedFactoryDispatcher
     {
         var testId = testVariation.TestId;
         var classArgs = testVariation.ClassArguments ?? Array.Empty<object?>();
-        
+
         // Try to get the appropriate strongly typed factory based on argument count
         if (classArgs.Length == 0)
         {
@@ -84,7 +84,7 @@ public class StronglyTypedFactoryDispatcher
                 return parameterizedFactory.DynamicInvoke(classArgs)!;
             }
         }
-        
+
         throw new InvalidOperationException(
             $"No strongly typed class factory found for test {testId} with {classArgs.Length} arguments");
     }
@@ -96,7 +96,7 @@ public class StronglyTypedFactoryDispatcher
     {
         var testId = testVariation.TestId;
         var classArgs = testVariation.ClassArguments ?? Array.Empty<object?>();
-        
+
         if (classArgs.Length == 0)
         {
             var factory = _registry.GetClassFactory(testId);
@@ -113,7 +113,7 @@ public class StronglyTypedFactoryDispatcher
                 return parameterizedFactory(classArgs);
             }
         }
-        
+
         throw new InvalidOperationException(
             $"No class factory found for test {testId}");
     }
@@ -125,7 +125,7 @@ public class StronglyTypedFactoryDispatcher
     {
         var testId = testVariation.TestId;
         var methodArgs = testVariation.MethodArguments ?? Array.Empty<object?>();
-        
+
         // Get the strongly typed method invoker
         var invoker = _registry.GetStronglyTypedMethodInvoker<Delegate>(testId);
         if (invoker == null)
@@ -133,28 +133,28 @@ public class StronglyTypedFactoryDispatcher
             throw new InvalidOperationException(
                 $"No strongly typed method invoker found for test {testId}");
         }
-        
+
         // Prepare arguments: instance first, then method arguments
         var allArgs = new object?[methodArgs.Length + 1];
         allArgs[0] = instance;
         Array.Copy(methodArgs, 0, allArgs, 1, methodArgs.Length);
-        
+
         // Invoke the strongly typed method
         var result = invoker.DynamicInvoke(allArgs);
-        
+
         // Handle async results
         if (result is Task task)
         {
             await task;
-            
+
             // Extract result from Task<T> if present
             var taskType = task.GetType();
             if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>))
             {
                 // Get Result property in an AOT-safe way
-                #pragma warning disable IL2075 // Task<T> type is known
+#pragma warning disable IL2075 // Task<T> type is known
                 var resultProperty = taskType.GetProperty("Result");
-                #pragma warning restore IL2075
+#pragma warning restore IL2075
                 if (resultProperty != null)
                 {
                     try
@@ -167,10 +167,10 @@ public class StronglyTypedFactoryDispatcher
                     }
                 }
             }
-            
+
             return null; // Task (void)
         }
-        
+
         return result;
     }
 
@@ -181,14 +181,14 @@ public class StronglyTypedFactoryDispatcher
     {
         var testId = testVariation.TestId;
         var methodArgs = testVariation.MethodArguments ?? Array.Empty<object?>();
-        
+
         var invoker = _registry.GetMethodInvoker(testId);
         if (invoker == null)
         {
             throw new InvalidOperationException(
                 $"No method invoker found for test {testId}");
         }
-        
+
         return await invoker(instance, methodArgs);
     }
 
@@ -203,10 +203,10 @@ public class StronglyTypedFactoryDispatcher
         {
             return;
         }
-        
+
         var testId = testVariation.TestId;
         var propertySetters = _registry.GetPropertySetters(testId);
-        
+
         foreach (var (propertyName, propertyValue) in testVariation.PropertyValues)
         {
             if (propertySetters.TryGetValue(propertyName, out var setter))
@@ -225,7 +225,7 @@ public class StronglyTypedFactoryDispatcher
         var allTestIds = _registry.GetRegisteredTestIds();
         var stronglyTypedCount = 0;
         var weaklyTypedCount = 0;
-        
+
         foreach (var testId in allTestIds)
         {
             if (_registry.HasStronglyTypedFactory(testId))
@@ -237,13 +237,13 @@ public class StronglyTypedFactoryDispatcher
                 weaklyTypedCount++;
             }
         }
-        
+
         return new FactoryDispatcherStats
         {
             TotalTests = allTestIds.Count,
             StronglyTypedTests = stronglyTypedCount,
             WeaklyTypedTests = weaklyTypedCount,
-            PerformanceRatio = allTestIds.Count > 0 ? (double)stronglyTypedCount / allTestIds.Count : 0.0
+            PerformanceRatio = allTestIds.Count > 0 ? (double) stronglyTypedCount / allTestIds.Count : 0.0
         };
     }
 }
@@ -257,22 +257,22 @@ public sealed class FactoryDispatcherStats
     /// Total number of registered tests.
     /// </summary>
     public int TotalTests { get; init; }
-    
+
     /// <summary>
     /// Number of tests using strongly typed factories.
     /// </summary>
     public int StronglyTypedTests { get; init; }
-    
+
     /// <summary>
     /// Number of tests using weakly typed factories.
     /// </summary>
     public int WeaklyTypedTests { get; init; }
-    
+
     /// <summary>
     /// Ratio of strongly typed tests (0.0 to 1.0, higher is better for performance).
     /// </summary>
     public double PerformanceRatio { get; init; }
-    
+
     /// <summary>
     /// Gets a human-readable description of the performance characteristics.
     /// </summary>

@@ -1,6 +1,6 @@
-using TUnit.Core;
-using TUnit.Assertions;
 using System.Collections.Generic;
+using TUnit.Assertions;
+using TUnit.Core;
 
 namespace TUnit.TestProject;
 

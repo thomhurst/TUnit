@@ -34,14 +34,14 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
                         self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
-                
+
                     return GetCount(enumerable) == 0;
                 },
                 (enumerable, _, _) =>
                     $"{enumerable} has a count of {GetCount(enumerable)}",
                 $"to be empty")
         , []);
-    
+
     public InvokableValueAssertionBuilder<TActual> GreaterThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected,
@@ -52,7 +52,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
                     self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
-                
+
                 return GetCount(enumerable) > expected;
             },
             (enumerable, _, _) =>
@@ -70,7 +70,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
                     self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
-                
+
                 return GetCount(enumerable) >= expected;
             },
             (enumerable, _, _) =>
@@ -88,7 +88,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
                     self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
-                
+
                 return GetCount(enumerable) < expected;
             },
             (enumerable, _, _) =>
@@ -106,7 +106,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
                     self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
-                
+
                 return GetCount(enumerable) <= expected;
             },
             (enumerable, _, _) =>
@@ -114,12 +114,12 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
             $"to be less than or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
-    
+
     public InvokableValueAssertionBuilder<TActual> Negative() => LessThan(0);
 
     public InvokableValueAssertionBuilder<TActual> EqualToZero() => EqualTo(0);
     public InvokableValueAssertionBuilder<TActual> EqualToOne() => EqualTo(1);
-    
+
     public InvokableValueAssertionBuilder<TActual> Positive() => GreaterThan(0);
 
 

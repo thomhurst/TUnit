@@ -8,7 +8,7 @@ public static class EnumerableExtensions
     {
         return string.Join(", ", enumerable);
     }
-    
+
     public static IEnumerable<AttributeData> ExceptSystemAttributes(this IEnumerable<AttributeData> attributeDatas)
     {
         return attributeDatas.Where(x => x.AttributeClass?.ContainingNamespace.Name.StartsWith("System") != true);

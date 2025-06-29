@@ -19,7 +19,7 @@ public class TestInstanceFactory : ITestInstanceFactory
         {
             // Find a constructor that matches the argument count
             var constructor = FindBestConstructor(type, args);
-            
+
             if (constructor == null)
             {
                 throw new InvalidOperationException(
@@ -57,7 +57,7 @@ public class TestInstanceFactory : ITestInstanceFactory
             if (result is Task task)
             {
                 await task.ConfigureAwait(false);
-                
+
                 // Get the result if it's a Task<T>
                 var taskType = task.GetType();
                 if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>))
@@ -65,7 +65,7 @@ public class TestInstanceFactory : ITestInstanceFactory
                     var resultProperty = taskType.GetProperty("Result");
                     return resultProperty?.GetValue(task);
                 }
-                
+
                 return null;
             }
 
@@ -96,7 +96,7 @@ public class TestInstanceFactory : ITestInstanceFactory
     private static ConstructorInfo? FindBestConstructor(Type type, object?[] args)
     {
         var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-        
+
         // First try to find exact match
         foreach (var constructor in constructors)
         {
@@ -149,7 +149,7 @@ public class TestInstanceFactory : ITestInstanceFactory
         for (int i = 0; i < genericParameters.Length; i++)
         {
             var genericParam = genericParameters[i];
-            
+
             // Try to infer from method parameters
             for (int j = 0; j < parameters.Length && j < args.Length; j++)
             {
@@ -164,7 +164,7 @@ public class TestInstanceFactory : ITestInstanceFactory
                             inferredTypes[i] = args[j]!.GetType();
                             break;
                         }
-                        
+
                         // Handle generic collections like IEnumerable<T>
                         if (paramType.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
                             paramType.GetGenericArguments()[0] == genericParam)

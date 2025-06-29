@@ -23,7 +23,7 @@ public static class CastHelper
 
         if (value.GetType().IsAssignableTo(underlyingType))
         {
-            return (T)value;
+            return (T) value;
         }
 
         if (value is not string

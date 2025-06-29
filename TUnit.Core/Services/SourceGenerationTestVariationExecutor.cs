@@ -118,7 +118,7 @@ public class SourceGenerationTestVariationExecutor : ITestVariationExecutor
         }
 
         var propertySetters = _registry.GetPropertySetters(variation.TestId);
-        
+
         foreach (var (propertyName, propertyValue) in variation.PropertyValues)
         {
             if (propertySetters.TryGetValue(propertyName, out var setter))
@@ -131,8 +131,8 @@ public class SourceGenerationTestVariationExecutor : ITestVariationExecutor
     }
 
     private static async Task SetPropertiesFromSourceData(
-        TestVariation variation, 
-        object instance, 
+        TestVariation variation,
+        object instance,
         SourceGeneratedTestData sourceData)
     {
         if (sourceData.PropertySetters == null || variation.PropertyValues == null)

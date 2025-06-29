@@ -57,7 +57,7 @@ public class CategoryAttribute(string category) : TUnitAttribute, ITestDiscovery
     /// Gets the name of the category.
     /// </summary>
     public string Category { get; } = category;
-    
+
     /// <inheritdoc />
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {

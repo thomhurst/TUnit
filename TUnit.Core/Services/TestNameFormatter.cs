@@ -11,8 +11,8 @@ public class TestNameFormatter : ITestNameFormatter
 {
     /// <inheritdoc />
     public string FormatTestName(
-        string template, 
-        object?[]? classArgs = null, 
+        string template,
+        object?[]? classArgs = null,
         object?[]? methodArgs = null,
         IDictionary<string, object?>? propertyValues = null)
     {
@@ -61,10 +61,10 @@ public class TestNameFormatter : ITestNameFormatter
 
     /// <inheritdoc />
     public string BuildTestId(
-        string template, 
-        int testIndex, 
-        int repeatIndex = 0, 
-        int classDataIndex = 0, 
+        string template,
+        int testIndex,
+        int repeatIndex = 0,
+        int classDataIndex = 0,
         int methodDataIndex = 0)
     {
         return template

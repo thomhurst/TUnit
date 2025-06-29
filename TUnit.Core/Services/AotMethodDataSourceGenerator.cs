@@ -25,14 +25,14 @@ public class AotMethodDataSourceGenerator
     /// <param name="declaringType">The type that declares the data source method</param>
     /// <returns>Generated AOT-safe factory code</returns>
     public string GenerateMethodDataSourceFactory(
-        MethodDataSourceAttribute methodDataSourceAttribute, 
+        MethodDataSourceAttribute methodDataSourceAttribute,
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] 
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
         Type declaringType)
     {
         var methodName = methodDataSourceAttribute.MethodNameProvidingDataSource;
         var dataSourceMethod = FindDataSourceMethod(declaringType, methodName);
-        
+
         if (dataSourceMethod == null)
         {
             throw new InvalidOperationException(
@@ -70,7 +70,7 @@ public class AotMethodDataSourceGenerator
     private void GenerateSyncDataSourceFactory(StringBuilder code, string declaringTypeName, string methodName, System.Reflection.MethodInfo dataSourceMethod)
     {
         var returnType = GetDataSourceReturnType(dataSourceMethod);
-        
+
         code.AppendLine($"    public static {returnType} GetData()");
         code.AppendLine("    {");
         code.AppendLine($"        return {declaringTypeName}.{methodName}();");
@@ -84,13 +84,13 @@ public class AotMethodDataSourceGenerator
     private void GenerateAsyncDataSourceFactory(StringBuilder code, string declaringTypeName, string methodName, System.Reflection.MethodInfo dataSourceMethod)
     {
         var returnType = GetDataSourceReturnType(dataSourceMethod);
-        
+
         code.AppendLine($"    public static async Task<{returnType}> GetDataAsync()");
         code.AppendLine("    {");
         code.AppendLine($"        return await {declaringTypeName}.{methodName}();");
         code.AppendLine("    }");
         code.AppendLine();
-        
+
     }
 
     /// <summary>
@@ -128,7 +128,7 @@ public class AotMethodDataSourceGenerator
 
         // Find all MethodDataSource attributes on the method
         var methodDataSources = testMethod.GetAttributes<MethodDataSourceAttribute>();
-        
+
         code.AppendLine("    public static async Task<IReadOnlyList<object?[]>> ResolveAllMethodDataAsync()");
         code.AppendLine("    {");
         code.AppendLine("        var allData = new List<object?[]>();");
@@ -138,7 +138,7 @@ public class AotMethodDataSourceGenerator
         {
             var dataMethodName = methodDataSource.MethodNameProvidingDataSource;
             var factoryClassName = $"{className}_{dataMethodName}_DataSourceFactory";
-            
+
             // Determine if the source method is async
             var sourceMethod = FindDataSourceMethod(testClass.Type, dataMethodName);
             var isAsync = sourceMethod != null && typeof(Task).IsAssignableFrom(sourceMethod.ReturnType);
@@ -151,7 +151,7 @@ public class AotMethodDataSourceGenerator
             {
                 code.AppendLine($"        var data_{dataMethodName} = {factoryClassName}.GetData();");
             }
-            
+
             code.AppendLine($"        allData.AddRange(data_{dataMethodName});");
             code.AppendLine();
         }
@@ -191,8 +191,8 @@ public class AotMethodDataSourceGenerator
     /// </summary>
     private static System.Reflection.MethodInfo? FindDataSourceMethod(
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] 
-        Type declaringType, 
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type declaringType,
         string methodName)
     {
         return declaringType.GetMethod(methodName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
@@ -204,19 +204,19 @@ public class AotMethodDataSourceGenerator
     private static string GetDataSourceReturnType(System.Reflection.MethodInfo method)
     {
         var returnType = method.ReturnType;
-        
+
         // Handle async methods
         if (typeof(Task).IsAssignableFrom(returnType) && returnType.IsGenericType)
         {
             returnType = returnType.GetGenericArguments()[0];
         }
-        
+
         // Check if it's already the expected type
         if (typeof(IEnumerable<object[]>).IsAssignableFrom(returnType))
         {
             return "IEnumerable<object?[]>";
         }
-        
+
         // Default to the most flexible type
         return "IEnumerable<object?[]>";
     }
@@ -228,39 +228,39 @@ public class AotMethodDataSourceGenerator
     /// <param name="declaringType">The type that declares the data source method</param>
     /// <returns>True if AOT-safe generation is possible</returns>
     public bool CanGenerateAotSafe(
-        MethodDataSourceAttribute methodDataSourceAttribute, 
+        MethodDataSourceAttribute methodDataSourceAttribute,
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] 
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
         Type declaringType)
     {
         var methodName = methodDataSourceAttribute.MethodNameProvidingDataSource;
         var dataSourceMethod = FindDataSourceMethod(declaringType, methodName);
-        
+
         if (dataSourceMethod == null)
         {
             return false;
         }
-        
+
         // Check if method is static (required for AOT safety)
         if (!dataSourceMethod.IsStatic)
         {
             return false;
         }
-        
+
         // Check if method has parameters (not supported in this implementation)
         if (dataSourceMethod.GetParameters().Length > 0)
         {
             return false;
         }
-        
+
         // Check if return type is compatible
         var returnType = dataSourceMethod.ReturnType;
         if (typeof(Task).IsAssignableFrom(returnType) && returnType.IsGenericType)
         {
             returnType = returnType.GetGenericArguments()[0];
         }
-        
-        return typeof(IEnumerable<object[]>).IsAssignableFrom(returnType) || 
+
+        return typeof(IEnumerable<object[]>).IsAssignableFrom(returnType) ||
                typeof(IEnumerable<object?>).IsAssignableFrom(returnType);
     }
 }

@@ -11,7 +11,7 @@ public class Tests
     public void Test(int a, params long[] arr)
     {
     }
-    
+
     [Test]
     [Arguments(0, 1L, 2L, 3L)] // this is ok
     [Arguments(0, 1, 2, 3)] // Error TUnit0001 : Attribute argument types 'int' don't match method parameter types 'long[]'

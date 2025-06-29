@@ -10,7 +10,7 @@ public class MixedMatrixTests
     [MatrixDataSource]
     public Task Render_Theory_Expected(
         Enum1 enum1,
-        [Matrix(null, "", "id")] 
+        [Matrix(null, "", "id")]
         string? id,
         [Matrix(Excluding = [Enum2.Five])]
         Enum2 enum2,
@@ -24,12 +24,12 @@ public class MixedMatrixTests
     {
         return Task.CompletedTask;
     }
-    
+
     public enum Enum1
     {
         One
     }
-    
+
     public enum Enum2
     {
         One,
@@ -38,7 +38,7 @@ public class MixedMatrixTests
         Four,
         Five,
     }
-    
+
     public enum Enum3
     {
         One,
@@ -66,6 +66,6 @@ public class MixedMatrixTests
 
 [GenerateOneOf]
 public partial class MixedMatrixTestsUnion1 : OneOfBase<MixedMatrixTests.Enum4, MixedMatrixTests.Enum5, string>;
-    
+
 [GenerateOneOf]
 public partial class MixedMatrixTestsUnion2 : OneOfBase<MixedMatrixTests.Enum4, MixedMatrixTests.Enum5, string>;

@@ -11,16 +11,16 @@ public class SyncHookTests
 {
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal = new();
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal2 = new();
-    
+
     private static readonly AsyncLocal<string> _1BeforeTestSessionLocal = new();
     private static readonly AsyncLocal<string> _1BeforeTestSessionLocal2 = new();
-    
+
     private static readonly AsyncLocal<string> _2BeforeAssemblyLocal = new();
     private static readonly AsyncLocal<string> _2BeforeAssemblyLocal2 = new();
-    
+
     private static readonly AsyncLocal<string> _3BeforeClassLocal = new();
     private static readonly AsyncLocal<string> _3BeforeClassLocal2 = new();
-    
+
     private static readonly AsyncLocal<string> _4BeforeTestLocal = new();
     private static readonly AsyncLocal<string> _4BeforeTestLocal2 = new();
 
@@ -32,7 +32,7 @@ public class SyncHookTests
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(TestDiscovery)]
     public static void BeforeTestDiscovery2(BeforeTestDiscoveryContext context)
     {
@@ -50,7 +50,7 @@ public class SyncHookTests
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(TestSession)]
     public static void BeforeTestSession2(TestSessionContext context)
     {
@@ -68,7 +68,7 @@ public class SyncHookTests
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(Assembly)]
     public static void BeforeAssembly2(AssemblyHookContext context)
     {
@@ -86,7 +86,7 @@ public class SyncHookTests
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(Class)]
     public static void BeforeClass2(ClassHookContext context)
     {
@@ -104,7 +104,7 @@ public class SyncHookTests
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(Test)]
     public void BeforeTest2(TestContext context)
     {
@@ -131,7 +131,7 @@ public class SyncHookTests
         await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly");
         await Assert.That(_3BeforeClassLocal.Value).IsEqualTo("BeforeClass");
         await Assert.That(_4BeforeTestLocal.Value).IsEqualTo("BeforeTest");
-        
+
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2");
         await Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2");
         await Assert.That(_2BeforeAssemblyLocal2.Value).IsEqualTo("BeforeAssembly2");

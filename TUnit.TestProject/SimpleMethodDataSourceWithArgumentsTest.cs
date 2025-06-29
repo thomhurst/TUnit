@@ -9,7 +9,7 @@ public class SimpleMethodDataSourceWithArgumentsTest
         // Test should receive 5, 10, 15
         await Assert.That(value % 5).IsEqualTo(0);
     }
-    
+
     public static int[] GetData(int multiplier)
     {
         return new[] { 1 * multiplier, 2 * multiplier, 3 * multiplier };

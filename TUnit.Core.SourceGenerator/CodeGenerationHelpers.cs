@@ -472,18 +472,18 @@ internal static class CodeGenerationHelpers
         {
             return "System.Type.EmptyTypes";
         }
-        
+
         // Check if any parameter contains type parameters
         if (method.Parameters.Any(p => ContainsTypeParameter(p.Type)))
         {
             // Return null to indicate that parameter type matching should be done at runtime
             return "null";
         }
-        
+
         var parameterTypes = method.Parameters
             .Select(p => $"typeof({p.Type.GloballyQualified()})")
             .ToArray();
-            
+
         return $"new System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
     }
 
@@ -682,7 +682,7 @@ internal static class CodeGenerationHelpers
                 var genericArgs = namedType.TypeArguments.Select(GenerateTypeReference).ToArray();
 
                 using var writer = new CodeWriter("", includeHeader: false);
-        writer.SetIndentLevel(1);
+                writer.SetIndentLevel(1);
                 writer.Append($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
                 foreach (var arg in genericArgs)
                 {
@@ -757,14 +757,14 @@ internal static class CodeGenerationHelpers
         if (method.Parameters.Length > 0) return false;
 
         var returnType = method.ReturnType;
-        
+
         // Check for common data source return types
         if (returnType is INamedTypeSymbol namedType)
         {
             var typeString = namedType.ToDisplayString();
-            
+
             // Look for IEnumerable patterns that are commonly used for test data
-            return typeString.Contains("IEnumerable<") || 
+            return typeString.Contains("IEnumerable<") ||
                    typeString.Contains("ICollection<") ||
                    typeString.Contains("List<") ||
                    typeString == "object[][]" ||
@@ -817,7 +817,7 @@ internal static class CodeGenerationHelpers
     private static bool ShouldUseAotOptimizedPropertyDataSource(IPropertySymbol property)
     {
         // For properties, check if they are static and have suitable return types
-        if (!property.IsStatic) 
+        if (!property.IsStatic)
         {
             // For instance properties, check if the containing type has a parameterless constructor
             var containingType = property.ContainingType;
@@ -826,13 +826,13 @@ internal static class CodeGenerationHelpers
         }
 
         var returnType = property.Type;
-        
+
         if (returnType is INamedTypeSymbol namedType)
         {
             var typeString = namedType.ToDisplayString();
-            
+
             // Look for common data source return types
-            return typeString.Contains("IEnumerable<") || 
+            return typeString.Contains("IEnumerable<") ||
                    typeString.Contains("ICollection<") ||
                    typeString.Contains("List<") ||
                    typeString == "object[][]" ||

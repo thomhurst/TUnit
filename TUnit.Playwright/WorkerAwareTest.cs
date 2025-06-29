@@ -13,7 +13,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         public readonly int WorkerIndex = Interlocked.Increment(ref _lastWorkedIndex);
         public readonly Dictionary<string, IWorkerService> Services = [];
     }
-    
+
     public virtual bool UseDefaultParallelLimiter => true;
 
     private static readonly ConcurrentStack<Worker> AllWorkers = [];
@@ -38,7 +38,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         {
             _currentWorker = new();
         }
-        
+
         WorkerIndex = _currentWorker.WorkerIndex;
     }
 
@@ -51,7 +51,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
             {
                 await kv.Value.ResetAsync().ConfigureAwait(false);
             }
-            
+
             AllWorkers.Push(_currentWorker);
         }
         else
@@ -60,7 +60,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
             {
                 await kv.Value.DisposeAsync().ConfigureAwait(false);
             }
-            
+
             _currentWorker.Services.Clear();
         }
     }
@@ -76,7 +76,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         {
             context.SetParallelLimiter(new DefaultPlaywrightParallelLimiter());
         }
-        
+
         return default;
     }
 

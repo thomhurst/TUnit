@@ -33,7 +33,7 @@ internal class MTPLoggerAdapter(global::Microsoft.Testing.Platform.Logging.ILogg
             _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
         };
     }
-    
+
     public static global::Microsoft.Testing.Platform.Logging.LogLevel Map(LogLevel logLevel)
     {
         return logLevel switch

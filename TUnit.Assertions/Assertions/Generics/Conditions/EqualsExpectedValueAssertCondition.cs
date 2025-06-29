@@ -10,7 +10,7 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected, IEqua
     public EqualsExpectedValueAssertCondition(TActual expected) : this(expected, EqualityComparer<TActual>.Default)
     {
     }
-    
+
     internal protected override string GetExpectation()
         => $"to be equal to {ExpectedValue}";
 
@@ -20,7 +20,7 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected, IEqua
         {
             return AssertionResult.Passed;
         }
-        
+
         if (actualValue is IEquatable<TActual> equatable)
         {
             return AssertionResult

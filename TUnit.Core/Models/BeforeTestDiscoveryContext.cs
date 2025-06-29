@@ -15,20 +15,20 @@ public class BeforeTestDiscoveryContext : Context
         get => Contexts.Value;
         internal set => Contexts.Value = value;
     }
-    
+
     internal BeforeTestDiscoveryContext() : base(GlobalContext.Current)
     {
         Current = this;
     }
-    
-    
+
+
     public GlobalContext GlobalContext => (GlobalContext) Parent!;
-    
+
     /// <summary>
     /// Gets or sets the test filter.
     /// </summary>
     public required string? TestFilter { get; init; }
-    
+
     internal override void RestoreContextAsyncLocal()
     {
         Current = this;

@@ -6,7 +6,7 @@ public class PropertyInitTest
 {
     [SimpleDataGenerator]
     public required InitializableService Service { get; set; }
-    
+
     [Test]
     public async Task Service_Should_Be_Initialized()
     {
@@ -18,7 +18,7 @@ public class PropertyInitTest
 public class InitializableService : IAsyncInitializer
 {
     public bool IsInitialized { get; private set; }
-    
+
     public Task InitializeAsync()
     {
         IsInitialized = true;

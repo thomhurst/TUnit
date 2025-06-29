@@ -10,7 +10,7 @@ public class ClassDataSourceEnumerableTest(string value)
     {
         await Task.CompletedTask;
     }
-    
+
     public class EnumerableDataSource : IEnumerable<string>
     {
         public IEnumerator<string> GetEnumerator()
@@ -21,7 +21,7 @@ public class ClassDataSourceEnumerableTest(string value)
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        
+
         public static implicit operator string(EnumerableDataSource source) => "FromImplicitOperator";
     }
 }

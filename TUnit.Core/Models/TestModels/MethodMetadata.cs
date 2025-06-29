@@ -29,7 +29,7 @@ public record MethodMetadata : MemberMetadata
     }
 
     public required TypeReference ReturnTypeReference { get; init; }
-    
+
     /// <summary>
     /// The concrete return type (only available for non-generic types).
     /// For generic types, this will be null and ReturnTypeReference must be resolved at runtime.
@@ -37,7 +37,7 @@ public record MethodMetadata : MemberMetadata
     public Type? ReturnType { get; init; }
 
     public required TypeReference TypeReference { get; init; }
-    
+
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods

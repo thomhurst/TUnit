@@ -1,5 +1,5 @@
-using Microsoft.CodeAnalysis;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.Helpers;
 
@@ -12,7 +12,7 @@ public static class CompileTimeArgumentConverter
     /// Generates a C# expression that converts data from a data source to IEnumerable<object?[]>.
     /// </summary>
     public static string GenerateConversionExpression(
-        ITypeSymbol sourceType, 
+        ITypeSymbol sourceType,
         IMethodSymbol targetMethod,
         string dataVariableName)
     {
@@ -57,14 +57,14 @@ public static class CompileTimeArgumentConverter
         // Check if it's IEnumerable<T>
         var enumerableInterface = type.AllInterfaces
             .FirstOrDefault(i => i.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T);
-            
+
         if (enumerableInterface != null)
         {
             return enumerableInterface.TypeArguments[0];
         }
 
         // Check if the type itself is IEnumerable<T>
-        if (type is INamedTypeSymbol namedType && 
+        if (type is INamedTypeSymbol namedType &&
             namedType.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
         {
             return namedType.TypeArguments[0];
@@ -84,18 +84,18 @@ public static class CompileTimeArgumentConverter
 
     private static bool IsTupleType(INamedTypeSymbol type)
     {
-        return type.IsTupleType || 
-               type.Name.StartsWith("ValueTuple`") || 
+        return type.IsTupleType ||
+               type.Name.StartsWith("ValueTuple`") ||
                type.Name.StartsWith("Tuple`");
     }
 
     private static string GenerateTupleConversion(
-        INamedTypeSymbol tupleType, 
+        INamedTypeSymbol tupleType,
         IMethodSymbol targetMethod,
         string dataVariableName)
     {
         var tupleElements = GetTupleElements(tupleType);
-        
+
         if (tupleElements.Length != targetMethod.Parameters.Length)
         {
             // Mismatch in count, generate error comment
@@ -104,9 +104,9 @@ public static class CompileTimeArgumentConverter
         }
 
         // Generate: data.Select(x => new object?[] { x.Item1, x.Item2, ... })
-        var itemAccessors = string.Join(", ", 
+        var itemAccessors = string.Join(", ",
             Enumerable.Range(1, tupleElements.Length).Select(i => $"x.Item{i}"));
-            
+
         return $"{dataVariableName}.Select(x => new object?[] {{ {itemAccessors} }})";
     }
 
@@ -116,7 +116,7 @@ public static class CompileTimeArgumentConverter
         {
             return tupleType.TupleElements.Select(f => f.Type).ToArray();
         }
-        
+
         // For System.Tuple or System.ValueTuple
         return tupleType.TypeArguments.ToArray();
     }
@@ -134,13 +134,13 @@ public static class CompileTimeArgumentConverter
             .ToArray();
 
         var propertyAccessors = new string?[targetMethod.Parameters.Length];
-        
+
         for (int i = 0; i < targetMethod.Parameters.Length; i++)
         {
             var paramName = parameterNames[i];
-            var matchingProperty = properties.FirstOrDefault(p => 
+            var matchingProperty = properties.FirstOrDefault(p =>
                 p.Name.ToLowerInvariant() == paramName);
-                
+
             if (matchingProperty != null)
             {
                 propertyAccessors[i] = $"x.{matchingProperty.Name}";

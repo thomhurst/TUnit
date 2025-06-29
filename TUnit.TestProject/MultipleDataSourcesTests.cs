@@ -17,7 +17,7 @@ public class MultipleDataSourcesTests(int classArg)
     {
         // Record this test execution
         ExecutedTests.Add($"Class:{classArg},Method:{methodArg}");
-        
+
         // With 2 class-level Arguments and 2 method-level Arguments,
         // we should have 2 * 2 = 4 total test instances eventually
         await Task.CompletedTask;
@@ -28,16 +28,16 @@ public class MultipleDataSourcesTests(int classArg)
     {
         // Get the executed tests
         var executedTests = ExecutedTests.ToList();
-        
+
         // Skip verification if no tests were executed (e.g., filtered run)
         if (executedTests.Count == 0)
         {
             return;
         }
-        
+
         // Should have exactly 4 test instances
         await Assert.That(executedTests.Count).IsEqualTo(4);
-        
+
         // Verify we have the expected combinations
         var expected = new[]
         {
@@ -51,10 +51,10 @@ public class MultipleDataSourcesTests(int classArg)
         {
             await Assert.That(executedTests).Contains(expectedTest);
         }
-        
+
         // Also verify we don't have duplicates
         await Assert.That(executedTests.Distinct().Count()).IsEqualTo(4);
-        
+
         // Clear for next run
         ExecutedTests.Clear();
     }

@@ -21,7 +21,7 @@ public abstract record StaticHookMethod
     public required MethodMetadata MethodInfo { get; init; }
 
     [field: AllowNull, MaybeNull]
-    public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
+    public string Name => field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
     public Type ClassType => MethodInfo.Class.Type;
     public Assembly Assembly => ClassType.Assembly;
 
@@ -31,18 +31,18 @@ public abstract record StaticHookMethod
 
     [field: AllowNull, MaybeNull]
     public IEnumerable<Attribute> Attributes => field ??=
-        [..MethodAttributes, ..ClassAttributes, ..AssemblyAttributes];
+        [.. MethodAttributes, .. ClassAttributes, .. AssemblyAttributes];
 
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 
     // TODO?
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
-    
+
     public required IHookExecutor HookExecutor { get; init; }
-    
+
     public required int Order { get; init; }
 
     public required string FilePath { get; init; }
-    
+
     public required int LineNumber { get; init; }
 }

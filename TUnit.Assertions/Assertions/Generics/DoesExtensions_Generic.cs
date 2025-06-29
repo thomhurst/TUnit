@@ -15,7 +15,7 @@ public static partial class DoesExtensions
         return valueSource.RegisterAssertion(new EnumerableContainsExpectedValueAssertCondition<TActual, TInner>(expected, equalityComparer)
             , [doNotPopulateThisValue]);
     }
-    
+
     public static MappableResultAssertionBuilder<IEnumerable<TInner>, EnumerableContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>, TInner> Contains<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)
     {
         var enumerableContainsExpectedFuncAssertCondition = new EnumerableContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>(matcher, doNotPopulateThisValue);

@@ -9,12 +9,12 @@ public class ClassLevelDataSourceTest
     {
         Console.WriteLine($"Constructor called with value: {value}");
     }
-    
+
     [Test]
     public void SimpleTest()
     {
         Console.WriteLine("Test executed");
     }
-    
+
     public static int[] ClassData() => new[] { 1, 2, 3 };
 }

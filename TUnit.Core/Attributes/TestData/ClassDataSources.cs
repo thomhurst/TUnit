@@ -40,27 +40,27 @@ internal class ClassDataSources
 #pragma warning disable CS8603 // Possible null reference return.
         if (sharedType == SharedType.None)
         {
-            return  Create<T>(dataGeneratorMetadata);
+            return Create<T>(dataGeneratorMetadata);
         }
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return (T)TestDataContainer.GetGlobalInstance(typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
+            return (T) TestDataContainer.GetGlobalInstance(typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return (T)TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
+            return (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return (T)TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
+            return (T) TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return (T)TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
+            return (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
         }
 #pragma warning restore CS8603 // Possible null reference return.
 
@@ -100,7 +100,7 @@ internal class ClassDataSources
     [return: NotNull]
     private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return ((T)Create(typeof(T), dataGeneratorMetadata))!;
+        return ((T) Create(typeof(T), dataGeneratorMetadata))!;
     }
 
     private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)

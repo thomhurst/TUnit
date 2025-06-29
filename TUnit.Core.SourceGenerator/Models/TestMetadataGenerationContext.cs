@@ -18,7 +18,7 @@ public class TestMetadataGenerationContext
     public required string SafeMethodName { get; init; }
     public required string Guid { get; init; }
     public required bool CanUseStaticDefinition { get; init; }
-    
+
     /// <summary>
     /// Creates a TestMetadataGenerationContext from the test method info
     /// </summary>
@@ -28,25 +28,25 @@ public class TestMetadataGenerationContext
         {
             throw new ArgumentNullException(nameof(testInfo), "TestInfo or its required properties cannot be null");
         }
-        
+
         var className = GetFullTypeName(testInfo.TypeSymbol);
         var methodName = testInfo.MethodSymbol.Name;
         var safeClassName = SanitizeForFilename(className);
         var safeMethodName = SanitizeForFilename(methodName);
-        
+
         var requiredProperties = testInfo.TypeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Where(p => p.IsRequired)
             .ToList();
-            
+
         var constructors = testInfo.TypeSymbol.Constructors
             .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
             .OrderBy(c => c.Parameters.Length)
             .ToList();
-            
+
         var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
         var constructorWithParameters = !hasParameterlessConstructor ? constructors.FirstOrDefault() : null;
-        
+
         return new TestMetadataGenerationContext
         {
             TestInfo = testInfo,
@@ -61,13 +61,13 @@ public class TestMetadataGenerationContext
             CanUseStaticDefinition = DetermineIfStaticTestDefinition(testInfo)
         };
     }
-    
+
     private static string GetFullTypeName(ITypeSymbol typeSymbol)
     {
         return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
             .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
     }
-    
+
     private static string SanitizeForFilename(string name)
     {
         // Replace all invalid filename characters with underscores
@@ -83,7 +83,7 @@ public class TestMetadataGenerationContext
 
         return sanitized;
     }
-    
+
     private static bool DetermineIfStaticTestDefinition(TestMethodMetadata testInfo)
     {
         // Can use static definition if:
@@ -102,14 +102,14 @@ public class TestMetadataGenerationContext
             if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
                 return false;
         }
-        
+
         // Check method-level attributes for data sources
         foreach (var attr in testInfo.MethodSymbol.GetAttributes())
         {
             if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
                 return false;
         }
-        
+
         // Check method parameters for data attributes
         foreach (var param in testInfo.MethodSymbol.Parameters)
         {
@@ -151,7 +151,7 @@ public class TestMetadataGenerationContext
         // All checks passed - can use static definition
         return true;
     }
-    
+
     private static bool IsRuntimeDataSourceAttribute(AttributeData attr, ITypeSymbol containingType)
     {
         var attrName = attr.AttributeClass?.Name;
@@ -162,18 +162,18 @@ public class TestMetadataGenerationContext
         // - Attributes inheriting from DataSourceGeneratorAttribute (dynamic generation)
         if (attrName is "GeneratedDataAttribute")
             return true;
-            
+
         // Check if it inherits from async/sync data source generator attributes
         var baseType = attr.AttributeClass?.BaseType;
         while (baseType != null)
         {
             var baseName = baseType.Name;
-            if (baseName is "AsyncDataSourceGeneratorAttribute" or "DataSourceGeneratorAttribute" 
+            if (baseName is "AsyncDataSourceGeneratorAttribute" or "DataSourceGeneratorAttribute"
                 or "AsyncNonTypedDataSourceGeneratorAttribute" or "NonTypedDataSourceGeneratorAttribute")
                 return true;
             baseType = baseType.BaseType;
         }
-        
+
         // Check if MethodDataSourceAttribute refers to an instance method
         if (attrName == "MethodDataSourceAttribute")
         {
@@ -188,7 +188,7 @@ public class TestMetadataGenerationContext
                     var method = containingType.GetMembers(methodName)
                         .OfType<IMethodSymbol>()
                         .FirstOrDefault();
-                    
+
                     if (method != null && method.IsStatic)
                     {
                         // Static method - can be resolved at compile time
@@ -204,7 +204,7 @@ public class TestMetadataGenerationContext
                 return true; // For now, assume it could be instance method
             }
         }
-        
+
         return false;
     }
 }

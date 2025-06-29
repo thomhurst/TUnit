@@ -67,7 +67,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
         // Resolve property sources at compile-time
         // This is a simplified implementation - real implementation would
         // evaluate property source attributes
-        
+
         await Task.CompletedTask;
         return propertyData;
     }
@@ -79,16 +79,16 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
         {
             // Simple value attributes can be resolved at compile-time
             ArgumentsAttribute => true,
-            
+
             // MethodDataSource can now be resolved through AOT-safe factory generation
             MethodDataSourceAttribute methodDataSource => CanResolveMethodDataSource(methodDataSource),
-            
+
             // AsyncDataSourceGenerator can now be resolved through AOT-safe factory generation
             IAsyncDataSourceGeneratorAttribute asyncDataSource => CanResolveAsyncDataSource(asyncDataSource),
-            
+
             // Generic data sources typically can't be resolved at compile-time
             _ when IsGenericDataSource(dataAttribute) => false,
-            
+
             // Default to runtime resolution for safety
             _ => false
         };
@@ -120,7 +120,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
         // For MethodDataSource, we don't resolve the data at compile-time.
         // Instead, we mark it as resolvable and the source generator will emit 
         // AOT-safe factory code that calls the method directly.
-        
+
         // Should not be called during actual compilation,
         // as MethodDataSource resolution happens through generated factories.
         throw new InvalidOperationException(
@@ -137,7 +137,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
         // For AsyncDataSourceGenerator, we don't resolve the data at compile-time.
         // Instead, we mark it as resolvable and the source generator will emit 
         // AOT-safe factory code that instantiates and calls the generator directly.
-        
+
         // Should not be called during actual compilation,
         // as AsyncDataSourceGenerator resolution happens through generated factories.
         throw new InvalidOperationException(
@@ -152,7 +152,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
     {
         // We can resolve any MethodDataSource that the generator can handle
         // This is determined by the method characteristics (static, compatible return type, etc.)
-        
+
         // For now, we'll assume all MethodDataSource attributes can be handled
         // The actual validation happens in the AotMethodDataSourceGenerator
         return true;
@@ -165,10 +165,10 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
     {
         // We can resolve any AsyncDataSourceGenerator that the generator can handle
         // This is determined by the generator characteristics (parameterless constructor, not abstract, etc.)
-        
-        #pragma warning disable IL2072 // Attribute types are known at compile time
+
+#pragma warning disable IL2072 // Attribute types are known at compile time
         return _asyncDataSourceGenerator.CanGenerateAotSafe(asyncDataAttr.GetType());
-        #pragma warning restore IL2072
+#pragma warning restore IL2072
     }
 
     private static bool IsGenericDataSource(IDataAttribute dataAttribute)
@@ -221,7 +221,7 @@ public class SourceGenerationDataResolver : ICompileTimeDataResolver
     /// Returns comprehensive data including unresolved attributes.
     /// </summary>
     public async Task<CompileTimeResolvedData> ResolveAllDataAsync(
-        ClassMetadata classMetadata, 
+        ClassMetadata classMetadata,
         MethodMetadata methodMetadata)
     {
         var classData = await ResolveClassDataAsync(classMetadata);

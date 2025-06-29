@@ -55,7 +55,7 @@ public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerClass), NotInParallel]
 public class InjectSharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
-    public static string Key => TestContext.Current!.TestDetails.ClassMetadata.Namespace + "." + TestContext.Current.TestDetails.ClassMetadata.Name  + "_" + TestContext.Current.TestDetails.TestName;
+    public static string Key => TestContext.Current!.TestDetails.ClassMetadata.Namespace + "." + TestContext.Current.TestDetails.ClassMetadata.Name + "_" + TestContext.Current.TestDetails.TestName;
 
     [Test, Repeat(5)]
     public async Task Test1()

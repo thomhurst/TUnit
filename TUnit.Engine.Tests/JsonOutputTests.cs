@@ -23,7 +23,7 @@ public class JsonOutputTests(TestMode testMode) : InvokableTestBase(testMode)
             ],
             new RunOptions
             {
-                AdditionalArguments = [ "--output-json", "--output-json-prefix", prefix, "--output-json-filename", filename ],
+                AdditionalArguments = ["--output-json", "--output-json-prefix", prefix, "--output-json-filename", filename],
             });
 
         // var file = await context

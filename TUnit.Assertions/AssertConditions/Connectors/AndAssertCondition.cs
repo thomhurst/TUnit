@@ -9,7 +9,7 @@ internal class AndAssertCondition : BaseAssertCondition
     {
         Verify.ArgNotNull(condition1);
         Verify.ArgNotNull(condition2);
-        
+
         _condition1 = condition1;
         _condition2 = condition2;
     }

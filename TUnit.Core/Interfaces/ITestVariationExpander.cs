@@ -15,7 +15,7 @@ public interface ITestVariationExpander
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>All test variations for the descriptor</returns>
     IAsyncEnumerable<TestVariation> ExpandTestVariationsAsync(
-        ITestDescriptor testDescriptor, 
+        ITestDescriptor testDescriptor,
         CancellationToken cancellationToken = default);
 
     /// <summary>

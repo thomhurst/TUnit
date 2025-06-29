@@ -15,26 +15,26 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
         );
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
         }
 
         var methods = namedTypeSymbol.GetMembers().OfType<IMethodSymbol>().ToArray();
-        
+
         var testMethods = methods.Where(x => x.IsTestMethod(context.Compilation)).ToArray();
-        
+
         if (!testMethods.Any())
         {
             return;
         }
-        
+
         foreach (var method in methods
                      .Where(x => x.MethodKind == MethodKind.Ordinary)
                      .Where(x => !x.IsAbstract)
@@ -56,8 +56,8 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
     {
         var attributes = testMethods.SelectMany(x => x.GetAttributes())
             .Concat(testMethods.SelectMany(x => x.Parameters).SelectMany(x => x.GetAttributes()));
-        
-        if(attributes.Any(x => !x.ConstructorArguments.IsDefaultOrEmpty 
+
+        if (attributes.Any(x => !x.ConstructorArguments.IsDefaultOrEmpty
                                && x.ConstructorArguments.Any(a => a is { Kind: TypedConstantKind.Primitive, Value: string s } && s == methodSymbol.Name)))
         {
             return true;
@@ -71,12 +71,12 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
         return method is { ReturnsVoid: true, Name: "Dispose" } &&
                method.ContainingType.AllInterfaces.Any(x => x.SpecialType == SpecialType.System_IDisposable);
     }
-    
+
     private bool IsAsyncDisposableDispose(IMethodSymbol method)
     {
         return method is { ReturnsVoid: false, Name: "DisposeAsync" };
     }
-    
+
     private bool IsInitializeAsync(IMethodSymbol method)
     {
         return method is { ReturnsVoid: false, Name: "InitializeAsync" };

@@ -21,12 +21,12 @@ public class HookInvoker : IHookInvoker
             await hook.Invoker(instance, context);
         }
     }
-    
+
     public async Task InvokeHookAsync(object? instance, MethodInfo method, HookContext context)
     {
         var parameters = method.GetParameters();
         object?[] args;
-        
+
         if (parameters.Length == 0)
         {
             args = Array.Empty<object>();
@@ -39,9 +39,9 @@ public class HookInvoker : IHookInvoker
         {
             throw new InvalidOperationException($"Hook method {method.Name} has invalid parameters. Expected no parameters or single HookContext parameter.");
         }
-        
+
         var result = method.Invoke(instance, args);
-        
+
         if (result is Task task)
         {
             await task;
@@ -51,7 +51,7 @@ public class HookInvoker : IHookInvoker
             await valueTask.AsTask();
         }
     }
-    
+
     public async Task InvokeHookAsync(object? instance, Func<object?, HookContext, Task> hookInvoker, HookContext context)
     {
         await hookInvoker(instance, context);

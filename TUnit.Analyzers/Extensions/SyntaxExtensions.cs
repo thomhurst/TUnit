@@ -12,10 +12,10 @@ public static class SyntaxExtensions
             {
                 return null;
             }
-            
+
             semanticModel = semanticModel.Compilation.GetSemanticModel(syntaxNode.SyntaxTree);
         }
-        
+
         return semanticModel.GetOperation(syntaxNode);
     }
 }

@@ -9,7 +9,7 @@ internal class OrAssertCondition : BaseAssertCondition
     {
         Verify.ArgNotNull(condition1);
         Verify.ArgNotNull(condition2);
-        
+
         _condition1 = condition1;
         _condition2 = condition2;
     }
@@ -22,7 +22,7 @@ internal class OrAssertCondition : BaseAssertCondition
 
     internal override sealed async ValueTask<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata, string? actualExpression)
     {
-        return  await (await _condition1.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression))
+        return await (await _condition1.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression))
             .OrAsync(() => _condition2.GetAssertionResult(actualValue, exception, assertionMetadata, actualExpression));
     }
 

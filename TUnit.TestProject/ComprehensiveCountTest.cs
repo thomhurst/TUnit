@@ -15,13 +15,13 @@ public class ComprehensiveCountTest(string classValue)
     {
         await Task.CompletedTask;
     }
-    
+
     public static IEnumerable<string> GetMethodData()
     {
         yield return "M1";
         yield return "M2";
     }
-    
+
     public class ClassData : IEnumerable<string>
     {
         public IEnumerator<string> GetEnumerator()
@@ -31,7 +31,7 @@ public class ComprehensiveCountTest(string classValue)
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        
+
         public static implicit operator string(ClassData _) => "ClassDataImplicit";
     }
 }

@@ -16,10 +16,10 @@ public static class RuntimeAttributeHelper
     /// Creates an attribute instance using reflection.
     /// </summary>
     public static Attribute CreateAttribute(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors |
                                     DynamicallyAccessedMemberTypes.PublicProperties)]
-        Type attributeType, 
-        object?[]? constructorArgs, 
+        Type attributeType,
+        object?[]? constructorArgs,
         Dictionary<string, object?>? namedArgs)
     {
         try

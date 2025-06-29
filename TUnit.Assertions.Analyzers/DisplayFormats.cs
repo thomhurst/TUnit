@@ -15,7 +15,7 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType
     );
-    
+
     public static readonly SymbolDisplayFormat FullyQualifiedNonGeneric = new(
         SymbolDisplayGlobalNamespaceStyle.Omitted,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,

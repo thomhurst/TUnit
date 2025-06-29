@@ -28,7 +28,7 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
         {
             throw new ArgumentException("Duplicate constraint keys are not allowed.");
         }
-        
+
         ConstraintKeys = constraintKeys;
     }
 

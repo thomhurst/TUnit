@@ -13,49 +13,49 @@ public class AssertionGroupTests
         var cd = AssertionGroup.For(value)
             .WithAssertion(assert => assert.Contains('C'))
             .And(assert => assert.Contains('D'));
-        
+
         var ab = AssertionGroup.ForSameValueAs(cd)
             .WithAssertion(assert => assert.Contains('A'))
             .And(assert => assert.Contains('B'));
 
         await AssertionGroup.Assert(cd).Or(ab);
     }
-    
+
     [Test]
     public async Task Test2()
     {
         var value = "Foo";
-        
+
         await AssertionGroup.For(value)
             .WithAssertion(assert => assert.IsNotNullOrEmpty())
             .And(assert => assert.IsEqualTo("Foo"));
     }
-    
+
     [Test]
     public async Task Test3()
     {
         var value = "Foo";
-        
+
         var group1 = AssertionGroup.For(value)
             .WithAssertion(assert => assert.IsNullOrEmpty())
             .And(assert => assert.IsEqualTo("Foo"));
-        
+
         var group2 = AssertionGroup.ForSameValueAs(group1)
             .WithAssertion(assert => assert.IsNullOrEmpty())
             .Or(assert => assert.IsEqualTo("Foo"));
 
         await AssertionGroup.Assert(group1).Or(group2);
     }
-    
+
     [Test]
     public async Task And_Condition_Throws_As_Expected()
     {
         var value = "Foo";
-        
+
         var group1 = AssertionGroup.For(value)
             .WithAssertion(assert => assert.IsNullOrEmpty())
             .And(assert => assert.IsEqualTo("Foo"));
-        
+
         var group2 = AssertionGroup.ForSameValueAs(group1)
             .WithAssertion(assert => assert.IsNullOrEmpty())
             .Or(assert => assert.IsEqualTo("Foo"));

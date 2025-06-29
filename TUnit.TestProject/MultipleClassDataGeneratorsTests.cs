@@ -15,7 +15,7 @@ public class MultipleClassDataGeneratorsTests(int value1, string value2, bool va
     {
         // Record this test execution
         ExecutedTests.Add($"Test executed with: {value1}, {value2}, {value3}");
-        
+
         // With 2 class-level generators, we should have 2 test instances
         await Task.CompletedTask;
     }
@@ -25,16 +25,16 @@ public class MultipleClassDataGeneratorsTests(int value1, string value2, bool va
     {
         // Get the executed tests
         var executedTests = ExecutedTests.ToList();
-        
+
         // Skip verification if no tests were executed (e.g., filtered run)
         if (executedTests.Count == 0)
         {
             return;
         }
-        
+
         // Should have exactly 2 test instances (one per class generator)
         await Assert.That(executedTests.Count).IsEqualTo(2);
-        
+
         // Clear for next run
         ExecutedTests.Clear();
     }

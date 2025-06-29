@@ -39,8 +39,8 @@ public class GeneratedDataAnalyzerTests
                     }
                 }
                 """,
-				expected
-			);
+                expected
+            );
     }
 
     [Test]
@@ -76,8 +76,8 @@ public class GeneratedDataAnalyzerTests
                     }
                 }
                 """,
-				expected
-			);
+                expected
+            );
     }
 
     [Test]
@@ -113,8 +113,8 @@ public class GeneratedDataAnalyzerTests
                     }
                 }
                 """,
-				expected
-			);
+                expected
+            );
     }
 
     [Test]

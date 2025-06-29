@@ -14,22 +14,22 @@ internal static class Rules
 
     public static readonly DiagnosticDescriptor CompilerArgumentsPopulated =
         CreateDescriptor("TUnitAssertions0003", UsageCategory, DiagnosticSeverity.Warning);
-    
+
     public static readonly DiagnosticDescriptor DisposableUsingMultiple =
         CreateDescriptor("TUnitAssertions0004", UsageCategory, DiagnosticSeverity.Error);
-        
+
     public static readonly DiagnosticDescriptor ConstantValueInAssertThat =
         CreateDescriptor("TUnitAssertions0005", UsageCategory, DiagnosticSeverity.Warning);
-        
+
     public static readonly DiagnosticDescriptor ObjectEqualsBaseMethod =
         CreateDescriptor("TUnitAssertions0006", UsageCategory, DiagnosticSeverity.Error);
-    
+
     public static readonly DiagnosticDescriptor DynamicValueInAssertThat =
         CreateDescriptor("TUnitAssertions0007", UsageCategory, DiagnosticSeverity.Error);
-    
+
     public static readonly DiagnosticDescriptor AwaitValueTaskInAssertThat =
         CreateDescriptor("TUnitAssertions0008", UsageCategory, DiagnosticSeverity.Error);
-    
+
     public static readonly DiagnosticDescriptor XUnitAssertion =
         CreateDescriptor("TUnitAssertions0009", UsageCategory, DiagnosticSeverity.Info);
 

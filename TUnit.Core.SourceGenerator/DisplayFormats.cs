@@ -16,7 +16,7 @@ public class DisplayFormats
         SymbolDisplayLocalOptions.IncludeType,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
-    
+
     public static readonly SymbolDisplayFormat FullyQualifiedGenericWithGlobalPrefix = new(
         SymbolDisplayGlobalNamespaceStyle.Included,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -29,7 +29,7 @@ public class DisplayFormats
         SymbolDisplayLocalOptions.IncludeType,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
-    
+
     public static readonly SymbolDisplayFormat FullyQualifiedNonGeneric = new(
         SymbolDisplayGlobalNamespaceStyle.Omitted,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -55,6 +55,6 @@ public class DisplayFormats
         SymbolDisplayLocalOptions.IncludeType,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
-    
+
     public static readonly SymbolDisplayFormat NameOnly = new(miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 }

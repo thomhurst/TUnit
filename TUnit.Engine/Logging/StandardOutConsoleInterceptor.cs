@@ -22,7 +22,7 @@ internal class StandardOutConsoleInterceptor : ConsoleInterceptor
     {
         Instance = this;
     }
-    
+
     public void Initialize()
     {
         Console.SetOut(this);

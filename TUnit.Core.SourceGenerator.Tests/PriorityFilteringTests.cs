@@ -10,7 +10,7 @@ internal class PriorityFilteringTests : TestsBase
             "PriorityFilteringTests.cs"),
         new RunTestOptions
         {
-            AdditionalFiles = 
+            AdditionalFiles =
                 [
                     Path.Combine(Git.RootDirectory.FullName,
                         "TUnit.TestProject",

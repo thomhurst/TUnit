@@ -16,7 +16,7 @@ public static class MethodExtensions
     {
         return IsStandardHookMethod(methodSymbol, compilation, out type, out hookLevel, out hookType) || IsEveryHookMethod(methodSymbol, compilation, out type, out hookLevel, out hookType);
     }
-    
+
     public static bool IsStandardHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         foreach (var attributeData in methodSymbol.GetAttributes())
@@ -32,7 +32,7 @@ public static class MethodExtensions
         hookLevel = null;
         return false;
     }
-    
+
     public static bool IsEveryHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         foreach (var attributeData in methodSymbol.GetAttributes())
@@ -53,7 +53,7 @@ public static class MethodExtensions
     {
         return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.TimeoutAttribute.WithGlobalPrefix);
     }
-    
+
     public static AttributeData? GetArgumentsAttribute(this IMethodSymbol methodSymbol)
     {
         return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.Arguments.WithGlobalPrefix, false);

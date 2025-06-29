@@ -26,6 +26,6 @@ public interface IGenericTypeResolver
     /// <returns>An array of concrete Type objects corresponding to the generic parameters</returns>
     /// <exception cref="GenericTypeResolutionException">Thrown if types cannot be resolved or constraints are violated</exception>
     Type[] ResolveGenericClassArguments(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type genericTypeDefinition, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type genericTypeDefinition,
         object?[] constructorArguments);
 }

@@ -20,7 +20,7 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
     }
-    
+
     private void AnalyzeOperation(OperationAnalysisContext context)
     {
         if (context.Operation is not IInvocationOperation invocationOperation)
@@ -31,25 +31,25 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
         var methodSymbol = invocationOperation.TargetMethod;
 
         var fullyQualifiedNonGenericMethodName = methodSymbol.GloballyQualifiedNonGeneric();
-        
+
         if (fullyQualifiedNonGenericMethodName is not "global::TUnit.Assertions.Assert.That")
         {
             return;
         }
 
         var funcArgumentOperation = invocationOperation.Arguments.First();
-        
+
         var type = funcArgumentOperation.Parameter?.Type;
 
         var valueTask = context.Compilation.GetTypeByMetadataName(typeof(ValueTask).FullName!)!;
         var genericValueTask = context.Compilation.GetTypeByMetadataName(typeof(ValueTask<>).FullName!)!;
-        
+
         if (type?.IsOrInherits(valueTask) is true || type?.OriginalDefinition?.IsOrInherits(genericValueTask) is true)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.AwaitValueTaskInAssertThat, context.Operation.Syntax.GetLocation())
             );
-            
+
             return;
         }
 
@@ -57,8 +57,8 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
-        if(namedTypeSymbol.DelegateInvokeMethod?.ReturnType.IsOrInherits(valueTask) is not true 
+
+        if (namedTypeSymbol.DelegateInvokeMethod?.ReturnType.IsOrInherits(valueTask) is not true
            && namedTypeSymbol.DelegateInvokeMethod?.ReturnType.OriginalDefinition.IsOrInherits(genericValueTask) is not true)
         {
             return;

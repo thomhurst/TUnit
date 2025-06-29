@@ -8,7 +8,7 @@ namespace TUnit.Core.SourceGenerator.DataProviders;
 /// </summary>
 internal static class DataProviderGeneratorFactory
 {
-    private static readonly IDataProviderGenerator[] Generators = 
+    private static readonly IDataProviderGenerator[] Generators =
     [
         new ArgumentsDataProviderGenerator(),
         new MethodDataSourceProviderGenerator(),

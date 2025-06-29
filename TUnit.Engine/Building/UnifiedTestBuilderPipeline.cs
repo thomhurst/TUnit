@@ -15,7 +15,7 @@ public sealed class UnifiedTestBuilderPipeline
     private readonly IGenericTypeResolver _genericResolver;
     private readonly IDataSourceExpander _dataSourceExpander;
     private readonly ITestBuilder _testBuilder;
-    
+
     public UnifiedTestBuilderPipeline(
         ITestDataCollector dataCollector,
         IGenericTypeResolver genericResolver,
@@ -27,7 +27,7 @@ public sealed class UnifiedTestBuilderPipeline
         _dataSourceExpander = dataSourceExpander ?? throw new ArgumentNullException(nameof(dataSourceExpander));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
     }
-    
+
     /// <summary>
     /// Builds all executable tests through the pipeline
     /// </summary>
@@ -35,20 +35,20 @@ public sealed class UnifiedTestBuilderPipeline
     {
         // Stage 1: Collect test metadata
         var collectedMetadata = await _dataCollector.CollectTestsAsync();
-        
+
         // Stage 2: Resolve generic types
         var resolvedMetadata = await _genericResolver.ResolveGenericsAsync(collectedMetadata);
-        
+
         // Stage 3 & 4: Expand data sources and build tests
         var executableTests = new List<ExecutableTest>();
-        
+
         foreach (var metadata in resolvedMetadata)
         {
             try
             {
                 // Stage 3: Expand data sources for this test
                 var expandedDataSets = await _dataSourceExpander.ExpandDataSourcesAsync(metadata);
-                
+
                 // Stage 4: Build executable test for each variation
                 foreach (var expandedData in expandedDataSets)
                 {
@@ -63,15 +63,15 @@ public sealed class UnifiedTestBuilderPipeline
                 executableTests.Add(failedTest);
             }
         }
-        
+
         return executableTests;
     }
-    
+
     private static ExecutableTest CreateFailedTestForDataSourceError(TestMetadata metadata, Exception exception)
     {
         var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataSourceError";
         var displayName = $"{metadata.TestName} [DATA SOURCE ERROR]";
-        
+
         return new ExecutableTest
         {
             TestId = testId,
@@ -125,14 +125,14 @@ public static class UnifiedTestBuilderPipelineFactory
         var dynamicResolver = new Expanders.DynamicDataSourceResolver();
         var dataSourceExpander = new Expanders.DataSourceExpander(dynamicResolver);
         var testBuilder = new TestBuilder(testInvoker, hookInvoker, isAotMode: true);
-        
+
         return new UnifiedTestBuilderPipeline(
             dataCollector,
             genericResolver,
             dataSourceExpander,
             testBuilder);
     }
-    
+
     /// <summary>
     /// Creates a pipeline configured for reflection mode
     /// </summary>
@@ -148,7 +148,7 @@ public static class UnifiedTestBuilderPipelineFactory
         var dynamicResolver = new Expanders.DynamicDataSourceResolver();
         var dataSourceExpander = new Expanders.DataSourceExpander(dynamicResolver);
         var testBuilder = new TestBuilder(testInvoker, hookInvoker, isAotMode: false);
-        
+
         return new UnifiedTestBuilderPipeline(
             dataCollector,
             genericResolver,

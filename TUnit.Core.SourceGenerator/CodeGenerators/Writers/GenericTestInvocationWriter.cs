@@ -81,8 +81,8 @@ public static class GenericTestInvocationWriter
         var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
 
-        sourceBuilder.Append($"{testSourceDataModel.ClassMetadata.GloballyQualified()}? classInstance = null;");;
-        sourceBuilder.Append("object?[]? classInstanceArguments = null;");;
+        sourceBuilder.Append($"{testSourceDataModel.ClassMetadata.GloballyQualified()}? classInstance = null;"); ;
+        sourceBuilder.Append("object?[]? classInstanceArguments = null;"); ;
 
         if (NeedsClassInstantiatedForMethodData(testSourceDataModel))
         {

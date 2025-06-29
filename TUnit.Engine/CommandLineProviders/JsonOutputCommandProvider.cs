@@ -22,7 +22,7 @@ internal class JsonOutputCommandProvider(IExtension extension) : ICommandLineOpt
     public string DisplayName => extension.DisplayName;
 
     public string Description => extension.Description;
-    
+
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
         return
@@ -39,12 +39,12 @@ internal class JsonOutputCommandProvider(IExtension extension) : ICommandLineOpt
         {
             return ValidationResult.InvalidTask("Invalid number of output json filename specified");
         }
-        
+
         if (commandOption.Name == OutputJsonFilename && arguments.Length != 1)
         {
             return ValidationResult.InvalidTask("Invalid number of output json filename specified");
         }
-        
+
         return ValidationResult.ValidTask;
     }
 

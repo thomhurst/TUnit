@@ -46,7 +46,7 @@ public class DynamicTestInstance<T> : DynamicTest<T> where T : class
     public object?[]? TestClassArguments { get; set; }
     public object?[]? TestMethodArguments { get; set; }
     public List<Attribute> Attributes { get; set; } = new List<Attribute>();
-    
+
     public override IEnumerable<DiscoveryResult> GetTests()
     {
         // Create a discovery result for this dynamic test
@@ -58,7 +58,7 @@ public class DynamicTestInstance<T> : DynamicTest<T> where T : class
             Attributes = Attributes,
             TestClassType = typeof(T)
         };
-        
+
         yield return result;
     }
 }
@@ -89,7 +89,7 @@ public class FailedDynamicTest<T> : DynamicTest where T : class
     public Exception Exception { get; set; } = null!;
     public string TestFilePath { get; set; } = string.Empty;
     public int TestLineNumber { get; set; }
-    
+
     public override IEnumerable<DiscoveryResult> GetTests()
     {
         // Failed dynamic tests don't produce any test results

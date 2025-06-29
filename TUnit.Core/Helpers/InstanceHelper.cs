@@ -147,7 +147,7 @@ internal static class InstanceHelper
         {
             // Check if property is settable and either required or in the property names
             if (!prop.CanWrite) continue;
-            
+
             var isRequired = prop.GetCustomAttribute<RequiredMemberAttribute>() != null || prop.GetCustomAttribute(typeof(RequiredMemberAttribute)) != null;
             if (!isRequired && !propertyNames.Contains(prop.Name)) continue;
 
@@ -156,7 +156,7 @@ internal static class InstanceHelper
             var hasValueExpr = Expression.Call(propsParam, typeof(IDictionary<string, object?>).GetMethod("ContainsKey", new Type[] { typeof(string) })!, propNameExpr);
             var getValueExpr = Expression.Call(propsParam, typeof(IDictionary<string, object?>).GetMethod("get_Item", new Type[] { typeof(string) })!, propNameExpr);
             var defaultValueExpr = Expression.Default(prop.PropertyType);
-            
+
             // Use conditional to handle missing values
             var valueExpr = Expression.Condition(
                 hasValueExpr,

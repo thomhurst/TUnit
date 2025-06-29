@@ -17,15 +17,15 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
 {
     private readonly UnifiedTestBuilderPipeline _testBuilderPipeline;
     private readonly bool _enableDynamicDiscovery;
-    
+
     public string Uid => "TUnit";
     public string Version => "2.0.0";
     public string DisplayName => "TUnit Test Discovery";
     public string Description => "TUnit Unified Test Discovery Service";
     public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
-    
+
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
-    
+
     public TestDiscoveryServiceV2(
         UnifiedTestBuilderPipeline testBuilderPipeline,
         bool enableDynamicDiscovery = false)
@@ -33,7 +33,7 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
         _enableDynamicDiscovery = enableDynamicDiscovery;
     }
-    
+
     /// <summary>
     /// Discovers all tests using the unified pipeline
     /// </summary>
@@ -41,7 +41,7 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
     {
         const int DiscoveryTimeoutSeconds = 30;
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
-        
+
         try
         {
             return await DiscoverTestsWithTimeout(cts.Token);
@@ -53,18 +53,18 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                 "This may indicate an issue with data sources or excessive test generation.");
         }
     }
-    
+
     private async Task<IEnumerable<ExecutableTest>> DiscoverTestsWithTimeout(CancellationToken cancellationToken)
     {
         const int MaxTestsPerDiscovery = 50_000;
-        
+
         // Use the pipeline to build all tests
         var allTests = new List<ExecutableTest>();
-        
+
         await foreach (var test in BuildTestsAsync(cancellationToken))
         {
             allTests.Add(test);
-            
+
             if (allTests.Count > MaxTestsPerDiscovery)
             {
                 throw new InvalidOperationException(
@@ -72,35 +72,35 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                     "Consider reducing data source sizes or using test filters.");
             }
         }
-        
+
         // No longer using TestRegistry - tests are managed directly
-        
+
         // Resolve dependencies between tests
         ResolveDependencies(allTests);
-        
+
         return allTests;
     }
-    
+
     private async IAsyncEnumerable<ExecutableTest> BuildTestsAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var executableTests = await _testBuilderPipeline.BuildTestsAsync();
-        
+
         foreach (var test in executableTests)
         {
             cancellationToken.ThrowIfCancellationRequested();
             yield return test;
         }
     }
-    
+
     private void ResolveDependencies(List<ExecutableTest> allTests)
     {
         var testMap = allTests.ToDictionary(t => t.TestId);
-        
+
         foreach (var test in allTests)
         {
             var dependencies = new List<ExecutableTest>();
-            
+
             foreach (var dependencyName in test.Metadata.DependsOn)
             {
                 // Try exact match first
@@ -109,12 +109,12 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                     dependencies.Add(dependency);
                     continue;
                 }
-                
+
                 // Try matching by test name
-                var matchingTests = allTests.Where(t => 
+                var matchingTests = allTests.Where(t =>
                     t.Metadata.TestName == dependencyName ||
                     t.DisplayName == dependencyName).ToList();
-                
+
                 if (matchingTests.Count == 1)
                 {
                     dependencies.Add(matchingTests[0]);
@@ -131,11 +131,11 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                         $"Test '{test.DisplayName}' depends on '{dependencyName}' which was not found.");
                 }
             }
-            
+
             test.Dependencies = dependencies.ToArray();
         }
     }
-    
+
     /// <summary>
     /// ITestDiscoverer implementation for Microsoft.Testing.Platform
     /// </summary>
@@ -146,25 +146,25 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
     {
         var tests = await DiscoverTests();
         var testNodes = new List<TestNode>();
-        
+
         foreach (var test in tests)
         {
             var testNode = CreateTestNode(test);
             var message = new TestNodeUpdateMessage(
                 discoverTestExecutionRequest.Session.SessionUid,
                 testNode);
-            
+
             await messageBus.PublishAsync(this, message);
             testNodes.Add(testNode);
         }
-        
+
         return testNodes;
     }
-    
+
     private static TestNode CreateTestNode(ExecutableTest test)
     {
         var propertyList = new List<IProperty>();
-        
+
         // Add file location if available
         if (test.Metadata.FilePath != null && test.Metadata.LineNumber.HasValue)
         {
@@ -175,7 +175,7 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                     new LinePosition(test.Metadata.LineNumber.Value, 0)
                 )));
         }
-        
+
         // Add test method identifier
         propertyList.Add(new TestMethodIdentifierProperty(
             Namespace: test.Metadata.TestClassType.Namespace ?? "GlobalNamespace",
@@ -186,18 +186,18 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
             ReturnTypeFullName: "void",
             MethodArity: 0
         ));
-        
+
         // Add categories as metadata
         foreach (var category in test.Metadata.Categories)
         {
             propertyList.Add(new TestMetadataProperty(category));
         }
-        
+
         // Add TRX properties
         propertyList.Add(new TrxFullyQualifiedTypeNameProperty(
             test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name));
         propertyList.Add(new TrxCategoriesProperty(test.Metadata.Categories.ToArray()));
-        
+
         return new TestNode
         {
             Uid = new TestNodeUid(test.TestId),

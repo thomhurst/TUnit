@@ -50,8 +50,8 @@ public static class SourceInformationWriter
 
             foreach (var parameter in parameters)
             {
-                    GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
-                    null);
+                GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
+                null);
             }
 
             sourceCodeWriter.Append("],");
@@ -60,7 +60,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Append("Properties = ");
         var properties = namedTypeSymbol.GetMembersIncludingBase().OfType<IPropertySymbol>().ToArray();
 
-        if(properties.Length == 0)
+        if (properties.Length == 0)
         {
             sourceCodeWriter.Append("[],");
         }
@@ -121,8 +121,8 @@ public static class SourceInformationWriter
 
             foreach (var parameter in parameters)
             {
-                    GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
-                    null);
+                GenerateParameterInformation(sourceCodeWriter, context, parameter, ArgumentsType.ClassConstructor,
+                null);
             }
 
             sourceCodeWriter.Append("],");
@@ -138,7 +138,7 @@ public static class SourceInformationWriter
 
     public static void GenerateMembers(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? property, ArgumentsType argumentsType)
     {
-        if(parameters.Length == 0 && property is null)
+        if (parameters.Length == 0 && property is null)
         {
             sourceCodeWriter.Append("[],");
             return;
@@ -178,7 +178,7 @@ public static class SourceInformationWriter
         sourceCodeWriter.Append("ClassMetadata = null,");
 
         sourceCodeWriter.Append("}");
-            sourceCodeWriter.Append(",");
+        sourceCodeWriter.Append(",");
     }
 
 
@@ -271,7 +271,7 @@ public static class SourceInformationWriter
         // }
 
         sourceCodeWriter.Append("}");
-            sourceCodeWriter.Append(",");
+        sourceCodeWriter.Append(",");
 
         string GetTypeOrSubstitution(ITypeSymbol type)
         {

@@ -10,7 +10,7 @@ public class SimpleStaticTest
         Console.WriteLine("Simple test running");
         await Assert.That(1).IsEqualTo(1);
     }
-    
+
     [Test]
     [Arguments(1)]
     [Arguments(2)]

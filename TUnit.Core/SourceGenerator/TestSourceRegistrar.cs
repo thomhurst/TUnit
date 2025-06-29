@@ -17,7 +17,7 @@ public static class TestSourceRegistrar
         // For now, we'll skip this as it's part of the old architecture
         // The new architecture uses TestMetadataRegistry.RegisterSource() instead
     }
-    
+
     /// <summary>
     /// Legacy method for backwards compatibility.
     /// New code should use RegisterTests.

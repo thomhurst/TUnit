@@ -32,14 +32,14 @@ public static class GeneratedAotAsyncDataSourceExample
     public static class MyAsyncApiDataSource_AotFactory
     {
         public static async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataAsync(
-            DataGeneratorMetadata metadata, 
+            DataGeneratorMetadata metadata,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var generator = new MyAsyncApiDataSource();  // ✅ Direct strongly-typed instantiation!
 
             await foreach (var dataSourceFunc in generator.GenerateAsync(metadata).WithCancellation(cancellationToken))
             {
-                yield return async () => 
+                yield return async () =>
             {
                 var result = await dataSourceFunc();
                 return new object?[] { result };
@@ -48,7 +48,7 @@ public static class GeneratedAotAsyncDataSourceExample
         }
 
         public static async Task<IReadOnlyList<Func<Task<object?[]?>>>> GenerateDataListAsync(
-            DataGeneratorMetadata metadata, 
+            DataGeneratorMetadata metadata,
             CancellationToken cancellationToken = default)
         {
             var results = new List<Func<Task<object?[]?>>>();
@@ -67,7 +67,7 @@ public static class GeneratedAotAsyncDataSourceExample
     public static class MyAsyncTests_MyAsyncTest_AsyncDataResolver
     {
         public static async Task<IReadOnlyList<Func<Task<object?[]?>>>> ResolveAllAsyncDataAsync(
-            DataGeneratorMetadata metadata, 
+            DataGeneratorMetadata metadata,
             CancellationToken cancellationToken = default)
         {
             var allDataSources = new List<Func<Task<object?[]?>>>();
@@ -80,7 +80,7 @@ public static class GeneratedAotAsyncDataSourceExample
         }
 
         public static async Task<IReadOnlyList<object?[]?>> ResolveAndExecuteAllAsyncDataAsync(
-            DataGeneratorMetadata metadata, 
+            DataGeneratorMetadata metadata,
             CancellationToken cancellationToken = default)
         {
             var dataSources = await ResolveAllAsyncDataAsync(metadata, cancellationToken);
@@ -122,13 +122,13 @@ public class MyAsyncApiDataSource : AsyncDataSourceGeneratorAttribute<string>
     {
         // Simulate API calls that generate test data
         await Task.Delay(1); // Make method truly async to avoid warning
-        
+
         yield return async () =>
         {
             await Task.Delay(10); // Simulate network call
             return "API Result 1";
         };
-        
+
         yield return async () =>
         {
             await Task.Delay(10); // Simulate network call
@@ -144,8 +144,8 @@ public class MyAsyncTests
 {
     // [Test]
     // [MyAsyncApiDataSource]
-    public async Task MyAsyncTest(string apiResult) 
-    { 
+    public async Task MyAsyncTest(string apiResult)
+    {
         // Test implementation that uses async-generated data
         await Task.Delay(1);
     }

@@ -22,7 +22,7 @@ public sealed class TestExecutorAttribute([DynamicallyAccessedMembers(Dynamicall
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        context.SetTestExecutor((ITestExecutor)Activator.CreateInstance(type)!);
+        context.SetTestExecutor((ITestExecutor) Activator.CreateInstance(type)!);
         return default;
     }
 }

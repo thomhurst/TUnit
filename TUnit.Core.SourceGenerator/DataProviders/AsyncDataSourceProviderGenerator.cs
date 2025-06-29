@@ -18,7 +18,7 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
     public string GenerateProvider(AttributeData attribute, TestMetadataGenerationContext context, DataProviderType providerType)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        
+
         if (providerType == DataProviderType.ClassParameters)
         {
             GenerateAsyncDataSourceProviderForClass(writer, attribute, context);
@@ -27,7 +27,7 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
         {
             GenerateAsyncDataSourceProviderForMethod(writer, attribute, context);
         }
-        
+
         return writer.ToString().Trim();
     }
 
@@ -47,21 +47,21 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
     {
         // Create async generator with compile-time metadata for class constructor parameters
         var attrType = attribute.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
-        
+
         writer.Append($"new TUnit.Core.AsyncDataGeneratorProvider(new {attrType}(), ");
         writer.Append("new TUnit.Core.CompileTimeDataGeneratorMetadata { ");
-        
+
         // Generate MembersToGenerate array from constructor parameters
         writer.Append("MembersToGenerate = new TUnit.Core.MemberMetadata[] { ");
-        
+
         // Find the constructor
         var constructors = context.TestInfo.TypeSymbol.Constructors
             .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
             .OrderBy(c => c.Parameters.Length)
             .ToList();
-        
+
         var constructor = constructors.FirstOrDefault(c => c.Parameters.Length > 0) ?? constructors.FirstOrDefault();
-        
+
         if (constructor != null)
         {
             var parameters = constructor.Parameters;
@@ -78,9 +78,9 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
                 writer.Append("}");
             }
         }
-        
+
         writer.Append(" }, ");
-        
+
         // Set other required properties
         writer.Append($"TestInformation = {GenerateMethodMetadataUsingWriter(context.TestInfo)}, ");
         writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.ClassParameters ");
@@ -91,13 +91,13 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
     {
         // Create async generator with compile-time metadata
         var attrType = attribute.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
-        
+
         writer.Append($"new TUnit.Core.AsyncDataGeneratorProvider(new {attrType}(), ");
         writer.Append("new TUnit.Core.CompileTimeDataGeneratorMetadata { ");
-        
+
         // Generate MembersToGenerate array from method parameters
         writer.Append("MembersToGenerate = new TUnit.Core.MemberMetadata[] { ");
-        
+
         var parameters = context.TestInfo.MethodSymbol.Parameters;
         for (int i = 0; i < parameters.Length; i++)
         {
@@ -111,9 +111,9 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
             writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(param.GetAttributes(), param, 0)} ");
             writer.Append("}");
         }
-        
+
         writer.Append(" }, ");
-        
+
         // Set other required properties
         writer.Append($"TestInformation = {GenerateMethodMetadataUsingWriter(context.TestInfo)}, ");
         writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.TestParameters ");
@@ -123,23 +123,23 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
     private static string GenerateParameterTypesArray(IEnumerable<IParameterSymbol> parameters)
     {
         var parameterList = parameters.ToList();
-        
+
         if (!parameterList.Any())
         {
             return "System.Type.EmptyTypes";
         }
-        
+
         // Check if any parameter contains type parameters
         if (parameterList.Any(p => ContainsTypeParameter(p.Type)))
         {
             // Return null to indicate that parameter type matching should be done at runtime
             return "null";
         }
-        
+
         var parameterTypes = parameterList
             .Select(p => $"typeof({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))})")
             .ToArray();
-            
+
         return $"new System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
     }
 
@@ -171,10 +171,10 @@ internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
     private static string GenerateMethodMetadataUsingWriter(TestMethodMetadata testInfo)
     {
         using var writer = new CodeWriter("", includeHeader: false);
-        
+
         // Use the existing writer to generate the metadata
         SourceInformationWriter.GenerateMethodInformation(writer, testInfo.Context, testInfo.TypeSymbol, testInfo.MethodSymbol, null, ',');
-        
+
         // Remove the trailing comma and newline
         var result = writer.ToString().TrimEnd('\r', '\n', ',');
         return result;

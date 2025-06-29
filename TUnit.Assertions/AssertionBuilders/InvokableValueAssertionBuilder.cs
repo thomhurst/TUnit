@@ -20,10 +20,10 @@ public class InvokableValueAssertionBuilder<TActual>(ISource source) : Invokable
     }
 
     internal AssertionBuilder AssertionBuilder => this;
-    
+
     public ValueAnd<TActual> And => new(new AndAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.And)));
     public ValueOr<TActual> Or => new(new OrAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.Or)));
-    
+
     public new TaskAwaiter<TActual?> GetAwaiter()
     {
         return AssertAndGet().GetAwaiter();

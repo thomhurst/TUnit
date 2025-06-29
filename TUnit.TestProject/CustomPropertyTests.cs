@@ -28,7 +28,7 @@ public class CustomPropertyTests
 
     private static ImmutableDictionary<string, IReadOnlyList<string>> GetDictionary()
     {
-        return TestContext.Current?.TestDetails.CustomProperties.ToImmutableDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Value)
+        return TestContext.Current?.TestDetails.CustomProperties.ToImmutableDictionary(x => x.Key, x => (IReadOnlyList<string>) x.Value)
             ?? ImmutableDictionary<string, IReadOnlyList<string>>.Empty;
     }
 

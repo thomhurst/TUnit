@@ -37,7 +37,7 @@ public class DependsOnConflictAnalyzerTests
                 .WithLocation(1)
         );
     }
-    
+
     [Test]
     public async Task Direct_Conflict_Other_Class_Raises_Error()
     {
@@ -86,7 +86,7 @@ public class DependsOnConflictAnalyzerTests
                 .WithLocation(2)
         );
     }
-    
+
     [Test]
     public async Task Direct_Conflict_Other_Class_Raises_Error_GenericAttribute()
     {
@@ -135,7 +135,7 @@ public class DependsOnConflictAnalyzerTests
                 .WithLocation(2)
         );
     }
-    
+
     [Test]
     public async Task No_Conflict_Raises_Nothing_GenericAttribute()
     {
@@ -173,7 +173,7 @@ public class DependsOnConflictAnalyzerTests
             """
         );
     }
-        
+
     [Test]
     public async Task No_Conflict_Raises_Nothing()
     {
@@ -211,7 +211,7 @@ public class DependsOnConflictAnalyzerTests
             """
         );
     }
-    
+
     [Test]
     public async Task No_Conflict_Base_Class_Raises_Nothing()
     {
@@ -239,7 +239,7 @@ public class DependsOnConflictAnalyzerTests
             """
         );
     }
-    
+
     [Test]
     public async Task Direct_Conflict_Other_Class_Raises_Error2()
     {
@@ -267,25 +267,25 @@ public class DependsOnConflictAnalyzerTests
                     }
                 }
                 """,
-                
+
                 Verifier
                     .Diagnostic(Rules.DependsOnConflicts)
                     .WithMessage("DependsOn Conflicts: MyClass1.Test > MyClass2.Test2 > MyClass1.Test")
                     .WithLocation(0),
-                
+
                 Verifier
                     .Diagnostic(Rules.DependsOnConflicts)
                     .WithMessage("DependsOn Conflicts: MyClass2.Test2 > MyClass1.Test > MyClass2.Test2")
                     .WithLocation(1)
             );
     }
-    
+
     [Test]
     public async Task Not_Found_Test_Raises_Error()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using System.Threading.Tasks;
                 using TUnit.Core;
 
@@ -309,13 +309,13 @@ public class DependsOnConflictAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task Nested_Conflict_Raises_Error()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using System.Threading.Tasks;
                 using TUnit.Core;
 
@@ -374,13 +374,13 @@ public class DependsOnConflictAnalyzerTests
                     .WithLocation(4)
             );
     }
-    
+
     [Test]
     public async Task Deep_Nested_With_Direct_Conflict()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using System.Threading.Tasks;
                 using TUnit.Core;
 
@@ -452,20 +452,20 @@ public class DependsOnConflictAnalyzerTests
                     .Diagnostic(Rules.DependsOnConflicts)
                     .WithMessage("DependsOn Conflicts: MyClass.Test9 > MyClass.Test10 > MyClass.Test9")
                     .WithLocation(0),
-                
+
                 Verifier
                     .Diagnostic(Rules.DependsOnConflicts)
                     .WithMessage("DependsOn Conflicts: MyClass.Test10 > MyClass.Test9 > MyClass.Test10")
                     .WithLocation(1)
             );
     }
-    
+
     [Test]
     public async Task Deep_Nested_With_Indirect_Conflict()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using System.Threading.Tasks;
                 using TUnit.Core;
 
@@ -537,12 +537,12 @@ public class DependsOnConflictAnalyzerTests
                     .Diagnostic(Rules.DependsOnConflicts)
                     .WithMessage("DependsOn Conflicts: MyClass.Test8 > MyClass.Test9 > MyClass.Test10 > MyClass.Test8")
                     .WithLocation(0),
-                
+
                 Verifier
                     .Diagnostic(Rules.DependsOnConflicts)
                     .WithMessage("DependsOn Conflicts: MyClass.Test9 > MyClass.Test10 > MyClass.Test8 > MyClass.Test9")
                     .WithLocation(1),
-                
+
                 Verifier
                     .Diagnostic(Rules.DependsOnConflicts)
                     .WithMessage("DependsOn Conflicts: MyClass.Test10 > MyClass.Test8 > MyClass.Test9 > MyClass.Test10")

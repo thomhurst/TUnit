@@ -9,12 +9,12 @@ public class LanguageVersionCheckGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var settings = context.CompilationProvider
-            .Select((c, _)  => 
+            .Select((c, _) =>
             {
                 LanguageVersion? csharpVersion = c is CSharpCompilation comp
                     ? comp.LanguageVersion
                     : null;
-                
+
                 return csharpVersion;
             });
 
@@ -24,8 +24,8 @@ public class LanguageVersionCheckGenerator : IIncrementalGenerator
             {
                 return;
             }
-            
-            if((int)languageVersion.Value < 1200)
+
+            if ((int) languageVersion.Value < 1200)
             {
                 sourceProductionContext.ReportDiagnostic(Diagnostic.Create(
                     new DiagnosticDescriptor(

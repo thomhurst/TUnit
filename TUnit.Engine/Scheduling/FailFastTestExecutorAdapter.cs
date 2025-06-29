@@ -19,7 +19,7 @@ internal sealed class FailFastTestExecutorAdapter : ITestExecutor, IDataProducer
     private readonly bool _isFailFastEnabled;
     private readonly CancellationTokenSource _failFastCancellationSource;
     private readonly TUnitFrameworkLogger _logger;
-    
+
     // IDataProducer implementation
     public string Uid => "TUnit.FailFastTestExecutorAdapter";
     public string Version => "1.0.0";
@@ -27,7 +27,7 @@ internal sealed class FailFastTestExecutorAdapter : ITestExecutor, IDataProducer
     public string Description => "Test executor adapter with fail-fast support";
     public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
-    
+
     public FailFastTestExecutorAdapter(
         ISingleTestExecutor innerExecutor,
         IMessageBus messageBus,
@@ -43,33 +43,33 @@ internal sealed class FailFastTestExecutorAdapter : ITestExecutor, IDataProducer
         _failFastCancellationSource = failFastCancellationSource;
         _logger = logger;
     }
-    
+
     public async Task ExecuteTestAsync(ExecutableTest test, CancellationToken cancellationToken)
     {
         test.State = TestState.Running;
         test.StartTime = DateTimeOffset.UtcNow;
-        
+
         // Ensure test context is initialized
         if (test.Context == null)
         {
             test.Context = new TestContext(test.TestId, test.DisplayName);
         }
-        
+
         // Report test started
         await _messageBus.PublishAsync(
             this,
             new TestNodeUpdateMessage(
                 _sessionUid,
                 test.Context.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
-        
+
         try
         {
             // Execute the test and get the result message
             var updateMessage = await _innerExecutor.ExecuteTestAsync(test, _messageBus, cancellationToken);
-            
+
             // Publish the result
             await _messageBus.PublishAsync(this, updateMessage);
-            
+
             // Check if we should trigger fail-fast
             if (_isFailFastEnabled && test.Result?.Status == Status.Failed)
             {
@@ -90,24 +90,24 @@ internal sealed class FailFastTestExecutorAdapter : ITestExecutor, IDataProducer
                 Exception = ex,
                 ComputerName = Environment.MachineName
             };
-            
+
             // Report the failure
             await _messageBus.PublishAsync(
                 this,
                 new TestNodeUpdateMessage(
                     _sessionUid,
                     test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(ex))));
-            
+
             // Log the exception
             await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}");
-            
+
             // If fail-fast is enabled, cancel all remaining tests
             if (_isFailFastEnabled)
             {
                 await _logger.LogErrorAsync("Unhandled exception occurred. Triggering fail-fast cancellation.");
                 _failFastCancellationSource.Cancel();
             }
-            
+
             // Re-throw to maintain existing behavior
             throw;
         }

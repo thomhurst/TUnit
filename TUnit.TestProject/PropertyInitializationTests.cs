@@ -7,10 +7,10 @@ public class PropertyInitializationTests
 {
     [TestData]
     public required InitializableProperty? TestProperty { get; set; }
-    
+
     [NestedDataGenerator]
     public required PropertyWithNestedDependencies? NestedProperty { get; set; }
-    
+
     [Test]
     public async Task Property_With_IDataAttribute_Should_Be_Initialized()
     {
@@ -18,7 +18,7 @@ public class PropertyInitializationTests
         await Assert.That(TestProperty).IsNotNull();
         await Assert.That(TestProperty!.IsInitialized).IsTrue();
     }
-    
+
     [Test]
     public async Task Nested_Properties_Should_Be_Initialized_Before_Parent()
     {
@@ -36,7 +36,7 @@ public class PropertyInitializationTests
 public class InitializableProperty : IAsyncInitializer
 {
     public bool IsInitialized { get; private set; }
-    
+
     public Task InitializeAsync()
     {
         IsInitialized = true;
@@ -48,16 +48,16 @@ public class PropertyWithNestedDependencies : IAsyncInitializer
 {
     public NestedDependency? NestedDependency { get; set; }
     public bool IsInitialized { get; private set; }
-    
+
     public Task InitializeAsync()
     {
         // This should be called AFTER nested dependencies are initialized
-        if (NestedDependency?.IsInitialized != true || 
+        if (NestedDependency?.IsInitialized != true ||
             NestedDependency?.DeepDependency?.IsInitialized != true)
         {
             throw new InvalidOperationException("Nested dependencies should be initialized first!");
         }
-        
+
         IsInitialized = true;
         return Task.CompletedTask;
     }
@@ -67,7 +67,7 @@ public class NestedDependency : IAsyncInitializer
 {
     public DeepDependency? DeepDependency { get; set; }
     public bool IsInitialized { get; private set; }
-    
+
     public Task InitializeAsync()
     {
         // This should be called AFTER deep dependency is initialized
@@ -75,7 +75,7 @@ public class NestedDependency : IAsyncInitializer
         {
             throw new InvalidOperationException("Deep dependency should be initialized first!");
         }
-        
+
         IsInitialized = true;
         return Task.CompletedTask;
     }
@@ -84,7 +84,7 @@ public class NestedDependency : IAsyncInitializer
 public class DeepDependency : IAsyncInitializer
 {
     public bool IsInitialized { get; private set; }
-    
+
     public Task InitializeAsync()
     {
         IsInitialized = true;
@@ -107,7 +107,7 @@ public class NestedDataGeneratorAttribute : AsyncDataSourceGeneratorAttribute<Pr
                     DeepDependency = new DeepDependency()
                 }
             };
-            
+
             return await Task.FromResult(property);
         };
     }

@@ -14,7 +14,7 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
     /// Gets the reason why the test is skipped
     /// </summary>
     public string Reason { get; }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SkipAttribute"/> class
     /// </summary>
@@ -23,10 +23,10 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
     {
         Reason = reason;
     }
-    
+
     /// <inheritdoc />
     public int Order => int.MinValue;
-    
+
     /// <inheritdoc />
     public async ValueTask OnTestRegistered(TestRegisteredContext context)
     {
@@ -36,7 +36,7 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
             context.TestContext.SkipReason = Reason;
         }
     }
-    
+
     /// <summary>
     /// Determines whether the test should be skipped
     /// </summary>

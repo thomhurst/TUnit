@@ -10,7 +10,7 @@ public static class TestAttributeExtensions
     /// <summary>
     /// Gets all TestAttributeMetadata instances of a specific type
     /// </summary>
-    public static IEnumerable<AttributeMetadata> OfAttributeType<TAttribute>(this IEnumerable<AttributeMetadata> attributes) 
+    public static IEnumerable<AttributeMetadata> OfAttributeType<TAttribute>(this IEnumerable<AttributeMetadata> attributes)
         where TAttribute : Attribute
     {
         return attributes.Where(ta => ta.Instance is TAttribute);
@@ -22,13 +22,13 @@ public static class TestAttributeExtensions
     public static IEnumerable<TAttribute> OfType<TAttribute>(this IEnumerable<AttributeMetadata> attributes)
         where TAttribute : Attribute
     {
-        return attributes.Where(ta => ta.Instance is TAttribute).Select(ta => (TAttribute)ta.Instance);
+        return attributes.Where(ta => ta.Instance is TAttribute).Select(ta => (TAttribute) ta.Instance);
     }
 
     /// <summary>
     /// Gets the first TestAttributeMetadata instance of a specific type, or null if not found
     /// </summary>
-    public static AttributeMetadata? FirstOfAttributeType<TAttribute>(this IEnumerable<AttributeMetadata> attributes) 
+    public static AttributeMetadata? FirstOfAttributeType<TAttribute>(this IEnumerable<AttributeMetadata> attributes)
         where TAttribute : Attribute
     {
         return attributes.FirstOrDefault(ta => ta.Instance is TAttribute);
@@ -37,7 +37,7 @@ public static class TestAttributeExtensions
     /// <summary>
     /// Gets the attribute instance as a specific type
     /// </summary>
-    public static TAttribute? GetInstance<TAttribute>(this AttributeMetadata attribute) 
+    public static TAttribute? GetInstance<TAttribute>(this AttributeMetadata attribute)
         where TAttribute : Attribute
     {
         return attribute.Instance as TAttribute;
@@ -46,7 +46,7 @@ public static class TestAttributeExtensions
     /// <summary>
     /// Checks if a TestAttributeMetadata has a specific attribute type
     /// </summary>
-    public static bool IsAttributeType<TAttribute>(this AttributeMetadata attribute) 
+    public static bool IsAttributeType<TAttribute>(this AttributeMetadata attribute)
         where TAttribute : Attribute
     {
         return attribute.Instance is TAttribute;

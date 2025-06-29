@@ -13,7 +13,7 @@ public sealed class DagTestScheduler : ITestScheduler
     private readonly IProgressMonitor _progressMonitor;
     private readonly TUnitFrameworkLogger _logger;
     private readonly TimeSpan _testTimeout;
-    
+
     public DagTestScheduler(
         IParallelismStrategy parallelismStrategy,
         IProgressMonitor progressMonitor,
@@ -25,7 +25,7 @@ public sealed class DagTestScheduler : ITestScheduler
         _logger = logger;
         _testTimeout = testTimeout ?? TimeSpan.FromMinutes(5);
     }
-    
+
     public async Task ScheduleAndExecuteAsync(
         IEnumerable<ExecutableTest> tests,
         ITestExecutor executor,
@@ -33,21 +33,21 @@ public sealed class DagTestScheduler : ITestScheduler
     {
         var testList = tests.ToList();
         if (!testList.Any()) return;
-        
+
         // Build execution state
         var executionGraph = BuildExecutionGraph(testList);
-        
+
         // Validate for circular dependencies
         ValidateDependencies(executionGraph);
-        
+
         // Execute tests
         await ExecuteTestsAsync(executionGraph, executor, cancellationToken);
     }
-    
+
     private Dictionary<string, TestExecutionState> BuildExecutionGraph(List<ExecutableTest> tests)
     {
         var graph = tests.ToDictionary(t => t.TestId, t => new TestExecutionState(t));
-        
+
         // Build dependency relationships
         foreach (var test in tests)
         {
@@ -59,16 +59,16 @@ public sealed class DagTestScheduler : ITestScheduler
                 }
             }
         }
-        
+
         return graph;
     }
-    
+
     private void ValidateDependencies(Dictionary<string, TestExecutionState> graph)
     {
         // Topological sort to detect cycles
         var visited = new HashSet<string>();
         var recursionStack = new HashSet<string>();
-        
+
         foreach (var testId in graph.Keys)
         {
             if (!visited.Contains(testId))
@@ -81,7 +81,7 @@ public sealed class DagTestScheduler : ITestScheduler
             }
         }
     }
-    
+
     private bool HasCycle(
         string testId,
         Dictionary<string, TestExecutionState> graph,
@@ -90,13 +90,13 @@ public sealed class DagTestScheduler : ITestScheduler
     {
         visited.Add(testId);
         recursionStack.Add(testId);
-        
+
         var state = graph[testId];
         foreach (var dependencyId in state.Test.Dependencies.Select(d => d.TestId))
         {
             if (!graph.ContainsKey(dependencyId))
                 continue;
-                
+
             if (!visited.Contains(dependencyId))
             {
                 if (HasCycle(dependencyId, graph, visited, recursionStack))
@@ -107,11 +107,11 @@ public sealed class DagTestScheduler : ITestScheduler
                 return true;
             }
         }
-        
+
         recursionStack.Remove(testId);
         return false;
     }
-    
+
     private async Task ExecuteTestsAsync(
         Dictionary<string, TestExecutionState> graph,
         ITestExecutor executor,
@@ -119,20 +119,20 @@ public sealed class DagTestScheduler : ITestScheduler
     {
         var readyQueue = new ConcurrentQueue<TestExecutionState>();
         var completionTracker = new TestCompletionTracker(graph, readyQueue);
-        
+
         // Enqueue tests with no dependencies
         foreach (var state in graph.Values.Where(s => s.RemainingDependencies == 0))
         {
             readyQueue.Enqueue(state);
         }
-        
+
         // Start progress monitoring
         using var progressCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var progressTask = _progressMonitor.MonitorProgressAsync(completionTracker, progressCts.Token);
-        
+
         // Start worker tasks
         var workers = CreateWorkers(readyQueue, graph, executor, completionTracker, progressCts.Token);
-        
+
         try
         {
             await Task.WhenAll(workers);
@@ -156,7 +156,7 @@ public sealed class DagTestScheduler : ITestScheduler
             }
         }
     }
-    
+
     private Task[] CreateWorkers(
         ConcurrentQueue<TestExecutionState> readyQueue,
         Dictionary<string, TestExecutionState> graph,
@@ -167,12 +167,12 @@ public sealed class DagTestScheduler : ITestScheduler
         var workerCount = _parallelismStrategy.CurrentParallelism;
         var workers = new Task[workerCount];
         var workStealingQueues = new WorkStealingQueue<TestExecutionState>[workerCount];
-        
+
         for (int i = 0; i < workerCount; i++)
         {
             workStealingQueues[i] = new WorkStealingQueue<TestExecutionState>();
         }
-        
+
         for (int i = 0; i < workerCount; i++)
         {
             var workerId = i;
@@ -188,10 +188,10 @@ public sealed class DagTestScheduler : ITestScheduler
                     cancellationToken);
             }, cancellationToken);
         }
-        
+
         return workers;
     }
-    
+
     private async Task WorkerLoopAsync(
         int workerId,
         ConcurrentQueue<TestExecutionState> globalQueue,
@@ -202,11 +202,11 @@ public sealed class DagTestScheduler : ITestScheduler
         CancellationToken cancellationToken)
     {
         var localQueue = workStealingQueues[workerId];
-        
+
         while (!cancellationToken.IsCancellationRequested)
         {
             TestExecutionState? state = null;
-            
+
             // Try local queue first
             if (localQueue.TryDequeue(out state) ||
                 // Then global queue
@@ -239,14 +239,14 @@ public sealed class DagTestScheduler : ITestScheduler
             }
         }
     }
-    
+
     private bool TryStealWork(
         int workerId,
         WorkStealingQueue<TestExecutionState>[] queues,
         out TestExecutionState? state)
     {
         state = null;
-        
+
         for (int i = 1; i < queues.Length; i++)
         {
             var targetId = (workerId + i) % queues.Length;
@@ -255,10 +255,10 @@ public sealed class DagTestScheduler : ITestScheduler
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     private async Task ExecuteTestWithTimeoutAsync(
         TestExecutionState state,
         ITestExecutor executor,
@@ -268,7 +268,7 @@ public sealed class DagTestScheduler : ITestScheduler
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutCts.CancelAfter(_testTimeout);
         state.TimeoutCts = timeoutCts;
-        
+
         try
         {
             state.State = TestState.Running;

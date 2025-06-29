@@ -12,7 +12,7 @@ public class MethodDataSourceWithParametersTest
         await Assert.That(value).IsGreaterThan(0);
         await Assert.That(text).IsNotNull();
     }
-    
+
     public static IEnumerable<object[]> GetDataWithParameters(int multiplier, string prefix)
     {
         yield return new object[] { 1 * multiplier, $"{prefix}_1" };

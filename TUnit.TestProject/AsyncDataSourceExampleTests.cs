@@ -10,13 +10,13 @@ public class AsyncApiDataSource : AsyncDataSourceGeneratorAttribute<string>
             await Task.Delay(10); // Simulate network delay
             return "API Result 1";
         };
-        
+
         yield return async () =>
         {
             await Task.Delay(10); // Simulate network delay
             return "API Result 2";
         };
-        
+
         yield return async () =>
         {
             await Task.Delay(10); // Simulate network delay
@@ -31,19 +31,19 @@ public class AsyncUserDataSource : AsyncDataSourceGeneratorAttribute<int, string
     {
         // Simulate fetching users from a database
         await Task.Delay(5); // Simulate initial DB connection
-        
+
         yield return async () =>
         {
             await Task.Delay(5); // Simulate query delay
             return (1, "Alice");
         };
-        
+
         yield return async () =>
         {
             await Task.Delay(5); // Simulate query delay
             return (2, "Bob");
         };
-        
+
         yield return async () =>
         {
             await Task.Delay(5); // Simulate query delay
@@ -62,7 +62,7 @@ public class AsyncUntypedDataSource : AsyncUntypedDataSourceGeneratorAttribute
             await Task.Delay(10);
             return new object?[] { 42, "Answer", true };
         };
-        
+
         yield return async () =>
         {
             await Task.Delay(10);
@@ -82,7 +82,7 @@ public class AsyncDataSourceExampleTests
         await Assert.That(apiResult).IsNotNull();
         await Assert.That(apiResult).Contains("API Result");
     }
-    
+
     [Test]
     [AsyncUserDataSource]
     public async Task TestWithAsyncUserData(int userId, string userName)
@@ -92,7 +92,7 @@ public class AsyncDataSourceExampleTests
         await Assert.That(userId).IsGreaterThan(0);
         await Assert.That(userName).IsNotEmpty();
     }
-    
+
     [Test]
     [AsyncUntypedDataSource]
     public async Task TestWithAsyncUntypedData(int number, string text, bool flag)

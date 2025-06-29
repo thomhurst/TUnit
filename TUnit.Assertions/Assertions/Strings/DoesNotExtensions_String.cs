@@ -15,18 +15,18 @@ public static partial class DoesNotExtensions
     {
         return DoesNotContain(valueSource, expected, StringComparison.Ordinal);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> DoesNotContain(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new StringNotContainsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return DoesNotStartWith(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
@@ -39,13 +39,13 @@ public static partial class DoesNotExtensions
             $"not start with {expected}")
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
-    
-        
+
+
     public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return DoesNotEndWith(valueSource, expected, StringComparison.Ordinal);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
@@ -58,12 +58,12 @@ public static partial class DoesNotExtensions
             $"not end with {expected}")
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> DoesNotMatch(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
     {
         return DoesNotMatch(valueSource, new Regex(regex), expression);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> DoesNotMatch(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, Regex>(regex,

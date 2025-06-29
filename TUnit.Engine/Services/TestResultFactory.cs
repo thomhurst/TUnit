@@ -10,8 +10,8 @@ internal sealed class TestResultFactory : ITestResultFactory
     public TestResult CreatePassedResult(DateTimeOffset startTime)
     {
         var endTime = DateTimeOffset.Now;
-        return new TestResult 
-        { 
+        return new TestResult
+        {
             Status = Core.Enums.Status.Passed,
             Start = startTime,
             End = endTime,
@@ -20,7 +20,7 @@ internal sealed class TestResultFactory : ITestResultFactory
             ComputerName = Environment.MachineName
         };
     }
-    
+
     public TestResult CreateFailedResult(DateTimeOffset startTime, Exception exception)
     {
         var endTime = DateTimeOffset.Now;
@@ -34,7 +34,7 @@ internal sealed class TestResultFactory : ITestResultFactory
             ComputerName = Environment.MachineName
         };
     }
-    
+
     public TestResult CreateSkippedResult(DateTimeOffset startTime, string reason)
     {
         var endTime = DateTimeOffset.Now;
@@ -49,7 +49,7 @@ internal sealed class TestResultFactory : ITestResultFactory
             OverrideReason = reason
         };
     }
-    
+
     public TestResult CreateTimeoutResult(DateTimeOffset startTime, int timeoutMs)
     {
         var endTime = DateTimeOffset.Now;

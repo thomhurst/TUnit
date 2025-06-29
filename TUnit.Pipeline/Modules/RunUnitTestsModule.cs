@@ -13,7 +13,7 @@ public class RunUnitTestsModule : TestBaseModule
     protected override Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.UnitTests.csproj").AssertExists();
-        
+
         return Task.FromResult(new DotNetRunOptions
         {
             WorkingDirectory = project.Folder!,

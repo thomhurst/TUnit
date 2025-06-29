@@ -14,7 +14,7 @@ public static class WellKnown
 
         public static readonly FullyQualifiedTypeName BeforeEveryAttribute = GetTypeName("BeforeEveryAttribute");
         public static readonly FullyQualifiedTypeName AfterEveryAttribute = GetTypeName("AfterEveryAttribute");
-        
+
         public static readonly FullyQualifiedTypeName Test = GetTypeName("TestAttribute");
         public static readonly FullyQualifiedTypeName Arguments = GetTypeName("ArgumentsAttribute");
         public static readonly FullyQualifiedTypeName MethodDataSource = GetTypeName("MethodDataSourceAttribute");
@@ -33,7 +33,7 @@ public static class WellKnown
 
         public static readonly FullyQualifiedTypeName NotInParallelAttribute = GetTypeName("NotInParallelAttribute");
         public static readonly FullyQualifiedTypeName DependsOnAttribute = GetTypeName("DependsOnAttribute");
-        
+
         public static readonly FullyQualifiedTypeName IDataAttribute = GetTypeName("IDataAttribute");
         public static readonly FullyQualifiedTypeName IAsyncDataSourceGeneratorAttribute = GetTypeName("IAsyncDataSourceGeneratorAttribute");
         public static readonly FullyQualifiedTypeName IAsyncUntypedDataSourceGeneratorAttribute = GetTypeName("IAsyncUntypedDataSourceGeneratorAttribute");

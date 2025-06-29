@@ -9,7 +9,7 @@ public static class FailedTestInitializationWriter
         TestSourceDataModel testSourceDataModel)
     {
         var testId = testSourceDataModel.TestId;
-        
+
         sourceBuilder.Append($"discoveryFailures.Add(new DiscoveryFailure");
         sourceBuilder.Append("{");
         sourceBuilder.Append($"TestId = $\"{testId}\",");
@@ -20,16 +20,16 @@ public static class FailedTestInitializationWriter
         sourceBuilder.Append($"TestMethodName = \"{testSourceDataModel.MethodName}\"");
         sourceBuilder.Append("});");
     }
-    
+
     public static void GenerateFailedTestCode(ICodeWriter sourceBuilder,
         DynamicTestSourceDataModel testSourceDataModel)
     {
         var testId = $"{testSourceDataModel.Class.GloballyQualified()}{testSourceDataModel.Method.Name}";
-        
+
         sourceBuilder.Append("return");
         sourceBuilder.Append("[");
         sourceBuilder.Append($"new FailedDynamicTest<{testSourceDataModel.Class.GloballyQualified()}>");
-        sourceBuilder.Append("{"); 
+        sourceBuilder.Append("{");
         sourceBuilder.Append($"TestId = @\"{testId}\",");
         sourceBuilder.Append($"MethodName = $\"{testSourceDataModel.Method.Name}\",");
         sourceBuilder.Append($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.Class.Name}.{testSourceDataModel.Method.Name} failed to initialize\", exception),");

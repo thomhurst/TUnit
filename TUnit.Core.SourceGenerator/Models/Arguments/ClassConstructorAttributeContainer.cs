@@ -20,7 +20,7 @@ public record ClassConstructorAttributeContainer(ArgumentsType ArgumentsType) : 
     {
         // Nothing
     }
-    
+
     public override string[] GetArgumentTypes()
     {
         return [];

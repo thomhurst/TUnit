@@ -23,7 +23,7 @@ internal class ParametersCommandProvider(IExtension extension) : ICommandLineOpt
     public string Description => extension.Description;
 
     public readonly Regex Regex = new("^.+=.*$");
-    
+
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
         return

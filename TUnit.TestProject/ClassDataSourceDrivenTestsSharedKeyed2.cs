@@ -40,7 +40,7 @@ public class ClassDataSourceDrivenTestsSharedKeyed2
     [After(Assembly)]
     public static async Task AssertAfter(AssemblyHookContext assemblyHookContext)
     {
-        if(assemblyHookContext.TestClasses.Any(x => x.ClassType != typeof(ClassDataSourceDrivenTestsSharedKeyed3)))
+        if (assemblyHookContext.TestClasses.Any(x => x.ClassType != typeof(ClassDataSourceDrivenTestsSharedKeyed3)))
         {
             return; // Skip if this class is not executed
         }

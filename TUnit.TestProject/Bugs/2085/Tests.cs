@@ -11,7 +11,7 @@ public class Tests
     {
         await Assert.That(d).IsNotEqualTo(0);
     }
-    
+
     [Test]
     [MatrixDataSource]
     public async Task Float_SpecialConsts([Matrix(float.NaN, float.PositiveInfinity, float.NegativeInfinity)] float d)

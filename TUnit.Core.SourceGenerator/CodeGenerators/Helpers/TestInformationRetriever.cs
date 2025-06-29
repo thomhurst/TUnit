@@ -37,17 +37,17 @@ public static class TestInformationRetriever
         {
             writer.Append($"CL-ARGS{classLevelArgumentsContainer.AttributeIndex}:");
         }
-        
+
         if (testGenerationContext.ClassArguments is ClassConstructorAttributeContainer classLevelClassConstructorAttribute)
         {
             writer.Append($"CL-CCA{classLevelClassConstructorAttribute.AttributeIndex}:");
         }
-        
+
         if (testGenerationContext.ClassArguments is AsyncDataSourceGeneratorContainer classLevelGeneratedArgumentsContainer)
         {
             writer.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
-        
+
         if (testGenerationContext.TestArguments is DataSourceAttributeContainer { Attribute.AttributeClass: not null } testMethodDataAttributeContainer)
         {
             writer.Append($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
@@ -64,30 +64,30 @@ public static class TestInformationRetriever
         {
             writer.Append($"TL-ARGS{testLevelArgumentsContainer.AttributeIndex}:");
         }
-        
+
         if (testGenerationContext.TestArguments is AsyncDataSourceGeneratorContainer testLevelGeneratedArgumentsContainer)
         {
             writer.Append($"TL-GAC{testLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
-        
+
         var fullyQualifiedClassName =
             testGenerationContext.ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
         writer.Append(fullyQualifiedClassName);
-        
+
         var classParameters = testGenerationContext.ClassSymbol.Constructors.SafeFirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
-        
+
         var classParameterTypes = GetTypes(classParameters);
 
         if (!string.IsNullOrEmpty(classParameterTypes))
         {
             writer.Append(classParameterTypes);
         }
-        
+
         writer.Append(".");
-        
+
         var testName = testGenerationContext.MethodSymbol.Name;
-        
+
         writer.Append(testName);
 
         var methodParameterTypes = GetTypes(testGenerationContext.MethodSymbol.Parameters);
@@ -96,11 +96,11 @@ public static class TestInformationRetriever
         {
             writer.Append(methodParameterTypes);
         }
-        
+
         writer.Append(":");
-        
+
         writer.Append(testGenerationContext.CurrentRepeatAttempt.ToString());
-        
+
         return writer.ToString().Trim();
     }
 
@@ -113,7 +113,7 @@ public static class TestInformationRetriever
 
         var parameterTypesFullyQualified = parameters.Select(x => x.Type)
             .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix));
-        
+
         return $"({string.Join(",", parameterTypesFullyQualified)})";
     }
 }

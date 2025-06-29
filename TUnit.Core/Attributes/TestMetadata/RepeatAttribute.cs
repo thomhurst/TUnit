@@ -12,7 +12,7 @@ public sealed class RepeatAttribute : TUnitAttribute
         {
             throw new ArgumentOutOfRangeException(nameof(times), "Repeat times must be positive");
         }
-        
+
         Times = times;
     }
 }

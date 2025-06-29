@@ -18,7 +18,7 @@ public class DataSourceCountTests(TestMode testMode) : InvokableTestBase(testMod
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
-    
+
     [Test]
     public async Task MultipleClassDataGeneratorsTests_ShouldHaveTwoTestInstances()
     {
@@ -32,7 +32,7 @@ public class DataSourceCountTests(TestMode testMode) : InvokableTestBase(testMod
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
-    
+
     [Test]
     public async Task ArgumentsWithClassDataSourceTests_ShouldHaveFourTestInstances()
     {
@@ -46,7 +46,7 @@ public class DataSourceCountTests(TestMode testMode) : InvokableTestBase(testMod
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
-    
+
     [Test]
     public async Task MethodDataSourceWithArgumentsTests_ShouldHaveFiveTestInstances()
     {
@@ -60,7 +60,7 @@ public class DataSourceCountTests(TestMode testMode) : InvokableTestBase(testMod
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
-    
+
     [Test]
     public async Task ClassDataSourceWithMethodDataSourceTests_ShouldHaveSixTestInstances()
     {
@@ -74,7 +74,7 @@ public class DataSourceCountTests(TestMode testMode) : InvokableTestBase(testMod
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
-    
+
     [Test]
     public async Task AllDataSourcesCombinedTests_ShouldHaveTwentyTestInstances()
     {

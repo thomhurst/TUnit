@@ -36,7 +36,7 @@ public class PropertyAttribute(string name, string value) : TUnitAttribute, ITes
     /// Gets the name of the property.
     /// </summary>
     public string Name { get; } = name;
-    
+
     /// <summary>
     /// Gets the value of the property.
     /// </summary>

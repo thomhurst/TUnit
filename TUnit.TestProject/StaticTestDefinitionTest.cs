@@ -11,7 +11,7 @@ public class StaticTestDefinitionTest
         // 3. No data sources that require runtime resolution
         Console.WriteLine("Running static test");
     }
-    
+
     [Test]
     [Arguments(1, 2, 3)]
     [Arguments(4, 5, 6)]
@@ -21,7 +21,7 @@ public class StaticTestDefinitionTest
         // because ArgumentsAttribute provides compile-time constants
         Console.WriteLine($"Running static test with args: {a}, {b}, {c}");
     }
-    
+
     [Test]
     [MethodDataSource(nameof(GetData))]
     public void DynamicTestWithMethodDataSource(int value)
@@ -30,7 +30,7 @@ public class StaticTestDefinitionTest
         // because MethodDataSource requires runtime resolution
         Console.WriteLine($"Running dynamic test with value: {value}");
     }
-    
+
     public static IEnumerable<int> GetData()
     {
         yield return 1;

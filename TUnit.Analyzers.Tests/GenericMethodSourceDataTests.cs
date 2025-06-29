@@ -4,7 +4,7 @@ namespace TUnit.Analyzers.Tests;
 
 public class GenericMethodSourceDataTests
 {
-    
+
     [Test]
     public async Task Test()
     {

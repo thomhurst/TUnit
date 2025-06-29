@@ -1,5 +1,5 @@
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.Models;
 
@@ -12,17 +12,17 @@ public record GenericTestRegistration
     /// The generic type definition (e.g., MyTest<>).
     /// </summary>
     public required INamedTypeSymbol GenericTypeDefinition { get; init; }
-    
+
     /// <summary>
     /// The concrete type arguments (e.g., int, string).
     /// </summary>
     public required ImmutableArray<ITypeSymbol> TypeArguments { get; init; }
-    
+
     /// <summary>
     /// The fully qualified name of the concrete type (e.g., MyTest<int>).
     /// </summary>
     public required string ConcreteTypeName { get; init; }
-    
+
     /// <summary>
     /// The constructed concrete type.
     /// </summary>

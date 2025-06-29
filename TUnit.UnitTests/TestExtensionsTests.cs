@@ -52,7 +52,7 @@ public class TestExtensionsTests
             Type = typeof(T),
             TypeReference = TypeReference.CreateConcrete($"{typeof(T).FullName}, {typeof(T).Assembly.GetName().Name}"),
         };
-        
+
         return _fixture.Build<TestDetails<T>>()
             .OmitAutoProperties()
             .With(x => x.TestId, "test-id")

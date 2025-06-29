@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Services;
 
@@ -22,7 +22,7 @@ public class NoOpGenericTypeResolver : IGenericTypeResolver
 
     /// <inheritdoc />
     public Type[] ResolveGenericClassArguments(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type genericTypeDefinition, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type genericTypeDefinition,
         object?[] constructorArguments)
     {
         throw new NotSupportedException(

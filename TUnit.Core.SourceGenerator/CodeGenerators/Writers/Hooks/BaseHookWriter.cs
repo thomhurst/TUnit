@@ -19,7 +19,7 @@ public class BaseHookWriter
             "TUnit.Core.HookType.TestDiscovery" when model.HookLocationType == HookLocationType.After => WellKnownFullyQualifiedClassNames.TestDiscoveryContext,
             _ => throw new ArgumentOutOfRangeException()
         };
-        
+
         foreach (var type in model.ParameterTypes)
         {
             if (type == expectedType.WithGlobalPrefix)

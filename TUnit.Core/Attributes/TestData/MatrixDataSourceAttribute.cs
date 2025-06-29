@@ -54,7 +54,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 
         var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata.TestClassInstance);
 
-        if (matrixAttribute is not null && objects is {Length: > 0})
+        if (matrixAttribute is not null && objects is { Length: > 0 })
         {
             return matrixAttribute.Excluding is not null
                        ? objects.Except(matrixAttribute.Excluding).ToArray()

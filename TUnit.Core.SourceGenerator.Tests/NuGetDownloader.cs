@@ -12,7 +12,7 @@ public static class NuGetDownloader
     private static SourceCacheContext CacheContext = new();
     private static ILogger Logger = NullLogger.Instance;
     private static string OutputPath = Path.Combine(Path.GetTempPath(), "TUnit.Core.SourceGenerator.Tests", "NuGetPackages");
-    
+
     public static async Task<IEnumerable<MetadataReference>> DownloadPackageAsync(string packageId, string version)
     {
         var extractedPath = Path.Combine(OutputPath, $"{packageId}.{version}");
@@ -42,9 +42,9 @@ public static class NuGetDownloader
                 zip.ExtractToDirectory(extractedPath);
             }
         }
-        
+
         var files = Directory.EnumerateFiles(extractedPath, "*.dll", SearchOption.AllDirectories);
-            
+
         return files
             .Where(f => f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
             .Select(x => MetadataReference.CreateFromFile(x));

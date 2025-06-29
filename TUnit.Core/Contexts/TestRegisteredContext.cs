@@ -11,24 +11,24 @@ public class TestRegisteredContext
     public string DisplayName { get; }
     public TestContext TestContext { get; }
     public DiscoveredTest DiscoveredTest { get; set; } = null!;
-    
+
     public TestRegisteredContext(TestContext testContext)
     {
         TestContext = testContext;
         TestName = testContext.TestName;
         DisplayName = testContext.DisplayName;
     }
-    
+
     /// <summary>
     /// Gets the object bag from the underlying TestContext
     /// </summary>
     public Dictionary<string, object?> ObjectBag => TestContext.ObjectBag;
-    
+
     /// <summary>
     /// Gets the test details from the underlying TestContext
     /// </summary>
     public TestDetails TestDetails => TestContext.TestDetails;
-    
+
     public void SetTestExecutor(ITestExecutor executor)
     {
         if (DiscoveredTest != null)
@@ -36,7 +36,7 @@ public class TestRegisteredContext
             DiscoveredTest.TestExecutor = executor;
         }
     }
-    
+
     /// <summary>
     /// Sets the parallel limiter for the test
     /// </summary>

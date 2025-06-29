@@ -17,7 +17,7 @@ public static class TestSourceDataModelRetriever
         {
             yield break;
         }
-        
+
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
 
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
@@ -33,7 +33,7 @@ public static class TestSourceDataModelRetriever
                 methodSymbol,
                 ArgumentsType.ClassConstructor)
             .ToArray();
-        
+
         var methodParametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
 
         var testArgumentsContainers = ArgumentsRetriever.GetArguments(
@@ -45,9 +45,9 @@ public static class TestSourceDataModelRetriever
             namedTypeSymbol,
             methodSymbol,
             ArgumentsType.Method);
-        
+
         var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol, methodSymbol);
-        
+
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
 
@@ -145,14 +145,14 @@ public static class TestSourceDataModelRetriever
         var testAttributes = methodSymbol.GetAttributes().ExcludingSystemAttributes();
         var classAttributes = namedTypeSymbol.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes();
         var assemblyAttributes = namedTypeSymbol.ContainingAssembly.GetAttributes().ExcludingSystemAttributes();
-        
+
         AttributeData[] allAttributes =
         [
             ..testAttributes,
             ..classAttributes,
             ..assemblyAttributes
         ];
-        
+
         return new TestSourceDataModel
         {
             TestGenerationContext = testGenerationContext,
@@ -168,7 +168,7 @@ public static class TestSourceDataModelRetriever
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            MethodArgumentTypes = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
+            MethodArgumentTypes = [.. GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
             PropertyArguments = testGenerationContext.PropertyArguments,
             GenericSubstitutions = GetGenericSubstitutions(methodSymbol, testArguments.GetArgumentTypes())
@@ -177,13 +177,13 @@ public static class TestSourceDataModelRetriever
 
     private static IDictionary<string, string>? GetGenericSubstitutions(IMethodSymbol methodSymbol, string[] argumentTypes)
     {
-        if(methodSymbol.Parameters.Length is 0 || methodSymbol.TypeParameters.Length is 0)
+        if (methodSymbol.Parameters.Length is 0 || methodSymbol.TypeParameters.Length is 0)
         {
             return null;
         }
 
         var dictionary = new Dictionary<string, string>();
-        
+
         for (var index = 0; index < methodSymbol.Parameters.Length; index++)
         {
             var parameter = methodSymbol.Parameters[index];

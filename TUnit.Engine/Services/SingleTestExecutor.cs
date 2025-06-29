@@ -107,9 +107,9 @@ public class SingleTestExecutor : ISingleTestExecutor
     {
         foreach (var propertyValue in propertyValues)
         {
-            #pragma warning disable IL2075 // Test instance types are known at compile time
+#pragma warning disable IL2075 // Test instance types are known at compile time
             var property = instance.GetType().GetProperty(propertyValue.Key);
-            #pragma warning restore IL2075
+#pragma warning restore IL2075
             property?.SetValue(instance, propertyValue.Value);
         }
         await Task.CompletedTask;

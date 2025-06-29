@@ -16,7 +16,7 @@ public class TimeSpanEqualToAssertionBuilderWrapper : InvokableValueAssertionBui
         assertion.SetTolerance(tolerance);
 
         AppendCallerMethod([doNotPopulateThis]);
-        
+
         return this;
     }
 }

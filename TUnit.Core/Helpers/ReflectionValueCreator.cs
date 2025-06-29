@@ -119,7 +119,7 @@ internal static class ReflectionValueCreator
         {
             // Get the AsTask method and convert to Task
             var asTaskMethod = valueTaskType.GetMethod("AsTask", Type.EmptyTypes);
-            var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
+            var convertedTask = (Task) asTaskMethod!.Invoke(result, null)!;
 
             await convertedTask.ConfigureAwait(false);
 
@@ -131,7 +131,7 @@ internal static class ReflectionValueCreator
         {
             // Non-generic ValueTask
             var asTaskMethod = valueTaskType.GetMethod("AsTask", Type.EmptyTypes);
-            var convertedTask = (Task)asTaskMethod!.Invoke(result, null)!;
+            var convertedTask = (Task) asTaskMethod!.Invoke(result, null)!;
 
             await convertedTask.ConfigureAwait(false);
 

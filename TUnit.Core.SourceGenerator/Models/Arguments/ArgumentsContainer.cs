@@ -18,7 +18,7 @@ public abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataSou
             };
         }
     }
-    
+
     protected string DataAttributeVariableNamePrefix
     {
         get
@@ -42,9 +42,9 @@ public abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataSou
                 Name = VariableNamePrefix,
                 Value = value
             });
-            
+
             globalIndex++;
-            
+
             return generateVariable;
         }
 
@@ -55,7 +55,7 @@ public abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataSou
             Value = value
         });
     }
-    
+
     protected Variable GenerateDataAttributeVariable(string type, string value, ref int globalIndex)
     {
         if (globalIndex == 0)
@@ -82,7 +82,7 @@ public abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataSou
         DataVariables.Add(variable);
         return variable;
     }
-    
+
     protected Variable AddDataAttributeVariable(Variable variable)
     {
         DataAttributesVariables.Add(variable);

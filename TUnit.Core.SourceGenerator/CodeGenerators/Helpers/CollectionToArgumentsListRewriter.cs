@@ -33,7 +33,7 @@ public class CollectionToArgumentsListRewriter(SemanticModel semanticModel) : CS
             ?? string.Empty
         );
     }
-    
+
 #if ROSLYN4_7_OR_GREATER
     public override SyntaxNode VisitCollectionExpression(CollectionExpressionSyntax node)
     {

@@ -28,7 +28,7 @@ internal static class RunHelpers
 
             taskCompletionSource.TrySetException(new TimeoutException(timeout ?? TimeSpan.Zero));
         });
-        
+
         if (timeout.HasValue && timeout.Value > TimeSpan.Zero)
         {
             cancellationTokenSource.CancelAfter(timeout.Value);
@@ -49,7 +49,7 @@ internal static class RunHelpers
             taskCompletionSource.TrySetResult(false);
         }
     }
-    
+
     [StackTraceHidden]
 #if NET
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -72,7 +72,7 @@ internal static class RunHelpers
             exceptions.Add(exception);
         }
     }
-    
+
     [StackTraceHidden]
 #if NET
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -95,7 +95,7 @@ internal static class RunHelpers
             exceptions.Add(exception);
         }
     }
-    
+
     [StackTraceHidden]
 #if NET
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

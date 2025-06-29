@@ -17,7 +17,7 @@ public class PublishSingleFileModule : Module<CommandResult>
     {
         return Task.FromResult<SkipDecision>(EnvironmentVariables.IsNetFramework);
     }
-    
+
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var testProject = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
@@ -38,12 +38,12 @@ public class PublishSingleFileModule : Module<CommandResult>
         {
             return "linux-x64";
         }
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return "win-x64";
         }
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             return "osx-x64";

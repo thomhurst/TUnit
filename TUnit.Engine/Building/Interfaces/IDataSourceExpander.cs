@@ -24,27 +24,27 @@ public sealed class ExpandedTestData
     /// The original test metadata
     /// </summary>
     public required TestMetadata Metadata { get; init; }
-    
+
     /// <summary>
     /// Factory functions for class constructor arguments
     /// </summary>
     public required Func<object?[]> ClassArgumentsFactory { get; init; }
-    
+
     /// <summary>
     /// Factory functions for test method arguments
     /// </summary>
     public required Func<object?[]> MethodArgumentsFactory { get; init; }
-    
+
     /// <summary>
     /// Factory functions for property values (key: property name, value: factory for value)
     /// </summary>
     public required Dictionary<string, Func<object?>> PropertyFactories { get; init; }
-    
+
     /// <summary>
     /// Display text for arguments (used in test name)
     /// </summary>
     public required string ArgumentsDisplayText { get; init; }
-    
+
     /// <summary>
     /// Data source indices for unique test identification
     /// </summary>

@@ -14,15 +14,15 @@ public class SourceGeneratedTestRegistry : ISourceGeneratedTestRegistry
     // Strongly typed factories (preferred for performance)
     private readonly ConcurrentDictionary<string, Delegate> _stronglyTypedClassFactories = new();
     private readonly ConcurrentDictionary<string, Delegate> _stronglyTypedMethodInvokers = new();
-    
+
     // Method data source resolvers (AOT-safe MethodDataSource support)
     private readonly ConcurrentDictionary<string, Func<IReadOnlyList<object?[]>>> _methodDataResolvers = new();
     private readonly ConcurrentDictionary<string, Func<Task<IReadOnlyList<object?[]>>>> _asyncMethodDataResolvers = new();
-    
+
     // Async data source resolvers (AOT-safe AsyncDataSourceGenerator support)
     private readonly ConcurrentDictionary<string, Func<DataGeneratorMetadata, CancellationToken, Task<IReadOnlyList<Func<Task<object?[]?>>>>>> _asyncDataSourceResolvers = new();
     private readonly ConcurrentDictionary<string, Func<DataGeneratorMetadata, CancellationToken, Task<IReadOnlyList<object?[]?>>>> _asyncDataExecutors = new();
-    
+
     // Weakly typed factories (backward compatibility)
     private readonly ConcurrentDictionary<string, Func<object>> _classFactories = new();
     private readonly ConcurrentDictionary<string, Func<object?[], object>> _parameterizedClassFactories = new();
@@ -265,7 +265,7 @@ public class SourceGeneratedTestRegistry : ISourceGeneratedTestRegistry
 /// </summary>
 public static class GlobalSourceGeneratedTestRegistry
 {
-    private static readonly Lazy<SourceGeneratedTestRegistry> _instance = 
+    private static readonly Lazy<SourceGeneratedTestRegistry> _instance =
         new(() => new SourceGeneratedTestRegistry());
 
     /// <summary>

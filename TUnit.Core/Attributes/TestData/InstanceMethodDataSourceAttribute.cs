@@ -19,5 +19,5 @@ public class InstanceMethodDataSourceAttribute : MethodDataSourceAttribute, IAcc
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class InstanceMethodDataSourceAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-    T>(string methodNameProvidingDataSource)
+T>(string methodNameProvidingDataSource)
     : MethodDataSourceAttribute<T>(methodNameProvidingDataSource), IAccessesInstanceData;

@@ -13,7 +13,7 @@ internal class AbstractTests : TestsBase
         {
             await Assert.That(generatedFiles).IsEmpty();
         });
-    
+
     [Test]
     public Task Concrete1() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
@@ -21,7 +21,7 @@ internal class AbstractTests : TestsBase
             "ConcreteClass1.cs"),
         new RunTestOptions
         {
-            AdditionalFiles = 
+            AdditionalFiles =
             [
                 Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "AbstractTests", "AbstractBaseClass.cs")
             ]
@@ -31,7 +31,7 @@ internal class AbstractTests : TestsBase
             await Assert.That(generatedFiles.Length).IsEqualTo(1);
             // await AssertFileContains(generatedFiles[0], "ReturnType = typeof(void),");
         });
-    
+
     [Test]
     public Task Concrete2() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
@@ -39,7 +39,7 @@ internal class AbstractTests : TestsBase
             "ConcreteClass2.cs"),
         new RunTestOptions
         {
-            AdditionalFiles = 
+            AdditionalFiles =
             [
                 Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "AbstractTests", "ConcreteClass1.cs"),
                 Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "AbstractTests", "AbstractBaseClass.cs")

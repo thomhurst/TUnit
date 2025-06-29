@@ -135,7 +135,7 @@ internal static class DataSourceInitializer
         PropertyMetadata propertyMetadata,
         InitializationContext context)
     {
-        var dataAttribute = (IAsyncDataSourceGeneratorAttribute)attributeMetadata.Instance;
+        var dataAttribute = (IAsyncDataSourceGeneratorAttribute) attributeMetadata.Instance;
 
         // Initialize the attribute itself if it requires it
         if (dataAttribute is IRequiresImmediateInitialization && attributeMetadata.ClassMetadata is not null)

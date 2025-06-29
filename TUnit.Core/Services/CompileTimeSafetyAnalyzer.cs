@@ -164,7 +164,7 @@ public class CompileTimeSafetyAnalyzer
     private static void AnalyzeClassConstructors(ClassMetadata classMetadata, List<CompileTimeSafetyIssue> issues, List<string> recommendations)
     {
         var constructors = classMetadata.Type.GetConstructors();
-        
+
         if (constructors.Length > 1)
         {
             issues.Add(new CompileTimeSafetyIssue
@@ -237,8 +237,8 @@ public class CompileTimeSafetyAnalyzer
 
     private static bool IsComplexType(Type type)
     {
-        return type.IsGenericType || 
-               type.IsInterface || 
+        return type.IsGenericType ||
+               type.IsInterface ||
                type.IsAbstract ||
                type.Assembly != typeof(string).Assembly; // Not in core library
     }
@@ -257,8 +257,8 @@ public class CompileTimeSafetyAnalyzer
     private static bool HasPropertyInjectionAttribute(PropertyInfo property)
     {
         // Check for common property injection attributes
-        return property.GetCustomAttributes().Any(attr => 
-            attr.GetType().Name.Contains("Inject") || 
+        return property.GetCustomAttributes().Any(attr =>
+            attr.GetType().Name.Contains("Inject") ||
             attr.GetType().Name.Contains("Property"));
     }
 }
@@ -329,12 +329,12 @@ public enum SafetyIssueSeverity
     /// Informational issue - no action required but good to know.
     /// </summary>
     Info,
-    
+
     /// <summary>
     /// Warning - may cause issues in AOT scenarios.
     /// </summary>
     Warning,
-    
+
     /// <summary>
     /// Error - will definitely cause issues in AOT scenarios.
     /// </summary>
@@ -350,37 +350,37 @@ public enum SafetyIssueType
     /// Complex parameter type that may not be AOT-safe.
     /// </summary>
     ComplexParameterType,
-    
+
     /// <summary>
     /// Generic method that may have limited AOT support.
     /// </summary>
     GenericMethod,
-    
+
     /// <summary>
     /// Generic class that requires AOT configuration.
     /// </summary>
     GenericClass,
-    
+
     /// <summary>
     /// Data attribute that requires runtime evaluation.
     /// </summary>
     RuntimeDataAttribute,
-    
+
     /// <summary>
     /// Complex return type that may require AOT configuration.
     /// </summary>
     ComplexReturnType,
-    
+
     /// <summary>
     /// Multiple constructors that may complicate AOT instance creation.
     /// </summary>
     MultipleConstructors,
-    
+
     /// <summary>
     /// Complex constructor parameters that may not be AOT-safe.
     /// </summary>
     ComplexConstructorParameters,
-    
+
     /// <summary>
     /// Property injection that may require runtime configuration.
     /// </summary>

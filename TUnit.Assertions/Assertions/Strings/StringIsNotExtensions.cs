@@ -14,13 +14,13 @@ public static class StringIsNotExtensions
     {
         return IsNotEqualTo(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new StringNotEqualsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> IsNotEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
@@ -29,7 +29,7 @@ public static class StringIsNotExtensions
             $"to not be empty")
             , []);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> IsNotNullOrEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
@@ -37,7 +37,7 @@ public static class StringIsNotExtensions
             (s, _, _) => $"'{s}' is null or empty",
             $"to not be null or empty"), []);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> IsNotNullOrWhitespace(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,

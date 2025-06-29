@@ -100,7 +100,8 @@ public class STAThreadTests
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
         // Task.Run executes on thread pool but we should return to STA
-        var result = await Task.Run(() => {
+        var result = await Task.Run(() =>
+        {
             // This runs on thread pool (MTA)
             return Thread.CurrentThread.GetApartmentState();
         });

@@ -44,10 +44,10 @@ public class TestMethodAnalyzer : ITestAnalyzer
 
         // Extract skip information
         var (isSkipped, skipReason) = ExtractSkipInfo(methodSymbol);
-        
+
         // Extract timeout
         var timeout = ExtractTimeout(methodSymbol);
-        
+
         // Extract repeat count
         var repeatCount = ExtractRepeatCount(methodSymbol);
 
@@ -85,7 +85,7 @@ public class TestMethodAnalyzer : ITestAnalyzer
     {
         var skipAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "SkipAttribute");
-            
+
         if (skipAttribute != null)
         {
             var reason = skipAttribute.ConstructorArguments.FirstOrDefault().Value?.ToString();
@@ -99,7 +99,7 @@ public class TestMethodAnalyzer : ITestAnalyzer
     {
         var timeoutAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "TimeoutAttribute");
-            
+
         if (timeoutAttribute != null && timeoutAttribute.ConstructorArguments.Length > 0)
         {
             if (timeoutAttribute.ConstructorArguments[0].Value is int milliseconds)
@@ -115,7 +115,7 @@ public class TestMethodAnalyzer : ITestAnalyzer
     {
         var repeatAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
-            
+
         if (repeatAttribute != null && repeatAttribute.ConstructorArguments.Length > 0)
         {
             if (repeatAttribute.ConstructorArguments[0].Value is int count)

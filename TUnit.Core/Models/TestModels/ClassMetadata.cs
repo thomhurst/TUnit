@@ -25,7 +25,7 @@ public record ClassMetadata : MemberMetadata
     }
 
     public required TypeReference TypeReference { get; init; }
-    
+
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -34,7 +34,7 @@ public record ClassMetadata : MemberMetadata
         | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override required Type Type { get; init; }
 
-    public required string? Namespace { get; init;}
+    public required string? Namespace { get; init; }
     public required AssemblyMetadata Assembly { get; init; }
     public required ParameterMetadata[] Parameters { get; init; }
 
