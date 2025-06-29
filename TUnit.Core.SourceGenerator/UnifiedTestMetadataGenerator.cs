@@ -721,7 +721,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         
         foreach (var attr in methodDataAttributes)
         {
-            var dataSource = GenerateDynamicDataSourceString(attr);
+            var dataSource = GenerateDynamicDataSourceString(attr, testInfo.TypeSymbol);
             if (!string.IsNullOrEmpty(dataSource))
             {
                 dataSources.Add(dataSource);
@@ -769,7 +769,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         
         foreach (var attr in methodDataAttributes)
         {
-            var dataSource = GenerateDynamicDataSourceString(attr);
+            var dataSource = GenerateDynamicDataSourceString(attr, testInfo.TypeSymbol);
             if (!string.IsNullOrEmpty(dataSource))
             {
                 classDataSources.Add(dataSource);
@@ -877,17 +877,28 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
     
-    private static string GenerateDynamicDataSourceString(AttributeData attr)
+    private static string GenerateDynamicDataSourceString(AttributeData attr, ITypeSymbol? containingType = null)
     {
         if (attr.ConstructorArguments.Length == 0)
         {
             return string.Empty;
         }
         
-        var sourceType = attr.ConstructorArguments[0].Value as ITypeSymbol;
-        var memberName = attr.ConstructorArguments.Length > 1 
-            ? attr.ConstructorArguments[1].Value?.ToString() 
-            : attr.ConstructorArguments[0].Value?.ToString();
+        ITypeSymbol? sourceType = null;
+        string? memberName = null;
+        
+        // Check if first argument is a type (two-argument constructor)
+        if (attr.ConstructorArguments.Length >= 2)
+        {
+            sourceType = attr.ConstructorArguments[0].Value as ITypeSymbol;
+            memberName = attr.ConstructorArguments[1].Value?.ToString();
+        }
+        else if (attr.ConstructorArguments.Length == 1)
+        {
+            // Single argument - method name on the same class
+            memberName = attr.ConstructorArguments[0].Value?.ToString();
+            sourceType = containingType;
+        }
             
         if (sourceType == null || memberName == null)
         {

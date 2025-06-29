@@ -90,7 +90,8 @@
       "mcp__serena__switch_modes",
       "Bash(./debug_discovery.sh:*)",
       "Bash(/dev/null)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dotnet:*)"
     ],
     "deny": []
   }

@@ -99,14 +99,14 @@ public class TestMetadataGenerationContext
         // Check class-level attributes for data sources
         foreach (var attr in testInfo.TypeSymbol.GetAttributes())
         {
-            if (IsRuntimeDataSourceAttribute(attr))
+            if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
                 return false;
         }
         
         // Check method-level attributes for data sources
         foreach (var attr in testInfo.MethodSymbol.GetAttributes())
         {
-            if (IsRuntimeDataSourceAttribute(attr))
+            if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
                 return false;
         }
         
@@ -116,7 +116,7 @@ public class TestMetadataGenerationContext
             foreach (var attr in param.GetAttributes())
             {
                 // Check if it's a data source attribute that requires runtime resolution
-                if (IsRuntimeDataSourceAttribute(attr))
+                if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
                     return false;
             }
         }
@@ -131,7 +131,7 @@ public class TestMetadataGenerationContext
             {
                 foreach (var attr in param.GetAttributes())
                 {
-                    if (IsRuntimeDataSourceAttribute(attr))
+                    if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
                         return false;
                 }
             }
@@ -143,7 +143,7 @@ public class TestMetadataGenerationContext
         {
             foreach (var attr in prop.GetAttributes())
             {
-                if (IsRuntimeDataSourceAttribute(attr))
+                if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
                     return false;
             }
         }
@@ -152,7 +152,7 @@ public class TestMetadataGenerationContext
         return true;
     }
     
-    private static bool IsRuntimeDataSourceAttribute(AttributeData attr)
+    private static bool IsRuntimeDataSourceAttribute(AttributeData attr, ITypeSymbol containingType)
     {
         var attrName = attr.AttributeClass?.Name;
 
@@ -178,7 +178,27 @@ public class TestMetadataGenerationContext
         if (attrName == "MethodDataSourceAttribute")
         {
             var args = attr.ConstructorArguments;
-            if (args.Length == 1 || (args.Length == 2 && args[0].Value == null))
+            if (args.Length == 1)
+            {
+                // Single argument - method name on the same class
+                var methodName = args[0].Value?.ToString();
+                if (methodName != null && containingType != null)
+                {
+                    // Find the method on the containing type
+                    var method = containingType.GetMembers(methodName)
+                        .OfType<IMethodSymbol>()
+                        .FirstOrDefault();
+                    
+                    if (method != null && method.IsStatic)
+                    {
+                        // Static method - can be resolved at compile time
+                        return false;
+                    }
+                }
+                // If we can't find it or it's not static, requires runtime
+                return true;
+            }
+            else if (args.Length == 2 && args[0].Value == null)
             {
                 // Method on test class - need to check if it's static
                 return true; // For now, assume it could be instance method
