@@ -232,14 +232,18 @@ public sealed class DataSourceExpander : IDataSourceExpander
             yield break;
         }
 
+        // Early exit if any dimension has zero length
+        var lengths = dataSets.Select(ds => ds.Factories.Length).ToArray();
+        if (lengths.Any(l => l == 0))
+        {
+            yield break;
+        }
+
         var maxCombinations = DiscoveryConfiguration.MaxCartesianCombinations;
         var combinationCount = 0;
 
-        // Simple implementation - can be optimized
-        var indices = new int[dataSets.Count];
-        var done = false;
-
-        while (!done)
+        // Delegate index generation to a dedicated helper method
+        foreach (var currentIndices in GenerateCartesianIndices(lengths))
         {
             combinationCount++;
             if (combinationCount > maxCombinations)
@@ -250,30 +254,44 @@ public sealed class DataSourceExpander : IDataSourceExpander
 
             // Build current combination
             var factories = new List<Func<object?[]>>();
-            var currentIndices = new List<int>();
+            var resultIndices = new List<int>();
 
             for (int i = 0; i < dataSets.Count; i++)
             {
-                factories.Add(dataSets[i].Factories[indices[i]]);
-                currentIndices.Add(dataSets[i].SourceIndex);
-                currentIndices.Add(indices[i]);
+                factories.Add(dataSets[i].Factories[currentIndices[i]]);
+                resultIndices.Add(dataSets[i].SourceIndex);
+                resultIndices.Add(currentIndices[i]);
             }
 
-            yield return (factories, currentIndices);
+            yield return (factories, resultIndices);
+        }
+    }
 
-            // Increment indices
-            for (int i = dataSets.Count - 1; i >= 0; i--)
+    private static IEnumerable<int[]> GenerateCartesianIndices(int[] lengths)
+    {
+        if (lengths == null || lengths.Length == 0)
+        {
+            yield break;
+        }
+
+        var indices = new int[lengths.Length];
+        var hasMore = true;
+
+        while (hasMore)
+        {
+            yield return (int[])indices.Clone();
+
+            // Increment indices from right to left
+            hasMore = false;
+            for (int i = lengths.Length - 1; i >= 0; i--)
             {
                 indices[i]++;
-                if (indices[i] < dataSets[i].Factories.Length)
+                if (indices[i] < lengths[i])
                 {
+                    hasMore = true;
                     break;
                 }
                 indices[i] = 0;
-                if (i == 0)
-                {
-                    done = true;
-                }
             }
         }
     }
