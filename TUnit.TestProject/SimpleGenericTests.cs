@@ -14,7 +14,8 @@ public class SimpleGenericMethodTests
     [Arguments("hello")]
     public async Task GenericMethod_SimpleCase<T>(T value)
     {
-        await Assert.That(value).IsNotNull();
+        // Just verify the method runs with different types
+        await Assert.That(value).IsNotEqualTo(default(T));
     }
 }
 
@@ -27,6 +28,7 @@ public class SimpleGenericClassTests<T>
     [Arguments(42)]  // Will create SimpleGenericClassTests<int>
     public async Task TestWithValue(T value)
     {
-        await Assert.That(value).IsNotNull();
+        // Just verify the method runs with the correct type
+        await Assert.That(value).IsNotEqualTo(default(T));
     }
 }
