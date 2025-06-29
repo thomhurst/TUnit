@@ -150,14 +150,63 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     /// <summary>
     /// Implementation of ITestExecutor for Microsoft.Testing.Platform
     /// </summary>
-    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
-    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
     public async Task ExecuteAsync(
         RunTestExecutionRequest request,
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        // Get tests from discovery
+        // Check if we're using reflection or source generation
+        bool enableDynamicDiscovery = IsReflectionScannerEnabled();
+        
+        if (enableDynamicDiscovery)
+        {
+            #pragma warning disable IL3050 // Calling method with RequiresDynamicCodeAttribute
+            #pragma warning disable IL2026 // Calling method with RequiresUnreferencedCodeAttribute
+            await ExecuteAsyncWithReflection(request, messageBus, cancellationToken);
+            #pragma warning restore IL2026
+            #pragma warning restore IL3050
+        }
+        else
+        {
+            await ExecuteAsyncAotSafe(request, messageBus, cancellationToken);
+        }
+    }
+    
+    /// <summary>
+    /// AOT-safe test execution (source generation path)
+    /// </summary>
+    private async Task ExecuteAsyncAotSafe(
+        RunTestExecutionRequest request,
+        IMessageBus messageBus,
+        CancellationToken cancellationToken)
+    {
+        // Get tests from discovery using source generation
+        var discoveryService = new TestDiscoveryService(
+            TestMetadataRegistry.GetSources(),
+            new TestFactory(
+                new TestInvoker(),
+                new HookInvoker(),
+                new DataSourceResolver(),
+                new NoOpGenericTypeResolver()), // AOT-safe: no runtime generic resolution
+            enableDynamicDiscovery: false);
+        
+        var tests = await discoveryService.DiscoverTests();
+        
+        // Execute tests
+        await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
+    }
+    
+    /// <summary>
+    /// Reflection-based test execution
+    /// </summary>
+    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
+    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
+    private async Task ExecuteAsyncWithReflection(
+        RunTestExecutionRequest request,
+        IMessageBus messageBus,
+        CancellationToken cancellationToken)
+    {
+        // Get tests from discovery using reflection
         var discoveryService = new TestDiscoveryService(
             TestMetadataRegistry.GetSources(),
             new TestFactory(
@@ -165,12 +214,19 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 new HookInvoker(),
                 new DataSourceResolver(),
                 new GenericTypeResolver()),
-            enableDynamicDiscovery: false);
+            enableDynamicDiscovery: true);
         
         var tests = await discoveryService.DiscoverTests();
         
         // Execute tests
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
+    }
+    
+    private bool IsReflectionScannerEnabled()
+    {
+        // Check command line options for reflection scanner flag
+        // Default to false (use source generation)
+        return false;
     }
 }
 

@@ -44,13 +44,52 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
     }
     
     /// <summary>
-    /// Discovers all tests from configured sources
+    /// Discovers all tests from configured sources (AOT-safe when using source generation)
+    /// </summary>
+    public async Task<IEnumerable<ExecutableTest>> DiscoverTests()
+    {
+        // If dynamic discovery is disabled (source generation path), this is AOT-safe
+        if (!_enableDynamicDiscovery)
+        {
+            return await DiscoverTestsAotSafe();
+        }
+        
+        // Otherwise, use the reflection-based path
+        #pragma warning disable IL3050 // Calling method with RequiresDynamicCodeAttribute
+        #pragma warning disable IL2026 // Calling method with RequiresUnreferencedCodeAttribute
+        return await DiscoverTestsWithReflection();
+        #pragma warning restore IL2026
+        #pragma warning restore IL3050
+    }
+    
+    /// <summary>
+    /// AOT-safe test discovery (source generation path only)
+    /// </summary>
+    private async Task<IEnumerable<ExecutableTest>> DiscoverTestsAotSafe()
+    {
+        const int DiscoveryTimeoutSeconds = 30;
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
+        
+        try
+        {
+            return await DiscoverTestsAotSafeWithTimeout(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException(
+                $"Test discovery timed out after {DiscoveryTimeoutSeconds} seconds. " +
+                "This may indicate an issue with data sources or excessive test generation.");
+        }
+    }
+    
+    /// <summary>
+    /// Reflection-based test discovery (requires dynamic code)
     /// </summary>
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
-    public async Task<IEnumerable<ExecutableTest>> DiscoverTests()
+    private async Task<IEnumerable<ExecutableTest>> DiscoverTestsWithReflection()
     {
-        const int DiscoveryTimeoutSeconds = 30; // 30 seconds default - enough for most discovery scenarios
+        const int DiscoveryTimeoutSeconds = 30;
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
         
         try
@@ -63,6 +102,64 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
                 $"Test discovery timed out after {DiscoveryTimeoutSeconds} seconds. " +
                 "This may indicate an issue with data sources or excessive test generation.");
         }
+    }
+    
+    /// <summary>
+    /// AOT-safe test discovery implementation (no reflection)
+    /// </summary>
+    private async Task<IEnumerable<ExecutableTest>> DiscoverTestsAotSafeWithTimeout(CancellationToken cancellationToken)
+    {
+        var allTests = new List<ExecutableTest>();
+        const int MaxTestsPerDiscovery = 50_000;
+        
+        // Load metadata from all sources (source-generated)
+        var allMetadata = new List<TestMetadata>();
+        foreach (var source in _sources)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var metadata = await source.GetTestMetadata();
+            allMetadata.AddRange(metadata);
+        }
+        
+        // Create executable tests from metadata
+        foreach (var metadata in allMetadata)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var executableTests = await _testFactory.CreateTests(metadata);
+            allTests.AddRange(executableTests);
+            
+            if (allTests.Count > MaxTestsPerDiscovery)
+            {
+                throw new InvalidOperationException(
+                    $"Test discovery exceeded maximum test count of {MaxTestsPerDiscovery:N0}. " +
+                    "Consider reducing data source sizes or using test filters.");
+            }
+        }
+        
+        // Register all discovered tests with the registry
+        TestRegistry registry;
+        try
+        {
+            registry = TestRegistry.Instance;
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Registry not initialized - this is a framework initialization issue
+            throw new InvalidOperationException(
+                "TestRegistry has not been initialized. This usually indicates the test framework " +
+                "has not been properly set up. Ensure TUnit framework initialization completes " +
+                "before running discovery.", ex);
+        }
+        foreach (var test in allTests)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            registry.RegisterTest(test);
+        }
+        
+        // Resolve dependencies between tests
+        ResolveDependencies(allTests);
+        
+        return allTests;
     }
     
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]

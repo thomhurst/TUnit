@@ -41,9 +41,54 @@ public sealed class TestFactory
     /// <summary>
     /// Creates executable tests from metadata, expanding data-driven tests
     /// </summary>
+    public async Task<IEnumerable<ExecutableTest>> CreateTests(TestMetadata metadata)
+    {
+        // Check if we're using runtime generic resolution
+        if (_genericTypeResolver.GetType().Name == "GenericTypeResolver")
+        {
+            #pragma warning disable IL3050 // Calling method with RequiresDynamicCodeAttribute
+            #pragma warning disable IL2026 // Calling method with RequiresUnreferencedCodeAttribute
+            return await CreateTestsWithReflection(metadata);
+            #pragma warning restore IL2026
+            #pragma warning restore IL3050
+        }
+        
+        // AOT-safe path
+        return await CreateTestsAotSafe(metadata);
+    }
+    
+    /// <summary>
+    /// AOT-safe test creation (source generation path)
+    /// </summary>
+    private async Task<IEnumerable<ExecutableTest>> CreateTestsAotSafe(TestMetadata metadata)
+    {
+        var tests = new List<ExecutableTest>();
+        
+        // Get all test data combinations
+        var testDataSets = await ExpandTestData(metadata);
+        
+        // Get property data if any
+        var propertyDataSets = await ExpandPropertyData(metadata);
+        
+        // Create executable test for each data combination
+        foreach (var (arguments, argumentsDisplayText) in testDataSets)
+        {
+            foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
+            {
+                var executableTest = CreateExecutableTestAotSafe(metadata, arguments, argumentsDisplayText, propertyData);
+                tests.Add(executableTest);
+            }
+        }
+        
+        return tests;
+    }
+    
+    /// <summary>
+    /// Reflection-based test creation
+    /// </summary>
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
-    public async Task<IEnumerable<ExecutableTest>> CreateTests(TestMetadata metadata)
+    private async Task<IEnumerable<ExecutableTest>> CreateTestsWithReflection(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
         
@@ -82,6 +127,53 @@ public sealed class TestFactory
         
         // Create test invoker
         var invokeTest = CreateTestInvoker(metadata, arguments);
+        
+        // Create hooks
+        var hooks = CreateHooks(metadata);
+        
+        var executableTest = new ExecutableTest
+        {
+            TestId = testId,
+            DisplayName = displayName,
+            Metadata = metadata,
+            Arguments = arguments,
+            CreateInstance = createInstance,
+            InvokeTest = invokeTest,
+            PropertyValues = propertyValues,
+            Hooks = hooks
+        };
+        
+        // Create test context for discovery
+        executableTest.Context = CreateTestContext(executableTest);
+        
+        return executableTest;
+    }
+    
+    /// <summary>
+    /// AOT-safe executable test creation
+    /// </summary>
+    private ExecutableTest CreateExecutableTestAotSafe(
+        TestMetadata metadata,
+        object?[] arguments,
+        string argumentsDisplayText,
+        Dictionary<string, object?> propertyValues)
+    {
+        var testId = GenerateTestId(metadata, arguments, propertyValues);
+        var displayName = GenerateDisplayName(metadata, argumentsDisplayText, propertyValues);
+        
+        // Use pre-compiled invokers from source generation
+        var createInstance = metadata.InstanceFactory != null 
+            ? async () => {
+                var instance = metadata.InstanceFactory();
+                await InjectProperties(instance, propertyValues);
+                return instance;
+              }
+            : CreateInstanceFactoryAotSafe(metadata, propertyValues);
+        
+        // Use pre-compiled test invoker from source generation
+        var invokeTest = metadata.TestInvoker != null
+            ? (Func<object, Task>)(instance => metadata.TestInvoker(instance, arguments))
+            : CreateTestInvokerAotSafe(metadata, arguments);
         
         // Create hooks
         var hooks = CreateHooks(metadata);
@@ -258,6 +350,42 @@ public sealed class TestFactory
         
         var concreteMethodInfo = methodInfo;
         return instance => _testInvoker.InvokeTestMethod(instance, concreteMethodInfo, arguments);
+    }
+    
+    /// <summary>
+    /// AOT-safe instance factory creation
+    /// </summary>
+    private Func<Task<object>> CreateInstanceFactoryAotSafe(TestMetadata metadata, Dictionary<string, object?> propertyValues)
+    {
+        // In AOT mode, we should have pre-compiled invokers
+        if (metadata.InstanceFactory == null)
+        {
+            throw new InvalidOperationException(
+                $"Test class '{metadata.TestClassType.Name}' does not have a pre-compiled instance invoker. " +
+                "Ensure source generation has run correctly.");
+        }
+        
+        return async () => {
+            var instance = metadata.InstanceFactory();
+            await InjectProperties(instance, propertyValues);
+            return instance;
+        };
+    }
+    
+    /// <summary>
+    /// AOT-safe test invoker creation
+    /// </summary>
+    private Func<object, Task> CreateTestInvokerAotSafe(TestMetadata metadata, object?[] arguments)
+    {
+        // In AOT mode, we should have pre-compiled invokers
+        if (metadata.TestInvoker == null)
+        {
+            throw new InvalidOperationException(
+                $"Test method '{metadata.TestName}' does not have a pre-compiled test invoker. " +
+                "Ensure source generation has run correctly.");
+        }
+        
+        return instance => metadata.TestInvoker(instance, arguments);
     }
     
     private TestLifecycleHooks CreateHooks(TestMetadata metadata)
