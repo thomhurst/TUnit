@@ -198,6 +198,12 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
             test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name));
         propertyList.Add(new TrxCategoriesProperty(test.Metadata.Categories.ToArray()));
 
+        // Add test state if already failed (e.g., from data source expansion error)
+        if (test.State == TestState.Failed && test.Result?.Exception != null)
+        {
+            propertyList.Add(new FailedTestNodeStateProperty(test.Result.Exception));
+        }
+
         return new TestNode
         {
             Uid = new TestNodeUid(test.TestId),

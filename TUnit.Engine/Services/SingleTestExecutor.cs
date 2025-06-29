@@ -32,6 +32,13 @@ public class SingleTestExecutor : ISingleTestExecutor
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
+        // If test is already failed (e.g., from data source expansion error), 
+        // just report the existing failure
+        if (test.State == TestState.Failed && test.Result != null)
+        {
+            return CreateUpdateMessage(test);
+        }
+
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
 
