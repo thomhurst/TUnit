@@ -51,13 +51,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             return null;
         }
         
-        // Skip open generic types (e.g., MyClass<T>)
-        if (namedTypeSymbol.IsGenericType && namedTypeSymbol.TypeArguments.Any(t => t is ITypeParameterSymbol))
-        {
-            return null;
-        }
-        
-        // Note: We now support generic methods - they will be resolved at runtime
+        // Note: We now support generic types and methods - they will be resolved at runtime
 
         // Skip non-public methods
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
@@ -306,30 +300,22 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             
             // Source location
             writer.AppendLine($"FilePath = @\"{testInfo.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
-            writer.AppendLine($"LineNumber = {testInfo.LineNumber}");
+            writer.AppendLine($"LineNumber = {testInfo.LineNumber},");
+            
+            // Generic type information
+            GenerateGenericTypeInfo(writer, testInfo);
+            
+            // Generic method information
+            GenerateGenericMethodInfo(writer, testInfo);
         }
         writer.AppendLine(");");
     }
     
     private static void GenerateGenericTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        // Get all Arguments attributes
-        var argumentsAttributes = testInfo.MethodSymbol.GetAttributes()
-            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToList();
-            
-        if (!argumentsAttributes.Any())
-        {
-            // No arguments, cannot infer generic types
-            writer.AppendLine($"// Skipping generic test {testInfo.MethodSymbol.Name} - no Arguments attributes to infer types");
-            return;
-        }
-        
-        // Generate a concrete test for each set of arguments
-        foreach (var attr in argumentsAttributes)
-        {
-            GenerateConcreteGenericTest(writer, testInfo, attr);
-        }
+        // For generic methods, we generate metadata that will be resolved at runtime
+        // We do NOT try to resolve generic types at compile time
+        GenerateTestMetadata(writer, testInfo);
     }
     
     private static void GenerateConcreteGenericTest(CodeWriter writer, TestMethodMetadata testInfo, AttributeData argumentsAttribute)
@@ -978,6 +964,139 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
         
         return hooks;
+    }
+    
+    private static void GenerateGenericTypeInfo(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        if (!testInfo.TypeSymbol.IsGenericType)
+        {
+            writer.AppendLine("GenericTypeInfo = null,");
+            return;
+        }
+        
+        var typeParams = testInfo.TypeSymbol.TypeParameters;
+        if (typeParams.Length == 0)
+        {
+            writer.AppendLine("GenericTypeInfo = null,");
+            return;
+        }
+        
+        using (writer.BeginBlock("GenericTypeInfo = new GenericTypeInfo"))
+        {
+            // Parameter names
+            writer.Append("ParameterNames = new[] { ");
+            writer.Append(string.Join(", ", typeParams.Select(p => $"\"{p.Name}\"")));
+            writer.AppendLine(" },");
+            
+            // Constraints
+            using (writer.BeginBlock("Constraints = new GenericParameterConstraints[]"))
+            {
+                for (int i = 0; i < typeParams.Length; i++)
+                {
+                    GenerateGenericParameterConstraints(writer, typeParams[i]);
+                    if (i < typeParams.Length - 1)
+                    {
+                        writer.AppendLine(",");
+                    }
+                }
+            }
+        }
+        writer.AppendLine(",");
+    }
+    
+    private static void GenerateGenericMethodInfo(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        if (!testInfo.MethodSymbol.IsGenericMethod)
+        {
+            writer.AppendLine("GenericMethodInfo = null");
+            return;
+        }
+        
+        var typeParams = testInfo.MethodSymbol.TypeParameters;
+        if (typeParams.Length == 0)
+        {
+            writer.AppendLine("GenericMethodInfo = null");
+            return;
+        }
+        
+        using (writer.BeginBlock("GenericMethodInfo = new GenericMethodInfo"))
+        {
+            // Parameter names
+            writer.Append("ParameterNames = new[] { ");
+            writer.Append(string.Join(", ", typeParams.Select(p => $"\"{p.Name}\"")));
+            writer.AppendLine(" },");
+            
+            // Constraints
+            using (writer.BeginBlock("Constraints = new GenericParameterConstraints[]"))
+            {
+                for (int i = 0; i < typeParams.Length; i++)
+                {
+                    GenerateGenericParameterConstraints(writer, typeParams[i]);
+                    if (i < typeParams.Length - 1)
+                    {
+                        writer.AppendLine(",");
+                    }
+                }
+            }
+            writer.AppendLine(",");
+            
+            // Parameter positions - map which method parameters use which generic types
+            var positions = new List<int>();
+            for (int i = 0; i < testInfo.MethodSymbol.Parameters.Length; i++)
+            {
+                var paramType = testInfo.MethodSymbol.Parameters[i].Type;
+                if (paramType is ITypeParameterSymbol typeParam)
+                {
+                    var index = Array.IndexOf(typeParams.ToArray(), typeParam);
+                    if (index >= 0)
+                    {
+                        positions.Add(i);
+                    }
+                }
+            }
+            
+            writer.Append("ParameterPositions = new[] { ");
+            writer.Append(string.Join(", ", positions));
+            writer.AppendLine(" }");
+        }
+    }
+    
+    private static void GenerateGenericParameterConstraints(CodeWriter writer, ITypeParameterSymbol param)
+    {
+        using (writer.BeginBlock("new GenericParameterConstraints"))
+        {
+            writer.AppendLine($"ParameterName = \"{param.Name}\",");
+            
+            // Base type constraint
+            var baseConstraint = param.ConstraintTypes.FirstOrDefault(t => t.TypeKind == TypeKind.Class);
+            if (baseConstraint != null)
+            {
+                writer.AppendLine($"BaseTypeConstraint = typeof({baseConstraint.ToDisplayString()}),");
+            }
+            else
+            {
+                writer.AppendLine("BaseTypeConstraint = null,");
+            }
+            
+            // Interface constraints
+            var interfaces = param.ConstraintTypes.Where(t => t.TypeKind == TypeKind.Interface).ToList();
+            if (interfaces.Any())
+            {
+                writer.Append("InterfaceConstraints = new Type[] { ");
+                writer.Append(string.Join(", ", interfaces.Select(i => $"typeof({i.ToDisplayString()})")));
+                writer.AppendLine(" },");
+            }
+            else
+            {
+                writer.AppendLine("InterfaceConstraints = Array.Empty<Type>(),");
+            }
+            
+            // Special constraints
+            writer.AppendLine($"HasDefaultConstructorConstraint = {param.HasConstructorConstraint.ToString().ToLower()},");
+            writer.AppendLine($"HasReferenceTypeConstraint = {param.HasReferenceTypeConstraint.ToString().ToLower()},");
+            writer.AppendLine($"HasValueTypeConstraint = {param.HasValueTypeConstraint.ToString().ToLower()},");
+            writer.AppendLine($"HasNotNullConstraint = {param.HasNotNullConstraint.ToString().ToLower()}");
+        }
     }
     
 }

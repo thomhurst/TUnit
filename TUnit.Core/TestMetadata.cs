@@ -121,6 +121,16 @@ public sealed class TestMetadata
     /// Line number where test is defined
     /// </summary>
     public int? LineNumber { get; init; }
+    
+    /// <summary>
+    /// Generic type information if the test class is generic
+    /// </summary>
+    public GenericTypeInfo? GenericTypeInfo { get; init; }
+    
+    /// <summary>
+    /// Generic method information if the test method is generic
+    /// </summary>
+    public GenericMethodInfo? GenericMethodInfo { get; init; }
 }
 
 /// <summary>
@@ -228,4 +238,82 @@ public enum HookLevel
     Assembly,
     Class,
     Test
+}
+
+/// <summary>
+/// Information about generic type parameters on a test class
+/// </summary>
+public sealed class GenericTypeInfo
+{
+    /// <summary>
+    /// Names of the generic type parameters (e.g., ["T", "U"])
+    /// </summary>
+    public string[] ParameterNames { get; init; } = [];
+    
+    /// <summary>
+    /// Constraints for each generic parameter
+    /// </summary>
+    public GenericParameterConstraints[] Constraints { get; init; } = [];
+}
+
+/// <summary>
+/// Information about generic type parameters on a test method
+/// </summary>
+public sealed class GenericMethodInfo
+{
+    /// <summary>
+    /// Names of the generic type parameters (e.g., ["T", "U"])
+    /// </summary>
+    public string[] ParameterNames { get; init; } = [];
+    
+    /// <summary>
+    /// Constraints for each generic parameter
+    /// </summary>
+    public GenericParameterConstraints[] Constraints { get; init; } = [];
+    
+    /// <summary>
+    /// Maps generic parameters to method argument positions for type inference
+    /// </summary>
+    public int[] ParameterPositions { get; init; } = [];
+}
+
+/// <summary>
+/// Constraints for a generic type parameter
+/// </summary>
+public sealed class GenericParameterConstraints
+{
+    /// <summary>
+    /// The generic parameter name
+    /// </summary>
+    public required string ParameterName { get; init; }
+    
+    /// <summary>
+    /// Base type constraint (if any)
+    /// </summary>
+    public Type? BaseTypeConstraint { get; init; }
+    
+    /// <summary>
+    /// Interface constraints
+    /// </summary>
+    public Type[] InterfaceConstraints { get; init; } = [];
+    
+    /// <summary>
+    /// Whether the parameter has a new() constraint
+    /// </summary>
+    public bool HasDefaultConstructorConstraint { get; init; }
+    
+    /// <summary>
+    /// Whether the parameter has a class constraint
+    /// </summary>
+    public bool HasReferenceTypeConstraint { get; init; }
+    
+    /// <summary>
+    /// Whether the parameter has a struct constraint
+    /// </summary>
+    public bool HasValueTypeConstraint { get; init; }
+    
+    /// <summary>
+    /// Whether the parameter has a notnull constraint
+    /// </summary>
+    public bool HasNotNullConstraint { get; init; }
 }

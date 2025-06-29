@@ -43,6 +43,16 @@ public sealed class TestFactory
     /// </summary>
     public async Task<IEnumerable<ExecutableTest>> CreateTests(TestMetadata metadata)
     {
+        // Handle generic types first
+        if (metadata.GenericTypeInfo != null || metadata.GenericMethodInfo != null)
+        {
+            #pragma warning disable IL3050 // Calling method with RequiresDynamicCodeAttribute
+            #pragma warning disable IL2026 // Calling method with RequiresUnreferencedCodeAttribute
+            return await CreateGenericTests(metadata);
+            #pragma warning restore IL2026
+            #pragma warning restore IL3050
+        }
+        
         // Check if we're using runtime generic resolution
         if (_genericTypeResolver.GetType().Name == "GenericTypeResolver")
         {
@@ -284,20 +294,12 @@ public sealed class TestFactory
         {
             var classType = metadata.TestClassType;
             
-            // Handle generic classes
+            // Handle generic classes (shouldn't happen if CreateGenericTests worked correctly)
             if (classType.IsGenericTypeDefinition)
             {
-                try
-                {
-                    // For generic classes, we need to infer types from the test method arguments or properties
-                    // This is a simplified approach - in practice, we might need constructor arguments
-                    var genericArguments = _genericTypeResolver.ResolveGenericClassArguments(classType, Array.Empty<object?>());
-                    classType = classType.MakeGenericType(genericArguments);
-                }
-                catch (GenericTypeResolutionException ex)
-                {
-                    throw new InvalidOperationException($"Failed to resolve generic types for test class {metadata.TestClassType.Name}: {ex.Message}", ex);
-                }
+                throw new InvalidOperationException(
+                    $"Generic test class '{metadata.TestClassType.Name}' reached instance factory without type resolution. " +
+                    "This indicates a bug in generic test expansion.");
             }
             
             #pragma warning disable IL2072 // Test class types are known at compile time through source generation
@@ -796,5 +798,180 @@ public sealed class TestFactory
         }
         
         return results;
+    }
+    
+    /// <summary>
+    /// Creates tests for generic types by resolving type parameters from test data
+    /// </summary>
+    [RequiresDynamicCode("Generic type resolution requires dynamic code generation")]
+    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming")]
+    private async Task<IEnumerable<ExecutableTest>> CreateGenericTests(TestMetadata metadata)
+    {
+        var tests = new List<ExecutableTest>();
+        
+        // Get all test data combinations
+        var testDataSets = await ExpandTestData(metadata);
+        
+        // For each data set, try to resolve generic types
+        foreach (var (arguments, argumentsDisplayText) in testDataSets)
+        {
+            try
+            {
+                // Create a specialized metadata for this specific generic instantiation
+                var specializedMetadata = CreateSpecializedMetadata(metadata, arguments);
+                
+                // Create tests with the specialized metadata
+                var specializedTests = await CreateTestsWithReflection(specializedMetadata);
+                tests.AddRange(specializedTests);
+            }
+            catch (GenericTypeResolutionException ex)
+            {
+                // Log and skip this combination if types can't be resolved
+                File.AppendAllText(DebugLogPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Failed to resolve generic types for {metadata.TestName} with arguments [{argumentsDisplayText}]: {ex.Message}{Environment.NewLine}");
+            }
+        }
+        
+        return tests;
+    }
+    
+    /// <summary>
+    /// Creates specialized metadata with resolved generic types
+    /// </summary>
+    [RequiresDynamicCode("Generic type resolution requires dynamic code generation")]
+    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming")]
+    private TestMetadata CreateSpecializedMetadata(TestMetadata metadata, object?[] arguments)
+    {
+        var testClassType = metadata.TestClassType;
+        var methodInfo = metadata.MethodInfo;
+        
+        // Resolve generic method types first (they might inform class types)
+        if (methodInfo?.IsGenericMethodDefinition == true && metadata.GenericMethodInfo != null)
+        {
+            var genericArguments = _genericTypeResolver.ResolveGenericMethodArguments(methodInfo, arguments);
+            methodInfo = methodInfo.MakeGenericMethod(genericArguments);
+        }
+        
+        // Resolve generic class types
+        if (testClassType.IsGenericTypeDefinition && metadata.GenericTypeInfo != null)
+        {
+            // Try to infer from method parameters if available
+            Type[] classGenericArgs;
+            
+            if (methodInfo != null)
+            {
+                // Extract type arguments from resolved method parameter types
+                classGenericArgs = InferClassGenericArgumentsFromMethod(testClassType, methodInfo, arguments);
+            }
+            else
+            {
+                // Fall back to constructor-based resolution
+                classGenericArgs = _genericTypeResolver.ResolveGenericClassArguments(testClassType, Array.Empty<object?>());
+            }
+            
+            testClassType = testClassType.MakeGenericType(classGenericArgs);
+            
+            // Update method info to be from the constructed type
+            if (methodInfo != null)
+            {
+                var methodName = methodInfo.Name;
+                var paramTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray();
+                methodInfo = testClassType.GetMethod(methodName, paramTypes);
+            }
+        }
+        
+        // Create new metadata with resolved types
+        return new TestMetadata
+        {
+            TestId = metadata.TestId,
+            TestName = metadata.TestName,
+            TestClassType = testClassType,
+            TestMethodName = metadata.TestMethodName,
+            Categories = metadata.Categories,
+            IsSkipped = metadata.IsSkipped,
+            SkipReason = metadata.SkipReason,
+            TimeoutMs = metadata.TimeoutMs,
+            RetryCount = metadata.RetryCount,
+            CanRunInParallel = metadata.CanRunInParallel,
+            DependsOn = metadata.DependsOn,
+            DataSources = metadata.DataSources,
+            PropertyDataSources = metadata.PropertyDataSources,
+            InstanceFactory = null, // Will be created with resolved type
+            TestInvoker = null, // Will be created with resolved method
+            ParameterCount = metadata.ParameterCount,
+            ParameterTypes = methodInfo?.GetParameters().Select(p => p.ParameterType).ToArray() ?? metadata.ParameterTypes,
+            Hooks = metadata.Hooks,
+            MethodInfo = methodInfo,
+            FilePath = metadata.FilePath,
+            LineNumber = metadata.LineNumber,
+            GenericTypeInfo = null, // No longer generic
+            GenericMethodInfo = null // No longer generic
+        };
+    }
+    
+    /// <summary>
+    /// Infers generic class type arguments from a resolved method and its arguments
+    /// </summary>
+    private Type[] InferClassGenericArgumentsFromMethod(Type genericClassType, MethodInfo resolvedMethod, object?[] arguments)
+    {
+        var classTypeParams = genericClassType.GetGenericArguments();
+        var resolvedTypes = new Type[classTypeParams.Length];
+        var typeMapping = new Dictionary<string, Type>();
+        
+        // Build mapping from method parameter types and arguments
+        var parameters = resolvedMethod.GetParameters();
+        for (int i = 0; i < parameters.Length && i < arguments.Length; i++)
+        {
+            if (arguments[i] != null)
+            {
+                var paramType = parameters[i].ParameterType;
+                var argType = arguments[i]!.GetType();
+                
+                // If parameter type contains generic parameters from the class, map them
+                ExtractTypeMapping(paramType, argType, genericClassType, typeMapping);
+            }
+        }
+        
+        // Resolve each class type parameter
+        for (int i = 0; i < classTypeParams.Length; i++)
+        {
+            var param = classTypeParams[i];
+            if (typeMapping.TryGetValue(param.Name, out var resolvedType))
+            {
+                resolvedTypes[i] = resolvedType;
+            }
+            else
+            {
+                throw new GenericTypeResolutionException(
+                    $"Could not resolve generic type parameter '{param.Name}' for class '{genericClassType.Name}'");
+            }
+        }
+        
+        return resolvedTypes;
+    }
+    
+    /// <summary>
+    /// Extracts type mappings from parameter and argument types
+    /// </summary>
+    private void ExtractTypeMapping(Type paramType, Type argType, Type genericClassType, Dictionary<string, Type> mapping)
+    {
+        // Check if paramType references any of the class's generic parameters
+        if (paramType.IsGenericParameter && paramType.DeclaringType == genericClassType)
+        {
+            mapping[paramType.Name] = argType;
+        }
+        else if (paramType.IsGenericType && argType.IsGenericType)
+        {
+            var paramGenericArgs = paramType.GetGenericArguments();
+            var argGenericArgs = argType.GetGenericArguments();
+            
+            for (int i = 0; i < paramGenericArgs.Length && i < argGenericArgs.Length; i++)
+            {
+                ExtractTypeMapping(paramGenericArgs[i], argGenericArgs[i], genericClassType, mapping);
+            }
+        }
+        else if (paramType.IsArray && argType.IsArray)
+        {
+            ExtractTypeMapping(paramType.GetElementType()!, argType.GetElementType()!, genericClassType, mapping);
+        }
     }
 }
