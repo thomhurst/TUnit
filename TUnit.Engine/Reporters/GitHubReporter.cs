@@ -13,14 +13,14 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 {
     private const long MaxFileSizeInBytes = 1 * 1024 * 1024; // 1MB
     private string _outputSummaryFilePath = null!;
-    
+
     public async Task<bool> IsEnabledAsync()
     {
         if (Environment.GetEnvironmentVariable("DISABLE_GITHUB_REPORTER") is not null)
         {
             return false;
         }
-        
+
         if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is null)
         {
             return false;
@@ -33,7 +33,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         }
 
         _outputSummaryFilePath = fileName;
-        
+
         return await extension.IsEnabledAsync();
     }
 
@@ -44,20 +44,20 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
     public string DisplayName => extension.DisplayName;
 
     public string Description => extension.Description;
-    
+
     private readonly ConcurrentDictionary<string, List<TestNodeUpdateMessage>> _updates = [];
-    
+
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
 
         _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, []).Add(testNodeUpdateMessage);
-        
+
         return Task.CompletedTask;
     }
 
     public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
-    
+
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
@@ -96,28 +96,28 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"### {Assembly.GetEntryAssembly()?.GetName().Name} ({targetFramework})");
-        
+
         if (!string.IsNullOrEmpty(Filter))
         {
             stringBuilder.AppendLine($"#### Filter: `{Filter}`");
         }
-        
+
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test Count | Status |");
         stringBuilder.AppendLine("| --- | --- |");
         stringBuilder.AppendLine($"| {passedCount} | Passed |");
         stringBuilder.AppendLine($"| {failed.Length} | Failed |");
-        
+
         if(skipped.Length > 0)
         {
             stringBuilder.AppendLine($"| {skipped.Length} | Skipped |");
         }
-        
+
         if(timeout.Length > 0)
         {
             stringBuilder.AppendLine($"| {timeout.Length} | Timed Out |");
         }
-        
+
         if(cancelled.Length > 0)
         {
             stringBuilder.AppendLine($"| {cancelled.Length} | Cancelled |");
@@ -149,21 +149,21 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             {
                 continue;
             }
-            
-            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p => 
-                p is FailedTestNodeStateProperty || 
-                p is SkippedTestNodeStateProperty || 
-                p is TimeoutTestNodeStateProperty || 
+
+            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p =>
+                p is FailedTestNodeStateProperty ||
+                p is SkippedTestNodeStateProperty ||
+                p is TimeoutTestNodeStateProperty ||
                 p is CancelledTestNodeStateProperty);
-            
+
             var status = GetStatus(stateProperty);
 
             var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties).Replace("\n", " <br> ");
-            
+
             var timingProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
-            
-            var duration = timingProperty?.Duration;
-            
+
+            var duration = timingProperty?.GlobalTiming.Duration;
+
             stringBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
         }
 
@@ -182,7 +182,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             Console.WriteLine("Appending to the GitHub Step Summary would exceed the 1MB file size limit.");
             return Task.CompletedTask;
         }
-        
+
 #if NET
         return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
 #else
@@ -194,7 +194,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
     {
-        if (stateProperty is FailedTestNodeStateProperty 
+        if (stateProperty is FailedTestNodeStateProperty
             or TimeoutTestNodeStateProperty
             or CancelledTestNodeStateProperty)
         {
@@ -203,16 +203,16 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
         if (stateProperty is SkippedTestNodeStateProperty skippedTestNodeStateProperty)
         {
-            return skippedTestNodeStateProperty.Reason ?? "Skipped (No reason provided)";
+            return skippedTestNodeStateProperty.Explanation ?? "Skipped (No reason provided)";
         }
 
         if (stateProperty is InProgressTestNodeStateProperty)
         {
             var timingProperty = properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
 
-            return $"Duration: {timingProperty?.Duration}";
+            return $"Duration: {timingProperty?.GlobalTiming.Duration}";
         }
-        
+
         return "Unknown Test State";
     }
 
@@ -222,7 +222,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         {
             FailedTestNodeStateProperty failedTestNodeStateProperty =>
                 failedTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
-            TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Message,
+            TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Explanation,
             CancelledTestNodeStateProperty => "Test was cancelled",
             _ => null
         };

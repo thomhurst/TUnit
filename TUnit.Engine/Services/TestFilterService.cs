@@ -92,7 +92,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         }
 
         // Add custom properties from TestContext if available
-        if (test.Context?.TestDetails?.CustomProperties != null)
+        if (test.Context?.TestDetails.CustomProperties != null)
         {
             _logger.LogDebug($"Found {test.Context.TestDetails.CustomProperties.Count} custom properties");
             foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)

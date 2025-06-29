@@ -22,13 +22,13 @@ internal static class TestExtensions
                     new LinePosition(testDetails.TestLineNumber, 0)
                 )),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.ClassMetadata?.Type.Namespace ?? testDetails.ClassType?.Namespace ?? "GlobalNamespace",
+                    Namespace: testDetails.ClassMetadata.Type.Namespace ?? testDetails.ClassType?.Namespace ?? "GlobalNamespace",
                     AssemblyFullName: testDetails.ClassMetadata?.Type.Assembly.FullName ?? testDetails.ClassType?.Assembly.FullName ?? "UnknownAssembly",
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? Array.Empty<string>(),
-                    ReturnTypeFullName: testDetails.ReturnType?.FullName ?? "void",
-                    MethodArity: testDetails.MethodMetadata?.GenericTypeCount ?? 0
+                    ReturnTypeFullName: testDetails.ReturnType.FullName ?? "void",
+                    MethodArity: testDetails.MethodMetadata.GenericTypeCount
                     ),
 
                 // Custom TUnit Properties
@@ -36,10 +36,10 @@ internal static class TestExtensions
                 ..ExtractProperties(testDetails),
 
                 // Artifacts
-                ..testContext.Artifacts.Where(x => x.Value is FileArtifact).Select(x => 
+                ..testContext.Artifacts.Where(x => x.Value is FileArtifact).Select(x =>
                 {
                     var artifact = (FileArtifact)x.Value!;
-                    return new FileArtifactProperty(new System.IO.FileInfo(artifact.File), artifact.DisplayName, artifact.Description);
+                    return new FileArtifactProperty(new FileInfo(artifact.File), artifact.DisplayName, artifact.Description);
                 }),
 
                 // TRX Report Properties

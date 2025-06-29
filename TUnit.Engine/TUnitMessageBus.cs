@@ -74,7 +74,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         exception = SimplifyStacktrace(exception);
 
         var updateType = GetFailureStateProperty(testContext, exception,
-            timingProperty.Duration);
+            timingProperty.GlobalTiming.Duration);
 
         var standardOutput = testContext.GetStandardOutput() ?? string.Empty;
         var standardError = testContext.GetErrorOutput() ?? string.Empty;
@@ -161,13 +161,13 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
     {
-        if (overallStart == default)
+        if (overallStart == default(DateTimeOffset))
         {
-            return new TimingProperty(TimeSpan.Zero);
+            return new TimingProperty(new TimingInfo());
         }
 
         var end = DateTimeOffset.Now;
-        return new TimingProperty(end - overallStart);
+        return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), testContext.Timings.Select(x => new StepTimingInfo(x.StepName, x.StepName, new TimingInfo(x.Start, x.End, x.Duration))).ToArray());
     }
 
     private static IProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
