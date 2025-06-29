@@ -73,11 +73,11 @@ public sealed class TestFactory
         var propertyDataSets = await ExpandPropertyData(metadata);
 
         // Create executable test for each data combination
-        foreach (var (arguments, argumentsDisplayText) in testDataSets)
+        foreach (var (arguments, argumentsDisplayText, dataSourceIndices) in testDataSets)
         {
             foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
             {
-                var executableTest = await CreateExecutableTestAotSafe(metadata, arguments, argumentsDisplayText, propertyData);
+                var executableTest = await CreateExecutableTestAotSafe(metadata, arguments, argumentsDisplayText, propertyData, dataSourceIndices);
                 tests.Add(executableTest);
             }
         }
@@ -101,11 +101,11 @@ public sealed class TestFactory
         var propertyDataSets = await ExpandPropertyData(metadata);
 
         // Create executable test for each data combination
-        foreach (var (arguments, argumentsDisplayText) in testDataSets)
+        foreach (var (arguments, argumentsDisplayText, dataSourceIndices) in testDataSets)
         {
             foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
             {
-                var executableTest = await CreateExecutableTest(metadata, arguments, argumentsDisplayText, propertyData);
+                var executableTest = await CreateExecutableTest(metadata, arguments, argumentsDisplayText, propertyData, dataSourceIndices);
                 tests.Add(executableTest);
             }
         }
@@ -119,9 +119,10 @@ public sealed class TestFactory
         TestMetadata metadata,
         object?[] arguments,
         string argumentsDisplayText,
-        Dictionary<string, object?> propertyValues)
+        Dictionary<string, object?> propertyValues,
+        int[] dataSourceIndices)
     {
-        var testId = GenerateTestId(metadata, arguments, propertyValues);
+        var testId = GenerateTestId(metadata, arguments, propertyValues, dataSourceIndices);
         var displayName = GenerateDisplayName(metadata, argumentsDisplayText, propertyValues);
 
         // Create instance factory
@@ -158,9 +159,10 @@ public sealed class TestFactory
         TestMetadata metadata,
         object?[] arguments,
         string argumentsDisplayText,
-        Dictionary<string, object?> propertyValues)
+        Dictionary<string, object?> propertyValues,
+        int[] dataSourceIndices)
     {
-        var testId = GenerateTestId(metadata, arguments, propertyValues);
+        var testId = GenerateTestId(metadata, arguments, propertyValues, dataSourceIndices);
         var displayName = GenerateDisplayName(metadata, argumentsDisplayText, propertyValues);
 
         // Use pre-compiled invokers from source generation
@@ -198,34 +200,61 @@ public sealed class TestFactory
         return executableTest;
     }
 
-    private async Task<List<(object?[] arguments, string displayText)>> ExpandTestData(TestMetadata metadata)
+    private async Task<List<(object?[] arguments, string displayText, int[] dataSourceIndices)>> ExpandTestData(TestMetadata metadata)
     {
-        var results = new List<(object?[], string)>();
+        var results = new List<(object?[], string, int[])>();
 
         if (metadata.DataSources.Length == 0)
         {
             // No data sources, single test with no arguments
-            results.Add((Array.Empty<object?>(), string.Empty));
+            results.Add((Array.Empty<object?>(), string.Empty, Array.Empty<int>()));
             return results;
         }
 
-        // Resolve all data sources
-        var allDataSets = new List<IEnumerable<object?[]>>();
-        foreach (var dataSource in metadata.DataSources)
+        // Resolve all data sources with their indices
+        var allDataSets = new List<(IEnumerable<object?[]> data, int sourceIndex)>();
+        for (int i = 0; i < metadata.DataSources.Length; i++)
         {
-            var data = await _dataSourceResolver.ResolveDataSource(dataSource);
-            allDataSets.Add(data);
+            var data = await _dataSourceResolver.ResolveDataSource(metadata.DataSources[i]);
+            // Convert to list and add index to each item
+            var indexedData = data.Select((item, itemIndex) => item).ToList();
+            allDataSets.Add((indexedData, i));
         }
 
         // Generate cartesian product for matrix/combinatorial tests
         DiscoveryDiagnostics.RecordDataSourceStart($"{metadata.TestName}", allDataSets.Count);
-        var combinations = CartesianProduct(allDataSets);
-
-        foreach (var combination in combinations)
+        
+        if (allDataSets.Count == 1)
         {
-            var flattened = combination.SelectMany(x => x).ToArray();
-            var displayText = GenerateArgumentsDisplayText(flattened);
-            results.Add((flattened, displayText));
+            // Single data source - simpler case
+            var (data, sourceIndex) = allDataSets[0];
+            int itemIndex = 0;
+            foreach (var args in data)
+            {
+                var displayText = GenerateArgumentsDisplayText(args);
+                results.Add((args, displayText, new[] { sourceIndex, itemIndex }));
+                itemIndex++;
+            }
+        }
+        else
+        {
+            // Multiple data sources - cartesian product with tracking
+            var dataLists = allDataSets.Select(x => x.data.ToList()).ToList();
+            var combinations = CartesianProductWithIndices(dataLists);
+
+            foreach (var (combination, indices) in combinations)
+            {
+                var flattened = combination.SelectMany(x => x).ToArray();
+                var displayText = GenerateArgumentsDisplayText(flattened);
+                // Create array of [sourceIndex, itemIndex] pairs
+                var dataSourceIndices = new List<int>();
+                for (int i = 0; i < allDataSets.Count; i++)
+                {
+                    dataSourceIndices.Add(allDataSets[i].sourceIndex);
+                    dataSourceIndices.Add(indices[i]);
+                }
+                results.Add((flattened, displayText, dataSourceIndices.ToArray()));
+            }
         }
 
         DiscoveryDiagnostics.RecordTestExpansion(metadata.TestName, results.Count);
@@ -439,9 +468,16 @@ public sealed class TestFactory
         return Task.CompletedTask;
     }
 
-    private static string GenerateTestId(TestMetadata metadata, object?[] arguments, Dictionary<string, object?> propertyValues)
+    private static string GenerateTestId(TestMetadata metadata, object?[] arguments, Dictionary<string, object?> propertyValues, int[] dataSourceIndices)
     {
         var parts = new List<string> { metadata.TestId };
+
+        // Add data source indices to make each test unique
+        if (dataSourceIndices.Length > 0)
+        {
+            var dsIndexPart = string.Join(".", dataSourceIndices);
+            parts.Add($"ds{dsIndexPart}");
+        }
 
         if (arguments.Length > 0)
         {
@@ -647,6 +683,11 @@ public sealed class TestFactory
         return CartesianProductWithLimits(sets, 0, new CartesianProductState());
     }
 
+    private static IEnumerable<(List<object?[]> combination, int[] indices)> CartesianProductWithIndices(List<List<object?[]>> sets)
+    {
+        return CartesianProductWithIndicesAndLimits(sets, 0, new CartesianProductState());
+    }
+
     private static IEnumerable<List<object?[]>> CartesianProductWithLimits(
         List<IEnumerable<object?[]>> sets,
         int depth,
@@ -698,6 +739,63 @@ public sealed class TestFactory
     private class CartesianProductState
     {
         public int TotalCombinations { get; set; }
+    }
+
+    private static IEnumerable<(List<object?[]> combination, int[] indices)> CartesianProductWithIndicesAndLimits(
+        List<List<object?[]>> sets,
+        int depth,
+        CartesianProductState state)
+    {
+        var maxDepth = DiscoveryConfiguration.MaxCartesianDepth;
+        var maxTotalCombinations = DiscoveryConfiguration.MaxCartesianCombinations;
+
+        // Record diagnostics
+        DiscoveryDiagnostics.RecordCartesianProductDepth(depth, sets.Count);
+
+        if (depth > maxDepth)
+        {
+            throw new InvalidOperationException(
+                $"Cartesian product exceeded maximum recursion depth of {maxDepth}. " +
+                "This may indicate an excessive number of data source combinations.");
+        }
+
+        if (!sets.Any())
+        {
+            yield return (new List<object?[]>(), Array.Empty<int>());
+            yield break;
+        }
+
+        var first = sets.First();
+        var rest = sets.Skip(1).ToList();
+        var restProduct = CartesianProductWithIndicesAndLimits(rest, depth + 1, state).ToList();
+
+        for (int i = 0; i < first.Count; i++)
+        {
+            var item = first[i];
+            foreach (var (restCombination, restIndices) in restProduct)
+            {
+                state.TotalCombinations++;
+
+                if (state.TotalCombinations > maxTotalCombinations)
+                {
+                    throw new InvalidOperationException(
+                        $"Cartesian product exceeded maximum combinations limit of {maxTotalCombinations:N0}. " +
+                        "Consider reducing the number of data sources or their sizes.");
+                }
+
+                var result = new List<object?[]> { item };
+                result.AddRange(restCombination);
+                
+                var indices = new int[sets.Count];
+                indices[0] = i;
+                if (restIndices.Length > 0)
+                {
+                    Array.Copy(restIndices, 0, indices, 1, restIndices.Length);
+                }
+                
+                yield return (result, indices);
+            }
+        }
     }
 
     private static List<Dictionary<string, object?>> GeneratePropertyCombinations(Dictionary<string, List<object?>> propertyDataMap)
@@ -778,7 +876,7 @@ public sealed class TestFactory
         }
 
         // For each data set, try to resolve generic types
-        foreach (var (arguments, argumentsDisplayText) in testDataSets)
+        foreach (var (arguments, argumentsDisplayText, dataSourceIndices) in testDataSets)
         {
             // Create a specialized metadata for this specific generic instantiation
             var specializedMetadata = CreateSpecializedMetadata(metadata, arguments);

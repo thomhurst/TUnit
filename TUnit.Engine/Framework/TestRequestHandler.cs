@@ -38,7 +38,10 @@ internal sealed class TestRequestHandler : IRequestHandler
         foreach (var test in allTests)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
-            await serviceProvider.MessageBus.Discovered(test.Context!);
+            if (test.Context != null)
+            {
+                await serviceProvider.MessageBus.Discovered(test.Context);
+            }
         }
     }
 
@@ -55,7 +58,10 @@ internal sealed class TestRequestHandler : IRequestHandler
         foreach (var test in filteredTests)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
-            await serviceProvider.MessageBus.Discovered(test.Context!);
+            if (test.Context != null)
+            {
+                await serviceProvider.MessageBus.Discovered(test.Context);
+            }
         }
 
         // Execute tests (executor will apply the same filter internally)
