@@ -79,11 +79,6 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
     {
         var properties = new List<IProperty>();
 
-        if (test.Context?.TestDetails.ClassMetadata.Name == "ArgumentsWithClassDataSourceTests")
-        {
-            Console.WriteLine("Debugging ArgumentsWithClassDataSourceTests");
-        }
-
         // Add categories
         foreach (var category in test.Metadata.Categories)
         {
