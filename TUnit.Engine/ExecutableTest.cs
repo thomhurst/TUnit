@@ -28,6 +28,11 @@ public sealed class ExecutableTest
     public required object?[] Arguments { get; init; }
     
     /// <summary>
+    /// Arguments to pass to the class constructor (empty for parameterless constructors)
+    /// </summary>
+    public object?[] ClassArguments { get; init; } = [];
+    
+    /// <summary>
     /// Factory to create the test class instance
     /// </summary>
     public required Func<Task<object>> CreateInstance { get; init; }

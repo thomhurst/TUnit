@@ -77,14 +77,20 @@ public sealed class TestMetadata
     public TestDataSource[] DataSources { get; init; } = [];
     
     /// <summary>
+    /// Class-level data sources for constructor arguments
+    /// </summary>
+    public TestDataSource[] ClassDataSources { get; init; } = [];
+    
+    /// <summary>
     /// Properties that require data injection
     /// </summary>
     public PropertyDataSource[] PropertyDataSources { get; init; } = [];
     
     /// <summary>
     /// AOT-safe factory to create test class instance (null for reflection-based)
+    /// Accepts constructor arguments array (empty array for parameterless constructors)
     /// </summary>
-    public Func<object>? InstanceFactory { get; init; }
+    public Func<object?[], object>? InstanceFactory { get; init; }
     
     /// <summary>
     /// AOT-safe test method invoker (null for reflection-based)

@@ -66,19 +66,31 @@ public sealed class TestFactory
     {
         var tests = new List<ExecutableTest>();
 
+        // Get all class data combinations
+        var classDataSets = await ExpandClassData(metadata);
+
         // Get all test data combinations
         var testDataSets = await ExpandTestData(metadata);
 
         // Get property data if any
         var propertyDataSets = await ExpandPropertyData(metadata);
 
-        // Create executable test for each data combination
-        foreach (var (arguments, argumentsDisplayText, dataSourceIndices) in testDataSets)
+        // Create executable test for each combination of class, method, and property data
+        foreach (var (classArguments, classDisplayText, classDataSourceIndices) in classDataSets)
         {
-            foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
+            foreach (var (arguments, argumentsDisplayText, dataSourceIndices) in testDataSets)
             {
-                var executableTest = await CreateExecutableTestAotSafe(metadata, arguments, argumentsDisplayText, propertyData, dataSourceIndices);
-                tests.Add(executableTest);
+                foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
+                {
+                    var executableTest = await CreateExecutableTestAotSafe(
+                        metadata, 
+                        classArguments,
+                        arguments, 
+                        argumentsDisplayText, 
+                        propertyData, 
+                        dataSourceIndices);
+                    tests.Add(executableTest);
+                }
             }
         }
 
@@ -94,19 +106,31 @@ public sealed class TestFactory
     {
         var tests = new List<ExecutableTest>();
 
+        // Get all class data combinations
+        var classDataSets = await ExpandClassData(metadata);
+
         // Get all test data combinations
         var testDataSets = await ExpandTestData(metadata);
 
         // Get property data if any
         var propertyDataSets = await ExpandPropertyData(metadata);
 
-        // Create executable test for each data combination
-        foreach (var (arguments, argumentsDisplayText, dataSourceIndices) in testDataSets)
+        // Create executable test for each combination of class, method, and property data
+        foreach (var (classArguments, classDisplayText, classDataSourceIndices) in classDataSets)
         {
-            foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
+            foreach (var (arguments, argumentsDisplayText, dataSourceIndices) in testDataSets)
             {
-                var executableTest = await CreateExecutableTest(metadata, arguments, argumentsDisplayText, propertyData, dataSourceIndices);
-                tests.Add(executableTest);
+                foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
+                {
+                    var executableTest = await CreateExecutableTest(
+                        metadata, 
+                        classArguments,
+                        arguments, 
+                        argumentsDisplayText, 
+                        propertyData, 
+                        dataSourceIndices);
+                    tests.Add(executableTest);
+                }
             }
         }
 
@@ -117,6 +141,7 @@ public sealed class TestFactory
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private async Task<ExecutableTest> CreateExecutableTest(
         TestMetadata metadata,
+        object?[] classArguments,
         object?[] arguments,
         string argumentsDisplayText,
         Dictionary<string, object?> propertyValues,
@@ -126,7 +151,7 @@ public sealed class TestFactory
         var displayName = GenerateDisplayName(metadata, argumentsDisplayText, propertyValues);
 
         // Create instance factory
-        var createInstance = CreateInstanceFactory(metadata, propertyValues);
+        var createInstance = CreateInstanceFactory(metadata, classArguments, propertyValues);
 
         // Create test invoker
         var invokeTest = CreateTestInvoker(metadata, arguments);
@@ -140,6 +165,7 @@ public sealed class TestFactory
             DisplayName = displayName,
             Metadata = metadata,
             Arguments = arguments,
+            ClassArguments = classArguments,
             CreateInstance = createInstance,
             InvokeTest = invokeTest,
             PropertyValues = propertyValues,
@@ -157,6 +183,7 @@ public sealed class TestFactory
     /// </summary>
     private async Task<ExecutableTest> CreateExecutableTestAotSafe(
         TestMetadata metadata,
+        object?[] classArguments,
         object?[] arguments,
         string argumentsDisplayText,
         Dictionary<string, object?> propertyValues,
@@ -167,12 +194,12 @@ public sealed class TestFactory
 
         // Use pre-compiled invokers from source generation
         var createInstance = metadata.InstanceFactory != null
-            ? async () => {
-                var instance = metadata.InstanceFactory();
+            ? (Func<Task<object>>)(async () => {
+                var instance = metadata.InstanceFactory(classArguments);
                 await InjectProperties(instance, propertyValues);
                 return instance;
-              }
-            : CreateInstanceFactoryAotSafe(metadata, propertyValues);
+              })
+            : CreateInstanceFactoryAotSafe(metadata, classArguments, propertyValues);
 
         // Use pre-compiled test invoker from source generation
         var invokeTest = metadata.TestInvoker != null
@@ -188,6 +215,7 @@ public sealed class TestFactory
             DisplayName = displayName,
             Metadata = metadata,
             Arguments = arguments,
+            ClassArguments = classArguments,
             CreateInstance = createInstance,
             InvokeTest = invokeTest,
             PropertyValues = propertyValues,
@@ -198,6 +226,69 @@ public sealed class TestFactory
         executableTest.Context = await CreateTestContext(executableTest);
 
         return executableTest;
+    }
+
+    private async Task<List<(object?[] arguments, string displayText, int[] dataSourceIndices)>> ExpandClassData(TestMetadata metadata)
+    {
+        var results = new List<(object?[], string, int[])>();
+
+        if (metadata.ClassDataSources.Length == 0)
+        {
+            // No data sources, single test with no arguments
+            results.Add((Array.Empty<object?>(), string.Empty, Array.Empty<int>()));
+            return results;
+        }
+
+        // Resolve all data sources with their indices
+        var allDataSets = new List<(IEnumerable<object?[]> data, int sourceIndex)>();
+        for (int i = 0; i < metadata.ClassDataSources.Length; i++)
+        {
+            var data = await _dataSourceResolver.ResolveDataSource(metadata.ClassDataSources[i]);
+            // Convert to list and add index to each item
+            var indexedData = data.Select((item, itemIndex) => item).ToList();
+            allDataSets.Add((indexedData, i));
+        }
+
+        // Generate cartesian product for matrix/combinatorial tests
+        DiscoveryDiagnostics.RecordDataSourceStart($"{metadata.TestName}_Class", allDataSets.Count);
+        
+        if (allDataSets.Count == 1)
+        {
+            // Single data source - simpler case
+            var (data, sourceIndex) = allDataSets[0];
+            int itemIndex = 0;
+            foreach (var args in data)
+            {
+                var displayText = GenerateArgumentsDisplayText(args);
+                results.Add((args, displayText, new[] { sourceIndex, itemIndex }));
+                itemIndex++;
+            }
+        }
+        else
+        {
+            // Multiple data sources - cartesian product with tracking
+            var dataLists = allDataSets.Select(x => x.data.ToList()).ToList();
+            var combinations = CartesianProductWithIndices(dataLists);
+
+            foreach (var (combination, indices) in combinations)
+            {
+                var flattened = combination.SelectMany(x => x).ToArray();
+                var displayText = GenerateArgumentsDisplayText(flattened);
+                // Create array of [sourceIndex, itemIndex] pairs
+                var dataSourceIndices = new List<int>();
+                for (int i = 0; i < allDataSets.Count; i++)
+                {
+                    dataSourceIndices.Add(allDataSets[i].sourceIndex);
+                    dataSourceIndices.Add(indices[i]);
+                }
+                results.Add((flattened, displayText, dataSourceIndices.ToArray()));
+            }
+        }
+
+        DiscoveryDiagnostics.RecordTestExpansion(metadata.TestName + "_Class", results.Count);
+        DiscoveryDiagnostics.RecordDataSourceEnd($"{metadata.TestName}_Class", results.Count);
+
+        return results;
     }
 
     private async Task<List<(object?[] arguments, string displayText, int[] dataSourceIndices)>> ExpandTestData(TestMetadata metadata)
@@ -290,26 +381,26 @@ public sealed class TestFactory
 
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
-    private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, Dictionary<string, object?> propertyValues)
+    private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, object?[] classArguments, Dictionary<string, object?> propertyValues)
     {
         if (metadata.InstanceFactory != null)
         {
             // AOT-safe path - source generated
             return async () =>
             {
-                var instance = metadata.InstanceFactory();
+                var instance = metadata.InstanceFactory(classArguments);
                 await InjectProperties(instance, propertyValues);
                 return instance;
             };
         }
 
         // Reflection fallback
-        return CreateReflectionInstanceFactory(metadata, propertyValues);
+        return CreateReflectionInstanceFactory(metadata, classArguments, propertyValues);
     }
 
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
-    private Func<Task<object>> CreateReflectionInstanceFactory(TestMetadata metadata, Dictionary<string, object?> propertyValues)
+    private Func<Task<object>> CreateReflectionInstanceFactory(TestMetadata metadata, object?[] classArguments, Dictionary<string, object?> propertyValues)
     {
         return async () =>
         {
@@ -324,8 +415,14 @@ public sealed class TestFactory
             }
 
             #pragma warning disable IL2072 // Test class types are known at compile time through source generation
-            var instance = Activator.CreateInstance(classType)
-                ?? throw new InvalidOperationException($"Failed to create instance of {classType}");
+            var instance = classArguments.Length > 0
+                ? Activator.CreateInstance(classType, classArguments)
+                : Activator.CreateInstance(classType);
+            
+            if (instance == null)
+            {
+                throw new InvalidOperationException($"Failed to create instance of {classType}");
+            }
             #pragma warning restore IL2072
             await InjectProperties(instance, propertyValues);
             return instance;
@@ -378,7 +475,7 @@ public sealed class TestFactory
     /// <summary>
     /// AOT-safe instance factory creation
     /// </summary>
-    private Func<Task<object>> CreateInstanceFactoryAotSafe(TestMetadata metadata, Dictionary<string, object?> propertyValues)
+    private Func<Task<object>> CreateInstanceFactoryAotSafe(TestMetadata metadata, object?[] classArguments, Dictionary<string, object?> propertyValues)
     {
         // In AOT mode, we should have pre-compiled invokers
         if (metadata.InstanceFactory == null)
@@ -389,7 +486,7 @@ public sealed class TestFactory
         }
 
         return async () => {
-            var instance = metadata.InstanceFactory();
+            var instance = metadata.InstanceFactory(classArguments);
             await InjectProperties(instance, propertyValues);
             return instance;
         };
@@ -649,7 +746,7 @@ public sealed class TestFactory
             MethodName = test.Metadata.TestMethodName,
             ClassInstance = null, // Will be set during execution
             TestMethodArguments = test.Arguments,
-            TestClassArguments = Array.Empty<object?>(),
+            TestClassArguments = test.ClassArguments,
             DisplayName = test.DisplayName,
             TestFilePath = test.Metadata.FilePath ?? "Unknown",
             TestLineNumber = test.Metadata.LineNumber ?? 0,

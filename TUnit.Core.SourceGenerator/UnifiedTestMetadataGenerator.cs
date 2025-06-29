@@ -291,6 +291,9 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 // Data sources
                 GenerateDataSources(writer, testInfo);
                 
+                // Class data sources
+                GenerateClassDataSources(writer, testInfo);
+                
                 // Property data sources
                 GeneratePropertyDataSources(writer, testInfo);
                 
@@ -304,10 +307,24 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             }
             
             // AOT factories (if possible)
-            if (context.CanUseStaticDefinition && context.HasParameterlessConstructor && 
+            if (context.CanUseStaticDefinition && 
                 !testInfo.MethodSymbol.IsGenericMethod && !testInfo.TypeSymbol.IsGenericType)
             {
-                writer.AppendLine($"InstanceFactory = () => new {context.ClassName}(),");
+                // Generate instance factory based on constructor
+                if (context.HasParameterlessConstructor)
+                {
+                    writer.AppendLine($"InstanceFactory = (args) => new {context.ClassName}(),");
+                }
+                else if (context.ConstructorWithParameters != null)
+                {
+                    // Generate factory that uses constructor parameters
+                    writer.AppendLine($"InstanceFactory = {context.SafeClassName}_InstanceFactory,");
+                }
+                else
+                {
+                    writer.AppendLine("InstanceFactory = null,");
+                }
+                
                 writer.AppendLine($"TestInvoker = {context.SafeClassName}_{context.SafeMethodName}_Invoker,");
             }
             else
@@ -452,13 +469,25 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         foreach (var testInfo in testMethods)
         {
             var context = TestMetadataGenerationContext.Create(testInfo);
-            if (context.CanUseStaticDefinition && context.HasParameterlessConstructor)
+            if (context.CanUseStaticDefinition)
             {
+                // Generate test invoker
                 var methodName = $"{context.SafeClassName}_{context.SafeMethodName}_Invoker";
                 if (!generatedMethods.Contains(methodName))
                 {
                     generatedMethods.Add(methodName);
                     GenerateTestInvoker(writer, testInfo, context);
+                }
+                
+                // Generate instance factory for parameterized constructors
+                if (!context.HasParameterlessConstructor && context.ConstructorWithParameters != null)
+                {
+                    var factoryName = $"{context.SafeClassName}_InstanceFactory";
+                    if (!generatedMethods.Contains(factoryName))
+                    {
+                        generatedMethods.Add(factoryName);
+                        GenerateInstanceFactory(writer, testInfo, context);
+                    }
                 }
             }
         }
@@ -505,6 +534,55 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             {
                 writer.AppendLine($"{methodCall};");
             }
+        }
+        writer.AppendLine();
+    }
+    
+    private static void GenerateInstanceFactory(CodeWriter writer, TestMethodMetadata testInfo, TestMetadataGenerationContext context)
+    {
+        if (context.ConstructorWithParameters == null)
+        {
+            return;
+        }
+        
+        var factoryName = $"{context.SafeClassName}_InstanceFactory";
+        var constructor = context.ConstructorWithParameters;
+        
+        using (writer.BeginBlock($"private static object {factoryName}(object?[] args)"))
+        {
+            // Validate argument count
+            writer.AppendLine($"if (args == null || args.Length != {constructor.Parameters.Length})");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"throw new ArgumentException(\"Expected {constructor.Parameters.Length} arguments for {context.ClassName} constructor, but got \" + (args?.Length ?? 0));");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine();
+            
+            // Generate parameter extraction with type checking
+            for (int i = 0; i < constructor.Parameters.Length; i++)
+            {
+                var param = constructor.Parameters[i];
+                var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var paramName = $"arg{i}";
+                
+                // Generate null check for non-nullable value types
+                if (param.Type.IsValueType && param.NullableAnnotation != NullableAnnotation.Annotated)
+                {
+                    writer.AppendLine($"if (args[{i}] == null)");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"throw new ArgumentException(\"Argument at index {i} cannot be null for parameter '{param.Name}' of type {paramType}\");");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+                
+                writer.AppendLine($"var {paramName} = ({paramType})args[{i}]!;");
+            }
+            
+            // Generate constructor call
+            var argList = string.Join(", ", Enumerable.Range(0, constructor.Parameters.Length).Select(i => $"arg{i}"));
+            writer.AppendLine($"return new {context.ClassName}({argList});");
         }
         writer.AppendLine();
     }
@@ -668,6 +746,51 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         else
         {
             writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
+        }
+    }
+    
+    private static void GenerateClassDataSources(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        // Get class-level data source attributes
+        var classDataSources = new List<string>();
+        
+        // Arguments attributes on class
+        var argumentsAttributes = testInfo.TypeSymbol.GetAttributes()
+            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute");
+        
+        foreach (var attr in argumentsAttributes)
+        {
+            classDataSources.Add($"new StaticTestDataSource(new object?[][] {{ new object?[] {{ {FormatAttributeArguments(attr)} }} }})");
+        }
+        
+        // MethodDataSource attributes on class
+        var methodDataAttributes = testInfo.TypeSymbol.GetAttributes()
+            .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
+        
+        foreach (var attr in methodDataAttributes)
+        {
+            var dataSource = GenerateDynamicDataSourceString(attr);
+            if (!string.IsNullOrEmpty(dataSource))
+            {
+                classDataSources.Add(dataSource);
+            }
+        }
+        
+        if (classDataSources.Any())
+        {
+            writer.AppendLine("ClassDataSources = new TestDataSource[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var ds in classDataSources)
+            {
+                writer.AppendLine($"{ds},");
+            }
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        else
+        {
+            writer.AppendLine("ClassDataSources = Array.Empty<TestDataSource>(),");
         }
     }
     
